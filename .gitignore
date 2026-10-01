@@ -1,0 +1,25 @@
+# Anchor / Rust
+.anchor
+target/*
+!target/idl
+!target/types
+**/*.rs.bk
+test-ledger
+.surfpool
+
+# Keys and secrets: never commit
+*-keypair.json
+id.json
+*.pem
+.env
+.env*.local
+
+# JS
+node_modules
+.next
+coverage
+*.tsbuildinfo
+
+# Logs and OS noise
+*.log
+.DS_Store

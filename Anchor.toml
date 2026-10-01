@@ -1,0 +1,27 @@
+skip_local_validator = true
+
+[toolchain]
+anchor_version = "1.1.2"
+package_manager = "bun"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+pred_provable = "F9KfegHTBzeHmkhUxgvpTzYD8xvwRmV3sue2BVXiKoE2"
+
+[programs.devnet]
+pred_provable = "F9KfegHTBzeHmkhUxgvpTzYD8xvwRmV3sue2BVXiKoE2"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+# Tests run in-process on LiteSVM, so no local validator is needed.
+# `bun test` takes directory filters; a `tests/**/*.ts` glob would be expanded by sh
+# without globstar and miss files directly under tests/.
+test = "bun test tests/"
+test-rust = "cargo test -p pred-provable --features no-entrypoint"
+
