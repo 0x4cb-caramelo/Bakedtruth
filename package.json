@@ -17,7 +17,11 @@
     "test": "bun test tests/",
     "test:rust": "cargo test -p pred-provable --features no-entrypoint",
     "dev": "bun --filter @pred-provable/app dev",
-    "lint": "prettier --check \"tests/**/*.ts\""
+    "lint": "prettier --check \"tests/**/*.ts\"",
+    "test:os": "node scripts/run-tests.js",
+    "self-test": "node scripts/os-self-test.js",
+    "codemap": "node scripts/codemap.js",
+    "prepare": "git config core.hooksPath .husky || echo \"git hooks not installed (not a git repository?)\""
   },
   "devDependencies": {
     "@anchor-lang/core": "^1.2.0",

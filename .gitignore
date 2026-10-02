@@ -23,3 +23,34 @@ coverage
 # Logs and OS noise
 *.log
 .DS_Store
+Thumbs.db
+desktop.ini
+
+# Personal Claude overrides
+CLAUDE.local.md
+.claude/settings.local.json
+
+# Environment
+.env.production
+
+# Build artifacts
+dist/
+build/
+out/
+.turbo/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Archives (no archives in repo)
+*.zip
+*.tar.gz
+*.7z
+*.rar
+*-overlay-*
+
+# Coverage / test outputs
+.nyc_output/
