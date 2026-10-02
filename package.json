@@ -1,0 +1,37 @@
+{
+  "name": "pred-provable",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Provable KPI Markets: pari-mutuel markets resolved by on-chain account reads",
+  "author": "Ronaldo Pereira",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0xcf02/pred-provable.git"
+  },
+  "workspaces": [
+    "app"
+  ],
+  "scripts": {
+    "build:program": "NO_DNA=1 anchor build && bun run --filter @pred-provable/app sync-idl",
+    "test": "bun test tests/",
+    "test:rust": "cargo test -p pred-provable --features no-entrypoint",
+    "dev": "bun --filter @pred-provable/app dev",
+    "lint": "prettier --check \"tests/**/*.ts\""
+  },
+  "devDependencies": {
+    "@anchor-lang/core": "^1.2.0",
+    "@solana/web3.js": "^1.99.0",
+    "@solana/kit": "~8.3.0",
+    "@solana/kit-plugin-litesvm": "^0.19.0",
+    "@solana/kit-plugin-signer": "^0.19.0",
+    "litesvm": "^1.5.0",
+    "@types/bun": "^1.4.2",
+    "prettier": "^3.9.9",
+    "typescript": "^5"
+  },
+  "trustedDependencies": [
+    "sharp",
+    "unrs-resolver"
+  ]
+}

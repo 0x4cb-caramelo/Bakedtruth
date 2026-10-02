@@ -1,0 +1,695 @@
+{
+  "address": "F9KfegHTBzeHmkhUxgvpTzYD8xvwRmV3sue2BVXiKoE2",
+  "metadata": {
+    "name": "pred_provable",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Provable KPI Markets: pari-mutuel markets resolved by on-chain account reads"
+  },
+  "instructions": [
+    {
+      "name": "claim",
+      "docs": [
+        "Pari-mutuel payout to a winning position; closes the position."
+      ],
+      "discriminator": [
+        62,
+        198,
+        214,
+        193,
+        213,
+        159,
+        108,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "position"
+          ]
+        },
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.sponsor",
+                "account": "Market"
+              },
+              {
+                "kind": "account",
+                "path": "market.market_id",
+                "account": "Market"
+              }
+            ]
+          },
+          "relations": [
+            "position"
+          ]
+        },
+        {
+          "name": "position",
+          "docs": [
+            "Closing the position is what prevents a double claim."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_market",
+      "docs": [
+        "Sponsor opens a market and seeds the NO pool (the bounty)."
+      ],
+      "discriminator": [
+        103,
+        226,
+        97,
+        235,
+        200,
+        188,
+        251,
+        254
+      ],
+      "accounts": [
+        {
+          "name": "sponsor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "sponsor"
+              },
+              {
+                "kind": "arg",
+                "path": "args.market_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "sponsor_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "sponsor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "target"
+        },
+        {
+          "name": "metric_account"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "CreateMarketArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "place_bet",
+      "docs": [
+        "Stake on YES or NO before the cutoff and before the metric is met."
+      ],
+      "discriminator": [
+        222,
+        62,
+        67,
+        220,
+        63,
+        166,
+        126,
+        33
+      ],
+      "accounts": [
+        {
+          "name": "bettor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.sponsor",
+                "account": "Market"
+              },
+              {
+                "kind": "account",
+                "path": "market.market_id",
+                "account": "Market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market"
+              },
+              {
+                "kind": "account",
+                "path": "bettor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "metric_account"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "side",
+          "type": {
+            "defined": {
+              "name": "Side"
+            }
+          }
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "resolve",
+      "docs": [
+        "Permissionless resolution by reading the locked metric account."
+      ],
+      "discriminator": [
+        246,
+        150,
+        236,
+        206,
+        108,
+        63,
+        58,
+        10
+      ],
+      "accounts": [
+        {
+          "name": "market",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  97,
+                  114,
+                  107,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "market.sponsor",
+                "account": "Market"
+              },
+              {
+                "kind": "account",
+                "path": "market.market_id",
+                "account": "Market"
+              }
+            ]
+          }
+        },
+        {
+          "name": "metric_account"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Market",
+      "discriminator": [
+        219,
+        190,
+        213,
+        55,
+        0,
+        227,
+        198,
+        154
+      ]
+    },
+    {
+      "name": "Position",
+      "discriminator": [
+        170,
+        188,
+        143,
+        228,
+        122,
+        64,
+        247,
+        208
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidSchedule",
+      "msg": "cutoff_slot must be in the future and no later than deadline_slot"
+    },
+    {
+      "code": 6001,
+      "name": "StakeTooSmall",
+      "msg": "Stake is below the minimum"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidMetricAccount",
+      "msg": "Metric account does not match the resolver kind (owner, size or layout)"
+    },
+    {
+      "code": 6003,
+      "name": "MintAuthorityLive",
+      "msg": "Mint authority must be revoked, otherwise supply can be faked by mint-then-burn"
+    },
+    {
+      "code": 6004,
+      "name": "AlreadyImmutable",
+      "msg": "Program is already immutable; the market would be decided at creation"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidEpoch",
+      "msg": "Target epoch must be in the future"
+    },
+    {
+      "code": 6006,
+      "name": "ProgramDataMismatch",
+      "msg": "Program data account is not derived from the target program"
+    },
+    {
+      "code": 6007,
+      "name": "BettingClosed",
+      "msg": "Betting is closed for this market"
+    },
+    {
+      "code": 6008,
+      "name": "MetricAlreadyMet",
+      "msg": "Metric is already met; betting is locked"
+    },
+    {
+      "code": 6009,
+      "name": "AlreadyResolved",
+      "msg": "Market is already resolved"
+    },
+    {
+      "code": 6010,
+      "name": "NotResolved",
+      "msg": "Market is not resolved yet"
+    },
+    {
+      "code": 6011,
+      "name": "NotResolvableYet",
+      "msg": "Market cannot be resolved yet"
+    },
+    {
+      "code": 6012,
+      "name": "CpiNotAllowed",
+      "msg": "resolve must be a top-level instruction, not a CPI"
+    },
+    {
+      "code": 6013,
+      "name": "AlreadyClaimed",
+      "msg": "Position already claimed"
+    },
+    {
+      "code": 6014,
+      "name": "MathOverflow",
+      "msg": "Arithmetic overflow"
+    }
+  ],
+  "types": [
+    {
+      "name": "CreateMarketArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market_id",
+            "type": "u64"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": {
+                "name": "ResolverKind"
+              }
+            }
+          },
+          {
+            "name": "metric_threshold",
+            "type": "u64"
+          },
+          {
+            "name": "cutoff_slot",
+            "type": "u64"
+          },
+          {
+            "name": "deadline_slot",
+            "type": "u64"
+          },
+          {
+            "name": "sponsor_stake",
+            "docs": [
+              "Sponsor's NO stake: the bounty paid to YES holders if the goal is hit."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Market",
+      "docs": [
+        "Pari-mutuel KPI market. The sponsor seeds the NO pool (pays out if the goal is",
+        "hit); doers buy YES and then move the metric. Lamports are held by this account."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "sponsor",
+            "type": "pubkey"
+          },
+          {
+            "name": "market_id",
+            "type": "u64"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": {
+                "name": "ResolverKind"
+              }
+            }
+          },
+          {
+            "name": "target_pubkey",
+            "docs": [
+              "Human-facing subject: mint, program id, or vote account."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "metric_account",
+            "docs": [
+              "Account actually read at resolution (equals `target_pubkey`, except for",
+              "`Immutable`, where it is the derived ProgramData address). Locked at creation."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "metric_threshold",
+            "type": "u64"
+          },
+          {
+            "name": "cutoff_slot",
+            "docs": [
+              "Last slot (exclusive) in which bets are accepted."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "deadline_slot",
+            "docs": [
+              "Last slot (inclusive) in which a ratchet metric may resolve YES."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "yes_pool",
+            "type": "u64"
+          },
+          {
+            "name": "no_pool",
+            "type": "u64"
+          },
+          {
+            "name": "outcome",
+            "type": {
+              "defined": {
+                "name": "Outcome"
+              }
+            }
+          },
+          {
+            "name": "resolved_slot",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Outcome",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Open"
+          },
+          {
+            "name": "Yes"
+          },
+          {
+            "name": "No"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Position",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "yes",
+            "type": "u64"
+          },
+          {
+            "name": "no",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ResolverKind",
+      "docs": [
+        "Closed set of resolvers. Each variant fixes the owner and layout of the account",
+        "it reads; there is deliberately no generic \"offset + comparator\" reader.",
+        "",
+        "Every variant reads state that flash capital cannot move: burned supply of a",
+        "mint with no authority, a revoked upgrade authority, or stake frozen at the",
+        "epoch boundary."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "SupplyAtMost"
+          },
+          {
+            "name": "Immutable"
+          },
+          {
+            "name": "StakeAtLeast",
+            "fields": [
+              {
+                "name": "epoch",
+                "type": "u64"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Side",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Yes"
+          },
+          {
+            "name": "No"
+          }
+        ]
+      }
+    }
+  ],
+  "constants": [
+    {
+      "name": "MARKET_SEED",
+      "type": "bytes",
+      "value": "[109, 97, 114, 107, 101, 116]"
+    },
+    {
+      "name": "MIN_STAKE_LAMPORTS",
+      "docs": [
+        "Smallest stake accepted on either side, in lamports. Keeps dust positions out."
+      ],
+      "type": "u64",
+      "value": "1000000"
+    },
+    {
+      "name": "POSITION_SEED",
+      "type": "bytes",
+      "value": "[112, 111, 115, 105, 116, 105, 111, 110]"
+    }
+  ]
+}
