@@ -7,10 +7,12 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { explorerTx } from "./config";
 import type { ClockInfo } from "./format";
 import idl from "./idl/pred_provable.json";
-import { ataAddress } from "./market";
+import { fetchActivity, type Activity } from "./history";
+import { ataAddress, PROGRAM_ID } from "./market";
 import { fetchReadings, parseTokenAmount, type Reading } from "./metric";
 import { useProgram } from "./program";
-import { big, type MarketAccount } from "./view";
+import { fetchTokenNames, type TokenName } from "./tokens";
+import { big, kindOf, type MarketAccount } from "./view";
 import { useToast } from "@/components/toast";
 
 export type Polled<T> = { data: T | undefined; error: Error | undefined; loading: boolean; refresh: () => void };
@@ -66,6 +68,8 @@ export function useClock(): ClockInfo | null {
       return {
         slot: info.absoluteSlot,
         epoch: info.epoch,
+        slotIndex: info.slotIndex,
+        slotsInEpoch: info.slotsInEpoch,
         msPerSlot: slots > 0 ? (seconds * 1000) / slots : 400,
         observedAt: Date.now(),
       };
@@ -75,25 +79,57 @@ export function useClock(): ClockInfo | null {
   return data ?? null;
 }
 
-export type MarketEntry = { address: PublicKey; account: MarketAccount; reading?: Reading };
+export type MarketEntry = {
+  address: PublicKey;
+  account: MarketAccount;
+  reading?: Reading;
+  /** USDC in the market's vault: the unspent budget plus one unit per YES. */
+  vault: bigint;
+  /** Metaplex name of the target token, when it has one. */
+  name?: TokenName;
+};
 
-/** Every market, newest first, each with its KPI reading (batched reads). */
+type Loaded = { publicKey: PublicKey; account: MarketAccount };
+
+/** Readings, vault balances and token names for `markets`, in a few batched calls. */
+async function enrich(
+  connection: Parameters<typeof fetchReadings>[0],
+  markets: Loaded[],
+  withStake: boolean,
+): Promise<MarketEntry[]> {
+  const tokenTargets = markets.filter((m) => !["immutable", "stakeAtLeast"].includes(kindOf(m.account)));
+  const [readings, vaults, names] = await Promise.all([
+    fetchReadings(connection, markets, { withStake }),
+    connection.getMultipleAccountsInfo(markets.map((m) => m.account.vault)),
+    fetchTokenNames(
+      connection,
+      tokenTargets.map((m) => m.account.targetPubkey),
+    ).catch(() => new Map<string, TokenName>()),
+  ]);
+  return markets.map(({ publicKey, account }, i) => ({
+    address: publicKey,
+    account,
+    reading: readings.get(publicKey.toBase58()),
+    vault: parseTokenAmount(vaults[i] ?? null) ?? 0n,
+    name: names.get(account.targetPubkey.toBase58()),
+  }));
+}
+
+/** Every market, newest first, with its KPI reading, vault balance and token name. */
 export function useMarkets() {
   const program = useProgram();
   return usePolling(
     "markets",
     async (): Promise<MarketEntry[]> => {
       const all = await program.account.market.all();
-      const readings = await fetchReadings(program.provider.connection, all);
-      return all
-        .map(({ publicKey, account }) => ({ address: publicKey, account, reading: readings.get(publicKey.toBase58()) }))
-        .sort((a, b) => (big(b.account.marketId) > big(a.account.marketId) ? 1 : -1));
+      const entries = await enrich(program.provider.connection, all, false);
+      return entries.sort((a, b) => (big(b.account.marketId) > big(a.account.marketId) ? 1 : -1));
     },
     20_000,
   );
 }
 
-/** One market and its reading, refreshed every few seconds; `null` data if the account does not exist. */
+/** One market, refreshed every few seconds; `null` data if the account does not exist. */
 export function useMarket(address: string) {
   const program = useProgram();
   return usePolling(
@@ -102,12 +138,33 @@ export function useMarket(address: string) {
       const key = new PublicKey(address);
       const account = await program.account.market.fetchNullable(key);
       if (!account) return null;
-      const readings = await fetchReadings(program.provider.connection, [{ publicKey: key, account }], {
-        withStake: true,
-      });
-      return { address: key, account, reading: readings.get(address) };
+      const [entry] = await enrich(program.provider.connection, [{ publicKey: key, account }], true);
+      return entry!;
     },
     8_000,
+  );
+}
+
+/** A market's events, oldest first (its price chart and activity feed), and when they were read. */
+export function useMarketActivity(address: string, limit = 200) {
+  const { connection } = useConnection();
+  return usePolling(
+    `activity:${address}:${limit}`,
+    async () => ({ activity: await fetchActivity(connection, new PublicKey(address), limit), fetchedAt: Date.now() }),
+    30_000,
+  );
+}
+
+/** The latest events across every market. */
+export function useProgramActivity(limit = 40) {
+  const { connection } = useConnection();
+  return usePolling(
+    "activity:program",
+    async (): Promise<{ activity: Activity[]; fetchedAt: number }> => ({
+      activity: (await fetchActivity(connection, PROGRAM_ID, limit)).reverse(),
+      fetchedAt: Date.now(),
+    }),
+    30_000,
   );
 }
 

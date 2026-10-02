@@ -98,9 +98,16 @@ const withAmount = (tag: number, amount: bigint, extra: number[] = []) => {
   return data;
 };
 
-/** InitializeMint2 with no freeze authority. */
-export const initializeMintIx = (mint: PublicKey, authority: PublicKey) =>
-  splIx([[mint, false, true]], Buffer.concat([Buffer.from([20, 6]), authority.toBuffer(), Buffer.from([0])]));
+/** InitializeMint2, 6 decimals, with an optional freeze authority. */
+export const initializeMintIx = (mint: PublicKey, authority: PublicKey, freezeAuthority?: PublicKey) =>
+  splIx(
+    [[mint, false, true]],
+    Buffer.concat([
+      Buffer.from([20, 6]),
+      authority.toBuffer(),
+      freezeAuthority ? Buffer.concat([Buffer.from([1]), freezeAuthority.toBuffer()]) : Buffer.from([0]),
+    ]),
+  );
 export const mintToIx = (mint: PublicKey, to: PublicKey, authority: PublicKey, amount: bigint) =>
   splIx(
     [
@@ -158,7 +165,7 @@ export const transferIx = (from: PublicKey, to: PublicKey, owner: PublicKey, amo
   );
 
 /** Creates and initializes a 6-decimal SPL mint at `mint` (which must sign) with `authority`. */
-export async function createMintIxs(mint: PublicKey, authority: PublicKey) {
+export async function createMintIxs(mint: PublicKey, authority: PublicKey, freezeAuthority?: PublicKey) {
   return [
     SystemProgram.createAccount({
       fromPubkey: deployer.publicKey,
@@ -167,6 +174,48 @@ export async function createMintIxs(mint: PublicKey, authority: PublicKey) {
       space: 82,
       programId: lib.TOKEN_PROGRAM_ID,
     }),
-    initializeMintIx(mint, authority),
+    initializeMintIx(mint, authority, freezeAuthority),
   ];
+}
+
+export const TOKEN_METADATA_PROGRAM_ID = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
+
+/**
+ * Metaplex CreateMetadataAccountV3 (name and symbol, no creators or collection), signed by the
+ * mint authority. The deployer pays and stays update authority.
+ */
+export function createMetadataIx(mint: PublicKey, mintAuthority: PublicKey, name: string, symbol: string) {
+  const metadata = PublicKey.findProgramAddressSync(
+    [Buffer.from("metadata"), TOKEN_METADATA_PROGRAM_ID.toBuffer(), mint.toBuffer()],
+    TOKEN_METADATA_PROGRAM_ID,
+  )[0];
+  const text = (value: string) => {
+    const bytes = Buffer.from(value);
+    const out = Buffer.alloc(4 + bytes.length);
+    out.writeUInt32LE(bytes.length);
+    bytes.copy(out, 4);
+    return out;
+  };
+  const data = Buffer.concat([
+    Buffer.from([33]), // CreateMetadataAccountV3
+    text(name),
+    text(symbol),
+    text(""), // uri
+    Buffer.from([0, 0]), // seller fee basis points
+    Buffer.from([0, 0, 0]), // creators, collection, uses: None
+    Buffer.from([1]), // is_mutable
+    Buffer.from([0]), // collection_details: None
+  ]);
+  return new TransactionInstruction({
+    programId: TOKEN_METADATA_PROGRAM_ID,
+    keys: [
+      { pubkey: metadata, isSigner: false, isWritable: true },
+      { pubkey: mint, isSigner: false, isWritable: false },
+      { pubkey: mintAuthority, isSigner: true, isWritable: false },
+      { pubkey: deployer.publicKey, isSigner: true, isWritable: true },
+      { pubkey: deployer.publicKey, isSigner: true, isWritable: false },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+    ],
+    data,
+  });
 }

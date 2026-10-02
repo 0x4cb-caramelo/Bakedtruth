@@ -3,7 +3,8 @@
 
 import { PublicKey, type AccountInfo, type Connection } from "@solana/web3.js";
 
-import { formatUnits } from "./format";
+import { formatUnits, shortAddress } from "./format";
+import type { TokenName } from "./tokens";
 import { BPF_LOADER_UPGRADEABLE_ID, TOKEN_PROGRAM_ID } from "./market";
 import { big, kindOf, stakeEpoch, type MarketAccount } from "./view";
 
@@ -151,6 +152,42 @@ export function goalText(market: MarketAccount, reading?: Reading): string {
     case "stakeAtLeast":
       return `${threshold} SOL staked in epoch ${stakeEpoch(market)}`;
   }
+}
+
+/** How a market's target reads in a sentence: "$SYMBOL", the token name, or a short address. */
+export function targetLabel(market: MarketAccount, name?: TokenName): string {
+  if (name?.symbol) return `$${name.symbol}`;
+  if (name?.name) return name.name;
+  return shortAddress(market.targetPubkey.toBase58());
+}
+
+/** The market as a yes/no question, e.g. "Will $BONK supply fall to 500,000?". */
+export function questionText(market: MarketAccount, reading?: Reading, name?: TokenName): string {
+  const target = targetLabel(market, name);
+  const decimals = reading?.type === "quantity" ? reading.decimals : 0;
+  const threshold = formatUnits(big(market.metricThreshold), kindOf(market) === "stakeAtLeast" ? 9 : decimals);
+  switch (kindOf(market)) {
+    case "supplyAtMost":
+      return `Will ${target} supply fall to ${threshold}?`;
+    case "lockedAtLeast":
+      return `Will ${threshold} ${target} be locked forever?`;
+    case "mintAuthorityRevoked":
+      return `Will ${target} renounce its mint authority?`;
+    case "freezeAuthorityRevoked":
+      return `Will ${target} renounce its freeze authority?`;
+    case "immutable":
+      return `Will program ${target} become immutable?`;
+    case "stakeAtLeast":
+      return `Will ${target} have ${threshold} SOL staked in epoch ${stakeEpoch(market)}?`;
+  }
+}
+
+/** The resolution rule in one sentence, for the market page. */
+export function ruleText(market: MarketAccount): string {
+  if (kindOf(market) === "stakeAtLeast") {
+    return `Resolves on the vote account's stake in epoch ${stakeEpoch(market)}, read on-chain by anyone during that epoch. No oracle.`;
+  }
+  return "Resolves YES the moment the goal is met on-chain, by anyone, in the same transaction. Not met by the deadline: NO. No oracle, no dispute window.";
 }
 
 const chunks = <T>(items: T[], size: number) =>

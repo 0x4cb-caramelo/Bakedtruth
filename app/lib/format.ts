@@ -50,7 +50,15 @@ export function formatDuration(ms: number): string {
   return parts.join(" ");
 }
 
-export type ClockInfo = { slot: number; epoch: number; msPerSlot: number; observedAt: number };
+export type ClockInfo = {
+  slot: number;
+  epoch: number;
+  /** Position in the current epoch and the epoch length, to estimate when an epoch starts. */
+  slotIndex: number;
+  slotsInEpoch: number;
+  msPerSlot: number;
+  observedAt: number;
+};
 
 /** Estimated wall-clock time of `targetSlot`, from the current slot and the recent slot rate. */
 export function slotTime(targetSlot: number, clock: ClockInfo) {

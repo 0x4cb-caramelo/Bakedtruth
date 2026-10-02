@@ -46,6 +46,18 @@ export function phaseOf(market: MarketAccount, clock: ClockInfo | null): Phase {
   return closed ? "awaitingResolution" : "trading";
 }
 
+/**
+ * The slot trading stops: the cutoff, or for a stake market the start of its epoch if that comes
+ * first (estimated from the epoch schedule).
+ */
+export function closeSlot(market: MarketAccount, clock: ClockInfo | null): number {
+  const cutoff = Number(market.cutoffSlot.toString());
+  const epoch = stakeEpoch(market);
+  if (epoch === null || !clock) return cutoff;
+  const epochStart = clock.slot - clock.slotIndex + (epoch - clock.epoch) * clock.slotsInEpoch;
+  return Math.min(cutoff, epochStart);
+}
+
 export type Price = { bps: number; source: "pool" | "sale" };
 
 /** YES price in basis points of its payout: the pool's if it has liquidity, else the sale's. */
@@ -67,3 +79,28 @@ export const KIND_INFO: Record<Kind, { label: string; summary: string }> = {
   freezeAuthorityRevoked: { label: "Renounce freezing", summary: "The token's freeze authority is revoked. It can never be set again." },
   lockedAtLeast: { label: "Lock goal", summary: "Tokens locked under the incinerator reach the target. Nobody can ever move them out." },
 };
+
+/** Browse categories: the resolver kinds, with both renounce kinds under one. */
+export type Category = "burn" | "renounce" | "lock" | "immutable" | "stake";
+
+export const CATEGORIES: { slug: Category; label: string }[] = [
+  { slug: "burn", label: "Burn" },
+  { slug: "renounce", label: "Renounce" },
+  { slug: "lock", label: "Lock" },
+  { slug: "immutable", label: "Immutable" },
+  { slug: "stake", label: "Stake" },
+];
+
+const KIND_CATEGORY: Record<Kind, Category> = {
+  supplyAtMost: "burn",
+  mintAuthorityRevoked: "renounce",
+  freezeAuthorityRevoked: "renounce",
+  lockedAtLeast: "lock",
+  immutable: "immutable",
+  stakeAtLeast: "stake",
+};
+
+export const categoryOf = (market: MarketAccount) => KIND_CATEGORY[kindOf(market)];
+
+/** What a winning token pays per unit of price: 10% -> 10x. */
+export const multiplier = (bps: number) => (bps <= 0 ? null : 10_000 / bps);
