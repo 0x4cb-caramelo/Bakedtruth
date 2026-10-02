@@ -2,13 +2,14 @@
   "name": "pred-provable",
   "version": "0.1.0",
   "private": true,
-  "description": "Provable KPI Markets: pari-mutuel markets resolved by on-chain account reads",
+  "description": "Provable KPI Markets: outcome-token markets resolved by on-chain account reads",
   "author": "Ronaldo Pereira",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/0xcf02/pred-provable.git"
+    "url": "git+https://github.com/0xcf07/pred-provable.git"
   },
+  "packageManager": "bun@1.4.2",
   "workspaces": [
     "app"
   ],
@@ -16,8 +17,11 @@
     "build:program": "NO_DNA=1 anchor build && bun run --filter @pred-provable/app sync-idl",
     "test": "bun test tests/",
     "test:rust": "cargo test -p pred-provable --features no-entrypoint",
+    "deploy:devnet": "solana program deploy target/deploy/pred_provable.so --program-id target/deploy/pred_provable-keypair.json --keypair $HOME/.config/solana/pred-provable-devnet.json --url devnet",
+    "smoke:devnet": "bun run scripts/devnet-smoke.ts",
+    "seed:devnet": "bun run scripts/devnet-seed.ts",
     "dev": "bun --filter @pred-provable/app dev",
-    "lint": "prettier --check \"tests/**/*.ts\""
+    "lint": "prettier --check \"tests/**/*.ts\" \"scripts/**/*.ts\""
   },
   "devDependencies": {
     "@anchor-lang/core": "^1.2.0",
