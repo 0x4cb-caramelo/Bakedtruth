@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Keep in sync with README "Stack" and the local toolchain.
+  SOLANA_VERSION: "3.1.10"
+  ANCHOR_VERSION: "1.1.2"
+  CARGO_TERM_COLOR: always
+  NO_DNA: "1"
+
+jobs:
+  program:
+    name: Program
+    # Anchor 1.1.x prebuilt binaries need GLIBC >= 2.39 (Ubuntu 24.04).
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Rust toolchain from rust-toolchain.toml
+        run: rustup toolchain install
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          cache-on-failure: true
+
+      - name: Cache Solana CLI and platform-tools
+        id: solana-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.local/share/solana/install
+            ~/.cache/solana
+          key: solana-${{ runner.os }}-${{ env.SOLANA_VERSION }}
+
+      - name: Install Solana CLI
+        if: steps.solana-cache.outputs.cache-hit != 'true'
+        run: sh -c "$(curl -sSfL https://release.anza.xyz/v${SOLANA_VERSION}/install)"
+
+      - name: Add Solana CLI to PATH
+        run: echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+
+      - name: Install Anchor CLI (prebuilt release binary)
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -sSfL -o "$HOME/.local/bin/anchor" \
+            "https://github.com/solana-foundation/anchor/releases/download/v${ANCHOR_VERSION}/anchor-${ANCHOR_VERSION}-x86_64-unknown-linux-gnu"
+          chmod +x "$HOME/.local/bin/anchor"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+
+      - name: Toolchain versions
+        run: |
+          rustc --version
+          solana --version
+          anchor --version
+          bun --version
+
+      - name: Install JS dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Check formatting
+        run: |
+          cargo fmt --all -- --check
+          bunx prettier --check "tests/**/*.ts"
+
+      - name: Build program and IDL
+        run: anchor build
+
+      - name: Check committed IDL is up to date
+        run: |
+          cp target/idl/pred_provable.json target/types/pred_provable.ts app/lib/idl/
+          git diff --exit-code -- target/idl target/types app/lib/idl \
+            || { echo "::error::IDL is stale. Run 'bun run build:program' and commit the result."; exit 1; }
+
+      # Runs after the build because the Rust tests embed target/deploy/pred_provable.so.
+      - name: Clippy
+        run: cargo clippy -p pred-provable --all-targets --features no-entrypoint -- -D warnings
+
+      - name: Typecheck tests
+        run: bunx tsc --noEmit
+
+      - name: TypeScript tests (bun test + LiteSVM)
+        run: bun run test
+
+      - name: Rust tests (anchor-litesvm)
+        run: bun run test:rust
+
+  app:
+    name: App
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: app
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+
+      - name: Cache Next.js build
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: app/.next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('bun.lock') }}-${{ hashFiles('app/**/*.ts', 'app/**/*.tsx', 'app/**/*.css') }}
+          restore-keys: nextjs-${{ runner.os }}-${{ hashFiles('bun.lock') }}-
+
+      - name: Install JS dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Build
+        run: bun run build
