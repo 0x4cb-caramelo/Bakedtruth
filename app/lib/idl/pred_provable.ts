@@ -497,7 +497,8 @@ export type PredProvable = {
     {
       "name": "buyYes",
       "docs": [
-        "Buy YES at the sponsor's fixed price before the cutoff and before the metric is met."
+        "Buy YES at the sponsor's fixed price before the cutoff and before the metric is met.",
+        "The matching NO is booked to the sponsor in `Market::sponsor_no`."
       ],
       "discriminator": [
         124,
@@ -552,10 +553,6 @@ export type PredProvable = {
           "writable": true
         },
         {
-          "name": "noMint",
-          "writable": true
-        },
-        {
           "name": "buyerYesAccount",
           "writable": true,
           "pda": {
@@ -604,103 +601,6 @@ export type PredProvable = {
               {
                 "kind": "account",
                 "path": "yesMint"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
-        },
-        {
-          "name": "sponsor"
-        },
-        {
-          "name": "sponsorNoAccount",
-          "docs": [
-            "Created at market creation. Recreated here if the sponsor closed it, so the",
-            "sponsor cannot halt the sale by closing their own token account."
-          ],
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "sponsor"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "noMint"
               }
             ],
             "program": {
@@ -876,99 +776,6 @@ export type PredProvable = {
           }
         },
         {
-          "name": "sponsorNoAccount",
-          "docs": [
-            "Receives the NO side of every sale."
-          ],
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "sponsor"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "noMint"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
-        },
-        {
           "name": "usdcMint",
           "address": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
         },
@@ -1010,10 +817,6 @@ export type PredProvable = {
         {
           "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "associatedTokenProgram",
-          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
           "name": "systemProgram",
@@ -2358,7 +2161,8 @@ export type PredProvable = {
     {
       "name": "withdrawBudget",
       "docs": [
-        "Sponsor takes back the budget no sale used, once the sale is closed."
+        "Sponsor takes back the budget no sale used once the sale is closed (or before any",
+        "sale), and its NO collateral 1:1 once NO wins."
       ],
       "discriminator": [
         26,
@@ -2439,6 +2243,138 @@ export type PredProvable = {
         227,
         198,
         154
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "liquidityAdded",
+      "discriminator": [
+        154,
+        26,
+        221,
+        108,
+        238,
+        64,
+        217,
+        161
+      ]
+    },
+    {
+      "name": "liquidityRemoved",
+      "discriminator": [
+        225,
+        105,
+        216,
+        39,
+        124,
+        116,
+        169,
+        189
+      ]
+    },
+    {
+      "name": "marketCreated",
+      "discriminator": [
+        88,
+        184,
+        130,
+        231,
+        226,
+        84,
+        6,
+        58
+      ]
+    },
+    {
+      "name": "pairBurned",
+      "discriminator": [
+        123,
+        129,
+        41,
+        59,
+        180,
+        163,
+        14,
+        57
+      ]
+    },
+    {
+      "name": "pairMinted",
+      "discriminator": [
+        24,
+        66,
+        202,
+        249,
+        156,
+        196,
+        33,
+        51
+      ]
+    },
+    {
+      "name": "redeemed",
+      "discriminator": [
+        14,
+        29,
+        183,
+        71,
+        31,
+        165,
+        107,
+        38
+      ]
+    },
+    {
+      "name": "resolved",
+      "discriminator": [
+        148,
+        46,
+        187,
+        66,
+        35,
+        1,
+        255,
+        147
+      ]
+    },
+    {
+      "name": "sponsorWithdrew",
+      "discriminator": [
+        153,
+        69,
+        92,
+        7,
+        30,
+        147,
+        232,
+        242
+      ]
+    },
+    {
+      "name": "swapped",
+      "discriminator": [
+        217,
+        52,
+        52,
+        83,
+        147,
+        135,
+        96,
+        109
+      ]
+    },
+    {
+      "name": "yesBought",
+      "discriminator": [
+        32,
+        82,
+        79,
+        181,
+        195,
+        218,
+        91,
+        150
       ]
     }
   ],
@@ -2552,6 +2488,11 @@ export type PredProvable = {
       "code": 6021,
       "name": "notUsdc",
       "msg": "Collateral mint must be USDC"
+    },
+    {
+      "code": 6022,
+      "name": "nothingToWithdraw",
+      "msg": "Nothing to withdraw"
     }
   ],
   "types": [
@@ -2602,12 +2543,88 @@ export type PredProvable = {
       }
     },
     {
+      "name": "liquidityAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "provider",
+            "type": "pubkey"
+          },
+          {
+            "name": "yesIn",
+            "type": "u64"
+          },
+          {
+            "name": "noIn",
+            "type": "u64"
+          },
+          {
+            "name": "shares",
+            "type": "u64"
+          },
+          {
+            "name": "poolYes",
+            "type": "u64"
+          },
+          {
+            "name": "poolNo",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "liquidityRemoved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "provider",
+            "type": "pubkey"
+          },
+          {
+            "name": "yesOut",
+            "type": "u64"
+          },
+          {
+            "name": "noOut",
+            "type": "u64"
+          },
+          {
+            "name": "shares",
+            "type": "u64"
+          },
+          {
+            "name": "poolYes",
+            "type": "u64"
+          },
+          {
+            "name": "poolNo",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "market",
       "docs": [
         "KPI market with outcome tokens. The sponsor funds a budget and sells YES at a fixed",
-        "price; each sale mints one YES to the buyer and one NO to the sponsor. The buyer pays",
-        "the price and the budget covers the rest, so every YES/NO pair is backed by exactly",
-        "one USDC base unit held in the market's vault. The winning token redeems 1:1 for it."
+        "price. Each sale mints one YES to the buyer and books the matching NO to the sponsor",
+        "in `sponsor_no`. The buyer pays the price and the budget covers the rest, so every",
+        "YES is backed by exactly one USDC base unit held in the market's vault. The winning",
+        "side redeems 1:1 for it.",
+        "",
+        "Invariants while the market is open:",
+        "`yes_supply == no_supply + sponsor_no` and `vault == budget + yes_supply`."
       ],
       "type": {
         "kind": "struct",
@@ -2694,6 +2711,16 @@ export type PredProvable = {
             "type": "u64"
           },
           {
+            "name": "sponsorNo",
+            "docs": [
+              "NO owed to the sponsor for every YES the sale minted. Kept as a balance instead of",
+              "tokens so the sponsor cannot burn it against YES to unwind the sale while it is open,",
+              "and the sale never depends on a token account the sponsor controls. Paid out by",
+              "`withdraw_budget` if NO wins."
+            ],
+            "type": "u64"
+          },
+          {
             "name": "poolYes",
             "docs": [
               "Reserves of the guarded YES/NO pool. Tracked here instead of read from the pool's token",
@@ -2725,6 +2752,54 @@ export type PredProvable = {
       }
     },
     {
+      "name": "marketCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "sponsor",
+            "type": "pubkey"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": {
+                "name": "resolverKind"
+              }
+            }
+          },
+          {
+            "name": "target",
+            "type": "pubkey"
+          },
+          {
+            "name": "metricThreshold",
+            "type": "u64"
+          },
+          {
+            "name": "cutoffSlot",
+            "type": "u64"
+          },
+          {
+            "name": "deadlineSlot",
+            "type": "u64"
+          },
+          {
+            "name": "yesPriceBps",
+            "type": "u16"
+          },
+          {
+            "name": "budget",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "outcome",
       "type": {
         "kind": "enum",
@@ -2737,6 +2812,98 @@ export type PredProvable = {
           },
           {
             "name": "no"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pairBurned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pairMinted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "redeemed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "outcome",
+            "type": {
+              "defined": {
+                "name": "outcome"
+              }
+            }
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "resolved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "outcome",
+            "type": {
+              "defined": {
+                "name": "outcome"
+              }
+            }
+          },
+          {
+            "name": "slot",
+            "type": "u64"
           }
         ]
       }
@@ -2791,6 +2958,110 @@ export type PredProvable = {
           },
           {
             "name": "no"
+          }
+        ]
+      }
+    },
+    {
+      "name": "sponsorWithdrew",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "sponsor",
+            "type": "pubkey"
+          },
+          {
+            "name": "budget",
+            "docs": [
+              "Unspent budget paid out."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "sponsorNo",
+            "docs": [
+              "The sponsor's NO paid out, 1:1, because NO won."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "swapped",
+      "docs": [
+        "Reserves are after the swap, so the YES price is `pool_no / (pool_yes + pool_no)`."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "trader",
+            "type": "pubkey"
+          },
+          {
+            "name": "tokenIn",
+            "type": {
+              "defined": {
+                "name": "side"
+              }
+            }
+          },
+          {
+            "name": "amountIn",
+            "type": "u64"
+          },
+          {
+            "name": "amountOut",
+            "type": "u64"
+          },
+          {
+            "name": "poolYes",
+            "type": "u64"
+          },
+          {
+            "name": "poolNo",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "yesBought",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "price",
+            "docs": [
+              "USDC the buyer paid; the budget covered `amount - price`."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "budgetLeft",
+            "type": "u64"
           }
         ]
       }

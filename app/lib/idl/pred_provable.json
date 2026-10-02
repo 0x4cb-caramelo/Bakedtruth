@@ -491,7 +491,8 @@
     {
       "name": "buy_yes",
       "docs": [
-        "Buy YES at the sponsor's fixed price before the cutoff and before the metric is met."
+        "Buy YES at the sponsor's fixed price before the cutoff and before the metric is met.",
+        "The matching NO is booked to the sponsor in `Market::sponsor_no`."
       ],
       "discriminator": [
         124,
@@ -546,10 +547,6 @@
           "writable": true
         },
         {
-          "name": "no_mint",
-          "writable": true
-        },
-        {
           "name": "buyer_yes_account",
           "writable": true,
           "pda": {
@@ -598,103 +595,6 @@
               {
                 "kind": "account",
                 "path": "yes_mint"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
-        },
-        {
-          "name": "sponsor"
-        },
-        {
-          "name": "sponsor_no_account",
-          "docs": [
-            "Created at market creation. Recreated here if the sponsor closed it, so the",
-            "sponsor cannot halt the sale by closing their own token account."
-          ],
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "sponsor"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "no_mint"
               }
             ],
             "program": {
@@ -870,99 +770,6 @@
           }
         },
         {
-          "name": "sponsor_no_account",
-          "docs": [
-            "Receives the NO side of every sale."
-          ],
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "sponsor"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "no_mint"
-              }
-            ],
-            "program": {
-              "kind": "const",
-              "value": [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ]
-            }
-          }
-        },
-        {
           "name": "usdc_mint",
           "address": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
         },
@@ -1004,10 +811,6 @@
         {
           "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
-        },
-        {
-          "name": "associated_token_program",
-          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
           "name": "system_program",
@@ -2352,7 +2155,8 @@
     {
       "name": "withdraw_budget",
       "docs": [
-        "Sponsor takes back the budget no sale used, once the sale is closed."
+        "Sponsor takes back the budget no sale used once the sale is closed (or before any",
+        "sale), and its NO collateral 1:1 once NO wins."
       ],
       "discriminator": [
         26,
@@ -2433,6 +2237,138 @@
         227,
         198,
         154
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "LiquidityAdded",
+      "discriminator": [
+        154,
+        26,
+        221,
+        108,
+        238,
+        64,
+        217,
+        161
+      ]
+    },
+    {
+      "name": "LiquidityRemoved",
+      "discriminator": [
+        225,
+        105,
+        216,
+        39,
+        124,
+        116,
+        169,
+        189
+      ]
+    },
+    {
+      "name": "MarketCreated",
+      "discriminator": [
+        88,
+        184,
+        130,
+        231,
+        226,
+        84,
+        6,
+        58
+      ]
+    },
+    {
+      "name": "PairBurned",
+      "discriminator": [
+        123,
+        129,
+        41,
+        59,
+        180,
+        163,
+        14,
+        57
+      ]
+    },
+    {
+      "name": "PairMinted",
+      "discriminator": [
+        24,
+        66,
+        202,
+        249,
+        156,
+        196,
+        33,
+        51
+      ]
+    },
+    {
+      "name": "Redeemed",
+      "discriminator": [
+        14,
+        29,
+        183,
+        71,
+        31,
+        165,
+        107,
+        38
+      ]
+    },
+    {
+      "name": "Resolved",
+      "discriminator": [
+        148,
+        46,
+        187,
+        66,
+        35,
+        1,
+        255,
+        147
+      ]
+    },
+    {
+      "name": "SponsorWithdrew",
+      "discriminator": [
+        153,
+        69,
+        92,
+        7,
+        30,
+        147,
+        232,
+        242
+      ]
+    },
+    {
+      "name": "Swapped",
+      "discriminator": [
+        217,
+        52,
+        52,
+        83,
+        147,
+        135,
+        96,
+        109
+      ]
+    },
+    {
+      "name": "YesBought",
+      "discriminator": [
+        32,
+        82,
+        79,
+        181,
+        195,
+        218,
+        91,
+        150
       ]
     }
   ],
@@ -2546,6 +2482,11 @@
       "code": 6021,
       "name": "NotUsdc",
       "msg": "Collateral mint must be USDC"
+    },
+    {
+      "code": 6022,
+      "name": "NothingToWithdraw",
+      "msg": "Nothing to withdraw"
     }
   ],
   "types": [
@@ -2596,12 +2537,88 @@
       }
     },
     {
+      "name": "LiquidityAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "provider",
+            "type": "pubkey"
+          },
+          {
+            "name": "yes_in",
+            "type": "u64"
+          },
+          {
+            "name": "no_in",
+            "type": "u64"
+          },
+          {
+            "name": "shares",
+            "type": "u64"
+          },
+          {
+            "name": "pool_yes",
+            "type": "u64"
+          },
+          {
+            "name": "pool_no",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LiquidityRemoved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "provider",
+            "type": "pubkey"
+          },
+          {
+            "name": "yes_out",
+            "type": "u64"
+          },
+          {
+            "name": "no_out",
+            "type": "u64"
+          },
+          {
+            "name": "shares",
+            "type": "u64"
+          },
+          {
+            "name": "pool_yes",
+            "type": "u64"
+          },
+          {
+            "name": "pool_no",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "Market",
       "docs": [
         "KPI market with outcome tokens. The sponsor funds a budget and sells YES at a fixed",
-        "price; each sale mints one YES to the buyer and one NO to the sponsor. The buyer pays",
-        "the price and the budget covers the rest, so every YES/NO pair is backed by exactly",
-        "one USDC base unit held in the market's vault. The winning token redeems 1:1 for it."
+        "price. Each sale mints one YES to the buyer and books the matching NO to the sponsor",
+        "in `sponsor_no`. The buyer pays the price and the budget covers the rest, so every",
+        "YES is backed by exactly one USDC base unit held in the market's vault. The winning",
+        "side redeems 1:1 for it.",
+        "",
+        "Invariants while the market is open:",
+        "`yes_supply == no_supply + sponsor_no` and `vault == budget + yes_supply`."
       ],
       "type": {
         "kind": "struct",
@@ -2688,6 +2705,16 @@
             "type": "u64"
           },
           {
+            "name": "sponsor_no",
+            "docs": [
+              "NO owed to the sponsor for every YES the sale minted. Kept as a balance instead of",
+              "tokens so the sponsor cannot burn it against YES to unwind the sale while it is open,",
+              "and the sale never depends on a token account the sponsor controls. Paid out by",
+              "`withdraw_budget` if NO wins."
+            ],
+            "type": "u64"
+          },
+          {
             "name": "pool_yes",
             "docs": [
               "Reserves of the guarded YES/NO pool. Tracked here instead of read from the pool's token",
@@ -2719,6 +2746,54 @@
       }
     },
     {
+      "name": "MarketCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "sponsor",
+            "type": "pubkey"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": {
+                "name": "ResolverKind"
+              }
+            }
+          },
+          {
+            "name": "target",
+            "type": "pubkey"
+          },
+          {
+            "name": "metric_threshold",
+            "type": "u64"
+          },
+          {
+            "name": "cutoff_slot",
+            "type": "u64"
+          },
+          {
+            "name": "deadline_slot",
+            "type": "u64"
+          },
+          {
+            "name": "yes_price_bps",
+            "type": "u16"
+          },
+          {
+            "name": "budget",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "Outcome",
       "type": {
         "kind": "enum",
@@ -2731,6 +2806,98 @@
           },
           {
             "name": "No"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PairBurned",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PairMinted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Redeemed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "outcome",
+            "type": {
+              "defined": {
+                "name": "Outcome"
+              }
+            }
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Resolved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "outcome",
+            "type": {
+              "defined": {
+                "name": "Outcome"
+              }
+            }
+          },
+          {
+            "name": "slot",
+            "type": "u64"
           }
         ]
       }
@@ -2785,6 +2952,110 @@
           },
           {
             "name": "No"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SponsorWithdrew",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "sponsor",
+            "type": "pubkey"
+          },
+          {
+            "name": "budget",
+            "docs": [
+              "Unspent budget paid out."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "sponsor_no",
+            "docs": [
+              "The sponsor's NO paid out, 1:1, because NO won."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Swapped",
+      "docs": [
+        "Reserves are after the swap, so the YES price is `pool_no / (pool_yes + pool_no)`."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "trader",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_in",
+            "type": {
+              "defined": {
+                "name": "Side"
+              }
+            }
+          },
+          {
+            "name": "amount_in",
+            "type": "u64"
+          },
+          {
+            "name": "amount_out",
+            "type": "u64"
+          },
+          {
+            "name": "pool_yes",
+            "type": "u64"
+          },
+          {
+            "name": "pool_no",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "YesBought",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "price",
+            "docs": [
+              "USDC the buyer paid; the budget covered `amount - price`."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "budget_left",
+            "type": "u64"
           }
         ]
       }

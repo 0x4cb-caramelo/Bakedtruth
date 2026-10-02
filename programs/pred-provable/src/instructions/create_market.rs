@@ -1,8 +1,7 @@
 use anchor_lang::prelude::*;
-use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
-use crate::{constants::*, error::ErrorCode, outcome, resolver, state::*};
+use crate::{constants::*, error::ErrorCode, events::MarketCreated, outcome, resolver, state::*};
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct CreateMarketArgs {
@@ -50,14 +49,6 @@ pub struct CreateMarket<'info> {
         mint::authority = market,
     )]
     pub no_mint: Box<Account<'info, Mint>>,
-    /// Receives the NO side of every sale.
-    #[account(
-        init,
-        payer = sponsor,
-        associated_token::mint = no_mint,
-        associated_token::authority = sponsor,
-    )]
-    pub sponsor_no_account: Box<Account<'info, TokenAccount>>,
     #[account(address = USDC_MINT @ ErrorCode::NotUsdc)]
     pub usdc_mint: Box<Account<'info, Mint>>,
     /// Holds the budget and all collateral. Only the market can move it.
@@ -77,7 +68,6 @@ pub struct CreateMarket<'info> {
     /// CHECK: account read at resolution; validated per resolver kind and locked into the market.
     pub metric_account: UncheckedAccount<'info>,
     pub token_program: Program<'info, Token>,
-    pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }
 
@@ -116,6 +106,7 @@ pub fn handle_create_market(ctx: Context<CreateMarket>, args: CreateMarketArgs) 
         vault: ctx.accounts.vault.key(),
         yes_price_bps: args.yes_price_bps,
         budget: args.sponsor_budget,
+        sponsor_no: 0,
         pool_yes: 0,
         pool_no: 0,
         outcome: Outcome::Open,
@@ -130,5 +121,18 @@ pub fn handle_create_market(ctx: Context<CreateMarket>, args: CreateMarketArgs) 
         &ctx.accounts.vault,
         ctx.accounts.sponsor.to_account_info(),
         args.sponsor_budget,
-    )
+    )?;
+
+    emit!(MarketCreated {
+        market: ctx.accounts.market.key(),
+        sponsor: ctx.accounts.sponsor.key(),
+        kind: args.kind,
+        target: ctx.accounts.target.key(),
+        metric_threshold: args.metric_threshold,
+        cutoff_slot: args.cutoff_slot,
+        deadline_slot: args.deadline_slot,
+        yes_price_bps: args.yes_price_bps,
+        budget: args.sponsor_budget,
+    });
+    Ok(())
 }

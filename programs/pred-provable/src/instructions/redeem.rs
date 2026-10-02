@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, burn, close_account, Burn, CloseAccount, Mint, Token, TokenAccount};
 
-use crate::{constants::*, error::ErrorCode, outcome, state::*};
+use crate::{constants::*, error::ErrorCode, events::Redeemed, outcome, state::*};
 
 #[derive(Accounts)]
 pub struct Redeem<'info> {
@@ -68,5 +68,12 @@ pub fn handle_redeem(ctx: Context<Redeem>) -> Result<()> {
         &ctx.accounts.vault,
         &ctx.accounts.owner_usdc_account,
         amount,
-    )
+    )?;
+    emit!(Redeemed {
+        market: ctx.accounts.market.key(),
+        owner: ctx.accounts.owner.key(),
+        outcome: ctx.accounts.market.outcome,
+        amount,
+    });
+    Ok(())
 }

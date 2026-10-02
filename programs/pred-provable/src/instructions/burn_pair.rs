@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, burn, Burn, Mint, Token, TokenAccount};
 
-use crate::{constants::*, error::ErrorCode, outcome, state::*};
+use crate::{constants::*, error::ErrorCode, events::PairBurned, outcome, state::*};
 
 #[derive(Accounts)]
 pub struct BurnPair<'info> {
@@ -58,5 +58,11 @@ pub fn handle_burn_pair(ctx: Context<BurnPair>, amount: u64) -> Result<()> {
         &ctx.accounts.vault,
         &ctx.accounts.owner_usdc_account,
         amount,
-    )
+    )?;
+    emit!(PairBurned {
+        market: ctx.accounts.market.key(),
+        owner: ctx.accounts.owner.key(),
+        amount,
+    });
+    Ok(())
 }

@@ -17,8 +17,10 @@
     "build:program": "NO_DNA=1 anchor build && bun run --filter @pred-provable/app sync-idl",
     "test": "bun test tests/",
     "test:rust": "cargo test -p pred-provable --features no-entrypoint",
+    "deploy:devnet": "solana program deploy target/deploy/pred_provable.so --program-id target/deploy/pred_provable-keypair.json --keypair $HOME/.config/solana/pred-provable-devnet.json --url devnet",
+    "smoke:devnet": "bun run scripts/devnet-smoke.ts",
     "dev": "bun --filter @pred-provable/app dev",
-    "lint": "prettier --check \"tests/**/*.ts\""
+    "lint": "prettier --check \"tests/**/*.ts\" \"scripts/**/*.ts\""
   },
   "devDependencies": {
     "@anchor-lang/core": "^1.2.0",

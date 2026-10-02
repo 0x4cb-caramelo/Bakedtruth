@@ -144,6 +144,8 @@ pub fn validate_new_market(
                 ErrorCode::InvalidMetricAccount
             );
             require!(epoch > clock.epoch, ErrorCode::InvalidEpoch);
+            // Every vote account has at least zero stake, so 0 would be a free YES.
+            require!(metric_threshold > 0, ErrorCode::MetricAlreadyMet);
         }
         ResolverKind::MintAuthorityRevoked => {
             require_keys_eq!(

@@ -1,5 +1,6 @@
 pub mod constants;
 pub mod error;
+pub mod events;
 pub mod instructions;
 pub mod outcome;
 pub mod resolver;
@@ -23,6 +24,7 @@ pub mod pred_provable {
     }
 
     /// Buy YES at the sponsor's fixed price before the cutoff and before the metric is met.
+    /// The matching NO is booked to the sponsor in `Market::sponsor_no`.
     pub fn buy_yes(ctx: Context<BuyYes>, amount: u64) -> Result<()> {
         crate::instructions::buy_yes::handle_buy_yes(ctx, amount)
     }
@@ -72,7 +74,8 @@ pub mod pred_provable {
         crate::instructions::redeem::handle_redeem(ctx)
     }
 
-    /// Sponsor takes back the budget no sale used, once the sale is closed.
+    /// Sponsor takes back the budget no sale used once the sale is closed (or before any
+    /// sale), and its NO collateral 1:1 once NO wins.
     pub fn withdraw_budget(ctx: Context<WithdrawBudget>) -> Result<()> {
         crate::instructions::withdraw_budget::handle_withdraw_budget(ctx)
     }

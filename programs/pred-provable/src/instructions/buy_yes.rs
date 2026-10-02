@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
-use crate::{constants::*, error::ErrorCode, outcome, resolver, state::*};
+use crate::{constants::*, error::ErrorCode, events::YesBought, outcome, resolver, state::*};
 
 #[derive(Accounts)]
 pub struct BuyYes<'info> {
@@ -15,8 +15,6 @@ pub struct BuyYes<'info> {
     pub metric_account: UncheckedAccount<'info>,
     #[account(mut, address = market.yes_mint)]
     pub yes_mint: Box<Account<'info, Mint>>,
-    #[account(mut, address = market.no_mint)]
-    pub no_mint: Box<Account<'info, Mint>>,
     #[account(
         init_if_needed,
         payer = buyer,
@@ -24,18 +22,6 @@ pub struct BuyYes<'info> {
         associated_token::authority = buyer,
     )]
     pub buyer_yes_account: Box<Account<'info, TokenAccount>>,
-    /// CHECK: the market's sponsor; only receives NO tokens.
-    #[account(address = market.sponsor)]
-    pub sponsor: UncheckedAccount<'info>,
-    /// Created at market creation. Recreated here if the sponsor closed it, so the
-    /// sponsor cannot halt the sale by closing their own token account.
-    #[account(
-        init_if_needed,
-        payer = buyer,
-        associated_token::mint = no_mint,
-        associated_token::authority = sponsor,
-    )]
-    pub sponsor_no_account: Box<Account<'info, TokenAccount>>,
     #[account(address = USDC_MINT @ ErrorCode::NotUsdc)]
     pub usdc_mint: Box<Account<'info, Mint>>,
     #[account(mut, address = market.vault)]
@@ -48,6 +34,11 @@ pub struct BuyYes<'info> {
 }
 
 /// Buys `amount` YES base units, each redeemable for one USDC base unit if YES wins.
+///
+/// The matching NO is not minted: it is booked to the sponsor in `sponsor_no` and paid out
+/// only if NO wins. So the sale touches no account the sponsor controls (which the sponsor
+/// could close or hand away to halt it), and the sponsor cannot buy its own YES and burn it
+/// against that NO to pull the budget out while the sale is open.
 pub fn handle_buy_yes(ctx: Context<BuyYes>, amount: u64) -> Result<()> {
     let clock = Clock::get()?;
     let market = &ctx.accounts.market;
@@ -55,7 +46,7 @@ pub fn handle_buy_yes(ctx: Context<BuyYes>, amount: u64) -> Result<()> {
     require!(amount >= MIN_STAKE, ErrorCode::StakeTooSmall);
 
     // The buyer pays the price, rounded up, and the budget (already in the vault) covers
-    // the rest, so the YES/NO pair minted below is backed by exactly `amount` USDC base units.
+    // the rest, so the YES minted below is backed by exactly `amount` USDC base units.
     let price = (amount as u128 * market.yes_price_bps as u128).div_ceil(BPS_DENOMINATOR as u128);
     let price = u64::try_from(price).map_err(|_| ErrorCode::MathOverflow)?;
     let cover = amount - price;
@@ -63,6 +54,10 @@ pub fn handle_buy_yes(ctx: Context<BuyYes>, amount: u64) -> Result<()> {
         .budget
         .checked_sub(cover)
         .ok_or(ErrorCode::BudgetExhausted)?;
+    let sponsor_no = market
+        .sponsor_no
+        .checked_add(amount)
+        .ok_or(ErrorCode::MathOverflow)?;
 
     outcome::deposit_usdc(
         &ctx.accounts.usdc_mint,
@@ -71,14 +66,22 @@ pub fn handle_buy_yes(ctx: Context<BuyYes>, amount: u64) -> Result<()> {
         ctx.accounts.buyer.to_account_info(),
         price,
     )?;
-
-    outcome::mint_backed_pair(
+    outcome::mint_from_market(
         &ctx.accounts.market,
-        (&ctx.accounts.yes_mint, &ctx.accounts.buyer_yes_account),
-        (&ctx.accounts.no_mint, &ctx.accounts.sponsor_no_account),
+        &ctx.accounts.yes_mint,
+        &ctx.accounts.buyer_yes_account,
         amount,
     )?;
 
-    ctx.accounts.market.budget = budget;
+    let market = &mut ctx.accounts.market;
+    market.budget = budget;
+    market.sponsor_no = sponsor_no;
+    emit!(YesBought {
+        market: market.key(),
+        buyer: ctx.accounts.buyer.key(),
+        amount,
+        price,
+        budget_left: budget,
+    });
     Ok(())
 }

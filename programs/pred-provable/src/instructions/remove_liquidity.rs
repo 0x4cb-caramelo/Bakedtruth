@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{self, burn, Burn, Mint, Token, TokenAccount};
 
-use crate::{constants::*, error::ErrorCode, outcome, state::*};
+use crate::{constants::*, error::ErrorCode, events::LiquidityRemoved, outcome, state::*};
 
 #[derive(Accounts)]
 pub struct RemoveLiquidity<'info> {
@@ -97,5 +97,14 @@ pub fn handle_remove_liquidity(
     let market = &mut ctx.accounts.market;
     market.pool_yes -= yes_out;
     market.pool_no -= no_out;
+    emit!(LiquidityRemoved {
+        market: market.key(),
+        provider: ctx.accounts.provider.key(),
+        yes_out,
+        no_out,
+        shares,
+        pool_yes: market.pool_yes,
+        pool_no: market.pool_no,
+    });
     Ok(())
 }

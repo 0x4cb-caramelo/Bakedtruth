@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
-use crate::{constants::*, error::ErrorCode, outcome, resolver, state::*};
+use crate::{constants::*, error::ErrorCode, events::LiquidityAdded, outcome, resolver, state::*};
 
 #[derive(Accounts)]
 pub struct AddLiquidity<'info> {
@@ -131,5 +131,14 @@ pub fn handle_add_liquidity(
         .pool_no
         .checked_add(no_in)
         .ok_or(ErrorCode::MathOverflow)?;
+    emit!(LiquidityAdded {
+        market: market.key(),
+        provider: ctx.accounts.provider.key(),
+        yes_in,
+        no_in,
+        shares,
+        pool_yes: market.pool_yes,
+        pool_no: market.pool_no,
+    });
     Ok(())
 }

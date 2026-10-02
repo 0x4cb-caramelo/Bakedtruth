@@ -46,4 +46,6 @@ pub enum ErrorCode {
     MathOverflow,
     #[msg("Collateral mint must be USDC")]
     NotUsdc,
+    #[msg("Nothing to withdraw")]
+    NothingToWithdraw,
 }

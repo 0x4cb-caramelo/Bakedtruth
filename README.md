@@ -30,17 +30,34 @@ is locked into the market at creation.
 
 Each market has a YES mint and a NO mint (classic SPL Token, 6 decimals like USDC, minted only by the market PDA, no
 freeze authority) and a USDC vault: a token account owned by the market PDA at the address `["vault", market]`. The
-sponsor sets a YES price `p` in basis points and deposits a USDC budget. Every sale mints a fully backed pair:
+sponsor sets a YES price `p` in basis points and deposits a USDC budget. Every sale is fully backed:
 
 | | Pays | Receives |
 | --- | --- | --- |
-| Buyer | `p` per YES (rounded up) | 1 YES |
-| Sponsor's budget | the rest, `1 - p` | 1 NO |
+| Buyer | `p` per YES (rounded up) | 1 YES token |
+| Sponsor's budget | the rest, `1 - p` | 1 NO, booked on the market as `sponsor_no` |
 
-So every YES/NO pair is backed 1:1 by USDC in the vault (one USDC base unit per outcome-token base unit). If YES
-wins, YES holders redeem 1:1 and the sponsor's bounty is `1 - p` per token. If NO wins, the sponsor redeems NO and gets
-everything back, including what buyers paid. Doers know their payout before they buy, and the tokens trade like any SPL
-token: no position accounts, no pro-rata dilution.
+So every YES is backed 1:1 by USDC in the vault (one USDC base unit per outcome-token base unit). If YES wins, YES
+holders redeem 1:1 and the sponsor's bounty is `1 - p` per token. If NO wins, `withdraw_budget` pays the sponsor its NO
+1:1, so it gets everything back, including what buyers paid. Doers know their payout before they buy, and the tokens
+trade like any SPL token: no position accounts, no pro-rata dilution.
+
+Invariants while a market is open, checked after every operation by a randomized test:
+`YES supply = NO supply + sponsor_no` and `vault = budget + YES supply`.
+
+### What the sponsor can and cannot do
+
+- **It cannot pull the budget back while the sale is open.** Once a YES is sold, the unspent budget stays locked until
+  `cutoff_slot` or resolution. The sponsor's NO is a balance on the market, not tokens in its wallet, so it cannot buy
+  its own YES and burn it against that NO to recover the budget early. Buying out its own sale costs the sponsor the
+  sale price, locked until resolution.
+- **It cannot halt the sale.** `buy_yes` touches no account the sponsor controls, so closing or handing away a token
+  account changes nothing, and buyers only pay rent for their own YES account.
+- **It can cancel a sale that has sold nothing**, by withdrawing the budget before the first purchase.
+- It cannot trade its NO before resolution. That is the price of the two guarantees above.
+
+Doers should still buy YES before doing the work. Sold YES is always fully backed; the remaining budget is first come,
+first served (when the pool prices YES above `p`, arbitrageurs may buy it first).
 
 The sponsor's budget caps the subsidized sale, not the market. Anyone can deposit USDC to mint unsubsidized YES/NO pairs
 at 1:1 and burn them back before resolution. A pair is worth its collateral whichever side wins, so minting carries no
@@ -77,8 +94,8 @@ their creators cannot pause them, so their liquidity providers carry the risk of
 
 1. `create_market`: the sponsor locks the target, threshold, schedule and YES price, creates the outcome mints and the
    USDC vault, and deposits the budget.
-2. `buy_yes`: buy YES at the fixed price before `cutoff_slot`, while the budget lasts. Purchases revert once the goal
-   is visibly met (anti-sniping).
+2. `buy_yes`: buy YES at the fixed price before `cutoff_slot`, while the budget lasts. The matching NO is booked to the
+   sponsor. Purchases revert once the goal is visibly met (anti-sniping).
 3. `mint_pair` / `burn_pair`: anyone, until resolution. Deposit USDC for the same number of YES and NO tokens, or
    burn equal YES and NO to get the USDC back. Never touches the sponsor's budget.
 4. `add_liquidity` / `swap` / `remove_liquidity`: the guarded pool. Adding and swapping stop with the sale; removing
@@ -86,8 +103,33 @@ their creators cannot pause them, so their liquidity providers carry the risk of
 5. `resolve`: permissionless, top-level only (no CPI) and final in one instruction. Every goal except stake (burn,
    renounce, lock, immutability) resolves YES as soon as it is met; past `deadline_slot` the market resolves NO.
 6. `redeem`: burn the winning token for USDC, 1:1. The emptied token account is closed and its rent refunded.
-7. `withdraw_budget`: once the sale is closed (cutoff passed or market resolved), the sponsor takes back the unspent
-   budget. It stays locked while the sale is open, so the bounty cannot be pulled from under doers.
+7. `withdraw_budget`: pays the sponsor what it is owed now, and can be called again later: the unspent budget once the
+   sale is closed (cutoff passed or market resolved) or before anything was sold, and its NO 1:1 once NO wins.
+
+## Events
+
+Every instruction logs one Anchor event: `MarketCreated`, `YesBought`, `PairMinted`, `PairBurned`, `LiquidityAdded`,
+`LiquidityRemoved`, `Swapped` (with the reserves after the trade, so YES price = `pool_no / (pool_yes + pool_no)`),
+`Resolved`, `Redeemed` and `SponsorWithdrew`. An activity feed or price history is `getSignaturesForAddress(market)`
+plus `decodeEvents(tx.meta.logMessages)`, with no indexer.
+
+## Client library
+
+[`app/lib/market.ts`](app/lib/market.ts) is framework-free and imported by the test suite, so the tests check the
+exact math and addresses the app uses:
+
+- addresses: `marketPda`, `yesMintPda`, `noMintPda`, `vaultPda`, `lpMintPda`, `poolAccounts`, `ataAddress`,
+  `incineratorAta`, `programDataPda`, plus the program constants read from the IDL;
+- sale: `salePrice` (rounded up like the program) and `maxSaleAmount` (the largest `buy_yes` the remaining budget
+  covers, exact);
+- pool: `swapQuote`, `buyQuote` (mint_pair + swap), `sellQuote` (swap + burn_pair split), `addLiquidityQuote`,
+  `removeLiquidityQuote`, `seedNoForPrice`, `poolYesPriceBps`;
+- `decodeEvents`: typed, camelCase like `program.account.*`;
+- `createAtaIdempotentIx`: prepend it to `redeem`, `burn_pair` and `withdraw_budget` when the user may not have a USDC
+  account yet (they take an existing one), and to a `LockedAtLeast` `create_market` for the incinerator's account.
+
+Losing tokens are worthless after resolution; the app can burn them and close the account for its rent with plain SPL
+Token instructions.
 
 ## Stack
 
@@ -115,6 +157,18 @@ NO_DNA=1 anchor test    # TypeScript suite on LiteSVM (no validator needed)
 bun run test:rust       # Rust suite with anchor-litesvm
 ```
 
+Deploy to devnet and run the smoke test (the whole USDC lifecycle, with the client stack the app uses):
+
+```bash
+bun run deploy:devnet   # ~2.9 SOL: 2.82 SOL of program rent (the upload buffer's SOL is reused for it)
+bun run smoke:devnet    # ~0.15 SOL and 4 devnet USDC; returns every USDC base unit at the end
+```
+
+Both use the keypair at `~/.config/solana/pred-provable-devnet.json` (`SMOKE_WALLET` overrides it for the smoke test,
+`SMOKE_RPC_URL` the RPC). To rehearse without devnet funds, fork devnet with
+[Surfpool](https://surfpool.run) (`surfpool start --network devnet`), deploy to it, give the wallet USDC with the
+`surfnet_setTokenAccount` cheatcode, and run with `SMOKE_RPC_URL=http://127.0.0.1:8899`.
+
 Run the app:
 
 ```bash
@@ -130,14 +184,33 @@ programs/pred-provable/   Anchor program
   src/instructions/       create_market, buy_yes, mint_pair, burn_pair, add_liquidity, swap,
                           remove_liquidity, resolve, redeem, withdraw_budget
   src/outcome.rs          market-signed minting and transfers of outcome and LP tokens, USDC vault deposits and payouts
+  src/events.rs           events for clients
   tests/                  Rust tests (anchor-litesvm)
 tests/                    TypeScript tests (bun test + LiteSVM)
+scripts/devnet-smoke.ts   devnet smoke test
 app/                      Next.js frontend
+  lib/market.ts           client library: addresses, quotes, events (shared with the tests)
 ```
+
+## Known limits
+
+- **Resolve in time.** A goal met but not resolved by `deadline_slot` resolves NO, and a `StakeAtLeast` market must be
+  resolved during its target epoch. YES holders should resolve in the same transaction as the action that meets the
+  goal.
+- **`resolve` rejects CPI**, so a multisig vault (for example Squads) cannot call it directly. Anyone else can.
+- **`StakeAtLeast` YES is untested.** LiteSVM cannot inject stake (it reports 0), so the tests cover validation, the
+  trading halt and the NO paths.
+- **Rent is not reclaimable for market accounts.** On devnet, creating a market costs the sponsor about 0.0057 SOL
+  (market account, two mints, vault) and seeding a pool costs the first provider about 0.0040 SOL (LP mint, two pool
+  accounts). Classic SPL Token mints cannot be closed, and closing the rest would need every winner to redeem first.
+- **Tokens or USDC sent by hand** to the vault or the pool's accounts are not tracked and stay there.
+- **`deadline_slot` has no upper bound.** The app should warn about markets whose deadline is far away.
+
 
 ## Status
 
-Hackathon MVP targeting devnet. Not audited; do not use with real funds.
+Hackathon MVP, deployed on devnet at `F9KfegHTBzeHmkhUxgvpTzYD8xvwRmV3sue2BVXiKoE2`, where the smoke test passes. Not
+audited; do not use with real funds.
 
 ## License
 

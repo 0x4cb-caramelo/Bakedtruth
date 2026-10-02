@@ -7,7 +7,6 @@ import {
   createTransactionMessage,
   generateKeyPairSigner,
   getAddressEncoder,
-  getProgramDerivedAddress,
   lamports,
   pipe,
   setTransactionMessageFeePayerSigner,
@@ -18,8 +17,10 @@ import {
 } from "@solana/kit";
 import { litesvm, isFailedTransaction } from "@solana/kit-plugin-litesvm";
 import { generatedSigner } from "@solana/kit-plugin-signer";
+import { BN } from "@anchor-lang/core";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 
+import * as lib from "../app/lib/market";
 import idl from "../target/idl/pred_provable.json";
 import type { PredProvable } from "../target/types/pred_provable";
 
@@ -112,64 +113,38 @@ export async function send(client: TestClient, ixs: TransactionInstruction[], si
   return result;
 }
 
-export async function marketPda(sponsor: Address, marketId: bigint): Promise<Address> {
-  const id = new Uint8Array(8);
-  new DataView(id.buffer).setBigUint64(0, marketId, true);
-  const [pda] = await getProgramDerivedAddress({
-    programAddress: PROGRAM_ID,
-    seeds: ["market", getAddressEncoder().encode(sponsor), id],
-  });
-  return pda;
+// Addresses come from the app's client library, so the suite also checks its derivations.
+const kit = (key: PublicKey) => address(key.toBase58());
+
+export const marketPda = (sponsor: Address, marketId: bigint) => kit(lib.marketPda(pk(sponsor), marketId));
+
+export function outcomeMints(market: Address): { yes: Address; no: Address } {
+  return { yes: kit(lib.yesMintPda(pk(market))), no: kit(lib.noMintPda(pk(market))) };
 }
 
-export async function outcomeMints(market: Address): Promise<{ yes: Address; no: Address }> {
-  const seeds = (prefix: string) => [prefix, getAddressEncoder().encode(market)];
-  const [[yes], [no]] = await Promise.all([
-    getProgramDerivedAddress({ programAddress: PROGRAM_ID, seeds: seeds("yes_mint") }),
-    getProgramDerivedAddress({ programAddress: PROGRAM_ID, seeds: seeds("no_mint") }),
-  ]);
-  return { yes, no };
-}
-
-export async function vaultPda(market: Address): Promise<Address> {
-  const [pda] = await getProgramDerivedAddress({
-    programAddress: PROGRAM_ID,
-    seeds: ["vault", getAddressEncoder().encode(market)],
-  });
-  return pda;
-}
-
-export async function lpMintPda(market: Address): Promise<Address> {
-  const [pda] = await getProgramDerivedAddress({
-    programAddress: PROGRAM_ID,
-    seeds: ["lp_mint", getAddressEncoder().encode(market)],
-  });
-  return pda;
-}
+export const vaultPda = (market: Address) => kit(lib.vaultPda(pk(market)));
+export const lpMintPda = (market: Address) => kit(lib.lpMintPda(pk(market)));
 
 /** Associated token account of `owner` for `mint` (classic SPL Token). */
-export async function ata(owner: Address, mint: Address): Promise<Address> {
-  const [pda] = await getProgramDerivedAddress({
-    programAddress: ATA_PROGRAM_ID,
-    seeds: [
-      getAddressEncoder().encode(owner),
-      getAddressEncoder().encode(TOKEN_PROGRAM_ID),
-      getAddressEncoder().encode(mint),
-    ],
-  });
-  return pda;
-}
+export const ata = (owner: Address, mint: Address) => kit(lib.ataAddress(pk(owner), pk(mint)));
 
-export async function programDataPda(programId: Address): Promise<Address> {
-  const [pda] = await getProgramDerivedAddress({
-    programAddress: LOADER_V3_ID,
-    seeds: [getAddressEncoder().encode(programId)],
-  });
-  return pda;
-}
+export const programDataPda = (programId: Address) => kit(lib.programDataPda(pk(programId)));
 
 /** Where locked tokens go: the incinerator's associated token account for `mint`. */
-export const incineratorAta = (mint: Address) => ata(INCINERATOR, mint);
+export const incineratorAta = (mint: Address) => kit(lib.incineratorAta(pk(mint)));
+
+/** The program's events in a transaction's logs, with u64s as bigint and pubkeys as addresses. */
+export function eventsOf(result: { logs(): string[] }) {
+  const plain = (value: unknown): unknown => {
+    if (BN.isBN(value)) return BigInt((value as BN).toString());
+    if (value instanceof PublicKey) return value.toBase58();
+    return value;
+  };
+  return lib.decodeEvents(result.logs()).map(({ name, data }) => ({
+    name,
+    data: Object.fromEntries(Object.entries(data as object).map(([k, v]) => [k, plain(v)])),
+  }));
+}
 
 export const usdcAta = (owner: Address) => ata(owner, USDC_MINT);
 
@@ -201,20 +176,8 @@ export function mintSupply(client: TestClient, mint: Address): bigint {
 // Built by hand (layouts from spl-token / spl-associated-token-account) to show that outcome
 // tokens move with the standard programs, with no pred-provable instruction involved.
 
-export function createAtaIdempotentIx(payer: Address, owner: Address, mint: Address, account: Address) {
-  return new TransactionInstruction({
-    programId: pk(ATA_PROGRAM_ID),
-    keys: [
-      { pubkey: pk(payer), isSigner: true, isWritable: true },
-      { pubkey: pk(account), isSigner: false, isWritable: true },
-      { pubkey: pk(owner), isSigner: false, isWritable: false },
-      { pubkey: pk(mint), isSigner: false, isWritable: false },
-      { pubkey: pk(SYSTEM_PROGRAM_ID), isSigner: false, isWritable: false },
-      { pubkey: pk(TOKEN_PROGRAM_ID), isSigner: false, isWritable: false },
-    ],
-    data: Buffer.from([1]),
-  });
-}
+export const createAtaIdempotentIx = (payer: Address, owner: Address, mint: Address) =>
+  lib.createAtaIdempotentIx(pk(payer), pk(owner), pk(mint));
 
 export function splTransferIx(source: Address, destination: Address, owner: Address, amount: bigint) {
   const data = Buffer.alloc(9);
@@ -225,6 +188,21 @@ export function splTransferIx(source: Address, destination: Address, owner: Addr
     keys: [
       { pubkey: pk(source), isSigner: false, isWritable: true },
       { pubkey: pk(destination), isSigner: false, isWritable: true },
+      { pubkey: pk(owner), isSigner: true, isWritable: false },
+    ],
+    data,
+  });
+}
+
+export function splBurnIx(account: Address, mint: Address, owner: Address, amount: bigint) {
+  const data = Buffer.alloc(9);
+  data[0] = 8; // TokenInstruction::Burn
+  data.writeBigUInt64LE(amount, 1);
+  return new TransactionInstruction({
+    programId: pk(TOKEN_PROGRAM_ID),
+    keys: [
+      { pubkey: pk(account), isSigner: false, isWritable: true },
+      { pubkey: pk(mint), isSigner: false, isWritable: true },
       { pubkey: pk(owner), isSigner: true, isWritable: false },
     ],
     data,
@@ -343,4 +321,23 @@ export async function setUpgradeableProgram(client: TestClient, programId: Addre
     space: BigInt(dataBytes.length),
   });
   return programData;
+}
+
+/** Moves the clock to `epoch`, keeping the slot (the program reads both). */
+export function setEpoch(client: TestClient, epoch: bigint) {
+  const clock = client.svm.getClock();
+  clock.epoch = epoch;
+  client.svm.setClock(clock);
+}
+
+/** An account owned by the Vote program. LiteSVM reports no stake for it, so it reads 0. */
+export function setVoteAccount(client: TestClient, vote: Address) {
+  client.svm.setAccount({
+    address: vote,
+    data: new Uint8Array(3762),
+    executable: false,
+    lamports: lamports(SOL),
+    programAddress: address("Vote111111111111111111111111111111111111111"),
+    space: 3762n,
+  });
 }

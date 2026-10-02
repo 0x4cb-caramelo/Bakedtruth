@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
-use crate::{constants::*, error::ErrorCode, outcome, resolver, state::*};
+use crate::{constants::*, error::ErrorCode, events::Swapped, outcome, resolver, state::*};
 
 #[derive(Accounts)]
 pub struct Swap<'info> {
@@ -114,5 +114,14 @@ pub fn handle_swap(ctx: Context<Swap>, token_in: Side, amount_in: u64, min_out: 
         Side::Yes => (market.pool_yes, market.pool_no) = (reserve_in, reserve_out),
         Side::No => (market.pool_no, market.pool_yes) = (reserve_in, reserve_out),
     }
+    emit!(Swapped {
+        market: market.key(),
+        trader: ctx.accounts.trader.key(),
+        token_in,
+        amount_in,
+        amount_out,
+        pool_yes: market.pool_yes,
+        pool_no: market.pool_no,
+    });
     Ok(())
 }

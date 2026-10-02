@@ -110,7 +110,6 @@ fn burn_goal_pays_yes_and_blocks_snipers() {
         Pubkey::find_program_address(&[NO_MINT_SEED, market.as_ref()], &pred_provable::ID);
     let (vault, _) =
         Pubkey::find_program_address(&[VAULT_SEED, market.as_ref()], &pred_provable::ID);
-    let sponsor_no = get_associated_token_address(&sponsor.pubkey(), &no_mint);
     let doer_yes = get_associated_token_address(&doer.pubkey(), &yes_mint);
 
     let create = ix(
@@ -119,14 +118,12 @@ fn burn_goal_pays_yes_and_blocks_snipers() {
             market,
             yes_mint,
             no_mint,
-            sponsor_no_account: sponsor_no,
             usdc_mint: USDC_MINT,
             vault,
             sponsor_usdc_account: sponsor_usdc,
             target: mint,
             metric_account: mint,
             token_program: token::ID,
-            associated_token_program: associated_token::ID,
             system_program: system_program::ID,
         },
         instruction::CreateMarket {
@@ -152,10 +149,7 @@ fn burn_goal_pays_yes_and_blocks_snipers() {
                 market,
                 metric_account: mint,
                 yes_mint,
-                no_mint,
                 buyer_yes_account: get_associated_token_address(buyer, &yes_mint),
-                sponsor: sponsor.pubkey(),
-                sponsor_no_account: sponsor_no,
                 usdc_mint: USDC_MINT,
                 vault,
                 buyer_usdc_account: get_associated_token_address(buyer, &USDC_MINT),
@@ -170,7 +164,10 @@ fn burn_goal_pays_yes_and_blocks_snipers() {
         .unwrap()
         .assert_success();
     assert_eq!(token_amount(&ctx, &doer_yes), USDC);
-    assert_eq!(token_amount(&ctx, &sponsor_no), USDC);
+    // The sponsor's NO is booked on the market, not minted to a token account it controls.
+    let state: Market = ctx.get_account(&market).unwrap();
+    assert_eq!(state.sponsor_no, USDC);
+    assert!(!ctx.account_exists(&get_associated_token_address(&sponsor.pubkey(), &no_mint)));
     // 2 USDC budget + 0.1 USDC price; the budget covered the other 0.9.
     assert_eq!(token_amount(&ctx, &vault), 2 * USDC + USDC / 10);
 

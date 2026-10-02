@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
-use crate::{constants::*, error::ErrorCode, outcome, state::*};
+use crate::{constants::*, error::ErrorCode, events::PairMinted, outcome, state::*};
 
 #[derive(Accounts)]
 pub struct MintPair<'info> {
@@ -63,5 +63,11 @@ pub fn handle_mint_pair(ctx: Context<MintPair>, amount: u64) -> Result<()> {
         (&ctx.accounts.yes_mint, &ctx.accounts.owner_yes_account),
         (&ctx.accounts.no_mint, &ctx.accounts.owner_no_account),
         amount,
-    )
+    )?;
+    emit!(PairMinted {
+        market: ctx.accounts.market.key(),
+        owner: ctx.accounts.owner.key(),
+        amount,
+    });
+    Ok(())
 }

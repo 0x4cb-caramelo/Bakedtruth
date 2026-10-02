@@ -40,8 +40,7 @@ pub fn mint_from_market<'info>(
 }
 
 /// Mints `amount` YES to `yes_to` and `amount` NO to `no_to`. Callers must already have
-/// added `amount` USDC base units to the vault (or taken them from the budget), which is
-/// what keeps every pair backed 1:1.
+/// added `amount` USDC base units to the vault, which is what keeps every pair backed 1:1.
 pub fn mint_backed_pair<'info>(
     market: &Account<'info, Market>,
     yes: (&Account<'info, Mint>, &Account<'info, TokenAccount>),

@@ -39,9 +39,13 @@ pub enum Side {
 }
 
 /// KPI market with outcome tokens. The sponsor funds a budget and sells YES at a fixed
-/// price; each sale mints one YES to the buyer and one NO to the sponsor. The buyer pays
-/// the price and the budget covers the rest, so every YES/NO pair is backed by exactly
-/// one USDC base unit held in the market's vault. The winning token redeems 1:1 for it.
+/// price. Each sale mints one YES to the buyer and books the matching NO to the sponsor
+/// in `sponsor_no`. The buyer pays the price and the budget covers the rest, so every
+/// YES is backed by exactly one USDC base unit held in the market's vault. The winning
+/// side redeems 1:1 for it.
+///
+/// Invariants while the market is open:
+/// `yes_supply == no_supply + sponsor_no` and `vault == budget + yes_supply`.
 #[account]
 #[derive(InitSpace)]
 pub struct Market {
@@ -69,6 +73,11 @@ pub struct Market {
     pub yes_price_bps: u16,
     /// Sponsor USDC still available to cover future sales. Withdrawable after the sale closes.
     pub budget: u64,
+    /// NO owed to the sponsor for every YES the sale minted. Kept as a balance instead of
+    /// tokens so the sponsor cannot burn it against YES to unwind the sale while it is open,
+    /// and the sale never depends on a token account the sponsor controls. Paid out by
+    /// `withdraw_budget` if NO wins.
+    pub sponsor_no: u64,
     /// Reserves of the guarded YES/NO pool. Tracked here instead of read from the pool's token
     /// accounts, so tokens sent to the pool by hand cannot move its price.
     pub pool_yes: u64,

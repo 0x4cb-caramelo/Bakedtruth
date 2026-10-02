@@ -77,7 +77,7 @@ jobs:
       - name: Check formatting
         run: |
           cargo fmt --all -- --check
-          bunx prettier --check "tests/**/*.ts"
+          bun run lint
 
       - name: Build program and IDL
         run: anchor build

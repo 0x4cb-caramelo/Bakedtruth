@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::instruction::{get_stack_height, TRANSACTION_LEVEL_STACK_HEIGHT};
 
-use crate::{constants::*, error::ErrorCode, resolver, state::*};
+use crate::{constants::*, error::ErrorCode, events::Resolved, resolver, state::*};
 
 /// Permissionless. YES holders are the ones with the incentive to call it, so there is no resolver fee.
 #[derive(Accounts)]
@@ -57,6 +57,10 @@ pub fn handle_resolve(ctx: Context<Resolve>) -> Result<()> {
     let market = &mut ctx.accounts.market;
     market.outcome = outcome;
     market.resolved_slot = clock.slot;
-    msg!("resolved: {:?}", outcome);
+    emit!(Resolved {
+        market: market.key(),
+        outcome,
+        slot: clock.slot,
+    });
     Ok(())
 }
