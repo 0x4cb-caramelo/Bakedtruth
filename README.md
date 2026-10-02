@@ -1,6 +1,6 @@
 # pred-provable
 
-[![CI](https://github.com/0xcf02/pred-provable/actions/workflows/ci.yml/badge.svg)](https://github.com/0xcf02/pred-provable/actions/workflows/ci.yml)
+[![CI](https://github.com/0xcf07/pred-provable/actions/workflows/ci.yml/badge.svg)](https://github.com/0xcf07/pred-provable/actions/workflows/ci.yml)
 
 **Provable KPI Markets on Solana.** Resolution is a read, not a judgement.
 
