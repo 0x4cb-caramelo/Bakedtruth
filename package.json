@@ -2,13 +2,14 @@
   "name": "pred-provable",
   "version": "0.1.0",
   "private": true,
-  "description": "Provable KPI Markets: pari-mutuel markets resolved by on-chain account reads",
+  "description": "Provable KPI Markets: outcome-token markets resolved by on-chain account reads",
   "author": "Ronaldo Pereira",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/0xcf02/pred-provable.git"
   },
+  "packageManager": "bun@1.4.2",
   "workspaces": [
     "app"
   ],

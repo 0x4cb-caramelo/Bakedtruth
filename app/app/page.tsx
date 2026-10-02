@@ -13,7 +13,7 @@ export default function Home() {
           Sponsors post a bounty on an on-chain goal. Doers back YES and move the metric. Resolution is a read,
           not a judgement.
         </p>
-        {/* TODO: market list (getProgramAccounts on Market), create-market form, bet / resolve / claim actions. */}
+        {/* TODO: market list (getProgramAccounts on Market), create-market form, buy YES / resolve / redeem / withdraw budget actions. */}
       </main>
     </div>
   );

@@ -1,7 +1,7 @@
 [package]
 name = "pred-provable"
 version = "0.1.0"
-description = "Provable KPI Markets: pari-mutuel markets resolved by on-chain account reads"
+description = "Provable KPI Markets: outcome-token markets resolved by on-chain account reads"
 authors = ["Ronaldo Pereira"]
 edition.workspace = true
 rust-version.workspace = true
@@ -15,13 +15,18 @@ default = []
 cpi = ["no-entrypoint"]
 no-entrypoint = []
 no-log-ix-name = []
-idl-build = ["anchor-lang/idl-build"]
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 anchor-debug = []
 custom-heap = []
 custom-panic = []
+# Collateral is mainnet USDC instead of Circle's devnet USDC.
+mainnet = []
 
 [dependencies]
 anchor-lang = { version = "=1.1.2", features = ["init-if-needed"] }
+# Default features: Anchor's mint/ATA `init` codegen references the Token-2022 interface
+# modules even when the program only uses classic SPL Token.
+anchor-spl = "=1.1.2"
 # 3.0.0 is the last release on solana-pubkey ^3, which is what anchor-lang 1.1.x uses.
 solana-epoch-stake = "=3.0.0"
 
