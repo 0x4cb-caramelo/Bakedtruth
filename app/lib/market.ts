@@ -4,6 +4,8 @@
 
 import { BorshEventCoder, convertIdlToCamelCase, type Idl, type IdlEvents } from "@anchor-lang/core";
 import { PublicKey, SystemProgram, TransactionInstruction } from "@solana/web3.js";
+// Browsers have no global Buffer.
+import { Buffer } from "buffer";
 
 // Synced from target/ by `bun run sync-idl` after `anchor build`.
 import idl from "./idl/pred_provable.json";

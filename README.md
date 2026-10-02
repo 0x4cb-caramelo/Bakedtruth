@@ -164,10 +164,13 @@ bun run deploy:devnet   # ~2.9 SOL: 2.82 SOL of program rent (the upload buffer'
 bun run smoke:devnet    # ~0.15 SOL and 4 devnet USDC; returns every USDC base unit at the end
 ```
 
-Both use the keypair at `~/.config/solana/pred-provable-devnet.json` (`SMOKE_WALLET` overrides it for the smoke test,
-`SMOKE_RPC_URL` the RPC). To rehearse without devnet funds, fork devnet with
+`bun run seed:devnet` then adds demo markets for the app: a burn goal partway there with a pool, a renounce goal, a
+lock goal and one that resolved NO (~0.06 SOL and 8 USDC).
+
+The scripts use the keypair at `~/.config/solana/pred-provable-devnet.json` (`DEVNET_WALLET` overrides it,
+`DEVNET_RPC_URL` the RPC). To rehearse without devnet funds, fork devnet with
 [Surfpool](https://surfpool.run) (`surfpool start --network devnet`), deploy to it, give the wallet USDC with the
-`surfnet_setTokenAccount` cheatcode, and run with `SMOKE_RPC_URL=http://127.0.0.1:8899`.
+`surfnet_setTokenAccount` cheatcode, and run with `DEVNET_RPC_URL=http://127.0.0.1:8899`.
 
 Run the app:
 
