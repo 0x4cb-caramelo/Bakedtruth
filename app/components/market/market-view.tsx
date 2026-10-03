@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { ExternalLink, Link2, SearchX, TriangleAlert } from "lucide-react";
 
+import { marketSummary } from "@/lib/chat";
+import { useChatContext } from "@/components/chat/chat";
 import { explorerAddress } from "@/lib/config";
 import { formatDuration, slotTime } from "@/lib/format";
 import { useClock, useMarket, useMarketActivity, useTokenBalances } from "@/lib/hooks";
@@ -38,6 +40,10 @@ export function MarketView({ address, initialSide }: { address: string; initialS
     no: (keys && balanceData.data?.get(keys.noMint.toBase58())) ?? 0n,
     loaded: balanceData.data !== undefined,
   };
+  const entryNow = market.data;
+  useChatContext(
+    entryNow && account ? marketSummary(entryNow, clock, questionText(account, entryNow.reading, entryNow.name)) : null,
+  );
   const refresh = () => {
     market.refresh();
     history.refresh();
@@ -110,7 +116,9 @@ export function MarketView({ address, initialSide }: { address: string; initialS
               <h1 className="mt-1 font-display text-4xl font-bold leading-[1.02] tracking-tight text-ink sm:text-5xl">
                 {questionText(account, entry.reading, entry.name)}
               </h1>
-              <p className="mt-1 text-sm text-muted">{goalText(account, entry.reading)} · resolved by an on-chain read</p>
+              <p className="mt-1 text-sm text-muted">
+                {goalText(account, entry.reading)} · resolved by an on-chain read
+              </p>
             </div>
             <div className="hidden shrink-0 gap-1 sm:flex">
               <button

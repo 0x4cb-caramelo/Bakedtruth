@@ -5,19 +5,58 @@ import { CircleCheck, CircleX, Gavel, Loader2, ScanEye } from "lucide-react";
 import { formatUnits, type ClockInfo } from "@/lib/format";
 import { useSendTransaction, type MarketEntry } from "@/lib/hooks";
 import { marketKeys, resolveIx } from "@/lib/instructions";
-import { goalText, ruleText, type Reading } from "@/lib/metric";
+import { authorityWords, goalText, ruleText, type Reading } from "@/lib/metric";
 import { useProgram } from "@/lib/program";
-import { stakeEpoch, statusOf } from "@/lib/view";
+import { kindOf, measuredEpoch, statusOf } from "@/lib/view";
 import { AddressLink, Card } from "@/components/primitives";
 
+type Next = { text: string; canResolve: boolean };
+
+/**
+ * A stake pool market resolves from the pool's own record of its total at the start of the epoch. The
+ * pool writes it on its first update of that epoch and replaces it on its first update of the next.
+ */
+function stakePoolResolution(epoch: number, reading: Reading | undefined, clock: ClockInfo): Next | null {
+  if (!reading) return null;
+  if (reading.type === "quantity" && reading.snapshot === "recorded") {
+    return reading.met
+      ? {
+          text: `The pool recorded its total for epoch ${epoch} and it meets the goal. Anyone can resolve it YES now, before the pool's first update of the next epoch replaces the record: after that it resolves NO.`,
+          canResolve: true,
+        }
+      : {
+          text: `The pool recorded its total for epoch ${epoch} and it is below the goal. Anyone can resolve it NO now.`,
+          canResolve: true,
+        };
+  }
+  if (clock.epoch > epoch) {
+    return {
+      text: `Epoch ${epoch} is over and the pool has no total recorded for it. Anyone can resolve it NO now.`,
+      canResolve: true,
+    };
+  }
+  return {
+    text: `Epoch ${epoch} has started. The pool records its total on its first update of the epoch, and the market can be resolved once it has.`,
+    canResolve: false,
+  };
+}
+
 /** What `resolve` would do now, as far as the app can tell; the program has the final word. */
-function nextResolution(entry: MarketEntry, clock: ClockInfo | null) {
+function nextResolution(entry: MarketEntry, clock: ClockInfo | null): Next | null {
   const { account, reading } = entry;
   if (statusOf(account) !== "active" || !clock) return null;
-  const epoch = stakeEpoch(account);
-  if (epoch !== null) return clock.epoch >= epoch ? `Epoch ${epoch} has started. Anyone can resolve now.` : null;
-  if (clock.slot > Number(account.deadlineSlot.toString())) return "The deadline passed. Anyone can resolve it NO now.";
-  if (reading && reading.type !== "unavailable" && reading.met) return "The goal is met. Anyone can resolve it YES now.";
+  const epoch = measuredEpoch(account);
+  if (epoch !== null) {
+    if (clock.epoch < epoch) return null;
+    if (kindOf(account) === "stakePoolTvlAtLeast") return stakePoolResolution(epoch, reading, clock);
+    return { text: `Epoch ${epoch} has started. Anyone can resolve now.`, canResolve: true };
+  }
+  if (clock.slot > Number(account.deadlineSlot.toString())) {
+    return { text: "The deadline passed. Anyone can resolve it NO now.", canResolve: true };
+  }
+  if (reading && reading.type !== "unavailable" && reading.met) {
+    return { text: "The goal is met. Anyone can resolve it YES now.", canResolve: true };
+  }
   return null;
 }
 
@@ -32,7 +71,8 @@ function ReadingView({ reading }: { reading?: Reading }) {
           {reading.authority ? <AddressLink address={reading.authority} /> : <p className="font-mono text-sm">None</p>}
         </div>
         <span className={`text-sm font-semibold ${reading.met ? "text-yes" : "text-warn"}`}>
-          {reading.met ? "Revoked ✓" : "Still live"}
+          {authorityWords(reading).badge}
+          {reading.met && " ✓"}
         </span>
       </div>
     );
@@ -102,17 +142,19 @@ export function ProofCard({ entry, clock, onDone }: { entry: MarketEntry; clock:
 
       {next && (
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-warn/30 bg-warn/5 p-4">
-          <p className="text-sm text-warn">{next}</p>
-          <button
-            type="button"
-            onClick={() => void resolve()}
-            disabled={!publicKey || pending !== null}
-            title={publicKey ? undefined : "Connect a wallet to resolve"}
-            className="flex items-center gap-2 rounded-lg bg-warn px-4 py-2 text-sm font-bold text-page transition hover:brightness-110 disabled:opacity-50"
-          >
-            {pending ? <Loader2 className="size-4 animate-spin" /> : <Gavel className="size-4" />}
-            Resolve
-          </button>
+          <p className="text-sm text-warn">{next.text}</p>
+          {next.canResolve && (
+            <button
+              type="button"
+              onClick={() => void resolve()}
+              disabled={!publicKey || pending !== null}
+              title={publicKey ? undefined : "Connect a wallet to resolve"}
+              className="flex items-center gap-2 rounded-lg bg-warn px-4 py-2 text-sm font-bold text-page transition hover:brightness-110 disabled:opacity-50"
+            >
+              {pending ? <Loader2 className="size-4 animate-spin" /> : <Gavel className="size-4" />}
+              Resolve
+            </button>
+          )}
         </div>
       )}
 

@@ -1,11 +1,15 @@
+import { readFileSync } from "node:fs";
+
 import { BorshAccountsCoder, Program, type Idl } from "@anchor-lang/core";
 import {
   AccountRole,
   address,
   appendTransactionMessageInstructions,
   createClient,
+  createKeyPairSignerFromPrivateKeyBytes,
   createTransactionMessage,
   generateKeyPairSigner,
+  getAddressDecoder,
   getAddressEncoder,
   lamports,
   pipe,
@@ -23,12 +27,18 @@ import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import * as lib from "../app/lib/market";
 import idl from "../target/idl/pred_provable.json";
 import type { PredProvable } from "../target/types/pred_provable";
+// Only for the fixture names; the file itself is read at run time by `loadFixture`.
+import type fixtureIndexShape from "./fixtures/index.json";
 
 export const PROGRAM_ID = address(idl.address);
 export const TOKEN_PROGRAM_ID = address("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 export const LOADER_V3_ID = address("BPFLoaderUpgradeab1e11111111111111111111111");
 export const ATA_PROGRAM_ID = address("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 export const SYSTEM_PROGRAM_ID = address("11111111111111111111111111111111");
+/**
+ * Not a lock: SPL Token lets anyone burn from, and close, the token accounts this address owns.
+ * Kept for the regression tests that prove it (and that `create_market` refuses its accounts).
+ */
 export const INCINERATOR = address("1nc1nerator11111111111111111111111111111111");
 export const SOL = 1_000_000_000n;
 /** The program's collateral mint, read from the IDL so it follows the build's cluster feature. */
@@ -54,9 +64,9 @@ export async function createTestClient() {
   return client;
 }
 
-/** A signer with SOL for fees and rent, and `usdc` whole USDC in its associated token account. */
-export async function fundedSigner(client: TestClient, usdc = 10n): Promise<KeyPairSigner> {
-  const signer = await generateKeyPairSigner();
+/** A signer (fresh, or `key`) with SOL for fees and rent, and `usdc` whole USDC in its associated token account. */
+export async function fundedSigner(client: TestClient, usdc = 10n, key?: KeyPairSigner): Promise<KeyPairSigner> {
+  const signer = key ?? (await generateKeyPairSigner());
   client.svm.airdrop(signer.address, lamports(SOL));
   setTokenAccount(client, await usdcAta(signer.address), {
     mint: USDC_MINT,
@@ -64,6 +74,14 @@ export async function fundedSigner(client: TestClient, usdc = 10n): Promise<KeyP
     amount: usdc * USDC,
   });
   return signer;
+}
+
+/**
+ * `fundedSigner` with the same key in every client. create_market's compute units depend on the sponsor's key
+ * (the bump searches of the market, mint and vault PDAs), so the figures compared across resolver kinds use it.
+ */
+export async function fixedSponsor(client: TestClient, usdc = 10n): Promise<KeyPairSigner> {
+  return fundedSigner(client, usdc, await createKeyPairSignerFromPrivateKeyBytes(new Uint8Array(32).fill(7)));
 }
 
 export const pk = (a: Address) => new PublicKey(a);
@@ -130,8 +148,14 @@ export const ata = (owner: Address, mint: Address) => kit(lib.ataAddress(pk(owne
 
 export const programDataPda = (programId: Address) => kit(lib.programDataPda(pk(programId)));
 
-/** Where locked tokens go: the incinerator's associated token account for `mint`. */
-export const incineratorAta = (mint: Address) => kit(lib.incineratorAta(pk(mint)));
+/** Owner of every lock account: a PDA of the program, which never signs for it. */
+export const lockOwner = () => kit(lib.lockOwner());
+
+/** Where locked tokens go: the lock owner's associated token account for `mint`. */
+export const lockAta = (mint: Address) => kit(lib.lockAta(pk(mint)));
+
+/** The Metaplex Token Metadata account of `mint`. */
+export const metadataPda = (mint: Address) => kit(lib.metadataPda(pk(mint)));
 
 /** The program's events in a transaction's logs, with u64s as bigint and pubkeys as addresses. */
 export function eventsOf(result: { logs(): string[] }) {
@@ -152,6 +176,13 @@ export function fetchMarket(client: TestClient, market: Address) {
   const account = client.svm.getAccount(market);
   if (!account.exists) throw new Error(`market ${market} not found`);
   return coder.decode("Market", Buffer.from(account.data));
+}
+
+/** Raw bytes of an account that must exist. */
+export function accountData(client: TestClient, account: Address): Uint8Array {
+  const info = client.svm.getAccount(account);
+  if (!info.exists) throw new Error(`account ${account} not found`);
+  return info.data;
 }
 
 /** Token amount held by an SPL token account, or `null` if the account does not exist. */
@@ -194,7 +225,8 @@ export function splTransferIx(source: Address, destination: Address, owner: Addr
   });
 }
 
-export function splBurnIx(account: Address, mint: Address, owner: Address, amount: bigint) {
+/** `authoritySigns = false` leaves the authority unsigned, as an attacker who holds no key would send it. */
+export function splBurnIx(account: Address, mint: Address, authority: Address, amount: bigint, authoritySigns = true) {
   const data = Buffer.alloc(9);
   data[0] = 8; // TokenInstruction::Burn
   data.writeBigUInt64LE(amount, 1);
@@ -203,19 +235,19 @@ export function splBurnIx(account: Address, mint: Address, owner: Address, amoun
     keys: [
       { pubkey: pk(account), isSigner: false, isWritable: true },
       { pubkey: pk(mint), isSigner: false, isWritable: true },
-      { pubkey: pk(owner), isSigner: true, isWritable: false },
+      { pubkey: pk(authority), isSigner: authoritySigns, isWritable: false },
     ],
     data,
   });
 }
 
-export function splCloseAccountIx(account: Address, destination: Address, owner: Address) {
+export function splCloseAccountIx(account: Address, destination: Address, authority: Address, authoritySigns = true) {
   return new TransactionInstruction({
     programId: pk(TOKEN_PROGRAM_ID),
     keys: [
       { pubkey: pk(account), isSigner: false, isWritable: true },
       { pubkey: pk(destination), isSigner: false, isWritable: true },
-      { pubkey: pk(owner), isSigner: true, isWritable: false },
+      { pubkey: pk(authority), isSigner: authoritySigns, isWritable: false },
     ],
     data: Buffer.from([9]), // TokenInstruction::CloseAccount
   });
@@ -285,6 +317,54 @@ export function setTokenAccount(
     space: 165n,
   });
 }
+
+/** Any account: `data` as given, owned by `owner` (a program that need not exist here), funded with 1 SOL. */
+export function setAccountData(client: TestClient, account: Address, owner: Address, data: Uint8Array) {
+  client.svm.setAccount({
+    address: account,
+    data,
+    executable: false,
+    lamports: lamports(SOL),
+    programAddress: owner,
+    space: BigInt(data.length),
+  });
+}
+
+// --- Real mainnet accounts ---------------------------------------------------------------
+// tests/fixtures holds the bytes third-party programs wrote on mainnet (scripts/capture-fixtures.ts),
+// so the readers are exercised against the real layouts instead of ones the tests assume.
+
+type FixtureEntry = { address: string; owner: string; length: number; slot: number; note: string };
+export type FixtureName = keyof typeof fixtureIndexShape;
+
+const fixtureFile = (file: string) => new URL(`./fixtures/${file}`, import.meta.url);
+const fixtureIndex: Record<string, FixtureEntry> = JSON.parse(readFileSync(fixtureFile("index.json"), "utf8"));
+
+/** A captured account: its real address and owner, and a private copy of its bytes to patch freely. */
+export function loadFixture(name: FixtureName): { address: Address; owner: Address; data: Uint8Array } {
+  const entry = fixtureIndex[name];
+  if (!entry) throw new Error(`no fixture named ${name} in tests/fixtures/index.json`);
+  const data = new Uint8Array(readFileSync(fixtureFile(`${name}.bin`)));
+  if (data.length !== entry.length) {
+    throw new Error(`fixture ${name} has ${data.length} bytes, index.json says ${entry.length}`);
+  }
+  return { address: address(entry.address), owner: address(entry.owner), data };
+}
+
+// --- Raw account bytes ----------------------------------------------------------------------
+// Reads and patches of layouts the tests do not own (little-endian, as on chain).
+
+const view = (data: Uint8Array) => new DataView(data.buffer, data.byteOffset, data.byteLength);
+const U64_MASK = (1n << 64n) - 1n;
+
+export const readU64 = (data: Uint8Array, at: number) => view(data).getBigUint64(at, true);
+export const writeU64 = (data: Uint8Array, at: number, value: bigint) => view(data).setBigUint64(at, value, true);
+export const readU128 = (data: Uint8Array, at: number) => readU64(data, at) | (readU64(data, at + 8) << 64n);
+export function writeU128(data: Uint8Array, at: number, value: bigint) {
+  writeU64(data, at, value & U64_MASK);
+  writeU64(data, at + 8, value >> 64n);
+}
+export const readKey = (data: Uint8Array, at: number) => getAddressDecoder().decode(data.subarray(at, at + 32));
 
 /**
  * Loader-v3 Program + ProgramData pair. The program account is written non-executable

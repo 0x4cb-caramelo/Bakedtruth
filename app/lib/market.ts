@@ -21,8 +21,12 @@ export const PROGRAM_ID = new PublicKey(idl.address);
 export const TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 export const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 export const BPF_LOADER_UPGRADEABLE_ID = new PublicKey("BPFLoaderUpgradeab1e11111111111111111111111");
-/** Address with no private key; tokens in its associated token accounts are locked forever. */
-export const INCINERATOR = new PublicKey("1nc1nerator11111111111111111111111111111111");
+/** SPL stake pool program (JitoSOL, bSOL and most other Solana LSTs). */
+export const STAKE_POOL_PROGRAM_ID = new PublicKey("SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy");
+/** Meteora DAMM v2 (cp-amm). */
+export const DAMM_V2_PROGRAM_ID = new PublicKey("cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG");
+/** Metaplex Token Metadata. */
+export const TOKEN_METADATA_PROGRAM_ID = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
 
 /** Collateral mint the program was built for (Circle devnet USDC unless built with `--features mainnet`). */
 export const USDC_MINT = new PublicKey(constant("USDC_MINT"));
@@ -62,8 +66,18 @@ export const poolAccounts = (market: PublicKey) => ({
   no: ataAddress(market, noMintPda(market)),
 });
 
-/** Metric account of a `LockedAtLeast` market on `mint`. */
-export const incineratorAta = (mint: PublicKey) => ataAddress(INCINERATOR, mint);
+/**
+ * Owner of every `LockedAtLeast` lock account: a PDA the program never signs for. Not the incinerator:
+ * SPL Token lets anyone burn from, or close, the token accounts the incinerator owns.
+ */
+export const lockOwner = () => pda([Buffer.from("lock")]);
+
+/** Metric account of a `LockedAtLeast` market on `mint`: the lock owner's associated token account. */
+export const lockAta = (mint: PublicKey) => ataAddress(lockOwner(), mint);
+
+/** Metric account of a `MetadataImmutable` market on `mint`: its Metaplex Token Metadata account. */
+export const metadataPda = (mint: PublicKey) =>
+  pda([Buffer.from("metadata"), TOKEN_METADATA_PROGRAM_ID.toBuffer(), mint.toBuffer()], TOKEN_METADATA_PROGRAM_ID);
 
 /** Metric account of an `Immutable` market on `programId`. */
 export const programDataPda = (programId: PublicKey) => pda([programId.toBuffer()], BPF_LOADER_UPGRADEABLE_ID);
@@ -71,7 +85,7 @@ export const programDataPda = (programId: PublicKey) => pda([programId.toBuffer(
 /**
  * Creates `owner`'s associated token account for `mint` if it does not exist. Prepend it to
  * `redeem`, `burn_pair` and `withdraw_budget` (they take an existing USDC account), and to a
- * `LockedAtLeast` `create_market` for the incinerator's account (`owner = INCINERATOR`).
+ * `LockedAtLeast` `create_market` for the lock account (`owner = lockOwner()`).
  */
 export function createAtaIdempotentIx(payer: PublicKey, owner: PublicKey, mint: PublicKey) {
   return new TransactionInstruction({

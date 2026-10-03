@@ -10,7 +10,7 @@ import { burnPairIx, buyViaPoolIxs, buyYesIx, marketKeys, mintPairIx, swapIx } f
 import * as lib from "@/lib/market";
 import { questionText } from "@/lib/metric";
 import { useProgram } from "@/lib/program";
-import { big, hasPool, kindOf, phaseOf, statusOf, yesPrice } from "@/lib/view";
+import { big, hasPool, measuredEpoch, phaseOf, statusOf, yesPrice } from "@/lib/view";
 import { Card } from "@/components/primitives";
 
 type Mode = "buy" | "sell" | "pairs";
@@ -57,7 +57,8 @@ export function TradeCard({
   const { account, reading } = entry;
   const keys = marketKeys(entry.address, account.metricAccount);
   const status = statusOf(account);
-  const goalMet = reading?.type !== "unavailable" && reading?.met === true && kindOf(account) !== "stakeAtLeast";
+  // Only a ratchet goal halts trading when it is met; an epoch-measured market trades until its epoch starts.
+  const goalMet = reading?.type !== "unavailable" && reading?.met === true && measuredEpoch(account) === null;
   const open = status === "active" && phaseOf(account, clock) === "trading" && !goalMet;
   const closedReason = goalMet ? "Goal met: trading is halted until someone resolves." : "Trading is closed for this market.";
 

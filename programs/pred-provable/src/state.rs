@@ -4,8 +4,11 @@ use anchor_lang::prelude::*;
 /// it reads; there is deliberately no generic "offset + comparator" reader.
 ///
 /// Every variant reads state that flash capital cannot move: burned supply of a
-/// mint with no authority, a revoked authority, tokens locked under the
-/// incinerator, or stake frozen at the epoch boundary.
+/// mint with no authority, a revoked authority, tokens locked at an address the
+/// program never signs for, liquidity locked forever, or a balance frozen at an
+/// epoch boundary.
+///
+/// Variants are Borsh-tagged by position: append new ones, never reorder.
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace, Debug)]
 pub enum ResolverKind {
     /// YES once the SPL Token mint's supply is <= `metric_threshold`.
@@ -20,9 +23,22 @@ pub enum ResolverKind {
     MintAuthorityRevoked,
     /// YES once the SPL Token mint's freeze authority is revoked. Resolves early on cross.
     FreezeAuthorityRevoked,
-    /// YES once the incinerator's associated token account for the mint holds
-    /// >= `metric_threshold` base units (e.g. LP tokens locked forever). Resolves early on cross.
+    /// YES once the lock account for the mint (the associated token account of the program's
+    /// `[LOCK_SEED]` PDA) holds >= `metric_threshold` base units, e.g. LP tokens locked forever.
+    /// Resolves early on cross.
     LockedAtLeast,
+    /// YES if the SPL stake pool's total at the start of `epoch` (`last_epoch_total_lamports`, written
+    /// once by the pool's first balance update of that epoch, before deposits reopen) is >=
+    /// `metric_threshold` lamports. `target` is the pool's mint. Capital has to sit in the pool across
+    /// the epoch boundary, so a flash loan cannot move it.
+    StakePoolTvlAtLeast { epoch: u64 },
+    /// YES once the Meteora DAMM v2 pool's permanently locked liquidity is >= `metric_threshold <<
+    /// shift` (liquidity units are u128, `shift` scales the u64 threshold, at most 64). Locking is
+    /// one-way and the locked principal cannot repay a loan. Resolves early on cross.
+    DammV2LockedAtLeast { shift: u8 },
+    /// YES once the mint's Metaplex Token Metadata is immutable (`is_mutable == false`, which can only
+    /// be flipped to false). Resolves early on cross.
+    MetadataImmutable,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace, Debug)]
@@ -54,9 +70,10 @@ pub struct Market {
     pub kind: ResolverKind,
     /// Human-facing subject: mint, program id, or vote account.
     pub target_pubkey: Pubkey,
-    /// Account actually read at resolution (equals `target_pubkey`, except for
-    /// `Immutable`, where it is the derived ProgramData address, and `LockedAtLeast`,
-    /// where it is the incinerator's associated token account). Locked at creation.
+    /// Account actually read at resolution (equals `target_pubkey` for the mint and vote readers;
+    /// the derived ProgramData for `Immutable`; the lock account for `LockedAtLeast`; the stake pool,
+    /// DAMM v2 pool and metadata account for the three kinds that name `target_pubkey`'s mint).
+    /// Locked at creation.
     pub metric_account: Pubkey,
     pub metric_threshold: u64,
     /// Last slot (exclusive) in which YES can be bought.

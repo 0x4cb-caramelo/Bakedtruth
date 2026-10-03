@@ -12,7 +12,7 @@ pub enum ErrorCode {
     InvalidMetricAccount,
     #[msg("Mint authority must be revoked, otherwise supply can be faked by mint-then-burn")]
     MintAuthorityLive,
-    #[msg("Program is already immutable; the market would be decided at creation")]
+    #[msg("Target is already immutable; the market would be decided at creation")]
     AlreadyImmutable,
     #[msg("Target epoch must be in the future")]
     InvalidEpoch,
@@ -48,4 +48,6 @@ pub enum ErrorCode {
     NotUsdc,
     #[msg("Nothing to withdraw")]
     NothingToWithdraw,
+    #[msg("Threshold scale (shift) is out of range")]
+    InvalidThreshold,
 }

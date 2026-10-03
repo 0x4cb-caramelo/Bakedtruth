@@ -6,7 +6,7 @@ import { formatBps, formatUnits, formatUsdc, relativeSlot, slotTime, type ClockI
 import type { Activity } from "@/lib/history";
 import type { MarketEntry } from "@/lib/hooks";
 import * as lib from "@/lib/market";
-import { big, closeSlot, hasPool, stakeEpoch, statusOf } from "@/lib/view";
+import { big, closeSlot, hasPool, measuredEpoch, statusOf } from "@/lib/view";
 import { ActivityFeed } from "@/components/activity-feed";
 import { AddressLink, Card, Tabs } from "@/components/primitives";
 
@@ -50,7 +50,7 @@ export function Details({
   const [tab, setTab] = useState<"activity" | "details">("activity");
   const { account } = entry;
   const budget = big(account.budget);
-  const epoch = stakeEpoch(account);
+  const epoch = measuredEpoch(account);
 
   return (
     <Card className="p-5 sm:p-6">
