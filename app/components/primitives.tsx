@@ -6,8 +6,11 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import {
   BadgeCheck,
+  Coins,
   Copy,
+  Droplets,
   ExternalLink,
+  FileLock,
   Flame,
   KeyRound,
   Lock,
@@ -19,7 +22,7 @@ import {
 
 import { explorerAddress } from "@/lib/config";
 import { formatBps, shortAddress } from "@/lib/format";
-import type { Reading } from "@/lib/metric";
+import { authorityWords, type Reading } from "@/lib/metric";
 import { KIND_INFO, multiplier, type Kind, type Phase, type Status } from "@/lib/view";
 
 export function Logo() {
@@ -40,6 +43,10 @@ const KIND_STYLE: Record<Kind, { icon: LucideIcon; tile: string }> = {
   lockedAtLeast: { icon: Lock, tile: "from-cyan-400 to-teal-600" },
   immutable: { icon: ShieldCheck, tile: "from-emerald-400 to-green-700" },
   stakeAtLeast: { icon: Vote, tile: "from-amber-300 to-orange-600" },
+  // Each new kind keeps the hue of its category: stake amber, lock teal, immutable green.
+  stakePoolTvlAtLeast: { icon: Coins, tile: "from-yellow-300 to-amber-600" },
+  dammV2LockedAtLeast: { icon: Droplets, tile: "from-teal-300 to-cyan-700" },
+  metadataImmutable: { icon: FileLock, tile: "from-lime-400 to-emerald-700" },
 };
 
 /** Gradient square with the resolver's icon, in place of a market thumbnail. */
@@ -138,9 +145,11 @@ export function ProgressLine({ reading }: { reading?: Reading }) {
   if (!reading) return <div className="h-4 animate-pulse rounded bg-raised" />;
   if (reading.type === "unavailable") return <p className="truncate text-xs text-dim">{reading.reason}</p>;
   if (reading.type === "authority") {
+    const { subject, state } = authorityWords(reading);
     return (
       <p className={`text-xs ${reading.met ? "text-yes" : "text-muted"}`}>
-        {reading.what} {reading.met ? "revoked ✓" : "still live"}
+        {subject} {state}
+        {reading.met && " ✓"}
       </p>
     );
   }

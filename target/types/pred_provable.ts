@@ -2407,7 +2407,7 @@ export type PredProvable = {
     {
       "code": 6005,
       "name": "alreadyImmutable",
-      "msg": "Program is already immutable; the market would be decided at creation"
+      "msg": "Target is already immutable; the market would be decided at creation"
     },
     {
       "code": 6006,
@@ -2493,6 +2493,11 @@ export type PredProvable = {
       "code": 6022,
       "name": "nothingToWithdraw",
       "msg": "Nothing to withdraw"
+    },
+    {
+      "code": 6023,
+      "name": "invalidThreshold",
+      "msg": "Threshold scale (shift) is out of range"
     }
   ],
   "types": [
@@ -2655,9 +2660,10 @@ export type PredProvable = {
           {
             "name": "metricAccount",
             "docs": [
-              "Account actually read at resolution (equals `target_pubkey`, except for",
-              "`Immutable`, where it is the derived ProgramData address, and `LockedAtLeast`,",
-              "where it is the incinerator's associated token account). Locked at creation."
+              "Account actually read at resolution (equals `target_pubkey` for the mint and vote readers;",
+              "the derived ProgramData for `Immutable`; the lock account for `LockedAtLeast`; the stake pool,",
+              "DAMM v2 pool and metadata account for the three kinds that name `target_pubkey`'s mint).",
+              "Locked at creation."
             ],
             "type": "pubkey"
           },
@@ -2915,8 +2921,11 @@ export type PredProvable = {
         "it reads; there is deliberately no generic \"offset + comparator\" reader.",
         "",
         "Every variant reads state that flash capital cannot move: burned supply of a",
-        "mint with no authority, a revoked authority, tokens locked under the",
-        "incinerator, or stake frozen at the epoch boundary."
+        "mint with no authority, a revoked authority, tokens locked at an address the",
+        "program never signs for, liquidity locked forever, or a balance frozen at an",
+        "epoch boundary.",
+        "",
+        "Variants are Borsh-tagged by position: append new ones, never reorder."
       ],
       "type": {
         "kind": "enum",
@@ -2944,6 +2953,27 @@ export type PredProvable = {
           },
           {
             "name": "lockedAtLeast"
+          },
+          {
+            "name": "stakePoolTvlAtLeast",
+            "fields": [
+              {
+                "name": "epoch",
+                "type": "u64"
+              }
+            ]
+          },
+          {
+            "name": "dammV2LockedAtLeast",
+            "fields": [
+              {
+                "name": "shift",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "metadataImmutable"
           }
         ]
       }
@@ -3075,6 +3105,17 @@ export type PredProvable = {
       ],
       "type": "u64",
       "value": "10000"
+    },
+    {
+      "name": "lockSeed",
+      "docs": [
+        "Owner of every `LockedAtLeast` lock account: the PDA `[LOCK_SEED]` of this program. The program",
+        "never signs for it, so tokens sent to its associated token accounts can never be moved, burned or",
+        "closed. The incinerator is not a lock: SPL Token lets anyone burn from, or close, the token accounts",
+        "it owns (and the system program's)."
+      ],
+      "type": "bytes",
+      "value": "[108, 111, 99, 107]"
     },
     {
       "name": "lpMintSeed",

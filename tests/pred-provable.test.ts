@@ -1,31 +1,48 @@
-import { describe, expect, test } from "bun:test";
+import { afterAll, describe, expect, test } from "bun:test";
 import { BN } from "@anchor-lang/core";
-import { generateKeyPairSigner, type Address, type KeyPairSigner } from "@solana/kit";
-import type { PublicKey } from "@solana/web3.js";
+import {
+  createKeyPairSignerFromPrivateKeyBytes,
+  generateKeyPairSigner,
+  getProgramDerivedAddress,
+  type Address,
+  type KeyPairSigner,
+} from "@solana/kit";
+import type { PublicKey, TransactionInstruction } from "@solana/web3.js";
 
 import * as lib from "../app/lib/market";
+import idl from "../target/idl/pred_provable.json";
 import {
   ATA_PROGRAM_ID,
   INCINERATOR,
+  PROGRAM_ID,
   SOL,
   SYSTEM_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
   USDC,
   USDC_MINT,
+  accountData,
   ata,
   createAtaIdempotentIx,
   createTestClient,
   eventsOf,
   fetchMarket,
+  fixedSponsor,
   fundedSigner,
-  incineratorAta,
+  loadFixture,
+  lockAta,
+  lockOwner,
   lpMintPda,
   marketPda,
+  metadataPda,
   mintSupply,
   outcomeMints,
   pk,
   program,
+  readKey,
+  readU128,
+  readU64,
   send,
+  setAccountData,
   setEpoch,
   setMint,
   setTokenAccount,
@@ -38,6 +55,9 @@ import {
   usdcAta,
   usdcBalance,
   vaultPda,
+  writeU128,
+  writeU64,
+  type FixtureName,
   type TestClient,
 } from "./helpers";
 
@@ -56,7 +76,10 @@ type Kind =
   | { stakeAtLeast: { epoch: BN } }
   | { mintAuthorityRevoked: {} }
   | { freezeAuthorityRevoked: {} }
-  | { lockedAtLeast: {} };
+  | { lockedAtLeast: {} }
+  | { stakePoolTvlAtLeast: { epoch: BN } }
+  | { dammV2LockedAtLeast: { shift: number } }
+  | { metadataImmutable: {} };
 
 type MarketRef = {
   address: Address;
@@ -87,6 +110,8 @@ async function createMarket(
     usdcMint?: Address;
     cutoff?: bigint;
     deadline?: bigint;
+    /** Instructions sent first, in the same transaction (the sponsor signs them). */
+    prelude?: TransactionInstruction[];
   },
 ) {
   const market = marketPda(sponsor.address, opts.id);
@@ -117,7 +142,7 @@ async function createMarket(
       systemProgram: pk(SYSTEM_PROGRAM_ID),
     })
     .instruction();
-  const created = await send(client, [ix], [sponsor]);
+  const created = await send(client, [...(opts.prelude ?? []), ix], [sponsor]);
   const ref: MarketRef = {
     address: market,
     sponsor: sponsor.address,
@@ -128,6 +153,23 @@ async function createMarket(
   };
   return { ...ref, created };
 }
+
+type MarketOpts = Parameters<typeof createMarket>[2];
+
+/**
+ * Compute units per instruction and resolver kind, noted as the tests run and printed once at the end. Tests that
+ * note create_market use `fixedSponsor` and market id 1, so every kind pays for the same PDA searches.
+ */
+const computeUnits = new Map<string, bigint>();
+const noteCu = (label: string, result: { computeUnitsConsumed(): bigint }) => {
+  computeUnits.set(label, result.computeUnitsConsumed());
+};
+afterAll(() => {
+  if (computeUnits.size === 0) return;
+  const rows = [...computeUnits].map(([label, cu]) => `  ${label.padEnd(58)}${cu.toString().padStart(8)}`);
+  console.log(`\nCompute units per instruction (create_market also initializes the market, mints and vault):`);
+  console.log(rows.join("\n"));
+});
 
 async function buyYesIx(buyer: Address, market: MarketRef, amount: bigint, overrides?: Overrides) {
   return program.methods
@@ -426,10 +468,11 @@ async function burnGoalMarket(
 describe("SupplyAtMost (burn goal)", () => {
   test("goal hit: resolves YES in the same slot, YES holders redeem 1:1 in USDC", async () => {
     const client = await createTestClient();
-    const sponsor = await fundedSigner(client);
+    const sponsor = await fixedSponsor(client);
     const doer = await fundedSigner(client);
     const speculator = await fundedSigner(client);
     const { mint, market } = await burnGoalMarket(client, sponsor, 1n);
+    noteCu("SupplyAtMost (baseline) create_market", market.created);
 
     const start = await usdcBalance(client, doer.address);
     await buyYes(client, doer, market, USDC);
@@ -444,7 +487,7 @@ describe("SupplyAtMost (burn goal)", () => {
     await expect(buyYes(client, sniper, market, USDC)).rejects.toThrow("BettingClosed");
 
     // No dispute window: the read that sees the burn settles the market in that same slot.
-    await resolve(client, market);
+    noteCu("SupplyAtMost (baseline) resolve YES", await resolve(client, market));
     const resolved = fetchMarket(client, market.address);
     expect(resolved.outcome).toEqual({ Yes: {} });
     expect(BigInt(resolved.resolved_slot.toString())).toBe(150n);
@@ -1441,115 +1484,1072 @@ describe("MintAuthorityRevoked / FreezeAuthorityRevoked (renounce goals)", () =>
   });
 });
 
-describe("LockedAtLeast (tokens locked under the incinerator)", () => {
-  test("locking LP tokens past the threshold resolves YES; the doer redeems", async () => {
-    const client = await createTestClient();
-    const sponsor = await fundedSigner(client);
-    const doer = await fundedSigner(client);
-    // LP mints keep a live authority (the AMM), which is why burn goals cannot cover them.
-    const amm = (await generateKeyPairSigner()).address;
-    const lpMint = (await generateKeyPairSigner()).address;
-    setMint(client, lpMint, 10_000_000n, amm);
-    const locked = incineratorAta(lpMint);
-    setTokenAccount(client, locked, { mint: lpMint, owner: INCINERATOR, amount: 0n });
+describe("LockedAtLeast (tokens locked at the program's lock PDA)", () => {
+  type TokenAccountOpts = Parameters<typeof setTokenAccount>[2];
 
-    const market = await createMarket(client, sponsor, {
-      id: 30n,
+  /**
+   * An LP-like mint: it keeps a live authority (the AMM), which is why burn goals cannot cover it. Its address is
+   * fixed, so the compute units of create_market (which searches the lock account's PDA) are the same every run.
+   */
+  async function lpMintWithAmm(client: TestClient) {
+    const amm = (await generateKeyPairSigner()).address;
+    const lpMint = (await createKeyPairSignerFromPrivateKeyBytes(new Uint8Array(32).fill(8))).address;
+    setMint(client, lpMint, 10_000_000n, amm);
+    return lpMint;
+  }
+
+  /** The lock account as the client's ATA prelude leaves it (owner = the lock PDA), holding `amount`. */
+  const putLock = (client: TestClient, lpMint: Address, amount: bigint, over: Partial<TokenAccountOpts> = {}) =>
+    setTokenAccount(client, lockAta(lpMint), { mint: lpMint, owner: lockOwner(), amount, ...over });
+
+  const lockedMarket = (
+    client: TestClient,
+    sponsor: KeyPairSigner,
+    id: bigint,
+    lpMint: Address,
+    over: Partial<MarketOpts> = {},
+  ) =>
+    createMarket(client, sponsor, {
+      id,
       kind: { lockedAtLeast: {} },
       threshold: 5_000_000n,
       target: lpMint,
-      metric: locked,
+      metric: lockAta(lpMint),
+      ...over,
     });
+
+  test("locking LP tokens past the threshold resolves YES; the doer redeems", async () => {
+    const client = await createTestClient();
+    const sponsor = await fixedSponsor(client);
+    const doer = await fundedSigner(client);
+    const lpMint = await lpMintWithAmm(client);
+    // The doer's LP tokens, locked the plain way: an SPL transfer into the lock account.
+    setTokenAccount(client, ata(doer.address, lpMint), { mint: lpMint, owner: doer.address, amount: 6_000_000n });
+    const lock = (amount: bigint) =>
+      send(client, [splTransferIx(ata(doer.address, lpMint), lockAta(lpMint), doer.address, amount)], [doer]);
+
+    await send(client, [createAtaIdempotentIx(sponsor.address, lockOwner(), lpMint)], [sponsor]);
+    const market = await lockedMarket(client, sponsor, 1n, lpMint);
+    noteCu("LockedAtLeast create_market", market.created);
     const start = await usdcBalance(client, doer.address);
     await buyYes(client, doer, market, USDC);
 
     client.svm.warpToSlot(150n);
-    setTokenAccount(client, locked, { mint: lpMint, owner: INCINERATOR, amount: 2_000_000n });
+    await lock(2_000_000n);
     await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
 
-    setTokenAccount(client, locked, { mint: lpMint, owner: INCINERATOR, amount: 6_000_000n });
-    await resolve(client, market);
+    await lock(4_000_000n);
+    noteCu("LockedAtLeast resolve YES", await resolve(client, market));
     expect(fetchMarket(client, market.address).outcome).toEqual({ Yes: {} });
 
     await redeem(client, doer, market, market.yesMint);
     expect((await usdcBalance(client, doer.address)) - start).toBe(USDC - USDC / 10n);
   });
 
-  test("the client's ATA prelude creates the incinerator account a new market needs", async () => {
+  test("the client's ATA prelude creates the lock account a new market needs, in the same transaction", async () => {
     const client = await createTestClient();
     const sponsor = await fundedSigner(client);
-    const lpMint = (await generateKeyPairSigner()).address;
-    setMint(client, lpMint, 10_000_000n, null);
-    const locked = incineratorAta(lpMint);
+    const lpMint = await lpMintWithAmm(client);
+    const locked = lockAta(lpMint);
+    const prelude = [createAtaIdempotentIx(sponsor.address, lockOwner(), lpMint)];
     expect(tokenBalance(client, locked)).toBeNull();
+    // Without the prelude there is nothing to read.
+    await expect(lockedMarket(client, sponsor, 35n, lpMint)).rejects.toThrow("InvalidMetricAccount");
 
-    await send(client, [createAtaIdempotentIx(sponsor.address, INCINERATOR, lpMint)], [sponsor]);
-    await createMarket(client, sponsor, {
-      id: 35n,
-      kind: { lockedAtLeast: {} },
-      threshold: 5_000_000n,
-      target: lpMint,
-      metric: locked,
-    });
+    await lockedMarket(client, sponsor, 35n, lpMint, { prelude });
+    const account = accountData(client, locked);
+    expect(readKey(account, 0)).toBe(lpMint);
+    expect(readKey(account, 32)).toBe(lockOwner());
+    expect(tokenBalance(client, locked)).toBe(0n);
+
+    // Idempotent, and one account serves every market on the mint.
+    await lockedMarket(client, sponsor, 36n, lpMint, { prelude });
   });
 
-  test("rejects a token account that is not the incinerator's ATA", async () => {
+  test("rejects a token account that is not the lock ATA, even one owned by the lock PDA", async () => {
     const client = await createTestClient();
     const sponsor = await fundedSigner(client);
-    const lpMint = (await generateKeyPairSigner()).address;
-    setMint(client, lpMint, 10_000_000n, null);
+    const lpMint = await lpMintWithAmm(client);
     const ownAccount = (await generateKeyPairSigner()).address;
+    const sidecar = (await generateKeyPairSigner()).address;
     setTokenAccount(client, ownAccount, { mint: lpMint, owner: sponsor.address, amount: 0n });
+    setTokenAccount(client, sidecar, { mint: lpMint, owner: lockOwner(), amount: 0n });
 
-    await expect(
-      createMarket(client, sponsor, {
-        id: 31n,
-        kind: { lockedAtLeast: {} },
-        threshold: 5_000_000n,
-        target: lpMint,
-        metric: ownAccount,
-      }),
-    ).rejects.toThrow("InvalidMetricAccount");
-  });
-
-  test("rejects an incinerator account that someone can still sign for", async () => {
-    const client = await createTestClient();
-    const sponsor = await fundedSigner(client);
-    const lpMint = (await generateKeyPairSigner()).address;
-    setMint(client, lpMint, 10_000_000n, null);
-    const locked = incineratorAta(lpMint);
-
-    for (const [i, escape] of [{ delegate: sponsor.address }, { closeAuthority: sponsor.address }].entries()) {
-      setTokenAccount(client, locked, { mint: lpMint, owner: INCINERATOR, amount: 0n, ...escape });
-      await expect(
-        createMarket(client, sponsor, {
-          id: 32n + BigInt(i),
-          kind: { lockedAtLeast: {} },
-          threshold: 5_000_000n,
-          target: lpMint,
-          metric: locked,
-        }),
-      ).rejects.toThrow("InvalidMetricAccount");
+    for (const [i, metric] of [ownAccount, sidecar].entries()) {
+      await expect(lockedMarket(client, sponsor, 31n + BigInt(i), lpMint, { metric })).rejects.toThrow(
+        "InvalidMetricAccount",
+      );
     }
   });
+
+  const notLocks: [name: string, put: (client: TestClient, lpMint: Address, other: Address) => void][] = [
+    ["a delegate that can move the tokens", (c, mint, other) => putLock(c, mint, 0n, { delegate: other })],
+    ["a close authority that can close it", (c, mint, other) => putLock(c, mint, 0n, { closeAuthority: other })],
+    ["an owner other than the lock PDA", (c, mint, other) => putLock(c, mint, 0n, { owner: other })],
+    ["another mint's tokens", (c, mint, other) => putLock(c, mint, 0n, { mint: other })],
+    [
+      "no token state (never initialized)",
+      (c, mint) => setAccountData(c, lockAta(mint), TOKEN_PROGRAM_ID, new Uint8Array(165)),
+    ],
+    ["a system-owned account", (c, mint) => setAccountData(c, lockAta(mint), SYSTEM_PROGRAM_ID, new Uint8Array(165))],
+  ];
+  for (const [name, put] of notLocks) {
+    test(`rejects a lock account with ${name}`, async () => {
+      const client = await createTestClient();
+      const sponsor = await fundedSigner(client);
+      const lpMint = await lpMintWithAmm(client);
+      put(client, lpMint, (await generateKeyPairSigner()).address);
+      await expect(lockedMarket(client, sponsor, 32n, lpMint)).rejects.toThrow("InvalidMetricAccount");
+
+      // The same market is fine on a clean lock account.
+      putLock(client, lpMint, 0n);
+      await lockedMarket(client, sponsor, 32n, lpMint);
+    });
+  }
 
   test("rejects a goal that is already met", async () => {
     const client = await createTestClient();
     const sponsor = await fundedSigner(client);
-    const lpMint = (await generateKeyPairSigner()).address;
-    setMint(client, lpMint, 10_000_000n, null);
-    const locked = incineratorAta(lpMint);
-    setTokenAccount(client, locked, { mint: lpMint, owner: INCINERATOR, amount: 5_000_000n });
+    const lpMint = await lpMintWithAmm(client);
 
+    putLock(client, lpMint, 5_000_000n);
+    await expect(lockedMarket(client, sponsor, 34n, lpMint)).rejects.toThrow("MetricAlreadyMet");
+    // One base unit short of the goal is a real market.
+    putLock(client, lpMint, 4_999_999n);
+    await lockedMarket(client, sponsor, 34n, lpMint);
+  });
+
+  test("rejects the old incinerator ATA: tokens locked there could be burned by anyone", async () => {
+    const client = await createTestClient();
+    const sponsor = await fundedSigner(client);
+    const lpMint = await lpMintWithAmm(client);
+    const burnable = ata(INCINERATOR, lpMint);
+    setTokenAccount(client, burnable, { mint: lpMint, owner: INCINERATOR, amount: 0n });
+
+    await expect(lockedMarket(client, sponsor, 37n, lpMint, { metric: burnable })).rejects.toThrow(
+      "InvalidMetricAccount",
+    );
+    // The same goal on the lock account is accepted.
+    putLock(client, lpMint, 0n);
+    await lockedMarket(client, sponsor, 37n, lpMint);
+  });
+
+  // The next two tests use no pred-provable instruction: they run the real Token program to show why the
+  // lock owner is a PDA and not the incinerator. SPL Token skips the owner check on Burn and CloseAccount
+  // for token accounts owned by the incinerator (and the system program), and for no other owner.
+  test("the incinerator is not a lock: anyone can burn its tokens and close its account", async () => {
+    const client = await createTestClient();
+    const mint = (await generateKeyPairSigner()).address;
+    setMint(client, mint, 1_000_000n, null);
+    const burnable = ata(INCINERATOR, mint);
+    setTokenAccount(client, burnable, { mint, owner: INCINERATOR, amount: 600_000n });
+    // A key nobody holds: it never signs, and the fee payer is the only signer of these transactions.
+    const nobody = (await generateKeyPairSigner()).address;
+
+    await send(client, [splBurnIx(burnable, mint, nobody, 600_000n, false)]);
+    expect(tokenBalance(client, burnable)).toBe(0n);
+    expect(mintSupply(client, mint)).toBe(400_000n);
+
+    // Once empty, the account can be closed too, with its rent going to the incinerator.
+    await send(client, [splCloseAccountIx(burnable, INCINERATOR, nobody, false)]);
+    expect(client.svm.getAccount(burnable).exists).toBe(false);
+  });
+
+  test("nobody can burn or close a lock account: its owner is a PDA that never signs", async () => {
+    const client = await createTestClient();
+    const mint = (await generateKeyPairSigner()).address;
+    setMint(client, mint, 1_000_000n, null);
+    const stranger = await generateKeyPairSigner();
+    const locked = lockAta(mint);
+    const ownerMismatch = "custom program error: 0x4"; // TokenError::OwnerMismatch
+    const missingSignature = "missing required signature for instruction";
+
+    setTokenAccount(client, locked, { mint, owner: lockOwner(), amount: 400_000n });
+    // What works on the incinerator's account: an unsigned burn, whoever it names as authority ...
+    await expect(send(client, [splBurnIx(locked, mint, lockOwner(), 400_000n, false)])).rejects.toThrow(
+      missingSignature,
+    );
+    await expect(send(client, [splBurnIx(locked, mint, stranger.address, 400_000n, false)])).rejects.toThrow(
+      ownerMismatch,
+    );
+    // ... and a burn signed by a key that is not the owner.
+    await expect(send(client, [splBurnIx(locked, mint, stranger.address, 400_000n)], [stranger])).rejects.toThrow(
+      ownerMismatch,
+    );
+    expect(tokenBalance(client, locked)).toBe(400_000n);
+    expect(mintSupply(client, mint)).toBe(1_000_000n);
+
+    // Emptied, the lock account cannot be closed either, not even to the incinerator.
+    setTokenAccount(client, locked, { mint, owner: lockOwner(), amount: 0n });
+    await expect(send(client, [splCloseAccountIx(locked, INCINERATOR, lockOwner(), false)])).rejects.toThrow(
+      missingSignature,
+    );
+    await expect(send(client, [splCloseAccountIx(locked, INCINERATOR, stranger.address, false)])).rejects.toThrow(
+      ownerMismatch,
+    );
     await expect(
-      createMarket(client, sponsor, {
-        id: 34n,
-        kind: { lockedAtLeast: {} },
-        threshold: 5_000_000n,
-        target: lpMint,
-        metric: locked,
-      }),
-    ).rejects.toThrow("MetricAlreadyMet");
+      send(client, [splCloseAccountIx(locked, stranger.address, stranger.address)], [stranger]),
+    ).rejects.toThrow(ownerMismatch);
+    expect(client.svm.getAccount(locked).exists).toBe(true);
+  });
+});
+
+// The next three kinds read accounts that other programs own. Their tests inject the REAL mainnet bytes
+// (tests/fixtures) at the real addresses and owners, and patch a COPY of the bytes to play what the owning
+// program would write later on chain.
+
+/** Fixture `name` at its real address and owner, with `edit` applied to a copy of its bytes first. */
+function putFixture(client: TestClient, name: FixtureName, edit?: (data: Uint8Array) => void) {
+  const fixture = loadFixture(name);
+  edit?.(fixture.data);
+  setAccountData(client, fixture.address, fixture.owner, fixture.data);
+  return fixture;
+}
+
+describe("StakePoolTvlAtLeast (SPL stake pool total at the start of an epoch)", () => {
+  // Byte offsets in the stake pool account. The options before the last field are all unset on JitoSOL and
+  // bSOL, which is where the program's Borsh walk ends at 427 (it follows the options when they are set).
+  const POOL_MINT_AT = 162;
+  const TOTAL_LAMPORTS_AT = 258;
+  const LAST_UPDATE_EPOCH_AT = 274;
+  const LAST_EPOCH_TOTAL_AT = 427;
+
+  /** What a fixture says about its pool. Epochs and goals derive from it, so a refreshed fixture needs no edits. */
+  function poolFacts(name: "stakepool-jitosol" | "stakepool-bsol", label: string) {
+    const { address, owner, data } = loadFixture(name);
+    const total = readU64(data, TOTAL_LAMPORTS_AT);
+    const snapshot = readU64(data, LAST_EPOCH_TOTAL_AT);
+    const updated = readU64(data, LAST_UPDATE_EPOCH_AT);
+    const highest = total > snapshot ? total : snapshot;
+    const lowest = total > snapshot ? snapshot : total;
+    return {
+      name,
+      label,
+      address,
+      owner,
+      mint: readKey(data, POOL_MINT_AT),
+      total,
+      snapshot,
+      highest,
+      lowest,
+      /** The epoch of the pool's last update: the clock's epoch when the market is made. */
+      updated,
+      /** The epoch the market measures: the next one. */
+      epoch: updated + 1n,
+      /** 1000 SOL above both totals, so the goal is not met yet. */
+      threshold: highest + 1_000n * SOL,
+    };
+  }
+  type Pool = ReturnType<typeof poolFacts>;
+  const jito = poolFacts("stakepool-jitosol", "JitoSOL");
+  const bsol = poolFacts("stakepool-bsol", "bSOL");
+
+  const kindFor = (epoch: bigint): Kind => ({ stakePoolTvlAtLeast: { epoch: new BN(epoch.toString()) } });
+
+  /** The pool as the stake pool program last wrote it, with `edit` applied to a copy of its bytes. */
+  const setPool = (client: TestClient, pool: Pool, edit?: (data: Uint8Array) => void) =>
+    putFixture(client, pool.name, edit);
+
+  /** The pool's first update of `epoch`: it stamps the epoch and keeps the total it held before as `snapshot`. */
+  const firstUpdate = (epoch: bigint, snapshot: bigint) => (data: Uint8Array) => {
+    writeU64(data, LAST_UPDATE_EPOCH_AT, epoch);
+    writeU64(data, LAST_EPOCH_TOTAL_AT, snapshot);
+  };
+
+  const poolMarket = (
+    client: TestClient,
+    sponsor: KeyPairSigner,
+    id: bigint,
+    pool: Pool,
+    over: Partial<MarketOpts> = {},
+  ) =>
+    createMarket(client, sponsor, {
+      id,
+      kind: kindFor(pool.epoch),
+      threshold: pool.threshold,
+      target: pool.mint,
+      metric: pool.address,
+      ...over,
+    });
+
+  /** A market on `pool`, made while the clock is still in the epoch of the pool's last update. */
+  async function openMarket(pool: Pool = jito) {
+    const client = await createTestClient();
+    const sponsor = await fixedSponsor(client);
+    const doer = await fundedSigner(client);
+    setEpoch(client, pool.updated);
+    setPool(client, pool);
+    const market = await poolMarket(client, sponsor, 1n, pool);
+    return { client, sponsor, doer, market };
+  }
+
+  test("creates on the real JitoSOL pool and locks its mint, address and goal into the market", async () => {
+    const { client, market } = await openMarket(jito);
+    noteCu("StakePoolTvlAtLeast (JitoSOL) create_market", market.created);
+
+    const stored = fetchMarket(client, market.address);
+    expect(BigInt(stored.kind.StakePoolTvlAtLeast.epoch.toString())).toBe(jito.epoch);
+    expect(stored.target_pubkey.toBase58()).toBe(jito.mint);
+    expect(stored.metric_account.toBase58()).toBe(jito.address);
+    expect(BigInt(stored.metric_threshold.toString())).toBe(jito.threshold);
+
+    // The app builds its activity feed from this event, so the client's IDL has to decode the new kind.
+    const [created] = eventsOf(market.created);
+    expect(created!.name).toBe("marketCreated");
+    const kind = created!.data.kind as { stakePoolTvlAtLeast: { epoch: BN } };
+    expect(kind.stakePoolTvlAtLeast.epoch.toString()).toBe(jito.epoch.toString());
+  });
+
+  /** Account type 2 is the validator list: not a pool. */
+  const notAPool = (data: Uint8Array) => {
+    data[0] = 2;
+  };
+  /** One byte short of `last_epoch_total_lamports` (427..435). */
+  const truncatedPool = () => loadFixture(jito.name).data.slice(0, 434);
+
+  const creationRejections: {
+    name: string;
+    error: string;
+    /** Changes the clock or the pool before `create_market` runs. */
+    arrange?: (client: TestClient) => void;
+    over?: Partial<MarketOpts>;
+  }[] = [
+    { name: "a mint that is not the pool's", error: "InvalidMetricAccount", over: { target: bsol.mint } },
+    {
+      name: "pool bytes owned by another program",
+      error: "InvalidMetricAccount",
+      arrange: (client) => setAccountData(client, jito.address, TOKEN_PROGRAM_ID, loadFixture(jito.name).data),
+    },
+    {
+      name: "an account that is not a pool (type 2, a validator list)",
+      error: "InvalidMetricAccount",
+      arrange: (client) => setPool(client, jito, notAPool),
+    },
+    {
+      name: "a pool truncated before its last_epoch_total_lamports",
+      error: "InvalidMetricAccount",
+      arrange: (client) => setAccountData(client, jito.address, jito.owner, truncatedPool()),
+    },
+    { name: "the epoch the clock is in", error: "InvalidEpoch", over: { kind: kindFor(jito.updated) } },
+    { name: "an epoch in the past", error: "InvalidEpoch", over: { kind: kindFor(jito.updated - 1n) } },
+    { name: "a zero threshold", error: "MetricAlreadyMet", over: { threshold: 0n } },
+    {
+      name: "a pool whose updates stopped (two epochs behind the clock)",
+      error: "InvalidMetricAccount",
+      arrange: (client) => setEpoch(client, jito.updated + 2n),
+      over: { kind: kindFor(jito.updated + 3n) },
+    },
+  ];
+  for (const { name, error, arrange, over } of creationRejections) {
+    test(`create_market rejects ${name}`, async () => {
+      const client = await createTestClient();
+      const sponsor = await fundedSigner(client);
+      setEpoch(client, jito.updated);
+      setPool(client, jito);
+      arrange?.(client);
+      await expect(poolMarket(client, sponsor, 1n, jito, over)).rejects.toThrow(error);
+    });
+  }
+
+  // A goal between a pool's two totals is met by the higher one, so a check against only the current total, or
+  // only the snapshot, would let it by. The real pools cover both orders: JitoSOL's current total is the higher
+  // one, bSOL's snapshot is.
+  const goals = [jito, bsol].flatMap((pool) => {
+    const higher = pool.total > pool.snapshot ? "current total" : "snapshot";
+    return [
+      {
+        name: `${pool.label}: between its two totals, the ${higher} being the higher`,
+        pool,
+        threshold: pool.lowest + 1n,
+      },
+      { name: `${pool.label}: exactly its higher total`, pool, threshold: pool.highest },
+    ];
+  });
+  for (const { name, pool, threshold } of goals) {
+    test(`create_market rejects a goal the pool already meets (${name})`, async () => {
+      const client = await createTestClient();
+      const sponsor = await fundedSigner(client);
+      setEpoch(client, pool.updated);
+      setPool(client, pool);
+      await expect(poolMarket(client, sponsor, 1n, pool, { threshold })).rejects.toThrow("MetricAlreadyMet");
+      // One lamport above both totals is a real market.
+      await poolMarket(client, sponsor, 1n, pool, { threshold: pool.highest + 1n });
+    });
+  }
+
+  test("a pool one epoch behind the clock is accepted: it can still update before the measured epoch", async () => {
+    const client = await createTestClient();
+    const sponsor = await fundedSigner(client);
+    setEpoch(client, jito.updated + 1n);
+    setPool(client, jito);
+    await poolMarket(client, sponsor, 1n, jito, { kind: kindFor(jito.updated + 2n) });
+  });
+
+  test("buying works until the measured epoch starts; then all trading closes, on the clock alone", async () => {
+    const { client, doer, market } = await openMarket(jito);
+    const provider = await fundedSigner(client, 20n);
+    await buyYes(client, doer, market, USDC);
+    await mintPair(client, provider, market, 9n * USDC);
+    await addLiquidity(client, provider, market, 9n * USDC, lib.seedNoForPrice(9n * USDC, PRICE_BPS));
+
+    // The epoch starts. The pool is not read to close trading, and has not even made its first update.
+    setEpoch(client, jito.epoch);
+    await expect(buyYes(client, doer, market, USDC)).rejects.toThrow("BettingClosed");
+    await expect(swap(client, doer, market, "yes", USDC / 2n)).rejects.toThrow("BettingClosed");
+    await expect(addLiquidity(client, provider, market, USDC, USDC)).rejects.toThrow("BettingClosed");
+
+    // Liquidity can still leave.
+    const shares = tokenBalance(client, ata(provider.address, lpMintPda(market.address)))!;
+    await removeLiquidity(client, provider, market, shares);
+    expect(poolOf(client, market)).toEqual({ yes: 0n, no: 0n });
+  });
+
+  for (const pool of [jito, bsol]) {
+    test(`${pool.label}: a snapshot at the goal resolves YES once the pool writes it; the doer redeems`, async () => {
+      const { client, doer, market } = await openMarket(pool);
+      if (pool === bsol) noteCu("StakePoolTvlAtLeast (bSOL) create_market", market.created);
+      const start = await usdcBalance(client, doer.address);
+      await buyYes(client, doer, market, USDC);
+
+      // The epoch starts, but the pool has not made its first update of it: there is nothing to read yet.
+      setEpoch(client, pool.epoch);
+      await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
+
+      // The first update stamps the epoch and keeps the total the pool held before it: exactly the goal.
+      setPool(client, pool, firstUpdate(pool.epoch, pool.threshold));
+      noteCu(`StakePoolTvlAtLeast (${pool.label}) resolve YES`, await resolve(client, market));
+      expect(fetchMarket(client, market.address).outcome).toEqual({ Yes: {} });
+
+      await redeem(client, doer, market, market.yesMint);
+      expect((await usdcBalance(client, doer.address)) - start).toBe(USDC - USDC / 10n);
+    });
+  }
+
+  test("a snapshot below the goal resolves NO at once; the sponsor withdraws the whole vault", async () => {
+    const { client, sponsor, doer, market } = await openMarket(jito);
+    await buyYes(client, doer, market, USDC);
+
+    setEpoch(client, jito.epoch);
+    setPool(client, jito, firstUpdate(jito.epoch, jito.threshold - 1n));
+    noteCu("StakePoolTvlAtLeast (JitoSOL) resolve NO", await resolve(client, market));
+    expect(fetchMarket(client, market.address).outcome).toEqual({ No: {} });
+    await expect(redeem(client, doer, market, market.yesMint)).rejects.toThrow("NotWinningMint");
+
+    const before = await usdcBalance(client, sponsor.address);
+    await withdrawBudget(client, sponsor, market);
+    // 1.1 USDC unspent budget + 1 USDC of NO (0.1 from the buyer + 0.9 of the sponsor's own cover).
+    expect((await usdcBalance(client, sponsor.address)) - before).toBe(BUDGET + USDC / 10n);
+    expect(vaultBalance(client, market)).toBe(0n);
+  });
+
+  // Where the clock and the pool can be when somebody calls `resolve` on a JitoSOL market of epoch EPOCH.
+  const EPOCH = jito.epoch;
+  const GOAL = jito.threshold;
+  /** The pool after its first update of `epoch` (kept `snapshot` as the total it held before). */
+  const afterUpdate = (epoch: bigint, snapshot: bigint) => (client: TestClient) => {
+    setPool(client, jito, firstUpdate(epoch, snapshot));
+  };
+  const unreadable: [string, (client: TestClient) => void][] = [
+    ["an account that is not a pool", (c) => setPool(c, jito, notAPool)],
+    ["a truncated account", (c) => setAccountData(c, jito.address, jito.owner, truncatedPool())],
+    [
+      "bytes owned by another program",
+      (c) => setAccountData(c, jito.address, TOKEN_PROGRAM_ID, loadFixture(jito.name).data),
+    ],
+  ];
+
+  const settles: { name: string; clock: bigint; pool?: (client: TestClient) => void; outcome: "Yes" | "No" }[] = [
+    {
+      name: "YES: the first update of the epoch kept exactly the goal",
+      clock: EPOCH,
+      pool: afterUpdate(EPOCH, GOAL),
+      outcome: "Yes",
+    },
+    {
+      name: "NO: the snapshot is one lamport short",
+      clock: EPOCH,
+      pool: afterUpdate(EPOCH, GOAL - 1n),
+      outcome: "No",
+    },
+    {
+      name: "YES, resolved late: the epoch is over but the next update has not overwritten the snapshot",
+      clock: EPOCH + 1n,
+      pool: afterUpdate(EPOCH, GOAL),
+      outcome: "Yes",
+    },
+    {
+      name: "NO, resolved late: the snapshot was short",
+      clock: EPOCH + 1n,
+      pool: afterUpdate(EPOCH, GOAL - 1n),
+      outcome: "No",
+    },
+    {
+      name: "NO: the pool moved on to the next epoch, so its snapshot is not the epoch's, whatever it holds",
+      clock: EPOCH + 1n,
+      pool: afterUpdate(EPOCH + 1n, 2n * GOAL),
+      outcome: "No",
+    },
+    { name: "NO: the pool never updated during the epoch", clock: EPOCH + 1n, outcome: "No" },
+    ...unreadable.map(([what, pool]) => ({
+      name: `NO: the epoch is over and the pool is unreadable (${what})`,
+      clock: EPOCH + 1n,
+      pool,
+      outcome: "No" as const,
+    })),
+  ];
+  for (const { name, clock, pool, outcome } of settles) {
+    test(`resolve, ${name}`, async () => {
+      const { client, market } = await openMarket(jito);
+      setEpoch(client, clock);
+      pool?.(client);
+      await resolve(client, market);
+      expect(fetchMarket(client, market.address).outcome).toEqual({ [outcome]: {} });
+    });
+  }
+
+  const reverts: { name: string; clock: bigint; pool?: (client: TestClient) => void; error: string }[] = [
+    { name: "before the measured epoch", clock: EPOCH - 1n, error: "NotResolvableYet" },
+    {
+      name: "before the measured epoch, even if the pool already shows a snapshot for it (not possible on chain)",
+      clock: EPOCH - 1n,
+      pool: afterUpdate(EPOCH, GOAL),
+      error: "NotResolvableYet",
+    },
+    {
+      name: "the epoch started but the pool has not made its first update of it",
+      clock: EPOCH,
+      error: "NotResolvableYet",
+    },
+    ...unreadable.map(([what, pool]) => ({
+      name: `an unreadable pool during the epoch itself (${what}): nothing proves NO yet`,
+      clock: EPOCH,
+      pool,
+      error: "InvalidMetricAccount",
+    })),
+  ];
+  for (const { name, clock, pool, error } of reverts) {
+    test(`resolve reverts ${name}`, async () => {
+      const { client, market } = await openMarket(jito);
+      setEpoch(client, clock);
+      pool?.(client);
+      await expect(resolve(client, market)).rejects.toThrow(error);
+      expect(fetchMarket(client, market.address).outcome).toEqual({ Open: {} });
+    });
+  }
+
+  test("flash-proof: inflating the pool's CURRENT total cannot change the outcome", async () => {
+    // A flash deposit moves total_lamports inside one transaction. The market never reads it: only the
+    // snapshot the pool wrote at the epoch boundary counts.
+    const U64_MAX = (1n << 64n) - 1n;
+    const inflate = (data: Uint8Array) => writeU64(data, TOTAL_LAMPORTS_AT, U64_MAX);
+    const { client, doer, market } = await openMarket(jito);
+    await buyYes(client, doer, market, USDC);
+
+    // Before the epoch, and in it before the pool's first update: still nothing to resolve.
+    setPool(client, jito, inflate);
+    await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
+    setEpoch(client, jito.epoch);
+    await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
+
+    // After the first update, with the snapshot short of the goal: NO, whatever the pool holds right now.
+    setPool(client, jito, (data) => {
+      firstUpdate(jito.epoch, jito.threshold - 1n)(data);
+      inflate(data);
+    });
+    expect(readU64(accountData(client, jito.address), TOTAL_LAMPORTS_AT)).toBe(U64_MAX);
+    await resolve(client, market);
+    expect(fetchMarket(client, market.address).outcome).toEqual({ No: {} });
+  });
+
+  test("resolve reads only the pool locked at creation: another pool that would say YES is refused", async () => {
+    const { client, market } = await openMarket(jito);
+    setEpoch(client, jito.epoch);
+    setPool(client, jito, firstUpdate(jito.epoch, jito.threshold - 1n)); // the market's own pool says NO ...
+    setPool(client, bsol, firstUpdate(jito.epoch, jito.threshold)); // ... another pool's snapshot meets the goal
+
+    await expect(resolve(client, market, bsol.address)).rejects.toThrow("InvalidMetricAccount");
+    await resolve(client, market);
+    expect(fetchMarket(client, market.address).outcome).toEqual({ No: {} });
+  });
+});
+
+describe("DammV2LockedAtLeast (liquidity locked forever in a Meteora DAMM v2 pool)", () => {
+  // Byte offsets in the DAMM v2 Pool account (1112 bytes, with its 8-byte Anchor discriminator).
+  const TOKEN_A_MINT_AT = 168;
+  const TOKEN_B_MINT_AT = 200;
+  const LOCKED_LIQUIDITY_AT = 552; // permanent_lock_liquidity, a u128
+
+  /** What a fixture says about its pool. The goal is `threshold << 64`, one unit above what is locked now. */
+  function poolFacts(name: "damm-ft8fd9" | "damm-sol-usdc") {
+    const { address, data } = loadFixture(name);
+    const locked = readU128(data, LOCKED_LIQUIDITY_AT);
+    return {
+      name,
+      address,
+      tokenA: readKey(data, TOKEN_A_MINT_AT),
+      tokenB: readKey(data, TOKEN_B_MINT_AT),
+      locked,
+      threshold: (locked >> 64n) + 1n,
+    };
+  }
+  type Pool = ReturnType<typeof poolFacts>;
+  const ft8 = poolFacts("damm-ft8fd9");
+  const solUsdc = poolFacts("damm-sol-usdc");
+  const goal = ft8.threshold << 64n;
+
+  const kindFor = (shift: number): Kind => ({ dammV2LockedAtLeast: { shift } });
+
+  /** The pool as the DAMM v2 program last wrote it, with `edit` applied to a copy of its bytes. */
+  const setPool = (client: TestClient, pool: Pool, edit?: (data: Uint8Array) => void) =>
+    putFixture(client, pool.name, edit);
+  const withLocked = (liquidity: bigint) => (data: Uint8Array) => writeU128(data, LOCKED_LIQUIDITY_AT, liquidity);
+
+  const poolMarket = (
+    client: TestClient,
+    sponsor: KeyPairSigner,
+    id: bigint,
+    pool: Pool,
+    over: Partial<MarketOpts> = {},
+  ) =>
+    createMarket(client, sponsor, {
+      id,
+      kind: kindFor(64),
+      threshold: pool.threshold,
+      target: pool.tokenB,
+      metric: pool.address,
+      ...over,
+    });
+
+  /** A market on the Ft8FD9 pool with a doer and a sponsor, before anybody trades. */
+  async function openMarket() {
+    const client = await createTestClient();
+    const sponsor = await fixedSponsor(client);
+    const doer = await fundedSigner(client);
+    setPool(client, ft8);
+    const market = await poolMarket(client, sponsor, 1n, ft8);
+    return { client, sponsor, doer, market };
+  }
+
+  for (const pool of [ft8, solUsdc]) {
+    test(`creates on the real ${pool.name} pool with either of its mints as the target`, async () => {
+      const client = await createTestClient();
+      const sponsor = await fixedSponsor(client);
+      setPool(client, pool);
+
+      for (const [i, target] of [pool.tokenB, pool.tokenA].entries()) {
+        const market = await poolMarket(client, sponsor, 1n + BigInt(i), pool, { target });
+        if (pool === ft8 && i === 0) noteCu("DammV2LockedAtLeast create_market", market.created);
+        const stored = fetchMarket(client, market.address);
+        expect(stored.kind).toEqual({ DammV2LockedAtLeast: { shift: 64 } });
+        expect(stored.target_pubkey.toBase58()).toBe(target);
+        expect(stored.metric_account.toBase58()).toBe(pool.address);
+        expect(BigInt(stored.metric_threshold.toString())).toBe(pool.threshold);
+        // The activity feed decodes the kind from the MarketCreated event.
+        expect(eventsOf(market.created)[0]!.data.kind).toEqual({ dammV2LockedAtLeast: { shift: 64 } });
+      }
+    });
+  }
+
+  const rejections: {
+    name: string;
+    error: string;
+    arrange?: (client: TestClient) => void;
+    over?: Partial<MarketOpts>;
+  }[] = [
+    {
+      name: "a target that is not one of the pool's mints",
+      error: "InvalidMetricAccount",
+      over: { target: USDC_MINT },
+    },
+    {
+      name: "pool bytes owned by another program",
+      error: "InvalidMetricAccount",
+      arrange: (client) => setAccountData(client, ft8.address, TOKEN_PROGRAM_ID, loadFixture(ft8.name).data),
+    },
+    {
+      name: "a truncated pool (1111 bytes)",
+      error: "InvalidMetricAccount",
+      arrange: (client) => {
+        const { owner, data } = loadFixture(ft8.name);
+        setAccountData(client, ft8.address, owner, data.slice(0, 1111));
+      },
+    },
+    {
+      name: "a pool with one byte too many (1113 bytes)",
+      error: "InvalidMetricAccount",
+      arrange: (client) => {
+        const { owner, data } = loadFixture(ft8.name);
+        const longer = new Uint8Array(1113);
+        longer.set(data);
+        setAccountData(client, ft8.address, owner, longer);
+      },
+    },
+    {
+      name: "a flipped discriminator byte",
+      error: "InvalidMetricAccount",
+      arrange: (client) =>
+        setPool(client, ft8, (data) => {
+          data[0] ^= 1;
+        }),
+    },
+    { name: "a shift of 65", error: "InvalidThreshold", over: { kind: kindFor(65) } },
+    { name: "a shift of 255", error: "InvalidThreshold", over: { kind: kindFor(255) } },
+    { name: "a zero threshold", error: "MetricAlreadyMet", over: { threshold: 0n } },
+    {
+      name: "a goal the pool already exceeds (threshold = lock >> 64)",
+      error: "MetricAlreadyMet",
+      over: { threshold: ft8.locked >> 64n },
+    },
+    {
+      name: "a raw-units goal the pool exceeds by far (shift 0, the largest u64 threshold)",
+      error: "MetricAlreadyMet",
+      over: { kind: kindFor(0), threshold: (1n << 64n) - 1n },
+    },
+  ];
+  for (const { name, error, arrange, over } of rejections) {
+    test(`create_market rejects ${name}`, async () => {
+      const client = await createTestClient();
+      const sponsor = await fundedSigner(client);
+      setPool(client, ft8);
+      arrange?.(client);
+      await expect(poolMarket(client, sponsor, 1n, ft8, over)).rejects.toThrow(error);
+    });
+  }
+
+  test("locking liquidity past the goal resolves YES and stops buying; the doer redeems 1:1", async () => {
+    const { client, doer, market } = await openMarket();
+    const sniper = await fundedSigner(client);
+    const start = await usdcBalance(client, doer.address);
+    await buyYes(client, doer, market, USDC);
+    await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
+
+    // One unit short of the goal is not enough. The liquidity is a u128, compared as one.
+    setPool(client, ft8, withLocked(goal - 1n));
+    await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
+    await buyYes(client, doer, market, MIN_STAKE);
+
+    // Somebody locks more liquidity forever, up to the goal: nobody can buy the known winner any more.
+    setPool(client, ft8, withLocked(goal));
+    await expect(buyYes(client, sniper, market, USDC)).rejects.toThrow("MetricAlreadyMet");
+    noteCu("DammV2LockedAtLeast resolve YES", await resolve(client, market));
+    expect(fetchMarket(client, market.address).outcome).toEqual({ Yes: {} });
+
+    await redeem(client, doer, market, market.yesMint);
+    expect((await usdcBalance(client, doer.address)) - start).toBe(2n * (USDC - USDC / 10n));
+  });
+
+  test("the goal unmet at the deadline resolves NO, and the sponsor gets its budget and its NO back", async () => {
+    const { client, sponsor, doer, market } = await openMarket();
+    await buyYes(client, doer, market, USDC);
+
+    client.svm.warpToSlot(150n);
+    await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
+
+    // Even liquidity locked after the deadline cannot flip the market to YES.
+    client.svm.warpToSlot(DEADLINE + 1n);
+    setPool(client, ft8, withLocked(goal));
+    await resolve(client, market);
+    expect(fetchMarket(client, market.address).outcome).toEqual({ No: {} });
+    await expect(redeem(client, doer, market, market.yesMint)).rejects.toThrow("NotWinningMint");
+
+    const before = await usdcBalance(client, sponsor.address);
+    await withdrawBudget(client, sponsor, market);
+    // 1.1 USDC unspent budget + 1 USDC of NO (0.1 from the buyer + 0.9 of the sponsor's own cover).
+    expect((await usdcBalance(client, sponsor.address)) - before).toBe(BUDGET + USDC / 10n);
+    expect(vaultBalance(client, market)).toBe(0n);
+  });
+
+  test("shift 0 reads the threshold as raw liquidity units (a small goal on a synthetic copy)", async () => {
+    const client = await createTestClient();
+    const sponsor = await fundedSigner(client);
+    const raw = (threshold: bigint) => ({ kind: kindFor(0), threshold });
+    setPool(client, ft8, withLocked(1_000n));
+
+    // A goal equal to what is locked is already met; one unit above it is a real market.
+    await expect(poolMarket(client, sponsor, 1n, ft8, raw(1_000n))).rejects.toThrow("MetricAlreadyMet");
+    const market = await poolMarket(client, sponsor, 1n, ft8, raw(1_001n));
+
+    await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
+    setPool(client, ft8, withLocked(1_001n));
+    await resolve(client, market);
+    expect(fetchMarket(client, market.address).outcome).toEqual({ Yes: {} });
+  });
+
+  test("shift 64 compares the full u128: a huge low word does not stand in for the high one", async () => {
+    const client = await createTestClient();
+    const sponsor = await fundedSigner(client);
+    setPool(client, ft8, withLocked(1n));
+    const market = await poolMarket(client, sponsor, 1n, ft8, { threshold: 3n });
+
+    // Just under 3 * 2^64: the high word is 2 and the low word is full.
+    setPool(client, ft8, withLocked((3n << 64n) - 1n));
+    await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
+    setPool(client, ft8, withLocked(3n << 64n));
+    await resolve(client, market);
+    expect(fetchMarket(client, market.address).outcome).toEqual({ Yes: {} });
+  });
+
+  test("the largest goal, u64::MAX << 64, is a real market: only a nearly full u128 lock meets it", async () => {
+    const client = await createTestClient();
+    const sponsor = await fundedSigner(client);
+    const goalMax = ((1n << 64n) - 1n) << 64n;
+    setPool(client, ft8);
+    const market = await poolMarket(client, sponsor, 1n, ft8, { threshold: (1n << 64n) - 1n });
+
+    setPool(client, ft8, withLocked(goalMax - 1n));
+    await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
+    setPool(client, ft8, withLocked(goalMax));
+    await resolve(client, market);
+    expect(fetchMarket(client, market.address).outcome).toEqual({ Yes: {} });
+  });
+
+  test("the pool is locked at creation: another pool's lock neither resolves nor reopens buying", async () => {
+    const { client, doer, market } = await openMarket();
+    // Another DAMM pool has locked twice the goal, while the market's own pool has not reached it.
+    setPool(client, solUsdc, withLocked(2n * goal));
+    await expect(resolve(client, market, solUsdc.address)).rejects.toThrow("InvalidMetricAccount");
+
+    // The market's own pool meets the goal: buying stops, and showing another, unmet pool does not bypass it.
+    setPool(client, ft8, withLocked(goal));
+    setPool(client, solUsdc);
+    await expect(buyYes(client, doer, market, USDC, { metricAccount: pk(solUsdc.address) })).rejects.toThrow(
+      "InvalidMetricAccount",
+    );
+    await expect(buyYes(client, doer, market, USDC)).rejects.toThrow("MetricAlreadyMet");
+  });
+});
+
+describe("MetadataImmutable (Metaplex token metadata made immutable)", () => {
+  // `is_mutable` follows the name, symbol, uri and creators, so it moves: byte 323 with no creators, 395 with
+  // two, 429 with three. The program finds it by walking the Borsh layout.
+  const MINT_AT = 33;
+  /** An address no seeds derive to here: not the metadata PDA of any mint the tests use. */
+  const STRAY = readKey(new Uint8Array(32).fill(7), 0);
+
+  /** What a fixture says about its metadata account, checked against the bytes so a refresh cannot drift. */
+  function metaFacts(name: FixtureName, flagAt: number, mutable: boolean) {
+    const { address, data } = loadFixture(name);
+    if (data[flagAt] !== (mutable ? 1 : 0)) throw new Error(`${name}: expected is_mutable=${mutable} at ${flagAt}`);
+    return { name, address, mint: readKey(data, MINT_AT), flagAt };
+  }
+  type Meta = ReturnType<typeof metaFacts>;
+  const usdcMeta = metaFacts("metadata-usdc", 323, true);
+  const wifMeta = metaFacts("metadata-wif", 323, false);
+  const madladsMeta = metaFacts("metadata-madlads-1725", 395, true);
+  const smbMeta = metaFacts("metadata-smb-1301", 429, false);
+
+  /** The metadata as Token Metadata left it, with `edit` applied to a copy of its bytes. */
+  const setMeta = (client: TestClient, meta: Meta, edit?: (data: Uint8Array) => void) =>
+    putFixture(client, meta.name, edit);
+  /** `UpdateMetadataAccountV2` with `is_mutable = false` (or its inverse, which only a test can do). */
+  const setMutable = (meta: Meta, mutable: boolean) => (data: Uint8Array) => {
+    data[meta.flagAt] = mutable ? 1 : 0;
+  };
+
+  const metaMarket = (
+    client: TestClient,
+    sponsor: KeyPairSigner,
+    id: bigint,
+    meta: Meta,
+    over: Partial<MarketOpts> = {},
+  ) =>
+    createMarket(client, sponsor, {
+      id,
+      kind: { metadataImmutable: {} },
+      threshold: 0n,
+      target: meta.mint,
+      metric: metadataPda(meta.mint),
+      ...over,
+    });
+
+  async function openMarket(meta: Meta = usdcMeta) {
+    const client = await createTestClient();
+    const sponsor = await fixedSponsor(client);
+    const doer = await fundedSigner(client);
+    setMeta(client, meta);
+    const market = await metaMarket(client, sponsor, 1n, meta);
+    return { client, sponsor, doer, market };
+  }
+
+  test("every fixture lives at the Metadata PDA the client derives from the mint it describes", () => {
+    expect(String(usdcMeta.mint)).toBe("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+    for (const meta of [usdcMeta, wifMeta, madladsMeta, smbMeta]) {
+      expect(metadataPda(meta.mint)).toBe(meta.address);
+    }
+  });
+
+  test("creates on the real USDC metadata and locks its mint and metadata account into the market", async () => {
+    const { client, market } = await openMarket(usdcMeta);
+    noteCu("MetadataImmutable (USDC, no creators) create_market", market.created);
+
+    const stored = fetchMarket(client, market.address);
+    expect(stored.kind).toEqual({ MetadataImmutable: {} });
+    expect(stored.target_pubkey.toBase58()).toBe(usdcMeta.mint);
+    expect(stored.metric_account.toBase58()).toBe(usdcMeta.address);
+    // The activity feed decodes the kind from the MarketCreated event.
+    expect(eventsOf(market.created)[0]!.data.kind).toEqual({ metadataImmutable: {} });
+  });
+
+  test("making the metadata immutable resolves YES and stops buying; the doer redeems 1:1", async () => {
+    const { client, doer, market } = await openMarket(usdcMeta);
+    const sniper = await fundedSigner(client);
+    const start = await usdcBalance(client, doer.address);
+    await buyYes(client, doer, market, USDC);
+    await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
+
+    // The update authority sets is_mutable to false. Token Metadata can never set it back.
+    setMeta(client, usdcMeta, setMutable(usdcMeta, false));
+    await expect(buyYes(client, sniper, market, USDC)).rejects.toThrow("MetricAlreadyMet");
+    noteCu("MetadataImmutable (USDC, no creators) resolve YES", await resolve(client, market));
+    expect(fetchMarket(client, market.address).outcome).toEqual({ Yes: {} });
+
+    await redeem(client, doer, market, market.yesMint);
+    expect((await usdcBalance(client, doer.address)) - start).toBe(USDC - USDC / 10n);
+  });
+
+  test("metadata still mutable at the deadline resolves NO, and a late freeze cannot flip it", async () => {
+    const { client, sponsor, doer, market } = await openMarket(usdcMeta);
+    await buyYes(client, doer, market, USDC);
+
+    client.svm.warpToSlot(DEADLINE + 1n);
+    setMeta(client, usdcMeta, setMutable(usdcMeta, false));
+    await resolve(client, market);
+    expect(fetchMarket(client, market.address).outcome).toEqual({ No: {} });
+
+    const before = await usdcBalance(client, sponsor.address);
+    await withdrawBudget(client, sponsor, market);
+    expect((await usdcBalance(client, sponsor.address)) - before).toBe(BUDGET + USDC / 10n);
+    expect(vaultBalance(client, market)).toBe(0n);
+  });
+
+  const rejections: {
+    name: string;
+    error: string;
+    arrange?: (client: TestClient) => void;
+    over?: Partial<MarketOpts>;
+    meta?: Meta;
+  }[] = [
+    { name: "metadata that is already immutable (WIF)", error: "AlreadyImmutable", meta: wifMeta },
+    {
+      name: "another mint as the target (the PDA of that mint is not the metric)",
+      error: "InvalidMetricAccount",
+      over: { target: wifMeta.mint },
+    },
+    {
+      name: "the right bytes at an address that is not the PDA",
+      error: "InvalidMetricAccount",
+      arrange: (client) => {
+        const { owner, data } = loadFixture(usdcMeta.name);
+        setAccountData(client, STRAY, owner, data);
+      },
+      over: { metric: STRAY },
+    },
+    {
+      name: "a flipped key byte (type 5, not Metadata v1)",
+      error: "InvalidMetricAccount",
+      arrange: (client) =>
+        setMeta(client, usdcMeta, (data) => {
+          data[0] ^= 1;
+        }),
+    },
+    {
+      name: "an is_mutable that is neither 0 nor 1",
+      error: "InvalidMetricAccount",
+      arrange: (client) =>
+        setMeta(client, usdcMeta, (data) => {
+          data[usdcMeta.flagAt] = 2;
+        }),
+    },
+    {
+      name: "an account truncated before is_mutable",
+      error: "InvalidMetricAccount",
+      arrange: (client) => {
+        const { address, owner, data } = loadFixture(usdcMeta.name);
+        setAccountData(client, address, owner, data.slice(0, usdcMeta.flagAt));
+      },
+    },
+    {
+      name: "metadata bytes owned by another program",
+      error: "InvalidMetricAccount",
+      arrange: (client) => {
+        const { address, data } = loadFixture(usdcMeta.name);
+        setAccountData(client, address, TOKEN_PROGRAM_ID, data);
+      },
+    },
+  ];
+  for (const { name, error, arrange, over, meta = usdcMeta } of rejections) {
+    test(`create_market rejects ${name}`, async () => {
+      const client = await createTestClient();
+      const sponsor = await fundedSigner(client);
+      setMeta(client, meta);
+      arrange?.(client);
+      await expect(metaMarket(client, sponsor, 1n, meta, over)).rejects.toThrow(error);
+    });
+  }
+
+  test("rejects the right PDA holding bytes that name another mint", async () => {
+    const client = await createTestClient();
+    const sponsor = await fundedSigner(client);
+    const other = (await generateKeyPairSigner()).address;
+    // USDC's metadata bytes, placed at the PDA of a different mint.
+    const { owner, data } = loadFixture(usdcMeta.name);
+    setAccountData(client, metadataPda(other), owner, data);
+
+    await expect(metaMarket(client, sponsor, 1n, { ...usdcMeta, mint: other })).rejects.toThrow("InvalidMetricAccount");
+  });
+
+  // The bytes at 323 and 395 of these accounts are not the flag (SMB has 0 and 59 there), so a reader that
+  // assumed the no-creators offset, or stopped at the first plausible byte, would answer wrong.
+  test("the walk finds is_mutable behind 3 creators: SMB #1301 reads immutable, and mutable once flagged", async () => {
+    const client = await createTestClient();
+    const sponsor = await fixedSponsor(client);
+    setMeta(client, smbMeta);
+    await expect(metaMarket(client, sponsor, 1n, smbMeta)).rejects.toThrow("AlreadyImmutable");
+
+    setMeta(client, smbMeta, setMutable(smbMeta, true));
+    const market = await metaMarket(client, sponsor, 1n, smbMeta);
+    noteCu("MetadataImmutable (SMB #1301, 3 creators) create_market", market.created);
+    await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
+
+    setMeta(client, smbMeta);
+    noteCu("MetadataImmutable (SMB #1301, 3 creators) resolve YES", await resolve(client, market));
+    expect(fetchMarket(client, market.address).outcome).toEqual({ Yes: {} });
+  });
+
+  test("the walk finds is_mutable behind 2 creators: Mad Lads #1725 is mutable until its flag is cleared", async () => {
+    const client = await createTestClient();
+    const sponsor = await fixedSponsor(client);
+    setMeta(client, madladsMeta);
+    const market = await metaMarket(client, sponsor, 1n, madladsMeta);
+    noteCu("MetadataImmutable (Mad Lads #1725, 2 creators) create_market", market.created);
+    await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
+
+    setMeta(client, madladsMeta, setMutable(madladsMeta, false));
+    noteCu("MetadataImmutable (Mad Lads #1725, 2 creators) resolve YES", await resolve(client, market));
+    expect(fetchMarket(client, market.address).outcome).toEqual({ Yes: {} });
+  });
+
+  test("the metadata account is locked at creation: another mint's immutable metadata is refused", async () => {
+    const { client, market } = await openMarket(usdcMeta);
+    setMeta(client, wifMeta); // WIF's metadata is immutable: a look-alike that would read as YES
+
+    await expect(resolve(client, market, wifMeta.address)).rejects.toThrow("InvalidMetricAccount");
+    await expect(resolve(client, market)).rejects.toThrow("NotResolvableYet");
+  });
+});
+
+describe("Client library addresses", () => {
+  test("the program ids it names own the real accounts the program accepts", () => {
+    expect(loadFixture("stakepool-jitosol").owner).toBe(lib.STAKE_POOL_PROGRAM_ID.toBase58() as Address);
+    expect(loadFixture("damm-ft8fd9").owner).toBe(lib.DAMM_V2_PROGRAM_ID.toBase58() as Address);
+    expect(loadFixture("metadata-usdc").owner).toBe(lib.TOKEN_METADATA_PROGRAM_ID.toBase58() as Address);
+  });
+
+  test("lockOwner is the PDA of the program's LOCK_SEED, not an address with a key", async () => {
+    const seed = JSON.parse(idl.constants.find((c) => c.name === "LOCK_SEED")!.value) as number[];
+    const [expected] = await getProgramDerivedAddress({ programAddress: PROGRAM_ID, seeds: [new Uint8Array(seed)] });
+    expect(lockOwner()).toBe(expected);
+    expect(lockOwner()).not.toBe(INCINERATOR);
   });
 });
 

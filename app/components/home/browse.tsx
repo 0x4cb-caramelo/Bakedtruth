@@ -71,7 +71,9 @@ export function Browse({ entries, clock, loading }: { entries: MarketEntry[]; cl
     !needle ||
     questionText(e.account, e.reading, e.name).toLowerCase().includes(needle) ||
     e.address.toBase58().toLowerCase().includes(needle) ||
-    e.account.targetPubkey.toBase58().toLowerCase().includes(needle);
+    e.account.targetPubkey.toBase58().toLowerCase().includes(needle) ||
+    // A pool or metadata account names the market where its mint alone is shared by many.
+    e.account.metricAccount.toBase58().toLowerCase().includes(needle);
   const inCategory = entries.filter((e) => (!category || categoryOf(e.account) === category) && matches(e));
   const shown = inCategory.filter((e) => statusOf(e.account) === status);
   const count = (s: Status) => inCategory.filter((e) => statusOf(e.account) === s).length;

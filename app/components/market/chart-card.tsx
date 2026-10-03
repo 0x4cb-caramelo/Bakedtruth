@@ -6,7 +6,7 @@ import { formatBps, formatUsdc, slotTime, type ClockInfo } from "@/lib/format";
 import { priceSeries, type Activity } from "@/lib/history";
 import type { MarketEntry } from "@/lib/hooks";
 import type { Side } from "@/lib/market";
-import { stakeEpoch, statusOf, yesPrice } from "@/lib/view";
+import { measuredEpoch, statusOf, yesPrice } from "@/lib/view";
 import { Card } from "@/components/primitives";
 import { PriceChart, type Range } from "@/components/price-chart";
 
@@ -37,7 +37,7 @@ export function ChartCard({
   const end = clock?.observedAt ?? history?.fetchedAt ?? 0;
   const change = history ? dayChange(points, end) : null;
   const trades = history?.activity.filter((a) => ["yesBought", "swapped", "pairMinted", "pairBurned"].includes(a.event.name)).length;
-  const epoch = stakeEpoch(account);
+  const epoch = measuredEpoch(account);
   const deadline =
     epoch !== null
       ? `epoch ${epoch}`
