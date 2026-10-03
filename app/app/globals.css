@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Design tokens: Trueo's slate surfaces, a blue brand for chrome, green and red only for YES and NO. */
+@theme {
+  --color-page: #12151b;
+  --color-surface: #1a1e26;
+  --color-raised: #222733;
+  --color-line: #2a3040;
+  --color-muted: #8a93a6;
+  --color-dim: #5f6779;
+  --color-ink: #f2f4f8;
+  --color-brand: #4f7dff;
+  --color-brand-strong: #3b69f0;
+  --color-yes: #22c98c;
+  --color-no: #f0506e;
+  --color-warn: #f2b33d;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-barlow);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Wallet adapter button as a brand pill. The adapter's stylesheet loads after this one, so these
+   selectors carry an extra `html` for specificity. */
+html .wallet-adapter-button-trigger {
+  height: 2.5rem;
+  border-radius: 0.625rem;
+  padding: 0 1.125rem;
+  background-color: var(--color-brand);
+  color: white;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+html .wallet-adapter-button-trigger:not([disabled]):hover {
+  background-color: var(--color-brand-strong);
+}
+
+html .wallet-adapter-button-trigger .wallet-adapter-button-start-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.5rem;
+}
+
+html .wallet-adapter-dropdown-list,
+html .wallet-adapter-modal-wrapper {
+  background: var(--color-surface);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Hide scrollbars on horizontal carousels. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
