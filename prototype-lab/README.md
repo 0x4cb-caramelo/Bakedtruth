@@ -114,11 +114,12 @@ element, pointer speed, idle time). The full attribute list is at the top of `sh
 ## Status
 
 On 2026-10-03 Lucas chose **D · Ledger²** for the site, with **N** as its light theme. This replaces the
-2026-10-02 approval of C ("Tape"), which is what the app still shows and what
-[`docs/product/DESIGN-DIRECTION.md`](../docs/product/DESIGN-DIRECTION.md) still describes below its status
-line. Two things are pending: Lucas's look at N, and rewriting `DESIGN-DIRECTION.md` for D and N. The app
-follows only after the upstream sync (see `session-log/2026-10-03-direcao-ledger2-claro-e-escuro.md`). The
-other directions stay in the lab.
+2026-10-02 approval of C ("Tape"), which is what the app still shows. Lucas approved N the same week, and on
+2026-10-05 [`docs/product/DESIGN-DIRECTION.md`](../docs/product/DESIGN-DIRECTION.md) was rewritten for D and N,
+with `prototype-n/` as the consolidated folder because it holds both themes. The other directions stay in the
+lab.
 
-These prototypes skipped the wizard's Phase 2 inputs (there is no BP v0.0.2); they are built from the
-existing program, the reference page and `knowledge-base/briefing-ideacao-nome-e-mascote.md`.
+These prototypes were built before the product was redefined as a pot market and before BP v0.0.2 existed: they
+come from the earlier program, the reference page and `knowledge-base/briefing-ideacao-nome-e-mascote.md`. The
+visual language stands; several screens show the old model (YES price, buy and sell, redemption).
+`DESIGN-DIRECTION.md` lists each conflict and `docs/product/PRODUCT-BRIEF.md` says what replaces it.
