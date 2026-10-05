@@ -1,6 +1,6 @@
 # Sprint 01 — Fundação: prova do leitor de preço
 
-**Estado:** planejada · **Branch:** `sprint-01-foundation` · **Datas:** sem datas, por decisão do fundador
+**Estado:** em andamento, aberta em 5/10/2026 · **Branch:** `sprint-01-foundation` · **Datas:** sem datas, por decisão do fundador
 
 | | |
 |---|---|
