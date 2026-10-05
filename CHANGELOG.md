@@ -73,6 +73,11 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
   pendências das Partes 1 e 2, com a conta do pote na taxa nova e o modelo financeiro refeito
   ([session-log](session-log/2026-10-05-bp-v0.0.2-taxa-decidida-e-partes-corrigidas.md)).
 - `docs/business/_review/pauta-bp-v0.0.2-parte-3.md` (5 de outubro): roteiro da Parte 3, de tokens.
+- **`docs/business/BP-v0.0.2-parte-3-tokens.md`** (5 de outubro): terceira parte, com cerca de 11.800 palavras. O
+  token A no pump.fun como canal de tração, com a taxa de criador indo ao fundo de prêmios; o token B com staking
+  com trava, desconto na taxa, voto e cofre; a ponte que queima A para comprar B; ordem e calendário; o que a
+  avaliação jurídica precisa olhar. Sete propostas aguardam o fundador. O texto diz o tamanho do dinheiro: no
+  cenário razoável o cofre receberia cerca de 900 dólares por mês, e no ruim, nada.
 - `CODEMAP.md` (5 de outubro): primeiro mapa do código, gerado por `node scripts/codemap.js`. 111 arquivos.
 - `docs/business/ideacao-perguntas-e-respostas.md`: as cinco rodadas de perguntas e as respostas do Lucas, com o
   estado consolidado no topo.
@@ -107,7 +112,7 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
   `DESIGN-DIRECTION.md` (que ainda descreve a C) e a aplicação ao app, que segue com a C e espera a sincronização com
   `0xcf07/pred-provable`.
 - **Nome do site:** decidido em 4 de outubro, Brot Markets. O app e os protótipos ainda dizem "baked".
-- **BP v0.0.2:** faltam as Partes 3 (tokens) e 4 (construção e risco). A v0.0.1 segue em `BUSINESS-PLAN.md` até as
+- **BP v0.0.2:** falta a Parte 4 (construção e risco). A Parte 3 tem sete propostas aguardando o fundador. A v0.0.1 segue em `BUSINESS-PLAN.md` até as
   quatro partes existirem. Aguarda o fundador: o teto da devolução da indicação.
 - **Não verificado:** transações no app (conectar, comprar, vender, resolver), `bun test`, `cargo test` e o
   `next build` de produção; o shader WebGPU da direção I (só a reserva em canvas foi vista).
