@@ -125,7 +125,9 @@ function collect() {
     // lstat, not exists: a tracked symlink can point outside the repo, and reading it
     // would lift that file's first comment line into a committed CODEMAP.md.
     if (!fs.existsSync(abs) || fs.lstatSync(abs).isSymbolicLink()) continue;
-    const content = fs.readFileSync(abs, 'utf8');
+    // Normalise line endings: a Windows checkout hands out CRLF, and a stray `\r` changes
+    // which line the description fallback picks. The map must not depend on the checkout.
+    const content = fs.readFileSync(abs, 'utf8').replace(/\r\n/g, '\n');
     const { text, missingHeader } = describe(content);
     rows.push({ rel, dir: path.dirname(rel), lines: content.split('\n').length, text, missingHeader });
   }
