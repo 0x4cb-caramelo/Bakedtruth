@@ -152,6 +152,8 @@ Golden rules carried over from the OS:
 5. No invented facts in market, competitor, legal, pricing, or regulatory claims.
 6. Use separation of concerns and keep code files under 200 lines where practical.
 7. Use stable dependencies by default; avoid alpha/beta unless explicitly accepted.
+8. End every reply to the founder with what was done, in plain Portuguese, and then the next steps: the possible
+   paths tied to the roadmap, and one recommendation (`.claude/rules/interaction-closing.md`).
 
 Checks the OS adds:
 

@@ -8,8 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-Nada mudou depois da Sprint 00. A próxima é a Sprint 01, a prova do leitor de preço
+Nenhuma sprint começou depois da 00. A próxima é a Sprint 01, a prova do leitor de preço
 (`docs/sprints/sprint-01-foundation.md`).
+
+### Added
+
+- `.claude/rules/interaction-closing.md` (5 de outubro): regra de trabalho pedida pelo fundador. Toda resposta
+  termina com um relatório breve do que foi feito, em português simples, e com os próximos passos: os caminhos
+  possíveis, ligados ao roteiro, e uma recomendação
+  ([session-log](session-log/2026-10-05-regra-de-fechamento-de-interacao.md)).
 
 ### Em aberto
 
