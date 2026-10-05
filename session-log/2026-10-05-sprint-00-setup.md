@@ -84,6 +84,22 @@ falhas, então o primeiro envio foi de propósito sem o `CODEMAP.md` regenerado 
   direto à `main` não passa pela conferência antes de entrar.
 - **Conferência final verde:** execução 37325279961, commit `bdc9aa2`.
 
+## Atualização: o fechamento
+
+- **A revisão de fechamento confirmou as entregas** e apontou trechos velhos em quatro documentos e a falta dos
+  achados adiados nas sprints de destino. Os dois pontos foram corrigidos antes do merge.
+- **O PR #2 foi mesclado às 14:51 UTC (`2b06404`), e o push não disparou a conferência automática.** Seis minutos
+  depois não havia execução para o commit, com o GitHub operacional. A causa não foi encontrada. Uma execução
+  manual na `main` (37328963156) passou nos três trabalhos, mas não publicava o artefato, porque a condição exigia
+  evento de push.
+- **O PR #3 mudou a condição** para "na `main` e fora de pull request". Mesclado às 15:06 UTC (`dfc1d6e`); desta
+  vez o push disparou a conferência em segundos.
+- **Artefato da sprint:** execução 37330023572, `programs-dfc1d6e73849b01c1bfa67ebcee1f3a319aa82cd`. Os seis
+  SHA-256 conferem, e o `brot_markets.so` tem o mesmo código de uma compilação anterior, feita em outro commit.
+- **Tag `sprint-00`** em `dfc1d6e`. A cópia no servidor está na `main`, no mesmo commit.
+- **Um erro meu de leitura no caminho:** dei o PR #3 como "sem conferência" quando ela só não tinha entrado na
+  fila ainda. O GitHub criava as execuções com cerca de um minuto de atraso naquele momento.
+
 ## Follow-ups
 
 - Fechar a sprint: IDL do programa novo commitado a partir do artefato, `CODEMAP.md` em dia, conferência automática

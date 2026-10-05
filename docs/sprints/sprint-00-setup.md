@@ -107,7 +107,15 @@ acontecem com o merge deste PR: a execução na `main` publicar `programs-<sha>`
 automática: seis minutos depois não havia execução para o commit, com o GitHub operacional e o arquivo válido (uma
 execução manual na `main`, a 37328963156, começou sem erro). A causa não foi encontrada. Como o artefato só saía de
 evento de push, ele não seria publicado. A condição passou a aceitar também execução manual na `main`, no PR #3, e
-o artefato desta sprint é o dessa execução. O número dela fica no session-log da sprint.
+o artefato desta sprint é o da execução na `main` depois desse merge.
+
+**Como fechou.** O PR #3 foi mesclado às 15:06 UTC (`dfc1d6e`), e desta vez o push disparou a conferência em
+segundos: execução 37330023572, os três trabalhos verdes. Ela publicou
+`programs-dfc1d6e73849b01c1bfa67ebcee1f3a319aa82cd`, com os dois `.so`, os IDLs, os tipos e o `SHA256SUMS`. O
+artefato foi baixado pelo número da execução e os seis códigos conferem; o IDL publicado é idêntico ao commitado.
+O `brot_markets.so` tem o mesmo SHA-256 da compilação da execução 37322085234
+(`bdc5941f1e81fb08e049c07ce2f0b7ac99d5e2c9eb20009e61fb83d7da27cabf`), feita em outro commit e em outra máquina
+do GitHub: a compilação se repetiu. A tag `sprint-00` aponta para `dfc1d6e`.
 
 ### O que mudou em relação ao planejado
 
