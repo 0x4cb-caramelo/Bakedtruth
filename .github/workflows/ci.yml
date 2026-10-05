@@ -137,12 +137,14 @@ jobs:
         run: bun run test:rust
 
       # The program is never built on the shared server (technical plan, section 10). What goes
-      # to a cluster is this artifact. It is published only from a push to main and only after
-      # every step above passed, so a red run or a pull request never leaves a deployable
-      # binary behind. The SHA-256 file detects a corrupted download, nothing more: it is
-      # written by the same job that builds. Provenance attestation is Sprint 16.
+      # to a cluster is this artifact. It is published only from main and only after every step
+      # above passed, so a red run or a pull request never leaves a deployable binary behind.
+      # A manual run on main counts: it builds the same commit and needs write access to start,
+      # and the push that merged Sprint 00 never triggered this workflow. The SHA-256 file
+      # detects a corrupted download, nothing more: it is written by the same job that builds.
+      # Provenance attestation is Sprint 16.
       - name: Hash program artifacts
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: |
           set -o pipefail
           mkdir -p artifacts
@@ -152,7 +154,7 @@ jobs:
           cat SHA256SUMS
 
       - name: Upload program artifacts
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: programs-${{ github.sha }}
