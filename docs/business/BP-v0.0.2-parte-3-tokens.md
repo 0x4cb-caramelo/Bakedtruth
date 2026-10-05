@@ -849,8 +849,8 @@ sobre cada ponto.
    dia e as páginas dos dois tokens passam pela avaliação antes de ir ao ar.
 9. **A equipe e o token A.** A equipe pode ter o token A? Em que condições pode vender depois da trava?
 10. **O Brasil.** Se o pote é aposta é assunto da Parte 4. Para tokens, a referência lida é o Parecer 40. A
-    pesquisa cita ainda uma Medida Provisória 1.394, de 25/9/2026, sobre apostas; a existência e o texto dela
-    estão a confirmar.
+    Medida Provisória 1.394, de 25/9/2026, proíbe a aposta de quota fixa no país, inclusive por empresa do
+    exterior (FATO, Planalto, lido em 5/10/2026). A tramitação dela no Congresso não foi conferida.
 
 O que a pesquisa não cobriu: impostos e contabilidade do repasse, da ponte e da venda; e o tratamento europeu de
 tokens com repasse ou recompra, que não foi encontrado.

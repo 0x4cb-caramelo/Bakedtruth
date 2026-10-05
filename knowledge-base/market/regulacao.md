@@ -41,6 +41,31 @@ Limitações desta rodada (leia antes):
 ### Tornado Cash
 - 5º Circuito, Van Loon v. Treasury (26/11/2024): contratos inteligentes imutáveis não são "propriedade" sob a IEEPA; OFAC excedeu autoridade. OFAC retirou o Tornado Cash da lista SDN em 21/03/2025. Roman Storm foi condenado em 06/08/2025 por conspiração para operar transmissão de dinheiro sem licença; júri não decidiu os outros dois crimes (lavagem e sanções). Semenov permanece na SDN. [SECUNDÁRIA: CoinDesk https://www.coindesk.com/policy/2025/04/05/why-ofac-delisted-tornado-cash ; Steptoe https://www.steptoe.com/en/news-publications/international-compliance-blog/treasury-department-delists-tornado-cash-following-the-fifth-circuits-decision.html]
 
+### Brasil, depois da pesquisa: a proibição da aposta de quota fixa
+
+- **Medida Provisória nº 1.394, de 25 de setembro de 2026** (acrescentado em 5/10/2026; lida no Planalto,
+  https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2026/mpv/mpv1394.htm). Ementa: "Proíbe a exploração, a oferta,
+  a intermediação e a publicidade de loterias de apostas de quota fixa no território nacional, institui o Comitê
+  Interinstitucional de Fiscalização da Exploração e da Publicidade Ilegal de Apostas de Quota Fixa, e altera a Lei
+  nº 14.790, de 29 de dezembro de 2023."
+  - Art. 1º: proíbe exploração, oferta, intermediação e publicidade, "inclusive quando realizadas por agente sediado
+    no exterior que as ofereça a pessoa localizada no território nacional". O § 1º diz que a proibição "abrange as
+    apostas sobre eventos reais de temática esportiva e sobre eventos virtuais de jogos on-line".
+  - Art. 3º, I: aposta de quota fixa é o "ato por meio do qual se coloca determinado valor em risco na expectativa
+    de obtenção de prêmio cujo montante é definido por fator de multiplicação".
+  - Arts. 4º e 6º: as autorizações existentes se extinguem em trinta dias; vedadas novas.
+  - Art. 14: instituições financeiras e de pagamento não podem processar transações destinadas a essas apostas.
+  - Art. 16: vedada a publicidade, inclusive "todo conteúdo que oferte, promova, divulgue ou facilite o acesso",
+    direcionado ao público brasileiro.
+  - Arts. 19 a 22: dever de cuidado de provedores e lojas de aplicativos; multa de até 10% do faturamento do grupo
+    no país, limitada a R$ 50 milhões por infração.
+  - Art. 23: bloqueio de sites a pedido da Fazenda e da Justiça, com a Anatel distribuindo as ordens.
+  - Art. 28: perdimento, em processo administrativo, dos valores em contas bloqueadas de operador irregular.
+  - Art. 29: revoga o Capítulo V da Lei 13.756/2018 e, da Lei 14.790/2023, os arts. 1º a 21, 22 a 24, 25 a 40, 43 a
+    48 e 54. Art. 30: em vigor na data da publicação.
+  - **Não conferido:** a tramitação no Congresso (conversão, alteração ou perda de validade) e o Decreto nº 13.128,
+    de 2026, que a página cita com "Vide".
+
 ## 2. Inferências (minhas, a validar)
 - A CMN 5.298 alcança "derivativos"; perguntas sobre fatos on-chain de cripto (ex.: preço, contagem de endereços) podem ou não ser "referencial econômico-financeiro". A CVM decidirá o enquadramento. Um pote por pergunta sobre fato on-chain não nomeado na norma fica numa zona cinzenta. ASSUNTO PARA ADVOGADO.
 - A Nota SPA 2958 trata mercado de previsão como aposta de quota fixa; um pote com dinheiro real e pergunta de resultado incerto pode ser lido do mesmo modo, mesmo sem ser exchange. ADVOGADO.
