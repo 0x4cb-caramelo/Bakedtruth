@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **133** |
+| Arquivos mapeados | **142** |
 | Acima de 200 linhas | **30** ⚠️ |
 | Sem cabeçalho `Purpose:` | **102** ⚠️ |
 
@@ -376,6 +376,40 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`pre-commit.test.js`](scripts/test/pre-commit.test.js) | prove the hook stops a staged credential in a real git repository, and gets out of the way everywhere else | 95 |
 | [`sensor-wiring.test.js`](scripts/test/sensor-wiring.test.js) | pin the two severities — a missing sensor is an error in the OS repo and a warning in a derived project — and the "exists but never gates" class | 140 |
 | [`sync-selfhosted.test.js`](scripts/test/sync-selfhosted.test.js) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 146 |
+
+## `services/landing/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`server.mjs`](services/landing/server.mjs) | HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API), bound to localhost behind the project's Cloudflare tunnel | 114 |
+
+## `services/landing/lib/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`api.mjs`](services/landing/lib/api.mjs) | the two waitlist endpoints of the "coming soon" site: join (POST /api/leads) and leave (/api/leads/remove) | 120 |
+| [`leads.mjs`](services/landing/lib/leads.mjs) | waitlist store for the "coming soon" page: validates an email and keeps one line per lead in a JSONL file | 91 |
+| [`rate-limit.mjs`](services/landing/lib/rate-limit.mjs) | in-memory request limiter per visitor address, so one address cannot flood the waitlist endpoint | 36 |
+| [`static.mjs`](services/landing/lib/static.mjs) | serves the files under public/ for the "coming soon" site, with clean URLs and no way out of that folder | 99 |
+
+## `services/landing/public/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`app.js`](services/landing/public/app.js) | browser script of the "coming soon" site: picks the theme before first paint, sends the waitlist forms and gives the mascot its remarks | 129 |
+
+## `services/landing/public/pitch/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`deck.js`](services/landing/public/pitch/deck.js) | runs the pitch deck at /pitch: scales the 1920 x 1080 slides to the window and moves between them by keyboard, click, swipe and the address (#3 opens slide 3) | 122 |
+
+## `services/landing/tests/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`leads.test.mjs`](services/landing/tests/leads.test.mjs) | tests the waitlist store and the request limiter of the "coming soon" site (node --test) | 113 |
+| [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 155 |
 
 ## `target/types/`
 

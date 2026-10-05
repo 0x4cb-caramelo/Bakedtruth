@@ -1,0 +1,186 @@
+/* Purpose: stage of the pitch deck at /pitch. The slides carry their own inline styles on a 1920 x 1080 canvas; this
+   file only loads the fonts, scales the canvas to the window, stacks the slides on a phone held upright, and prints
+   one slide per page. Sprint: out of band (landing page), 2026-10-05. */
+
+@font-face { font-family: "IBM Plex Mono"; font-weight: 400; font-display: swap; src: url("fonts/ibm-plex-mono-400.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 500; font-display: swap; src: url("fonts/ibm-plex-mono-500.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 600; font-display: swap; src: url("fonts/ibm-plex-mono-600.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 700; font-display: swap; src: url("fonts/ibm-plex-mono-700.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-weight: 400; font-display: swap; src: url("fonts/ibm-plex-sans-400.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-weight: 500; font-display: swap; src: url("fonts/ibm-plex-sans-500.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-weight: 600; font-display: swap; src: url("fonts/ibm-plex-sans-600.woff2") format("woff2"); }
+
+html,
+body {
+  margin: 0;
+  background: #0b0f15;
+}
+a {
+  color: #eea546;
+  text-decoration: none;
+}
+a:hover {
+  color: #f7eedb;
+}
+
+.slide h2 {
+  text-wrap: balance;
+}
+
+/* Without the script: the slides in a column, at full size. */
+.slide {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  margin: 0 0 8px;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* With the script: one frame per slide, sized by --w and --h, with the slide scaled inside it. */
+html.js,
+html.js body {
+  height: 100%;
+  overflow: hidden;
+}
+html.js .deck {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+html.js .frame {
+  display: none;
+  position: relative;
+  width: var(--w);
+  height: var(--h);
+  overflow: hidden;
+}
+html.js .frame.on {
+  display: block;
+}
+html.js .slide {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 0;
+  transform: scale(var(--scale));
+  transform-origin: 0 0;
+}
+
+/* A phone held upright: every slide, one under the other, each as wide as the screen. */
+html.js.stack,
+html.js.stack body {
+  height: auto;
+  overflow: visible;
+}
+html.js.stack .deck {
+  position: static;
+  display: block;
+}
+html.js.stack .frame {
+  display: block;
+  margin: 0 0 6px;
+}
+
+.bar {
+  position: fixed;
+  right: 18px;
+  bottom: 16px;
+  display: none;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border: 1px solid #2c3647;
+  border-radius: 10px;
+  background: rgba(16, 21, 28, 0.88);
+  color: #a3acba;
+  font: 500 13px/1 "IBM Plex Mono", monospace;
+  opacity: 0.55;
+  transition: opacity 0.3s;
+}
+html.js .bar {
+  display: flex;
+}
+html.js.stack .bar {
+  display: none;
+}
+.bar.idle {
+  opacity: 0;
+}
+.bar:hover,
+.bar:focus-within {
+  opacity: 1;
+}
+.bar a {
+  padding: 0 8px;
+}
+.bar span {
+  min-width: 62px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.bar button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: #f7eedb;
+  cursor: pointer;
+}
+.bar button:hover:not(:disabled) {
+  background: #253042;
+}
+.bar button:disabled {
+  color: #4a5567;
+  cursor: default;
+}
+.bar button:focus-visible,
+.bar a:focus-visible {
+  outline: 2px solid #eea546;
+  outline-offset: 2px;
+}
+.bar svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media print {
+  @page {
+    size: 1920px 1080px;
+    margin: 0;
+  }
+  html,
+  body,
+  html.js,
+  html.js body {
+    height: auto;
+    overflow: visible;
+    background: none;
+  }
+  html.js .deck {
+    position: static;
+    display: block;
+  }
+  html.js .frame {
+    display: block;
+    width: 1920px;
+    height: 1080px;
+    margin: 0;
+    break-after: page;
+  }
+  .slide,
+  html.js .slide {
+    margin: 0;
+    transform: none;
+    break-after: page;
+  }
+  .bar,
+  html.js .bar {
+    display: none;
+  }
+}
