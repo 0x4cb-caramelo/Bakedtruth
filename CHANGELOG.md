@@ -6,17 +6,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-## [Unreleased] — Bakedtruth: layout Tape no app, Prototype Lab com catorze direções, Ledger² escolhida com tema claro
+## [Unreleased]
 
-Primeiras mudanças do projeto Bakedtruth em si; as versões abaixo desta são a história do AI Dev OS, herdada na Largada.
-Trabalho de 2 a 5 de outubro de 2026, na branch `feat/layout-tape`. **Commitado e enviado ao `origin` em 5 de
-outubro**, em commits separados por assunto (app, protótipos, pesquisa, mapa do código, negócio e registros). O
-primeiro push foi recusado porque a credencial não tinha o escopo `workflow`, exigido pelo
-`.github/workflows/ci.yml`; o Lucas deu o escopo e o segundo passou. Os
-motivos de cada decisão estão no `session-log/`; as três primeiras entradas:
-[direção C e nome](session-log/2026-10-02-prototipo-direcao-c-e-nome-em-aberto.md),
-[layout no app](session-log/2026-10-02-layout-tape-aplicado-ao-app.md) e
-[lab de D a M](session-log/2026-10-03-lab-de-d-a-m-e-direcao-reaberta.md).
+Nada mudou depois da Sprint 00. A próxima é a Sprint 01, a prova do leitor de preço
+(`docs/sprints/sprint-01-foundation.md`).
+
+### Em aberto
+
+- **Sprints:** a 00 está concluída e nenhuma outra começou. A 02 depende de saber quem guarda a chave de
+  atualização na devnet e quem tem chave de equipe (pergunta 12 do plano técnico).
+- **Perguntas do fundador:** as doze da seção 14.2 do plano técnico valem com a resposta recomendada, porque os
+  documentos foram aprovados sem alteração. Três não têm resposta padrão: a verba e o fornecedor do segundo
+  serviço, a compra do domínio `brot.markets` e os nomes de quem guarda chave.
+- **Apresentação resumida do plano (etapa 2.9 do método):** não foi escrita. O `docs/business/PITCH.md` não existe.
+- **Direção de design:** Ledger² escura e clara, aprovada e documentada. O app ainda mostra a direção C; a troca
+  é a Sprint -1 e as Sprints 09 a 13. Várias telas do protótipo mostram o modelo antigo e precisam de conteúdo novo.
+- **Nome:** Brot Markets. O app, os protótipos e o `package.json` da raiz ainda dizem "baked" ou `pred-provable`.
+- **Servidor:** o projeto tem espaço próprio no servidor compartilhado, só com o código. Faltam o domínio na conta
+  do Cloudflare, o túnel e o lugar do segundo serviço agendado.
+- **Ferramentas locais:** a máquina de desenvolvimento tem Anchor 1.0.0 e Solana 2.2.16, e o projeto fixa 1.1.2 e
+  3.1.x. O programa só compila na conferência automática.
+- **Chave do endereço do programa:** só na máquina do fundador, em `target/deploy/`. Precisa de cópia de segurança.
+- **Proteção da `main`:** indisponível em repositório privado da conta gratuita do GitHub.
+- **`bun.lock`** aponta para `registry.npmmirror.com`, herdado do upstream. Falta decidir se volta ao registro
+  oficial do npm.
+- **Achados de segurança adiados:** na seção 7.1 do plano técnico e nas Sprints 02, 05, 09 e 16.
+- **Regulação:** falta conferir a tramitação da MP 1.394 no Congresso e ler o Decreto 13.128, de 2026.
+- **BP v0.0.2:** fechado, sem proposta em aberto. Faltam o primeiro valor do teto global e os nomes de quem assina a
+  carteira com várias assinaturas.
+- **Não verificado:** transações no app (conectar, comprar, vender, resolver) e o shader WebGPU da direção I.
+- **`CODEMAP.md`:** o gerador aponta arquivos acima de 200 linhas e sem cabeçalho `Purpose:`, quase todos do
+  programa e do app antigos; os números atuais estão no topo do próprio mapa.
+
+---
+
+## [sprint-00] — 2026-10-05 — Bakedtruth vira Brot Markets: plano de negócio, direção Ledger², documentos da Fase 4 e a fundação do programa novo
+
+Primeiras mudanças do projeto em si; as versões abaixo desta são a história do AI Dev OS, herdada na Largada.
+Trabalho de 2 a 5 de outubro de 2026. Entrou na `main` em 5 de outubro por três pull requests: o #1, com os
+documentos das Fases 2 a 4 e a base do app; o #2, com a Sprint 00; e o #3, com uma correção da conferência
+automática. A tag `sprint-00` aponta para `dfc1d6e`. Os motivos de cada decisão estão no `session-log/`, uma
+entrada por assunto, listadas em `session-log/INDEX.md`.
 
 ### Added — Prototype Lab (`prototype-lab/`)
 
@@ -160,29 +190,6 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
 - `CLAUDE.md` passou a juntar a orientação do `pred-provable` com o método do AI Dev OS.
 - `package.json` e `.gitignore` mesclados com os do OS na Largada
   ([session-log](session-log/2026-10-02-largada-import-pred-provable-e-os.md)).
-
-### Em aberto
-
-- **Direção de design:** D · Ledger² com a N como tema claro, aprovada e documentada em `DESIGN-DIRECTION.md`. O
-  app ainda mostra a direção C; a troca entra no roteiro de sprints. O protótipo mostra telas do modelo antigo, que
-  precisam de conteúdo novo.
-- **Servidor:** o projeto tem espaço próprio no servidor compartilhado, só com o código. Faltam o domínio na conta
-  do Cloudflare, o túnel, o lugar do segundo serviço agendado e a decisão de onde compilar o programa.
-- **Fase 4:** fechada. O fundador aprovou o resumo de produto, o plano técnico e o roteiro de sprints em 5 de
-  outubro, e a escolha de pacotes do catálogo (etapa 4.3) foi feita na Sprint 00.
-- **Sprints:** a 00 está concluída. A próxima é a 01, a prova do leitor de preço.
-- **Programa:** os nove leitores estão no repositório desde a Sprint 00, no programa antigo. Portá-los para o
-  programa novo é a Sprint 03.
-- **`bun.lock`** aponta para `registry.npmmirror.com`, herdado do upstream. Falta decidir se volta ao registro
-  oficial do npm.
-- **Nome do site:** decidido em 4 de outubro, Brot Markets. O app e os protótipos ainda dizem "baked".
-- **BP v0.0.2: fechado.** As quatro partes existem e não há proposta em aberto. Faltam valores e nomes: o primeiro
-  valor do teto global e quem assina a carteira com várias assinaturas. Falta conferir a tramitação da MP 1.394 no Congresso e ler o Decreto 13.128, de 2026. O próximo passo do método é a apresentação resumida do plano, e depois os documentos da Fase 4.
-- **Não verificado:** transações no app (conectar, comprar, vender, resolver) e o shader WebGPU da direção I (só a
-  reserva em canvas foi vista). `bun test`, `cargo test` e o `next build` de produção passaram a rodar, verdes, na
-  conferência automática desde a Sprint 00.
-- **`CODEMAP.md`:** o gerador aponta arquivos acima de 200 linhas e sem cabeçalho `Purpose:`, quase todos do
-  programa e do app antigos; os números atuais estão no topo do próprio mapa.
 
 ---
 

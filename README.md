@@ -1,5 +1,11 @@
 # pred-provable
 
+> **This repository is being rebuilt as Brot Markets**, a pot-based prediction market. What follows describes the
+> upstream program it started from (`pred-provable`, by Ronaldo Pereira), which stays in `programs/pred-provable`,
+> frozen, until its readers are ported to `programs/brot-markets`. For the product being built, read
+> `docs/business/BUSINESS-PLAN.md`, `docs/product/PRODUCT-BRIEF.md`, `docs/technical/TECHNICAL-PLAN.md` and
+> `docs/SPRINTS.md`.
+
 [![CI](https://github.com/0xcf07/pred-provable/actions/workflows/ci.yml/badge.svg)](https://github.com/0xcf07/pred-provable/actions/workflows/ci.yml)
 
 **Provable KPI Markets on Solana.** Resolution is a read, not a judgement.
