@@ -8,22 +8,23 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **111** |
-| Acima de 200 linhas | **28** ⚠️ |
-| Sem cabeçalho `Purpose:` | **96** ⚠️ |
+| Arquivos mapeados | **128** |
+| Acima de 200 linhas | **30** ⚠️ |
+| Sem cabeçalho `Purpose:` | **111** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
 
 A regra diz "under 200 lines where practical". Estes passaram — vale checar se dá pra separar:
 
-- `app/components/market/trade-card.tsx` — 314 linhas
-- `app/components/primitives.tsx` — 272 linhas
+- `app/components/market/trade-card.tsx` — 315 linhas
+- `app/components/primitives.tsx` — 291 linhas
 - `app/lib/hooks.ts` — 244 linhas
-- `app/lib/idl/pred_provable.ts` — 3148 linhas
-- `app/lib/instructions.ts` — 231 linhas
+- `app/lib/idl/pred_provable.ts` — 3189 linhas
+- `app/lib/instructions.ts` — 234 linhas
+- `app/lib/market.ts` — 211 linhas
 - `app/lib/mascot/engine.ts` — 302 linhas
-- `app/lib/metric.ts` — 238 linhas
-- `programs/pred-provable/src/resolver.rs` — 235 linhas
+- `app/lib/metric.ts` — 691 linhas
+- `programs/pred-provable/src/resolver.rs` — 733 linhas
 - `programs/pred-provable/tests/burn_goal.rs` — 219 linhas
 - `prototype-lab/prototype-b/view.js` — 265 linhas
 - `prototype-lab/prototype-e/view.js` — 258 linhas
@@ -41,9 +42,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `scripts/os-self-test.js` — 406 linhas
 - `scripts/sync-selfhosted.js` — 349 linhas
 - `scripts/test/hooks.test.js` — 246 linhas
-- `target/types/pred_provable.ts` — 3148 linhas
-- `tests/helpers.ts` — 344 linhas
-- `tests/pred-provable.test.ts` — 1799 linhas
+- `scripts/tokenomics-model.ts` — 584 linhas
+- `target/types/pred_provable.ts` — 3189 linhas
+- `tests/helpers.ts` — 424 linhas
+- `tests/pred-provable.test.ts` — 2799 linhas
 
 ---
 
@@ -67,8 +69,14 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`layout.tsx`](app/app/layout.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 53 |
+| [`layout.tsx`](app/app/layout.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 56 |
 | [`page.tsx`](app/app/page.tsx) | HomeView reads the search params (query, category, tab), which needs a Suspense boundary | 13 |
+
+## `app/app/api/chat/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`route.ts`](app/app/api/chat/route.ts) | Server-only: the OpenRouter key never reaches the browser. Streams the model's reply as plain text | 123 |
 
 ## `app/app/markets/[address]/`
 
@@ -84,7 +92,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`cell-field.tsx`](app/components/cell-field.tsx) | Background grid: cells light up under the pointer and fade out in steps. One fixed canvas, | 68 |
 | [`mascot.tsx`](app/components/mascot.tsx) | Mounts the mascot once for the whole app. Each page decides where it may stand with | 31 |
 | [`price-chart.tsx`](app/components/price-chart.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 167 |
-| [`primitives.tsx`](app/components/primitives.tsx) | Building blocks shared by the home page and the market page, in the "Tape" direction: | 272 |
+| [`primitives.tsx`](app/components/primitives.tsx) | Building blocks shared by the home page and the market page, in the "Tape" direction: | 291 |
 | [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 27 |
 | [`site-header.tsx`](app/components/site-header.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 98 |
 | [`tape-context.tsx`](app/components/tape-context.tsx) | What the ticker shows: the markets the current page has already loaded. Pages publish their | 32 |
@@ -92,11 +100,17 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`toast.tsx`](app/components/toast.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 71 |
 | [`wallet-button.tsx`](app/components/wallet-button.tsx) | The wallet button reads window state, so it must not render on the server | 25 |
 
+## `app/components/chat/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`chat.tsx`](app/components/chat/chat.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 193 |
+
 ## `app/components/home/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`browse.tsx`](app/components/home/browse.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 183 |
+| [`browse.tsx`](app/components/home/browse.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 185 |
 | [`featured.tsx`](app/components/home/featured.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 135 |
 | [`hero-meter.tsx`](app/components/home/hero-meter.tsx) | The hero's meter: the market with the most at stake, read live. A quantity goal shows the | 72 |
 | [`home-view.tsx`](app/components/home/home-view.tsx) | The market with the most at stake leads the page | 75 |
@@ -107,34 +121,35 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`chart-card.tsx`](app/components/market/chart-card.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 128 |
+| [`chart-card.tsx`](app/components/market/chart-card.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 130 |
 | [`details.tsx`](app/components/market/details.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 142 |
-| [`market-view.tsx`](app/components/market/market-view.tsx) | A stable array, or publishing it would re-render this view in a loop | 176 |
+| [`market-view.tsx`](app/components/market/market-view.tsx) | A stable array, or publishing it would re-render this view in a loop | 182 |
 | [`position-card.tsx`](app/components/market/position-card.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 121 |
-| [`proof-card.tsx`](app/components/market/proof-card.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 123 |
-| [`trade-card.tsx`](app/components/market/trade-card.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 314 |
+| [`proof-card.tsx`](app/components/market/proof-card.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 176 |
+| [`trade-card.tsx`](app/components/market/trade-card.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 315 |
 
 ## `app/lib/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`brand.ts`](app/lib/brand.ts) | Product name and copy in one place. The name is provisional (see docs/product/DESIGN-DIRECTION.md): | 35 |
+| [`chat.ts`](app/lib/chat.ts) | Shared by the chat widget and the chat route: message shape, limits and the market summary | 59 |
 | [`config.ts`](app/lib/config.ts) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 10 |
 | [`format.ts`](app/lib/format.ts) | Display formatting for base-unit amounts, prices and slot-based times. Framework-free | 74 |
 | [`history.ts`](app/lib/history.ts) | Price history and activity from the program's events: signatures for an address, the transactions, | 138 |
 | [`hooks.ts`](app/lib/hooks.ts) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 244 |
-| [`instructions.ts`](app/lib/instructions.ts) | Instruction builders with the exact account lists the program expects. The devnet smoke test | 231 |
-| [`market.ts`](app/lib/market.ts) | Framework-free client helpers for pred-provable: addresses, the program's integer math, event | 197 |
-| [`metric.ts`](app/lib/metric.ts) | Reads a market's KPI the way the program's resolver does (same owners, layouts and comparisons), | 238 |
+| [`instructions.ts`](app/lib/instructions.ts) | Instruction builders with the exact account lists the program expects. The devnet smoke test | 234 |
+| [`market.ts`](app/lib/market.ts) | Framework-free client helpers for pred-provable: addresses, the program's integer math, event | 211 |
+| [`metric.ts`](app/lib/metric.ts) | Reads a market's KPI the way the program's resolver does (same owners, layouts and comparisons), | 691 |
 | [`program.ts`](app/lib/program.ts) | Synced from target/ by `bun run sync-idl` after `anchor build` | 19 |
 | [`tokens.ts`](app/lib/tokens.ts) | Token names from Metaplex metadata, so markets on real tokens read "$BONK" instead of an address | 47 |
-| [`view.ts`](app/lib/view.ts) | How the app reads a market account: kind, status, phase and price. Framework-free | 107 |
+| [`view.ts`](app/lib/view.ts) | How the app reads a market account: kind, status, phase and price. Framework-free | 155 |
 
 ## `app/lib/idl/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`pred_provable.ts`](app/lib/idl/pred_provable.ts) | Program IDL in camelCase format in order to be used in JS/TS | 3148 |
+| [`pred_provable.ts`](app/lib/idl/pred_provable.ts) | Program IDL in camelCase format in order to be used in JS/TS | 3189 |
 
 ## `app/lib/mascot/`
 
@@ -143,18 +158,63 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`engine.ts`](app/lib/mascot/engine.ts) | Baked, the mascot, as a page resident. It does not follow the cursor freely: it hops to the | 302 |
 | [`perches.ts`](app/lib/mascot/perches.ts) | Where the mascot may stand. A page declares perches as data attributes on any element: | 65 |
 
+## `packages/sdk/src/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`index.ts`](packages/sdk/src/index.ts) | public entry of the Brot Markets client library, shared by the site, the services, the scripts and the tests. Must stay free of React and Next imports | 19 |
+
+## `packages/sdk/src/idl/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`brot_markets.ts`](packages/sdk/src/idl/brot_markets.ts) | Program IDL in camelCase format in order to be used in JS/TS | 115 |
+
+## `programs/brot-markets/src/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`constants.rs`](programs/brot-markets/src/constants.rs) | ! Purpose: seeds, the collateral mint and the hard limits compiled into the program | 57 |
+| [`error.rs`](programs/brot-markets/src/error.rs) | ! Purpose: every failure the program can return, one code per cause | 12 |
+| [`events.rs`](programs/brot-markets/src/events.rs) | ! Purpose: Anchor events, one per instruction; the indexer rebuilds history from them | 6 |
+| [`lib.rs`](programs/brot-markets/src/lib.rs) | ! Purpose: entry point of the Brot Markets program; declares the program id and wires the modules | 24 |
+
+## `programs/brot-markets/src/instructions/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`mod.rs`](programs/brot-markets/src/instructions/mod.rs) | ! Purpose: instruction handlers, one file each, grouped by feature (Sprint 02 onwards) | 6 |
+
+## `programs/brot-markets/src/math/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`mod.rs`](programs/brot-markets/src/math/mod.rs) | ! Purpose: money and schedule math: fees, payout, betting cutoff, invariants (Sprints 02 and 04) | 6 |
+
+## `programs/brot-markets/src/readers/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`mod.rs`](programs/brot-markets/src/readers/mod.rs) | ! Purpose: on-chain readers that turn an account into a yes/no answer, ported from pred-provable (Sprint 03) | 6 |
+
+## `programs/brot-markets/src/state/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`mod.rs`](programs/brot-markets/src/state/mod.rs) | ! Purpose: account layouts: config, cap, question, position (Sprint 02) | 6 |
+
 ## `programs/pred-provable/src/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`constants.rs`](programs/pred-provable/src/constants.rs) | [constant] | 60 |
-| [`error.rs`](programs/pred-provable/src/error.rs) | [error_code] | 52 |
+| [`constants.rs`](programs/pred-provable/src/constants.rs) | [constant] | 72 |
+| [`error.rs`](programs/pred-provable/src/error.rs) | [error_code] | 54 |
 | [`events.rs`](programs/pred-provable/src/events.rs) | ! Events for clients: every state change logs one, so an activity feed or price history | 103 |
 | [`instructions.rs`](programs/pred-provable/src/instructions.rs) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 22 |
 | [`lib.rs`](programs/pred-provable/src/lib.rs) | [program] | 83 |
 | [`outcome.rs`](programs/pred-provable/src/outcome.rs) | ! Outcome-token and USDC plumbing shared by the sale, the pair instructions, the pool and payouts | 130 |
-| [`resolver.rs`](programs/pred-provable/src/resolver.rs) | ! Typed metric readers. Each reader checks the account owner and layout before | 235 |
-| [`state.rs`](programs/pred-provable/src/state.rs) | / Closed set of resolvers. Each variant fixes the owner and layout of the account | 89 |
+| [`resolver.rs`](programs/pred-provable/src/resolver.rs) | ! Typed metric readers. Each reader checks the account owner and layout before | 733 |
+| [`state.rs`](programs/pred-provable/src/state.rs) | / Closed set of resolvers. Each variant fixes the owner and layout of the account | 106 |
 
 ## `programs/pred-provable/src/instructions/`
 
@@ -167,7 +227,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`mint_pair.rs`](programs/pred-provable/src/instructions/mint_pair.rs) | [derive(Accounts)] | 74 |
 | [`redeem.rs`](programs/pred-provable/src/instructions/redeem.rs) | [derive(Accounts)] | 80 |
 | [`remove_liquidity.rs`](programs/pred-provable/src/instructions/remove_liquidity.rs) | [derive(Accounts)] | 111 |
-| [`resolve.rs`](programs/pred-provable/src/instructions/resolve.rs) | / Permissionless. YES holders are the ones with the incentive to call it, so there is no resolver fee | 67 |
+| [`resolve.rs`](programs/pred-provable/src/instructions/resolve.rs) | / Permissionless. YES holders are the ones with the incentive to call it, so there is no resolver fee | 73 |
 | [`swap.rs`](programs/pred-provable/src/instructions/swap.rs) | [derive(Accounts)] | 128 |
 | [`withdraw_budget.rs`](programs/pred-provable/src/instructions/withdraw_budget.rs) | [derive(Accounts)] | 60 |
 
@@ -276,6 +336,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
+| [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | Captures the mainnet accounts the resolver tests decode into tests/fixtures: real bytes, so the tests | 52 |
+| [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns | 48 |
 | [`codemap.js`](scripts/codemap.js) | let an AI locate the right file without reading every file. Pairs with the 200-line limit in .claude/rules/code-style.md — small files plus a one-line index mea | 219 |
 | [`detach-os.ps1`](scripts/detach-os.ps1) | detach-os.ps1 — desconecta seu projeto do repositório AI Dev Operating System | 161 |
 | [`detach-os.sh`](scripts/detach-os.sh) | detach-os.sh — desconecta seu projeto do repositório AI Dev Operating System | 157 |
@@ -285,7 +347,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`extract-external-links.sh`](scripts/extract-external-links.sh) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 16 |
 | [`init-project.ps1`](scripts/init-project.ps1) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 34 |
 | [`init-project.sh`](scripts/init-project.sh) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 25 |
-| [`instruction-drift.js`](scripts/instruction-drift.js) | catch references in instruction files (CLAUDE.md, templates, skills, agents, WIZARD) to agents, commands and wizard stages that do not exist, and model generati | 151 |
+| [`instruction-drift.js`](scripts/instruction-drift.js) | catch references in instruction files (CLAUDE.md, templates, skills, agents, WIZARD) to agents, commands and wizard stages that do not exist, and model generati | 157 |
 | [`os-self-test.js`](scripts/os-self-test.js) | the `os-self-test` skill did this, but only when a human or a model remembered to invoke it — and three session logs record it NOT being run when it would have  | 406 |
 | [`pre-commit.js`](scripts/pre-commit.js) | the PreToolUse gate only sees commits Claude makes. A commit from a terminal or an editor skipped it entirely. This runs the same scan from git itself | 76 |
 | [`release-v0.2.0.ps1`](scripts/release-v0.2.0.ps1) | Release helper for AI Dev Operating System v0.2.0 | 11 |
@@ -293,6 +355,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`run-tests.js`](scripts/run-tests.js) | give `npm test` a file list that does not depend on the shell. npm runs scripts through cmd.exe on Windows, which does not expand globs, and Node only learned t | 33 |
 | [`sensor-wiring.js`](scripts/sensor-wiring.js) | verify the repo has a standard test entry point, a linter with its config, a lockfile, a feedback hook, a git pre-commit, and a CI that actually runs them. The  | 121 |
 | [`sync-selfhosted.js`](scripts/sync-selfhosted.js) | keep a local, navigable mirror of the full self-hosted catalogue so the WIZARD (stage 4.2) can offer self-hosted alternatives without a network call | 349 |
+| [`tokenomics-model.ts`](scripts/tokenomics-model.ts) | Quantitative model behind ECONOMICS.md: protocol fees, revenue split, staker yield, the token unlock curve and the | 584 |
 
 ## `scripts/test/`
 
@@ -309,14 +372,15 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`pred_provable.ts`](target/types/pred_provable.ts) | Program IDL in camelCase format in order to be used in JS/TS | 3148 |
+| [`brot_markets.ts`](target/types/brot_markets.ts) | Program IDL in camelCase format in order to be used in JS/TS | 115 |
+| [`pred_provable.ts`](target/types/pred_provable.ts) | Program IDL in camelCase format in order to be used in JS/TS | 3189 |
 
 ## `tests/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`helpers.ts`](tests/helpers.ts) | The Anchor client is used only to encode instructions and decode accounts; it never | 344 |
-| [`pred-provable.test.ts`](tests/pred-provable.test.ts) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 1799 |
+| [`helpers.ts`](tests/helpers.ts) | Only for the fixture names; the file itself is read at run time by `loadFixture` | 424 |
+| [`pred-provable.test.ts`](tests/pred-provable.test.ts) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 2799 |
 
 ---
 

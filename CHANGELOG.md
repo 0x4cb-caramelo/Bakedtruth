@@ -116,6 +116,21 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
 - Session log da redefinição do produto como mercado de previsão em pote
   ([entrada](session-log/2026-10-03-produto-redefinido-como-mercado-de-pote.md)). Nenhum código mudou por causa dela.
 
+### Added — Sprint 00 (setup)
+
+- **`programs/brot-markets`**: o programa novo, ao lado do antigo, com endereço próprio. Só o esqueleto: constantes
+  (sementes, USDC, teto da taxa, aposta mínima), erro, eventos e as pastas `state/`, `math/`, `readers/` e
+  `instructions/`. Nenhuma instrução.
+- **`packages/sdk`**: biblioteca do cliente, por ora com o endereço do programa e o IDL. O workspace do Bun ganha
+  `packages/*` e `services/*`.
+- **Upstream `0xcf07/pred-provable@4d672ae`**, por merge: os leitores de pool de staking, liquidez travada na Meteora
+  DAMM v2 e metadados imutáveis, as contas reais capturadas em `tests/fixtures/` e o script de captura.
+- **CI**: compila os dois programas; publica `.so`, IDL e tipos como artefato com SHA-256; confere o IDL dos dois
+  com `git status`; clippy nos dois pacotes; e o trabalho "Repo", com o mapa de código, a coerência do projeto e a
+  varredura de segredos sobre a branch (`scripts/ci-secret-scan.js`).
+- `docs/technical/registry-pick.md`: a etapa 4.3 do método. Dos 72 pacotes do catálogo, nenhum para instalar.
+- Decisões e riscos em [session-log](session-log/2026-10-05-sprint-00-setup.md).
+
 ### Changed — app (`app/`)
 
 - Base atualizada com a versão nova do `pred-provable` (`0xcf07/pred-provable@638752c`): tokens YES/NO com USDC, pool,
@@ -141,8 +156,10 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
   do Cloudflare, o túnel, o lugar do segundo serviço agendado e a decisão de onde compilar o programa.
 - **Fase 4:** resumo de produto, plano técnico e roteiro de sprints existem, em rascunho, e aguardam a aprovação
   do fundador. Não foi feita a etapa 4.3, a escolha de pacotes do catálogo (`docs/technical/registry-pick.md`).
-- **Programa:** a cópia local tem seis leitores; os de pool de staking e Meteora estão em `upstream/main`, baixado
-  e não trazido. Trazê-lo é a primeira entrega da Sprint 00 e espera o sinal do fundador.
+- **Programa:** os nove leitores estão no repositório desde a Sprint 00, no programa antigo. Portá-los para o
+  programa novo é a Sprint 03.
+- **`bun.lock`** aponta para `registry.npmmirror.com`, herdado do upstream. Falta decidir se volta ao registro
+  oficial do npm.
 - **Nome do site:** decidido em 4 de outubro, Brot Markets. O app e os protótipos ainda dizem "baked".
 - **BP v0.0.2: fechado.** As quatro partes existem e não há proposta em aberto. Faltam valores e nomes: o primeiro
   valor do teto global e quem assina a carteira com várias assinaturas. Falta conferir a tramitação da MP 1.394 no Congresso e ler o Decreto 13.128, de 2026. O próximo passo do método é a apresentação resumida do plano, e depois os documentos da Fase 4.

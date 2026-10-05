@@ -20,9 +20,15 @@ const path = require('node:path');
 const ALLOWED_COMMANDS = new Set([
   'codex', // gstack's external cross-review command, cited by multi-ai-review
   'investors', // product route the pitch skill may create, not a Claude command
+  'health', // HTTP path of Cloak's API, cited by upstream's PRIVACY_PLAN.md; not a Claude command
 ]);
 const ALLOWED_AGENT_WORDS = new Set([
   'multi-agent', // ordinary word ("multi-agent review"), not an agent name
+  // Work streams named in upstream's PRIVACY_PLAN.md (0xcf07/pred-provable), which arrives by
+  // merge and is not ours to edit. They are that plan's own labels, not agents of this repo.
+  'cloak-agent',
+  'zcash-agent',
+  'submission-agent',
 ]);
 
 /** Backticked `/name` references to commands or skills that do not exist. */
