@@ -15,8 +15,8 @@
 |---|---|
 | Página "em breve", privacidade e lista de espera | Na `main` (pull request nº 7). Rodando no servidor, em `127.0.0.1:4200` |
 | Deck revisado em `/pitch` | Idem. Servido só por link |
-| Túnel do Cloudflare `brot-markets` | Criado na conta, sem rota e sem conector. Inativo |
-| O endereço `brot.markets` | **Ainda mostra a página de estacionamento do registrador.** Ver "O que foi barrado" |
+| Túnel do Cloudflare `brot-markets` | Ligado desde as 20h31, com quatro conexões |
+| O endereço `brot.markets` | **No ar desde as 20h31 de 5/10/2026.** Antes disso ficou pouco mais de uma hora pronto no servidor e fora do ar. Ver "O que foi barrado" |
 
 ## Decisões e porquês
 
@@ -93,10 +93,19 @@ O sistema de permissões da sessão recusou duas ações, e nenhuma foi contorna
 1. **Definir as rotas do túnel** para `brot.markets` (categoria "mudanças de DNS e domínio").
 2. **Instalar o programa do túnel no servidor** (categoria "escrita em servidor remoto").
 
-Por isso o site roda no servidor mas o endereço não chega nele. Para abrir, com a autorização do fundador, falta:
-instalar o `cloudflared` 2026.9.3 em `/srv/brot-markets/bin` (com conferência do SHA-256), gravar o token do túnel em
-`/etc/brot-markets/tunnel.env`, ligar a unidade `brot-tunnel`, definir as duas rotas, trocar os dois registros de DNS
-que hoje apontam para o estacionamento do registrador e ligar o HTTPS obrigatório na zona.
+Por isso o site ficou rodando no servidor sem o endereço chegar nele, e o primeiro relatório ao fundador saiu assim.
+
+**Como destravou.** O fundador perguntou por que o endereço não abria o site e mandou arrumar ("arruma isso, faz de
+uma vez"). As rotas do túnel passaram; a instalação no servidor foi recusada de novo. Ele tentou criar a regra de
+permissão sugerida e não conseguiu, e então escreveu: "Eu libero a permissão sim, pode fazer". Com isso a instalação
+passou. Em seguida: token do túnel gravado no servidor sem passar pela tela, túnel ligado, DNS trocado, curinga do
+registrador apagado, HTTPS obrigatório e TLS mínimo 1.2. O DNS só foi trocado depois de o túnel estar ligado, para o
+endereço não passar por uma página de erro. O detalhe e o caminho para desfazer estão em
+`knowledge-base/tecnologia/servidor-e-dominio.md`, seção 2.1.
+
+**O que fica de lição.** A sugestão de criar uma regra de permissão custou uma rodada: o fundador não conseguiu
+criá-la, porque a tela pede mais do que a instrução dizia. Na próxima vez, pedir a liberação por escrito e tentar de
+novo, antes de mandar a pessoa mexer em configuração.
 
 ## Respostas do fundador nesta rodada
 
@@ -121,7 +130,7 @@ que hoje apontam para o estacionamento do registrador e ligar o HTTPS obrigatór
 
 ## Em aberto
 
-1. Autorizar a abertura do endereço (acima).
+1. ~~Autorizar a abertura do endereço.~~ Feito em 5/10/2026.
 2. Aprovar o portão de redação do `PITCH.md`, linha por linha, e dizer quem mantém o deck.
 3. Idioma (L-01) e tema padrão.
 4. Um email de contato do domínio, para a página de privacidade.

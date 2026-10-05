@@ -64,8 +64,8 @@ bom"). As demais respostas estão na seção 5, cada uma na linha da sprint que 
 **Fora do roteiro, em 5/10/2026: o site provisório.** A pedido do fundador, o endereço `brot.markets` ganhou uma
 página "em breve" com lista de espera e o deck em `/pitch` (`services/landing`). Não é uma sprint e não muda a ordem
 das outras. Ela adianta dois itens da Sprint 06, o túnel próprio e o domínio, e sai quando a Sprint 09 puser o site
-de verdade no mesmo endereço. Na noite de 5/10 o serviço rodava no servidor, e a abertura do endereço esperava a
-autorização do fundador (`session-log/2026-10-05-pagina-em-breve-e-pitch.md`).
+de verdade no mesmo endereço. O endereço está no ar desde a noite de 5/10/2026
+(`session-log/2026-10-05-pagina-em-breve-e-pitch.md`).
 
 | # | Sprint | Bloco | Depende de |
 |---|---|---|---|

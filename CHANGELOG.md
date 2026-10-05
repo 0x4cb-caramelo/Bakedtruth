@@ -36,9 +36,9 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Em aberto
 
-- **O endereço `brot.markets` ainda não abre o site.** O serviço roda no servidor, na porta local. Faltam o
-  conector do túnel, as rotas e a troca do DNS, que o sistema de permissões da sessão recusou e que esperam a
-  autorização do fundador (`knowledge-base/tecnologia/servidor-e-dominio.md`, seção 2.1).
+- **O endereço `brot.markets` está no ar desde 5/10/2026**, pelo túnel próprio do projeto, com HTTPS obrigatório. O
+  que foi criado e como desfazer: `knowledge-base/tecnologia/servidor-e-dominio.md`, seção 2.1. Falta conferir se o
+  país do visitante chega ao servidor e o que o Cloudflare registra dos visitantes.
 - **Portão de redação do deck:** o fundador mandou publicar, e falta aprovar linha por linha o que vai a público e
   dizer quem mantém o deck. Até lá ele fica só por link. A recomendação está no `PITCH.md`.
 - **Site provisório, pendências:** idioma (está em inglês, por escolha provisória; L-01 segue aberta); um email de
