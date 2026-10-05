@@ -132,7 +132,8 @@ da promessa fica provado na rede (seção 3.7).
 ### 2.3 O que existe hoje e o que se aproveita
 
 Existe um programa, que é o código que roda na Solana e guarda o dinheiro, publicado na devnet. Ele tem 1.717
-linhas, 138 testes e nove leitores on-chain (FATO, repositório, 4/out/2026). Leitor on-chain é a parte do programa
+linhas e 138 testes. Os leitores on-chain são nove: seis nesta cópia do repositório e três na versão mais nova do
+sócio, baixada e ainda não trazida (FATO, repositório, 5/out/2026). Leitor on-chain é a parte do programa
 que abre uma conta da Solana, lê um número ou uma chave e responde sim ou não, sem ninguém informar nada.
 
 Esse programa segue o modelo antigo, em que um patrocinador vende o SIM com desconto, como recompensa por uma meta.

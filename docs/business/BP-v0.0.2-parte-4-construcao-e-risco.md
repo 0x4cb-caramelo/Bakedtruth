@@ -121,7 +121,7 @@ código, desde que mantenha o aviso de autoria (seção 6.3).
 
 | Peça | O que é | Destino |
 |---|---|---|
-| Os nove leitores | Cada um abre uma conta da rede, lê um número ou uma chave e responde sim ou não | Aproveita. Quatro abrem o site, um espera o padrão novo de token e quatro ficam fora do pote (Parte 1, seção 4.2) |
+| Os nove leitores | Cada um lê um dado e responde sim ou não. Seis nesta cópia; três na versão nova do sócio | Aproveita. Quatro abrem o site, um espera o padrão novo de token e quatro ficam fora do pote (Parte 1, seção 4.2) |
 | A resolução | A operação que grava o resultado lido | Aproveita, com um terceiro resultado: "Anulada" |
 | O cofre por pergunta | A conta que guarda o USDC de cada pergunta, separada das outras | Aproveita o desenho. Um problema numa pergunta não atinge as demais |
 | O teste que confere as contas | Sorteia milhares de sequências de operações e confere, depois de cada uma, se o cofre tem o que o programa deve | Aproveita o método. As contas são outras |
