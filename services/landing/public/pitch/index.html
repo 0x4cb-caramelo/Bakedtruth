@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brot Markets — pitch deck</title>
+<!-- Reachable by link only. Do not remove "noindex" before the founder approves every row of the redaction table in
+     docs/business/PITCH.md. The server sends the same rule in the X-Robots-Tag header. -->
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="description" content="Brot Markets pitch deck: prediction markets on Solana that the chain resolves.">
+<link rel="icon" type="image/png" href="/img/favicon.png">
+<link rel="preload" href="fonts/ibm-plex-mono-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/ibm-plex-sans-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="deck.css">
+<script src="deck.js" defer></script>
+</head>
+<body>
+<!-- Slide design and copy by the founder (1920 x 1080 canvas, inline styles kept as authored). The speaking notes are
+     in services/landing/pitch-notes.md. What was changed from the original and why: session-log, 2026-10-05. -->
+<main class="deck" data-deck aria-label="Brot Markets pitch deck">
+
+<section class="slide" data-label="Title" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:grid;grid-template-columns:1.15fr 0.85fr;align-items:center;gap:60px;">
+  <div style="display:flex;flex-direction:column;gap:48px;">
+    <img src="img/logo-wordmark.webp" alt="brot.markets" style="mix-blend-mode:lighten;width:760px;margin-left:-120px;margin-top:-60px;margin-bottom:-60px;display:block;">
+    <h1 style="margin:0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:92px;line-height:1.05;letter-spacing:-0.03em;text-wrap:balance;">Prediction markets the chain resolves.</h1>
+    <p style="margin:0;font-size:36px;line-height:1.4;color:#a3acba;max-width:900px;text-wrap:pretty;">Parimutuel USDC pools on Solana, settled by data anyone can verify on-chain.</p>
+    <div style="display:flex;gap:16px;align-items:center;">
+      <div style="height:6px;width:180px;border-radius:3px;background:linear-gradient(90deg,#ff9ad5,#9ad0ff,#a6ffcf,#fff59a,#ffb37a);"></div>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;letter-spacing:0.08em;color:#eea546;">COLOSSEUM HACKATHON · 2026</span>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:center;">
+    <img src="img/baked-sticker.webp" alt="Baked mascot sticker" style="width:100%;max-width:720px;display:block;">
+  </div>
+</section>
+
+<section class="slide" data-label="Problem" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">02 · PROBLEM</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">Every prediction market needs someone to say who won</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:60px;align-items:start;align-content:center;">
+    <div style="display:flex;flex-direction:column;gap:22px;border-top:2px solid #f7eedb;padding-top:32px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:120px;line-height:1;letter-spacing:-0.05em;">4–6</span>
+      <span style="font-size:32px;line-height:1.4;color:#d9d1c1;">Days a contested result takes on the largest on-chain platform, where token holders vote on it.</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;">Platform documentation · Oct 2026</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:22px;border-top:2px solid #f7eedb;padding-top:32px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:120px;line-height:1;letter-spacing:-0.05em;">1,150+</span>
+      <span style="font-size:32px;line-height:1.4;color:#d9d1c1;">Of its markets went to arbitration in 2026 through May, more than in all of 2025.</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;">WSJ, via Finance Magnates · May 2026</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:22px;border-top:2px solid #eea546;padding-top:32px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:120px;line-height:1;letter-spacing:-0.05em;color:#eea546;">~1 in 5</span>
+      <span style="font-size:32px;line-height:1.4;color:#d9d1c1;">Disputes had a voter holding a position in the market being judged.</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;">WSJ, via Finance Magnates · May 2026</span>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-label="Solution" style="background:#f6eddb;color:#1b1611;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:grid;grid-template-columns:1.2fr 0.8fr;gap:60px;align-items:center;">
+  <div style="display:flex;flex-direction:column;gap:28px;">
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#a8481b;">03 · SOLUTION</span>
+    <h2 style="margin:0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;text-wrap:balance;">Brot only lists questions the chain can answer</h2>
+    <p style="margin:12px 0 0;font-size:36px;line-height:1.45;color:#3d3328;max-width:1000px;text-wrap:pretty;">If the answer isn't stored in a Solana account, the market doesn't open. The program reads that account and settles. Nobody types in a result.</p>
+    <div style="display:flex;flex-direction:column;gap:0;margin-top:28px;border-top:2px solid #1b1611;max-width:1000px;">
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;padding:22px 0;border-bottom:1px solid #cdbfa6;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:30px;">Wallet-only</span>
+        <span style="font-size:30px;color:#3d3328;">No account, no KYC sign-up.</span>
+      </div>
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;padding:22px 0;border-bottom:1px solid #cdbfa6;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:30px;">USDC pools</span>
+        <span style="font-size:30px;color:#3d3328;">One pool per question, YES or NO.</span>
+      </div>
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;padding:22px 0;border-bottom:1px solid #cdbfa6;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:30px;">Auto payout</span>
+        <span style="font-size:30px;color:#3d3328;">Winnings arrive in the wallet. No claim button.</span>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:center;">
+    <img src="img/baked-standing.webp" alt="Baked, standing" style="width:100%;max-width:640px;display:block;">
+  </div>
+</section>
+
+<section class="slide" data-label="How it works" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">04 · PRODUCT</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;">Five steps from bet to payout</h2>
+  <div style="margin-top:44px;display:flex;align-items:center;gap:24px;">
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:#a3acba;">Example</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:36px;font-weight:500;background:#f6eddb;color:#1b1611;padding:12px 28px;border-radius:12px;">"Does SOL touch $300 by Dec 31?"</span>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:20px;align-items:start;align-content:center;">
+    <div style="display:flex;flex-direction:column;gap:18px;border-top:4px solid #eea546;padding-top:28px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:28px;color:#eea546;">01</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;">Bet</span>
+      <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">300 USDC on YES, 700 on NO. Screen shows 30% / 70%.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px;border-top:4px solid #eea546;padding-top:28px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:28px;color:#eea546;">02</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;">Close</span>
+      <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">Betting stops before the deadline, at 5% of the duration left.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px;border-top:4px solid #eea546;padding-top:28px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:28px;color:#eea546;">03</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;">Resolve</span>
+      <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">The program reads the Pyth price on-chain and records YES or NO.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px;border-top:4px solid #eea546;padding-top:28px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:28px;color:#eea546;">04</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;">Review</span>
+      <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">6-hour window. The team can confirm or void, never flip.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px;border-top:4px solid #eea546;padding-top:28px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:28px;color:#eea546;">05</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;">Pay</span>
+      <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">USDC goes straight to the winners' wallets.</span>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+    <div style="background:#171e29;border-radius:16px;padding:26px 36px;display:flex;justify-content:space-between;align-items:baseline;gap:20px;">
+      <span style="font-size:30px;color:#a3acba;">If YES: each 1 USDC on YES returns</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:44px;color:#eea546;">3.10</span>
+    </div>
+    <div style="background:#171e29;border-radius:16px;padding:26px 36px;display:flex;justify-content:space-between;align-items:baseline;gap:20px;">
+      <span style="font-size:30px;color:#a3acba;">If NO: each 1 USDC on NO returns</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:44px;color:#eea546;">1.39</span>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-label="Question types" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">05 · MARKETS</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;">Five question types at launch, all read on‑chain</h2>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+    <div style="display:grid;grid-template-columns:440px 1fr 280px;gap:32px;padding:0 0 18px;border-bottom:2px solid #f7eedb;font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.08em;color:#a3acba;">
+      <span>TYPE</span><span>EXAMPLE QUESTION</span><span>READER</span>
+    </div>
+    <div style="display:grid;grid-template-columns:440px 1fr 280px;gap:32px;padding:24px 0;border-bottom:1px solid #2c3647;align-items:baseline;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:32px;">Major asset price</span>
+      <span style="font-size:30px;color:#d9d1c1;">Does SOL touch $300 by the 30th?</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:#eea546;">Pyth · built</span>
+    </div>
+    <div style="display:grid;grid-template-columns:440px 1fr 280px;gap:32px;padding:24px 0;border-bottom:1px solid #2c3647;align-items:baseline;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:32px;">Supply burn</span>
+      <span style="font-size:30px;color:#d9d1c1;">Does token T's supply drop to 900M by the 30th?</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:#a3acba;">Written, to port</span>
+    </div>
+    <div style="display:grid;grid-template-columns:440px 1fr 280px;gap:32px;padding:24px 0;border-bottom:1px solid #2c3647;align-items:baseline;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:32px;">Locked liquidity</span>
+      <span style="font-size:30px;color:#d9d1c1;">Does the T/SOL Meteora pool reach X permanently locked?</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:#a3acba;">Written, to port</span>
+    </div>
+    <div style="display:grid;grid-template-columns:440px 1fr 280px;gap:32px;padding:24px 0;border-bottom:1px solid #2c3647;align-items:baseline;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:32px;">Staking pool size</span>
+      <span style="font-size:30px;color:#d9d1c1;">Does the JitoSOL pool hold X SOL or more on the 30th?</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:#a3acba;">Written, to port</span>
+    </div>
+    <div style="display:grid;grid-template-columns:440px 1fr 280px;gap:32px;padding:24px 0;border-bottom:1px solid #2c3647;align-items:baseline;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:32px;">Validator stake</span>
+      <span style="font-size:30px;color:#d9d1c1;">Does validator V have X SOL or more staked on the 30th?</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:#a3acba;">Written, to port</span>
+    </div>
+  </div>
+  <p style="margin:0;font-size:30px;line-height:1.4;color:#a3acba;max-width:1600px;">Left out: anything a single keyholder can decide for free, such as renouncing mint or freeze authority, or making a program immutable.</p>
+</section>
+
+<section class="slide" data-label="Fee model" style="background:#f6eddb;color:#1b1611;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#a8481b;">06 · FEE MODEL</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">The fee is 10% of the losing side, so being right never costs you</h2>
+  <div style="flex:1;display:grid;grid-template-columns:0.8fr 1.2fr;gap:90px;align-items:center;">
+    <div style="display:flex;flex-direction:column;gap:40px;">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:120px;line-height:1;letter-spacing:-0.04em;color:#a8481b;">3.70%</span>
+        <span style="font-size:30px;line-height:1.4;color:#3d3328;">Modelled average take on volume. Range 2.70–4.18%, depending on a question mix nobody has measured yet.</span>
+      </div>
+      <span style="font-size:30px;line-height:1.4;color:#3d3328;">No order book, no market makers. Winners split the pool pro rata.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b5e4e;margin-bottom:18px;">Winner's return per 1 USDC · 1,000 USDC pool</span>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:0 0 16px;border-bottom:2px solid #1b1611;font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.06em;color:#6b5e4e;">
+        <span>WINNING SIDE</span><span>FLAT 3% OF POT</span><span>BROT · 10% OF LOSERS</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:22px 0;border-bottom:1px solid #cdbfa6;font-family:'IBM Plex Mono',monospace;font-size:34px;">
+        <span>50%</span><span>1.940</span><span style="font-weight:600;">1.900</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:22px 0;border-bottom:1px solid #cdbfa6;font-family:'IBM Plex Mono',monospace;font-size:34px;">
+        <span>90%</span><span>1.078</span><span style="font-weight:600;">1.100</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:22px 0;border-bottom:1px solid #cdbfa6;font-family:'IBM Plex Mono',monospace;font-size:34px;">
+        <span>97%</span><span>1.000</span><span style="font-weight:600;">1.028</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:22px 20px;margin:0 -20px;background:#1b1611;color:#f6eddb;border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:34px;">
+        <span>99%</span><span style="color:#ff9a7a;">0.980</span><span style="font-weight:600;color:#eea546;">1.009</span>
+      </div>
+      <span style="margin-top:20px;font-size:26px;color:#6b5e4e;">With a flat pot fee, backing a 99% favourite loses money even when you're right.</span>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-label="Sponsors" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">07 · SPONSORS</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">Projects sponsor questions about their own promises</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.25fr 0.75fr;gap:60px;align-items:center;">
+    <div style="display:flex;flex-direction:column;gap:44px;">
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:14px;padding:28px 26px;background:#171e29;border-radius:16px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#eea546;">1</span>
+          <span style="font-size:28px;line-height:1.35;">Project promises a token burn</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;padding:28px 26px;background:#171e29;border-radius:16px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#eea546;">2</span>
+          <span style="font-size:28px;line-height:1.35;">It sponsors the question about it</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;padding:28px 26px;background:#171e29;border-radius:16px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#eea546;">3</span>
+          <span style="font-size:28px;line-height:1.35;">Its community bets and shares</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;padding:28px 26px;background:#f6eddb;color:#1b1611;border-radius:16px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a8481b;">4</span>
+          <span style="font-size:28px;line-height:1.35;font-weight:600;">The burn is proven on-chain</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:2px solid #f7eedb;">
+        <div style="display:flex;flex-direction:column;gap:8px;padding:26px 0;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:56px;">$500</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;">TIER 1</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:26px 0;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:56px;">$1,500</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;">TIER 2</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:26px 0;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:56px;">$5,000</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;">TIER 3</span>
+        </div>
+      </div>
+      <span style="font-size:30px;line-height:1.4;color:#d9d1c1;">70% goes into the pool, 30% to the platform. 20–30 launch partners get one free question, featured for 72 hours.</span>
+    </div>
+    <div style="display:flex;justify-content:center;">
+      <img src="img/baked-hips.webp" alt="Baked, hands on hips" style="width:100%;max-width:620px;display:block;">
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-label="Market" style="background:#f6eddb;color:#1b1611;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#a8481b;">08 · MARKET</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">The category is large; Solana's share is still small</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:60px;align-items:start;align-content:center;">
+    <div style="display:flex;flex-direction:column;gap:22px;border-top:2px solid #1b1611;padding-top:32px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:132px;line-height:1;letter-spacing:-0.05em;">$21.7B</span>
+      <span style="font-size:32px;line-height:1.4;color:#3d3328;">Prediction-market volume in 30 days, in dollars actually paid.</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b5e4e;">DefiRate · Sep 4 – Oct 3, 2026</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:22px;border-top:2px solid #1b1611;padding-top:32px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:132px;line-height:1;letter-spacing:-0.05em;">~$15M</span>
+      <span style="font-size:32px;line-height:1.4;color:#3d3328;">World, inside Phantom, in September. About 300× less than Polymarket.</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b5e4e;">DefiLlama · Sep 2026</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:22px;border-top:2px solid #a8481b;padding-top:32px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:132px;line-height:1;letter-spacing:-0.05em;color:#a8481b;">$4M+</span>
+      <span style="font-size:32px;line-height:1.4;color:#3d3328;">Traded on one Polymarket token-launch market. Token events draw bets, yet still resolve off-chain.</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b5e4e;">Polymarket · $LAPTOP FDV market · Sep 2026, via Predscope</span>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-label="Business model" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">09 · BUSINESS MODEL</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;">Break-even at $208.6k monthly volume</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.1fr 0.9fr;gap:80px;align-items:center;">
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:200px;line-height:0.95;letter-spacing:-0.05em;color:#eea546;">1.4%</span>
+      <span style="font-size:36px;line-height:1.4;color:#d9d1c1;max-width:820px;">of World's September volume is enough to pay for the whole company.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;border-top:2px solid #f7eedb;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;padding:26px 0;border-bottom:1px solid #2c3647;">
+        <span style="font-size:30px;color:#a3acba;">Monthly cost, 3 founders + infra</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;">$5,500</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;padding:26px 0;border-bottom:1px solid #2c3647;">
+        <span style="font-size:30px;color:#a3acba;">Average fee on volume</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;">3.70%</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;padding:26px 0;border-bottom:1px solid #2c3647;">
+        <span style="font-size:30px;color:#a3acba;">Spend before real money</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;">$7,500</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;padding:26px 0;border-bottom:1px solid #2c3647;">
+        <span style="font-size:30px;color:#a3acba;">Base case break-even</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;">Month 9</span>
+      </div>
+      <span style="margin-top:20px;font-size:26px;color:#a3acba;">Fee split: 75% operations until break-even, 25% treasury. Every figure on this slide is our own model, not a promise.</span>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-label="Go-to-market" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">10 · GO-TO-MARKET</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">Distribution comes from partners, not paid points</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.3fr 0.7fr;gap:60px;align-items:center;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <div style="background:#171e29;border:2px solid #263041;border-radius:20px;padding:36px 38px;display:flex;flex-direction:column;gap:16px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:36px;">Launch partners</span>
+        <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">20–30 projects post their question to their own communities.</span>
+      </div>
+      <div style="background:#171e29;border:2px solid #263041;border-radius:20px;padding:36px 38px;display:flex;flex-direction:column;gap:16px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:36px;">Referrals, day one</span>
+        <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">Referrers earn 20% of fees for 90 days, paid from the fee itself.</span>
+      </div>
+      <div style="background:#171e29;border:2px solid #263041;border-radius:20px;padding:36px 38px;display:flex;flex-direction:column;gap:16px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:36px;">Ideas from X</span>
+        <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">Users suggest questions; the team reviews every one.</span>
+      </div>
+      <div style="background:#171e29;border:2px solid #263041;border-radius:20px;padding:36px 38px;display:flex;flex-direction:column;gap:16px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:36px;">pump.fun token</span>
+        <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">A traction channel with no company rights. Creator fees fund prizes.</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:150px;line-height:1;letter-spacing:-0.05em;color:#ff9a7a;">−94%</span>
+      <span style="font-size:30px;line-height:1.4;color:#d9d1c1;">Myriad's volume drop, Q1 to Q2 2026, after points campaigns. Opinion fell 81%.</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6f7a8c;">Predictefy · 2026</span>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-label="Safety" style="background:#f6eddb;color:#1b1611;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#a8481b;">11 · SAFETY</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;">Safety rules are part of the design</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.25fr 0.75fr;gap:60px;align-items:center;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;column-gap:56px;">
+      <div style="display:flex;flex-direction:column;gap:10px;padding:26px 0;border-top:2px solid #1b1611;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:32px;">Two schedulers</span>
+        <span style="font-size:28px;line-height:1.4;color:#3d3328;">On separate providers. The backup takes over after 10 silent minutes and 3 restart attempts.</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;padding:26px 0;border-top:2px solid #1b1611;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:32px;">Confirm or void</span>
+        <span style="font-size:28px;line-height:1.4;color:#3d3328;">The 6-hour review can never change the winner.</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;padding:26px 0;border-top:2px solid #1b1611;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:32px;">Void refunds all</span>
+        <span style="font-size:28px;line-height:1.4;color:#3d3328;">Every bettor gets 100% back, no fee.</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;padding:26px 0;border-top:2px solid #1b1611;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:32px;">Vault per question</span>
+        <span style="font-size:28px;line-height:1.4;color:#3d3328;">A problem in one pool can't touch another.</span>
+      </div>
+      <div style="grid-column:1 / span 2;display:flex;flex-direction:column;gap:14px;padding:30px 36px;margin-top:16px;background:#1b1611;color:#f6eddb;border-radius:16px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.08em;color:#eea546;">MAINNET GATE</span>
+        <span style="font-size:30px;line-height:1.4;">External audit by two firms · 2-of-3 founder multisig · low global cap, raised in steps</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;">
+      <img src="img/baked-arms-crossed.webp" alt="Baked, arms crossed" style="width:100%;max-width:600px;display:block;">
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-label="Roadmap" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">12 · ROADMAP</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;">Devnet now, capped mainnet targeted for month 2</h2>
+  <div style="margin-top:48px;display:flex;gap:56px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:baseline;gap:16px;"><span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:52px;color:#eea546;">9</span><span style="font-size:28px;color:#a3acba;">on-chain readers to reuse</span></div>
+    <div style="display:flex;align-items:baseline;gap:16px;"><span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:52px;color:#eea546;">160+</span><span style="font-size:28px;color:#a3acba;">tests green in CI</span></div>
+    <div style="display:flex;align-items:baseline;gap:16px;"><span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:52px;color:#eea546;">2</span><span style="font-size:28px;color:#a3acba;">real Pyth devnet accounts parsed</span></div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;align-items:start;align-content:center;">
+    <div style="display:flex;flex-direction:column;gap:16px;padding-top:28px;border-top:6px solid #eea546;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#eea546;">NOW · HACKATHON</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:38px;">Devnet</span>
+      <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">Pool program, test USDC, points leaderboard.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;padding-top:28px;border-top:6px solid #f7eedb;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;">TARGET · MONTH 2</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:38px;">Capped mainnet</span>
+      <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">Real USDC after audit, multisig and global cap.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;padding-top:28px;border-top:6px solid #3a4558;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;">PHASE 1.2</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:38px;">Open disputes</span>
+      <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">Bettor challenges, arbitration, new token-standard reader.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;padding-top:28px;border-top:6px solid #3a4558;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;">PHASE 2</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:38px;">Wider markets</span>
+      <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">Early exit, sports via own oracle, per-question caps.</span>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-label="Close" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:grid;grid-template-columns:0.9fr 1.1fr;gap:80px;align-items:center;">
+  <div style="display:flex;justify-content:center;">
+    <img src="img/badge-proof.webp" alt="Proof &gt; Promises badge" style="width:100%;max-width:760px;display:block;">
+  </div>
+  <div style="display:flex;flex-direction:column;gap:40px;">
+    <h2 style="margin:0;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:120px;line-height:1;letter-spacing:-0.04em;">Proof &gt; Promises</h2>
+    <p style="margin:0;font-size:38px;line-height:1.4;color:#d9d1c1;max-width:860px;text-wrap:pretty;">Questions the chain can answer. Pools anyone can verify. Payouts nobody has to claim.</p>
+    <div style="height:6px;width:220px;border-radius:3px;background:linear-gradient(90deg,#ff9ad5,#9ad0ff,#a6ffcf,#fff59a,#ffb37a);"></div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:48px;color:#eea546;">brot.markets</span>
+      <span style="font-size:30px;color:#a3acba;">Lucas · Founder</span>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<nav class="bar" data-bar aria-label="Slide controls">
+  <a href="/" title="brot.markets">brot.markets</a>
+  <button type="button" data-prev aria-label="Previous slide">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <span data-count aria-live="polite">1 / 13</span>
+  <button type="button" data-next aria-label="Next slide">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button type="button" data-full aria-label="Full screen">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</nav>
+</body>
+</html>

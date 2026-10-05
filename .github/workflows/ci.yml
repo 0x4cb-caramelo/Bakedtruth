@@ -179,6 +179,10 @@ jobs:
       - name: Project coherence (os-self-test)
         run: node scripts/os-self-test.js
 
+      # The "coming soon" site has no dependencies, so it needs no install step.
+      - name: Landing site tests
+        run: node --test services/landing/tests/leads.test.mjs services/landing/tests/server.test.mjs
+
       - name: Secret scan over the branch
         env:
           BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}

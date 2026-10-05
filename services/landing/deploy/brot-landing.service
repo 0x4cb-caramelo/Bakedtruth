@@ -1,0 +1,42 @@
+# Purpose: runs the Brot Markets "coming soon" site (landing page, /pitch, waitlist API) on 127.0.0.1:4200.
+# Install: copy to /etc/systemd/system/, then `systemctl daemon-reload && systemctl enable --now brot-landing`.
+# The process is the unprivileged service user, opens no public port and can write only to the waitlist folder.
+
+[Unit]
+Description=Brot Markets landing page (coming soon, /pitch, waitlist)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=brot
+Group=brot
+WorkingDirectory=/srv/brot-markets/work/current/services/landing
+EnvironmentFile=/etc/brot-markets/landing.env
+ExecStart=/usr/bin/node server.mjs
+Restart=on-failure
+RestartSec=3
+UMask=0077
+
+# Limits: this server is shared with other projects.
+MemoryMax=256M
+CPUQuota=50%
+TasksMax=64
+
+# Sandboxing. No MemoryDenyWriteExecute: Node's compiler needs writable executable memory.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+ReadWritePaths=/var/lib/brot-markets/leads
+
+[Install]
+WantedBy=multi-user.target

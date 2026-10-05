@@ -1,0 +1,40 @@
+# Purpose: runs the Cloudflare tunnel that belongs to Brot Markets. It only dials out: no port is opened on the server.
+# Install: copy to /etc/systemd/system/, then `systemctl daemon-reload && systemctl enable --now brot-tunnel`.
+# The binary is a single file under /srv/brot-markets/bin (no system package). The tunnel's routes live in Cloudflare.
+# The token is in /etc/brot-markets/tunnel.env (root, 0600), as TUNNEL_TOKEN. It never goes into the repository.
+
+[Unit]
+Description=Brot Markets Cloudflare tunnel (outbound only)
+After=network-online.target brot-landing.service
+Wants=network-online.target
+
+[Service]
+User=brot
+Group=brot
+EnvironmentFile=/etc/brot-markets/tunnel.env
+ExecStart=/srv/brot-markets/bin/cloudflared tunnel --no-autoupdate --metrics 127.0.0.1:4290 run
+Restart=always
+RestartSec=5
+UMask=0077
+
+# Limits: this server is shared with other projects.
+MemoryMax=256M
+CPUQuota=50%
+TasksMax=64
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

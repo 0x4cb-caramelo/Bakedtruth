@@ -1,0 +1,82 @@
+# services/landing
+
+O site "em breve" do Brot Markets: a página inicial com a lista de espera, a página de privacidade e o deck em
+`/pitch`. É provisório. Na Sprint 09 o site de verdade (`app/`, em Next.js) assume o endereço e esta pasta sai.
+
+Não tem dependências. Roda com o Node que já existe no servidor (22 ou mais novo).
+
+## O que tem aqui
+
+| Caminho | O que é |
+|---|---|
+| `server.mjs` | Entrada HTTP: cabeçalhos de segurança, `/healthz`, API da lista e arquivos estáticos |
+| `lib/api.mjs` | `POST /api/leads` (entrar) e `POST /api/leads/remove` (sair) |
+| `lib/leads.mjs` | Validação do email e o arquivo da lista |
+| `lib/rate-limit.mjs` | Limite de pedidos por endereço, só em memória |
+| `lib/static.mjs` | Serve `public/`, sem deixar sair da pasta |
+| `public/` | Página inicial, privacidade, 404, fontes e imagens |
+| `public/pitch/` | O deck: 13 slides do fundador, um palco leve (`deck.js`, `deck.css`) |
+| `pitch-notes.md` | O roteiro de fala de cada slide. Não é publicado |
+| `deploy/` | As duas unidades do systemd: o site e o túnel do Cloudflare |
+| `tests/` | Testes do armazenamento, do limitador e do servidor por HTTP |
+
+## Rodar e testar
+
+```bash
+node services/landing/server.mjs            # http://localhost:4200
+node --test "services/landing/tests/*.test.mjs"
+```
+
+Sem configuração, a lista vai para `services/landing/data/leads.jsonl`, que o Git ignora. As variáveis estão em
+`.env.example`.
+
+## A lista de espera
+
+Cada inscrito é uma linha:
+
+```json
+{"email":"pessoa@exemplo.com","at":"2026-10-05T21:00:00.000Z","consent":"v1-2026-10-05","source":"landing"}
+```
+
+- **Não grava** IP, navegador nem localização. O endereço de quem pede serve só de chave do limitador, em memória.
+- **Entrar duas vezes** e **sair sem estar na lista** respondem "ok", para a API não revelar quem está inscrito.
+- **Sair** apaga a linha na hora (`/privacy` tem o formulário).
+- **Doze meses** depois da inscrição a linha é apagada sozinha, na partida do serviço e a cada 24 horas. A página de
+  privacidade promete esse prazo: mudar um exige mudar o outro (`RETENTION_MS` em `server.mjs`).
+- **Teto de 50 mil linhas**, para uma enxurrada não encher o disco de um servidor dividido.
+- **Mudou a frase de consentimento** embaixo do formulário? Suba `CONSENT_VERSION` em `lib/leads.mjs`.
+
+No servidor o arquivo é `/var/lib/brot-markets/leads/leads.jsonl`, do usuário `brot`, com permissão 0600. Quem lê:
+o próprio serviço e quem administra o servidor. Para contar ou exportar:
+
+```bash
+sudo wc -l /var/lib/brot-markets/leads/leads.jsonl
+sudo cat /var/lib/brot-markets/leads/leads.jsonl      # é dado pessoal: não cole em chat nem em issue
+```
+
+As nove perguntas de privacidade respondidas estão em `docs/technical/TECHNICAL-PLAN.md`.
+
+## O deck em `/pitch`
+
+- **Só por link.** A página manda `noindex` (na marcação e no cabeçalho `X-Robots-Tag`), a página inicial não aponta
+  para ela e o `robots.txt` não a cita. Isso muda quando o fundador aprovar, linha por linha, o portão de redação de
+  `docs/business/PITCH.md`. Um teste falha se alguém ligar a página inicial ao deck antes disso.
+- **Navegação:** setas, espaço, clique, deslizar, `F` para tela cheia, `#3` no endereço abre o slide 3. No celular
+  em pé os slides ficam empilhados.
+- **PDF:** imprimir a página (Ctrl+P) gera um slide por folha, em 1920 × 1080.
+- **Editar um slide:** cada `<section class="slide">` de `public/pitch/index.html` é um slide, num quadro de
+  1920 × 1080, com os estilos na própria marcação, como o fundador desenhou.
+
+## Publicar no servidor
+
+O desenho é o do plano técnico: o site escuta em `127.0.0.1:4200` e só o túnel do Cloudflare do próprio projeto
+chega nele. Nenhuma porta abre para fora.
+
+1. Levar o código: pacote do Git enviado por SSH para `/srv/brot-markets/repo.git`, e a cópia de trabalho em
+   `/srv/brot-markets/work/current` atualizada para a `main`.
+2. Na primeira vez: criar `/var/lib/brot-markets/leads` (dono `brot`, 0700), `/etc/brot-markets/landing.env` a
+   partir de `.env.example`, e instalar `deploy/brot-landing.service`.
+3. A cada atualização: `sudo systemctl restart brot-landing` e conferir `curl -s localhost:4200/healthz`.
+
+O túnel (`deploy/brot-tunnel.service`) só precisa ser mexido se o endereço ou a porta mudarem. O passo a passo da
+primeira instalação e os nomes criados no Cloudflare estão em `knowledge-base/tecnologia/servidor-e-dominio.md`.

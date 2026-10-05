@@ -28,6 +28,9 @@ node_modules
 coverage
 *.tsbuildinfo
 
+# Local waitlist of the "coming soon" site: personal data, never committed
+services/landing/data/
+
 # Logs and OS noise
 *.log
 .DS_Store
