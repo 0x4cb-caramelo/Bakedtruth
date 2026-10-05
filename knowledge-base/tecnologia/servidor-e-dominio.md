@@ -60,8 +60,8 @@ Outras portas em uso: 22 (SSH) e 20241.
 - O token fica em `F:\AceleradoraECO\agenttokenfy\.aios\secrets\cloudflare.env`, com as variáveis
   `CLOUDFLARE_ACCOUNT_ID` e `CLOUDFLARE_API_TOKEN`. A pasta `/startup-se`, citada pelo fundador, não existe.
 - O token enxerga 18 domínios da conta e pode ler e editar DNS e configurações de zona em todos.
-- **`brot.markets` não está na conta e não responde no DNS público.** O domínio ainda não foi comprado ou não foi
-  apontado para o Cloudflare.
+- **Na manhã de 5/10/2026, `brot.markets` não estava na conta nem respondia no DNS público.** À noite, estava: ver a
+  seção 2.1.
 
 ## 2. O que foi criado em 5 de outubro de 2026
 
@@ -84,6 +84,51 @@ Depois da criação, o painel do `agent-rails` seguia ativo, os 15 contêineres 
 
 Para desfazer tudo: `sudo userdel -r brot`, `sudo rm -rf /srv/brot-markets /etc/brot-markets`.
 
+## 2.1 O que foi criado em 5 de outubro de 2026, à noite: o site provisório
+
+O fundador avisou que o domínio estava comprado e na conta, e pediu a página "em breve" com o deck em `/pitch`.
+
+**O domínio, como foi encontrado (FATO, consulta à API do Cloudflare).**
+
+| Item | Valor |
+|---|---|
+| Zona `brot.markets` | Ativa, plano gratuito, criada em 5/10/2026. Servidores de nome do Cloudflare |
+| Registros de DNS | Dois, herdados do registrador: `brot.markets` e `*.brot.markets`, os dois apontando para a página de estacionamento do Porkbun, sem passar pelo Cloudflare |
+| HTTPS | Modo "full". "Sempre HTTPS" desligado. TLS mínimo 1.0 |
+| Roteamento de email | Não configurado |
+| O que o endereço mostra | A página de estacionamento do registrador (resposta 200) |
+
+**O que foi criado no servidor.** Nenhum pacote instalado e nenhuma porta aberta para fora.
+
+| O que | Dono e permissão | Para quê |
+|---|---|---|
+| Unidade `brot-landing.service` | `/etc/systemd/system/`, root | Roda `services/landing/server.mjs` como o usuário `brot`, em `127.0.0.1:4200`, com limite de 256 MB e meio processador |
+| `/etc/brot-markets/landing.env` | root, grupo `brot`, 0640 | Porta, endereço público e caminho da lista. Sem segredo |
+| `/var/lib/brot-markets/leads` | `brot`, 0700 | A lista de espera (`leads.jsonl`, 0600). É dado pessoal |
+
+Conferido no servidor: os 21 testes passam com o Node de lá; `/healthz`, a página e `/pitch/` respondem 200; uma
+inscrição de teste foi gravada e apagada; o serviço usa 15 MB; o painel do outro projeto e os 15 contêineres
+seguiam ativos.
+
+**O que foi criado no Cloudflare.** Um túnel chamado `brot-markets` (identificador
+`8f186c9a-90b5-4ea1-a8f2-4997204c9095`), só do projeto. Está **inativo**: não tem rota nem conector.
+
+**O que falta para o endereço abrir.** O sistema de permissões da sessão recusou estas ações, e elas esperam a
+autorização do fundador:
+
+1. Instalar o `cloudflared` como arquivo único em `/srv/brot-markets/bin`, sem pacote do sistema. A versão escolhida
+   é a 2026.9.3, de 24/9/2026, e não a 2026.10.0, que saiu horas antes. Conferir o SHA-256 publicado na página da
+   versão.
+2. Gravar o token do túnel em `/etc/brot-markets/tunnel.env` (root, 0600) e ligar a unidade `brot-tunnel.service`,
+   que está em `services/landing/deploy/`.
+3. Definir as rotas do túnel: `brot.markets` e `www.brot.markets` para `http://127.0.0.1:4200`.
+4. Trocar o registro de `brot.markets` pelo endereço do túnel, criar o de `www` e apagar o curinga `*.brot.markets`,
+   que hoje leva qualquer subdomínio ao estacionamento do registrador.
+5. Ligar "Sempre HTTPS" e subir o TLS mínimo para 1.2.
+
+Para desfazer esta parte: parar e desabilitar a unidade `brot-landing`, apagar a unidade, o `landing.env` e a pasta
+`leads`, e apagar o túnel `brot-markets` no painel do Cloudflare.
+
 ## 3. Inferências (minhas, a validar no plano técnico)
 
 - **O servidor aguenta os serviços do Brot Markets.** Um site em Next.js e dois ou três serviços pequenos em Node
@@ -101,9 +146,8 @@ Para desfazer tudo: `sudo userdel -r brot`, `sudo rm -rf /srv/brot-markets /etc/
 
 ## 4. Perguntas em aberto
 
-1. O domínio `brot.markets` foi comprado? Se sim, falta colocá-lo na conta do Cloudflare. Se não, qual endereço o
-   projeto usa enquanto isso?
+1. ~~O domínio `brot.markets` foi comprado?~~ Respondida em 5/10/2026: comprado e na conta do Cloudflare.
 2. O Ronaldo também usa este servidor. Ele já sabe que o Brot Markets vai morar lá?
-3. O túnel do Cloudflare: usar o que já existe, que pertence ao outro projeto, ou criar um só do Brot Markets? Um
-   túnel próprio mantém a regra de não mexer no que é dos outros.
+3. ~~O túnel do Cloudflare: usar o que já existe ou criar um só do Brot Markets?~~ Decidido no plano técnico: um
+   túnel próprio. Criado em 5/10/2026, ainda inativo (seção 2.1).
 4. Onde fica o segundo serviço agendado.

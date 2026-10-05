@@ -454,7 +454,7 @@ de regra pedem decisão do fundador; as de tela vão para o `DESIGN-DIRECTION.md
 
 | # | O que o produto pede | O que falta |
 |---|---|---|
-| L-01 | Um idioma para o site | O protótipo está em inglês e as frases decididas, em português. Não há decisão |
+| L-01 | Um idioma para o site | O protótipo está em inglês e as frases decididas, em português. Não há decisão. O site provisório de 5/10/2026 (`services/landing`) está em inglês, por escolha provisória de quem o construiu |
 | L-02 | Carteira conectada e "minhas apostas" | A tela com cada aposta, o lado, o valor, o retorno estimado, o estado e o que já foi recebido |
 | L-03 | A confirmação da aposta | Onde aparecem os avisos obrigatórios e o texto do aviso de dinheiro preso |
 | L-04 | As telas dos estados | "Fechada", "em revisão", "paga" e "anulada". O nome do estado durante a disputa: P1 §3.1 não tem um para o pagamento pausado. Quem grava "anulada" fora da janela de 6 horas |
@@ -470,7 +470,7 @@ de regra pedem decisão do fundador; as de tela vão para o `DESIGN-DIRECTION.md
 | L-14 | A disputa antes da fase 1.2 | Se a etapa 2 já vale na rede principal ou só com a arbitragem interna. O segundo oráculo não foi escolhido (P4 §5.3) |
 | L-15 | O pagamento que não chegou | Como a pessoa é avisada do valor reservado e como recebe (P4 §4.5) |
 | L-16 | Avisar e lembrar, sem cadastro | Não há canal para avisar de resolução, pagamento ou anulação, nem lugar para a lista "Saved" |
-| L-17 | A página de sugestões pelo X | A fase em que entra, o desenho, o texto de orientação e a guarda do nome de usuário |
+| L-17 | A página de sugestões pelo X | A fase em que entra, o desenho, o texto de orientação e a guarda do nome de usuário. A conta informada pelo fundador em 5/10/2026 é `x.com/brotmarkets`; o site provisório já aponta para ela e convida a sugerir por lá |
 | L-18 | As páginas do Cloak e do SODAX | O desenho das duas e o aviso de carteira sem SOL |
 | L-19 | O teto global | O primeiro valor e o que a tela diz quando ele é atingido |
 | L-20 | O bloqueio por país | O que a tela mostra com o interruptor ligado |

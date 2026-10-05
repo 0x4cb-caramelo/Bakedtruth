@@ -630,6 +630,35 @@ Sem dado pessoal: o programa (só chaves públicas), o keeper e o banco, que cop
 visitas; se entrar, as nove perguntas voltam. O relatório do parceiro traz volume e número de carteiras, sem
 endereços.
 
+### 8.1 O site provisório: o email da lista de espera
+
+Em 5/10/2026 o fundador pediu uma página "em breve" com captura de emails (`services/landing`). É o primeiro dado
+pessoal que o projeto guarda fora da rede. As nove perguntas, respondidas antes do merge:
+
+| Pergunta | Resposta |
+|---|---|
+| 1. Que dado | O endereço de email, a data e a hora da inscrição e a versão da frase de consentimento. Nada mais: nem IP, nem navegador, nem carteira |
+| 2. Por quê | Avisar quando as apostas abrirem na devnet e, depois, quando o produto abrir com dinheiro real. A base é o consentimento, dado ao enviar o formulário, que traz a frase logo abaixo do campo |
+| 3. Onde fica | Um arquivo de texto, `/var/lib/brot-markets/leads/leads.jsonl`, no servidor do projeto, nos Estados Unidos. A página de privacidade diz o país |
+| 4. Quem acessa | O serviço do site, pelo usuário `brot`, e quem administra o servidor: Lucas e Ronaldo. Os outros projetos do servidor não leem a pasta |
+| 5. Controle | Permissão de arquivo (pasta 0700, arquivo 0600). Não há painel nem rota que liste a lista. A API responde "ok" a quem já está inscrito e a quem pede para sair sem estar, para não revelar quem está na lista |
+| 6. Retenção | Até a pessoa sair, ou doze meses depois da inscrição. O serviço apaga sozinho as linhas vencidas, ao iniciar e a cada 24 horas |
+| 7. Logs | O serviço registra só contagens ("lead added (total N)"). Nunca o email, nunca o IP. O endereço do visitante serve de chave do limitador, em memória, por um minuto. Os registros do Cloudflare seguem a conta do Cloudflare **[AC]** |
+| 8. Exclusão e exportação | O formulário de `/privacy` apaga na hora. Exportação a pedido, pelo X: o registro são dois campos. Não há cópia de segurança do arquivo, então apagar é definitivo; se um dia houver cópia, o prazo dela entra aqui |
+| 9. Documento ou consentimento | Página `/privacy`, em inglês, e a frase de consentimento com versão (`CONSENT_VERSION`). O site não tem estatística de visitas nem cookies |
+
+**Riscos aceitos, com o motivo.**
+
+- **Sem confirmação por email.** Alguém pode inscrever o endereço de outra pessoa. A consequência é um email de
+  aviso, e a pessoa sai pelo formulário. Confirmar exigiria um serviço de envio, que o projeto ainda não tem.
+- **Sair sem prova de posse.** Quem conhece um endereço pode tirá-lo da lista. O dano é não receber o aviso.
+- **O texto de privacidade não passou por advogado**, e não nomeia uma empresa, porque ela ainda não existe. Entra na
+  avaliação jurídica de antes da rede principal (L-20, L-21).
+- **O canal de contato é o X.** Falta um endereço de email do domínio.
+
+A decisão anterior do fundador de que a lista de investidores é de contatos de negócio (P2) não cobre esta lista:
+aqui se inscrevem pessoas.
+
 ## 9. Testing strategy
 
 | Camada | O que se testa | Ferramenta |
@@ -731,8 +760,12 @@ Alternativas descartadas: o agendador do GitHub, que tem intervalo mínimo de 5 
 tarefas, e o da Vercel, que só roda a cada minuto no plano pago **[F]** (`saida-fechamento-cron-e-perguntas.md`
 §3.2). Qual provedor e a que custo: **[Q]** 8.
 
-**Domínio.** `brot.markets` não está na conta do Cloudflare nem responde no DNS público **[F]**. Sem ele o túnel
-não tem endereço: **[Q]** 11.
+**Domínio.** `brot.markets` foi comprado e está na conta do Cloudflare desde 5/10/2026 **[F]**
+(`servidor-e-dominio.md`). O estado do túnel e do DNS está nesse mesmo arquivo.
+
+**Site provisório.** Enquanto o site de verdade não existe (Sprint 09), o endereço serve `services/landing`: uma
+página "em breve" com lista de espera e o deck em `/pitch`. É Node puro, sem dependências, na porta `127.0.0.1:4200`
+que o site vai herdar. Sai quando o site entrar.
 
 ## 13. Risks
 
@@ -779,6 +812,12 @@ das doze respostas. Tinha sido avisado de que, sem resposta em contrário, vale 
 não têm padrão possível e seguem abertos: a verba e o fornecedor da pergunta 8, a compra do domínio da pergunta 11
 e os nomes da pergunta 12.
 
+**Respostas de 5/10/2026, à noite.** Pergunta 11: o domínio foi comprado e está na conta do Cloudflare ("o domínio
+já foi comprado e configurado em nosso cloudflare"). Pergunta 12: as chaves ficam com o Lucas e o Ronaldo ("tem eu e
+o Ronaldo"); qual dos dois guarda a chave de atualização na devnet no dia da publicação se define na Sprint 05, e a
+leitura de que os dois têm chave de equipe é desta equipe técnica, a confirmar. Segue aberta a verba e o fornecedor
+da pergunta 8.
+
 | # | Pergunta | Opções | Recomendação |
 |---|---|---|---|
 | 1 | Quem pode acionar a leitura do resultado e o envio dos pagamentos? Em nenhuma opção há botão no site | (A) Só os nossos dois serviços. (B) Qualquer carteira, direto na rede | **B.** Quem aciona não escolhe resultado, valor nem destino, e se os dois serviços caírem alguém de fora aciona |
@@ -803,7 +842,7 @@ e os nomes da pergunta 12.
 | T3 | Tamanho do lote de pagamentos e o processamento de cada instrução | B4 |
 | T4 | `emit!` ou `emit_cpi!`; fuzzing dedicado | Antes da auditoria |
 | T5 | Provedores de RPC (um por keeper e o do repasse) e o serviço de email | B6 |
-| T6 | Como o túnel roda sem docker e sem root | B6 |
+| T6 | Como o túnel roda sem docker e sem root. **Desenhado em 5/10/2026, para o site provisório:** o `cloudflared` é um arquivo único em `/srv/brot-markets/bin`, sem pacote do sistema, e roda como o usuário `brot` numa unidade do systemd (`services/landing/deploy/brot-tunnel.service`). Se o país do visitante chega ao servidor (C9) segue a conferir | B6 |
 | T7 | Produto de carteira com várias assinaturas, com espera pública | B9 |
 | T8 | Segundo oráculo para a disputa em pergunta de preço (L-14) | B9 |
 | T9 | Migração para `@solana/kit`; fechar ou guardar a conta `Question` | Depois da devnet |
