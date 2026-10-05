@@ -136,7 +136,7 @@ Leia com `cat` ou `sed -n` pelo Bash; a ferramenta Read devolve só a primeira l
 8. `docs/business/_review/wave-3-coordinator.md`: procure por "OBJ-" para a lista completa das objeções.
 9. `knowledge-base/tecnologia/privacidade-entre-redes-e-x.md` e
    `knowledge-base/tecnologia/saida-fechamento-cron-e-perguntas.md`.
-10. `docs/business/BUSINESS-PLAN.md`, capítulos 11 a 16 (linhas 3077 a 4414): a versão anterior.
+10. `docs/business/_review/BUSINESS-PLAN-v0.0.1.md`, capítulos 11 a 16 (linhas 3077 a 4414): a versão anterior.
 11. `CLAUDE.md` na raiz do repositório: descreve o programa atual e as regras de trabalho do projeto.
 
 ## 7. Regras de escrita

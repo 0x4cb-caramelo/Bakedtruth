@@ -501,7 +501,8 @@ já negociou 10.000 dólares (FATO, documentação). A regra daqui é mais gener
 do prazo.
 
 O risco que sobra é a autoindicação. Sem cadastro, uma pessoa abre duas carteiras, indica a si mesma e recebe de
-volta 20% da própria taxa. A trava é trabalho da Parte 4.
+volta 20% da própria taxa. Num produto que só conhece carteiras não há trava para isso. O fundador aceitou o
+risco: no pior caso custa 0,74% do volume (Parte 4, seção 4.7).
 
 ### 4.5 Fundo de prêmios
 
@@ -563,7 +564,8 @@ Bitcoin em caixa, estava 38% abaixo do custo em 30 de junho de 2026 (FATO SECUND
 
 A consequência prática: a tesouraria não pode ser a reserva que paga as contas num mês ruim. A decisão vale. A
 revisão do mês 12 é a hora de olhar, com dados reais, se a base continua sendo a taxa bruta ou passa a ser a
-sobra. Como guardar o Bitcoin é assunto da Parte 4.
+sobra. A guarda está decidida (Parte 4, seção 4.9): os 25% ficam em USDC, numa conta separada, até a
+empresa ter conta em corretora; daí em diante, compra mensal de Bitcoin, com regra escrita.
 
 ### 4.7 Recompra, em espera
 

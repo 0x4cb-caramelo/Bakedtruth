@@ -348,8 +348,8 @@ taxa". Quem apostou 100 recebe 100. O precedente é o PancakeSwap Prediction, ta
 quando a rodada é cancelada (FATO, documentação do PancakeSwap).
 
 **Decisão: o prêmio do patrocinador nesses dois casos.** No pote de um lado só e na pergunta anulada, o prêmio
-volta inteiro ao patrocinador ("ok"). O destino dos 30% que ficam com a plataforma nesses dois casos não foi
-decidido; a Parte 4 fecha esse detalhe.
+volta inteiro ao patrocinador ("ok"). Os 30% da plataforma seguem a causa (Parte 4, seção 4.8): ela fica com
+eles no pote de um lado só, porque a divulgação foi entregue, e devolve na pergunta anulada por falha dela.
 
 ### 3.5 Fechamento das apostas
 

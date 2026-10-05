@@ -148,7 +148,7 @@ Leia com `cat` pelo Bash; a ferramenta Read devolve só a primeira linha destes 
 6. `knowledge-base/market/modelos-de-token.md`, inteiro.
 7. `knowledge-base/market/monetizacao-e-tesouraria.md`: só o que tocar recompra, repasse e tesouraria.
 8. `docs/business/_review/wave-2-compliance.md`: o que tocar tokens.
-9. `docs/business/BUSINESS-PLAN.md`, capítulo 8 (linhas 2208 a 2577): a versão anterior, para saber o que existia e
+9. `docs/business/_review/BUSINESS-PLAN-v0.0.1.md`, capítulo 8 (linhas 2208 a 2577): a versão anterior, para saber o que existia e
    quais objeções (OBJ-11, OBJ-12 e vizinhas) foram registradas. `docs/business/_review/wave-3-coordinator.md` tem a
    lista completa das objeções; procure por "OBJ-" e por "token".
 

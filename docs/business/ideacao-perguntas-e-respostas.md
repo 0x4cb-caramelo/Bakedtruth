@@ -48,7 +48,25 @@ Registro completo, com as contas, em [`_review/correcoes-bp-v0.0.2-partes-1-e-2.
   (7) venda privada depois de três meses seguidos com a operação paga, de 60 a 90 dias antes do lançamento do B.
 - **Os quatro testes antes do lançamento do token A** (carteira do fundo na divisão da taxa de criador, ferramentas
   de trava com o padrão Token-2022, termos completos do pump.fun, destino do fundo se a empresa parar): "ok".
-- **Sem pendência do fundador nas Partes 1, 2 e 3.**
+- **Construção, as oito propostas da Parte 4** (todas aprovadas em 5 de outubro):
+  1. Ordem de construção: núcleo primeiro. "Perfeito, e as auditorias virão depois. Eles não precisam estar dentro
+     dos prazos do hackathon."
+  2. Rede principal só com os três critérios cumpridos por inteiro; se faltar, a data anda: "isso aí".
+  3. Carteira com duas assinaturas de três, com os três sócios: "apesar de no hackathon a gente se apresentar apenas
+     como uma pessoa, na prática real somos três sócios, então esse plano é bom".
+  4. Teto global baixo, subindo por degraus: "concordo". O primeiro valor ainda não foi fixado.
+  5. Avaliação jurídica antes do país e da empresa; bloqueio por país construído como interruptor: "perfeito e
+     concordo".
+  6. Termo curto com o Ronaldo agora e acordo completo com a empresa: "sim, isso, e vamos deixar tudo em nome da
+     empresa".
+  7. Os 30% do patrocínio: a plataforma fica com eles no pote de um lado só e devolve na pergunta anulada por falha
+     dela: "perfeito".
+  8. Tesouraria em USDC numa conta separada no começo, Bitcoin depois, com regra escrita: "perfeito, isso aí".
+- **Hackathon Colosseum:** prazo em 12 de outubro de 2026, confirmado por ele: "é isso mesmo, e vai dar certo,
+  confia".
+- **Autoindicação** (uma pessoa com duas carteiras indicando a si mesma): risco aceito, sem trava: "isso memso".
+- **Sem pendência do fundador nas quatro partes.** Faltam valores e nomes: o primeiro valor do teto global e quem
+  assina a carteira.
 
 ### Alterações da revisão do BP v0.0.1 (4 de outubro de 2026) — prevalecem sobre o resto desta seção
 

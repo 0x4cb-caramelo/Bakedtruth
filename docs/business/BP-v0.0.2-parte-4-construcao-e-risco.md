@@ -4,8 +4,8 @@
 v0.0.1. É a última das quatro partes; as Partes 1 (produto), 2 (mercado e negócio) e 3 (tokens) estão prontas.
 
 **Como ler.** As marcas são as das outras partes. **Decisão** é o que o fundador já decidiu, com as palavras dele
-entre aspas. **Proposta, aguardando decisão** é o que este documento sugere e ele ainda não respondeu; são oito,
-numeradas de P1 a P8 e reunidas no capítulo 9. Fatos e números de fora trazem etiqueta: FATO (lido na fonte), FATO
+entre aspas. Este documento levou oito propostas, de P1 a P8. Em 5/10/2026 o fundador aprovou as oito
+recomendações; as respostas dele estão no capítulo 9. Fatos e números de fora trazem etiqueta: FATO (lido na fonte), FATO
 SECUNDÁRIO (lido em quem citou a fonte) e INFERÊNCIA (conta ou conclusão nossa). Onde a pesquisa não achou, o
 texto diz. Os valores estão em dólares.
 
@@ -89,14 +89,16 @@ O capítulo 8 traz a tabela inteira. Os cinco que mais pesam:
 - **A demanda não demonstrada.** **Decisão:** aos 180 dias na rede principal, com volume mensal de até 45 mil
   dólares, a empresa para ou muda de rumo ("ok").
 
-### 1.5 O que falta decidir
+### 1.5 O que foi decidido em 5/10/2026
 
-Oito propostas aguardam o fundador. Cada uma está explicada na seção indicada, com exemplo, opções e custo.
+As respostas do fundador estão na seção 9.1.
 
-- **P1** e **P2:** a ordem de construção, e o que conta como "pronto" nos três critérios (seções 3.3 e 3.4).
-- **P3** e **P4:** quem assina a carteira com várias assinaturas, e o valor do teto global (4.2 e 4.4).
-- **P5** e **P6:** país da empresa e tratamento do Brasil; acordo escrito com o Ronaldo (7.5 e 6.3).
-- **P7** e **P8:** os 30% do patrocínio que volta; a guarda da tesouraria e da carteira do serviço (4.8 e 4.9).
+- **P1** e **P2:** núcleo primeiro; a rede principal só abre com os três critérios cumpridos (3.3 e 3.4).
+- **P3** e **P4:** duas assinaturas de três, com os três sócios; teto global baixo, subindo por degraus (4.2 e 4.4).
+- **P5** e **P6:** avaliação jurídica antes do país e da empresa; termo curto agora, tudo em nome da empresa (7.5 e 6.3).
+- **P7** e **P8:** os 30% ficam ou voltam conforme a causa; tesouraria em USDC separado, Bitcoin depois (4.8 e 4.9).
+
+Falta fixar valores e nomes: o primeiro valor do teto, e quem assina a carteira.
 
 ## 2. O que existe e o que será construído
 
@@ -196,8 +198,8 @@ Esta é a tensão mais importante do documento. Quatro fatos a formam.
 1. **O ponto de partida.** Em 5/out/2026, o programa do pote não existe no repositório (FATO).
 2. **O hackathon.** **Decisão.** "estamos codando pro colosseum", com o Cloak para a trilha de privacidade. Os
    arquivos do projeto registram 12 de outubro de 2026 como prazo do Colosseum (FATO SECUNDÁRIO, briefing do
-   projeto e revisão de finanças; a página do evento não foi conferida). Se a data estiver certa, são sete dias a
-   partir deste documento. O fundador confirma.
+   projeto e revisão de finanças; a página do evento não foi conferida). O fundador confirmou a data em 5/10/2026: "é isso mesmo, e vai dar
+   certo, confia". São sete dias a partir deste documento.
 3. **O tamanho do trabalho.** A revisão de viabilidade dividiu a construção em doze etapas, sem datas: "tamanho é
    relativo, não é prazo nem horas". Com as decisões, duas etapas saíram, as da saída antecipada, e quatro peças
    entraram: janela de 6 horas, pagamento automático, indicação e Cloak integrado. Só para dar a medida: a uma
@@ -247,7 +249,7 @@ construção que dá mais chance a esse alvo (P1) e a regra que evita cumpri-lo 
 
 ### 3.3 O que entra no primeiro mês
 
-**Proposta, aguardando decisão (P1): a ordem de construção.**
+**Decisão (P1), de 5/10/2026: a ordem de construção.**
 
 **O que está sendo decidido.** Quais peças a equipe constrói primeiro, para o mês de devnet e o hackathon, e
 quais ficam para o intervalo entre a devnet e a rede principal.
@@ -266,7 +268,7 @@ perguntas.
 | (b) Tudo junto | Todas as peças no mesmo mês | Nenhuma fica bem testada. É o caminho em que o prazo mais provavelmente estoura (INFERÊNCIA) |
 | (c) Só o que já tem leitor | O pote com os quatro tipos prontos; o preço depois | Contraria a decisão de construir o preço primeiro. Abre sem o único tipo que ninguém controla |
 
-**Recomendação: a opção (a).** Três motivos.
+**Recomendação, aprovada: a opção (a).** Três motivos.
 
 - **Os parceiros gratuitos não precisam do módulo de patrocínio.** A pergunta do parceiro é uma pergunta aberta
   pela equipe, com selo e destaque. Não entra dinheiro dele. O módulo só faz falta quando alguém pagar.
@@ -279,7 +281,7 @@ perguntas.
 
 ### 3.4 O que conta como "pronto"
 
-**Proposta, aguardando decisão (P2): os três critérios e a regra da data.**
+**Decisão (P2), de 5/10/2026: os três critérios e a regra da data.**
 
 **O que está sendo decidido.** O que cada critério precisa mostrar para valer como cumprido, e o que acontece
 com o início do mês 2 se um deles não estiver.
@@ -305,7 +307,7 @@ A definição proposta:
 | (b) Abrir com uma auditoria | Abre com um relatório concluído e sem falha grave aberta, e com teto menor até o segundo chegar | Menos espera. Uma revisão a menos no período de maior risco |
 | (c) Abrir na data, com teto mínimo | Abre sem auditoria concluída | Contraria o critério decidido. Dinheiro real em código que ninguém de fora revisou |
 
-**Recomendação: a opção (a), com a (b) como exceção combinada de antemão.** O custo de esperar é conhecido e
+**Recomendação, aprovada: a opção (a), com a (b) como exceção combinada de antemão.** O custo de esperar é conhecido e
 pequeno: 5.500 dólares por mês. O custo de um erro é o dinheiro que estiver nos cofres e o nome da casa. Dois
 complementos. Perguntar agora às duas empresas o prazo, o escopo e de que versão precisam: essa resposta define
 o calendário. E fixar quando o mês começa a contar; a leitura proposta é o dia em que o programa do pote estiver
@@ -340,7 +342,7 @@ dinheiro de todos os cofres para si. Hoje, na devnet, os comandos usam uma carte
 computador (FATO, repositório). Quem guarda a chave do programa atual: não encontrado. Na rede principal, essa
 chave precisa estar numa carteira com várias assinaturas.
 
-**Proposta, aguardando decisão (P3): quem assina e quantas assinaturas.**
+**Decisão (P3), de 5/10/2026: quem assina e quantas assinaturas.**
 
 **O que está sendo decidido.** Quem são as pessoas, quantas precisam aprovar e quanto tempo se espera entre
 aprovar uma troca de código e ela valer.
@@ -358,7 +360,7 @@ três de três, uma perda trava o programa para sempre.
 | (b) Duas de três, com dois sócios e uma pessoa de fora | Um olhar independente em toda troca de código | Depende de achar essa pessoa. Decisões mais lentas |
 | (c) Três de cinco, com pessoas de fora | Aguenta mais perdas e mais pressão | Cinco pessoas para coordenar, numa equipe de três |
 
-**Recomendação: a opção (a) para abrir, com três condições.** Cada assinatura fica num aparelho físico próprio,
+**Recomendação, aprovada: a opção (a) para abrir, com três condições.** Cada assinatura fica num aparelho físico próprio,
 nunca num arquivo. Toda troca de código espera um prazo público antes de valer, para qualquer pessoa ver o que
 vem; de 24 a 48 horas é um ponto de partida. E a mesma carteira é o destino da taxa. A referência de segurança
 lida pela revisão técnica recomenda maioria simples e desaconselha "uma de várias" e "todas de várias" (FATO,
@@ -389,7 +391,7 @@ numa fase futura".
 O teto global é um limite para a soma de todos os potes abertos. Quando ela chega ao limite, o programa recusa
 apostas novas até alguma pergunta pagar.
 
-**Proposta, aguardando decisão (P4): o valor do teto e quando ele sobe.**
+**Decisão (P4), de 5/10/2026: o valor do teto e quando ele sobe.**
 
 **O que está sendo decidido.** O valor do primeiro dia com dinheiro real e a regra que o faz subir.
 
@@ -406,7 +408,7 @@ equilíbrio; um de 10.000 impede.
 | (b) Alto e fixo | Exemplo: 100.000 desde o primeiro dia | Dez vezes mais dinheiro exposto justamente no período menos testado |
 | (c) Só teto por pergunta | Sem teto global | Contraria as duas decisões |
 
-**Recomendação: a opção (a).** Os valores são exemplo; quem fixa é o fundador. Um critério para o primeiro
+**Recomendação, aprovada: a opção (a).** Os valores são exemplo; quem fixa é o fundador. Um critério para o primeiro
 degrau: quanto os sócios conseguiriam devolver do próprio bolso se o pior acontecesse. O teto é revisto na fase
 1.2.
 
@@ -474,12 +476,12 @@ aposta do indicado; e de qual aposta veio cada pedaço de taxa, para repartir os
 **A autoindicação.** Sem cadastro, uma pessoa abre duas carteiras e indica a si mesma. Num produto que só conhece
 carteiras, não há trava que impeça isso. Há limite para o ganho: 20% de desconto na própria taxa por 90 dias,
 mais a devolução, com teto de 5 dólares. Se todos fizessem isso, o custo seria de 0,74% do volume, que são 20%
-de 3,70% (INFERÊNCIA). O modelo da Parte 2 conta com um quarto disso. A medida é acompanhar: se a fatia da taxa
-que sai em indicação passar muito do previsto, a regra volta ao fundador.
+de 3,70% (INFERÊNCIA). O modelo da Parte 2 conta com um quarto disso. **Decisão.** O fundador aceitou o risco ("isso mesmo"): acompanha-se, e a
+regra volta a ele se a fatia da taxa que sai em indicação passar muito do previsto.
 
 ### 4.8 O patrocínio que volta
 
-**Proposta, aguardando decisão (P7): os 30% da plataforma quando o prêmio volta.**
+**Decisão (P7), de 5/10/2026: os 30% da plataforma quando o prêmio volta.**
 
 **O que está sendo decidido.** No pote de um lado só e na pergunta anulada, o prêmio volta inteiro ao
 patrocinador; isso está decidido. Falta dizer o que acontece com os 30% que ficaram com a plataforma.
@@ -496,13 +498,13 @@ só com apostas no SIM. Os 1.050 voltam ao patrocinador. E os 450?
 | (b) A plataforma devolve sempre | Voltam ao patrocinador | Selo, destaque e publicações saem de graça. Vira um jeito de ter divulgação sem pagar |
 | (c) Depende da causa | Ficam com a casa quando a pergunta esteve no ar e as contrapartidas foram entregues: pote de um lado só, ou anulação por causa de fora. Voltam quando a anulação veio de falha da casa | Exige registrar o motivo de cada anulação, o que a seção 4.3 já pede |
 
-**Recomendação: a opção (c).** Os 30% pagam a vitrine, e a vitrine foi entregue. Quando a falha é da casa, a
+**Recomendação, aprovada: a opção (c).** Os 30% pagam a vitrine, e a vitrine foi entregue. Quando a falha é da casa, a
 casa devolve. O efeito no modelo é pequeno: o cenário razoável conta com 150 dólares de patrocínio por mês, do
 mês 7 ao 12. Os 30% que ficam seguem para a operação, como decidido ("concordo").
 
 ### 4.9 A tesouraria e a carteira do serviço
 
-**Proposta, aguardando decisão (P8): onde fica guardado o dinheiro da empresa.**
+**Decisão (P8), de 5/10/2026: onde fica guardado o dinheiro da empresa.**
 
 **O que está sendo decidido.** Duas guardas: a da tesouraria, que recebe 25% da taxa em Bitcoin "desde o dia
 zero", e a da carteira que paga as taxas de rede.
@@ -520,7 +522,7 @@ três primeiros meses e chega a 18.038 no mês 12 (INFERÊNCIA, modelo da Parte 
 | (b) Bitcoin emitido na Solana | Uma versão do Bitcoin que circula na Solana, na mesma carteira, desde o primeiro dia | A reserva passa a depender de quem emite essa versão |
 | (c) Bitcoin deixado na corretora | A corretora guarda | A reserva fica na mão de um terceiro, e só é possível com a empresa aberta |
 
-**Recomendação: a opção (a); a (b), se o fundador fizer questão do Bitcoin desde o primeiro dólar.** Nos dois
+**Recomendação, aprovada: a opção (a); a (b), se o fundador fizer questão do Bitcoin desde o primeiro dólar.** Nos dois
 casos, com regra escrita: quem assina, em que dia compra e em que situação vende.
 
 **A carteira do serviço.** Guarda pouco SOL e é reposta pela verba de infraestrutura. A Parte 1 já definiu que
@@ -606,7 +608,7 @@ O custo para o patrocinador é pequeno: sacar 500 custa 1,95; sacar 1.500, 4,95;
 |---|---|---|
 | Dono do produto e das regras | Lucas, o fundador | Decide o que este plano descreve e conduz a avaliação jurídica |
 | Responsável técnico | Ronaldo | **Decisão:** "o CTO é o Ronaldo". Recebe os alertas dos serviços. É o autor do programa atual |
-| Terceiro sócio | Sem nome nos arquivos lidos | Papel a definir |
+| Terceiro sócio | Sem nome nos arquivos lidos | Papel a definir. No hackathon a equipe se apresenta como uma pessoa; "na prática real somos três sócios" |
 | Escrever o programa e o site | A equipe, neste repositório, com assistentes de código | Decidido |
 | Propor e aprovar perguntas | Duas pessoas da equipe | Sem dono |
 | Conferir as resoluções na janela de 6 horas | Alguém da equipe | Sem dono |
@@ -635,7 +637,7 @@ ninguém" (Parte 3). Quatro pontos de concentração.
 
 ### 6.3 O acordo sobre o código
 
-**Proposta, aguardando decisão (P6): pôr por escrito o acordo com o Ronaldo.**
+**Decisão (P6), de 5/10/2026: pôr por escrito o acordo com o Ronaldo.**
 
 **O que está sendo decidido.** Se, antes de aproveitar trechos do código atual, os sócios escrevem de quem é o
 programa novo e em que condições o antigo é usado.
@@ -657,8 +659,8 @@ assinatura na carteira, e a quem pertence o programa que guarda o dinheiro dos u
 | (b) Um termo curto entre os sócios, agora | Uma página: o código novo pertence à empresa que será aberta; os trechos antigos seguem a licença, com o aviso de autoria; a dedicação de cada um; o destino de chaves e assinaturas se alguém sair | Uma conversa e uma página |
 | (c) Acordo de sócios completo | Com as participações de cada um | Só é possível com a empresa e o país definidos (P5) |
 
-**Recomendação: a (b) agora e a (c) junto com a abertura da empresa.** O fundador informou que faz a avaliação jurídica ele
-mesmo, então o termo não custa dinheiro. Ele evita ter essa conversa sob pressão.
+**Recomendação, aprovada: a (b) agora e a (c) junto com a abertura da empresa.** O termo não custa dinheiro e evita ter essa
+conversa sob pressão. **Decisão.** "vamos deixar tudo em nome da empresa": código, programa e chaves.
 
 ### 6.4 Empresa e custos
 
@@ -783,7 +785,7 @@ valem.
 
 ### 7.5 Empresa e Brasil
 
-**Proposta, aguardando decisão (P5): onde abrir a empresa e como tratar o Brasil.**
+**Decisão (P5), de 5/10/2026: onde abrir a empresa e como tratar o Brasil.**
 
 **O que está sendo decidido.** O país da empresa e o que o site faz com visitantes do Brasil no dia do dinheiro
 real: nada, bloqueio, e com ou sem material em português.
@@ -801,7 +803,7 @@ da operação é de 5.500 dólares por mês.
 | (c) Licença de jogo no exterior | Dezenas de milhares por ano | Exige identificar o usuário, o que contraria "sem kyc". Não cabe no orçamento |
 | (d) Avaliar primeiro, abrir depois | Zero até a avaliação | A abertura espera a avaliação e pode mover a data da rede principal |
 
-**Recomendação: a ordem da opção (d), com o bloqueio construído como interruptor.** Este documento não diz qual
+**Recomendação, aprovada: a ordem da opção (d), com o bloqueio construído como interruptor.** Este documento não diz qual
 estrutura a lei permite. Recomenda a ordem: primeiro a avaliação, que não custa dinheiro; depois o país e a
 empresa, que dependem dela. O mês de devnet, sem dinheiro real, é o tempo para isso. E o bloqueio por país entra
 no site como uma chave de liga e desliga, para a resposta da avaliação valer no mesmo dia.
@@ -853,20 +855,20 @@ Três leituras. Todo risco crítico tem uma proteção já decidida, e nenhuma e
 piora os outros: sob pressão de data, um critério vira formalidade. E a casa não tem reserva para devolver
 dinheiro quando a falha for dela; o teto global é o que limita esse valor.
 
-## 9. Decisões pendentes e objeções
+## 9. Decisões e objeções
 
-### 9.1 As oito propostas
+### 9.1 As oito decisões de 5/10/2026
 
-| # | O que decidir | Opções | Recomendação | Seção |
+| # | Assunto | Resposta do fundador | O que passa a valer | Seção |
 |---|---|---|---|---|
-| P1 | O que entra no primeiro mês | (a) núcleo primeiro; (b) tudo junto; (c) só o que já tem leitor | (a) | 3.3 |
-| P2 | O que é "pronto" nos três critérios, e a regra da data | (a) a data anda; (b) abrir com uma auditoria; (c) abrir na data com teto mínimo | (a), com a (b) como exceção combinada | 3.4 |
-| P3 | Quem assina a carteira e quantas assinaturas | (a) duas de três, os três sócios; (b) duas de três, com uma pessoa de fora; (c) três de cinco | (a), com aparelhos físicos e espera pública | 4.2 |
-| P4 | O valor do teto global | (a) baixo, subindo por degraus; (b) alto e fixo; (c) só por pergunta | (a); os valores são do fundador | 4.4 |
-| P5 | País da empresa e tratamento do Brasil | (a) abrir já, sem bloqueio; (b) com bloqueio; (c) licença de jogo; (d) avaliar primeiro | A ordem da (d), com o bloqueio como interruptor | 7.5 |
-| P6 | Acordo escrito com o Ronaldo | (a) nada agora; (b) termo curto; (c) acordo completo | (b) agora, (c) com a empresa | 6.3 |
-| P7 | Os 30% quando o prêmio volta ao patrocinador | (a) a casa fica sempre; (b) devolve sempre; (c) depende da causa | (c) | 4.8 |
-| P8 | Guarda da tesouraria e da carteira do serviço | (a) USDC separado, depois Bitcoin; (b) Bitcoin emitido na Solana; (c) na corretora | (a) | 4.9 |
+| P1 | O que entra no primeiro mês | "Perfeito, e as auditorias virão depois. Eles não precisam estar dentro dos prazos do hackathon" | Núcleo primeiro. As auditorias vêm depois do hackathon e antes da rede principal | 3.3 |
+| P2 | O que é "pronto", e a regra da data | "isso aí" | Os três critérios cumpridos por inteiro; se faltar, a data anda | 3.4 |
+| P3 | Quem assina a carteira | "na prática real somos três sócios, então esse plano é bom" | Duas de três, com os três sócios, aparelhos físicos e espera pública | 4.2 |
+| P4 | O teto global | "concordo" | Baixo, subindo por degraus. O primeiro valor ainda será fixado | 4.4 |
+| P5 | País da empresa e Brasil | "perfeito e concordo" | Avaliação jurídica primeiro; bloqueio por país construído como interruptor | 7.5 |
+| P6 | Acordo com o Ronaldo | "sim, isso, e vamos deixar tudo em nome da empresa" | Termo curto agora, acordo completo com a empresa. Código, programa e chaves em nome da empresa | 6.3 |
+| P7 | Os 30% quando o prêmio volta | "perfeito" | A casa fica com eles no pote de um lado só e devolve na pergunta anulada por falha dela | 4.8 |
+| P8 | Guarda da tesouraria | "perfeito, isso aí" | USDC em carteira separada no começo; Bitcoin depois, com regra escrita | 4.9 |
 
 ### 9.2 As objeções da v0.0.1 que tocam a construção
 
@@ -903,7 +905,7 @@ A v0.0.1 registrou 29 objeções. As Partes 1, 2 e 3 trataram 24. As cinco que f
 
 ### 9.4 O que vem depois deste plano
 
-1. As respostas do fundador às oito propostas.
+1. O primeiro valor do teto global e os nomes de quem assina a carteira.
 2. A avaliação jurídica, pela lista da seção 7.6, e o termo entre os sócios.
 3. A pergunta às duas empresas de auditoria: prazo, escopo e de que versão precisam.
 4. A apresentação resumida do plano, que é o passo seguinte do método.
