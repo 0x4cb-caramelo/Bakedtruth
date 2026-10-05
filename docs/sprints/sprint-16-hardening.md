@@ -31,6 +31,7 @@ que as duas empresas leem.
 - [ ] Domínio, Cloudflare, servidor e GitHub têm segundo fator com chave física; a `main` tem proteção de ramo.
 - [ ] T4 está decidida: `emit!` ou `emit_cpi!`, e se há fuzzing dedicado.
 - [ ] A versão candidata está marcada, com commit e hash, e foi enviada às duas empresas.
+- [ ] Cada item da seção "Herdado da Sprint 01" está feito, ou decidido por escrito com o motivo.
 - [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
 
 ## Entregas
@@ -67,6 +68,12 @@ degraus, que é operação depois da abertura.
 
 A conferência padrão e o teste aleatório sobre a versão candidata. O ensaio de pausa e de retomada na devnet, pela
 carteira 2 de 3.
+
+## Herdado da Sprint 01
+
+Da revisão adversarial do leitor de preço (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`, seção 1.8).
+
+- Antes da rede principal, saber quem controla a atualização dos programas da Pyth lá: a autoridade é o endereço derivado `6oXTdojyfDS8m5VtTaYB9xRCxpKGSvKJFndLUPV3V3wT`, e não foi conferido que programa ou carteira com várias assinaturas está por trás dele. Conferir também quem é a autoridade de governança gravada na configuração do receptor, que troca a fonte dos preços e o mínimo de assinaturas sem reinstalar o programa. O risco está na seção 13 do plano técnico.
 
 ## Herdado da Sprint 00
 

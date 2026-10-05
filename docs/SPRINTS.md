@@ -54,7 +54,8 @@ para o hackathon.
 
 ## 2. As sprints
 
-**Situação em 5/10/2026.** A Sprint 00 está concluída, com a tag `sprint-00`. Nenhuma outra começou. A próxima é a 01.
+**Situação em 5/10/2026.** As Sprints 00 e 01 estão concluídas, com as tags `sprint-00` e `sprint-01`. A 01 concluiu
+que a Pyth serve na devnet; a leitura no Surfpool, que ela pedia, não foi feita e passou para a 03. A próxima é a 02.
 
 | # | Sprint | Bloco | Depende de |
 |---|---|---|---|
@@ -141,11 +142,11 @@ Cada decisão aparece uma vez, na primeira sprint que ela trava.
 | Sprint | O que precisa de resposta |
 |---|---|
 | 00 | Aprovar o resumo de produto, o plano técnico e este roteiro. Dar o sinal para trazer o `upstream/main` |
-| 01, para fechar | Se a Pyth não servir na devnet: abrir com quatro tipos ou rever a decisão dos cinco (P1 §4.2) |
+| 01, para fechar | Se a Pyth não servir na devnet: abrir com quatro tipos ou rever a decisão dos cinco (P1 §4.2). **Não se colocou: a Pyth serve na devnet** |
 | 02 | **Q3:** aposta mínima, apostar nos dois lados, alcance da isenção do primeiro apostador (L-07). **Q12:** quem guarda a chave de atualização na devnet e quem tem chave de equipe |
-| 03 | **Q1:** quem pode acionar a leitura e o pagamento. **Q4:** o que conta como "encostou no alvo" |
+| 03 | **Q1:** quem pode acionar a leitura e o pagamento. **Q4:** o que conta como "encostou no alvo". **Da Sprint 01:** o limite de 30 segundos para a idade do preço vale também na devnet, onde a conta patrocinada chega a 64 segundos, ou vira parâmetro por pergunta. Recomendação: parâmetro por pergunta (inferência da nota de pesquisa, seção 3) |
 | 04 | **Q2:** o vencedor pode pedir o envio pela própria carteira (L-15) |
-| 06 | **Q8:** verba para o acesso pago à rede. **Q11:** o domínio. **Q12:** o Ronaldo saber que o projeto vai para o servidor |
+| 06 | **Q8:** verba para o acesso pago à rede. **Q11:** o domínio. **Q12:** o Ronaldo saber que o projeto vai para o servidor. **Da Sprint 01:** obter a chave do serviço de preços da Pyth, que só é necessária se o nosso serviço publicar preço. Recomendação: não obter antes de medir por dias a conta patrocinada, salvo se a resposta da 03 mantiver 30 segundos fixos na devnet |
 | 07 | **Q8:** o provedor da segunda máquina e o serviço de email, ou adiar o segundo serviço |
 | 08 | **Q7:** a fórmula dos pontos (L-09) |
 | -1 | Escuro oficial; tema padrão; idioma (L-01); gráfico da chance (L-23); aviso de dinheiro preso (L-03); selo e destaque (L-24); aprovar as telas redesenhadas |
@@ -169,8 +170,7 @@ resposta diz se o núcleo pode ser lido antes de a 14 e a 15 ficarem prontas.
 Sem data. Três degraus, cada um demonstrável.
 
 1. **00 → 01 → 02 → 03 → 04 → 05.** Um ciclo inteiro na devnet, acionado por script: abrir a pergunta, apostar,
-   resolver, passar a janela e pagar. Sem tela. Se a prova da 01 falhar, segue com quatro tipos, por decisão do
-   fundador.
+   resolver, passar a janela e pagar. Sem tela. A prova da 01 passou, então seguem os cinco tipos.
 2. **Mais a 06.** A resolução e o pagamento saem sozinhos.
 3. **Mais a 08, a -1, a 09, a 10 e a 11.** Uma pessoa de fora abre o site, vê as perguntas e aposta. Com a 12,
    acompanha até receber.

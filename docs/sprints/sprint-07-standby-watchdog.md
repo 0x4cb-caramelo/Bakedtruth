@@ -28,6 +28,8 @@ carteira e outro RPC.
       leitura diferente; posição reservada há mais de 7 dias.
 - [ ] Com os dois keepers ligados, a segunda chamada da mesma instrução recebe erro e nada muda (teste).
 - [ ] Ensaio na devnet: parar `brot-keeper.service`, ver o reserva assumir e o email chegar.
+- [ ] A vigia alerta quando o receptor da Pyth é reinstalado ou a configuração dele muda (seção "Herdado da Sprint
+      01"), ou está decidido por escrito, com o motivo, que isso fica para depois.
 - [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
 
 ## Entregas
@@ -64,6 +66,15 @@ keeper (16).
 ## Testes
 
 `bun test` da vigia, com o principal simulado como derrubado. O ensaio na devnet, com as duas máquinas.
+
+## Herdado da Sprint 01
+
+Da revisão adversarial do leitor de preço (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`, seção 1.8).
+
+- **A vigia olha também a Pyth.** O leitor de preço confia num programa de fora, o receptor `rec2HH...`. A vigia
+  acompanha o slot da última instalação dele (conta `3UV7w2yTaqVcUAbWm1KUXdcE1Ziw8CfyyCpZvhKFkPfX`) e a
+  configuração (fonte dos preços, mínimo de assinaturas). Se um dos dois mudar, alerta, e a equipe decide se pausa
+  as perguntas de preço.
 
 ## Riscos
 

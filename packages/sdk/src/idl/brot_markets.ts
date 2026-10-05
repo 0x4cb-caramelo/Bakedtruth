@@ -18,6 +18,26 @@ export type BrotMarkets = {
       "code": 6000,
       "name": "mathOverflow",
       "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6001,
+      "name": "readerWrongOwner",
+      "msg": "Account is not owned by the program this reader trusts"
+    },
+    {
+      "code": 6002,
+      "name": "readerBadLayout",
+      "msg": "Account data does not match the layout this reader expects"
+    },
+    {
+      "code": 6003,
+      "name": "priceNotFullyVerified",
+      "msg": "Price update was not fully verified by the Pyth receiver"
+    },
+    {
+      "code": 6004,
+      "name": "priceWrongFeed",
+      "msg": "Price update is for another feed than the one expected"
     }
   ],
   "constants": [

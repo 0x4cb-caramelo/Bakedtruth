@@ -8,9 +8,9 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **128** |
+| Arquivos mapeados | **133** |
 | Acima de 200 linhas | **30** ⚠️ |
-| Sem cabeçalho `Purpose:` | **103** ⚠️ |
+| Sem cabeçalho `Purpose:` | **102** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
 
@@ -168,14 +168,14 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`brot_markets.ts`](packages/sdk/src/idl/brot_markets.ts) | Program IDL in camelCase format in order to be used in JS/TS | 115 |
+| [`brot_markets.ts`](packages/sdk/src/idl/brot_markets.ts) | Program IDL in camelCase format in order to be used in JS/TS | 135 |
 
 ## `programs/brot-markets/src/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`constants.rs`](programs/brot-markets/src/constants.rs) | seeds, the collateral mint and the hard limits compiled into the program | 57 |
-| [`error.rs`](programs/brot-markets/src/error.rs) | every failure the program can return, one code per cause | 12 |
+| [`error.rs`](programs/brot-markets/src/error.rs) | every failure the program can return, one code per cause | 20 |
 | [`events.rs`](programs/brot-markets/src/events.rs) | Anchor events, one per instruction; the indexer rebuilds history from them | 6 |
 | [`lib.rs`](programs/brot-markets/src/lib.rs) | entry point of the Brot Markets program; declares the program id and wires the modules | 24 |
 
@@ -195,13 +195,22 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`mod.rs`](programs/brot-markets/src/readers/mod.rs) | on-chain readers that turn an account into a yes/no answer, ported from pred-provable (Sprint 03) | 6 |
+| [`cursor.rs`](programs/brot-markets/src/readers/cursor.rs) | bounds-checked little-endian reads over raw account data, for the readers. An account shorter than its layout is an error, never a panic | 56 |
+| [`mod.rs`](programs/brot-markets/src/readers/mod.rs) | on-chain readers that turn an account into a yes/no answer, ported from pred-provable (Sprint 03) | 10 |
+| [`price_touch.rs`](programs/brot-markets/src/readers/price_touch.rs) | read a Pyth `PriceUpdateV2` account into the price of one named feed, checking who wrote it and how well it was verified. The base of the "price of a large asse | 107 |
 
 ## `programs/brot-markets/src/state/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`mod.rs`](programs/brot-markets/src/state/mod.rs) | account layouts: config, cap, question, position (Sprint 02) | 6 |
+
+## `programs/brot-markets/tests/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`cursor.rs`](programs/brot-markets/tests/cursor.rs) | the bounds-checked cursor on its own. Readers of variable layouts lean on it, so "an error, never a panic" is proved here and not through one reader's fixed siz | 74 |
+| [`price_reader.rs`](programs/brot-markets/tests/price_reader.rs) | the price reader against real Pyth accounts captured from devnet, and against the malformed versions of them. A wrong account must be an error, never a panic | 160 |
 
 ## `programs/pred-provable/src/`
 
@@ -336,7 +345,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | Captures the mainnet accounts the resolver tests decode into tests/fixtures: real bytes, so the tests | 52 |
+| [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party programs actually write instead of a layout someone typed f | 145 |
 | [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns | 74 |
 | [`codemap.js`](scripts/codemap.js) | let an AI locate the right file without reading every file. Pairs with the 200-line limit in .claude/rules/code-style.md — small files plus a one-line index mea | 222 |
 | [`detach-os.ps1`](scripts/detach-os.ps1) | detach-os.ps1 — desconecta seu projeto do repositório AI Dev Operating System | 161 |
@@ -372,13 +381,14 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`brot_markets.ts`](target/types/brot_markets.ts) | Program IDL in camelCase format in order to be used in JS/TS | 115 |
+| [`brot_markets.ts`](target/types/brot_markets.ts) | Program IDL in camelCase format in order to be used in JS/TS | 135 |
 | [`pred_provable.ts`](target/types/pred_provable.ts) | Program IDL in camelCase format in order to be used in JS/TS | 3189 |
 
 ## `tests/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
+| [`fixtures.test.ts`](tests/fixtures.test.ts) | the captured accounts in tests/fixtures are exactly the ones index.json describes. Git shows a changed .bin only as "binary files differ", so a swapped fixture  | 34 |
 | [`helpers.ts`](tests/helpers.ts) | Only for the fixture names; the file itself is read at run time by `loadFixture` | 424 |
 | [`pred-provable.test.ts`](tests/pred-provable.test.ts) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 2799 |
 
