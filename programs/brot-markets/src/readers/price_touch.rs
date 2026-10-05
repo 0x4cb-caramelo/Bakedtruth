@@ -1,11 +1,12 @@
-//! Purpose: read a Pyth `PriceUpdateV2` account into a price, checking who wrote it and how well it
-//!          was verified. The base of the "price of a large asset" question type.
-//! Version: 0.0.1
+//! Purpose: read a Pyth `PriceUpdateV2` account into the price of one named feed, checking who wrote
+//!          it and how well it was verified. The base of the "price of a large asset" question type.
+//! Version: 0.0.2
 //! Sprint: 01 (price reader proof)
 //!
 //! Sprint 01 ships the read only. Freshness, the bet lock and the "touch" rule arrive in Sprint 03;
 //! until then nothing in the program calls this. The layout below was checked against real accounts
-//! on devnet and mainnet (knowledge-base/tecnologia/pyth-leitor-de-preco.md).
+//! on devnet and mainnet and against the IDL the receiver publishes on-chain
+//! (knowledge-base/tecnologia/pyth-leitor-de-preco.md).
 
 use anchor_lang::prelude::*;
 
@@ -30,7 +31,8 @@ pub const PRICE_UPDATE_V2_LEN: usize = 134;
 const VERIFICATION_FULL: u8 = 1;
 
 /// What the reader takes from a price update. `price` and `conf` are integers scaled by
-/// `10^exponent`: 11921844516 with exponent -8 is 119.21844516.
+/// `10^exponent`: 11921844516 with exponent -8 is 119.21844516. Nothing here is sanitised: `price`
+/// can be negative and `conf` can be any `u64`, so a rule that combines them has to widen first.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct PriceReading {
     pub feed_id: [u8; 32],
@@ -44,10 +46,17 @@ pub struct PriceReading {
     pub posted_slot: u64,
 }
 
-/// Reads a fully verified `PriceUpdateV2`. The caller still has to check `feed_id` against the
-/// question and `publish_time` against its own rule; this function only answers "is this a price
-/// the trusted receiver wrote, and what does it say".
-pub fn read_price_update(owner: &Pubkey, data: &[u8]) -> Result<PriceReading> {
+/// Reads a fully verified `PriceUpdateV2` of the feed the caller expects.
+///
+/// Anyone can post an update of any feed, of any age, through the receiver. An account that passes
+/// the owner and layout checks therefore proves only "Pyth signed this, for some asset, at some
+/// time". Naming the feed is part of the read so that a BTC price can never answer a SOL question
+/// by omission. The age is not checked here: the caller compares `publish_time` with its own rule.
+pub fn read_price_update(
+    owner: &Pubkey,
+    data: &[u8],
+    expected_feed_id: &[u8; 32],
+) -> Result<PriceReading> {
     require_keys_eq!(*owner, PYTH_RECEIVER_ID, BrotError::ReaderWrongOwner);
     require!(
         data.len() == PRICE_UPDATE_V2_LEN,
@@ -67,6 +76,7 @@ pub fn read_price_update(owner: &Pubkey, data: &[u8]) -> Result<PriceReading> {
     );
 
     let feed_id = cursor.take::<32>()?;
+    require!(feed_id == *expected_feed_id, BrotError::PriceWrongFeed);
     let price = cursor.i64()?;
     let conf = cursor.u64()?;
     let exponent = cursor.i32()?;
@@ -83,4 +93,14 @@ pub fn read_price_update(owner: &Pubkey, data: &[u8]) -> Result<PriceReading> {
         publish_time,
         posted_slot,
     })
+}
+
+/// The same read taken from the account itself, so the owner and the bytes cannot come from two
+/// different accounts. Instructions use this one.
+pub fn read_price_account(
+    account: &AccountInfo,
+    expected_feed_id: &[u8; 32],
+) -> Result<PriceReading> {
+    let data = account.try_borrow_data()?;
+    read_price_update(account.owner, &data, expected_feed_id)
 }

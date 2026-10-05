@@ -3,6 +3,7 @@
     "address": "Jito4APyf642JPZPx3hGc6WWJ8zPKtRbRs4P815Awbb",
     "owner": "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy",
     "length": 611,
+    "sha256": "8eec8173c29b1233722f76182fc0921c5a49d8bf005c8465e4ba7f298147d309",
     "slot": 452735324,
     "note": "JitoSOL SPL stake pool, fees all unset",
     "cluster": "mainnet"
@@ -11,6 +12,7 @@
     "address": "stk9ApL5HeVAwPLr3TLhDXdZS8ptVu7zp6ov8HFDuMi",
     "owner": "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy",
     "length": 611,
+    "sha256": "416bd557b776836fe4af57669964c8007781ec436a9931dd8b4e1c454ec96acb",
     "slot": 452735324,
     "note": "bSOL SPL stake pool, same layout",
     "cluster": "mainnet"
@@ -19,6 +21,7 @@
     "address": "8Pm2kZpnxD3hoMmt4bjStX2Pw2Z9abpbHzZxMPqxPmie",
     "owner": "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG",
     "length": 1112,
+    "sha256": "d57bde6f306944e8dfaa717bf74dfcb9a247878f0b4a1e7c27621a7d820150fc",
     "slot": 452735324,
     "note": "Meteora DAMM v2 SOL-USDC pool, 0.02% locked",
     "cluster": "mainnet"
@@ -27,6 +30,7 @@
     "address": "Ft8FD9gg1TdawhWijNzdkpYTiVL8ETfY6gAwS24bwYio",
     "owner": "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG",
     "length": 1112,
+    "sha256": "6e9eb82717f6ddbea6ee0602a1fa1084a34cbde179ff8f96f34bdae303abdda2",
     "slot": 452735324,
     "note": "Meteora DAMM v2 pool, 59.7% of liquidity locked",
     "cluster": "mainnet"
@@ -35,6 +39,7 @@
     "address": "5x38Kp4hvdomTCnCrAny4UtMUt5rQBdB6px2K1Ui45Wq",
     "owner": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
     "length": 679,
+    "sha256": "345ddda2c2797d32c7ebeba89290766e6154cb26575af0aabfcd5afaf01476b2",
     "slot": 452735324,
     "note": "Metaplex metadata of USDC: mutable, no creators",
     "cluster": "mainnet"
@@ -43,6 +48,7 @@
     "address": "C1BpuaMytZAbSCFf9WM2gm6fAm54Yh1gh32ieptrp12B",
     "owner": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
     "length": 679,
+    "sha256": "a811cc592812952a0027480f037f5b4db66de09225aee5e9003ea49b4a4178b4",
     "slot": 452735324,
     "note": "Metaplex metadata of WIF: immutable, no creators",
     "cluster": "mainnet"
@@ -51,6 +57,7 @@
     "address": "91tCv8sG8esgP5dVQ9WchuzBmojXbdaqxMxA16qt6CnE",
     "owner": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
     "length": 607,
+    "sha256": "d732e2759cf8ac7ab1637aa9794d8f15fb8283aa1ec7e85f66f228e70512a905",
     "slot": 452735324,
     "note": "Metaplex pNFT SMB #1301: immutable, 3 creators",
     "cluster": "mainnet"
@@ -59,6 +66,7 @@
     "address": "2zjfABAdNg7SuqvwpPR3jFH3p91SjH4LKsGfBQ2hdrc7",
     "owner": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
     "length": 607,
+    "sha256": "92fcdab75630ced91d15164b8344a24366570291a312999b6d515f068ee15bdd",
     "slot": 452735324,
     "note": "Metaplex pNFT Mad Lads #1725: mutable, 2 creators",
     "cluster": "mainnet"
@@ -67,6 +75,7 @@
     "address": "7AviUf9nL62mcxNbQGKm4nKDQnPjswo6c5MX4D57HmyE",
     "owner": "rec2HHDDnjLfj4kE7VyEtFA1HPGQLK33259532cRyHp",
     "length": 134,
+    "sha256": "b11292a20c878c50aa9491810da97269fa59a72fe2abba44d82c9e0fe55a9d4b",
     "slot": 507785675,
     "note": "Pyth PriceUpdateV2, SOL/USD, upgraded Core receiver, sponsored push feed",
     "cluster": "devnet"
@@ -75,6 +84,7 @@
     "address": "APgzQGGdv2qCgBkX6aHVkrGePtBVDDg68GiqaM7rmtf5",
     "owner": "rec2HHDDnjLfj4kE7VyEtFA1HPGQLK33259532cRyHp",
     "length": 134,
+    "sha256": "5774ae9940aee97c6a420870245eb2340fb07f09eebce4a65f90df74c8cc1427",
     "slot": 507785675,
     "note": "Pyth PriceUpdateV2, BTC/USD, upgraded Core receiver, sponsored push feed",
     "cluster": "devnet"
@@ -83,6 +93,7 @@
     "address": "7UVimffxr9ow1uXYxsr4LHAcV58mLzhmwaeKvJ1pjLiE",
     "owner": "rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ",
     "length": 134,
+    "sha256": "271e466d16e96610ca7a4c924a36791522c5283d3caf3acfeb43921420a802e8",
     "slot": 507785675,
     "note": "Pyth PriceUpdateV2, SOL/USD, pre-upgrade receiver: same layout, an owner the reader rejects",
     "cluster": "devnet"

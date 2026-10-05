@@ -33,6 +33,11 @@ export type BrotMarkets = {
       "code": 6003,
       "name": "priceNotFullyVerified",
       "msg": "Price update was not fully verified by the Pyth receiver"
+    },
+    {
+      "code": 6004,
+      "name": "priceWrongFeed",
+      "msg": "Price update is for another feed than the one expected"
     }
   ],
   "constants": [

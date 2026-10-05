@@ -1,26 +1,42 @@
 // Purpose: capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party
 //          programs actually write instead of a layout someone typed from memory.
-// Version: 0.1.0
+// Version: 0.2.0
 // Sprint:  01 (price reader proof); the mainnet set came from upstream pred-provable
 //
 // Usage:   bun run scripts/capture-fixtures.ts            every fixture, all clusters
 //          bun run scripts/capture-fixtures.ts pyth       only the fixtures whose name starts with "pyth"
 // MAINNET_RPC_URL and DEVNET_RPC_URL override the public endpoints. Re-run after an upstream upgrade and review the
 // diff. A filtered run leaves the other fixtures and their index entries untouched: re-capturing a live account
-// changes its bytes, and the tests that read it may assert on them.
+// changes its bytes, and the tests that read it may assert on them. The index records the SHA-256 of every file, and
+// tests/fixtures.test.ts fails when a .bin and its index entry disagree.
 
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { Connection, PublicKey } from "@solana/web3.js";
 
 type Cluster = "mainnet" | "devnet";
-type Entry = { address: string; owner: string; length: number; slot: number; note: string; cluster: Cluster };
+type Entry = {
+  address: string;
+  owner: string;
+  length: number;
+  sha256: string;
+  slot: number;
+  note: string;
+  cluster: Cluster;
+};
 
 // fileURLToPath, not URL.pathname: on Windows the pathname is "/F:/...", which is not a usable path.
 const OUT = fileURLToPath(new URL("../tests/fixtures/", import.meta.url));
 const RPC: Record<Cluster, string> = {
   mainnet: process.env.MAINNET_RPC_URL ?? "https://api.mainnet-beta.solana.com",
   devnet: process.env.DEVNET_RPC_URL ?? "https://api.devnet.solana.com",
+};
+// Third-party programs keep one address on every cluster, so an RPC URL pointing at the wrong network would
+// capture that network's bytes under the right name. The genesis hash is what tells the clusters apart.
+const GENESIS: Record<Cluster, string> = {
+  mainnet: "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d",
+  devnet: "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG",
 };
 
 /** name -> [address, what it is, cluster the bytes come from]. */
@@ -96,6 +112,8 @@ for (const cluster of ["mainnet", "devnet"] as const) {
   if (wanted.length === 0) continue;
 
   const connection = new Connection(RPC[cluster], "confirmed");
+  const genesis = await connection.getGenesisHash();
+  if (genesis !== GENESIS[cluster]) throw new Error(`the ${cluster} RPC answers for another cluster (${genesis})`);
   const { context, value } = await connection.getMultipleAccountsInfoAndContext(
     wanted.map((name) => new PublicKey(FIXTURES[name]![0])),
   );
@@ -103,16 +121,22 @@ for (const cluster of ["mainnet", "devnet"] as const) {
     const [address, note] = FIXTURES[name]!;
     const info = value[i];
     if (!info) throw new Error(`${name} (${address}) does not exist on ${cluster}`);
+    const owner = info.owner.toBase58();
+    // An account that changed hands is not the one the tests were written against. To accept a new owner on
+    // purpose, delete the entry from index.json and capture again.
+    const before = index[name];
+    if (before && before.owner !== owner) throw new Error(`${name}: owner was ${before.owner}, is now ${owner}`);
     writeFileSync(`${OUT}${name}.bin`, info.data);
     index[name] = {
       address,
-      owner: info.owner.toBase58(),
+      owner,
       length: info.data.length,
+      sha256: createHash("sha256").update(info.data).digest("hex"),
       slot: context.slot,
       note,
       cluster,
     };
-    console.log(`${name}: ${info.data.length} bytes, owner ${info.owner.toBase58()}, ${cluster} slot ${context.slot}`);
+    console.log(`${name}: ${info.data.length} bytes, owner ${owner}, ${cluster} slot ${context.slot}`);
   });
 }
 

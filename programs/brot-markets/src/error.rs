@@ -14,4 +14,6 @@ pub enum BrotError {
     ReaderBadLayout,
     #[msg("Price update was not fully verified by the Pyth receiver")]
     PriceNotFullyVerified,
+    #[msg("Price update is for another feed than the one expected")]
+    PriceWrongFeed,
 }
