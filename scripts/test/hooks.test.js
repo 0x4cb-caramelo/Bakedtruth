@@ -37,6 +37,9 @@ describe('block-secret-commit: deteta credencial com formato completo', () => {
     ['Slack', 'SLACK=xoxb-1234567890-abcdefghij'],
     ['Stripe', 'STRIPE=sk_live_abcdefghij0123456789'],
     ['chave privada', '-----BEGIN RSA PRIVATE KEY-----'],
+    // Built at run time so this file never holds something shaped like a real keypair.
+    ['par de chaves da Solana', `[${Array.from({ length: 64 }, (_, i) => (i * 7) % 256).join(',')}]`],
+    ['chave de API na URL', `RPC=https://rpc.example.com/?api-${'key'}=${'a1b2c3d4'.repeat(4)}`],
   ];
   for (const [label, line] of cases) {
     test(`bloqueia ${label}`, () => {
@@ -96,12 +99,41 @@ describe('block-secret-commit: só inspeciona linhas adicionadas', () => {
 });
 
 describe('block-secret-commit: arquivos proibidos no stage', () => {
-  for (const f of ['.env', '.env.local', '.env.production', 'certs/server.pem', 'id_rsa.key']) {
+  const blocked = [
+    '.env',
+    '.env.local',
+    '.env.production',
+    '.env.devnet',
+    'services/keeper/.env.mainnet',
+    'deploy/vps/keeper.env',
+    'target/deploy/brot_markets-keypair.json',
+    'keypair.json',
+    'wallets/id.json',
+    'certs/server.pem',
+    'id_rsa.key',
+  ];
+  for (const f of blocked) {
     test(`bloqueia ${f}`, () => assert.equal(scan('', [f]).length, 1));
   }
-  for (const f of ['.env.example', '.env.sample', '.env.template', 'src/index.ts']) {
+  const allowed = [
+    '.env.example',
+    '.env.sample',
+    '.env.template',
+    'app/.env.example',
+    'deploy/vps/keeper.env.example',
+    'src/index.ts',
+    'target/idl/brot_markets.json',
+  ];
+  for (const f of allowed) {
     test(`permite ${f}`, () => assert.equal(scan('', [f]).length, 0));
   }
+});
+
+describe('block-secret-commit: endereço público não é confundido com chave', () => {
+  test('vetor de 32 bytes, como os de um IDL, passa', () => {
+    const address = `[${Array.from({ length: 32 }, (_, i) => i).join(', ')}]`;
+    assert.equal(scan(diffAdding('target/idl/brot_markets.json', `"value": "${address}"`), []).length, 0);
+  });
 });
 
 describe('block-secret-commit: nunca retém o valor casado', () => {

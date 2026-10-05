@@ -9,7 +9,27 @@ as a bounty on an on-chain goal; anyone resolves the market by reading the targe
 irreversibly. No oracle, indexer or dispute window. The README is the source of truth for the economics, lifecycle and
 known limits; read it before changing program behavior.
 
-Bun workspace (root + `app/`), one Anchor program (`programs/pred-provable`), Next.js frontend (`app/`).
+Bun workspace (root, `app/`, `packages/*`, `services/*`), two Anchor programs (`programs/brot-markets`, new, and
+`programs/pred-provable`, frozen), Next.js frontend (`app/`).
+
+## State of the rewrite (read this before the rest)
+
+The product is being rebuilt as **Brot Markets**: a pot-based prediction market. People bet USDC on YES or NO, the
+winners split the pot, the house keeps 10% of the losing side, and there are no outcome tokens, no pool and no early
+exit. The sections below still describe the earlier program (`programs/pred-provable`, sponsor-subsidised YES
+tokens), which is **frozen**: it stays in the workspace only until its readers are ported.
+
+- What to build: `docs/product/PRODUCT-BRIEF.md`. How: `docs/technical/TECHNICAL-PLAN.md`. In what order:
+  `docs/SPRINTS.md` and `docs/sprints/`. Why: `docs/business/BUSINESS-PLAN.md`. The founder's answers in
+  `docs/business/ideacao-perguntas-e-respostas.md` outrank the README and the old code.
+- The new program is `programs/brot-markets` (id `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN`). After Sprint 00
+  it is a skeleton with no instruction. Its client library is `packages/sdk`; `app/lib` moves there in Sprint 05.
+- New program code follows the house rules: one instruction and one reader per file, under 200 lines, a
+  `Purpose:` header, checked math (clippy denies unchecked arithmetic and truncating casts in that crate), and
+  `init-if-needed` off unless an instruction justifies it.
+- The program is built in CI, never on the shared server. A machine without the pinned toolchain takes the
+  generated IDL from the `idl-preview-<run id>` artifact of a pull-request run and commits it.
+- `gh` resolves to the upstream repository here. Pass `--repo 0x4cb-caramelo/Bakedtruth` on every `gh` command.
 
 ## Commands
 
@@ -18,12 +38,15 @@ Bun is at `~/.bun/bin` and may not be on PATH in tool shells (`export PATH="$HOM
 
 ```bash
 bun install
-bun run build:program      # NO_DNA=1 anchor build, then copies the IDL into app/lib/idl (sync-idl)
+bun run build:program      # NO_DNA=1 anchor build (both programs), then sync-idl: app/lib/idl and packages/sdk/src/idl
 bun run test               # bun test tests/  (TypeScript, LiteSVM, in-process; no validator)
-bun run test:rust          # cargo test -p pred-provable --features no-entrypoint  (anchor-litesvm)
-bun run lint               # prettier --check on tests/ and scripts/ only
+bun run test:rust          # cargo test for pred-provable and brot-markets, --features no-entrypoint
+bun run lint               # prettier --check on tests/, scripts/ and packages/
 cargo fmt --all -- --check
-cargo clippy -p pred-provable --all-targets --features no-entrypoint -- -D warnings
+cargo clippy --locked -p pred-provable --all-targets --features no-entrypoint -- -D warnings
+cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint -- -D warnings
+cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint,mainnet -- -D warnings
+node scripts/codemap.js --check && node scripts/ci-secret-scan.js origin/main
 bunx tsc --noEmit          # typecheck tests/scripts
 bun run dev                # Next.js app (cp app/.env.example app/.env.local first)
 cd app && bun run lint && bun run build
@@ -32,7 +55,8 @@ cd app && bun run lint && bun run build
 Single tests: `bun test tests/ -t "<describe or test name substring>"`; `cargo test -p pred-provable --features no-entrypoint <name>`.
 
 Both test suites load `target/deploy/pred_provable.so`, so **run `anchor build` before testing** after any program change.
-CI (`.github/workflows/ci.yml`) runs all of the above and fails if the committed IDL is stale.
+CI (`.github/workflows/ci.yml`) runs all of the above and fails if a committed IDL or `CODEMAP.md` is stale, if
+`Cargo.lock` disagrees with the manifests, or if the branch adds something shaped like a credential.
 
 Devnet: `deploy:devnet`, `smoke:devnet` (full USDC lifecycle with the app's client stack), `seed:devnet` (demo markets).
 Scripts use `~/.config/solana/pred-provable-devnet.json` (`DEVNET_WALLET`, `DEVNET_RPC_URL` override).
@@ -46,8 +70,11 @@ Scripts use `~/.config/solana/pred-provable-devnet.json` (`DEVNET_WALLET`, `DEVN
 - Invariants while open: `yes_supply == no_supply + sponsor_no` and `vault == budget + yes_supply`. A randomized test
   checks these after every operation; preserve them in any new instruction.
 - `resolver.rs`: closed `ResolverKind` enum (no generic offset reader, deliberately rejected). Each variant checks the
-  owner/layout of its `metric_account`, which is locked at creation. Only irreversible or epoch-lagged metrics. Also
-  holds `require_trading_open`, the anti-sniping guard used by `buy_yes`, `add_liquidity` and `swap` (not by
+  owner/layout of its `metric_account`, which is locked at creation. Only irreversible or epoch-lagged metrics: nothing a
+  flash loan can move (pool reserves and live TVL were rejected on purpose; `RESOLVERS.md` has the reasoning, every
+  verified third-party layout and the roadmap). Variants are Borsh-tagged by position: append, never reorder. Layouts
+  with options or strings are read through the bounds-checked `Cursor`, never by slicing. Also holds
+  `require_trading_open`, the anti-sniping guard used by `buy_yes`, `add_liquidity` and `swap` (not by
   `remove_liquidity`, which is always open).
 - `outcome.rs`: market-PDA-signed minting/transfers of YES/NO/LP tokens and USDC vault deposits/payouts. All collateral
   moves use `transfer_checked`. Collateral mint is `USDC_MINT` (devnet Circle USDC by default; `--features mainnet`
@@ -72,6 +99,11 @@ edges, and the Baked mascot hopping between declared perches). A generic dashboa
 (loaded via `app/CLAUDE.md`) says this Next.js version has breaking changes: read `app/node_modules/next/dist/docs/`
 before writing app code.
 
+**In-app chat** (`app/app/api/chat/route.ts`, `app/components/chat/chat.tsx`, `app/lib/chat.ts`): a read-only explainer
+that streams from OpenRouter (`OPENROUTER_API_KEY`, optional `OPENROUTER_MODEL`, server-only in `app/.env.local`). The
+market page feeds it a text summary through `useChatContext`. It cannot sign or trade. The per-IP rate limit is
+in-memory, so a multi-instance deploy needs a shared store.
+
 ## Gotchas
 
 - `@solana/kit` is pinned `~8.3.0` (8.4.0 shipped with unpublished sub-packages); re-check before bumping.
@@ -83,6 +115,13 @@ before writing app code.
   warp to slot 1 and use absolute cutoff/deadline slots. Anchor 1.x decoded account/enum names are PascalCase.
 - LiteSVM cannot inject epoch stake (`sol_get_epoch_stake` returns 0), so `StakeAtLeast` YES is only testable on a real
   cluster.
+- The incinerator is not a lock: SPL Token lets anyone burn from, or close when empty, token accounts owned by the
+  incinerator or the system program. `LockedAtLeast` therefore reads the ATA of the program's `["lock"]` PDA. Injecting
+  token accounts with `setTokenAccount` hides this kind of bug; use the real Token program for behavior tests.
+- Third-party account layouts (stake pool, DAMM v2, Token Metadata) are tested on real mainnet bytes in
+  `tests/fixtures`, captured by `scripts/capture-fixtures.ts`. Re-run it after an upstream upgrade and read the diff.
+  Read their fields by copying bytes at pinned offsets; Anchor discriminators are name-derived and collide across
+  programs, so check the owner first.
 - App code under `app/lib` runs in browsers: `import { Buffer } from "buffer"` (no global Buffer). The wallet-adapter
   stylesheet loads after `globals.css`, so overrides need extra specificity. Single-column mobile grids need
   `grid-cols-1`.

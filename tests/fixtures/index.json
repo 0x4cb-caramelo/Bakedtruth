@@ -1,0 +1,58 @@
+{
+  "stakepool-jitosol": {
+    "address": "Jito4APyf642JPZPx3hGc6WWJ8zPKtRbRs4P815Awbb",
+    "owner": "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy",
+    "length": 611,
+    "slot": 452735324,
+    "note": "JitoSOL SPL stake pool, fees all unset"
+  },
+  "stakepool-bsol": {
+    "address": "stk9ApL5HeVAwPLr3TLhDXdZS8ptVu7zp6ov8HFDuMi",
+    "owner": "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy",
+    "length": 611,
+    "slot": 452735324,
+    "note": "bSOL SPL stake pool, same layout"
+  },
+  "damm-sol-usdc": {
+    "address": "8Pm2kZpnxD3hoMmt4bjStX2Pw2Z9abpbHzZxMPqxPmie",
+    "owner": "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG",
+    "length": 1112,
+    "slot": 452735324,
+    "note": "Meteora DAMM v2 SOL-USDC pool, 0.02% locked"
+  },
+  "damm-ft8fd9": {
+    "address": "Ft8FD9gg1TdawhWijNzdkpYTiVL8ETfY6gAwS24bwYio",
+    "owner": "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG",
+    "length": 1112,
+    "slot": 452735324,
+    "note": "Meteora DAMM v2 pool, 59.7% of liquidity locked"
+  },
+  "metadata-usdc": {
+    "address": "5x38Kp4hvdomTCnCrAny4UtMUt5rQBdB6px2K1Ui45Wq",
+    "owner": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
+    "length": 679,
+    "slot": 452735324,
+    "note": "Metaplex metadata of USDC: mutable, no creators"
+  },
+  "metadata-wif": {
+    "address": "C1BpuaMytZAbSCFf9WM2gm6fAm54Yh1gh32ieptrp12B",
+    "owner": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
+    "length": 679,
+    "slot": 452735324,
+    "note": "Metaplex metadata of WIF: immutable, no creators"
+  },
+  "metadata-smb-1301": {
+    "address": "91tCv8sG8esgP5dVQ9WchuzBmojXbdaqxMxA16qt6CnE",
+    "owner": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
+    "length": 607,
+    "slot": 452735324,
+    "note": "Metaplex pNFT SMB #1301: immutable, 3 creators"
+  },
+  "metadata-madlads-1725": {
+    "address": "2zjfABAdNg7SuqvwpPR3jFH3p91SjH4LKsGfBQ2hdrc7",
+    "owner": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
+    "length": 607,
+    "slot": 452735324,
+    "note": "Metaplex pNFT Mad Lads #1725: mutable, 2 creators"
+  }
+}

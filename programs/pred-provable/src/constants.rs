@@ -45,12 +45,24 @@ pub const BPS_DENOMINATOR: u64 = 10_000;
 #[constant]
 pub const MIN_STAKE: u64 = 1_000_000;
 
+/// Owner of every `LockedAtLeast` lock account: the PDA `[LOCK_SEED]` of this program. The program
+/// never signs for it, so tokens sent to its associated token accounts can never be moved, burned or
+/// closed. The incinerator is not a lock: SPL Token lets anyone burn from, or close, the token accounts
+/// it owns (and the system program's).
+#[constant]
+pub const LOCK_SEED: &[u8] = b"lock";
+
 pub const SPL_TOKEN_PROGRAM_ID: Pubkey = pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 pub const VOTE_PROGRAM_ID: Pubkey = pubkey!("Vote111111111111111111111111111111111111111");
 pub const ASSOCIATED_TOKEN_PROGRAM_ID: Pubkey =
     pubkey!("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
-/// Address with no private key. Tokens in an account it owns can never be moved again.
-pub const INCINERATOR_ID: Pubkey = pubkey!("1nc1nerator11111111111111111111111111111111");
+/// SPL stake pool program (JitoSOL, bSOL and most other Solana LSTs).
+pub const STAKE_POOL_PROGRAM_ID: Pubkey = pubkey!("SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy");
+/// Meteora DAMM v2 (cp-amm).
+pub const DAMM_V2_PROGRAM_ID: Pubkey = pubkey!("cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG");
+/// Metaplex Token Metadata. Not upgradeable.
+pub const TOKEN_METADATA_PROGRAM_ID: Pubkey =
+    pubkey!("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
 
 /// Packed size of an SPL Token `Mint` account.
 pub const SPL_MINT_LEN: usize = 82;

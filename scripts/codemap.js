@@ -84,16 +84,17 @@ function describe(text) {
   const head = text.split('\n').slice(0, 40);
 
   // 1. The documented convention: "Purpose: ...", possibly wrapped across lines.
-  const pi = head.findIndex((l) => /^\s*(?:[*#/;-]+\s*)?Purpose\s*:/i.test(l));
+  // `!` covers Rust inner doc comments (`//! Purpose:`), the form a module header takes.
+  const pi = head.findIndex((l) => /^\s*(?:[*#/;!-]+\s*)?Purpose\s*:/i.test(l));
   if (pi >= 0) {
-    let s = head[pi].replace(/^\s*(?:[*#/;-]+\s*)?Purpose\s*:\s*/i, '');
+    let s = head[pi].replace(/^\s*(?:[*#/;!-]+\s*)?Purpose\s*:\s*/i, '');
     for (let i = pi + 1; i < head.length; i++) {
-      const stripped = head[i].replace(/^\s*(?:[*#/;-]+\s*)?/, '');
+      const stripped = head[i].replace(/^\s*(?:[*#/;!-]+\s*)?/, '');
       if (!stripped.trim() || /^(Version|Sprint|Usage|Contract|Note)\s*:/i.test(stripped)) break;
       // Indentation marks the continuation, but it sits *after* the comment marker
       // (`#          more`, ` *          more`). Strip the marker without eating the
       // spaces that follow it, or hash-comment headers never continue.
-      if (/^\s{2,}/.test(head[i].replace(/^\s*[*#/;-]+/, ''))) s += ` ${stripped.trim()}`;
+      if (/^\s{2,}/.test(head[i].replace(/^\s*[*#/;!-]+/, ''))) s += ` ${stripped.trim()}`;
       else break;
     }
     return { text: clean(s), missingHeader: false };
@@ -125,7 +126,9 @@ function collect() {
     // lstat, not exists: a tracked symlink can point outside the repo, and reading it
     // would lift that file's first comment line into a committed CODEMAP.md.
     if (!fs.existsSync(abs) || fs.lstatSync(abs).isSymbolicLink()) continue;
-    const content = fs.readFileSync(abs, 'utf8');
+    // Normalise line endings: a Windows checkout hands out CRLF, and a stray `\r` changes
+    // which line the description fallback picks. The map must not depend on the checkout.
+    const content = fs.readFileSync(abs, 'utf8').replace(/\r\n/g, '\n');
     const { text, missingHeader } = describe(content);
     rows.push({ rel, dir: path.dirname(rel), lines: content.split('\n').length, text, missingHeader });
   }

@@ -167,12 +167,12 @@ const steps: Record<string, (week: bigint) => Promise<void>> = {
     );
   },
 
-  /** Lock goal: 300,000 $VLP under the incinerator, 100,000 locked so far. */
+  /** Lock goal: 300,000 $VLP in the program's lock account, 100,000 locked so far. */
   async lock(week) {
     const token = await demoToken("Vaultline LP", "VLP", 1_000_000n * TOKEN);
-    const locked = lib.incineratorAta(token.mint);
-    await send("$VLP: send 100,000 to the incinerator", [
-      lib.createAtaIdempotentIx(me, lib.INCINERATOR, token.mint),
+    const locked = lib.lockAta(token.mint);
+    await send("$VLP: send 100,000 to the lock account", [
+      lib.createAtaIdempotentIx(me, lib.lockOwner(), token.mint),
       transferIx(token.account, locked, me, 100_000n * TOKEN),
     ]);
     await openMarket(

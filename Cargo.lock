@@ -773,6 +773,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "brot-markets"
+version = "0.0.1"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+]
+
+[[package]]
 name = "bs58"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

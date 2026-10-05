@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ExternalLink, Link2, SearchX, TriangleAlert } from "lucide-react";
 
+import { marketSummary } from "@/lib/chat";
+import { useChatContext } from "@/components/chat/chat";
 import { explorerAddress } from "@/lib/config";
 import { formatDuration, slotTime } from "@/lib/format";
 import { useClock, useMarket, useMarketActivity, useTokenBalances } from "@/lib/hooks";
@@ -42,6 +44,10 @@ export function MarketView({ address, initialSide }: { address: string; initialS
     no: (keys && balanceData.data?.get(keys.noMint.toBase58())) ?? 0n,
     loaded: balanceData.data !== undefined,
   };
+  const entryNow = market.data;
+  useChatContext(
+    entryNow && account ? marketSummary(entryNow, clock, questionText(account, entryNow.reading, entryNow.name)) : null,
+  );
   const refresh = () => {
     market.refresh();
     history.refresh();

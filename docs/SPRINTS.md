@@ -47,8 +47,8 @@ para o hackathon.
 - **Nomes.** Arquivo `docs/sprints/sprint-XX-topico.md` e branch com o mesmo nome, aberta da `main`; commits com a
   marca `[STAGE:CHEGADA]`.
 - **Antes do código,** o método exige a aprovação do plano de negócio, do documento de design, do resumo de
-  produto, do plano técnico e deste roteiro (wizard, etapa 5.1). Os três últimos estão em rascunho. A etapa 4.3
-  (`docs/technical/registry-pick.md`) ainda não foi feita.
+  produto, do plano técnico e deste roteiro (wizard, etapa 5.1). Os cinco estão aprovados desde 5/10/2026, e a etapa 4.3
+  (`docs/technical/registry-pick.md`) foi feita na Sprint 00.
 - **Agentes e skills** citados são só os do projeto. A skill de Solana que o plano técnico cita fica na máquina do
   usuário.
 
@@ -119,15 +119,17 @@ Sprints 09 a 13.
 5. Revisão do `coordinator-agent`; revisão adversarial quando a sprint toca dinheiro, chave ou dado pessoal.
 6. Documento da sprint com o estado final e a retrospectiva; merge na `main` e tag (`docs/sprint-system.md`).
 
-**Conferência padrão.** Os comandos de Rust apontam hoje para `pred-provable`; a Sprint 00 os ajusta.
+**Conferência padrão.** Desde a Sprint 00 os comandos de Rust cobrem os dois pacotes, e `test:rust` roda os dois.
 
 ```bash
 bun run build:program && bun run test && bun run test:rust
 cargo fmt --all -- --check
-cargo clippy -p pred-provable --all-targets --features no-entrypoint -- -D warnings
+cargo clippy --locked -p pred-provable --all-targets --features no-entrypoint -- -D warnings
+cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint -- -D warnings
+cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint,mainnet -- -D warnings
 bunx tsc --noEmit && bun run lint
 cd app && bun run lint && bun run build
-node scripts/codemap.js --check && node scripts/os-self-test.js
+node scripts/codemap.js --check && node scripts/os-self-test.js && node scripts/ci-secret-scan.js origin/main
 ```
 
 ## 5. Decisões do fundador que travam sprints

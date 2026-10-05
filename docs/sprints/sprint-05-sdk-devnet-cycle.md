@@ -67,6 +67,14 @@ Nenhuma nova. A resposta de **Q12** (quem guarda a chave de atualização na dev
 
 `bun run test` em `packages/sdk`, com as contas conferidas contra o programa. `bun run smoke:devnet` na rede.
 
+## Herdado da Sprint 00
+
+Da revisão de segurança que fechou a Sprint 00 (`docs/sprints/sprint-00-setup.md`).
+
+- Na primeira publicação na devnet, baixar o artefato sempre pelo número da execução de push na `main` (`gh run download <número>`), nunca só pelo nome, e conferir o `SHA256SUMS`. O roteiro de publicação escreve isso.
+- A chave do endereço do programa precisa de cópia de segurança fora de `target/deploy/` antes da publicação, e o comando de publicação aponta para essa cópia.
+- O endereço do programa no SDK vem do IDL (`idl.address`). Manter assim ao mover `app/lib`.
+
 ## Riscos
 
 - O limite da torneira de USDC da Circle travar os testes (C5).
