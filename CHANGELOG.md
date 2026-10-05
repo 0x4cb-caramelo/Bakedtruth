@@ -6,6 +6,113 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [Unreleased] — Bakedtruth: layout Tape no app, Prototype Lab com catorze direções, Ledger² escolhida com tema claro
+
+Primeiras mudanças do projeto Bakedtruth em si; as versões abaixo desta são a história do AI Dev OS, herdada na Largada.
+Trabalho de 2 a 5 de outubro de 2026, na branch `feat/layout-tape`. **Commitado e enviado ao `origin` em 5 de
+outubro**, em commits separados por assunto (app, protótipos, pesquisa, mapa do código, negócio e registros). Os
+motivos de cada decisão estão no `session-log/`; as três primeiras entradas:
+[direção C e nome](session-log/2026-10-02-prototipo-direcao-c-e-nome-em-aberto.md),
+[layout no app](session-log/2026-10-02-layout-tape-aplicado-ao-app.md) e
+[lab de D a M](session-log/2026-10-03-lab-de-d-a-m-e-direcao-reaberta.md).
+
+### Added — Prototype Lab (`prototype-lab/`)
+
+Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/mock-data.js`), a mesma lógica
+(`shared/app.js`) e o mesmo mascote (`shared/mascot.js`). O `README.md` do lab descreve cada uma.
+
+| Direções | O que são |
+|---|---|
+| A · Ledger, B · Oven, C · Tape | As três hipóteses de marca originais |
+| D · Ledger², E · Oven², F · Tape² | As três anteriores com a home em mosaico |
+| G · Casino | Registro de aposta levado ao extremo, como teste |
+| H · Prism, I · Blocks, J · Orbit | Variações de Ledger e Tape com cara de mercado preditivo web3 |
+| K · Desk, L · Arena, M · Vault | A estrutura da Ledger² em três visuais (papel claro, neobrutalismo, carteira roxa), com tabela e feed, descoberta e ranking, carteira simulada e ciclo de vida |
+| N · Ledger² Light | A D em tema claro, com um botão que volta ao escuro da D. Só tokens sobre `shared/ledger.css`; nenhuma estrutura nova |
+
+- `shared/mosaic.js`: carrossel e listas laterais da home em mosaico (D a M).
+- `shared/shader.js`: fundo em WebGPU com reserva em Canvas 2D (I).
+- `shared/ledger.js` e `shared/ledger.css`: estrutura da Ledger² com cor, raio, borda e fonte como variáveis (K, L, M).
+- `shared/mock-data.js` ganhou `upcoming`, `leaders`, `wallet` e `sponsors`, todos sintéticos.
+
+### Added — documentos
+
+- `docs/product/DESIGN-DIRECTION.md`: a direção C como aprovada em 2 de outubro, com tokens, telas, fluxo e quinze
+  lacunas. Marcada como reaberta em 3 de outubro.
+- `knowledge-base/briefing-ideacao-nome-e-mascote.md`: contexto do projeto para nome e mascote.
+- `knowledge-base/pesquisa-nome-do-site.md`: pesquisa de nome, com fontes; finalistas Ovenproof e Baked Markets.
+- `docs/product/`: as oito poses do mascote e a página de referência `baked-home.html`.
+- `knowledge-base/referencias/`: leitura da documentação e da central de ajuda do Polymarket e da documentação da
+  Kalshi, com o que não pôde ser lido.
+- `knowledge-base/competitors/mercados-de-previsao-web3.md`: treze mercados on-chain, três analisados.
+- `knowledge-base/market/`: receita dos mercados de previsão, modelos de token e pump.fun, rendimento do pote.
+- `knowledge-base/tecnologia/privacidade-entre-redes-e-x.md`: Cloak e alternativas, pagamento entre redes, API do X.
+- `knowledge-base/market/patrocinio-e-destaque-pago.md`: precedentes de patrocínio em mercados de previsão e em
+  plataformas de tokens.
+- `docs/business/BRIEFING-MERCADO-DE-POTE.md`: briefing do modelo de pote para discussão com o Ronaldo, com cada item
+  marcado como decidido, proposta ou em aberto.
+- **`docs/business/BUSINESS-PLAN.md`, v0.0.1** (4 de outubro): 16 capítulos e três anexos, cerca de 63.700 palavras,
+  com as decisões do fundador e 31 objeções registradas. Feito pelas três ondas do wizard
+  ([session-log](session-log/2026-10-04-ondas-de-pesquisa-e-bp-v0.0.1.md)).
+- **`docs/business/BP-v0.0.2-parte-1-produto.md`** (4 de outubro): primeira das quatro partes do BP v0.0.2, com cerca
+  de 11.500 palavras. O nome passa a ser Brot Markets. Incorpora a revisão do fundador
+  (`_review/user-review-v0.0.1.md`) e a revisão de impacto com a simulação da taxa
+  (`_review/bp-impact-review-v0.0.2.md`). **Corrigida em 5 de outubro** com as respostas do fundador: taxa de 10% do
+  lado perdedor, um fechamento só com perguntas de até 90 dias, vigia do serviço, disputa e indicação como decisão.
+  Sobra uma proposta, a lista dos tipos de pergunta do primeiro dia.
+- **`docs/business/BP-v0.0.2-parte-2-mercado-e-negocio.md`** (4 de outubro): segunda parte, com cerca de 11.500
+  palavras. Modelo financeiro refeito com as decisões novas (`_review/pauta-bp-v0.0.2-parte-2.md`): 75% da taxa para a
+  operação, custo de 5.500 dólares por mês. **Corrigida em 5 de outubro:** a taxa de 10% do lado perdedor vira a
+  base das tabelas (média de 3,70% do volume), o gasto antes do dinheiro real passa a 7.500 (abertura da empresa e
+  um mês de devnet) e o ponto de equilíbrio cai para cerca de 209 mil dólares apostados por mês. As sete decisões
+  foram respondidas.
+- `docs/business/_review/correcoes-bp-v0.0.2-partes-1-e-2.md` (5 de outubro): as respostas do fundador às treze
+  pendências das Partes 1 e 2, com a conta do pote na taxa nova e o modelo financeiro refeito
+  ([session-log](session-log/2026-10-05-bp-v0.0.2-taxa-decidida-e-partes-corrigidas.md)).
+- `docs/business/_review/pauta-bp-v0.0.2-parte-3.md` (5 de outubro): roteiro da Parte 3, de tokens.
+- `CODEMAP.md` (5 de outubro): primeiro mapa do código, gerado por `node scripts/codemap.js`. 111 arquivos.
+- `docs/business/ideacao-perguntas-e-respostas.md`: as cinco rodadas de perguntas e as respostas do Lucas, com o
+  estado consolidado no topo.
+- `docs/business/_review/`: plano das ondas, seis relatórios da Onda 2 (advogado do diabo, negócio e finanças, técnica
+  e segurança, conformidade, modelo financeiro, viabilidade do MVP), o relatório do coordenador e as três partes do BP.
+- `knowledge-base/` (Onda 1): lista longa e análise dos cinco concorrentes, tamanho de mercado, regulação, público
+  web3, monetização e tesouraria, dois tokens e venda privada, saída antecipada e tipos de pergunta, e o índice de
+  fontes (`market/source-index.md`, 663 endereços).
+- Session log da redefinição do produto como mercado de previsão em pote
+  ([entrada](session-log/2026-10-03-produto-redefinido-como-mercado-de-pote.md)). Nenhum código mudou por causa dela.
+
+### Changed — app (`app/`)
+
+- Base atualizada com a versão nova do `pred-provable` (`0xcf07/pred-provable@638752c`): tokens YES/NO com USDC, pool,
+  explorador de mercados, tela de mercado, compra e venda.
+- Layout da direção C aplicado sobre ela: paleta, cantos retos, bordas de 2 px, sombras duras, Jersey 15 e Space
+  Grotesk; ticker, categorias segmentadas, grade de células ao fundo, medidor no topo, fita de mercados em linhas com
+  trilho luminoso, prova on-chain primeiro na tela de mercado.
+- Mascote portado para TypeScript (`app/lib/mascot/`, `app/components/mascot.tsx`).
+- Nome provisório "baked" concentrado em `app/lib/brand.ts`.
+
+### Changed — base do repositório
+
+- `CLAUDE.md` passou a juntar a orientação do `pred-provable` com o método do AI Dev OS.
+- `package.json` e `.gitignore` mesclados com os do OS na Largada
+  ([session-log](session-log/2026-10-02-largada-import-pred-provable-e-os.md)).
+
+### Em aberto
+
+- **Direção de design:** em 3 de outubro a D · Ledger² foi escolhida, com a N como tema claro
+  ([session-log](session-log/2026-10-03-direcao-ledger2-claro-e-escuro.md)). Faltam a aprovação da N, a reescrita do
+  `DESIGN-DIRECTION.md` (que ainda descreve a C) e a aplicação ao app, que segue com a C e espera a sincronização com
+  `0xcf07/pred-provable`.
+- **Nome do site:** decidido em 4 de outubro, Brot Markets. O app e os protótipos ainda dizem "baked".
+- **BP v0.0.2:** faltam as Partes 3 (tokens) e 4 (construção e risco). A v0.0.1 segue em `BUSINESS-PLAN.md` até as
+  quatro partes existirem. Aguardam o fundador: a lista dos tipos de pergunta do primeiro dia e o teto da devolução
+  da indicação.
+- **Não verificado:** transações no app (conectar, comprar, vender, resolver), `bun test`, `cargo test` e o
+  `next build` de produção; o shader WebGPU da direção I (só a reserva em canvas foi vista).
+- **`CODEMAP.md`:** o gerador aponta 28 arquivos acima de 200 linhas e 96 sem cabeçalho `Purpose:`.
+
+---
+
 ## [0.5.6] — 2026-10-01 — Sensores com ponto de entrada: `npm test`, Biome, hook de feedback e pre-commit
 
 Um scanner externo de maturidade de harness ([harness-score](https://github.com/paladini/harness-score) v1.7.5, rodado de fora do repositório) mediu o OS em **L2, 80/108**. Quatro das seis dimensões estavam entre 78% e 100%; "Sensors & Feedback" estava em 2/20, por uma causa só: os testes existiam e rodavam no CI, mas sem `package.json` não havia ponto de entrada padrão por onde um agente — ou uma ferramenta — os encontrasse. Depois desta release o mesmo scan dá **L4, 101/108**. Raciocínio e o que ficou de fora em [`session-log/2026-10-01-v0.5.6-harness-sensors.md`](session-log/2026-10-01-v0.5.6-harness-sensors.md).
