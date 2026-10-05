@@ -89,6 +89,14 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
   poucas pessoas. As oito propostas foram aprovadas pelo fundador no mesmo dia. Pauta em `_review/pauta-bp-v0.0.2-parte-4.md`.
 - `knowledge-base/market/regulacao.md` (5 de outubro): nota sobre a Medida Provisória 1.394, de 25/9/2026, lida no
   Planalto. Ela proíbe a aposta de quota fixa em todo o país, inclusive por empresa do exterior.
+- **`docs/product/DESIGN-DIRECTION.md`, reescrito** (5 de outubro): passa a descrever a direção aprovada, Ledger²
+  escura (D) e clara (N), com tokens dos dois temas extraídos do código, 19 conflitos entre o protótipo e o produto
+  decidido e 22 lacunas de tela. A versão da direção C saiu.
+- **`docs/product/PRODUCT-BRIEF.md`, v0.0.1** (5 de outubro): resumo operacional de produto, com doze fluxos, 32
+  regras de negócio com referência, escopo por fase, a confrontação do protótipo tela a tela e 25 lacunas.
+- `knowledge-base/tecnologia/servidor-e-dominio.md` (5 de outubro): o servidor compartilhado, as regras de
+  convivência, o que o token do Cloudflare enxerga e o espaço criado para o projeto
+  ([session-log](session-log/2026-10-05-servidor-e-inicio-da-fase-4.md)).
 - `CODEMAP.md` (5 de outubro): primeiro mapa do código, gerado por `node scripts/codemap.js`. 111 arquivos.
 - `docs/business/ideacao-perguntas-e-respostas.md`: as cinco rodadas de perguntas e as respostas do Lucas, com o
   estado consolidado no topo.
@@ -118,10 +126,12 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
 
 ### Em aberto
 
-- **Direção de design:** em 3 de outubro a D · Ledger² foi escolhida, com a N como tema claro
-  ([session-log](session-log/2026-10-03-direcao-ledger2-claro-e-escuro.md)). Faltam a aprovação da N, a reescrita do
-  `DESIGN-DIRECTION.md` (que ainda descreve a C) e a aplicação ao app, que segue com a C e espera a sincronização com
-  `0xcf07/pred-provable`.
+- **Direção de design:** D · Ledger² com a N como tema claro, aprovada e documentada em `DESIGN-DIRECTION.md`. O
+  app ainda mostra a direção C; a troca entra no roteiro de sprints. O protótipo mostra telas do modelo antigo, que
+  precisam de conteúdo novo.
+- **Servidor:** o projeto tem espaço próprio no servidor compartilhado, só com o código. Faltam o domínio na conta
+  do Cloudflare, o túnel, o lugar do segundo serviço agendado e a decisão de onde compilar o programa.
+- **Fase 4:** faltam o plano técnico e o roteiro de sprints.
 - **Nome do site:** decidido em 4 de outubro, Brot Markets. O app e os protótipos ainda dizem "baked".
 - **BP v0.0.2: fechado.** As quatro partes existem e não há proposta em aberto. Faltam valores e nomes: o primeiro
   valor do teto global e quem assina a carteira com várias assinaturas. Falta conferir a tramitação da MP 1.394 no Congresso e ler o Decreto 13.128, de 2026. O próximo passo do método é a apresentação resumida do plano, e depois os documentos da Fase 4.
