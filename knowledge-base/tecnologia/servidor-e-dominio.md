@@ -111,23 +111,32 @@ inscrição de teste foi gravada e apagada; o serviço usa 15 MB; o painel do ou
 seguiam ativos.
 
 **O que foi criado no Cloudflare.** Um túnel chamado `brot-markets` (identificador
-`8f186c9a-90b5-4ea1-a8f2-4997204c9095`), só do projeto. Está **inativo**: não tem rota nem conector.
+`8f186c9a-90b5-4ea1-a8f2-4997204c9095`), só do projeto.
 
-**O que falta para o endereço abrir.** O sistema de permissões da sessão recusou estas ações, e elas esperam a
-autorização do fundador:
+**A abertura do endereço, em 5/10/2026 às 20h31 de Brasília.** O sistema de permissões da sessão recusou duas vezes
+a instalação do túnel e a troca do domínio. Só passaram depois de o fundador liberar por escrito ("Eu libero a
+permissão sim, pode fazer"). O que foi feito, nesta ordem:
 
-1. Instalar o `cloudflared` como arquivo único em `/srv/brot-markets/bin`, sem pacote do sistema. A versão escolhida
-   é a 2026.9.3, de 24/9/2026, e não a 2026.10.0, que saiu horas antes. Conferir o SHA-256 publicado na página da
-   versão.
-2. Gravar o token do túnel em `/etc/brot-markets/tunnel.env` (root, 0600) e ligar a unidade `brot-tunnel.service`,
-   que está em `services/landing/deploy/`.
-3. Definir as rotas do túnel: `brot.markets` e `www.brot.markets` para `http://127.0.0.1:4200`.
-4. Trocar o registro de `brot.markets` pelo endereço do túnel, criar o de `www` e apagar o curinga `*.brot.markets`,
-   que hoje leva qualquer subdomínio ao estacionamento do registrador.
-5. Ligar "Sempre HTTPS" e subir o TLS mínimo para 1.2.
+| Passo | O que ficou |
+|---|---|
+| Programa do túnel | `cloudflared` 2026.9.3, arquivo único em `/srv/brot-markets/bin` (root, 0755), sem pacote do sistema. O SHA-256 conferiu com o publicado na página da versão. A 2026.10.0 tinha saído horas antes e foi preterida |
+| Token do túnel | `/etc/brot-markets/tunnel.env`, root, 0600. Foi do Cloudflare ao servidor sem passar pela tela nem pelo repositório |
+| Unidade `brot-tunnel.service` | Ativa e habilitada, como o usuário `brot`, sem docker e sem root. Só disca para fora. Métricas em `127.0.0.1:4290`. 17 MB de memória |
+| Rotas do túnel | `brot.markets` e `www.brot.markets` para `http://127.0.0.1:4200`; o resto responde 404 |
+| DNS | `brot.markets` e `www.brot.markets` apontam para o túnel, passando pelo Cloudflare. O curinga `*.brot.markets`, que levava qualquer subdomínio ao estacionamento do registrador, foi apagado |
+| Zona | "Sempre HTTPS" ligado; TLS mínimo 1.2 |
 
-Para desfazer esta parte: parar e desabilitar a unidade `brot-landing`, apagar a unidade, o `landing.env` e a pasta
-`leads`, e apagar o túnel `brot-markets` no painel do Cloudflare.
+**Conferido de fora, pelo endereço público:** a página responde 200 em HTTPS; HTTP vai para HTTPS; `www` vai para o
+endereço sem `www`; `/pitch/` traz os 13 slides e o cabeçalho que o mantém fora dos buscadores; uma inscrição de
+teste entrou e saiu da lista; um pedido vindo de outro site foi recusado; o Cloudflare não altera a página no
+caminho. O painel do outro projeto e os 15 contêineres seguiam ativos.
+
+**Não conferido:** se o país do visitante chega ao servidor pelo túnel (C9 do plano técnico), e o que o Cloudflare
+registra dos visitantes (C13).
+
+Para desfazer esta parte: voltar os dois registros de DNS para `pixie.porkbun.com` (sem proxy, TTL 600) e recriar o
+curinga igual; parar e desabilitar `brot-tunnel` e `brot-landing`; apagar as duas unidades, `tunnel.env`,
+`landing.env`, a pasta `leads` e `/srv/brot-markets/bin`; apagar o túnel `brot-markets` no painel do Cloudflare.
 
 ## 3. Inferências (minhas, a validar no plano técnico)
 

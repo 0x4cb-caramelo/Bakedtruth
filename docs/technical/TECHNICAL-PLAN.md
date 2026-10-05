@@ -842,7 +842,7 @@ da pergunta 8.
 | T3 | Tamanho do lote de pagamentos e o processamento de cada instrução | B4 |
 | T4 | `emit!` ou `emit_cpi!`; fuzzing dedicado | Antes da auditoria |
 | T5 | Provedores de RPC (um por keeper e o do repasse) e o serviço de email | B6 |
-| T6 | Como o túnel roda sem docker e sem root. **Desenhado em 5/10/2026, para o site provisório:** o `cloudflared` é um arquivo único em `/srv/brot-markets/bin`, sem pacote do sistema, e roda como o usuário `brot` numa unidade do systemd (`services/landing/deploy/brot-tunnel.service`). Se o país do visitante chega ao servidor (C9) segue a conferir | B6 |
+| T6 | Como o túnel roda sem docker e sem root. **Resolvido em 5/10/2026, com o site provisório no ar:** o `cloudflared` é um arquivo único em `/srv/brot-markets/bin`, sem pacote do sistema, e roda como o usuário `brot` numa unidade do systemd (`services/landing/deploy/brot-tunnel.service`). Se o país do visitante chega ao servidor (C9) segue a conferir | B6 |
 | T7 | Produto de carteira com várias assinaturas, com espera pública | B9 |
 | T8 | Segundo oráculo para a disputa em pergunta de preço (L-14) | B9 |
 | T9 | Migração para `@solana/kit`; fechar ou guardar a conta `Question` | Depois da devnet |
