@@ -24,8 +24,18 @@ mainnet = []
 
 [dependencies]
 # Same pins as programs/pred-provable; see CLAUDE.md "Gotchas" before changing either.
-anchor-lang = { version = "=1.1.2", features = ["init-if-needed"] }
+# `init-if-needed` is off on purpose: it is the classic re-initialisation door. An instruction
+# that needs it turns it on with a written reason and a re-initialisation test.
+anchor-lang = "=1.1.2"
 anchor-spl = "=1.1.2"
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))'] }
+
+# Money math must not wrap or truncate in silence. `overflow-checks` in the workspace profile
+# covers `+` and `*` at run time; these catch the unchecked operator and the `as` cast at
+# review time, so the code uses checked math and `try_from`.
+[lints.clippy]
+arithmetic_side_effects = "deny"
+cast_possible_truncation = "deny"
+cast_sign_loss = "deny"

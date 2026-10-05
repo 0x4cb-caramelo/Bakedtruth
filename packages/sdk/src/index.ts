@@ -12,7 +12,10 @@ import idl from "./idl/brot_markets.json";
 
 export type { BrotMarkets } from "./idl/brot_markets";
 
-/** The program address declared in programs/brot-markets/src/lib.rs. */
-export const BROT_MARKETS_PROGRAM_ID = "6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN";
-
 export const BROT_MARKETS_IDL = idl;
+
+/**
+ * The program address. Read from the IDL, which the build writes from `declare_id!` in
+ * programs/brot-markets/src/lib.rs, so it cannot drift from the program.
+ */
+export const BROT_MARKETS_PROGRAM_ID: string = idl.address;

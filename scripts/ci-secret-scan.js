@@ -26,15 +26,41 @@ function baseRef(arg) {
   return /^0+$/.test(arg) ? 'HEAD~1' : arg;
 }
 
+// The scanner's own test file holds one sample per pattern. Nothing else is exempt.
+const EXEMPT = new Set(['scripts/test/hooks.test.js']);
+
+const lines = (text) => text.split('\n').filter(Boolean);
+
+/** Everything a revision range adds, as { diff, files }. Renames count as additions. */
+function added(args) {
+  return {
+    diff: git(['-c', 'core.quotepath=off', ...args, '--unified=0', '--no-renames']),
+    files: lines(git(['-c', 'core.quotepath=off', ...args, '--name-only', '--diff-filter=d', '--no-renames'])),
+  };
+}
+
 function main() {
   const base = baseRef(process.argv[2]);
-  const range = `${base}...HEAD`;
-  const diff = git(['diff', '--unified=0', range]);
-  const changed = git(['diff', '--name-only', '--diff-filter=AM', range]).split('\n').filter(Boolean);
-  const findings = scan(diff, changed);
+  const commits = lines(git(['rev-list', '--no-merges', `${base}..HEAD`]));
+
+  // Commit by commit: a secret added in one commit and removed in the next is gone from the
+  // net diff but stays in history. Then the net diff, which also covers merge resolutions.
+  const parts = commits.map((sha) => added(['show', '--format=', sha]));
+  parts.push(added(['diff', `${base}...HEAD`]));
+
+  const seen = new Set();
+  const findings = [];
+  for (const { diff, files } of parts) {
+    for (const f of scan(diff, files)) {
+      const key = `${f.file}::${f.label}`;
+      if (EXEMPT.has(f.file) || seen.has(key)) continue;
+      seen.add(key);
+      findings.push(f);
+    }
+  }
 
   if (findings.length === 0) {
-    console.log(`secret scan: clean (${changed.length} files changed since ${base})`);
+    console.log(`secret scan: clean (${commits.length} commits since ${base}, plus the net diff)`);
     return;
   }
 

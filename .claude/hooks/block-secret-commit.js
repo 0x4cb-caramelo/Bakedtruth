@@ -32,11 +32,17 @@ const PATTERNS = [
   ['Slack token', /\bxox[baprs]-[A-Za-z0-9-]{10,}/],
   ['Private key block', /-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----/],
   ['Stripe secret key', /\b[sr]k_live_[A-Za-z0-9]{20,}/],
+  // A Solana keypair file is one JSON array of 64 byte values. Addresses in an IDL are 32.
+  ['Solana keypair (64-byte array)', /\[\s*(?:\d{1,3}\s*,\s*){63}\d{1,3}\s*\]/],
+  // RPC providers put the credential in the URL: https://host/?api-key=<value>.
+  ['API key in a URL', /[?&]api[-_]?key=[A-Za-z0-9_-]{16,}/i],
 ];
 
 // Staged filenames that should never be committed. `.env.example` is the documented
 // exception — it is how the OS tells you which variables exist, without their values.
-const FORBIDDEN_FILE = /(^|\/)\.env(\.local|\.production|\.[a-z]+\.local)?$|\.pem$|\.key$|\.p12$|\.pfx$/i;
+// Covers every `.env.<stage>`, service env files such as `keeper.env`, and Solana keypairs.
+const FORBIDDEN_FILE =
+  /(^|\/)\.env(\.[A-Za-z0-9_.-]+)?$|\.env$|(^|\/)[^/]*keypair[^/]*\.json$|(^|\/)id\.json$|\.pem$|\.key$|\.p12$|\.pfx$/i;
 const ALLOWED_FILE = /(^|\/)\.env\.(example|sample|template)$/i;
 
 function readStdin() {
