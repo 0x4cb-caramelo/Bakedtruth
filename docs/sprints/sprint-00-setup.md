@@ -100,8 +100,14 @@ novos do CI são provados com uma falha de propósito.
 | Conferência verde | Execução 37325279961, commit `bdc9aa2`, a última que mudou código do programa e do CI: os três trabalhos passam. Os commits seguintes são de documentação e do gerador do mapa de código |
 
 **O que só fecha depois do merge.** O critério do artefato e o fechamento comum dependem de dois passos que
-acontecem com o merge deste PR: a execução de push na `main` publicar `programs-<sha>` com `SHA256SUMS`, e a tag
-`sprint-00`. O número dessa execução é anotado na abertura da Sprint 01.
+acontecem com o merge deste PR: a execução na `main` publicar `programs-<sha>` com `SHA256SUMS`, e a tag
+`sprint-00`.
+
+**O que aconteceu no merge.** O PR #2 foi mesclado às 14:51 UTC (`2b06404`), e o push não disparou a conferência
+automática: seis minutos depois não havia execução para o commit, com o GitHub operacional e o arquivo válido (uma
+execução manual na `main`, a 37328963156, começou sem erro). A causa não foi encontrada. Como o artefato só saía de
+evento de push, ele não seria publicado. A condição passou a aceitar também execução manual na `main`, no PR #3, e
+o artefato desta sprint é o dessa execução. O número dela fica no session-log da sprint.
 
 ### O que mudou em relação ao planejado
 
