@@ -532,6 +532,14 @@ repetição dentro do mesmo arquivo. Endereço presente aqui não significa fato
 - https://www.theblock.co/post/405086/limitless-ceo-no-prediction-market-platform-will-dominate-perpetual-futures-precedent
 - https://www.tradetheoutcome.com/best-polymarket-categories-trade-2026/
 
+## `knowledge-base/market/mercado-de-token-na-polymarket.md` (3)
+
+Acrescentado à mão em 5 de outubro de 2026, fora da geração automática.
+
+- https://coingape.com/prediction-markets/will-laptop-meme-coin-hold-a-100m-fdv-one-day-after-launch-odds-reach-96/
+- https://predscope.com/event/laptop-fdv-above-one-day-after-launch
+- https://www.odaily.news/en/newsflash/516246
+
 ## `knowledge-base/market/receita-mercados-de-previsao.md` (12)
 
 - https://defirate.com/prediction-markets/fees/

@@ -8,33 +8,63 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-Nada depois da Sprint 01. A próxima é a Sprint 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.md`).
+A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.md`).
+
+### Added
+
+- **Site provisório do `brot.markets`** (`services/landing`), fora do roteiro, a pedido do fundador: página "em
+  breve" na direção Ledger², em claro e escuro, com lista de espera; página de privacidade com formulário para sair;
+  e o deck de pitch em `/pitch`. Node puro, sem dependências, com 21 testes que entraram na conferência automática.
+- **Lista de espera** com o mínimo de dado: email, data e versão do consentimento. Sem IP. Sair apaga na hora, e
+  doze meses depois da inscrição a linha é apagada sozinha. As nove perguntas de privacidade estão na seção 8.1 do
+  plano técnico.
+- **Deck de pitch revisado:** os 12 slides do fundador mais um de problema, num palco de 39 KB no lugar do pacote de
+  10 MB. Onze correções de conteúdo, listadas no registro de sessão. Servido só por link, fora dos buscadores.
+- **Nota de pesquisa** sobre o mercado do token $LAPTOP na Polymarket, que dá fonte a um número do deck.
+
+### Changed
+
+- **Respostas do fundador de 5/10/2026 registradas** no roteiro, no plano técnico e na Sprint 02: chaves com o Lucas
+  e o Ronaldo; idade do preço como parâmetro por pergunta, com piso de 30 segundos; chave da Pyth à espera da
+  medida; leitura no Surfpool mantida na Sprint 03; domínio comprado.
+- **`PITCH.md`:** o portão de redação passa a dizer o que o deck mostra em cada linha e o que se recomenda.
+
+### Fixed
+
+- **Redirecionamento de pasta** do site provisório montado a partir do caminho validado, e não do texto enviado pelo
+  visitante. Apontado pela revisão de segurança do commit; nenhum caso testado saía do domínio.
 
 ### Em aberto
 
-- **Sprints:** a 00 e a 01 estão concluídas. A 02 depende de saber quem guarda a chave de atualização na devnet e
-  quem tem chave de equipe (pergunta 12 do plano técnico).
-- **Leitura no Surfpool:** era critério de pronto da Sprint 01 e não foi feita. Está na Sprint 03.
-- **Perguntas novas para o fundador, da Sprint 01:** se o limite de 30 segundos para a idade do preço vale também
-  na devnet, onde a conta patrocinada chega a 64 segundos, ou vira parâmetro por pergunta (Sprint 03); e se vale
-  obter a chave do serviço de preços da Pyth, necessária só se o nosso serviço publicar preço (Sprint 06).
+- **O endereço `brot.markets` ainda não abre o site.** O serviço roda no servidor, na porta local. Faltam o
+  conector do túnel, as rotas e a troca do DNS, que o sistema de permissões da sessão recusou e que esperam a
+  autorização do fundador (`knowledge-base/tecnologia/servidor-e-dominio.md`, seção 2.1).
+- **Portão de redação do deck:** o fundador mandou publicar, e falta aprovar linha por linha o que vai a público e
+  dizer quem mantém o deck. Até lá ele fica só por link. A recomendação está no `PITCH.md`.
+- **Site provisório, pendências:** idioma (está em inglês, por escolha provisória; L-01 segue aberta); um email de
+  contato do domínio para a página de privacidade; revisão jurídica do texto de privacidade; a conta do X não foi
+  conferida; o Ronaldo ser avisado do serviço novo no servidor.
+- **Arquivo original do deck** (10 MB) em `docs/technical/`, fora do Git. Não foi commitado nem apagado.
+- **Sprints:** a 00 e a 01 estão concluídas. A 02 está destravada: as chaves ficam com o Lucas e o Ronaldo. Falta
+  confirmar a leitura de que os dois têm chave de equipe.
+- **Leitura no Surfpool:** era critério de pronto da Sprint 01 e não foi feita. Está na Sprint 03, com o de acordo
+  do fundador.
 - **Desenho da pergunta de preço:** a revisão da Sprint 01 propõe aceitar, na aposta, só a conta patrocinada do
   ativo, e na prova qualquer conta completa. O plano técnico hoje aceita qualquer conta válida. Decide-se na
   Sprint 03.
 - **Quem controla a Pyth:** na rede principal, a autoridade que atualiza os programas é um endereço derivado cujo
   controle não foi conferido. Risco na seção 13 do plano técnico; conferir antes da rede principal (Sprint 16).
 - **Perguntas do fundador:** as doze da seção 14.2 do plano técnico valem com a resposta recomendada, porque os
-  documentos foram aprovados sem alteração. Três não têm resposta padrão: a verba e o fornecedor do segundo
-  serviço, a compra do domínio `brot.markets` e os nomes de quem guarda chave.
-- **Apresentação resumida do plano:** escrita, não publicada. Falta o fundador decidir se e como publicar, e
-  qual versão da seção de equipe vai na inscrição do hackathon.
+  documentos foram aprovados sem alteração. Segue sem resposta a verba e o fornecedor do segundo serviço.
+- **Apresentação resumida do plano:** o `PITCH.md`, em português, segue não publicado. Falta decidir qual versão
+  da seção de equipe vai na inscrição do hackathon: o deck diz "3 founders".
 - **Coerência do BP v0.0.2:** há pontos que se contradizem entre as partes (critério de parada, tesouraria,
-  quando sai o token A, cabeçalhos que ainda dizem "rascunho"). A Parte 4 ainda dá a Pyth na devnet como não verificada. Falta uma passada para resolvê-los.
+  quando sai o token A, cabeçalhos que ainda dizem "rascunho"). A Parte 4 ainda dá a Pyth na devnet como não verificada, e a Parte 2 não traz o número do mercado $LAPTOP que o deck usa. Falta uma passada para resolvê-los.
 - **Direção de design:** Ledger² escura e clara, aprovada e documentada. O app ainda mostra a direção C; a troca
   é a Sprint -1 e as Sprints 09 a 13. Várias telas do protótipo mostram o modelo antigo e precisam de conteúdo novo.
 - **Nome:** Brot Markets. O app, os protótipos e o `package.json` da raiz ainda dizem "baked" ou `pred-provable`.
-- **Servidor:** o projeto tem espaço próprio no servidor compartilhado, só com o código. Faltam o domínio na conta
-  do Cloudflare, o túnel e o lugar do segundo serviço agendado.
+- **Servidor:** o projeto tem espaço próprio no servidor compartilhado, com o código e o site provisório rodando.
+  Falta o lugar do segundo serviço agendado.
 - **Ferramentas locais:** a máquina de desenvolvimento tem Anchor 1.0.0 e Solana 2.2.16, e o projeto fixa 1.1.2 e
   3.1.x. O programa só compila na conferência automática.
 - **Chave do endereço do programa:** só na máquina do fundador, em `target/deploy/`. Precisa de cópia de segurança.

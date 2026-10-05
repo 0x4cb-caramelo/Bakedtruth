@@ -28,6 +28,9 @@ tokens), which is **frozen**: it stays in the workspace only until its readers a
 - The new program is `programs/brot-markets` (id `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN`). After Sprint 01
   it still has no instruction. It has one reader, `readers/price_touch.rs`, which parses a Pyth `PriceUpdateV2`
   of a feed the caller must name, and is called by nothing until Sprint 03. Its client library is `packages/sdk`; `app/lib` moves there in Sprint 05.
+- `services/landing` is the provisional `brot.markets` site: a "coming soon" page with a waitlist, a privacy page and
+  the pitch deck under the `pitch/` path. Plain Node, no dependencies, its own tests (`node --test services/landing/tests/*.test.mjs`).
+  It stores emails, so read section 8.1 of the technical plan before changing what it keeps. It goes away in Sprint 09.
 - Pyth has two generations of programs on Solana. Its documentation dates the Core upgrade 2026-08-26; the upgraded
   programs have been on-chain since 2026-05-05. The reader trusts only the upgraded
   receiver (`rec2HH...`), and the price service (Hermes) now needs an API key. Addresses, layout, cadence and
@@ -147,7 +150,8 @@ This repository also carries the AI Dev Operating System (`.claude/rules`, `.cla
 are applied where they still add value rather than from zero. Phases 1 to 4 are done: BP v0.0.2 in `docs/business/`,
 the prototype lab with fourteen directions and the approved one in `docs/product/DESIGN-DIRECTION.md`, the Product
 Brief, the Technical Plan and the sprint roadmap. Phase 5 is under way: Sprints 00 and 01 are closed (tags `sprint-00`,
-`sprint-01`) and Sprint 02 is next. The pitch (wizard stage 2.9) is written in `docs/business/PITCH.md` and not published.
+`sprint-01`) and Sprint 02 is next. The pitch (wizard stage 2.9) is written in `docs/business/PITCH.md`; the founder's
+own deck is served at `/pitch` by link only, and stays out of search engines until he approves the redaction table there.
 
 Golden rules carried over from the OS:
 

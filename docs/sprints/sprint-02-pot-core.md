@@ -52,7 +52,9 @@ zero. O SDK e a devnet (05).
 - **Q3 (L-07):** a aposta mínima; se a mesma carteira pode apostar nos dois lados; se a isenção do primeiro
   apostador vale para tudo o que ele apostar.
 - **Q12:** quem guarda a chave de atualização na devnet e quem são as pessoas com chave de equipe. O plano técnico
-  pede a resposta antes de B2.
+  pede a resposta antes de B2. **Respondida em 5/10/2026: "tem eu e o Ronaldo".** A leitura é que os dois têm chave
+  de equipe; quem guarda a de atualização no dia da publicação se define na Sprint 05. Confirmar a leitura com o
+  fundador na abertura desta sprint.
 
 ## Agentes e skills
 

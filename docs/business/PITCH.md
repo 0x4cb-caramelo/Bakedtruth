@@ -4,7 +4,9 @@
 - **Derivado do plano de negócio:** v0.0.2, de 5/10/2026
 - **Última atualização:** 2026-10-05
 - **Público:** investidores e avaliadores de hackathon
-- **Situação de publicação:** não publicado. Nada foi aprovado, e a decisão do fundador está pendente (ver o fim).
+- **Situação de publicação:** em 5/10/2026 o fundador mandou publicar o deck dele em `brot.markets/pitch`. O deck
+  está pronto e servido só por link, fora dos buscadores. A aprovação linha por linha do portão continua pendente
+  (ver o fim). Este documento, em português, segue não publicado.
 
 **Como ler.** Todo número vem do plano. Entre parênteses, P1 a P4 são as quatro partes, § é a seção e "Resumo" é o
 `BUSINESS-PLAN.md`. FATO SECUNDÁRIO é número lido em quem citou a fonte. INFERÊNCIA é conta nossa. Toda projeção é
@@ -145,11 +147,33 @@ ano, e o plano não depende disso (P2 §5.5). O cenário razoável pede cerca de
 
 ---
 
+## O deck em `/pitch`
+
+O fundador montou um deck próprio, em inglês, para o hackathon Colosseum, e pediu em 5/10/2026: "quero que você
+avalie a qualidade e conteúdo, e coloque online no site também depois de arrumado e melhorado no endereço /pitch".
+O deck é a apresentação; este documento continua sendo a fonte, e o deck não deve dizer o que o plano não diz.
+
+O deck revisado tem 13 slides e está em `services/landing/public/pitch/`. O roteiro de fala está em
+`services/landing/pitch-notes.md`. A avaliação e a lista do que mudou estão em
+`session-log/2026-10-05-pagina-em-breve-e-pitch.md`.
+
+**Onde o deck e o plano não batem.** Três pontos, todos a resolver na passada de coerência do plano:
+
+| Ponto | O deck diz | O plano diz |
+|---|---|---|
+| Mercado de lançamento de token | Um mercado da Polymarket sobre o token $LAPTOP negociou mais de 4 milhões de dólares | Nada. O número foi conferido num agregador (4,6 milhões, FATO SECUNDÁRIO, `knowledge-base/market/mercado-de-token-na-polymarket.md`) e precisa entrar na Parte 2 |
+| Equipe | "3 founders" e "2-of-3 founder multisig" | No hackathon a equipe se apresenta como uma pessoa (P4 §6.1) |
+| Rede principal | "Capped mainnet targeted for month 2" | "Provavelmente" no início do mês 2, e construir tudo com duas auditorias no mesmo mês não cabe (P4 §1.3) |
+
 ## Portão de redação para publicação
 
-**Estado em 5/10/2026: nada aprovado para publicação.** A pergunta da etapa 2.9 (tudo público, versão enxuta com a
-completa restrita, ou nada online por enquanto) ainda não foi feita ao fundador. Nenhuma coluna está marcada. A
-última lista o que rever se a resposta for publicar.
+**Estado em 5/10/2026.** O fundador escolheu publicar o deck, o que responde à pergunta da etapa 2.9. O que ele
+ainda não fez foi aprovar cada linha abaixo, e o método exige isso antes de uma página pública. Por isso o deck foi
+preparado na forma mais fácil de desfazer: **só por link** (`noindex` na página e no cabeçalho, sem link na página
+inicial, fora do `robots.txt`). Para abrir aos buscadores e ligar na página inicial, falta marcar a tabela.
+
+Nenhuma coluna está marcada. A última lista o que rever, e a tabela seguinte diz o que o deck mostra hoje em cada
+linha, com a recomendação de quem o revisou.
 
 | Seção | Público | Restrito | Não publicar | O que rever antes |
 |---|:---:|:---:|:---:|---|
@@ -169,13 +193,33 @@ completa restrita, ou nada online por enquanto) ainda não foi feita ao fundador
 | Registro de riscos | | | | Em geral, não publicar |
 | Equipe | | | | Dado pessoal. Não há consentimento registrado |
 
+**O que o deck mostra, linha por linha.** A recomendação é de quem revisou o deck. A decisão é do fundador.
+
+| Seção | O que o deck mostra | Recomendação |
+|---|---|---|
+| Em uma linha, solução, como funciona | Slides 1, 3, 4 e 5. Regra do produto, exemplo do SOL a 300 dólares, os cinco tipos de pergunta | Público. Falta o aviso de fase de testes: só o slide 12 diz "Devnet". O deck está em inglês, o que reduz, e não elimina, a dúvida do art. 16 da MP 1.394 |
+| Problema | Slide 2, novo. A plataforma aparece sem nome, com três números do plano | Público |
+| Mercado e fontes | Slide 8. World, Phantom e Polymarket com nome; três números de terceiros | Público, depois de conferir as três fontes na origem. Hoje duas são de segunda mão |
+| Por que nós | Slide 10. "Myriad's volume drop −94%" e "Opinion fell 81%" | **Trocar antes de abrir.** São dois concorrentes com nome ao lado de um ponto fraco. Sugestão: "two points-driven platforms lost 81% and 94% of their volume" |
+| Modelo de negócio: taxa e patrocínio | Slide 6: 10% do lado perdedor, média de 3,70%. Slide 7: faixas de 500, 1.500 e 5.000 dólares, 70/30, 20 a 30 parceiros | Publicar o deck é anunciar a taxa e as faixas. Decidir se é a hora |
+| Tokens | Slide 10, um cartão: token no pump.fun, sem direito na empresa, taxa de criador para prêmios | **Tirar do público** até a avaliação jurídica (P3 §7.1) |
+| Projeções e economia | Slide 9: custo de 5.500 por mês, equilíbrio em 208,6 mil de volume, mês 9, 7.500 antes do dinheiro real | **Restrito.** Serve para jurado e investidor, por link. Em página aberta vira promessa cobrada depois. O slide já diz que é modelo |
+| Roteiro | Slide 12: "Capped mainnet targeted for month 2" | Público, com a ressalva que já está na tela: só abre com auditoria, duas de três e teto |
+| Tração, captação, valuation, riscos | O deck não traz | Nada a decidir |
+| Equipe | Slides 1 e 13: "Lucas · Founder". Slides 9 e 11: "3 founders" | O nome é do próprio fundador e foi ele quem o pôs. "3 founders" diverge do que vai na inscrição do hackathon: alinhar |
+
+**Resumo da recomendação.** Manter o link direto como está, para jurados e investidores. Para a versão aberta,
+tirar o slide 9 e o cartão do token, e trocar os nomes do slide 10.
+
 **As cinco perguntas da regra de privacidade.**
 
 1. **Alguma persona leva a uma pessoa real?** Não. O plano não tem persona com nome.
 2. **Os entrevistados aceitaram ser descritos em público?** Não se aplica: nenhuma entrevista foi feita (P2 §2.4).
 3. **A seção de equipe expõe mais do que as pessoas aceitaram?** A conferir. O texto cita Lucas e Ronaldo, sem
-   registro de consentimento, e diz "três sócios", o que diverge da apresentação no hackathon.
-4. **A página terá analytics?** Não decidido. Se tiver, é coleta de dado pessoal e reabre as nove perguntas.
+   registro de consentimento, e diz "três sócios", o que diverge da apresentação no hackathon. O deck só traz o
+   nome do Lucas, posto por ele; o Ronaldo e o terceiro sócio não aparecem.
+4. **A página terá analytics?** Não. O site provisório não tem estatística de visitas nem cookies. Se entrar, é
+   coleta de dado pessoal e reabre as nove perguntas.
 5. **Dá para despublicar?** Na prática, não. Publicar é permanente.
 
 **Aprovação**
@@ -184,6 +228,7 @@ completa restrita, ou nada online por enquanto) ainda não foi feita ao fundador
 - [ ] A auditoria de privacidade rodou sobre personas e equipe.
 - [ ] Nenhum concorrente aparece ao lado de um ponto fraco específico.
 - [ ] Todo número publicado é um que o projeto aceita ver citado.
-- [ ] A decisão e o motivo estão registrados em `session-log/`.
+- [x] A decisão e o motivo estão registrados em `session-log/2026-10-05-pagina-em-breve-e-pitch.md`.
 
-**Responsável pela manutenção:** não definido. Sem responsável, o método manda não publicar.
+**Responsável pela manutenção:** não definido. Sem responsável, o método manda não publicar em aberto. É mais um
+motivo para o deck ficar só por link até o fundador dizer quem cuida dele.
