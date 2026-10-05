@@ -13,6 +13,9 @@ Nenhuma sprint começou depois da 00. A próxima é a Sprint 01, a prova do leit
 
 ### Added
 
+- `docs/business/PITCH.md` (5 de outubro): a apresentação resumida do plano, etapa 2.9 do método, em dez seções
+  derivadas do BP v0.0.2. Mantém as ressalvas do plano e diz o que o plano não tem. Não publicada
+  ([session-log](session-log/2026-10-05-pitch-and-publication-decision.md)).
 - `.claude/rules/interaction-closing.md` (5 de outubro): regra de trabalho pedida pelo fundador. Toda resposta
   termina com um relatório breve do que foi feito, em português simples, e com os próximos passos: os caminhos
   possíveis, ligados ao roteiro, e uma recomendação
@@ -25,7 +28,10 @@ Nenhuma sprint começou depois da 00. A próxima é a Sprint 01, a prova do leit
 - **Perguntas do fundador:** as doze da seção 14.2 do plano técnico valem com a resposta recomendada, porque os
   documentos foram aprovados sem alteração. Três não têm resposta padrão: a verba e o fornecedor do segundo
   serviço, a compra do domínio `brot.markets` e os nomes de quem guarda chave.
-- **Apresentação resumida do plano (etapa 2.9 do método):** não foi escrita. O `docs/business/PITCH.md` não existe.
+- **Apresentação resumida do plano:** escrita, não publicada. Falta o fundador decidir se e como publicar, e
+  qual versão da seção de equipe vai na inscrição do hackathon.
+- **Coerência do BP v0.0.2:** há pontos que se contradizem entre as partes (critério de parada, tesouraria,
+  quando sai o token A, cabeçalhos que ainda dizem "rascunho"). Falta uma passada para resolvê-los.
 - **Direção de design:** Ledger² escura e clara, aprovada e documentada. O app ainda mostra a direção C; a troca
   é a Sprint -1 e as Sprints 09 a 13. Várias telas do protótipo mostram o modelo antigo e precisam de conteúdo novo.
 - **Nome:** Brot Markets. O app, os protótipos e o `package.json` da raiz ainda dizem "baked" ou `pred-provable`.
