@@ -1,6 +1,6 @@
 # Brot Markets — Resumo de produto (Product Brief)
 
-**Versão:** 0.0.1 · **Estado:** rascunho para revisão do fundador · **Data:** 5 de outubro de 2026 · **Etapa:** Fase 4,
+**Versão:** 0.0.1 · **Estado:** aprovado pelo fundador em 5/10/2026 ("docs aprovados, podemos dar início") · **Data:** 5 de outubro de 2026 · **Etapa:** Fase 4,
 etapa 4.1 do wizard
 
 Diz a agentes e desenvolvedores o que construir. Não é texto para investidor (isso é o plano de negócio) nem

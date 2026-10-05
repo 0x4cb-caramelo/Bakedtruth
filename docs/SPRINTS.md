@@ -1,6 +1,6 @@
 # Brot Markets — Roteiro de sprints
 
-**Versão:** 0.0.1 · **Estado:** rascunho para revisão do fundador · **Data:** 5 de outubro de 2026 · **Etapa:** Fase 4,
+**Versão:** 0.0.1 · **Estado:** aprovado pelo fundador em 5/10/2026 ("docs aprovados, podemos dar início") · **Data:** 5 de outubro de 2026 · **Etapa:** Fase 4,
 etapa 4.4 do wizard
 
 Diz em que ordem o produto é construído, o que cada sprint entrega e o que conta como pronto. Não tem datas nem

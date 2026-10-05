@@ -1,6 +1,6 @@
 # Sprint 00 — Setup
 
-**Estado:** planejada · **Branch:** `sprint-00-setup` · **Datas:** sem datas, por decisão do fundador
+**Estado:** em andamento, aberta em 5/10/2026 · **Branch:** `sprint-00-setup` · **Datas:** sem datas, por decisão do fundador
 
 | | |
 |---|---|

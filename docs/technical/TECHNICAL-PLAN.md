@@ -1,6 +1,6 @@
 # Brot Markets — Plano técnico (Technical Plan)
 
-**Versão:** 0.0.1 · **Estado:** rascunho para revisão do fundador · **Data:** 5 de outubro de 2026 · **Etapa:** Fase 4,
+**Versão:** 0.0.1 · **Estado:** aprovado pelo fundador em 5/10/2026 ("docs aprovados, podemos dar início") · **Data:** 5 de outubro de 2026 · **Etapa:** Fase 4,
 etapa 4.2 do wizard
 
 Diz como o produto de `docs/product/PRODUCT-BRIEF.md` será construído. Não escreve código nem decide regra de
@@ -752,6 +752,12 @@ Os riscos de negócio estão em P4, capítulo 8. Aqui, os deste plano.
 | L-01, L-13, L-21, L-25 | Não são técnicas; seguem com o fundador |
 
 ### 14.2 Perguntas para o fundador
+
+**Situação em 5/10/2026.** O fundador aprovou este plano ("docs aprovados, podemos dar início") sem alterar nenhuma
+das doze respostas. Tinha sido avisado de que, sem resposta em contrário, vale a recomendação. Por isso **a coluna
+"Recomendação" é o padrão de trabalho**, e cada sprint que depende de uma pergunta a relê no fechamento. Três itens
+não têm padrão possível e seguem abertos: a verba e o fornecedor da pergunta 8, a compra do domínio da pergunta 11
+e os nomes da pergunta 12.
 
 | # | Pergunta | Opções | Recomendação |
 |---|---|---|---|
