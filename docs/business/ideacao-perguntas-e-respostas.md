@@ -37,7 +37,18 @@ Registro completo, com as contas, em [`_review/correcoes-bp-v0.0.2-partes-1-e-2.
   não sei o que é, e quais as suas recomendações". Depois da explicação refeita, decidiu no mesmo dia: "das três
   saídas, vamos com o recomendado (a)". O site abre com cinco tipos (preço de ativo grande, queima, liquidez travada
   na Meteora, pool de staking e stake de validador), e o leitor de preço é a primeira peça a construir.
-- **Segue pendente:** só o teto da devolução ao indicado (proposto: 5 USDC).
+- **Teto da devolução ao indicado:** 5 USDC por indicado, aprovado ("está ótimo").
+- **Tokens, as sete propostas da Parte 3:** "sobre as 7 decisões, concordo". Passam a valer: (1) a equipe cria o
+  token A, compra até 2% em carteira declarada, trava por 12 meses e não negocia depois; (2) staking do B com travas
+  de 1, 3, 6 e 12 meses e pesos 1, 1,5, 2 e 3, valendo para desconto, voto e cofre; (3) desconto na taxa em quatro
+  faixas, de 10% a 40%, com revisão se os descontos passarem de 10% da taxa num trimestre; (4) 20% do resultado do
+  mês ao cofre, só com caixa positivo e 33.000 dólares de reserva, e um quinto disso para as pools das perguntas;
+  (5) distribuição do B: venda privada 15%, reserva da ponte 10%, liquidez 12%, crescimento 25%, equipe 15%,
+  tesouraria 13%, reserva futura 10%; (6) ponte com 20% de desconto e até 30% de cada compra paga com A queimado;
+  (7) venda privada depois de três meses seguidos com a operação paga, de 60 a 90 dias antes do lançamento do B.
+- **Os quatro testes antes do lançamento do token A** (carteira do fundo na divisão da taxa de criador, ferramentas
+  de trava com o padrão Token-2022, termos completos do pump.fun, destino do fundo se a empresa parar): "ok".
+- **Sem pendência do fundador nas Partes 1, 2 e 3.**
 
 ### Alterações da revisão do BP v0.0.1 (4 de outubro de 2026) — prevalecem sobre o resto desta seção
 

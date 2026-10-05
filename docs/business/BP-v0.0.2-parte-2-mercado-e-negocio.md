@@ -92,8 +92,8 @@ no mês 12 e pede cerca de 35,5 mil (seção 5.4).
 Em 5/10/2026 o fundador respondeu às sete decisões que este documento deixava em aberto. As respostas estão no
 capítulo 7, cada uma com a citação.
 
-Três pontos continuam abertos: a mistura real de perguntas, que define a taxa média; o teto da devolução da
-indicação; e a confirmação da data de ida para a rede principal.
+Dois pontos continuam abertos: a mistura real de perguntas, que define a taxa média, e a confirmação da data de
+ida para a rede principal.
 
 ## 2. Mercado e público
 
@@ -492,9 +492,9 @@ chegasse de outro jeito. No modelo, a indicação consome 5% da parte da operaç
 volume venha de indicados ainda dentro dos 90 dias. Se for metade do volume, o custo dobra. A devolução não está
 nesses 5%.
 
-**Detalhe a confirmar: o teto da devolução.** Como a taxa sai do ganho, uma aposta pequena num azarão que ganha
+**Decisão: a devolução tem teto de 5 USDC por indicado.** Como a taxa sai do ganho, uma aposta pequena num azarão que ganha
 gera uma taxa alta. Exemplo: 50 USDC num lado que tem 10% do pote, se esse lado ganha, pagam 45 de taxa. Sem
-teto, a devolução seria de 45. A sugestão é um teto de 5 USDC por indicado. O fundador ainda não viu esse detalhe.
+teto, a devolução seria de 45. O fundador aprovou o teto de 5 USDC em 5/10/2026.
 
 Uma comparação. A Polymarket paga 10% da taxa dos indicados diretos e 5% dos indiretos, por 30 dias, e só a quem
 já negociou 10.000 dólares (FATO, documentação). A regra daqui é mais generosa: o dobro do percentual e o triplo
@@ -884,13 +884,12 @@ explicação completa.
 | Critério de parada (5.6) | "ok" | Aceito como estava proposto |
 | Lista de investidores (6.4) | "não tem problema, pois são e-mails de negócios, e não dados pessoais" | Lista de contatos de negócio. O convite por email segue, com opção de descadastro |
 
-**O que continua aberto.** Três pontos.
+**O que continua aberto.** Dois pontos. O teto da devolução da indicação, de 5 USDC por indicado, foi aprovado
+depois (seção 4.4).
 
 1. **A mistura real de perguntas.** Ela define a taxa média, a premissa mais frágil do modelo. Só o uso mostra
    qual é (seção 5.4).
-2. **O teto da devolução da indicação.** A sugestão é de 5 USDC por indicado, e o fundador ainda não a viu
-   (seção 4.4).
-3. **A data de ida para a rede principal.** O início do mês 2 é "provavelmente" (seção 6.1).
+2. **A data de ida para a rede principal.** O início do mês 2 é "provavelmente" (seção 6.1).
 
 Três propostas menores seguem no texto e podem esperar: as réguas do beta (seção 2.6), as regras de gasto do
 fundo de prêmios, que precisam estar escritas antes do mês 10 (seção 4.5), e o material de captação (seção 6.4).

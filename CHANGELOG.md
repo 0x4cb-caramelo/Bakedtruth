@@ -76,7 +76,8 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
 - **`docs/business/BP-v0.0.2-parte-3-tokens.md`** (5 de outubro): terceira parte, com cerca de 11.800 palavras. O
   token A no pump.fun como canal de tração, com a taxa de criador indo ao fundo de prêmios; o token B com staking
   com trava, desconto na taxa, voto e cofre; a ponte que queima A para comprar B; ordem e calendário; o que a
-  avaliação jurídica precisa olhar. Sete propostas aguardam o fundador. O texto diz o tamanho do dinheiro: no
+  avaliação jurídica precisa olhar. As sete propostas foram aprovadas pelo fundador no mesmo dia ("sobre as 7 decisões, concordo"), junto com o
+  teto de 5 USDC na devolução ao indicado. O texto diz o tamanho do dinheiro: no
   cenário razoável o cofre receberia cerca de 900 dólares por mês, e no ruim, nada.
 - `CODEMAP.md` (5 de outubro): primeiro mapa do código, gerado por `node scripts/codemap.js`. 111 arquivos.
 - `docs/business/ideacao-perguntas-e-respostas.md`: as cinco rodadas de perguntas e as respostas do Lucas, com o
@@ -112,8 +113,8 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
   `DESIGN-DIRECTION.md` (que ainda descreve a C) e a aplicação ao app, que segue com a C e espera a sincronização com
   `0xcf07/pred-provable`.
 - **Nome do site:** decidido em 4 de outubro, Brot Markets. O app e os protótipos ainda dizem "baked".
-- **BP v0.0.2:** falta a Parte 4 (construção e risco). A Parte 3 tem sete propostas aguardando o fundador. A v0.0.1 segue em `BUSINESS-PLAN.md` até as
-  quatro partes existirem. Aguarda o fundador: o teto da devolução da indicação.
+- **BP v0.0.2:** falta a Parte 4 (construção e risco). As Partes 1, 2 e 3 não têm pendência do fundador. A v0.0.1 segue em `BUSINESS-PLAN.md` até as
+  quatro partes existirem. Depois das quatro partes, montar o `BUSINESS-PLAN.md` v0.0.2.
 - **Não verificado:** transações no app (conectar, comprar, vender, resolver), `bun test`, `cargo test` e o
   `next build` de produção; o shader WebGPU da direção I (só a reserva em canvas foi vista).
 - **`CODEMAP.md`:** o gerador aponta 28 arquivos acima de 200 linhas e 96 sem cabeçalho `Purpose:`.

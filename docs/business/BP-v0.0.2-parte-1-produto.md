@@ -6,7 +6,7 @@ negócio), 3 (tokens) e 4 (construção e risco) vêm depois.
 
 **Como ler.** Cada regra traz uma de duas marcas. **Decisão** é o que o fundador já decidiu, com as palavras dele
 entre aspas quando ajudam. **Proposta, aguardando decisão** é o que este documento sugere e ele ainda não aprovou.
-Sobrou um detalhe a confirmar, o teto da devolução ao indicado (seção 3.8), resumido no capítulo 5. Números que vêm de fora trazem etiqueta:
+Não sobrou proposta em aberto nesta parte. Números que vêm de fora trazem etiqueta:
 FATO (lido na fonte), FATO SECUNDÁRIO (lido em quem citou a fonte) e INFERÊNCIA (conta ou conclusão nossa). Três
 termos aparecem no texto inteiro: USDC é a moeda digital que vale 1 dólar; MVP é a primeira versão do produto;
 devnet é a rede de testes da Solana, em que o dinheiro não tem valor.
@@ -83,10 +83,9 @@ parte em 90% do que o outro lado perdeu.
 
 ### 1.4 O que falta decidir
 
-A última proposta desta parte foi decidida em 5/10/2026: o site abre com cinco tipos de pergunta, e o leitor de
-preço é a primeira peça a construir (seção 4.2).
-
-Falta um detalhe a confirmar: o teto da devolução ao indicado, de 5 USDC (seção 3.8).
+Nada. As duas últimas pendências desta parte foram decididas em 5/10/2026: o site abre com cinco tipos de
+pergunta, com o leitor de preço construído primeiro (seção 4.2), e a devolução ao indicado tem teto de 5 USDC
+(seção 3.8).
 
 ## 2. O que é e para quem
 
@@ -532,11 +531,10 @@ a média de 3,70% do volume usada na Parte 2 (INFERÊNCIA). Bia recebe 20% disso
 apostados e recebe de volta a taxa dos primeiros 50, que na média é de 1,85. A casa fica com 27,75. Na média, o
 programa custa 0,74% do volume indicado (20% de 3,70%), mais a devolução.
 
-**Detalhe a confirmar (proposta, aguardando decisão): o teto da devolução.** Este ponto nasceu da taxa sobre o
-ganho e o fundador ainda não o viu. Uma aposta de 50 USDC num azarão que ganha gera uma taxa alta. Exemplo: com os
+**Decisão: a devolução tem teto de 5 USDC por indicado.** O fundador aprovou o teto em 5/10/2026. Ele nasceu da
+taxa sobre o ganho. Uma aposta de 50 USDC num azarão que ganha gera uma taxa alta. Exemplo: com os
 primeiros 50 do Caio, um lado fica com 100 USDC, contra 900 do outro, e ganha. A taxa do pote é 90 e a parte dele
-nessa taxa é 45. Sem teto, a casa devolveria 45 USDC a uma carteira só. A proposta é um teto de 5 USDC por
-indicado. O custo do teto: quem acertar um azarão logo de início recebe de volta menos do que pagou de taxa nos
+nessa taxa é 45. Sem teto, a casa devolveria 45 USDC a uma carteira só. O custo do teto: quem acertar um azarão logo de início recebe de volta menos do que pagou de taxa nos
 primeiros 50.
 
 Dois cuidados para a Parte 4: gravar quem indicou quem, e gravar de qual aposta veio cada pedaço da taxa, para
@@ -886,7 +884,7 @@ ressalva na rede principal.
 
 ## 5. Decisões pendentes e objeções
 
-### 5.1 O que foi decidido em 5/10/2026 e o detalhe que sobra
+### 5.1 O que foi decidido em 5/10/2026
 
 O fundador respondeu em 5/10/2026 a tudo o que estava como proposta. São dez decisões. A citação dele está
 na seção indicada.
@@ -904,8 +902,7 @@ na seção indicada.
 | 9 | Tipo "tokens travados" | Fora da lista do primeiro dia | 4.3 |
 | 10 | Tipos de pergunta do primeiro dia | Cinco tipos: preço de ativo grande, queima, liquidez travada na Meteora, pool de staking e stake de validador. O leitor de preço é construído primeiro | 4.2 |
 
-**O detalhe a confirmar (proposta, aguardando decisão): o teto da devolução ao indicado.** A proposta é de 5 USDC
-por indicado (seção 3.8).
+O último detalhe, o teto de 5 USDC na devolução ao indicado, também foi aprovado (seção 3.8).
 
 ### 5.2 As objeções da v0.0.1 que tocam o produto
 

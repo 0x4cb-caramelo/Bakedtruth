@@ -4,8 +4,9 @@
 v0.0.1. As Partes 1 (produto) e 2 (mercado e negócio) estão prontas; a Parte 4 (construção e risco) vem depois.
 
 **Como ler.** As marcas são as das Partes 1 e 2. **Decisão** é o que o fundador já decidiu, com as palavras dele
-entre aspas. **Proposta, aguardando decisão** é o que este documento sugere e ele ainda não aprovou. São sete
-propostas, numeradas de P1 a P7 e resumidas no capítulo 8. Números que vêm de fora trazem etiqueta: FATO (lido na
+entre aspas. Este documento levou sete propostas ao fundador, numeradas de P1 a P7. Em 5/10/2026 ele aprovou a recomendação
+de todas: "sobre as 7 decisões, concordo". Elas aparecem como **Decisão (P1)** a **Decisão (P7)**, com as opções
+que foram consideradas, e estão resumidas no capítulo 8. Números que vêm de fora trazem etiqueta: FATO (lido na
 fonte), FATO SECUNDÁRIO (lido em quem citou a fonte) e INFERÊNCIA (conta ou conclusão nossa). Os valores estão em
 dólares. Nada neste documento é promessa de preço ou de retorno, para nenhum dos dois tokens.
 
@@ -58,9 +59,11 @@ depois do custo de 5.500 dólares e do fundo de prêmios.
 - A ordem: o A quando o produto estiver utilizável; o B depois do equilíbrio.
 - A distribuição do B parte da proposta do sócio Ronaldo, o CTO.
 
-### 1.3 O que falta decidir
+### 1.3 O que foi decidido em 5/10/2026
 
-| # | O que decidir | Recomendação, em uma linha |
+O fundador aprovou as sete recomendações: "sobre as 7 decisões, concordo".
+
+| # | O que foi decidido | O que passa a valer |
 |---|---|---|
 | P1 | Como o token A é lançado e o que se diz no dia | A equipe lança, compra até 2% e trava por 12 meses; o texto diz que o A não dá direito a nada |
 | P2 | Prazos de trava do staking e o peso de cada um | 1, 3, 6 e 12 meses, com pesos 1, 1,5, 2 e 3 |
@@ -272,7 +275,7 @@ cada coisa significa.
 
 ### 3.5 O lançamento e o que dizer a quem compra
 
-**Proposta, aguardando decisão (P1).**
+**Decisão (P1), de 5/10/2026.** O fundador aprovou a recomendação desta seção.
 
 **O que está sendo decidido.** Quem cria o token A no pump.fun, de qual carteira, se a equipe compra, e qual texto
 é publicado no dia.
@@ -297,7 +300,7 @@ para o fundo põe 4.500 dólares por mês nos prêmios; ligar o programa de reco
 | (b) A equipe cria e não compra nada | Só aponta a taxa de criador | Os primeiros tokens, os mais baratos, ficam com quem chegar antes. A equipe não tem nada em jogo |
 | (c) Outra pessoa cria | Um terceiro lança o token | É o único "sem vínculo" completo. Mas quem cria define o destino da taxa de criador, e a empresa perde o controle disso |
 
-**Recomendação: a opção (a), com cinco regras.**
+**Recomendação, aprovada: a opção (a), com cinco regras.**
 
 1. O token A sai quando o produto estiver utilizável. Ponto de partida: pelo menos quatro semanas na rede
    principal, com perguntas já resolvidas e pagas.
@@ -368,7 +371,7 @@ Relembrando: staking é depositar o token num programa da plataforma, e trava é
 pode ser sacado. O motivo da trava é prático: não dá para medir na rede há quanto tempo alguém "segura" um token
 na carteira, porque a pessoa pode vender e recomprar. Com o depósito travado, o tempo fica registrado.
 
-**Proposta, aguardando decisão (P2).**
+**Decisão (P2), de 5/10/2026.** O fundador aprovou a recomendação desta seção.
 
 **O que está sendo decidido.** Quais prazos de trava a plataforma oferece e quanto cada um pesa.
 
@@ -396,7 +399,7 @@ que o total de pontos é 1,5 milhão, Ana recebe 23,82 e Beto, 15,88.
 | (b) Peso igual para todos; só a quantidade conta | Mais simples ainda, mas contraria o "quanto mais tempo maior o desconto" |
 | (c) Prazos de até quatro anos, com pesos maiores | Prende mais tokens. Prende também as pessoas por anos, cedo demais |
 
-**Recomendação: a opção (a).** Os mesmos pontos valem para o desconto, para o voto e para a parte no cofre: uma
+**Recomendação, aprovada: a opção (a).** Os mesmos pontos valem para o desconto, para o voto e para a parte no cofre: uma
 conta só, que qualquer pessoa confere. Três regras acompanham. Não há saque antes do fim da trava. Quando a
 trava termina, o depósito continua valendo com peso 1 até o dono sacar ou travar de novo. E o "tempo" que conta é
 o prazo com que a pessoa se compromete, e não o tempo que já passou; é a leitura mais simples da decisão, e fica
@@ -408,7 +411,7 @@ não estava no ramo principal do repositório em 04/10/2026 (FATO, conferido no 
 
 ### 4.3 Desconto na taxa
 
-**Proposta, aguardando decisão (P3).**
+**Decisão (P3), de 5/10/2026.** O fundador aprovou a recomendação desta seção.
 
 **O que está sendo decidido.** Quanto de desconto cada faixa de pontos dá e qual é o teto.
 
@@ -453,7 +456,7 @@ tivessem 40% de desconto, a taxa média cairia de 3,70% para 2,22% do volume, e 
 | (b) Quatro faixas, de 5% a 20% | Custa a metade. O desconto fica pequeno demais para o apostador notar: 148 por mês para quem aposta 20.000 |
 | (c) Lançar o B sem desconto, só com voto e cofre | Custo zero. O B nasce sem nenhum uso que não dependa do lucro da empresa |
 
-**Recomendação: a opção (a), com duas proteções.** Primeira: o desconto sai da taxa inteira, antes da divisão
+**Recomendação, aprovada: a opção (a), com duas proteções.** Primeira: o desconto sai da taxa inteira, antes da divisão
 entre tesouraria e operação, e a indicação é paga sobre a taxa já com desconto. Segunda: uma revisão marcada. Se
 os descontos passarem de 10% da taxa num trimestre, a tabela é revista para as travas novas. O porquê: o desconto
 é o único uso do B que tem valor desde o primeiro dia sem depender de lucro. A Gains, quando suspendeu os
@@ -497,7 +500,7 @@ recomendações sobre o que é saudável para a empresa". O mecanismo faz sentid
 quem faz staking. Mas não existe um ganho do staking para somar. Se cem pessoas depositam tokens num cofre e
 ninguém põe dinheiro lá, não há o que repartir. O cofre vale só o que a empresa repassar.
 
-**Proposta, aguardando decisão (P4).**
+**Decisão (P4), de 5/10/2026.** O fundador aprovou a recomendação desta seção.
 
 **O que está sendo decidido.** Que fatia do resultado vai ao cofre, a partir de quando, e quanto disso volta às
 pools como prêmio.
@@ -544,7 +547,7 @@ cento vão ao cofre: 1.489. Um quinto disso, 298, vai ao fundo de prêmios e vir
 
 A fatia das pools também tem opções: nada, um quinto ou a metade do que for ao cofre.
 
-**Recomendação: 20% do resultado, e um quinto disso para as pools.** Com 10%, o cofre do cenário razoável paga
+**Recomendação, aprovada: 20% do resultado, e um quinto disso para as pools.** Com 10%, o cofre do cenário razoável paga
 595 dólares por mês a todos somados, pouco para alguém travar um token por causa dele. Com 30%, a empresa perde
 folga justamente quando precisa contratar: o custo de 5.500 por mês é a conta de três sócios, sem mais ninguém.
 Um quinto para as pools devolve parte do dinheiro ao produto sem esvaziar o cofre. Esse prêmio é uma aposta da
@@ -595,7 +598,7 @@ porque o mercado não reagia (FATO SECUNDÁRIO, BeInCrypto e SolanaFloor, jan/20
 **Liberação gradual** é a trava que solta os tokens aos poucos, em partes iguais por mês, depois de um período
 "parado" em que nada sai.
 
-**Proposta, aguardando decisão (P5).**
+**Decisão (P5), de 5/10/2026.** O fundador aprovou a recomendação desta seção.
 
 **O que está sendo decidido.** Como o 1 bilhão de tokens B é dividido e quando cada fatia pode ser vendida.
 
@@ -629,7 +632,7 @@ reserva da ponte entra em circulação conforme for usada.
 | (b) A proposta original do sócio: venda pública de 22%, com 40% livres no lançamento, e sem venda privada | Mais tokens à venda no primeiro dia. Contraria a decisão de fazer venda privada |
 | (c) Venda privada com 12 meses parados | Menos venda no primeiro ano. Menos gente disposta a comprar |
 
-**Recomendação: a opção (a).** A equipe fica com 15% e trava mais longa que a média: em cerca de 85% das empresas
+**Recomendação, aprovada: a opção (a).** A equipe fica com 15% e trava mais longa que a média: em cerca de 85% das empresas
 a equipe fica 1 ano parada e recebe ao longo de 4 (FATO SECUNDÁRIO, Pulley, set/2025). O contraexemplo é o PUMP,
 que vendeu 33% da oferta sem trava nenhuma (FATO SECUNDÁRIO, Blockworks, set/2026).
 
@@ -653,7 +656,7 @@ O desenho, passo a passo.
 
 ### 5.2 O tamanho da ponte
 
-**Proposta, aguardando decisão (P6).**
+**Decisão (P6), de 5/10/2026.** O fundador aprovou a recomendação desta seção.
 
 **O que está sendo decidido.** O tamanho do desconto, quanto de cada compra pode ser pago com token A, o tamanho
 da reserva e como o A é avaliado.
@@ -692,7 +695,7 @@ servindo contra o movimento oposto, que é inflar o preço do A por uma hora ant
 | (c) Ponte grande | 40% de desconto; até 50% da compra | Vira distribuição de B barato. O preço do A passa a depender da ponte |
 | (d) Sem queima | Dar B a quem segura A, por saldo ao longo do tempo | É o que funcionou nos casos da pesquisa. Contraria a decisão do fundador |
 
-**Recomendação: a opção (a), com três proteções.** A queima e a entrega na mesma operação. A avaliação do A pelo
+**Recomendação, aprovada: a opção (a), com três proteções.** A queima e a entrega na mesma operação. A avaliação do A pelo
 menor dos dois preços. E o B comprado pela ponte entregue já em staking, com trava de 3 meses: sem isso, quem
 compra com desconto vende no mesmo dia, e ainda leva condição melhor que a do comprador da venda privada, que
 espera 6 meses. O USDC recebido pela ponte segue o destino do dinheiro da venda privada (P7).
@@ -753,7 +756,7 @@ propõe esperar três meses seguidos.
 
 ### 6.2 Quando acontece a venda privada
 
-**Proposta, aguardando decisão (P7).**
+**Decisão (P7), de 5/10/2026.** O fundador aprovou a recomendação desta seção.
 
 **O que está sendo decidido.** Em que momento a empresa vende token B a compradores escolhidos, e quanto tempo
 antes do lançamento.
@@ -776,7 +779,7 @@ entregar. E o mercado de vendas está fraco: no mundo, foram 37 vendas públicas
 | (b) Venda depois do equilíbrio, de 60 a 90 dias antes do lançamento | Tokens já emitidos, com a trava da P5: 10% no lançamento, 6 meses parado, 12 de liberação gradual | Nenhum dinheiro para atravessar o primeiro ano. O comprador vê volume real |
 | (c) Venda no mesmo dia do lançamento | Igual à (b), sem intervalo | Não há tempo de montar a pool de negociação com o dinheiro da venda |
 
-**Recomendação: a opção (b), com gatilho escrito.** A venda só abre depois de três meses seguidos com a operação
+**Recomendação, aprovada: a opção (b), com gatilho escrito.** A venda só abre depois de três meses seguidos com a operação
 paga. O lançamento do B vem de 60 a 90 dias depois. Quem quiser investir antes disso entra pelo outro caminho, o
 da captação de 50 mil a 350 mil dólares que o fundador busca (Parte 2, seção 5.5): compra participação na
 empresa, com direito a receber tokens se um dia existirem. A pesquisa descreve esse contrato como o usual na fase
@@ -876,11 +879,13 @@ tokens com repasse ou recompra, que não foi encontrado.
 - **"Quem tem mais token escolhe as perguntas."** É a crítica previsível ao voto. A resposta é o veto da equipe
   pelos critérios de segurança e a regra de que voto nenhum decide resultado.
 
-## 8. Decisões pendentes e objeções
+## 8. Decisões e objeções
 
-### 8.1 As sete propostas
+### 8.1 As sete decisões de 5/10/2026
 
-| # | O que decidir | Opções | Recomendação | Seção |
+O fundador aprovou a recomendação das sete propostas: "sobre as 7 decisões, concordo".
+
+| # | O que foi decidido | Opções consideradas | O que passa a valer | Seção |
 |---|---|---|---|---|
 | P1 | Como o token A é lançado e o que se diz no dia | A equipe cria, compra pouco e trava; cria e não compra; outra pessoa cria | A primeira, com teto de 2%, trava de 12 meses, equipe sem negociar e texto revisado | 3.5 |
 | P2 | Prazos de trava e pesos | Quatro prazos com pesos de 1 a 3; peso igual; prazos de até quatro anos | Quatro prazos: 1, 3, 6 e 12 meses, pesos 1, 1,5, 2 e 3 | 4.2 |
@@ -893,7 +898,7 @@ tokens com repasse ou recompra, que não foi encontrado.
 O roteiro desta parte previa oito propostas. Duas foram fundidas na P4, porque tratam do mesmo dinheiro: quanto
 vai ao cofre e quanto disso volta às pools.
 
-Quatro pontos menores precisam de teste ou de leitura antes do lançamento do token A, e não de decisão: se a
+Quatro pontos menores precisam de teste ou de leitura antes do lançamento do token A, e não de decisão ("ok"): se a
 carteira do fundo pode ser uma conta de programa na divisão da taxa de criador; se as ferramentas de trava
 aceitam o padrão Token-2022; o texto inteiro dos termos do pump.fun; e para onde vai o dinheiro do fundo se a
 empresa parar.
