@@ -46,8 +46,11 @@ Scripts use `~/.config/solana/pred-provable-devnet.json` (`DEVNET_WALLET`, `DEVN
 - Invariants while open: `yes_supply == no_supply + sponsor_no` and `vault == budget + yes_supply`. A randomized test
   checks these after every operation; preserve them in any new instruction.
 - `resolver.rs`: closed `ResolverKind` enum (no generic offset reader, deliberately rejected). Each variant checks the
-  owner/layout of its `metric_account`, which is locked at creation. Only irreversible or epoch-lagged metrics. Also
-  holds `require_trading_open`, the anti-sniping guard used by `buy_yes`, `add_liquidity` and `swap` (not by
+  owner/layout of its `metric_account`, which is locked at creation. Only irreversible or epoch-lagged metrics: nothing a
+  flash loan can move (pool reserves and live TVL were rejected on purpose; `RESOLVERS.md` has the reasoning, every
+  verified third-party layout and the roadmap). Variants are Borsh-tagged by position: append, never reorder. Layouts
+  with options or strings are read through the bounds-checked `Cursor`, never by slicing. Also holds
+  `require_trading_open`, the anti-sniping guard used by `buy_yes`, `add_liquidity` and `swap` (not by
   `remove_liquidity`, which is always open).
 - `outcome.rs`: market-PDA-signed minting/transfers of YES/NO/LP tokens and USDC vault deposits/payouts. All collateral
   moves use `transfer_checked`. Collateral mint is `USDC_MINT` (devnet Circle USDC by default; `--features mainnet`
@@ -72,6 +75,11 @@ edges, and the Baked mascot hopping between declared perches). A generic dashboa
 (loaded via `app/CLAUDE.md`) says this Next.js version has breaking changes: read `app/node_modules/next/dist/docs/`
 before writing app code.
 
+**In-app chat** (`app/app/api/chat/route.ts`, `app/components/chat/chat.tsx`, `app/lib/chat.ts`): a read-only explainer
+that streams from OpenRouter (`OPENROUTER_API_KEY`, optional `OPENROUTER_MODEL`, server-only in `app/.env.local`). The
+market page feeds it a text summary through `useChatContext`. It cannot sign or trade. The per-IP rate limit is
+in-memory, so a multi-instance deploy needs a shared store.
+
 ## Gotchas
 
 - `@solana/kit` is pinned `~8.3.0` (8.4.0 shipped with unpublished sub-packages); re-check before bumping.
@@ -83,6 +91,13 @@ before writing app code.
   warp to slot 1 and use absolute cutoff/deadline slots. Anchor 1.x decoded account/enum names are PascalCase.
 - LiteSVM cannot inject epoch stake (`sol_get_epoch_stake` returns 0), so `StakeAtLeast` YES is only testable on a real
   cluster.
+- The incinerator is not a lock: SPL Token lets anyone burn from, or close when empty, token accounts owned by the
+  incinerator or the system program. `LockedAtLeast` therefore reads the ATA of the program's `["lock"]` PDA. Injecting
+  token accounts with `setTokenAccount` hides this kind of bug; use the real Token program for behavior tests.
+- Third-party account layouts (stake pool, DAMM v2, Token Metadata) are tested on real mainnet bytes in
+  `tests/fixtures`, captured by `scripts/capture-fixtures.ts`. Re-run it after an upstream upgrade and read the diff.
+  Read their fields by copying bytes at pinned offsets; Anchor discriminators are name-derived and collide across
+  programs, so check the owner first.
 - App code under `app/lib` runs in browsers: `import { Buffer } from "buffer"` (no global Buffer). The wallet-adapter
   stylesheet loads after `globals.css`, so overrides need extra specificity. Single-column mobile grids need
   `grid-cols-1`.

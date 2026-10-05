@@ -13,7 +13,10 @@ export type Kind =
   | "stakeAtLeast"
   | "mintAuthorityRevoked"
   | "freezeAuthorityRevoked"
-  | "lockedAtLeast";
+  | "lockedAtLeast"
+  | "stakePoolTvlAtLeast"
+  | "dammV2LockedAtLeast"
+  | "metadataImmutable";
 /** The explorer's filter: open markets, and the two resolved outcomes. */
 export type Status = "active" | "yes" | "no";
 /** Where an open market is in its life. */
@@ -29,30 +32,43 @@ export function statusOf(market: MarketAccount): Status {
   return "active";
 }
 
-/** The epoch a `StakeAtLeast` market measures, or null for the other kinds. */
-export const stakeEpoch = (market: MarketAccount) =>
-  "stakeAtLeast" in market.kind && market.kind.stakeAtLeast ? Number(market.kind.stakeAtLeast.epoch.toString()) : null;
+/**
+ * The epoch an epoch-measured market (`StakeAtLeast`, `StakePoolTvlAtLeast`) reads, or null for the
+ * ratchet kinds, which resolve the moment their goal is met.
+ */
+export function measuredEpoch(market: MarketAccount): number | null {
+  const { kind } = market;
+  if ("stakeAtLeast" in kind && kind.stakeAtLeast) return Number(kind.stakeAtLeast.epoch.toString());
+  if ("stakePoolTvlAtLeast" in kind && kind.stakePoolTvlAtLeast) {
+    return Number(kind.stakePoolTvlAtLeast.epoch.toString());
+  }
+  return null;
+}
+
+/** The scale of a `DammV2LockedAtLeast` goal (threshold << shift), or 0 for the other kinds. */
+export const dammShift = (market: MarketAccount) =>
+  "dammV2LockedAtLeast" in market.kind && market.kind.dammV2LockedAtLeast ? market.kind.dammV2LockedAtLeast.shift : 0;
 
 /**
- * Trading (the sale and the pool) runs until the cutoff, or until a stake market's epoch
+ * Trading (the sale and the pool) runs until the cutoff, or until an epoch-measured market's epoch
  * starts; after that the market waits for anyone to resolve it. The program also halts
- * trading the moment a goal is met, which the metric reading shows.
+ * trading the moment a ratchet goal is met, which the metric reading shows.
  */
 export function phaseOf(market: MarketAccount, clock: ClockInfo | null): Phase {
   if (statusOf(market) !== "active") return "resolved";
   if (!clock) return "trading";
-  const epoch = stakeEpoch(market);
+  const epoch = measuredEpoch(market);
   const closed = clock.slot >= Number(market.cutoffSlot.toString()) || (epoch !== null && clock.epoch >= epoch);
   return closed ? "awaitingResolution" : "trading";
 }
 
 /**
- * The slot trading stops: the cutoff, or for a stake market the start of its epoch if that comes
- * first (estimated from the epoch schedule).
+ * The slot trading stops: the cutoff, or for an epoch-measured market the start of its epoch if that
+ * comes first (estimated from the epoch schedule).
  */
 export function closeSlot(market: MarketAccount, clock: ClockInfo | null): number {
   const cutoff = Number(market.cutoffSlot.toString());
-  const epoch = stakeEpoch(market);
+  const epoch = measuredEpoch(market);
   if (epoch === null || !clock) return cutoff;
   const epochStart = clock.slot - clock.slotIndex + (epoch - clock.epoch) * clock.slotsInEpoch;
   return Math.min(cutoff, epochStart);
@@ -72,12 +88,41 @@ export function yesPrice(market: MarketAccount): Price {
 export const hasPool = (market: MarketAccount) => big(market.poolYes) > BigInt(0) && big(market.poolNo) > BigInt(0);
 
 export const KIND_INFO: Record<Kind, { label: string; summary: string }> = {
-  supplyAtMost: { label: "Burn goal", summary: "Token supply falls to the target. The mint has no authority, so supply only goes down." },
+  supplyAtMost: {
+    label: "Burn goal",
+    summary: "Token supply falls to the target. The mint has no authority, so supply only goes down.",
+  },
   immutable: { label: "Immutability", summary: "The program's upgrade authority is revoked. Revoking is one-way." },
-  stakeAtLeast: { label: "Stake goal", summary: "The vote account holds the target stake in the named epoch. Stake is fixed per epoch." },
-  mintAuthorityRevoked: { label: "Renounce minting", summary: "The token's mint authority is revoked. It can never be set again." },
-  freezeAuthorityRevoked: { label: "Renounce freezing", summary: "The token's freeze authority is revoked. It can never be set again." },
-  lockedAtLeast: { label: "Lock goal", summary: "Tokens locked under the incinerator reach the target. Nobody can ever move them out." },
+  stakeAtLeast: {
+    label: "Stake goal",
+    summary: "The vote account holds the target stake in the named epoch. Stake is fixed per epoch.",
+  },
+  mintAuthorityRevoked: {
+    label: "Renounce minting",
+    summary: "The token's mint authority is revoked. It can never be set again.",
+  },
+  freezeAuthorityRevoked: {
+    label: "Renounce freezing",
+    summary: "The token's freeze authority is revoked. It can never be set again.",
+  },
+  lockedAtLeast: {
+    label: "Lock goal",
+    summary: "Tokens in the program's lock account reach the target. Nobody can ever move, burn or close them.",
+  },
+  stakePoolTvlAtLeast: {
+    label: "Pool TVL goal",
+    summary:
+      "The stake pool holds the target SOL at the start of the named epoch. The pool records it itself, so a flash loan can't move it.",
+  },
+  dammV2LockedAtLeast: {
+    label: "Liquidity lock",
+    summary:
+      "A Meteora pool's permanently locked liquidity reaches the target. Locked liquidity can never be withdrawn.",
+  },
+  metadataImmutable: {
+    label: "Immutable metadata",
+    summary: "The token's metadata is made immutable. The flag only ever flips one way.",
+  },
 };
 
 /** Browse categories: the resolver kinds, with both renounce kinds under one. */
@@ -96,8 +141,11 @@ const KIND_CATEGORY: Record<Kind, Category> = {
   mintAuthorityRevoked: "renounce",
   freezeAuthorityRevoked: "renounce",
   lockedAtLeast: "lock",
+  dammV2LockedAtLeast: "lock",
   immutable: "immutable",
+  metadataImmutable: "immutable",
   stakeAtLeast: "stake",
+  stakePoolTvlAtLeast: "stake",
 };
 
 export const categoryOf = (market: MarketAccount) => KIND_CATEGORY[kindOf(market)];

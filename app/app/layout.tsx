@@ -4,6 +4,7 @@ import "./globals.css";
 import { BRAND } from "@/lib/brand";
 import { CellField } from "@/components/cell-field";
 import { Mascot } from "@/components/mascot";
+import { ChatProvider } from "@/components/chat/chat";
 import { Providers } from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
 import { TapeProvider } from "@/components/tape-context";
@@ -24,26 +25,28 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full">
         <Providers>
           <CellField />
-          <TapeProvider>
-            <div className="relative z-10 flex min-h-screen flex-col">
-              <Ticker />
-              <SiteHeader />
-              <main className="mx-auto w-full max-w-[1320px] flex-1 px-4 py-6 sm:px-6">{children}</main>
-              <footer
-                className="mt-16 border-t-2 border-line"
-                data-perch="foot"
-                data-perch-pose="tired"
-                data-perch-say="Not audited. Stay sharp."
-              >
-                <div className="mx-auto flex max-w-[1320px] flex-wrap items-center justify-between gap-3 px-4 py-6 text-xs text-dim sm:px-6">
-                  <span>
-                    {BRAND.name} · {BRAND.tagline} · devnet · not audited, do not use with real funds
-                  </span>
-                  <span>{BRAND.motto}</span>
-                </div>
-              </footer>
-            </div>
-          </TapeProvider>
+          <ChatProvider>
+            <TapeProvider>
+              <div className="relative z-10 flex min-h-screen flex-col">
+                <Ticker />
+                <SiteHeader />
+                <main className="mx-auto w-full max-w-[1320px] flex-1 px-4 py-6 sm:px-6">{children}</main>
+                <footer
+                  className="mt-16 border-t-2 border-line"
+                  data-perch="foot"
+                  data-perch-pose="tired"
+                  data-perch-say="Not audited. Stay sharp."
+                >
+                  <div className="mx-auto flex max-w-[1320px] flex-wrap items-center justify-between gap-3 px-4 py-6 text-xs text-dim sm:px-6">
+                    <span>
+                      {BRAND.name} · {BRAND.tagline} · devnet · not audited, do not use with real funds
+                    </span>
+                    <span>{BRAND.motto}</span>
+                  </div>
+                </footer>
+              </div>
+            </TapeProvider>
+          </ChatProvider>
           <Mascot />
         </Providers>
       </body>

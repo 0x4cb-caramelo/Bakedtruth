@@ -21,10 +21,15 @@ is the product. To keep it honest, every resolver reads state that flash capital
 | `StakeAtLeast { epoch }` | Vote account, via `sol_get_epoch_stake` (SIMD-0133) | Stake in `epoch` `>= threshold` | Stake is fixed per epoch and needs an epoch to activate |
 | `MintAuthorityRevoked` | SPL Token mint | Mint authority revoked by `deadline_slot` | A revoked mint authority can never be set again |
 | `FreezeAuthorityRevoked` | SPL Token mint | Freeze authority revoked by `deadline_slot` | A revoked freeze authority can never be set again |
-| `LockedAtLeast` | The incinerator's associated token account for the mint | Balance `>= threshold` by `deadline_slot` | Nobody holds the incinerator's key, so locked tokens (e.g. LP) can never leave |
+| `LockedAtLeast` | The lock account for the mint: the associated token account of the program's `["lock"]` PDA | Balance `>= threshold` by `deadline_slot` | The program never signs for the lock owner, so tokens sent there (e.g. LP) can't be moved, burned or closed. The incinerator would not do: SPL Token lets anyone burn from, or close, its accounts |
+| `StakePoolTvlAtLeast { epoch }` | SPL stake pool (JitoSOL, bSOL, ...): `last_epoch_total_lamports` | The pool's total at the start of `epoch` `>= threshold` lamports | The pool writes it once per epoch, and deposits and withdrawals revert until then: capital has to sit in the pool across an epoch boundary |
+| `DammV2LockedAtLeast { shift }` | Meteora DAMM v2 pool: `permanent_lock_liquidity` | Permanently locked liquidity `>= threshold << shift` by `deadline_slot` | Written by one instruction that only adds to it, and locked principal cannot repay a flash loan |
+| `MetadataImmutable` | The mint's Metaplex Token Metadata account | `is_mutable == false` by `deadline_slot` | The flag can only be flipped to false, and the Token Metadata program is not upgradeable |
 
 The set is a closed enum on purpose: each variant checks the owner and layout of the account it reads, and the account
-is locked into the market at creation.
+is locked into the market at creation. Pool reserves, TVL read from a live balance and volume counters are left out on
+purpose: they either move inside one transaction or no longer update. The reasoning, every verified layout and the
+roadmap are in [RESOLVERS.md](RESOLVERS.md).
 
 ## Outcome tokens
 
@@ -100,8 +105,9 @@ their creators cannot pause them, so their liquidity providers carry the risk of
    burn equal YES and NO to get the USDC back. Never touches the sponsor's budget.
 4. `add_liquidity` / `swap` / `remove_liquidity`: the guarded pool. Adding and swapping stop with the sale; removing
    is always open.
-5. `resolve`: permissionless, top-level only (no CPI) and final in one instruction. Every goal except stake (burn,
-   renounce, lock, immutability) resolves YES as soon as it is met; past `deadline_slot` the market resolves NO.
+5. `resolve`: permissionless, top-level only (no CPI) and final in one instruction. Every goal except the
+   epoch-measured ones (stake, stake pool TVL) resolves YES as soon as it is met; past `deadline_slot` the market
+   resolves NO.
 6. `redeem`: burn the winning token for USDC, 1:1. The emptied token account is closed and its rent refunded.
 7. `withdraw_budget`: pays the sponsor what it is owed now, and can be called again later: the unspent budget once the
    sale is closed (cutoff passed or market resolved) or before anything was sold, and its NO 1:1 once NO wins.
@@ -119,14 +125,14 @@ plus `decodeEvents(tx.meta.logMessages)`, with no indexer.
 exact math and addresses the app uses:
 
 - addresses: `marketPda`, `yesMintPda`, `noMintPda`, `vaultPda`, `lpMintPda`, `poolAccounts`, `ataAddress`,
-  `incineratorAta`, `programDataPda`, plus the program constants read from the IDL;
+  `lockOwner`, `lockAta`, `metadataPda`, `programDataPda`, plus the program constants read from the IDL;
 - sale: `salePrice` (rounded up like the program) and `maxSaleAmount` (the largest `buy_yes` the remaining budget
   covers, exact);
 - pool: `swapQuote`, `buyQuote` (mint_pair + swap), `sellQuote` (swap + burn_pair split), `addLiquidityQuote`,
   `removeLiquidityQuote`, `seedNoForPrice`, `poolYesPriceBps`;
 - `decodeEvents`: typed, camelCase like `program.account.*`;
 - `createAtaIdempotentIx`: prepend it to `redeem`, `burn_pair` and `withdraw_budget` when the user may not have a USDC
-  account yet (they take an existing one), and to a `LockedAtLeast` `create_market` for the incinerator's account.
+  account yet (they take an existing one), and to a `LockedAtLeast` `create_market` for the lock account.
 
 Losing tokens are worthless after resolution; the app can burn them and close the account for its rent with plain SPL
 Token instructions.
@@ -198,11 +204,31 @@ app/                      Next.js frontend
 ## Known limits
 
 - **Resolve in time.** A goal met but not resolved by `deadline_slot` resolves NO, and a `StakeAtLeast` market must be
-  resolved during its target epoch. YES holders should resolve in the same transaction as the action that meets the
-  goal.
+  resolved during its target epoch. A `StakePoolTvlAtLeast` market must be resolved while the pool still shows its
+  epoch's snapshot, that is until the pool's first balance update of the next epoch. YES holders should resolve in the
+  same transaction as the action that meets the goal.
 - **`resolve` rejects CPI**, so a multisig vault (for example Squads) cannot call it directly. Anyone else can.
 - **`StakeAtLeast` YES is untested.** LiteSVM cannot inject stake (it reports 0), so the tests cover validation, the
   trading halt and the NO paths.
+- **`StakeAtLeast` can only see validators in the filtered epoch snapshot.** On Agave 4.x the epoch stakes behind
+  `sol_get_epoch_stake` drop vote accounts with no BLS key, too little balance, or outside the top 2000 by stake
+  (read from `bank.rs`; the live effect is inferred from `getVoteAccounts`, nothing has called the syscall). Such a
+  validator reads 0, so its market can only resolve NO. Check `epochVoteAccount` before opening one.
+- **`StakePoolTvlAtLeast` needs the pool's own balance update.** The first `UpdateStakePoolBalance` of an epoch is
+  permissionless but takes many transactions on a large pool; if nobody runs it during the target epoch the market is
+  NO. Set `cutoff_slot` well before the epoch boundary: late in the previous epoch the pool's total is mostly known,
+  and the sale would otherwise stay open until the boundary.
+- **`DammV2LockedAtLeast` counts liquidity units, not dollars.** Value per unit depends on the pool's price range,
+  which its creator picks, so check the locked amounts the app shows before buying. It counts any locked position,
+  including the creator's own.
+- **`MetadataImmutable` freezes the on-chain name, symbol, URI, fee and creator list only.** The update authority can
+  still be handed over, and the JSON behind the URI can still change. Coins created by pump.fun's newer `create_v2`
+  have no Metaplex account at all, so they cannot have this market.
+- **Locks must go to the lock account.** Tokens sent to the incinerator, or anywhere else, do not count for a
+  `LockedAtLeast` market, and a mint with a live freeze authority can freeze the lock account.
+- **Third-party layouts are pinned, not guaranteed.** The stake pool, DAMM v2 and Token Metadata readers fix owner,
+  length and offsets and fail closed, but the first two programs are upgradeable. `scripts/capture-fixtures.ts`
+  re-captures the accounts the tests decode; run it after an upstream upgrade.
 - **Rent is not reclaimable for market accounts.** On devnet, creating a market costs the sponsor about 0.0057 SOL
   (market account, two mints, vault) and seeding a pool costs the first provider about 0.0040 SOL (LP mint, two pool
   accounts). Classic SPL Token mints cannot be closed, and closing the rest would need every winner to redeem first.

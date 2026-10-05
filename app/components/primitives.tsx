@@ -6,12 +6,25 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Copy, ExternalLink, Flame, KeyRound, Lock, ShieldCheck, Snowflake, Vote, type LucideIcon } from "lucide-react";
+import {
+  Coins,
+  Copy,
+  Droplets,
+  ExternalLink,
+  FileLock,
+  Flame,
+  KeyRound,
+  Lock,
+  ShieldCheck,
+  Snowflake,
+  Vote,
+  type LucideIcon,
+} from "lucide-react";
 
 import { BRAND } from "@/lib/brand";
 import { explorerAddress } from "@/lib/config";
 import { formatBps, shortAddress } from "@/lib/format";
-import type { Reading } from "@/lib/metric";
+import { authorityWords, type Reading } from "@/lib/metric";
 import { KIND_INFO, multiplier, type Kind, type Phase, type Status } from "@/lib/view";
 
 export function Logo() {
@@ -37,6 +50,10 @@ const KIND_STYLE: Record<Kind, { icon: LucideIcon; bg: string; fg: string }> = {
   lockedAtLeast: { icon: Lock, bg: "#23403f", fg: "#9fdcd6" },
   immutable: { icon: ShieldCheck, bg: "#2a3f30", fg: "#a9dfb4" },
   stakeAtLeast: { icon: Vote, bg: "#4a3a22", fg: "#f2cf8a" },
+  // Each new kind keeps the hue of its category: stake amber, lock teal, immutable green.
+  stakePoolTvlAtLeast: { icon: Coins, bg: "#4a4020", fg: "#f0dc8c" },
+  dammV2LockedAtLeast: { icon: Droplets, bg: "#1f3d44", fg: "#9bd6e2" },
+  metadataImmutable: { icon: FileLock, bg: "#2f4226", fg: "#bfe3a0" },
 };
 
 /** Flat square with the resolver's icon, in place of a market thumbnail. */
@@ -175,9 +192,11 @@ export function ProgressLine({ reading }: { reading?: Reading }) {
   if (!reading) return <div className="h-4 animate-pulse bg-raised" />;
   if (reading.type === "unavailable") return <p className="truncate text-xs text-dim">{reading.reason}</p>;
   if (reading.type === "authority") {
+    const { subject, state } = authorityWords(reading);
     return (
       <p className={`text-xs ${reading.met ? "text-yes" : "text-muted"}`}>
-        {reading.what} {reading.met ? "revoked ✓" : "still live"}
+        {subject} {state}
+        {reading.met && " ✓"}
       </p>
     );
   }

@@ -35,9 +35,12 @@ export type CreateMarketParams = {
   sponsor: PublicKey;
   marketId: bigint;
   kind: ResolverKind;
-  /** Mint, program id or vote account, per kind. */
+  /** Mint, program id or vote account, per kind (the stake pool, DAMM v2 and metadata kinds name a mint). */
   target: PublicKey;
-  /** Account read at resolution: the target itself, its ProgramData, or the incinerator's token account. */
+  /**
+   * Account read at resolution: the target itself, its ProgramData, the mint's lock account
+   * (`lockAta`), its stake pool, a DAMM v2 pool that holds it, or its Metaplex metadata (`metadataPda`).
+   */
   metric: PublicKey;
   threshold: bigint;
   cutoffSlot: bigint;

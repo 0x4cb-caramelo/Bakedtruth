@@ -33,7 +33,9 @@ pub fn handle_resolve(ctx: Context<Resolve>) -> Result<()> {
         | ResolverKind::Immutable
         | ResolverKind::MintAuthorityRevoked
         | ResolverKind::FreezeAuthorityRevoked
-        | ResolverKind::LockedAtLeast => {
+        | ResolverKind::LockedAtLeast
+        | ResolverKind::DammV2LockedAtLeast { .. }
+        | ResolverKind::MetadataImmutable => {
             if clock.slot > market.deadline_slot {
                 Outcome::No
             } else if resolver::ratchet_met(market, &ctx.accounts.metric_account)? {
@@ -51,6 +53,10 @@ pub fn handle_resolve(ctx: Context<Resolve>) -> Result<()> {
             } else {
                 Outcome::No
             }
+        }
+        // The pool's own snapshot of the epoch's first total, fixed until its next epoch's first update.
+        ResolverKind::StakePoolTvlAtLeast { epoch } => {
+            resolver::resolve_stake_pool(market, epoch, &ctx.accounts.metric_account, &clock)?
         }
     };
 
