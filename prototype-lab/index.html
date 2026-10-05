@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>baked · Prototype Lab</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 48px 24px 64px; background: #0e1116; color: #e9edf3; font: 15px/1.55 system-ui, -apple-system, 'Segoe UI', sans-serif; }
+  main { max-width: 1080px; margin: 0 auto; }
+  header { display: flex; align-items: center; gap: 18px; margin-bottom: 8px; }
+  header img { height: 84px; }
+  h1 { margin: 0; font-size: 30px; letter-spacing: -.5px; }
+  .lead { max-width: 720px; margin: 0 0 34px; color: #a3adbd; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  a.dir { display: flex; flex-direction: column; gap: 10px; padding: 22px; border: 1px solid #2a323f; border-radius: 12px; background: #151a22; color: inherit; text-decoration: none; transition: border-color .15s, transform .15s; }
+  a.dir:hover { border-color: #efbc74; transform: translateY(-2px); }
+  .swatches { display: flex; gap: 6px; }
+  .swatches i { width: 26px; height: 26px; border-radius: 6px; border: 1px solid #ffffff22; }
+  h2 { margin: 0; font-size: 21px; }
+  h2.group { margin: 40px 0 12px; font-size: 15px; color: #a3adbd; text-transform: uppercase; letter-spacing: .8px; }
+  h2.group:first-of-type { margin-top: 0; }
+  h2.group + .lead { margin-bottom: 16px; }
+  p { margin: 0; color: #a3adbd; }
+  dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 4px 0 0; font-size: 13px; }
+  dt { color: #6f7b8e; }
+  dd { margin: 0; }
+  .go { margin-top: auto; padding-top: 8px; color: #efbc74; font-weight: 600; }
+  section.notes { margin-top: 40px; padding: 22px; border: 1px solid #2a323f; border-radius: 12px; }
+  section.notes h2 { margin-bottom: 10px; }
+  section.notes li { margin: 6px 0; color: #c2cad6; }
+  code { padding: 1px 5px; border-radius: 4px; background: #232b38; font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <header><img src="shared/mascot/skeptical.png" alt="Baked, o pãozinho"><h1>baked · Prototype Lab</h1></header>
+  <p class="lead">Catorze direções para o site, com os mesmos dados (<code>shared/mock-data.js</code>), os mesmos fluxos (home, filtros, mercado, painel de compra) e o mesmo mascote. De A a C muda a hipótese de marca; de D a G muda a estrutura da home.</p>
+
+  <h2 class="group">Estrutura original · A, B e C</h2>
+  <div class="grid">
+    <a class="dir" href="prototype-a/index.html">
+      <div class="swatches"><i style="background:#10141b"></i><i style="background:#181d27"></i><i style="background:#4f7dff"></i><i style="background:#efbc74"></i><i style="background:#24c78f"></i><i style="background:#f06a85"></i></div>
+      <h2>A · Ledger</h2>
+      <p>A mais próxima da referência: uma mesa de operações com um pãozinho rabugento em cima.</p>
+      <dl>
+        <dt>Tipografia</dt><dd>Barlow Condensed + Inter</dd>
+        <dt>Mercados</dt><dd>Grade densa de cards</dd>
+        <dt>Efeitos</dt><dd>Spotlight nos cards, borda em movimento no botão, campo de pontos em canvas</dd>
+        <dt>Mascote</dt><dd>Pousa no topo dos cards e painéis</dd>
+      </dl>
+      <span class="go">Abrir A →</span>
+    </a>
+    <a class="dir" href="prototype-b/index.html">
+      <div class="swatches"><i style="background:#0f0b09"></i><i style="background:#1a1310"></i><i style="background:#ff8a3d"></i><i style="background:#e9b26a"></i><i style="background:#5fd39a"></i><i style="background:#ff7887"></i></div>
+      <h2>B · Oven</h2>
+      <p>Uma padaria à noite: a paleta sai da casca do mascote e a prova vira "ponto do assado".</p>
+      <dl>
+        <dt>Tipografia</dt><dd>Fraunces (serifada) + Manrope</dd>
+        <dt>Mercados</dt><dd>Bento, com cards largos e estreitos</dd>
+        <dt>Efeitos</dt><dd>Calor em shader WebGPU, título que surge palavra a palavra, card 3D</dd>
+        <dt>Mascote</dt><dd>Maior; sobe no título e nos cards</dd>
+      </dl>
+      <span class="go">Abrir B →</span>
+    </a>
+    <a class="dir" href="prototype-c/index.html">
+      <div class="swatches"><i style="background:#0b111c"></i><i style="background:#111a2a"></i><i style="background:#6aa8ff"></i><i style="background:#f2a94e"></i><i style="background:#3ddc97"></i><i style="background:#ff6b8a"></i></div>
+      <h2>C · Tape</h2>
+      <p>O mascote é pixel art, então o produto inteiro também é: um placar, não um dashboard.</p>
+      <dl>
+        <dt>Tipografia</dt><dd>Jersey 15 (pixel) + Space Grotesk</dd>
+        <dt>Mercados</dt><dd>Linhas numa fita, progresso em blocos</dd>
+        <dt>Efeitos</dt><dd>Ticker infinito, trilho luminoso, grade de células em canvas</dd>
+        <dt>Mascote</dt><dd>Anda pelo trilho apontando para a linha</dd>
+      </dl>
+      <span class="go">Abrir C →</span>
+    </a>
+  </div>
+
+  <h2 class="group">Home em mosaico · D, E, F e G</h2>
+  <p class="lead">A home passa a abrir com um mosaico: carrossel dos mercados em negociação à esquerda, "Upcoming" e "Closing soon" à direita, os três princípios logo abaixo e então as abas. D, E e F mantêm o visual de A, B e C; a G testa um visual novo.</p>
+  <div class="grid">
+    <a class="dir" href="prototype-d/index.html">
+      <div class="swatches"><i style="background:#10141b"></i><i style="background:#181d27"></i><i style="background:#4f7dff"></i><i style="background:#efbc74"></i><i style="background:#24c78f"></i><i style="background:#f06a85"></i></div>
+      <h2>D · Ledger²</h2>
+      <p>O visual da A sobre o mosaico.</p>
+      <dl>
+        <dt>Base</dt><dd>A · Ledger</dd>
+        <dt>Mercados</dt><dd>Carrossel, depois a grade de cards</dd>
+      </dl>
+      <span class="go">Abrir D →</span>
+    </a>
+    <a class="dir" href="prototype-e/index.html">
+      <div class="swatches"><i style="background:#0f0b09"></i><i style="background:#1a1310"></i><i style="background:#ff8a3d"></i><i style="background:#e9b26a"></i><i style="background:#5fd39a"></i><i style="background:#ff7887"></i></div>
+      <h2>E · Oven²</h2>
+      <p>O visual da B sobre o mosaico.</p>
+      <dl>
+        <dt>Base</dt><dd>B · Oven</dd>
+        <dt>Mercados</dt><dd>Carrossel, depois o bento</dd>
+      </dl>
+      <span class="go">Abrir E →</span>
+    </a>
+    <a class="dir" href="prototype-f/index.html">
+      <div class="swatches"><i style="background:#0b111c"></i><i style="background:#111a2a"></i><i style="background:#6aa8ff"></i><i style="background:#f2a94e"></i><i style="background:#3ddc97"></i><i style="background:#ff6b8a"></i></div>
+      <h2>F · Tape²</h2>
+      <p>O visual da C, a direção aprovada, sobre o mosaico.</p>
+      <dl>
+        <dt>Base</dt><dd>C · Tape</dd>
+        <dt>Mercados</dt><dd>Carrossel, depois a fita em linhas</dd>
+      </dl>
+      <span class="go">Abrir F →</span>
+    </a>
+    <a class="dir" href="prototype-g/index.html">
+      <div class="swatches"><i style="background:#04261a"></i><i style="background:#0b5034"></i><i style="background:#f6c445"></i><i style="background:#e3263b"></i><i style="background:#ff3ea5"></i><i style="background:#2fe39a"></i></div>
+      <h2>G · Casino</h2>
+      <p>Cassino assumido: feltro verde, ouro, néon e todos os clichês de aposta. O mascote é o único que não sorri.</p>
+      <dl>
+        <dt>Tipografia</dt><dd>Bungee + Monoton (néon) + Rubik</dd>
+        <dt>Mercados</dt><dd>Mesas de feltro, fichas no lugar de Yes e No</dd>
+        <dt>Efeitos</dt><dd>Letreiro de lâmpadas, caça-níquel, roleta, contagem regressiva, confete</dd>
+        <dt>Mascote</dt><dd>Pousa na borda das mesas e no bilhete de aposta</dd>
+      </dl>
+      <span class="go">Abrir G →</span>
+    </a>
+  </div>
+
+  <h2 class="group">Mercado preditivo web3 · H, I e J</h2>
+  <p class="lead">Variações de Ledger e Tape, as duas que chegaram mais perto, com cara de mercado preditivo on-chain. Todas usam a home em mosaico; cada uma puxa uma das referências (Aceternity UI, canvas, WebGPU, Spline).</p>
+  <div class="grid">
+    <a class="dir" href="prototype-h/index.html">
+      <div class="swatches"><i style="background:#080a11"></i><i style="background:#141a2b"></i><i style="background:#4f8dff"></i><i style="background:#3fe0c5"></i><i style="background:#2bd9a0"></i><i style="background:#ff5d7d"></i></div>
+      <h2>H · Prism</h2>
+      <p>A mesa do Ledger em vidro, sobre uma aurora. O azul original vira um degradê azul-turquesa.</p>
+      <dl>
+        <dt>Parte de</dt><dd>A · Ledger</dd>
+        <dt>Tipografia</dt><dd>Sora + Inter, números em JetBrains Mono</dd>
+        <dt>Mercados</dt><dd>Grade de cards com anel de probabilidade e mini-gráfico</dd>
+        <dt>Efeitos</dt><dd>Aurora, spotlight nos cards, borda em movimento (Aceternity), rede de pontos em canvas</dd>
+      </dl>
+      <span class="go">Abrir H →</span>
+    </a>
+    <a class="dir" href="prototype-i/index.html">
+      <div class="swatches"><i style="background:#06070b"></i><i style="background:#171a2a"></i><i style="background:#a78bfa"></i><i style="background:#f2a94e"></i><i style="background:#5ef2a8"></i><i style="background:#ff6b8a"></i></div>
+      <h2>I · Blocks</h2>
+      <p>A Tape lida como explorador de blocos: cada mercado é um bloco na corrente, carimbado com a conta que ele lê.</p>
+      <dl>
+        <dt>Parte de</dt><dd>C · Tape</dd>
+        <dt>Tipografia</dt><dd>VT323 (terminal) + JetBrains Mono</dd>
+        <dt>Mercados</dt><dd>Blocos encadeados num trilho, progresso em blocos</dd>
+        <dt>Efeitos</dt><dd>Shader de células em WebGPU (reserva em canvas), feixe no trilho, título que se decodifica</dd>
+      </dl>
+      <span class="go">Abrir I →</span>
+    </a>
+    <a class="dir" href="prototype-j/index.html">
+      <div class="swatches"><i style="background:#090c1b"></i><i style="background:#1b2249"></i><i style="background:#6aa8ff"></i><i style="background:#f2a94e"></i><i style="background:#3ddc97"></i><i style="background:#ff6b8a"></i></div>
+      <h2>J · Orbit</h2>
+      <p>Os cards do Ledger com os blocos da Tape, em azul-marinho e âmbar, em volta de uma moeda 3D: YES de um lado, NO do outro.</p>
+      <dl>
+        <dt>Parte de</dt><dd>A · Ledger + C · Tape</dd>
+        <dt>Tipografia</dt><dd>Chakra Petch + Inter</dd>
+        <dt>Mercados</dt><dd>Cards largos em duas colunas, que inclinam em 3D</dd>
+        <dt>Efeitos</dt><dd>Moeda em órbita no estilo Spline (CSS 3D), lâmpada sob o cabeçalho, céu de estrelas em canvas</dd>
+      </dl>
+      <span class="go">Abrir J →</span>
+    </a>
+  </div>
+
+  <h2 class="group">Ledger² em três visuais · K, L e M</h2>
+  <p class="lead">Partem da estrutura da D · Ledger², a mais próxima do que queremos, mas cada uma tem cor, tipografia e forma próprias, e acrescenta o que mercados preditivos e apps web3 costumam ter e a D não tinha.</p>
+  <div class="grid">
+    <a class="dir" href="prototype-k/index.html">
+      <div class="swatches"><i style="background:#f1f3f6"></i><i style="background:#ffffff"></i><i style="background:#0b1017"></i><i style="background:#1746d1"></i><i style="background:#056b46"></i><i style="background:#b01c38"></i></div>
+      <h2>K · Desk</h2>
+      <p>Um terminal financeiro impresso em papel. A única direção clara do lab: branco, tinta preta e um azul-cobalto.</p>
+      <dl>
+        <dt>Tipografia</dt><dd>IBM Plex Sans Condensed + IBM Plex Sans, números em IBM Plex Mono</dd>
+        <dt>Forma</dt><dd>Cantos retos, linhas finas, régua preta no topo de cada painel, sem sombra</dd>
+        <dt>Acrescenta</dt><dd>Faixa de números, lista em tabela (cards a um clique), variação de preço, feed de atividade, períodos no gráfico, valores rápidos</dd>
+      </dl>
+      <span class="go">Abrir K →</span>
+    </a>
+    <a class="dir" href="prototype-l/index.html">
+      <div class="swatches"><i style="background:#e6dcff"></i><i style="background:#ffd84a"></i><i style="background:#bfe3ff"></i><i style="background:#ffc4d4"></i><i style="background:#46e08e"></i><i style="background:#141414"></i></div>
+      <h2>L · Arena</h2>
+      <p>Barulhenta de propósito. Neobrutalismo em blocos de cor: chão lilás, amarelo, azul e rosa chapados, contorno preto grosso e sombra dura.</p>
+      <dl>
+        <dt>Tipografia</dt><dd>Bricolage Grotesque pesada + DM Sans</dd>
+        <dt>Forma</dt><dd>Cantos redondos, borda de 2,5 px, botões que afundam ao clicar, tokens na cor da categoria</dd>
+        <dt>Acrescenta</dt><dd>Categorias com contagem, maiores movimentos, medidor de chance em arco, ranking de traders, a regra de resolução em uma frase</dd>
+      </dl>
+      <span class="go">Abrir L →</span>
+    </a>
+    <a class="dir" href="prototype-m/index.html">
+      <div class="swatches"><i style="background:#130923"></i><i style="background:#2b1a4c"></i><i style="background:#9945ff"></i><i style="background:#e04fb0"></i><i style="background:#14f195"></i><i style="background:#ffb85c"></i></div>
+      <h2>M · Vault</h2>
+      <p>O interior de uma carteira web3: roxo profundo, degradê roxo-rosa em tudo que se aperta, verde Solana para YES. Clique em "Connect wallet": a carteira é simulada.</p>
+      <dl>
+        <dt>Tipografia</dt><dd>Outfit</dd>
+        <dt>Forma</dt><dd>Tudo em pílula, cantos de 20 px, brilho suave, tokens redondos</dd>
+        <dt>Acrescenta</dt><dd>Saldo e posições no topo, recompensa do patrocinador, "You hold" nos cards, ciclo de vida, botão Resolve, resgate, aviso de transação</dd>
+      </dl>
+      <span class="go">Abrir M →</span>
+    </a>
+  </div>
+
+  <h2 class="group">Direção escolhida · D no escuro, N no claro</h2>
+  <p class="lead">Em 3 de outubro a Ledger² (D) foi escolhida para o site, com uma versão clara. A N é a mesma página da D com o tema claro e um botão (lua/sol, no topo) que volta ao escuro da D.</p>
+  <div class="grid">
+    <a class="dir" href="prototype-n/index.html">
+      <div class="swatches"><i style="background:#eef1f6"></i><i style="background:#ffffff"></i><i style="background:#2f5fe6"></i><i style="background:#b5670f"></i><i style="background:#0a7a52"></i><i style="background:#c0243f"></i></div>
+      <h2>N · Ledger² Light</h2>
+      <p>A mesa de operações da D com a luz acesa: mesma estrutura, mesma tipografia, mesmos cantos; só as superfícies invertem.</p>
+      <dl>
+        <dt>Base</dt><dd>D · Ledger²</dd>
+        <dt>Tipografia</dt><dd>Barlow Condensed + Inter, como na D</dd>
+        <dt>Muda</dt><dd>Chão cinza-azulado claro, painéis brancos com sombra leve, azul e âmbar mais escuros para dar contraste, tokens em tom pastel por categoria</dd>
+        <dt>Tema</dt><dd>Claro por padrão; o botão alterna e a escolha fica salva</dd>
+      </dl>
+      <span class="go">Abrir N →</span>
+    </a>
+  </div>
+
+  <section class="notes">
+    <h2>Como o mascote se comporta</h2>
+    <ul>
+      <li>Ele não segue o cursor livremente. A página declara <strong>poleiros</strong> e ele salta para o poleiro mais próximo de onde o mouse parou.</li>
+      <li>Passar o mouse rápido por cima não o arrasta: é preciso parar um instante sobre a área.</li>
+      <li>Ele acompanha o poleiro durante a rolagem e procura outro quando o atual sai da tela.</li>
+      <li>A pose muda com o contexto: aprova sobre o botão <em>Yes</em>, desconfia sobre o <em>No</em>, bate o pé se o mouse fica frenético, cansa depois de 9 segundos parado e emburra depois de 22.</li>
+      <li>Clique nele para ouvir uma frase. No teclado, ele acompanha o foco.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

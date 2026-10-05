@@ -1,0 +1,126 @@
+/* Direction M · Vault
+   Brand hypothesis: the inside of a web3 wallet. Deep purple everywhere, a purple-to-pink gradient
+   for anything you can press, Solana green for YES and for progress, soft glows, and every control
+   a pill. The page knows who you are: balance and positions up top, the sponsor's bounty on every
+   market, your stake marked on the cards, and a market page that shows the whole lifecycle,
+   including the permissionless Resolve and the 1:1 redemption.
+   The wallet is mocked: "Connect wallet" flips a local flag and nothing is signed or sent. */
+@import url("../shared/ledger.css");
+
+:root {
+  --grad: linear-gradient(100deg, #9945ff, #e04fb0);
+  --bg: #130923; --panel: #1f1238; --raised: #2b1a4c; --line: #3a2762; --line-strong: #5b4192;
+  --text: #f6f0ff; --muted: #b7a8d6; --dim: #8271aa;
+  --accent: #a67cff; --accent-soft: #cdb5ff; --accent-hover: #fff; --on-accent: #fff;
+  --crust: #ffb85c; --warn: #ffb85c;
+  --yes-bg: rgba(20, 241, 149, .14); --yes-fg: #4dffb8; --no-bg: rgba(255, 92, 138, .16); --no-fg: #ff9db8;
+  --done-bg: rgba(20, 241, 149, .14); --done-fg: #4dffb8;
+  --strip-bg: #0c0518; --strip-fg: #8271aa;
+  --top-bg: rgba(19, 9, 35, .82);
+  --feature-bg: linear-gradient(135deg, #4a2396, #2a1552 55%, #1f1238);
+  --note-bg: #2b1a4c; --note-fg: #dccfff; --notice-bg: #3a2762;
+  --track: #33205a; --fill: linear-gradient(90deg, #9945ff, #14f195);
+  --pressed-bg: #a67cff; --pressed-fg: #150a26;
+  --ic-bg: rgba(166, 124, 255, .2); --row-hover: #2b1a4c;
+  --spot: rgba(166, 124, 255, .22); --spot-edge: #cdb5ff; --dot-rgb: 190, 160, 255;
+  --spark-line: #cdb5ff; --spark-fill: rgba(166, 124, 255, .16);
+  --slide-line: #14f195; --slide-fill: rgba(20, 241, 149, .12);
+  --chart-line: #14f195; --chart-fill: rgba(20, 241, 149, .1);
+  --cta-bg: var(--grad); --cta-hover: linear-gradient(100deg, #b06bff, #f06cc4); --cta-ring: var(--grad);
+  --r: 20px; --r-sm: 12px; --r-lg: 24px; --shadow: 0 18px 50px rgba(6, 1, 16, .5);
+  --display: Outfit, system-ui, sans-serif;
+  --body: Outfit, system-ui, sans-serif;
+  --pet-say-bg: #fff; --pet-say-fg: #2a1552; --pet-say-radius: 14px;
+  --pet-say-font: 600 13px/1.2 Outfit, sans-serif;
+  color-scheme: dark;
+}
+
+body { font-size: 14.5px; background: radial-gradient(900px 520px at 10% -6%, rgba(153, 69, 255, .4), transparent 62%), radial-gradient(760px 520px at 96% 4%, rgba(224, 79, 176, .26), transparent 60%), var(--bg); background-repeat: no-repeat; }
+
+/* Pills and glow. */
+.brand { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -.5px; }
+.search, .cta, .cta span, .odds button, .filters button, .notify, .pager > button, select, .seg, .seg button, .quick button { border-radius: 999px; }
+.search { padding: 10px 16px; border: 1px solid var(--line); }
+.cta { padding: 0; animation: none; box-shadow: 0 8px 26px rgba(153, 69, 255, .45); }
+.cta span { padding: 10px 18px; font-size: 13px; }
+.cats { gap: 8px; padding-top: 10px; padding-bottom: 10px; border-bottom: 0; }
+.cats button { padding: 7px 14px; border: 1px solid var(--line); border-radius: 999px; background: rgba(31, 18, 56, .6); }
+.cats button[aria-pressed='true'] { border-color: transparent; background: var(--grad); color: #fff; }
+.cats .sponsor { border-color: var(--accent); background: none; }
+.filters button { border: 1px solid var(--line); }
+.filters button[aria-pressed='true'] { border-color: transparent; font-weight: 600; }
+.odds button { padding: 10px 14px; border: 1px solid transparent; }
+.odds .yes { border-color: rgba(20, 241, 149, .35); }
+.odds .no { border-color: rgba(255, 92, 138, .4); }
+.card, .side-box, .box, .proof, .chart, .order, .principles > div { border-color: rgba(255, 255, 255, .08); }
+.carousel { border-color: rgba(205, 181, 255, .35); }
+.card-title { font-size: 15px; line-height: 1.3; }
+.slide-title, .detail h2 { font-weight: 700; letter-spacing: -1px; line-height: 1.08; }
+.side-box h2, .box h2 { font-size: 19px; text-transform: none; letter-spacing: -.3px; }
+.chance strong, .read-values b, .side-right strong { letter-spacing: -1px; }
+.slide .chance strong { background: linear-gradient(100deg, #fff, #cdb5ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.dots button[aria-current='true'] { background: var(--grad); }
+.token { border-radius: 50%; }
+.principles .ic-box { border-radius: 50%; }
+.order input { border-radius: 14px; background: #150a26; font-weight: 600; }
+
+.wallet-chip { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--panel); font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wallet-chip i { width: 18px; height: 18px; border-radius: 50%; background: conic-gradient(#9945ff, #14f195, #ffb85c, #e04fb0, #9945ff); }
+.wallet-chip b { font-weight: 600; }
+.wallet-chip span { color: var(--muted); }
+.is-connected .top .cta { background: none; box-shadow: none; border: 1px solid var(--line-strong); }
+.is-connected .top .cta span { background: none; color: var(--muted); }
+
+/* Portfolio banner: only there while the mock wallet is connected. */
+.portfolio { display: grid; grid-template-columns: repeat(3, auto) minmax(0, 1fr); align-items: center; gap: 34px; margin-bottom: 20px; padding: 20px 26px; border-radius: var(--r-lg); background: linear-gradient(105deg, #6a2cf0, #b23cc9 58%, #ff5fa2); box-shadow: 0 24px 60px rgba(153, 69, 255, .35); }
+.portfolio small { display: block; color: rgba(255, 255, 255, .75); font-size: 12px; }
+.portfolio > div > b { font: 700 32px/1.1 var(--display); letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+.portfolio .pos { color: #a8ffdc; }
+.portfolio .neg { color: #ffd0dc; }
+.positions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.pos-chip { display: flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 999px; background: rgba(19, 9, 35, .55); backdrop-filter: blur(6px); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.pos-chip:hover { background: rgba(19, 9, 35, .8); }
+.pos-chip b { font-weight: 600; }
+
+/* The sponsor's bounty: what was put up, and what one YES redeems for. */
+.bounty { display: flex; flex-wrap: wrap; gap: 3px 10px; padding: 10px 14px; border: 1px solid rgba(255, 184, 92, .4); border-radius: 14px; background: rgba(255, 184, 92, .1); color: #f0dcc0; font-size: 12px; }
+.bounty b { color: var(--crust); font-weight: 600; font-variant-numeric: tabular-nums; }
+.mine { position: absolute; top: -11px; right: 16px; padding: 4px 11px; border-radius: 999px; background: #14f195; color: #06231a; font-size: 11px; font-weight: 700; box-shadow: 0 6px 18px rgba(20, 241, 149, .4); }
+
+/* Lifecycle: four steps, the current one lit. */
+.life { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: -46px 0 60px; }
+.life div { padding-top: 12px; border-top: 4px solid var(--line); border-radius: 2px; color: var(--dim); font-size: 12px; }
+.life b { display: block; color: var(--muted); font-size: 13.5px; font-weight: 600; }
+.life .done { border-image: linear-gradient(90deg, #14f195, #14f195) 1; }
+.life .done b { color: var(--yes-fg); }
+.life .now { border-image: var(--grad) 1; color: var(--muted); }
+.life .now b { color: var(--text); }
+
+.resolve { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.resolve button { padding: 10px 18px; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--raised); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.resolve button:disabled { cursor: not-allowed; color: var(--dim); }
+.resolve small { flex: 1; min-width: 200px; color: var(--muted); font-size: 12px; }
+
+.aside-stack { display: grid; gap: 14px; position: sticky; top: 84px; margin-top: 74px; }
+.aside-stack .order { position: static; margin-top: 0; }
+.detail .aside-stack .box { margin-top: 0; }
+.facts { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; margin: 0; font-size: 13px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.redeem { width: 100%; margin-top: 14px; padding: 11px; border-radius: 999px; background: #14f195; color: #06231a; font-size: 13px; font-weight: 700; }
+
+.toast { position: fixed; right: 18px; bottom: 18px; z-index: 210; max-width: 320px; padding: 13px 18px; border: 1px solid var(--line-strong); border-radius: 16px; background: #2b1a4c; font-size: 13px; box-shadow: 0 18px 46px rgba(6, 1, 16, .6); opacity: 0; transform: translateY(16px); transition: opacity .25s, transform .25s; pointer-events: none; }
+.toast.is-on { opacity: 1; transform: none; }
+
+@media (max-width: 980px) {
+  .portfolio { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 20px; }
+  .positions { grid-column: 1 / -1; justify-content: flex-start; }
+}
+@media (max-width: 860px) {
+  .cats { padding-left: 16px; padding-right: 16px; }
+  .aside-stack { position: static; margin-top: 0; }
+  .life { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 8px; }
+  .wallet-chip span { display: none; }
+  .portfolio { padding: 18px; }
+  .portfolio > div > b { font-size: 20px; letter-spacing: -.5px; }
+}

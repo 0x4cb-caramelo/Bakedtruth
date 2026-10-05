@@ -1,0 +1,58 @@
+/* Direction N · Ledger² Light
+   Purpose: the light theme of direction D (Ledger²), with D itself as the dark theme one click away.
+   Version: 0.1 · Phase 3 (Prototype Lab), 2026-10-03.
+   Brand hypothesis: D's trading desk with the lights on. Same structure, type, radii and motion;
+   only the surfaces invert. Still one blue for chrome, green and red only for YES and NO, crust
+   amber for the brand. The dark values are the defaults in ../shared/ledger.css (they reproduce D). */
+@import url("../shared/ledger.css");
+
+:root[data-theme='light'] {
+  --bg: #eef1f6; --panel: #fff; --raised: #e3e8f0; --line: #d5dbe6; --line-strong: #b4bfd2;
+  --text: #131a26; --muted: #556074; --dim: #6b7689;
+  --accent: #2f5fe6; --accent-soft: #2a52c9; --accent-hover: #1b3a9c; --on-accent: #fff;
+  --crust: #b5670f; --warn: #a86200;
+  --yes-bg: #dff5ea; --yes-fg: #0a7a52; --no-bg: #fde6ea; --no-fg: #c0243f;
+  --done-bg: #dff5ea; --done-fg: #0a6b48;
+  --strip-bg: #e3e8f0; --strip-fg: var(--muted);
+  --feature-bg: linear-gradient(115deg, #fff, #e8eefa 70%);
+  --note-bg: #e3e8f0; --note-fg: #3a4557; --notice-bg: #dfe8ff;
+  --track: #dde3ec; --fill: linear-gradient(90deg, #2f5fe6, #6f93ff);
+  --pressed-bg: #d9e0ec; --pressed-fg: var(--text);
+  --ic-bg: #e3eaff; --row-hover: #f3f6fb;
+  --spot: rgba(47, 95, 230, .09); --spot-edge: #2f5fe6; --dot-rgb: 60, 85, 140;
+  --spark-line: #2f5fe6; --spark-fill: rgba(47, 95, 230, .09);
+  --slide-line: #2f5fe6; --slide-fill: rgba(47, 95, 230, .1);
+  --chart-line: #0a8a5c; --chart-fill: rgba(10, 138, 92, .1);
+  --cta-hover: #2450cf;
+  --cta-ring: conic-gradient(from var(--spin), #1f43b0 0 62%, #c9d8ff 80%, #1f43b0 100%);
+  /* On a light page the panels need a little lift to separate from the floor. */
+  --shadow: 0 1px 2px rgba(19, 26, 38, .05), 0 10px 24px -14px rgba(19, 26, 38, .18);
+  --pet-say-bg: #131a26; --pet-say-fg: #fff; --pet-shadow: rgba(19, 26, 38, .28);
+  color-scheme: light;
+}
+
+/* What the variables cannot carry. */
+[data-theme='light'] .status { border-bottom: 1px solid var(--line); }
+[data-theme='light'] .odds button:hover { filter: brightness(.95); }
+[data-theme='light'] .search { background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
+
+/* Market tokens: the mock data's colours are dark tiles, so light takes a tint per category. */
+[data-theme='light'] .token[data-cat='Burn'] { background: #fde6d6; color: #a3470f; }
+[data-theme='light'] .token[data-cat='Renounce'] { background: #dcecf7; color: #1d5a80; }
+[data-theme='light'] .token[data-cat='Lock'] { background: #e8e4f7; color: #4f3f9a; }
+[data-theme='light'] .token[data-cat='Immutable'] { background: #dff0e3; color: #2a6a3c; }
+[data-theme='light'] .token[data-cat='Stake'] { background: #f8ecc9; color: #8a5a06; }
+
+/* D has no price-move chip on the carousel; ledger.js adds one for K, L and M. */
+.slide .chance .delta { display: none; }
+
+/* Theme switch, next to "How it works". */
+.theme { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: var(--r-sm); color: var(--muted); }
+.theme:hover { color: var(--text); border-color: var(--muted); }
+.theme svg { display: none; }
+[data-theme='light'] .theme .moon, [data-theme='dark'] .theme .sun { display: block; }
+
+body, .top, .card, .carousel, .side-box, .proof, .chart, .order { transition: background-color .2s, border-color .2s; }
+@media (prefers-reduced-motion: reduce) {
+  body, .top, .card, .carousel, .side-box, .proof, .chart, .order { transition: none; }
+}

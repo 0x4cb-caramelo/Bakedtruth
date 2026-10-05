@@ -1,0 +1,138 @@
+/* Direction L · Arena
+   Brand hypothesis: loud on purpose. Neo-brutalist colour blocks: a lilac floor, flat yellow, sky
+   and pink panels, thick black outlines, hard offset shadows and a heavy grotesque. Tokens take
+   the colour of their category. It is a place to browse: categories with counts, the biggest
+   price moves, a chance gauge on every card, who is winning, the resolution rule in a sentence. */
+@import url("../shared/ledger.css");
+
+:root {
+  --ink: #141414;
+  --bg: #e6dcff; --panel: #fff; --raised: #f2edff; --line: var(--ink); --line-strong: var(--ink);
+  --text: var(--ink); --muted: #3f3a50; --dim: #6c6682;
+  --accent: #5a3cf0; --accent-soft: #5a3cf0; --accent-hover: #5a3cf0; --on-accent: #fff;
+  --crust: #ff7a1a; --warn: #b93a00;
+  --yes-bg: #46e08e; --yes-fg: #06230f; --no-bg: #ff7088; --no-fg: #2c040c;
+  --done-bg: #46e08e; --done-fg: #06230f;
+  --strip-bg: var(--ink); --strip-fg: #fff;
+  --top-bg: #fff;
+  --feature-bg: #ffd84a;
+  --note-bg: #fff; --note-fg: var(--ink); --notice-bg: #bfe3ff;
+  --track: rgba(20, 20, 20, .16); --fill: var(--ink);
+  --pressed-bg: var(--ink); --pressed-fg: #fff;
+  --ic-bg: #ffd84a; --row-hover: #f2edff;
+  --spot: transparent; --spot-edge: transparent; --dot-rgb: 20, 20, 20;
+  --spark-line: var(--ink); --spark-fill: rgba(90, 60, 240, .2);
+  --slide-line: var(--ink); --slide-fill: rgba(20, 20, 20, .1);
+  --chart-line: var(--ink); --chart-fill: rgba(70, 224, 142, .45);
+  --cta-bg: var(--ink); --cta-hover: #5a3cf0; --cta-ring: var(--ink);
+  --bw: 2.5px; --r: 14px; --r-sm: 10px; --r-lg: 18px; --shadow: 5px 5px 0 var(--ink);
+  --display: 'Bricolage Grotesque', 'Arial Black', sans-serif;
+  --body: 'DM Sans', system-ui, sans-serif;
+  --pet-say-bg: #ffd84a; --pet-say-fg: var(--ink); --pet-say-border: 2.5px solid #141414;
+  --pet-say-radius: 10px; --pet-say-shadow: 3px 3px 0 #141414;
+  --pet-say-font: 700 13px/1.2 'DM Sans', sans-serif;
+  color-scheme: light;
+}
+
+/* Everything pressable is outlined and casts a hard shadow; pressing it pushes it into the page. */
+.status b { color: #ffd84a; }
+.top { border-bottom: var(--bw) solid var(--ink); backdrop-filter: none; }
+.brand { color: var(--ink); font-weight: 800; letter-spacing: -1px; }
+.brand span::after { content: '!'; color: var(--crust); }
+.search { background: #fff; border: var(--bw) solid var(--ink); }
+.cta { padding: 0; animation: none; border: var(--bw) solid var(--ink); box-shadow: 3px 3px 0 #ffd84a, 3px 3px 0 2.5px var(--ink); }
+.cta span { border-radius: calc(var(--r-sm) - 3px); font-size: 13px; }
+.cats { background: #fff; gap: 20px; }
+.cats button { font-weight: 500; }
+.cats button[aria-pressed='true'] { border-bottom: 4px solid var(--crust); font-weight: 700; }
+.cats .n { padding: 1px 7px; border: 2px solid var(--ink); border-radius: 9px; background: #fff; color: var(--ink); font-size: 10.5px; font-weight: 700; }
+.cats button[aria-pressed='true'] .n { background: var(--ink); color: #fff; }
+
+.odds button, .notify, .filters button, .pager > button, select, .seg, .empty button { border: var(--bw) solid var(--ink); box-shadow: 3px 3px 0 var(--ink); transition: transform .1s, box-shadow .1s; }
+.odds button:hover { filter: none; transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+.odds button:active, .notify:active, .filters button:active, .pager > button:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
+.odds .is-on { box-shadow: 3px 3px 0 var(--ink), inset 0 0 0 2.5px #fff; }
+.filters { gap: 10px; }
+.filters button { background: #fff; color: var(--ink); font-weight: 700; }
+.pager > button { background: #fff; color: var(--ink); }
+.notify { background: #fff; color: var(--ink); }
+select { color: var(--ink); font-weight: 700; }
+.dots button { width: 10px; height: 10px; border: 2px solid var(--ink); border-radius: 50%; background: #fff; }
+.dots button[aria-current='true'] { width: 26px; border-radius: 6px; background: var(--ink); }
+.kicker, .eyebrow { color: var(--ink); font-weight: 700; }
+.bar { height: 10px; border: 2px solid var(--ink); border-radius: 6px; background: #fff; }
+.evidence .bar { height: 8px; }
+
+/* Colour blocks. */
+.side-box:first-child { background: #bfe3ff; }
+.side-box:last-child { background: #ffc4d4; }
+.principles > div:nth-child(1) .ic-box { background: #46e08e; }
+.principles > div:nth-child(3) .ic-box { background: #ff9ec0; }
+.principles .ic-box, .token { border: var(--bw) solid var(--ink); color: var(--ink); }
+.steps > div { background: #c9f7dc; }
+.token[data-cat='Burn'] { background: #ff7a1a; }
+.token[data-cat='Renounce'] { background: #b8a6ff; }
+.token[data-cat='Lock'] { background: #5cd6ff; }
+.token[data-cat='Immutable'] { background: #ffd84a; }
+.token[data-cat='Stake'] { background: #ff9ec0; }
+.card { transition: transform .12s, box-shadow .12s; }
+.card:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--ink); }
+.card-title, .slide-title { font-family: var(--display); font-weight: 700; }
+.card-title { font-size: 15.5px; line-height: 1.25; }
+.slide-title, .detail h2 { font-weight: 800; letter-spacing: -1px; }
+.chance strong, .side-right strong, .read-values b { font-weight: 800; letter-spacing: -1px; }
+.side-box h2, .box h2 { font-weight: 800; text-transform: none; letter-spacing: -.5px; font-size: 24px; }
+.slide-chart path:last-of-type, .chart svg path:last-of-type { stroke-width: 3.5; }
+
+.sec { display: flex; align-items: baseline; gap: 10px; margin: 34px 0 12px; font: 800 26px/1 var(--display); letter-spacing: -.5px; }
+.sec span { color: var(--muted); font: 500 12px/1 var(--body); letter-spacing: 0; }
+
+/* Biggest moves: four markets ranked by how far the YES price travelled. */
+.movers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.mover { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 12px 14px; border: var(--bw) solid var(--ink); border-radius: var(--r); background: #fff; box-shadow: var(--shadow); text-align: left; transition: transform .12s, box-shadow .12s; }
+.mover:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--ink); }
+.mover-text { min-width: 0; }
+.mover-text b { display: block; overflow: hidden; font-size: 13px; font-weight: 700; white-space: nowrap; text-overflow: ellipsis; }
+.mover-right strong { display: block; font: 800 26px/1 var(--display); letter-spacing: -1px; }
+.delta { padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+.delta.up { background: #46e08e; color: #06230f; }
+.delta.down { background: #ff7088; color: #2c040c; }
+
+/* Chance gauge: a half ring filled to the YES price, in place of the card's sparkline. */
+.card-head .gauge { flex: none; width: 78px; margin: -2px -2px 0 0; }
+.gauge path { fill: none; stroke-width: 11; stroke-linecap: round; }
+.gauge .track { stroke: rgba(20, 20, 20, .14); }
+.gauge .fill { stroke: #5a3cf0; }
+.gauge.likely .fill { stroke: #16b866; }
+.gauge text { fill: var(--ink); font: 800 23px var(--display); }
+.gauge text.cap { fill: var(--dim); font: 700 8.5px var(--body); }
+.card-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 11.5px; font-weight: 500; }
+
+.arena { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; margin-top: 96px; }
+.arena .box:first-child { background: #fff; }
+.arena .box:last-child { background: #c9f7dc; }
+.leader { display: grid; grid-template-columns: 26px minmax(0, 1fr) 76px 76px 44px; align-items: center; gap: 10px; padding: 8px 10px; border-top: 2px solid var(--ink); font-size: 13px; font-variant-numeric: tabular-nums; }
+.leader span:nth-child(n + 3) { text-align: right; font-weight: 700; }
+.leader.head { border-top: 0; color: var(--muted); font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.leader.first { background: #ffd84a; }
+.rank { display: grid; place-items: center; width: 24px; height: 24px; border: 2px solid var(--ink); border-radius: 50%; background: #fff; font-size: 11px; font-weight: 800; }
+.leader .pos, .leader .neg { color: var(--ink); }
+.leader .neg { text-decoration: underline wavy #ff3d5e; }
+.trade .side-y, .trade .side-n { padding: 0 5px; border-radius: 5px; color: var(--ink); }
+.trade .side-y { background: #46e08e; }
+.trade .side-n { background: #ff7088; }
+
+.rule { margin: 0; font-size: 14px; line-height: 1.6; }
+.note { border: var(--bw) solid var(--ink); font-weight: 500; }
+.order input { background: #fff; font: 800 22px var(--display); }
+.foot { background: var(--ink); color: #fff; border-top: 0; }
+
+@media (max-width: 980px) {
+  .movers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .arena { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+  .movers { grid-template-columns: minmax(0, 1fr); }
+  .leader { grid-template-columns: 26px minmax(0, 1fr) 70px 40px; }
+  .leader span:nth-child(4) { display: none; }
+}
