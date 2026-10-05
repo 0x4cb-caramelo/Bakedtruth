@@ -97,6 +97,14 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
 - `knowledge-base/tecnologia/servidor-e-dominio.md` (5 de outubro): o servidor compartilhado, as regras de
   convivência, o que o token do Cloudflare enxerga e o espaço criado para o projeto
   ([session-log](session-log/2026-10-05-servidor-e-inicio-da-fase-4.md)).
+- **`docs/technical/TECHNICAL-PLAN.md`, v0.0.1** (5 de outubro): programa novo em `programs/brot-markets`, com
+  contas, instruções, estados e dez invariantes de dinheiro; três serviços fora da rede; site em Ledger²;
+  implantação no servidor compartilhado; programa compilado só na integração contínua. Doze perguntas para o
+  fundador e treze pontos a conferir. Achou que a cópia local tem seis leitores, e não nove.
+- **`docs/SPRINTS.md` e `docs/sprints/`** (5 de outubro): roteiro de 20 sprints, sem datas, na ordem pedida pelo
+  fundador: programa (00 a 05), serviços (06 a 08), design system (-1), site (09 a 13), o que entra antes da rede
+  principal (14 e 15) e segurança e abertura (16 a 18). Cada sprint traz critério de pronto, regras e fluxos
+  cobertos e as decisões do fundador que a travam.
 - `CODEMAP.md` (5 de outubro): primeiro mapa do código, gerado por `node scripts/codemap.js`. 111 arquivos.
 - `docs/business/ideacao-perguntas-e-respostas.md`: as cinco rodadas de perguntas e as respostas do Lucas, com o
   estado consolidado no topo.
@@ -131,7 +139,10 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
   precisam de conteúdo novo.
 - **Servidor:** o projeto tem espaço próprio no servidor compartilhado, só com o código. Faltam o domínio na conta
   do Cloudflare, o túnel, o lugar do segundo serviço agendado e a decisão de onde compilar o programa.
-- **Fase 4:** faltam o plano técnico e o roteiro de sprints.
+- **Fase 4:** resumo de produto, plano técnico e roteiro de sprints existem, em rascunho, e aguardam a aprovação
+  do fundador. Não foi feita a etapa 4.3, a escolha de pacotes do catálogo (`docs/technical/registry-pick.md`).
+- **Programa:** a cópia local tem seis leitores; os de pool de staking e Meteora estão em `upstream/main`, baixado
+  e não trazido. Trazê-lo é a primeira entrega da Sprint 00 e espera o sinal do fundador.
 - **Nome do site:** decidido em 4 de outubro, Brot Markets. O app e os protótipos ainda dizem "baked".
 - **BP v0.0.2: fechado.** As quatro partes existem e não há proposta em aberto. Faltam valores e nomes: o primeiro
   valor do teto global e quem assina a carteira com várias assinaturas. Falta conferir a tramitação da MP 1.394 no Congresso e ler o Decreto 13.128, de 2026. O próximo passo do método é a apresentação resumida do plano, e depois os documentos da Fase 4.

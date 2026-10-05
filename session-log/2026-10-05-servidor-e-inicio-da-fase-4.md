@@ -59,7 +59,17 @@ que o plano técnico ainda vai tomar.
 
 ## Follow-ups
 
-- Plano técnico (`docs/technical/TECHNICAL-PLAN.md`) e roteiro de sprints (`docs/SPRINTS.md`).
+- **Feito no mesmo dia:** o plano técnico (`docs/technical/TECHNICAL-PLAN.md`) e o roteiro de 20 sprints
+  (`docs/SPRINTS.md` e `docs/sprints/`). Os três documentos da Fase 4 estão em rascunho e aguardam a aprovação do
+  Lucas, que o método exige antes de qualquer código de produção.
+- **Achado do plano técnico:** a cópia local do programa tem seis leitores, e não os nove que o BP citava. Os de
+  pool de staking, Meteora e metadados imutáveis estão só em `upstream/main`. O BP foi corrigido, e trazer o
+  upstream virou a primeira entrega da Sprint 00.
+- **Uma contradição que o roteiro aponta:** a Parte 4 do BP descreve a demonstração do Cloak com uma carteira
+  entrando "como patrocinador não divulgado" na devnet, mas o módulo de patrocínio é a Sprint 15. Se a demonstração
+  do hackathon precisar disso de verdade, a 15 sobe na ordem. Decisão do Lucas.
+- **Não feita:** a etapa 4.3 do método, a escolha de pacotes do catálogo.
+- As doze perguntas da seção 14.2 do plano técnico, das quais Q3 e Q12 travam a Sprint 02 e Q1 e Q4 travam a 03.
 - O Lucas responde: o domínio foi comprado; o Ronaldo sabe do servidor; túnel próprio ou o existente.
 - Escolher o provedor do segundo serviço agendado.
 - Atualizar a cópia do código no servidor quando os documentos da Fase 4 estiverem fechados.
