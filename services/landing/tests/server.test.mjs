@@ -4,13 +4,14 @@
  */
 import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync } from "node:fs";
-import { createServer } from "node:http";
+import { createServer, request } from "node:http";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { after, before, test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { createLeadStore } from "../lib/leads.mjs";
 import { createRateLimiter } from "../lib/rate-limit.mjs";
+import { resolveStatic } from "../lib/static.mjs";
 import { createApp } from "../server.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
@@ -26,6 +27,7 @@ before(async () => {
     store: createLeadStore(leadsFile),
     limiter: createRateLimiter({ limit: 50, windowMs: 60_000 }),
     allowedOrigins: [ORIGIN],
+    siteOrigin: ORIGIN,
     log: (line) => logs.push(line),
   });
   server = createServer(app);
@@ -151,4 +153,29 @@ test("unknown paths and attempts to leave the public folder answer 404", async (
     assert.ok(!(await res.text()).includes("createApp"), path);
   }
   assert.equal((await fetch(`${base}/`, { method: "DELETE" })).status, 405);
+});
+
+test("a folder redirect is built from the validated path and cannot point at another host", () => {
+  assert.deepEqual(resolveStatic(ROOT, "/pitch"), { redirect: "/pitch/" });
+  assert.deepEqual(resolveStatic(ROOT, "//pitch"), { redirect: "/pitch/" });
+  assert.deepEqual(resolveStatic(ROOT, "//evil.example/../pitch"), { redirect: "/pitch/" });
+  assert.deepEqual(resolveStatic(ROOT, "/%2Fevil.example/..%2Fpitch"), { redirect: "/pitch/" });
+});
+
+test("www is sent to the bare domain, keeping path and query and nothing else", async () => {
+  const ask = (path) =>
+    new Promise((resolve, reject) => {
+      const { port } = server.address();
+      const req = request({ host: "127.0.0.1", port, path, headers: { Host: "www.brot.markets" } }, (res) => {
+        res.resume();
+        resolve({ status: res.statusCode, location: res.headers.location });
+      });
+      req.on("error", reject);
+      req.end();
+    });
+  assert.deepEqual(await ask("/privacy?theme=dark"), {
+    status: 301,
+    location: "https://brot.markets/privacy?theme=dark",
+  });
+  assert.deepEqual(await ask("//evil.example/x"), { status: 301, location: "https://brot.markets/x" });
 });

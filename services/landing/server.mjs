@@ -49,16 +49,23 @@ function sendNotFound(root, req, res) {
 }
 
 /** Builds the request handler. Tests call this with a temporary folder and their own store. */
-export function createApp({ root, store, limiter, allowedOrigins, log = () => {} }) {
+export function createApp({ root, store, limiter, allowedOrigins, siteOrigin, log = () => {} }) {
+  const canonical = siteOrigin ? new URL(siteOrigin) : null;
   return async function app(req, res) {
     let path;
+    let search;
     try {
-      path = new URL(req.url, "http://localhost").pathname;
+      ({ pathname: path, search } = new URL(req.url, "http://localhost"));
     } catch {
       res.writeHead(400).end();
       return;
     }
     setSecurityHeaders(res, path);
+    // One address for the site: "www" goes to the bare domain. The target is ours; only path and query are kept.
+    if (canonical && req.headers.host === `www.${canonical.host}`) {
+      res.writeHead(301, { Location: `${canonical.origin}${path}${search}` }).end();
+      return;
+    }
     try {
       if (path === "/healthz") {
         res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
@@ -101,6 +108,7 @@ function start() {
     store,
     limiter: createRateLimiter({ limit: 5, windowMs: 60_000 }),
     allowedOrigins: [siteOrigin, `http://${host}:${port}`, `http://localhost:${port}`],
+    siteOrigin,
     log,
   });
   const server = createServer(app);

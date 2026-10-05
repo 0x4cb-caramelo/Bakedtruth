@@ -60,7 +60,12 @@ export function resolveStatic(root, urlPath) {
   // "/privacy" answers with privacy.html; "/pitch" is a folder and goes to "/pitch/" so relative assets resolve.
   const page = fileAt(`${target}.html`);
   if (page) return { path: `${target}.html`, stat: page };
-  if (fileAt(join(target, "index.html"))) return { redirect: `${urlPath}/` };
+  if (fileAt(join(target, "index.html"))) {
+    // Built from the validated location, never from the text the visitor sent: exactly one leading slash, so the
+    // answer cannot point at another host ("//example.com/").
+    const parts = target.slice(root.length).split(sep).filter(Boolean);
+    return { redirect: `/${parts.map(encodeURIComponent).join("/")}/` };
+  }
   return null;
 }
 
