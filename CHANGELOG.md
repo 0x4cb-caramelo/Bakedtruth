@@ -9,8 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [Unreleased] — Bakedtruth: layout Tape no app, Prototype Lab com catorze direções, Ledger² escolhida com tema claro
 
 Primeiras mudanças do projeto Bakedtruth em si; as versões abaixo desta são a história do AI Dev OS, herdada na Largada.
-Trabalho de 2 a 5 de outubro de 2026, na branch `feat/layout-tape`. **Commitado e enviado ao `origin` em 5 de
-outubro**, em commits separados por assunto (app, protótipos, pesquisa, mapa do código, negócio e registros). Os
+Trabalho de 2 a 5 de outubro de 2026, na branch `feat/layout-tape`. **Commitado em 5 de outubro**, em commits
+separados por assunto (app, protótipos, pesquisa, mapa do código, negócio e registros). O push foi recusado pelo
+GitHub nesse dia: a credencial ativa não tinha o escopo `workflow`, exigido porque a branch traz
+`.github/workflows/ci.yml`. Fica pendente até a credencial ser atualizada. Os
 motivos de cada decisão estão no `session-log/`; as três primeiras entradas:
 [direção C e nome](session-log/2026-10-02-prototipo-direcao-c-e-nome-em-aberto.md),
 [layout no app](session-log/2026-10-02-layout-tape-aplicado-ao-app.md) e
