@@ -1,26 +1,209 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Design tokens: direction C, "Tape" (docs/product/DESIGN-DIRECTION.md). Navy surfaces, hard 2px
+   edges and offset shadows, no rounded corners. Blue for chrome, crust amber for the brand and the
+   primary action, green and red only for YES and NO. */
+@theme {
+  --color-page: #0b111c;
+  --color-surface: #111a2a;
+  --color-raised: #18243a;
+  --color-line: #2a3a58;
+  --color-muted: #92a3c0;
+  --color-dim: #63748f;
+  --color-ink: #e8eefb;
+  --color-brand: #6aa8ff;
+  --color-brand-strong: #8bbcff;
+  --color-crust: #f2a94e;
+  --color-yes: #3ddc97;
+  --color-no: #ff6b8a;
+  --color-warn: #f2b33d;
+  --color-shade: #04070d;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --shadow-hard: 4px 4px 0 var(--color-shade);
+  --shadow-hard-sm: 3px 3px 0 var(--color-shade);
+
+  --animate-blink: blink 1s steps(2) infinite;
+  --animate-tape: tape 70s linear infinite;
+  @keyframes blink {
+    50% {
+      opacity: 0.25;
+    }
+  }
+  @keyframes tape {
+    to {
+      transform: translateX(-50%);
+    }
   }
 }
 
+@theme inline {
+  --font-sans: var(--font-grotesk);
+  --font-display: var(--font-jersey);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  color-scheme: dark;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-grotesk), system-ui, sans-serif;
+}
+
+/* Jersey 15 has a single weight: never fake a bold. */
+.font-display {
+  font-synthesis: none;
+}
+
+/* Wallet adapter button as a square, crust-coloured block. The adapter's stylesheet loads after
+   this one, so these selectors carry an extra `html` for specificity. */
+html .wallet-adapter-button-trigger {
+  height: 2.5rem;
+  border-radius: 0;
+  padding: 0 1rem;
+  background-color: var(--color-crust);
+  color: #1a0f02;
+  font-family: var(--font-jersey), system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+  box-shadow: var(--shadow-hard);
+  transition:
+    transform 80ms,
+    box-shadow 80ms;
+}
+
+html .wallet-adapter-button-trigger:not([disabled]):hover {
+  background-color: var(--color-crust);
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--color-shade);
+}
+
+html .wallet-adapter-button-trigger:not([disabled]):active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 var(--color-shade);
+}
+
+html .wallet-adapter-button-trigger .wallet-adapter-button-start-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.5rem;
+}
+
+html .wallet-adapter-dropdown-list,
+html .wallet-adapter-modal-wrapper {
+  background: var(--color-surface);
+  border-radius: 0;
+  font-family: var(--font-grotesk), system-ui, sans-serif;
+}
+
+/* Hide scrollbars on horizontal carousels. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---- Baked, the mascot (lib/mascot/engine.ts builds this markup). ---- */
+.bk-pet {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 80;
+  pointer-events: none;
+  will-change: transform;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.bk-pet.is-on {
+  opacity: 1;
+}
+.bk-pet-flip,
+.bk-pet-squash,
+.bk-pet-body {
+  position: absolute;
+  inset: 0;
+}
+.bk-pet-flip {
+  transition: transform 0.16s;
+}
+.bk-pet-squash,
+.bk-pet-body {
+  transform-origin: 50% 100%;
+}
+.bk-pet-body {
+  animation: bk-pet-breathe 3.4s ease-in-out infinite;
+}
+.bk-pet-body img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  image-rendering: pixelated;
+  user-select: none;
+}
+.bk-pet-body img.is-on {
+  opacity: 1;
+}
+.bk-pet-shadow {
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  bottom: -2%;
+  height: 8%;
+  border-radius: 50%;
+  background: var(--color-shade);
+  filter: blur(3px);
+}
+.bk-pet-say {
+  position: absolute;
+  left: 50%;
+  bottom: 102%;
+  transform: translate(-50%, 6px);
+  white-space: nowrap;
+  padding: 6px 10px;
+  font:
+    400 19px/1 var(--font-jersey),
+    sans-serif;
+  color: var(--color-page);
+  background: var(--color-ink);
+  border: 2px solid var(--color-page);
+  box-shadow: 3px 3px 0 var(--color-shade);
+  opacity: 0;
+  transition:
+    opacity 0.18s,
+    transform 0.18s;
+}
+.bk-pet-say.is-on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.bk-pet-say.is-below {
+  bottom: auto;
+  top: 104%;
+}
+@keyframes bk-pet-breathe {
+  50% {
+    transform: scaleY(1.03) scaleX(0.988);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bk-pet-body {
+    animation: none;
+  }
+  .bk-pet-flip {
+    transition: none;
+  }
 }

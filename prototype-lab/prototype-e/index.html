@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>baked · Oven² (direction E)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="bar">
+  <button class="brand" data-action="home" aria-label="baked home">
+    <img src="../shared/mascot/deadpan.png" alt=""><span>baked</span>
+  </button>
+  <nav class="cats" aria-label="Market categories">
+    <button data-category="All" aria-pressed="true">Trending</button>
+    <button data-category="Burn">Burn</button>
+    <button data-category="Renounce">Renounce</button>
+    <button data-category="Lock">Lock</button>
+    <button data-category="Immutable">Immutable</button>
+    <button data-category="Stake">Stake</button>
+  </nav>
+  <label class="search">
+    <i data-icon="search"></i>
+    <input data-role="search" type="search" placeholder="Search markets" aria-label="Search markets">
+  </label>
+  <button class="btn" data-action="wallet" data-mood="tapping">Connect wallet</button>
+</header>
+
+<main>
+  <div class="notice" data-role="notice" hidden role="status">
+    <span data-role="notice-text"></span>
+    <button data-action="dismiss" aria-label="Dismiss notification">×</button>
+  </div>
+
+  <section data-screen="home">
+    <div class="hero mosaic-hero">
+      <canvas id="heat" aria-hidden="true"></canvas>
+      <div class="mosaic" data-role="mosaic">
+        <section class="carousel" data-role="carousel" data-perch="carousel" data-perch-x="0.84" data-perch-size="1.4" data-perch-say="Trading now.">
+          <div class="carousel-head">
+            <span class="kicker">Trading now</span>
+            <div class="pager">
+              <button data-mosaic="prev" aria-label="Previous market"><i data-icon="arrow-left"></i></button>
+              <span class="dots" data-role="dots"></span>
+              <button data-mosaic="next" aria-label="Next market"><i data-icon="arrow-right"></i></button>
+            </div>
+          </div>
+          <div class="slides" data-role="slides" aria-live="polite"></div>
+        </section>
+        <div class="side">
+          <section class="side-box" data-perch="upcoming" data-perch-x="0.82" data-perch-size="0.85" data-perch-pose="impatient" data-perch-say="Still proofing.">
+            <h2>Upcoming</h2>
+            <div data-role="upcoming"></div>
+          </section>
+          <section class="side-box">
+            <h2>Closing soon</h2>
+            <div data-role="closing"></div>
+          </section>
+        </div>
+      </div>
+      <span class="renderer" id="renderer"></span>
+    </div>
+
+    <div class="steps" data-role="explain" hidden id="steps"></div>
+    <div class="principles" id="principles"></div>
+
+    <div class="toolbar" data-perch="toolbar" data-perch-x="0.56" data-perch-size="0.85" data-perch-pose="skeptical">
+      <h2>Markets</h2>
+      <div class="filters">
+        <button data-status="Active" aria-pressed="true">Active</button>
+        <button data-status="Closing soon">Closing soon</button>
+        <button data-status="Resolved">Resolved</button>
+        <button data-status="Saved">Saved</button>
+      </div>
+      <span class="count" data-role="count" aria-live="polite"></span>
+      <select data-role="sort" aria-label="Sort markets">
+        <option value="volume">Most volume</option>
+        <option value="deadline">Closing first</option>
+        <option value="yes">Highest YES</option>
+      </select>
+    </div>
+
+    <div class="bento" data-role="grid"></div>
+    <div class="empty" data-role="empty" hidden>
+      <img src="../shared/mascot/sulking.png" alt="Baked, sulking">
+      <p>Nothing in the oven here.</p>
+      <button class="ghost" data-action="reset">Clear filters</button>
+    </div>
+  </section>
+
+  <section data-screen="detail" hidden>
+    <div data-role="detail"></div>
+  </section>
+</main>
+
+<footer class="foot" data-perch="foot" data-perch-x="0.5" data-perch-pose="tired" data-perch-say="Not audited. Stay sharp.">
+  <span>baked · KPI markets on Solana</span>
+  <span>Resolution is a read, not a judgement.</span>
+  <span>Devnet · Example data · Not audited</span>
+</footer>
+
+<script src="../shared/mock-data.js"></script>
+<script src="../shared/app.js"></script>
+<script src="../shared/mascot.js"></script>
+<script src="../shared/mosaic.js"></script>
+<script src="view.js"></script>
+</body>
+</html>

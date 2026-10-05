@@ -6,6 +6,152 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [Unreleased] — Bakedtruth: layout Tape no app, Prototype Lab com catorze direções, Ledger² escolhida com tema claro
+
+Primeiras mudanças do projeto Bakedtruth em si; as versões abaixo desta são a história do AI Dev OS, herdada na Largada.
+Trabalho de 2 a 5 de outubro de 2026, na branch `feat/layout-tape`. **Commitado e enviado ao `origin` em 5 de
+outubro**, em commits separados por assunto (app, protótipos, pesquisa, mapa do código, negócio e registros). O
+primeiro push foi recusado porque a credencial não tinha o escopo `workflow`, exigido pelo
+`.github/workflows/ci.yml`; o Lucas deu o escopo e o segundo passou. Os
+motivos de cada decisão estão no `session-log/`; as três primeiras entradas:
+[direção C e nome](session-log/2026-10-02-prototipo-direcao-c-e-nome-em-aberto.md),
+[layout no app](session-log/2026-10-02-layout-tape-aplicado-ao-app.md) e
+[lab de D a M](session-log/2026-10-03-lab-de-d-a-m-e-direcao-reaberta.md).
+
+### Added — Prototype Lab (`prototype-lab/`)
+
+Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/mock-data.js`), a mesma lógica
+(`shared/app.js`) e o mesmo mascote (`shared/mascot.js`). O `README.md` do lab descreve cada uma.
+
+| Direções | O que são |
+|---|---|
+| A · Ledger, B · Oven, C · Tape | As três hipóteses de marca originais |
+| D · Ledger², E · Oven², F · Tape² | As três anteriores com a home em mosaico |
+| G · Casino | Registro de aposta levado ao extremo, como teste |
+| H · Prism, I · Blocks, J · Orbit | Variações de Ledger e Tape com cara de mercado preditivo web3 |
+| K · Desk, L · Arena, M · Vault | A estrutura da Ledger² em três visuais (papel claro, neobrutalismo, carteira roxa), com tabela e feed, descoberta e ranking, carteira simulada e ciclo de vida |
+| N · Ledger² Light | A D em tema claro, com um botão que volta ao escuro da D. Só tokens sobre `shared/ledger.css`; nenhuma estrutura nova |
+
+- `shared/mosaic.js`: carrossel e listas laterais da home em mosaico (D a M).
+- `shared/shader.js`: fundo em WebGPU com reserva em Canvas 2D (I).
+- `shared/ledger.js` e `shared/ledger.css`: estrutura da Ledger² com cor, raio, borda e fonte como variáveis (K, L, M).
+- `shared/mock-data.js` ganhou `upcoming`, `leaders`, `wallet` e `sponsors`, todos sintéticos.
+
+### Added — documentos
+
+- `docs/product/DESIGN-DIRECTION.md`: a direção C como aprovada em 2 de outubro, com tokens, telas, fluxo e quinze
+  lacunas. Marcada como reaberta em 3 de outubro.
+- `knowledge-base/briefing-ideacao-nome-e-mascote.md`: contexto do projeto para nome e mascote.
+- `knowledge-base/pesquisa-nome-do-site.md`: pesquisa de nome, com fontes; finalistas Ovenproof e Baked Markets.
+- `docs/product/`: as oito poses do mascote e a página de referência `baked-home.html`.
+- `knowledge-base/referencias/`: leitura da documentação e da central de ajuda do Polymarket e da documentação da
+  Kalshi, com o que não pôde ser lido.
+- `knowledge-base/competitors/mercados-de-previsao-web3.md`: treze mercados on-chain, três analisados.
+- `knowledge-base/market/`: receita dos mercados de previsão, modelos de token e pump.fun, rendimento do pote.
+- `knowledge-base/tecnologia/privacidade-entre-redes-e-x.md`: Cloak e alternativas, pagamento entre redes, API do X.
+- `knowledge-base/market/patrocinio-e-destaque-pago.md`: precedentes de patrocínio em mercados de previsão e em
+  plataformas de tokens.
+- `docs/business/BRIEFING-MERCADO-DE-POTE.md`: briefing do modelo de pote para discussão com o Ronaldo, com cada item
+  marcado como decidido, proposta ou em aberto.
+- **`docs/business/BUSINESS-PLAN.md`, v0.0.2** (5 de outubro): índice e resumo de uma página das quatro partes, com
+  a situação das decisões e os riscos. A v0.0.1 foi movida para `docs/business/_review/BUSINESS-PLAN-v0.0.1.md`.
+- **BP v0.0.1** (4 de outubro, hoje em `_review/BUSINESS-PLAN-v0.0.1.md`): 16 capítulos e três anexos, cerca de 63.700 palavras,
+  com as decisões do fundador e 31 objeções registradas. Feito pelas três ondas do wizard
+  ([session-log](session-log/2026-10-04-ondas-de-pesquisa-e-bp-v0.0.1.md)).
+- **`docs/business/BP-v0.0.2-parte-1-produto.md`** (4 de outubro): primeira das quatro partes do BP v0.0.2, com cerca
+  de 11.500 palavras. O nome passa a ser Brot Markets. Incorpora a revisão do fundador
+  (`_review/user-review-v0.0.1.md`) e a revisão de impacto com a simulação da taxa
+  (`_review/bp-impact-review-v0.0.2.md`). **Corrigida em 5 de outubro** com as respostas do fundador: taxa de 10% do
+  lado perdedor, um fechamento só com perguntas de até 90 dias, vigia do serviço, disputa e indicação como decisão.
+  A lista dos tipos de pergunta do primeiro dia foi decidida no mesmo dia: cinco tipos, com o leitor de preço
+  construído primeiro. Sobra um detalhe, o teto da devolução ao indicado.
+- **`docs/business/BP-v0.0.2-parte-2-mercado-e-negocio.md`** (4 de outubro): segunda parte, com cerca de 11.500
+  palavras. Modelo financeiro refeito com as decisões novas (`_review/pauta-bp-v0.0.2-parte-2.md`): 75% da taxa para a
+  operação, custo de 5.500 dólares por mês. **Corrigida em 5 de outubro:** a taxa de 10% do lado perdedor vira a
+  base das tabelas (média de 3,70% do volume), o gasto antes do dinheiro real passa a 7.500 (abertura da empresa e
+  um mês de devnet) e o ponto de equilíbrio cai para cerca de 209 mil dólares apostados por mês. As sete decisões
+  foram respondidas.
+- `docs/business/_review/correcoes-bp-v0.0.2-partes-1-e-2.md` (5 de outubro): as respostas do fundador às treze
+  pendências das Partes 1 e 2, com a conta do pote na taxa nova e o modelo financeiro refeito
+  ([session-log](session-log/2026-10-05-bp-v0.0.2-taxa-decidida-e-partes-corrigidas.md)).
+- `docs/business/_review/pauta-bp-v0.0.2-parte-3.md` (5 de outubro): roteiro da Parte 3, de tokens.
+- **`docs/business/BP-v0.0.2-parte-3-tokens.md`** (5 de outubro): terceira parte, com cerca de 11.800 palavras. O
+  token A no pump.fun como canal de tração, com a taxa de criador indo ao fundo de prêmios; o token B com staking
+  com trava, desconto na taxa, voto e cofre; a ponte que queima A para comprar B; ordem e calendário; o que a
+  avaliação jurídica precisa olhar. As sete propostas foram aprovadas pelo fundador no mesmo dia ("sobre as 7 decisões, concordo"), junto com o
+  teto de 5 USDC na devolução ao indicado. O texto diz o tamanho do dinheiro: no
+  cenário razoável o cofre receberia cerca de 900 dólares por mês, e no ruim, nada.
+- **`docs/business/BP-v0.0.2-parte-4-construcao-e-risco.md`** (5 de outubro): quarta e última parte, com cerca de
+  11.950 palavras. O que existe e o que será construído; o roteiro em quatro fases; o que protege o dinheiro
+  (auditoria, carteira com várias assinaturas, tetos, os dois serviços, pausa e plano de incidente); as peças de
+  fora (Pyth, Cloak, SODAX, pump.fun, X); pessoas e empresa; regulação; a tabela de riscos. Registra três tensões
+  sem mudar as decisões: o prazo de um mês, a falta de bloqueio de país com sócios no Brasil, e a dependência de
+  poucas pessoas. As oito propostas foram aprovadas pelo fundador no mesmo dia. Pauta em `_review/pauta-bp-v0.0.2-parte-4.md`.
+- `knowledge-base/market/regulacao.md` (5 de outubro): nota sobre a Medida Provisória 1.394, de 25/9/2026, lida no
+  Planalto. Ela proíbe a aposta de quota fixa em todo o país, inclusive por empresa do exterior.
+- **`docs/product/DESIGN-DIRECTION.md`, reescrito** (5 de outubro): passa a descrever a direção aprovada, Ledger²
+  escura (D) e clara (N), com tokens dos dois temas extraídos do código, 19 conflitos entre o protótipo e o produto
+  decidido e 22 lacunas de tela. A versão da direção C saiu.
+- **`docs/product/PRODUCT-BRIEF.md`, v0.0.1** (5 de outubro): resumo operacional de produto, com doze fluxos, 32
+  regras de negócio com referência, escopo por fase, a confrontação do protótipo tela a tela e 25 lacunas.
+- `knowledge-base/tecnologia/servidor-e-dominio.md` (5 de outubro): o servidor compartilhado, as regras de
+  convivência, o que o token do Cloudflare enxerga e o espaço criado para o projeto
+  ([session-log](session-log/2026-10-05-servidor-e-inicio-da-fase-4.md)).
+- **`docs/technical/TECHNICAL-PLAN.md`, v0.0.1** (5 de outubro): programa novo em `programs/brot-markets`, com
+  contas, instruções, estados e dez invariantes de dinheiro; três serviços fora da rede; site em Ledger²;
+  implantação no servidor compartilhado; programa compilado só na integração contínua. Doze perguntas para o
+  fundador e treze pontos a conferir. Achou que a cópia local tem seis leitores, e não nove.
+- **`docs/SPRINTS.md` e `docs/sprints/`** (5 de outubro): roteiro de 20 sprints, sem datas, na ordem pedida pelo
+  fundador: programa (00 a 05), serviços (06 a 08), design system (-1), site (09 a 13), o que entra antes da rede
+  principal (14 e 15) e segurança e abertura (16 a 18). Cada sprint traz critério de pronto, regras e fluxos
+  cobertos e as decisões do fundador que a travam.
+- `CODEMAP.md` (5 de outubro): primeiro mapa do código, gerado por `node scripts/codemap.js`. 111 arquivos.
+- `docs/business/ideacao-perguntas-e-respostas.md`: as cinco rodadas de perguntas e as respostas do Lucas, com o
+  estado consolidado no topo.
+- `docs/business/_review/`: plano das ondas, seis relatórios da Onda 2 (advogado do diabo, negócio e finanças, técnica
+  e segurança, conformidade, modelo financeiro, viabilidade do MVP), o relatório do coordenador e as três partes do BP.
+- `knowledge-base/` (Onda 1): lista longa e análise dos cinco concorrentes, tamanho de mercado, regulação, público
+  web3, monetização e tesouraria, dois tokens e venda privada, saída antecipada e tipos de pergunta, e o índice de
+  fontes (`market/source-index.md`, 663 endereços).
+- Session log da redefinição do produto como mercado de previsão em pote
+  ([entrada](session-log/2026-10-03-produto-redefinido-como-mercado-de-pote.md)). Nenhum código mudou por causa dela.
+
+### Changed — app (`app/`)
+
+- Base atualizada com a versão nova do `pred-provable` (`0xcf07/pred-provable@638752c`): tokens YES/NO com USDC, pool,
+  explorador de mercados, tela de mercado, compra e venda.
+- Layout da direção C aplicado sobre ela: paleta, cantos retos, bordas de 2 px, sombras duras, Jersey 15 e Space
+  Grotesk; ticker, categorias segmentadas, grade de células ao fundo, medidor no topo, fita de mercados em linhas com
+  trilho luminoso, prova on-chain primeiro na tela de mercado.
+- Mascote portado para TypeScript (`app/lib/mascot/`, `app/components/mascot.tsx`).
+- Nome provisório "baked" concentrado em `app/lib/brand.ts`.
+
+### Changed — base do repositório
+
+- `CLAUDE.md` passou a juntar a orientação do `pred-provable` com o método do AI Dev OS.
+- `package.json` e `.gitignore` mesclados com os do OS na Largada
+  ([session-log](session-log/2026-10-02-largada-import-pred-provable-e-os.md)).
+
+### Em aberto
+
+- **Direção de design:** D · Ledger² com a N como tema claro, aprovada e documentada em `DESIGN-DIRECTION.md`. O
+  app ainda mostra a direção C; a troca entra no roteiro de sprints. O protótipo mostra telas do modelo antigo, que
+  precisam de conteúdo novo.
+- **Servidor:** o projeto tem espaço próprio no servidor compartilhado, só com o código. Faltam o domínio na conta
+  do Cloudflare, o túnel, o lugar do segundo serviço agendado e a decisão de onde compilar o programa.
+- **Fase 4:** resumo de produto, plano técnico e roteiro de sprints existem, em rascunho, e aguardam a aprovação
+  do fundador. Não foi feita a etapa 4.3, a escolha de pacotes do catálogo (`docs/technical/registry-pick.md`).
+- **Programa:** a cópia local tem seis leitores; os de pool de staking e Meteora estão em `upstream/main`, baixado
+  e não trazido. Trazê-lo é a primeira entrega da Sprint 00 e espera o sinal do fundador.
+- **Nome do site:** decidido em 4 de outubro, Brot Markets. O app e os protótipos ainda dizem "baked".
+- **BP v0.0.2: fechado.** As quatro partes existem e não há proposta em aberto. Faltam valores e nomes: o primeiro
+  valor do teto global e quem assina a carteira com várias assinaturas. Falta conferir a tramitação da MP 1.394 no Congresso e ler o Decreto 13.128, de 2026. O próximo passo do método é a apresentação resumida do plano, e depois os documentos da Fase 4.
+- **Não verificado:** transações no app (conectar, comprar, vender, resolver), `bun test`, `cargo test` e o
+  `next build` de produção; o shader WebGPU da direção I (só a reserva em canvas foi vista).
+- **`CODEMAP.md`:** o gerador aponta 28 arquivos acima de 200 linhas e 96 sem cabeçalho `Purpose:`.
+
+---
+
 ## [0.5.6] — 2026-10-01 — Sensores com ponto de entrada: `npm test`, Biome, hook de feedback e pre-commit
 
 Um scanner externo de maturidade de harness ([harness-score](https://github.com/paladini/harness-score) v1.7.5, rodado de fora do repositório) mediu o OS em **L2, 80/108**. Quatro das seis dimensões estavam entre 78% e 100%; "Sensors & Feedback" estava em 2/20, por uma causa só: os testes existiam e rodavam no CI, mas sem `package.json` não havia ponto de entrada padrão por onde um agente — ou uma ferramenta — os encontrasse. Depois desta release o mesmo scan dá **L4, 101/108**. Raciocínio e o que ficou de fora em [`session-log/2026-10-01-v0.5.6-harness-sensors.md`](session-log/2026-10-01-v0.5.6-harness-sensors.md).

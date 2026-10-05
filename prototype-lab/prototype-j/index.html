@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>baked · Orbit (direction J)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<header class="top">
+  <button class="brand" data-action="home" aria-label="baked home">
+    <img src="../shared/mascot/deadpan.png" alt="">
+    <span>baked</span>
+  </button>
+  <nav class="cats" aria-label="Market categories">
+    <button data-category="All" aria-pressed="true">Trending</button>
+    <button data-category="Burn">Burn</button>
+    <button data-category="Renounce">Renounce</button>
+    <button data-category="Lock">Lock</button>
+    <button data-category="Immutable">Immutable</button>
+    <button data-category="Stake">Stake</button>
+  </nav>
+  <label class="search">
+    <i data-icon="search"></i>
+    <input data-role="search" type="search" placeholder="Search markets" aria-label="Search markets">
+  </label>
+  <button class="btn" data-action="wallet" data-mood="tapping">Connect wallet</button>
+</header>
+<div class="lamp" aria-hidden="true"></div>
+
+<main>
+  <div class="notice" data-role="notice" hidden role="status">
+    <span data-role="notice-text"></span>
+    <button data-action="dismiss" aria-label="Dismiss notification">×</button>
+  </div>
+
+  <section data-screen="home">
+    <div class="mosaic" data-role="mosaic">
+      <section class="carousel panel" data-role="carousel" data-perch="carousel" data-perch-x="0.08" data-perch-size="1.1" data-perch-pose="point" data-perch-say="Read the account.">
+        <div class="box-head">
+          <h2>Trading now</h2>
+          <div class="pager">
+            <button data-mosaic="prev" aria-label="Previous market"><i data-icon="arrow-left" data-size="14"></i></button>
+            <span class="dots" data-role="dots"></span>
+            <button data-mosaic="next" aria-label="Next market"><i data-icon="arrow-right" data-size="14"></i></button>
+          </div>
+        </div>
+        <div class="slides" data-role="slides" aria-live="polite"></div>
+      </section>
+      <div class="side">
+        <section class="side-box panel" data-perch="upcoming" data-perch-x="0.88" data-perch-size="0.8" data-perch-pose="impatient">
+          <h2>Upcoming</h2>
+          <div data-role="upcoming"></div>
+        </section>
+        <section class="side-box panel">
+          <h2>Closing soon</h2>
+          <div data-role="closing"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="how-row"><button class="link" data-action="explain">How it works <i data-icon="arrow-right" data-size="14"></i></button></div>
+    <div class="steps" data-role="explain" hidden id="steps"></div>
+    <div class="principles" id="principles"></div>
+
+    <div class="toolbar">
+      <div class="filters">
+        <button data-status="Active" aria-pressed="true">Active</button>
+        <button data-status="Closing soon">Closing soon</button>
+        <button data-status="Resolved">Resolved</button>
+        <button data-status="Saved">Saved</button>
+      </div>
+      <span class="count" data-role="count" aria-live="polite"></span>
+      <select data-role="sort" aria-label="Sort markets">
+        <option value="volume">Volume</option>
+        <option value="deadline">Deadline</option>
+        <option value="yes">YES price</option>
+      </select>
+    </div>
+
+    <div class="grid" data-role="grid"></div>
+    <div class="empty" data-role="empty" hidden>
+      <img src="../shared/mascot/sulking.png" alt="Baked, sulking">
+      <p>Nothing in orbit here.</p>
+      <button class="link" data-action="reset">Clear filters</button>
+    </div>
+  </section>
+
+  <section data-screen="detail" hidden>
+    <div data-role="detail"></div>
+  </section>
+</main>
+
+<footer class="foot" data-perch="foot" data-perch-x="0.5" data-perch-pose="tired">
+  <span>baked · KPI markets on Solana</span>
+  <span>Devnet · Example data · Not audited</span>
+</footer>
+
+<script src="../shared/mock-data.js"></script>
+<script src="../shared/app.js"></script>
+<script src="../shared/mascot.js"></script>
+<script src="../shared/mosaic.js"></script>
+<script src="view.js"></script>
+</body>
+</html>

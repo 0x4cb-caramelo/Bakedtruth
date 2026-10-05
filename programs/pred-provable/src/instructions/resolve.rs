@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::instruction::{get_stack_height, TRANSACTION_LEVEL_STACK_HEIGHT};
 
-use crate::{constants::*, error::ErrorCode, resolver, state::*};
+use crate::{constants::*, error::ErrorCode, events::Resolved, resolver, state::*};
 
 /// Permissionless. YES holders are the ones with the incentive to call it, so there is no resolver fee.
 #[derive(Accounts)]
@@ -29,7 +29,11 @@ pub fn handle_resolve(ctx: Context<Resolve>) -> Result<()> {
         // Ratchet metrics: YES the moment the goal is crossed, as long as it is proven by the
         // deadline. After the deadline the market is NO regardless, so an unresolved YES
         // cannot be claimed late with a metric that crossed after the deadline.
-        ResolverKind::SupplyAtMost | ResolverKind::Immutable => {
+        ResolverKind::SupplyAtMost
+        | ResolverKind::Immutable
+        | ResolverKind::MintAuthorityRevoked
+        | ResolverKind::FreezeAuthorityRevoked
+        | ResolverKind::LockedAtLeast => {
             if clock.slot > market.deadline_slot {
                 Outcome::No
             } else if resolver::ratchet_met(market, &ctx.accounts.metric_account)? {
@@ -53,6 +57,10 @@ pub fn handle_resolve(ctx: Context<Resolve>) -> Result<()> {
     let market = &mut ctx.accounts.market;
     market.outcome = outcome;
     market.resolved_slot = clock.slot;
-    msg!("resolved: {:?}", outcome);
+    emit!(Resolved {
+        market: market.key(),
+        outcome,
+        slot: clock.slot,
+    });
     Ok(())
 }

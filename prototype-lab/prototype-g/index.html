@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>baked · Casino (direction G)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Monoton&family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="ticker" aria-label="Big wins"><div class="ticker-track" id="ticker"></div></div>
+
+<header class="top">
+  <button class="brand" data-action="home" aria-label="baked home">
+    <img src="../shared/mascot/approve.png" alt="">
+    <span class="neon">baked</span>
+    <span class="suits" aria-hidden="true">♠ <b>♥</b> ♣ <b>♦</b></span>
+  </button>
+  <nav class="cats" aria-label="Market categories">
+    <button data-category="All" aria-pressed="true">🔥 Hot</button>
+    <button data-category="Burn">Burn</button>
+    <button data-category="Renounce">Renounce</button>
+    <button data-category="Lock">Lock</button>
+    <button data-category="Immutable">Immutable</button>
+    <button data-category="Stake">Stake</button>
+  </nav>
+  <label class="search">
+    <i data-icon="search"></i>
+    <input data-role="search" type="search" placeholder="Find a table" aria-label="Search markets">
+  </label>
+  <button class="gold-btn" data-action="wallet" data-mood="tapping">Connect &amp; play</button>
+</header>
+
+<main>
+  <div class="notice" data-role="notice" hidden role="status">
+    <span data-role="notice-text"></span>
+    <button data-action="dismiss" aria-label="Dismiss notification">×</button>
+  </div>
+
+  <section data-screen="home">
+    <div class="jackpot">
+      <span>★ Total pot on the floor ★</span>
+      <b id="jackpot">$0</b>
+      <span>Every chip backed 1:1 in USDC</span>
+    </div>
+
+    <div class="mosaic" data-role="mosaic">
+      <section class="carousel" data-role="carousel" data-perch="carousel" data-perch-x="0.9" data-perch-size="1.35" data-perch-dy="-14" data-perch-pose="approve" data-perch-say="Place your bets.">
+        <div class="carousel-head">
+          <span class="badge hot">🔥 Hot tables</span>
+          <div class="pager">
+            <button data-mosaic="prev" aria-label="Previous table">◀</button>
+            <span class="dots" data-role="dots"></span>
+            <button data-mosaic="next" aria-label="Next table">▶</button>
+          </div>
+        </div>
+        <div class="slides" data-role="slides" aria-live="polite"></div>
+      </section>
+      <div class="side">
+        <section class="side-box tickets" data-perch="upcoming" data-perch-x="0.86" data-perch-size="0.85" data-perch-pose="impatient" data-perch-say="Doors open soon.">
+          <h2><span>🎟</span> Next games</h2>
+          <div data-role="upcoming"></div>
+        </section>
+        <section class="side-box last-call">
+          <h2><span class="blink">●</span> Last call!</h2>
+          <div data-role="closing"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="how-row"><button class="how" data-action="explain">★ How the house works ★</button></div>
+    <div class="steps" data-role="explain" hidden id="steps"></div>
+    <div class="principles" id="principles"></div>
+
+    <div class="toolbar">
+      <div class="filters">
+        <button data-status="Active" aria-pressed="true">Active</button>
+        <button data-status="Closing soon">Closing soon</button>
+        <button data-status="Resolved">Resolved</button>
+        <button data-status="Saved">Saved</button>
+      </div>
+      <span class="count" data-role="count" aria-live="polite"></span>
+      <select data-role="sort" aria-label="Sort markets">
+        <option value="volume">Biggest pot</option>
+        <option value="deadline">Last call first</option>
+        <option value="yes">Safest bet</option>
+      </select>
+    </div>
+
+    <div class="grid" data-role="grid"></div>
+    <div class="empty" data-role="empty" hidden>
+      <img src="../shared/mascot/sulking.png" alt="Baked, sulking">
+      <p>No tables open here. The house is closed.</p>
+      <button class="gold-btn" data-action="reset">Back to the floor</button>
+    </div>
+  </section>
+
+  <section data-screen="detail" hidden>
+    <div data-role="detail"></div>
+  </section>
+</main>
+
+<footer class="foot" data-perch="foot" data-perch-x="0.5" data-perch-pose="tired" data-perch-say="Not audited. Play responsibly.">
+  <span>baked · KPI markets on Solana · Devnet · example data · not audited</span>
+  <span>The house doesn't decide. The chain does.</span>
+</footer>
+
+<script src="../shared/mock-data.js"></script>
+<script src="../shared/app.js"></script>
+<script src="../shared/mascot.js"></script>
+<script src="../shared/mosaic.js"></script>
+<script src="view.js"></script>
+</body>
+</html>
