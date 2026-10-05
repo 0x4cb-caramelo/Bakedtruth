@@ -8,23 +8,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-Nenhuma sprint começou depois da 00. A próxima é a Sprint 01, a prova do leitor de preço
-(`docs/sprints/sprint-01-foundation.md`).
-
-### Added
-
-- `docs/business/PITCH.md` (5 de outubro): a apresentação resumida do plano, etapa 2.9 do método, em dez seções
-  derivadas do BP v0.0.2. Mantém as ressalvas do plano e diz o que o plano não tem. Não publicada
-  ([session-log](session-log/2026-10-05-pitch-and-publication-decision.md)).
-- `.claude/rules/interaction-closing.md` (5 de outubro): regra de trabalho pedida pelo fundador. Toda resposta
-  termina com um relatório breve do que foi feito, em português simples, e com os próximos passos: os caminhos
-  possíveis, ligados ao roteiro, e uma recomendação
-  ([session-log](session-log/2026-10-05-regra-de-fechamento-de-interacao.md)).
+Nada depois da Sprint 01. A próxima é a Sprint 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.md`).
 
 ### Em aberto
 
-- **Sprints:** a 00 está concluída e nenhuma outra começou. A 02 depende de saber quem guarda a chave de
-  atualização na devnet e quem tem chave de equipe (pergunta 12 do plano técnico).
+- **Sprints:** a 00 e a 01 estão concluídas. A 02 depende de saber quem guarda a chave de atualização na devnet e
+  quem tem chave de equipe (pergunta 12 do plano técnico).
+- **Leitura no Surfpool:** era critério de pronto da Sprint 01 e não foi feita. Está na Sprint 03.
+- **Perguntas novas para o fundador, da Sprint 01:** se o limite de 30 segundos para a idade do preço vale também
+  na devnet, onde a conta patrocinada chega a 64 segundos, ou vira parâmetro por pergunta (Sprint 03); e se vale
+  obter a chave do serviço de preços da Pyth, necessária só se o nosso serviço publicar preço (Sprint 06).
+- **Desenho da pergunta de preço:** a revisão da Sprint 01 propõe aceitar, na aposta, só a conta patrocinada do
+  ativo, e na prova qualquer conta completa. O plano técnico hoje aceita qualquer conta válida. Decide-se na
+  Sprint 03.
+- **Quem controla a Pyth:** na rede principal, a autoridade que atualiza os programas é um endereço derivado cujo
+  controle não foi conferido. Risco na seção 13 do plano técnico; conferir antes da rede principal (Sprint 16).
 - **Perguntas do fundador:** as doze da seção 14.2 do plano técnico valem com a resposta recomendada, porque os
   documentos foram aprovados sem alteração. Três não têm resposta padrão: a verba e o fornecedor do segundo
   serviço, a compra do domínio `brot.markets` e os nomes de quem guarda chave.
@@ -50,6 +48,56 @@ Nenhuma sprint começou depois da 00. A próxima é a Sprint 01, a prova do leit
 - **Não verificado:** transações no app (conectar, comprar, vender, resolver) e o shader WebGPU da direção I.
 - **`CODEMAP.md`:** o gerador aponta arquivos acima de 200 linhas e sem cabeçalho `Purpose:`, quase todos do
   programa e do app antigos; os números atuais estão no topo do próprio mapa.
+
+---
+
+## [sprint-01] — 2026-10-05 — A Pyth serve na devnet: o leitor de preço lê contas reais
+
+Sprint 01 do roteiro (`docs/sprints/sprint-01-foundation.md`), mais o que entrou na `main` depois da tag
+`sprint-00`. Entrou por dois pull requests: o #5, com a regra de fechamento de interação, e o #6, com a sprint. A
+tag `sprint-01` aponta para o merge do #6. O porquê de cada decisão está em
+[session-log](session-log/2026-10-05-sprint-01-leitor-de-preco.md).
+
+**Veredito da sprint:** a Pyth serve na devnet. Os programas e as contas de preço de SOL e de BTC existem lá, nos
+mesmos endereços da rede principal. Seguem os cinco tipos de pergunta.
+
+### Added
+
+- **Leitor de preço** (`programs/brot-markets/src/readers/price_touch.rs`), só a leitura: confere o dono, o
+  tamanho exato, o tipo da conta, a verificação completa e o ativo esperado, e devolve preço, margem, expoente,
+  horário e slot. Aceita só a geração atualizada da Pyth. Nenhuma instrução o chama ainda.
+- **Leitor de bytes com conferência de limites** (`readers/cursor.rs`): conta mais curta que o formato é erro,
+  nunca pânico.
+- **Quatro erros novos no programa:** dono errado, formato errado, verificação incompleta e ativo errado. O IDL
+  commitado traz os quatro.
+- **Testes:** dez do leitor e cinco do leitor de bytes (`programs/brot-markets/tests/`), contra três contas reais
+  da devnet em `tests/fixtures/`; e `tests/fixtures.test.ts`, que confere o tamanho e o SHA-256 de toda conta
+  capturada contra o índice.
+- **Nota de pesquisa** `knowledge-base/tecnologia/pyth-leitor-de-preco.md`: as duas gerações de programas da Pyth,
+  os endereços, o formato da conta, a frequência de atualização nas duas redes, a taxa, a exigência de chave no
+  serviço de preços e o que a própria rede diz de quem controla os programas. Responde C1, C2, C3, C4 e C12 do
+  plano técnico, duas delas em parte.
+- `docs/business/PITCH.md`: a apresentação resumida do plano, etapa 2.9 do método, em dez seções derivadas do
+  BP v0.0.2. Mantém as ressalvas do plano e diz o que o plano não tem. Não publicada
+  ([session-log](session-log/2026-10-05-pitch-and-publication-decision.md)).
+- `.claude/rules/interaction-closing.md`: regra de trabalho pedida pelo fundador. Toda resposta termina com um
+  relatório breve do que foi feito, em português simples, e com os próximos passos: os caminhos possíveis, ligados
+  ao roteiro, e uma recomendação ([session-log](session-log/2026-10-05-regra-de-fechamento-de-interacao.md)).
+
+### Changed
+
+- `scripts/capture-fixtures.ts` captura também da devnet, aceita um prefixo para capturar só um grupo, grava o
+  SHA-256 de cada conta no índice, confere pelo código da rede que o endereço consultado é da rede certa e recusa
+  conta que mudou de dono.
+- `.gitattributes` marca `*.bin` como binário, para o Git nunca mexer nos bytes de uma conta capturada.
+- O plano técnico marca o que a sprint conferiu (C1 a C4, C12, T2) e ganha dois riscos: quem controla a Pyth, e a
+  dependência da conta de preço patrocinada. As Sprints 03, 06, 07 e 16 ganham uma seção "Herdado da Sprint 01".
+
+### Não feito
+
+- **A leitura no Surfpool**, que era critério de pronto. Passou para a Sprint 03; o motivo está no documento da
+  sprint.
+- A atualização das ferramentas da máquina de desenvolvimento, por falta de memória e de disco.
 
 ---
 

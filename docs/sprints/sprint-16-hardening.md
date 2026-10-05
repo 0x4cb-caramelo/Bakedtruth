@@ -68,6 +68,12 @@ degraus, que é operação depois da abertura.
 A conferência padrão e o teste aleatório sobre a versão candidata. O ensaio de pausa e de retomada na devnet, pela
 carteira 2 de 3.
 
+## Herdado da Sprint 01
+
+Da revisão adversarial do leitor de preço (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`, seção 1.8).
+
+- Antes da rede principal, saber quem controla a atualização dos programas da Pyth lá: a autoridade é o endereço derivado `6oXTdojyfDS8m5VtTaYB9xRCxpKGSvKJFndLUPV3V3wT`, e não foi conferido que programa ou carteira com várias assinaturas está por trás dele. O risco está na seção 13 do plano técnico.
+
 ## Herdado da Sprint 00
 
 Da revisão de segurança que fechou a Sprint 00 (`docs/sprints/sprint-00-setup.md`).

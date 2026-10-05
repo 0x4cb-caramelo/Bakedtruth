@@ -12,8 +12,10 @@ com cinco tipos de pergunta, com o preço construído primeiro, se sustenta.
 
 Três coisas mudam em relação ao que o plano supunha, e nenhuma derruba o veredito:
 
-1. **A Pyth fez uma atualização do núcleo em 26 de agosto de 2026.** Há duas gerações de programas na Solana, e a
-   recomendada para integração nova não é a que todo material antigo cita.
+1. **A documentação da Pyth data de 26 de agosto de 2026 uma atualização do núcleo.** Há duas gerações de programas
+   na Solana, e a recomendada para integração nova não é a que todo material antigo cita. Os programas da geração
+   atualizada estão na rede desde 5 de maio de 2026 (seção 1.8); o que mudou em agosto, pelo que se vê de fora, foi
+   a documentação e o serviço de preços.
 2. **O serviço público de preços passou a exigir chave**, com teste gratuito e planos pagos. Só precisa dele quem
    publica preço por conta própria.
 3. **Na rede principal a conta de preço patrocinada renova a cada 5 a 11 segundos.** Isso pode dispensar o nosso
@@ -36,7 +38,8 @@ e consulta às duas redes.
   devnet e na rede principal (conferido por `getAccountInfo`).
 - A documentação diz que a geração anterior foi atualizada no lugar pela DAO e continua funcionando, e recomenda a
   atualizada para integração nova. Diz também: "Each endpoint's payloads verify only on its own contract
-  generation."
+  generation." Na rede, o receptor anterior da rede principal não é reinstalado desde março de 2025 (seção 1.8). O
+  que "atualizada no lugar" quer dizer ali: não conferido.
 - O endereço de cada conta de preço é derivado do programa de contas e do identificador do preço. Como o programa
   mudou, os endereços das contas mudaram.
 
@@ -79,6 +82,9 @@ slot da rede no momento.
 | 133 | 1 | Sobra, zero quando a verificação é completa |
 
 As duas gerações gravam o mesmo formato e o mesmo discriminador. O que as distingue é o dono da conta.
+
+A fonte mais forte do formato é o próprio programa: o receptor atualizado publica na rede a descrição das suas
+contas (o IDL, `pyth_solana_receiver` 0.2.1), e ela declara os mesmos campos, na mesma ordem (seção 1.8).
 
 ### 1.4 Frequência de atualização das contas patrocinadas
 
@@ -124,6 +130,33 @@ Numa leitura da rede principal, o horário de publicação estava 2 segundos **�
 Uma leitura de cada rede em 5/10/2026, comparando o relógio da rede com o relógio real: devnet 1 segundo à frente;
 rede principal, zero. É uma amostra só, e não uma medida de desvio ao longo do tempo.
 
+### 1.8 O que a própria rede diz dos programas
+
+Consulta direta às duas redes em 5/10/2026, depois da revisão adversarial da sprint: a conta de dados de cada
+programa guarda o slot da última instalação e quem pode atualizá-lo.
+
+| Programa | Rede principal, última instalação | Devnet, última instalação |
+|---|---|---|
+| Receptor atualizado (`rec2HH...`) | 5/5/2026 (slot 417825260) | 5/5/2026 (slot 460336311) |
+| Contas patrocinadas atualizadas (`pyt2F4...`) | 5/5/2026 (slot 417825281) | 5/5/2026 (slot 460336332) |
+| Receptor anterior (`rec5EK...`) | 16/3/2025 (slot 327047637) | 31/8/2026 (slot 491006444) |
+
+- **Quem pode atualizar os três programas.** Na rede principal, `6oXTdojyfDS8m5VtTaYB9xRCxpKGSvKJFndLUPV3V3wT`,
+  um endereço derivado de programa (fora da curva): quem o controla, e com quantas assinaturas, **não conferido**.
+  Na devnet, `upg8KLALUN7ByDHiBu4wEbMDTC6UnSVFSYfTyGfXuzr`, uma chave comum.
+- **O formato declarado pelo receptor** (IDL lido da devnet): `PriceUpdateV2` tem `writeAuthority`,
+  `verificationLevel`, `priceMessage` e `postedSlot`. `VerificationLevel` tem `Partial { numSignatures: u8 }` e
+  `Full`, nessa ordem. `PriceFeedMessage` tem `feedId`, `price` (i64), `conf` (u64), `exponent` (i32),
+  `publishTime`, `prevPublishTime`, `emaPrice` e `emaConf`. O IDL é o que o programa declara, e não prova do
+  código instalado; o código-fonte do receptor não foi lido.
+- **Qualquer pessoa posta um preço.** Em `postUpdate` assinam o pagador, a conta nova e o `writeAuthority`, todos
+  escolhidos por quem chama. A lista de erros do receptor não tem erro de preço velho: se ele confere a idade do
+  preço ao postar, **não conferido**; o leitor não conta com isso.
+- **O receptor tem instruções de governança** que trocam a fonte dos preços, o endereço do Wormhole e o mínimo de
+  assinaturas (`setDataSources`, `setWormholeAddress`, `setMinimumSignatures`), sem reinstalar o programa.
+- **Os códigos de rede**, usados pelo script de captura para não confundir as duas: rede principal
+  `5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d`, devnet `EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG`.
+
 ## 2. Decisões desta sprint
 
 | Decisão | Escolha | Alternativa descartada | Por quê |
@@ -132,6 +165,7 @@ rede principal, zero. É uma amostra só, e não uma medida de desvio ao longo d
 | Como ler a conta (T2) | Leitor escrito à mão, com conferência de dono, tamanho, discriminador e nível de verificação | A biblioteca `pyth-solana-receiver-sdk` 1.2.0, com a opção `pro-compatible` | O formato são 134 bytes e doze campos, já conferidos em oito contas reais. A biblioteca traria uma dependência cuja compatibilidade com o `anchor-lang 1.1.2` **não foi testada**; o repositório já ficou preso numa versão por causa de dependência assim |
 | Verificação parcial | Recusada | Aceitar com um mínimo de assinaturas | Verificação parcial desloca os campos em um byte e significa menos assinaturas conferidas |
 | Tamanho da conta | Exatamente 134 bytes | Aceitar 133 ou mais | Qualquer outro tamanho não é uma conta que o receptor criou |
+| O ativo esperado | Faz parte da leitura: o leitor recebe o identificador e recusa outro | Devolver o preço e deixar a conferência para quem chama | Como qualquer pessoa posta um preço assinado de qualquer ativo, esquecer a conferência faria um preço de BTC responder a uma pergunta de SOL. Achado da revisão adversarial |
 
 ## 3. Inferências (minhas, a validar)
 
@@ -148,6 +182,17 @@ rede principal, zero. É uma amostra só, e não uma medida de desvio ao longo d
   bom.
 - **Depender da conta patrocinada é depender de um terceiro que paga por ela.** A documentação lista quais contas
   são patrocinadas; a lista pode mudar.
+- **A aposta e a prova do SIM deveriam aceitar contas diferentes.** Uma conta avulsa, postada por qualquer pessoa,
+  pode trazer um preço legítimo e antigo. Se a aposta aceitar qualquer conta válida, quem aposta escolhe o preço
+  mais velho que a regra admite, e a fresta de 30 segundos vira sempre a fresta inteira. A saída proposta pela
+  revisão: na aposta, exigir a conta patrocinada do ativo (o endereço é derivado do identificador, e o programa de
+  contas patrocinadas declara o erro `UpdatesNotMonotonic`, que sugere que ela só anda para a frente; se o código
+  impõe isso, não conferido); na prova do SIM, aceitar qualquer conta completa do ativo, dentro do prazo. O plano
+  técnico hoje diz "o programa aceita qualquer conta válida". É decisão de desenho da Sprint 03.
+- **Quem controla a atualização do receptor controla o que o leitor lê.** Uma mudança de tamanho quebra a leitura
+  e as perguntas de preço deixam de dar SIM (falha fechada, que depende de a anulação funcionar). Uma mudança de
+  significado dentro dos 134 bytes não é detectável pelo programa. Daí a proposta de um vigia sobre o slot de
+  instalação do receptor e sobre a configuração dele.
 
 ## 4. O que não foi feito
 

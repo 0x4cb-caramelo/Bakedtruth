@@ -37,6 +37,20 @@ segundos, resolve o que já pode, publica preço, acerta o que venceu a janela e
   acertar, pagar e tentar de novo todo dia.
 - A base do servidor em `deploy/vps/`, e a escolha do provedor de RPC do keeper (T5).
 
+## Herdado da Sprint 01
+
+Da prova do leitor de preço (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`).
+
+- **O serviço de preços da Pyth exige chave desde 26/8/2026.** Publicar preço por conta própria, que é uma tarefa
+  deste keeper, precisa dela. Há plano gratuito de teste e planos pagos; o preço não foi levantado. A chave é
+  segredo: vai em `/etc/brot-markets/keeper.env`, nunca no repositório.
+- **Antes de construir a tarefa de publicar preço, medir se ela é necessária.** Na rede principal a conta
+  patrocinada renovou a cada 5 a 11 segundos, o que cumpre o limite de 30 segundos sem publicação nossa. A medida
+  foi de um a dois minutos, numa tarde: falta medir por dias e saber o que acontece quando o patrocínio acaba. Na
+  devnet a conta leva de 62 a 64 segundos, e aí a publicação própria é a única forma de cumprir 30 segundos.
+- **A taxa do receptor por atualização é zero lamports** nas duas redes, hoje. O custo de publicar é a taxa da
+  transação e o aluguel da conta.
+
 ## Fora desta sprint
 
 O keeper reserva, a vigia, `POST /restart` e os alertas por email (07). O indexer (08). O site (09).

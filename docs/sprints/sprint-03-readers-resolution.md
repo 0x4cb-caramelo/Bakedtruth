@@ -49,7 +49,8 @@ Confirmar, anular à mão, contestar, acertar e pagar (04). O serviço que publi
 
 - **Q1:** quem pode acionar a leitura e o pagamento, só os dois serviços ou qualquer carteira.
 - **Q4:** o que conta como "encostou no alvo" na pergunta de preço.
-- Se a Sprint 01 concluiu que a Pyth não serve: quatro tipos, ou rever a decisão dos cinco.
+- **Da Sprint 01:** o limite de 30 segundos para a idade do preço vale também na devnet, ou vira um parâmetro por
+  pergunta. A Sprint 01 concluiu que a Pyth serve, então a escolha entre quatro e cinco tipos não se coloca.
 
 ## Agentes e skills
 
@@ -69,6 +70,38 @@ Confirmar, anular à mão, contestar, acertar e pagar (04). O serviço que publi
 
 `bun run test:rust` com as contas capturadas. `bun run test` para a resolução e a trava da aposta. Surfpool para o
 leitor de preço.
+
+## Herdado da Sprint 01
+
+Da prova do leitor de preço (`docs/sprints/sprint-01-foundation.md`; a pesquisa está em
+`knowledge-base/tecnologia/pyth-leitor-de-preco.md`).
+
+- **A leitura no Surfpool, que a Sprint 01 não fez.** Fixar o Surfpool v1.6.0 na conferência automática (só há
+  binário para Linux e macOS), com o SHA-256 do binário conferido, e rodar o leitor de preço dentro de uma instrução
+  contra o modelo de `PriceUpdateV2` dele. Usar o sistema de cenários para simular o preço encostando no alvo ao
+  longo do tempo. Conferir também se ele simula o stake de época (a metade de C4 que ficou sem resposta).
+- **`price_touch.rs` já existe, só com a leitura.** `read_price_update` confere dono, tamanho, discriminador,
+  verificação completa e o ativo esperado, que é parâmetro obrigatório. Não confere a idade do preço: quem chama
+  confere. Instrução usa `read_price_account`, que tira dono e bytes da mesma conta.
+- **Separar a conta aceita na aposta da conta aceita na prova** (revisão adversarial da Sprint 01). O plano técnico
+  diz "o programa aceita qualquer conta válida"; isso deixa quem aposta apresentar uma conta avulsa com o preço mais
+  velho que a regra admite, anterior ao toque. Proposta: na aposta, exigir a conta patrocinada do ativo, cujo
+  endereço é derivado do identificador no programa `pyt2F4...`, mais a idade máxima; na prova do SIM, aceitar
+  qualquer conta completa do ativo dentro do prazo. Antes de decidir, conferir se a conta patrocinada só anda para
+  a frente (o programa declara o erro `UpdatesNotMonotonic`; o código não foi lido).
+- **A conta `preço − margem` precisa alargar os tipos.** `price` é `i64` e pode ser negativo; `conf` é `u64`. Usar
+  `i128` ou `try_from`, e testar com valores extremos: preço negativo, margem máxima, expoente fora do esperado.
+- **Registrar no plano técnico o risco de quem controla a Pyth.** Na devnet uma chave comum atualiza o receptor;
+  na rede principal é um endereço derivado cujo controle não foi conferido. A governança do receptor troca a fonte
+  dos preços e o mínimo de assinaturas sem reinstalar o programa. O vigia sobre isso está na Sprint 07.
+- **Uma conta de preço da rede principal entre as contas capturadas.** As três de hoje são da devnet.
+- **O horário de publicação pode estar à frente do relógio da rede.** Calcular a idade como "agora menos publicação"
+  dá número negativo. A regra tem de tratar isso sem estouro e sem recusar preço bom.
+- **A idade máxima do preço como parâmetro, e não número fixo.** A conta patrocinada renova a cada 5 a 11 segundos
+  na rede principal e a cada 62 a 64 na devnet. Com 30 segundos fixos, nenhuma aposta em pergunta de preço entra na
+  devnet sem que o nosso serviço publique preço. Depende da resposta do fundador (seção acima).
+- **Só a geração atualizada da Pyth é aceita** (`rec2HH...`). A conta de preço que a pergunta grava na criação tem
+  de ser dessa geração.
 
 ## Riscos
 

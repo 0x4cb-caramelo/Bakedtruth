@@ -65,6 +65,15 @@ keeper (16).
 
 `bun test` da vigia, com o principal simulado como derrubado. O ensaio na devnet, com as duas máquinas.
 
+## Herdado da Sprint 01
+
+Da revisão adversarial do leitor de preço (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`, seção 1.8).
+
+- **A vigia olha também a Pyth.** O leitor de preço confia num programa de fora, o receptor `rec2HH...`. A vigia
+  acompanha o slot da última instalação dele (conta `3UV7w2yTaqVcUAbWm1KUXdcE1Ziw8CfyyCpZvhKFkPfX`) e a
+  configuração (fonte dos preços, mínimo de assinaturas). Se um dos dois mudar, alerta, e a equipe decide se pausa
+  as perguntas de preço.
+
 ## Riscos
 
 - Dois serviços com o mesmo código têm o mesmo defeito (gravidade alta). A janela de 6 horas e a anulação continuam
