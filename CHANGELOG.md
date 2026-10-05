@@ -79,6 +79,14 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
   avaliação jurídica precisa olhar. As sete propostas foram aprovadas pelo fundador no mesmo dia ("sobre as 7 decisões, concordo"), junto com o
   teto de 5 USDC na devolução ao indicado. O texto diz o tamanho do dinheiro: no
   cenário razoável o cofre receberia cerca de 900 dólares por mês, e no ruim, nada.
+- **`docs/business/BP-v0.0.2-parte-4-construcao-e-risco.md`** (5 de outubro): quarta e última parte, com cerca de
+  11.950 palavras. O que existe e o que será construído; o roteiro em quatro fases; o que protege o dinheiro
+  (auditoria, carteira com várias assinaturas, tetos, os dois serviços, pausa e plano de incidente); as peças de
+  fora (Pyth, Cloak, SODAX, pump.fun, X); pessoas e empresa; regulação; a tabela de riscos. Registra três tensões
+  sem mudar as decisões: o prazo de um mês, a falta de bloqueio de país com sócios no Brasil, e a dependência de
+  poucas pessoas. Oito propostas aguardam o fundador. Pauta em `_review/pauta-bp-v0.0.2-parte-4.md`.
+- `knowledge-base/market/regulacao.md` (5 de outubro): nota sobre a Medida Provisória 1.394, de 25/9/2026, lida no
+  Planalto. Ela proíbe a aposta de quota fixa em todo o país, inclusive por empresa do exterior.
 - `CODEMAP.md` (5 de outubro): primeiro mapa do código, gerado por `node scripts/codemap.js`. 111 arquivos.
 - `docs/business/ideacao-perguntas-e-respostas.md`: as cinco rodadas de perguntas e as respostas do Lucas, com o
   estado consolidado no topo.
@@ -113,7 +121,8 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
   `DESIGN-DIRECTION.md` (que ainda descreve a C) e a aplicação ao app, que segue com a C e espera a sincronização com
   `0xcf07/pred-provable`.
 - **Nome do site:** decidido em 4 de outubro, Brot Markets. O app e os protótipos ainda dizem "baked".
-- **BP v0.0.2:** falta a Parte 4 (construção e risco). As Partes 1, 2 e 3 não têm pendência do fundador. A v0.0.1 segue em `BUSINESS-PLAN.md` até as
+- **BP v0.0.2:** as quatro partes existem. As Partes 1, 2 e 3 não têm pendência do fundador; a Parte 4 tem oito
+  propostas aguardando. Falta conferir a tramitação da MP 1.394 no Congresso e ler o Decreto 13.128, de 2026. A v0.0.1 segue em `BUSINESS-PLAN.md` até as
   quatro partes existirem. Depois das quatro partes, montar o `BUSINESS-PLAN.md` v0.0.2.
 - **Não verificado:** transações no app (conectar, comprar, vender, resolver), `bun test`, `cargo test` e o
   `next build` de produção; o shader WebGPU da direção I (só a reserva em canvas foi vista).
