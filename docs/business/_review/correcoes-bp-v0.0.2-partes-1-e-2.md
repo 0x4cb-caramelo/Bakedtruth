@@ -11,7 +11,7 @@ dada em 5/10/2026, e prevalece sobre o que as duas partes dizem hoje. As citaç�
 |---|---|---|---|
 | 1 | Forma da taxa | "forma da taxa, sua recomendação" | **A taxa é 10% do lado perdedor.** As formas de 3% do pote e de 8% do lado perdedor deixam de ser opções e ficam só como comparação |
 | 2 | Fechamento das apostas | "um fechamento só, porém vamos sim permitir perguntas acima de 30 dias, limitados a 90 no mvp" | Uma regra só, a do T2, para todas as perguntas. Duração máxima de **90 dias** no MVP |
-| 3 | Lista dos tipos de pergunta do primeiro dia | "esse trecho você segue me entregando sem contexto, eu não sei o que é, e quais as suas recomendações" | **Continua pendente.** É a única proposta que sobra na Parte 1 e precisa ser reescrita (ver seção 2.5) |
+| 3 | Lista dos tipos de pergunta do primeiro dia | "esse trecho você segue me entregando sem contexto, eu não sei o que é, e quais as suas recomendações" | Reescrita como manda a seção 2.5. **Decidida depois, no mesmo dia:** "das três saídas, vamos com o recomendado (a)". Cinco tipos no primeiro dia, com o leitor de preço construído primeiro |
 | 4 | Vigia do serviço agendado | "sim, e aí o segundo assume o cron e envia notificação para o cto saber que tem um sistema down" | Decidido: 10 minutos sem resposta, 3 tentativas de religar; depois o segundo serviço assume e avisa o CTO |
 | 5 | Disputa em duas etapas | "pode ser, mas membros da equipe, né?" | Decidido. Os revisores da etapa 2 são **membros da equipe**, dois de três |
 | 6 | Indicação | "gosto. sim, vamos." | Decidido: 20% por 90 dias. O benefício do indicado segue a regra 1.2, item 4 |

@@ -6,8 +6,7 @@ negócio), 3 (tokens) e 4 (construção e risco) vêm depois.
 
 **Como ler.** Cada regra traz uma de duas marcas. **Decisão** é o que o fundador já decidiu, com as palavras dele
 entre aspas quando ajudam. **Proposta, aguardando decisão** é o que este documento sugere e ele ainda não aprovou.
-Sobrou uma proposta só, a lista dos tipos de pergunta do primeiro dia (seção 4.2), e um detalhe a confirmar, o
-teto da devolução ao indicado (seção 3.8). Os dois estão no capítulo 5. Números que vêm de fora trazem etiqueta:
+Sobrou um detalhe a confirmar, o teto da devolução ao indicado (seção 3.8), resumido no capítulo 5. Números que vêm de fora trazem etiqueta:
 FATO (lido na fonte), FATO SECUNDÁRIO (lido em quem citou a fonte) e INFERÊNCIA (conta ou conclusão nossa). Três
 termos aparecem no texto inteiro: USDC é a moeda digital que vale 1 dólar; MVP é a primeira versão do produto;
 devnet é a rede de testes da Solana, em que o dinheiro não tem valor.
@@ -84,11 +83,10 @@ parte em 90% do que o outro lado perdeu.
 
 ### 1.4 O que falta decidir
 
-Falta uma decisão: a lista dos tipos de pergunta do primeiro dia, isto é, sobre quais assuntos a equipe vai poder
-abrir perguntas no dia em que o site abrir. A seção 4.2 traz as três saídas possíveis e a recomendação.
+A última proposta desta parte foi decidida em 5/10/2026: o site abre com cinco tipos de pergunta, e o leitor de
+preço é a primeira peça a construir (seção 4.2).
 
-Há também um detalhe a confirmar: o teto da devolução ao indicado, de 5 USDC (seção 3.8). Os dois pontos estão
-resumidos no capítulo 5.
+Falta um detalhe a confirmar: o teto da devolução ao indicado, de 5 USDC (seção 3.8).
 
 ## 2. O que é e para quem
 
@@ -602,8 +600,8 @@ Ela fica separada da página em que a carteira assina a aposta. E nenhuma sugest
 
 ### 4.2 Os tipos de pergunta, em linguagem simples
 
-**Proposta, aguardando decisão: a lista dos tipos de pergunta do primeiro dia.** É a única proposta que sobra nesta
-parte. Ela vai em seis passos.
+**Decisão: a lista dos tipos de pergunta do primeiro dia.** Das três saídas do passo 5, o fundador escolheu a
+recomendada: "vamos com o recomendado (a)". Os seis passos mostram o que foi decidido e por quê.
 
 **1. O que está sendo decidido.** No dia em que o site abrir, sobre quais assuntos a equipe vai poder abrir
 perguntas.
@@ -676,7 +674,7 @@ Dois avisos sobre os tipos que entram.
   a data de lançamento fica presa a uma peça só. Se ela atrasar, atrasam também os quatro tipos que já poderiam
   estar no ar.
 
-**6. A recomendação e o porquê.** A saída (a). O preço é o único tipo que ninguém controla e é o assunto em que o
+**6. A decisão e o porquê.** A saída (a). O preço é o único tipo que ninguém controla e é o assunto em que o
 público de cripto mais aposta (INFERÊNCIA, apoiada no dado da Polymarket acima). Os outros quatro dão ao site o
 que os concorrentes da seção 2.1 não têm: perguntas decididas pela leitura de um fato gravado na rede, como uma
 queima ou uma liquidez travada.
@@ -888,9 +886,9 @@ ressalva na rede principal.
 
 ## 5. Decisões pendentes e objeções
 
-### 5.1 O que foi decidido em 5/10/2026 e o que sobra
+### 5.1 O que foi decidido em 5/10/2026 e o detalhe que sobra
 
-O fundador respondeu em 5/10/2026 a quase tudo o que estava como proposta. São nove decisões. A citação dele está
+O fundador respondeu em 5/10/2026 a tudo o que estava como proposta. São dez decisões. A citação dele está
 na seção indicada.
 
 | # | Assunto | O que passa a valer | Seção |
@@ -904,11 +902,7 @@ na seção indicada.
 | 7 | 1% no pote de um lado só | Mantido, como regra à parte | 3.4 |
 | 8 | Prêmio do patrocinador em pote de um lado só ou pergunta anulada | Volta inteiro ao patrocinador | 3.4 |
 | 9 | Tipo "tokens travados" | Fora da lista do primeiro dia | 4.3 |
-
-**A proposta que sobra (proposta, aguardando decisão): a lista dos tipos de pergunta do primeiro dia.** Decide-se
-sobre quais assuntos a equipe vai poder abrir perguntas no dia em que o site abrir. A seção 4.2 traz as três saídas
-e o custo de cada uma. A recomendação é a saída (a): lançar com os cinco tipos recomendados, construindo primeiro
-o leitor de preço.
+| 10 | Tipos de pergunta do primeiro dia | Cinco tipos: preço de ativo grande, queima, liquidez travada na Meteora, pool de staking e stake de validador. O leitor de preço é construído primeiro | 4.2 |
 
 **O detalhe a confirmar (proposta, aguardando decisão): o teto da devolução ao indicado.** A proposta é de 5 USDC
 por indicado (seção 3.8).

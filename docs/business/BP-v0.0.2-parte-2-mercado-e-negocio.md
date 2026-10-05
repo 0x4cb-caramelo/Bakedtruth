@@ -201,7 +201,7 @@ beta (INFERÊNCIA, out/2026).
 A leitura da pesquisa (INFERÊNCIA): o que une esse público é preço de cripto em prazo curto e eventos de grande
 atenção, como esporte e eleição. Fatos de projeto de token, como queima ou trava de liquidez, não aparecem como
 categoria relevante em plataforma nenhuma. Isso tem duas consequências para a lista de tipos de pergunta do
-primeiro dia, proposta na Parte 1, seção 4.2. A primeira: o preço de ativo grande é o único tipo de pergunta com demanda conhecida, e é por ele que o
+primeiro dia, decidida na Parte 1, seção 4.2. A primeira: o preço de ativo grande é o único tipo de pergunta com demanda conhecida, e é por ele que o
 volume deve começar. A segunda: os fatos de token são a assinatura do produto, o que o torna diferente, mas não
 se pode contar com eles como fonte principal de volume antes de ver apostas de verdade.
 

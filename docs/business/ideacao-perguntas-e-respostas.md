@@ -33,8 +33,11 @@ Registro completo, com as contas, em [`_review/correcoes-bp-v0.0.2-partes-1-e-2.
   para ou muda de rumo.
 - **Lista de investidores:** "não tem problema, pois são e-mails de negócios, e não dados pessoais". O convite por
   email segue.
-- **Segue pendente:** a lista dos tipos de pergunta do primeiro dia. "esse trecho você segue me entregando sem
-  contexto, eu não sei o que é, e quais as suas recomendações".
+- **Tipos de pergunta do primeiro dia:** primeiro ele disse "esse trecho você segue me entregando sem contexto, eu
+  não sei o que é, e quais as suas recomendações". Depois da explicação refeita, decidiu no mesmo dia: "das três
+  saídas, vamos com o recomendado (a)". O site abre com cinco tipos (preço de ativo grande, queima, liquidez travada
+  na Meteora, pool de staking e stake de validador), e o leitor de preço é a primeira peça a construir.
+- **Segue pendente:** só o teto da devolução ao indicado (proposto: 5 USDC).
 
 ### Alterações da revisão do BP v0.0.1 (4 de outubro de 2026) — prevalecem sobre o resto desta seção
 

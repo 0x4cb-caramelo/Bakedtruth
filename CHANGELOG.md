@@ -9,10 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [Unreleased] — Bakedtruth: layout Tape no app, Prototype Lab com catorze direções, Ledger² escolhida com tema claro
 
 Primeiras mudanças do projeto Bakedtruth em si; as versões abaixo desta são a história do AI Dev OS, herdada na Largada.
-Trabalho de 2 a 5 de outubro de 2026, na branch `feat/layout-tape`. **Commitado em 5 de outubro**, em commits
-separados por assunto (app, protótipos, pesquisa, mapa do código, negócio e registros). O push foi recusado pelo
-GitHub nesse dia: a credencial ativa não tinha o escopo `workflow`, exigido porque a branch traz
-`.github/workflows/ci.yml`. Fica pendente até a credencial ser atualizada. Os
+Trabalho de 2 a 5 de outubro de 2026, na branch `feat/layout-tape`. **Commitado e enviado ao `origin` em 5 de
+outubro**, em commits separados por assunto (app, protótipos, pesquisa, mapa do código, negócio e registros). O
+primeiro push foi recusado porque a credencial não tinha o escopo `workflow`, exigido pelo
+`.github/workflows/ci.yml`; o Lucas deu o escopo e o segundo passou. Os
 motivos de cada decisão estão no `session-log/`; as três primeiras entradas:
 [direção C e nome](session-log/2026-10-02-prototipo-direcao-c-e-nome-em-aberto.md),
 [layout no app](session-log/2026-10-02-layout-tape-aplicado-ao-app.md) e
@@ -61,7 +61,8 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
   (`_review/user-review-v0.0.1.md`) e a revisão de impacto com a simulação da taxa
   (`_review/bp-impact-review-v0.0.2.md`). **Corrigida em 5 de outubro** com as respostas do fundador: taxa de 10% do
   lado perdedor, um fechamento só com perguntas de até 90 dias, vigia do serviço, disputa e indicação como decisão.
-  Sobra uma proposta, a lista dos tipos de pergunta do primeiro dia.
+  A lista dos tipos de pergunta do primeiro dia foi decidida no mesmo dia: cinco tipos, com o leitor de preço
+  construído primeiro. Sobra um detalhe, o teto da devolução ao indicado.
 - **`docs/business/BP-v0.0.2-parte-2-mercado-e-negocio.md`** (4 de outubro): segunda parte, com cerca de 11.500
   palavras. Modelo financeiro refeito com as decisões novas (`_review/pauta-bp-v0.0.2-parte-2.md`): 75% da taxa para a
   operação, custo de 5.500 dólares por mês. **Corrigida em 5 de outubro:** a taxa de 10% do lado perdedor vira a
@@ -107,8 +108,7 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
   `0xcf07/pred-provable`.
 - **Nome do site:** decidido em 4 de outubro, Brot Markets. O app e os protótipos ainda dizem "baked".
 - **BP v0.0.2:** faltam as Partes 3 (tokens) e 4 (construção e risco). A v0.0.1 segue em `BUSINESS-PLAN.md` até as
-  quatro partes existirem. Aguardam o fundador: a lista dos tipos de pergunta do primeiro dia e o teto da devolução
-  da indicação.
+  quatro partes existirem. Aguarda o fundador: o teto da devolução da indicação.
 - **Não verificado:** transações no app (conectar, comprar, vender, resolver), `bun test`, `cargo test` e o
   `next build` de produção; o shader WebGPU da direção I (só a reserva em canvas foi vista).
 - **`CODEMAP.md`:** o gerador aponta 28 arquivos acima de 200 linhas e 96 sem cabeçalho `Purpose:`.
