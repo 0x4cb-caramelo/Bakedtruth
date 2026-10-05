@@ -74,10 +74,12 @@ nenhuma mudança no DNS.
 | `/var/lib/brot-markets` | `brot`, 0750 | Pasta pessoal do usuário de serviço |
 | `/srv/brot-markets` | root, 0755 | Raiz do projeto |
 | `/srv/brot-markets/repo.git` | `brot`, 0750 | Repositório Git sem pasta de trabalho, que recebe os pacotes |
-| `/srv/brot-markets/work/current` | `brot`, 0750 | Cópia de trabalho da branch `feat/layout-tape` |
+| `/srv/brot-markets/work/current` | `brot`, 0750 | Cópia de trabalho. Nasceu na branch `feat/layout-tape` e passou para a `main` no fechamento da Sprint 00 |
 | `/etc/brot-markets` | root, grupo `brot`, 0750 | Vazia. Lugar dos arquivos de ambiente |
 
-O código chegou como pacote do Git pelo SSH, e o commit no servidor é o mesmo da máquina do fundador (`3222acb`).
+O código chegou como pacote do Git pelo SSH, e o commit no servidor era o mesmo da máquina do fundador (`3222acb`).
+No fechamento da Sprint 00, no mesmo dia, a cópia foi levada para a `main`, com a tag `sprint-00`, e é atualizada
+a cada merge na `main`.
 Depois da criação, o painel do `agent-rails` seguia ativo, os 15 contêineres seguiam rodando e a carga não mudou.
 
 Para desfazer tudo: `sudo userdel -r brot`, `sudo rm -rf /srv/brot-markets /etc/brot-markets`.

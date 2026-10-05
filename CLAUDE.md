@@ -4,10 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Provable KPI Markets on Solana (hackathon MVP, devnet, unaudited). A sponsor sells YES outcome tokens below face value
-as a bounty on an on-chain goal; anyone resolves the market by reading the target account on-chain, instantly and
-irreversibly. No oracle, indexer or dispute window. The README is the source of truth for the economics, lifecycle and
-known limits; read it before changing program behavior.
+**Brot Markets**, a pot-based prediction market on Solana (devnet, unaudited), being rebuilt in this repository.
+
+The code it grew from is `pred-provable`, "Provable KPI Markets": a sponsor sells YES outcome tokens below face value
+as a bounty on an on-chain goal, and anyone resolves the market by reading the target account on-chain. That program
+is frozen. What carries over is its way of resolving: typed reads of on-chain accounts, with no opinion oracle. The
+README still describes the old economics and stays as the record of the upstream program. It is no longer the source
+of truth for the product; the next section says what is.
 
 Bun workspace (root, `app/`, `packages/*`, `services/*`), two Anchor programs (`programs/brot-markets`, new, and
 `programs/pred-provable`, frozen), Next.js frontend (`app/`).
@@ -94,8 +97,9 @@ free of React/Next imports where they are used by scripts or tests.
 Program signature changes require `bun run build:program` and committing the regenerated files.
 
 **Frontend** (`app/`): Next.js App Router, Tailwind v4, wallet-adapter. The UI follows the approved design direction in
-`docs/product/DESIGN-DIRECTION.md` (direction C, "Tape": pixel-art scoreboard, markets as rows, progress in blocks, hard
-edges, and the Baked mascot hopping between declared perches). A generic dashboard look was rejected. `app/AGENTS.md`
+`docs/product/DESIGN-DIRECTION.md` (Ledger²: lab direction D in dark and N in light, consolidated in `prototype-lab/prototype-n/`,
+with the Baked mascot). The app still renders the earlier direction C ("Tape") until the design-system sprint (-1)
+and the site sprints (09 to 13) replace it. A generic dashboard look was rejected. `app/AGENTS.md`
 (loaded via `app/CLAUDE.md`) says this Next.js version has breaking changes: read `app/node_modules/next/dist/docs/`
 before writing app code.
 
@@ -134,8 +138,10 @@ in-memory, so a multi-instance deploy needs a shared store.
 
 This repository also carries the AI Dev Operating System (`.claude/rules`, `.claude/agents`, `.claude/skills`,
 `.claude/commands`, `WIZARD.md`, `START-HERE.md`). It entered the OS with code already written, so the wizard's phases
-are applied where they still add value rather than from zero. Phase 3 (Protótipo) is done: `prototype-lab/` holds the
-three directions and `docs/product/DESIGN-DIRECTION.md` records the approved one.
+are applied where they still add value rather than from zero. Phases 1 to 4 are done: BP v0.0.2 in `docs/business/`,
+the prototype lab with fourteen directions and the approved one in `docs/product/DESIGN-DIRECTION.md`, the Product
+Brief, the Technical Plan and the sprint roadmap. Phase 5 is under way: Sprint 00 is closed (tag `sprint-00`) and
+Sprint 01 is next. The pitch (wizard stage 2.9) was not written.
 
 Golden rules carried over from the OS:
 

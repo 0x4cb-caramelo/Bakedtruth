@@ -54,6 +54,8 @@ para o hackathon.
 
 ## 2. As sprints
 
+**Situação em 5/10/2026.** A Sprint 00 está concluída, com a tag `sprint-00`. Nenhuma outra começou. A próxima é a 01.
+
 | # | Sprint | Bloco | Depende de |
 |---|---|---|---|
 | -1 | [Design system](sprints/sprint--1-design-system.md) | pré-requisito de B8 | 00 |

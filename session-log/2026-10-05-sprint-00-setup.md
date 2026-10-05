@@ -100,6 +100,21 @@ falhas, então o primeiro envio foi de propósito sem o `CODEMAP.md` regenerado 
 - **Um erro meu de leitura no caminho:** dei o PR #3 como "sem conferência" quando ela só não tinha entrado na
   fila ainda. O GitHub criava as execuções com cerca de um minuto de atraso naquele momento.
 
+## Atualização: auditoria de documentação
+
+A pedido do Lucas ("vamos documentar tudo, como manda as nossas regras"), depois do fechamento:
+
+- **CHANGELOG:** o bloco "não lançado" virou a entrada `[sprint-00]`, e um bloco novo guarda o que está em aberto.
+- **`CLAUDE.md`:** a abertura deixa de dizer que o README é a fonte da verdade; a direção de design passa a ser a
+  Ledger²; e o estado do método passa a dizer Fases 1 a 4 feitas e Fase 5 em andamento.
+- **README:** aviso no topo de que o repositório está sendo reconstruído como Brot Markets. O resto é o texto do
+  upstream, mantido.
+- **Roteiro e levantamento do servidor:** situação da Sprint 00 e a cópia do servidor na `main`.
+- **Memórias do assistente:** direção de design, relação com o upstream e servidor atualizadas.
+- **O que a auditoria achou e não corrigiu:** a apresentação resumida do plano (etapa 2.9) nunca foi escrita; o
+  `package.json` da raiz ainda se chama `pred-provable` e aponta para o repositório do upstream; o `.env.example`
+  da raiz é o modelo genérico do OS. As branches já mescladas continuam no GitHub.
+
 ## Follow-ups
 
 - Fechar a sprint: IDL do programa novo commitado a partir do artefato, `CODEMAP.md` em dia, conferência automática
