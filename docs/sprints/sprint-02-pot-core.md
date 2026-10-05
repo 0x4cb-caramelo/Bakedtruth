@@ -71,6 +71,14 @@ zero. O SDK e a devnet (05).
 
 `bun run test`, com LiteSVM, por instrução e por erro. `bun run test:rust` para `math/schedule.rs`, como função pura.
 
+## Herdado da Sprint 00
+
+Da revisão de segurança que fechou a Sprint 00 (`docs/sprints/sprint-00-setup.md`).
+
+- Gravar o endereço do USDC na conta de configuração, na inicialização, e conferir contra a constante `USDC_MINT`. O IDL exporta o endereço da devnet, e um cliente que o lesse do IDL erraria na rede principal.
+- `init-if-needed` está desligado no `Cargo.toml`. Se a conta de posição precisar dele, ligar com o motivo escrito e um teste de reinicialização.
+- Os lints `arithmetic_side_effects`, `cast_possible_truncation` e `cast_sign_loss` estão em `deny` no pacote. Toda conta usa operação checada e `try_from`. Se o código gerado pelo Anchor disparar um deles, restringir o lint aos módulos próprios, sem desligar no pacote inteiro.
+
 ## Riscos
 
 - Programa novo, sem revisão de fora (gravidade crítica). Reduz: arquivos curtos e um erro por ponto de falha.

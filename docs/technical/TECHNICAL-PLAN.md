@@ -591,6 +591,22 @@ login, rota administrativa nem escrita; o único segredo de entrada no servidor 
 Deliberadamente adiado: teto por pergunta (fase futura **[DF]**), Token-2022 e contestação com depósito (fase 1.2),
 segundo oráculo (L-14), cofre de chaves para o keeper (antes da rede principal).
 
+### 7.1 Adiado na Sprint 00
+
+A regra `security-baseline` manda registrar aqui o que foi adiado de propósito. A revisão adversarial que fechou a
+Sprint 00 não achou nada crítico; isto é o que ficou para depois, com a sprint que herda.
+
+| O que ficou | Risco enquanto não é feito | Sprint |
+|---|---|---|
+| Atestar a origem do `.so`; reproduzir o hash com `solana-verify` | Quem compromete o trabalho de compilação entrega um binário com hash coerente | 16 |
+| Fixar o SHA-256 das ferramentas baixadas no CI (instalador da Solana, binário do Anchor) | A origem de uma ferramenta comprometida compromete o programa | 16 |
+| Variante `mainnet` compilada e publicada com nome próprio, e conferência da rede ao publicar | Publicar a variante errada cria um programa cujo colateral não é o USDC real | 16; o endereço do USDC na configuração, na 02 |
+| Varredura de segredos: base58, URL com senha, hexadecimal, binário | Um desses formatos entra no repositório sem ser visto | 16 |
+| `CODEOWNERS` e proteção da `main` | Um envio direto à `main` não passa pela conferência antes de entrar | 16 |
+| Registro do `bun.lock` num espelho de terceiro | Disponibilidade de um terceiro em todo build; os hashes nunca foram comparados com o registro oficial | 16 |
+| Rota de chat do upstream, com chave de servidor e sem limite de uso real | Com a chave configurada, vira um modelo gratuito de uso geral pago pela empresa | 09; até lá, sem chave |
+| Baixar o artefato pelo número da execução e guardar a chave do endereço do programa fora de `target/` | Publicar o artefato errado, ou perder o endereço | 05 |
+
 ## 8. Privacy/compliance baseline
 
 Para apostar, o produto não coleta dado pessoal **[DF]**. Sobram três pontos, cada um com as nove perguntas de

@@ -10,7 +10,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 |---|---|
 | Arquivos mapeados | **128** |
 | Acima de 200 linhas | **30** ⚠️ |
-| Sem cabeçalho `Purpose:` | **111** ⚠️ |
+| Sem cabeçalho `Purpose:` | **103** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
 
@@ -35,7 +35,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `prototype-lab/shared/ledger.js` — 238 linhas
 - `prototype-lab/shared/mascot.js` — 379 linhas
 - `prototype-lab/shared/mock-data.js` — 290 linhas
-- `scripts/codemap.js` — 221 linhas
+- `scripts/codemap.js` — 222 linhas
 - `scripts/devnet-seed.ts` — 246 linhas
 - `scripts/devnet-smoke.ts` — 273 linhas
 - `scripts/devnet.ts` — 222 linhas
@@ -174,34 +174,34 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`constants.rs`](programs/brot-markets/src/constants.rs) | ! Purpose: seeds, the collateral mint and the hard limits compiled into the program | 57 |
-| [`error.rs`](programs/brot-markets/src/error.rs) | ! Purpose: every failure the program can return, one code per cause | 12 |
-| [`events.rs`](programs/brot-markets/src/events.rs) | ! Purpose: Anchor events, one per instruction; the indexer rebuilds history from them | 6 |
-| [`lib.rs`](programs/brot-markets/src/lib.rs) | ! Purpose: entry point of the Brot Markets program; declares the program id and wires the modules | 24 |
+| [`constants.rs`](programs/brot-markets/src/constants.rs) | seeds, the collateral mint and the hard limits compiled into the program | 57 |
+| [`error.rs`](programs/brot-markets/src/error.rs) | every failure the program can return, one code per cause | 12 |
+| [`events.rs`](programs/brot-markets/src/events.rs) | Anchor events, one per instruction; the indexer rebuilds history from them | 6 |
+| [`lib.rs`](programs/brot-markets/src/lib.rs) | entry point of the Brot Markets program; declares the program id and wires the modules | 24 |
 
 ## `programs/brot-markets/src/instructions/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`mod.rs`](programs/brot-markets/src/instructions/mod.rs) | ! Purpose: instruction handlers, one file each, grouped by feature (Sprint 02 onwards) | 6 |
+| [`mod.rs`](programs/brot-markets/src/instructions/mod.rs) | instruction handlers, one file each, grouped by feature (Sprint 02 onwards) | 6 |
 
 ## `programs/brot-markets/src/math/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`mod.rs`](programs/brot-markets/src/math/mod.rs) | ! Purpose: money and schedule math: fees, payout, betting cutoff, invariants (Sprints 02 and 04) | 6 |
+| [`mod.rs`](programs/brot-markets/src/math/mod.rs) | money and schedule math: fees, payout, betting cutoff, invariants (Sprints 02 and 04) | 6 |
 
 ## `programs/brot-markets/src/readers/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`mod.rs`](programs/brot-markets/src/readers/mod.rs) | ! Purpose: on-chain readers that turn an account into a yes/no answer, ported from pred-provable (Sprint 03) | 6 |
+| [`mod.rs`](programs/brot-markets/src/readers/mod.rs) | on-chain readers that turn an account into a yes/no answer, ported from pred-provable (Sprint 03) | 6 |
 
 ## `programs/brot-markets/src/state/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`mod.rs`](programs/brot-markets/src/state/mod.rs) | ! Purpose: account layouts: config, cap, question, position (Sprint 02) | 6 |
+| [`mod.rs`](programs/brot-markets/src/state/mod.rs) | account layouts: config, cap, question, position (Sprint 02) | 6 |
 
 ## `programs/pred-provable/src/`
 
@@ -338,7 +338,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | Captures the mainnet accounts the resolver tests decode into tests/fixtures: real bytes, so the tests | 52 |
 | [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns | 74 |
-| [`codemap.js`](scripts/codemap.js) | let an AI locate the right file without reading every file. Pairs with the 200-line limit in .claude/rules/code-style.md — small files plus a one-line index mea | 221 |
+| [`codemap.js`](scripts/codemap.js) | let an AI locate the right file without reading every file. Pairs with the 200-line limit in .claude/rules/code-style.md — small files plus a one-line index mea | 222 |
 | [`detach-os.ps1`](scripts/detach-os.ps1) | detach-os.ps1 — desconecta seu projeto do repositório AI Dev Operating System | 161 |
 | [`detach-os.sh`](scripts/detach-os.sh) | detach-os.sh — desconecta seu projeto do repositório AI Dev Operating System | 157 |
 | [`devnet-seed.ts`](scripts/devnet-seed.ts) | Seeds devnet with demo markets for the app, on named tokens (Metaplex metadata) so they read like | 246 |

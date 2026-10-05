@@ -68,6 +68,17 @@ degraus, que é operação depois da abertura.
 A conferência padrão e o teste aleatório sobre a versão candidata. O ensaio de pausa e de retomada na devnet, pela
 carteira 2 de 3.
 
+## Herdado da Sprint 00
+
+Da revisão de segurança que fechou a Sprint 00 (`docs/sprints/sprint-00-setup.md`).
+
+- Atestar a origem do `.so` com `actions/attest-build-provenance`, num trabalho próprio, e conferir com `gh attestation verify`. O `SHA256SUMS` de hoje é escrito pelo mesmo trabalho que compila e só detecta download corrompido.
+- Fixar o SHA-256 do instalador da Solana e do binário do Anchor no workflow, e compilar o artefato de publicação num trabalho sem cache.
+- Compilar e publicar a variante `mainnet` com nome próprio (`brot_markets.mainnet.so`), com IDL por rede, e um roteiro de publicação que confere a rede antes de publicar.
+- Trocar ou reforçar a varredura de segredos com o `gitleaks` (recomendado em `docs/technical/registry-pick.md`): ela ainda não pega chave em base58, URL com usuário e senha, segredo em hexadecimal nem arquivo binário.
+- `CODEOWNERS` para `.github/`, `scripts/ci-secret-scan.js` e `.claude/hooks/`. A proteção da `main` não existe em repositório privado da conta gratuita: decidir entre mudar de plano e tornar o repositório público.
+- Decidir o registro do `bun.lock`, hoje `registry.npmmirror.com`. Teste: trocar o host pelo registro oficial numa branch e rodar `bun install --frozen-lockfile`.
+
 ## Riscos
 
 - O produto de carteira não ter espera pública para atualizar programa (C11).

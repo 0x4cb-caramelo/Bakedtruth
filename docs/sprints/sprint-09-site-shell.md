@@ -66,6 +66,14 @@ Sprint -1.
 Build e lint do app. Conferência nos dois temas e em largura de celular. Conectar e desconectar uma carteira na
 devnet. `ss -ltn` no servidor.
 
+## Herdado da Sprint 00
+
+Da revisão de segurança que fechou a Sprint 00 (`docs/sprints/sprint-00-setup.md`).
+
+- A rota de chat que veio do upstream (`app/app/api/chat/route.ts`) não entra no site novo como está: o limite de uso se contorna trocando um cabeçalho, não há teto de gasto, o contexto vem do cliente e o texto descreve o produto antigo. Decidir nesta sprint: sai, ou é reescrita.
+- Se ficar: chave exclusiva com limite de crédito no provedor; visitante identificado por `CF-Connecting-IP`; teto global por dia; contexto montado no servidor; texto para o produto de pote; aviso na interface de que a pergunta vai a um terceiro; e as nove perguntas de `.claude/rules/privacy-audit.md`.
+- Até a decisão, a variável `OPENROUTER_API_KEY` não é configurada em nenhum ambiente.
+
 ## Riscos
 
 - Esta versão do Next tem mudanças que quebram.

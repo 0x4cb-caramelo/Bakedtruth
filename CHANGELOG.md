@@ -129,6 +129,20 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
   com `git status`; clippy nos dois pacotes; e o trabalho "Repo", com o mapa de código, a coerência do projeto e a
   varredura de segredos sobre a branch (`scripts/ci-secret-scan.js`).
 - `docs/technical/registry-pick.md`: a etapa 4.3 do método. Dos 72 pacotes do catálogo, nenhum para instalar.
+- **Depois da revisão de segurança:** o artefato publicável (`.so` com SHA-256) sai só de push na `main` e só
+  depois dos testes; o IDL gerado tem um artefato de pré-visualização, sem binário; o `Cargo.lock` é imposto;
+  o IDL antigo é apagado antes do build; o clippy compila também a variante `mainnet`.
+- **Varredura de segredos:** reconhece par de chaves da Solana e chave de API em URL; o filtro de nome e o
+  `.gitignore` cobrem `.env.<fase>`, `*.env`, `*keypair*.json` e `id.json`; no CI ela olha commit por commit.
+- **No programa novo:** `init-if-needed` desligado e três lints de aritmética em `deny`.
+
+### Fixed — Sprint 00
+
+- `scripts/codemap.js`: a descrição de um arquivo dependia do fim de linha do checkout, e o `--check` falhava só
+  no Linux do CI. O conteúdo é normalizado antes da leitura.
+- `scripts/instruction-drift.js`: quatro nomes do `PRIVACY_PLAN.md` do upstream entram na lista de referências
+  externas, com o motivo.
+- `CLAUDE.md`: ganha a seção "State of the rewrite" e os comandos dos dois programas.
 - Decisões e riscos em [session-log](session-log/2026-10-05-sprint-00-setup.md).
 
 ### Changed — app (`app/`)
@@ -154,8 +168,9 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
   precisam de conteúdo novo.
 - **Servidor:** o projeto tem espaço próprio no servidor compartilhado, só com o código. Faltam o domínio na conta
   do Cloudflare, o túnel, o lugar do segundo serviço agendado e a decisão de onde compilar o programa.
-- **Fase 4:** resumo de produto, plano técnico e roteiro de sprints existem, em rascunho, e aguardam a aprovação
-  do fundador. Não foi feita a etapa 4.3, a escolha de pacotes do catálogo (`docs/technical/registry-pick.md`).
+- **Fase 4:** fechada. O fundador aprovou o resumo de produto, o plano técnico e o roteiro de sprints em 5 de
+  outubro, e a escolha de pacotes do catálogo (etapa 4.3) foi feita na Sprint 00.
+- **Sprints:** a 00 está concluída. A próxima é a 01, a prova do leitor de preço.
 - **Programa:** os nove leitores estão no repositório desde a Sprint 00, no programa antigo. Portá-los para o
   programa novo é a Sprint 03.
 - **`bun.lock`** aponta para `registry.npmmirror.com`, herdado do upstream. Falta decidir se volta ao registro
@@ -163,9 +178,11 @@ Catorze direções em HTML, CSS e JS sobre os mesmos dados sintéticos (`shared/
 - **Nome do site:** decidido em 4 de outubro, Brot Markets. O app e os protótipos ainda dizem "baked".
 - **BP v0.0.2: fechado.** As quatro partes existem e não há proposta em aberto. Faltam valores e nomes: o primeiro
   valor do teto global e quem assina a carteira com várias assinaturas. Falta conferir a tramitação da MP 1.394 no Congresso e ler o Decreto 13.128, de 2026. O próximo passo do método é a apresentação resumida do plano, e depois os documentos da Fase 4.
-- **Não verificado:** transações no app (conectar, comprar, vender, resolver), `bun test`, `cargo test` e o
-  `next build` de produção; o shader WebGPU da direção I (só a reserva em canvas foi vista).
-- **`CODEMAP.md`:** o gerador aponta 28 arquivos acima de 200 linhas e 96 sem cabeçalho `Purpose:`.
+- **Não verificado:** transações no app (conectar, comprar, vender, resolver) e o shader WebGPU da direção I (só a
+  reserva em canvas foi vista). `bun test`, `cargo test` e o `next build` de produção passaram a rodar, verdes, na
+  conferência automática desde a Sprint 00.
+- **`CODEMAP.md`:** o gerador aponta arquivos acima de 200 linhas e sem cabeçalho `Purpose:`, quase todos do
+  programa e do app antigos; os números atuais estão no topo do próprio mapa.
 
 ---
 

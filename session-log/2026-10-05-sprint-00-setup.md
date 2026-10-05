@@ -70,6 +70,20 @@ falhas, então o primeiro envio foi de propósito sem o `CODEMAP.md` regenerado 
 - **A pergunta 12 segue sem resposta:** quem guarda a chave de atualização na devnet e quem tem chave de equipe. A
   Sprint 02 depende disso.
 
+## Atualização: a conferência automática e a revisão de segurança
+
+- **O programa sem instrução compila**, e o IDL veio do artefato, com o SHA-256 conferido.
+- **As duas falhas de propósito saíram como pedido** (execução 37322085234). A do mapa de código continuou
+  depois da correção, e a causa era um defeito do gerador: ele lia os arquivos como estavam no disco, e num
+  checkout do Windows o fim de linha mudava a descrição de um arquivo. Foi corrigido.
+- **A revisão de segurança não achou nada crítico.** Foram aplicados nesta sprint: artefato publicável só da
+  `main` e só depois dos testes; `Cargo.lock` imposto; IDL antigo apagado antes do build; clippy com a variante
+  `mainnet`; varredura de segredos que reconhece chave da Solana e olha commit por commit; `init-if-needed`
+  desligado; lints de aritmética em `deny`. O que ficou para depois está no documento da sprint, com destino.
+- **A proteção da `main` não está disponível** em repositório privado da conta gratuita do GitHub. Um envio
+  direto à `main` não passa pela conferência antes de entrar.
+- **Conferência final verde:** execução 37325279961, commit `bdc9aa2`.
+
 ## Follow-ups
 
 - Fechar a sprint: IDL do programa novo commitado a partir do artefato, `CODEMAP.md` em dia, conferência automática
