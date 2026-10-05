@@ -29,7 +29,7 @@ Nada depois da Sprint 01. A próxima é a Sprint 02, o núcleo do pote (`docs/sp
 - **Apresentação resumida do plano:** escrita, não publicada. Falta o fundador decidir se e como publicar, e
   qual versão da seção de equipe vai na inscrição do hackathon.
 - **Coerência do BP v0.0.2:** há pontos que se contradizem entre as partes (critério de parada, tesouraria,
-  quando sai o token A, cabeçalhos que ainda dizem "rascunho"). Falta uma passada para resolvê-los.
+  quando sai o token A, cabeçalhos que ainda dizem "rascunho"). A Parte 4 ainda dá a Pyth na devnet como não verificada. Falta uma passada para resolvê-los.
 - **Direção de design:** Ledger² escura e clara, aprovada e documentada. O app ainda mostra a direção C; a troca
   é a Sprint -1 e as Sprints 09 a 13. Várias telas do protótipo mostram o modelo antigo e precisam de conteúdo novo.
 - **Nome:** Brot Markets. O app, os protótipos e o `package.json` da raiz ainda dizem "baked" ou `pred-provable`.
@@ -41,7 +41,8 @@ Nada depois da Sprint 01. A próxima é a Sprint 02, o núcleo do pote (`docs/sp
 - **Proteção da `main`:** indisponível em repositório privado da conta gratuita do GitHub.
 - **`bun.lock`** aponta para `registry.npmmirror.com`, herdado do upstream. Falta decidir se volta ao registro
   oficial do npm.
-- **Achados de segurança adiados:** na seção 7.1 do plano técnico e nas Sprints 02, 05, 09 e 16.
+- **Achados de segurança adiados:** os da Sprint 00, na seção 7.1 do plano técnico e nas Sprints 02, 05, 09 e 16;
+  os da Sprint 01, nas Sprints 03, 07 e 16.
 - **Regulação:** falta conferir a tramitação da MP 1.394 no Congresso e ler o Decreto 13.128, de 2026.
 - **BP v0.0.2:** fechado, sem proposta em aberto. Faltam o primeiro valor do teto global e os nomes de quem assina a
   carteira com várias assinaturas.
@@ -54,7 +55,7 @@ Nada depois da Sprint 01. A próxima é a Sprint 02, o núcleo do pote (`docs/sp
 ## [sprint-01] — 2026-10-05 — A Pyth serve na devnet: o leitor de preço lê contas reais
 
 Sprint 01 do roteiro (`docs/sprints/sprint-01-foundation.md`), mais o que entrou na `main` depois da tag
-`sprint-00`. Entrou por dois pull requests: o #5, com a regra de fechamento de interação, e o #6, com a sprint. A
+`sprint-00`. Entrou por dois pull requests: o #5, com a regra de fechamento de interação, e o #6, com a sprint e a apresentação resumida. A
 tag `sprint-01` aponta para o merge do #6. O porquê de cada decisão está em
 [session-log](session-log/2026-10-05-sprint-01-leitor-de-preco.md).
 

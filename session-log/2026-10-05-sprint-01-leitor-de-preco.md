@@ -19,12 +19,13 @@ A atualização das ferramentas locais foi abandonada antes de começar: a máqu
    mesmos endereços da rede principal, e o leitor lê as contas reais. A escolha entre abrir com quatro ou com cinco
    tipos de pergunta não se coloca.
 2. **O leitor aceita só a geração atualizada da Pyth** (receptor `rec2HH...`). A pesquisa achou o que o plano não
-   sabia: desde 26/8/2026 há duas gerações de programas na Solana. A atualizada é a recomendada para integração
+   sabia: há duas gerações de programas na Solana. A documentação data a atualização de 26/8/2026; os programas da
+   geração atualizada estão na rede desde 5/5/2026. A atualizada é a recomendada para integração
    nova e a que renova mais rápido.
 3. **O leitor foi escrito à mão (decisão T2 do plano técnico).** Confere dono, tamanho exato de 134 bytes,
    discriminador e verificação completa, e devolve preço, margem, expoente, horário e slot.
 4. **Verificação parcial é recusada**, e tamanho diferente de 134 bytes também.
-5. **Só a leitura entrou.** A idade do preço, a conferência do ativo contra a pergunta, a trava da aposta e o
+5. **Só a leitura entrou.** A idade do preço, passar ao leitor o ativo que a pergunta gravou (o leitor já recusa outro ativo; decisão 9), a trava da aposta e o
    "encostou no alvo" são da Sprint 03. Nada no programa chama o leitor ainda.
 6. **Os testes ficam em arquivo próprio** (`programs/brot-markets/tests/price_reader.rs`), porque com eles o
    leitor passava de 200 linhas.
@@ -83,10 +84,14 @@ A atualização das ferramentas locais foi abandonada antes de começar: a máqu
   mostrou, e eu conferi nas duas redes, que os programas da geração atualizada estão lá desde 5/5/2026. A nota foi
   corrigida e passou a separar o que a documentação diz do que a rede mostra.
 - Deixei um critério de pronto para depois sem levar a escolha ao Lucas na hora. Foi relatado no fechamento.
+- A revisão do coordenador barrou o fechamento por um ponto: a leitura no Surfpool tinha virado nota na Sprint 03,
+  e não critério de pronto de lá, então a obrigação podia sumir. Virou critério. Ela achou também texto velho em
+  cinco documentos e três afirmações da nota mais fortes que a medida; tudo corrigido antes do merge.
 
 ## Follow-up
 
-- Sprint 03: a leitura no Surfpool, a idade do preço, a conferência do ativo e o "encostou".
+- Sprint 03: a leitura no Surfpool (agora critério de pronto de lá), a idade do preço, ligar o ativo da pergunta ao
+  leitor e o "encostou". Sprints 07 e 16: a vigia sobre o receptor e quem o controla na rede principal.
 - Sprint 06: decidir, com medida de dias, se o keeper precisa publicar preço na rede principal.
 - Fundador: as duas perguntas acima.
 

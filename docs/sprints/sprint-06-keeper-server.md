@@ -29,6 +29,7 @@ segundos, resolve o que já pode, publica preço, acerta o que venceu a janela e
 - [ ] `GET /healthz` devolve a hora do último ciclo completo, o saldo de SOL e as pendências.
 - [ ] Uma pergunta da devnet é resolvida, acertada e paga sem ninguém acionar.
 - [ ] Depois de cada mudança no servidor, os serviços dos vizinhos seguem de pé.
+- [ ] Cada item da seção "Herdado da Sprint 01" está feito, ou decidido por escrito com o motivo.
 - [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
 
 ## Entregas
@@ -61,6 +62,8 @@ O keeper reserva, a vigia, `POST /restart` e os alertas por email (07). O indexe
 - **Q11:** o domínio. Sem ele o túnel não tem endereço; a opção provisória é um subdomínio já na conta.
 - **Q12:** o Ronaldo saber que o projeto vai para o servidor que ele também usa. A regra da casa pede aviso antes de
   instalar.
+- **Da Sprint 01:** obter a chave do serviço de preços da Pyth. Só é necessária se este serviço publicar preço;
+  depende da resposta sobre o limite de 30 segundos (Sprint 03) e da medida pedida em "Herdado da Sprint 01".
 
 ## Agentes e skills
 

@@ -31,6 +31,9 @@ toque; `resolve_question` grava o resultado e abre a janela; e a aposta trava qu
       dentro e fora do prazo.
 - [ ] Token do padrão novo (Token-2022) é recusado na pergunta de queima.
 - [ ] `programs/pred-provable` sai do workspace, num commit só, e `tests/pred-provable.test.ts` sai com ele.
+- [ ] A leitura de preço passa no Surfpool, dentro de uma instrução, com a versão fixada na conferência automática
+      e o SHA-256 do binário conferido (C4). É o critério que a Sprint 01 não cumpriu e trouxe para cá.
+- [ ] Cada item da seção "Herdado da Sprint 01" está feito, ou decidido por escrito com o motivo.
 - [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
 
 ## Entregas
@@ -91,15 +94,20 @@ Da prova do leitor de preço (`docs/sprints/sprint-01-foundation.md`; a pesquisa
   a frente (o programa declara o erro `UpdatesNotMonotonic`; o código não foi lido).
 - **A conta `preço − margem` precisa alargar os tipos.** `price` é `i64` e pode ser negativo; `conf` é `u64`. Usar
   `i128` ou `try_from`, e testar com valores extremos: preço negativo, margem máxima, expoente fora do esperado.
-- **Registrar no plano técnico o risco de quem controla a Pyth.** Na devnet uma chave comum atualiza o receptor;
-  na rede principal é um endereço derivado cujo controle não foi conferido. A governança do receptor troca a fonte
-  dos preços e o mínimo de assinaturas sem reinstalar o programa. O vigia sobre isso está na Sprint 07.
+- **O risco de quem controla a Pyth já está na seção 13 do plano técnico.** Na devnet uma chave comum atualiza o
+  receptor; na rede principal é um endereço derivado cujo controle não foi conferido. A governança do receptor
+  troca a fonte dos preços e o mínimo de assinaturas sem reinstalar o programa. O vigia está na Sprint 07 e a
+  conferência da rede principal na 16. Aqui, basta o desenho da pergunta de preço contar com esse risco.
 - **Uma conta de preço da rede principal entre as contas capturadas.** As três de hoje são da devnet.
 - **O horário de publicação pode estar à frente do relógio da rede.** Calcular a idade como "agora menos publicação"
   dá número negativo. A regra tem de tratar isso sem estouro e sem recusar preço bom.
-- **A idade máxima do preço como parâmetro, e não número fixo.** A conta patrocinada renova a cada 5 a 11 segundos
-  na rede principal e a cada 62 a 64 na devnet. Com 30 segundos fixos, nenhuma aposta em pergunta de preço entra na
-  devnet sem que o nosso serviço publique preço. Depende da resposta do fundador (seção acima).
+- **A idade máxima do preço como parâmetro, e não número fixo.** Numa medida de um a dois minutos, a conta
+  patrocinada renovou a cada 5 a 11 segundos na rede principal e a cada 62 a 64 na devnet, onde o preço teve de 5 a
+  64 segundos de idade. Com 30 segundos fixos, a aposta em pergunta de preço só entra na devnet numa parte de cada
+  ciclo, enquanto o preço ainda tem menos de 30 segundos, a não ser que o nosso serviço publique preço. Depende da
+  resposta do fundador (seção acima).
+- **Levantar quais ativos têm conta patrocinada na geração atualizada** (pergunta em aberto 2 da nota). Se a aposta
+  exigir a conta patrocinada, essa lista limita de quais ativos se abre pergunta.
 - **Só a geração atualizada da Pyth é aceita** (`rec2HH...`). A conta de preço que a pergunta grava na criação tem
   de ser dessa geração.
 

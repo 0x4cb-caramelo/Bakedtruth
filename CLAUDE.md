@@ -28,7 +28,8 @@ tokens), which is **frozen**: it stays in the workspace only until its readers a
 - The new program is `programs/brot-markets` (id `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN`). After Sprint 01
   it still has no instruction. It has one reader, `readers/price_touch.rs`, which parses a Pyth `PriceUpdateV2`
   of a feed the caller must name, and is called by nothing until Sprint 03. Its client library is `packages/sdk`; `app/lib` moves there in Sprint 05.
-- Pyth has two generations of programs on Solana since its 2026-08-26 upgrade. The reader trusts only the upgraded
+- Pyth has two generations of programs on Solana. Its documentation dates the Core upgrade 2026-08-26; the upgraded
+  programs have been on-chain since 2026-05-05. The reader trusts only the upgraded
   receiver (`rec2HH...`), and the price service (Hermes) now needs an API key. Addresses, layout, cadence and
   sources: `knowledge-base/tecnologia/pyth-leitor-de-preco.md`. Read it before touching the price reader.
 - New program code follows the house rules: one instruction and one reader per file, under 200 lines, a

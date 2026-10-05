@@ -28,6 +28,8 @@ carteira e outro RPC.
       leitura diferente; posição reservada há mais de 7 dias.
 - [ ] Com os dois keepers ligados, a segunda chamada da mesma instrução recebe erro e nada muda (teste).
 - [ ] Ensaio na devnet: parar `brot-keeper.service`, ver o reserva assumir e o email chegar.
+- [ ] A vigia alerta quando o receptor da Pyth é reinstalado ou a configuração dele muda (seção "Herdado da Sprint
+      01"), ou está decidido por escrito, com o motivo, que isso fica para depois.
 - [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
 
 ## Entregas

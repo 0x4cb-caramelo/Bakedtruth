@@ -2,7 +2,8 @@
 
 Levantamento de 5 de outubro de 2026. Responde às perguntas C1, C2, C3, C4 e C12 do plano técnico (seção 14.4), que
 o plano marcava como "a conferir". Tudo o que está em "Fatos" foi lido na fonte: a própria rede, por consulta
-direta, ou a documentação oficial da Pyth. O que é conclusão minha está em "Inferências".
+direta, ou a documentação oficial da Pyth. A exceção está marcada onde aparece: o que se sabe do Surfpool além da
+versão vem de fonte secundária (seção 1.6). O que é conclusão minha está em "Inferências".
 
 ## Veredito
 
@@ -15,11 +16,12 @@ Três coisas mudam em relação ao que o plano supunha, e nenhuma derruba o vere
 1. **A documentação da Pyth data de 26 de agosto de 2026 uma atualização do núcleo.** Há duas gerações de programas
    na Solana, e a recomendada para integração nova não é a que todo material antigo cita. Os programas da geração
    atualizada estão na rede desde 5 de maio de 2026 (seção 1.8); o que mudou em agosto, pelo que se vê de fora, foi
-   a documentação e o serviço de preços.
+   a documentação, o serviço de preços e, na devnet, uma reinstalação do receptor anterior em 31/8.
 2. **O serviço público de preços passou a exigir chave**, com teste gratuito e planos pagos. Só precisa dele quem
    publica preço por conta própria.
-3. **Na rede principal a conta de preço patrocinada renova a cada 5 a 11 segundos.** Isso pode dispensar o nosso
-   serviço de publicar preço, que era a parte que exigiria a chave. Na devnet ela renova a cada 62 a 64 segundos.
+3. **Na rede principal a conta de preço patrocinada renovou a cada 5 a 11 segundos,** numa medida de um a dois
+   minutos. Se isso se mantiver, pode dispensar o nosso serviço de publicar preço, que era a parte que exigiria a
+   chave. Na devnet ela renovou a cada 62 a 64 segundos.
 
 ## 1. Fatos
 
@@ -88,7 +90,9 @@ contas (o IDL, `pyth_solana_receiver` 0.2.1), e ela declara os mesmos campos, na
 
 ### 1.4 Frequência de atualização das contas patrocinadas
 
-Medido em 5/10/2026, lendo a conta de SOL a cada 8 a 10 segundos.
+Medido em 5/10/2026, lendo a conta de SOL a cada 8 a 10 segundos, por um a dois minutos em cada caso. Com leituras
+nesse espaçamento não se observa diretamente um intervalo menor que ele: os números da rede principal atualizada
+são a diferença entre o que leituras seguidas mostraram e valem como teto do intervalo real.
 
 | Rede | Geração | Intervalo entre atualizações | Idade do preço observada |
 |---|---|---|---|
@@ -111,8 +115,8 @@ Numa leitura da rede principal, o horário de publicação estava 2 segundos **�
   pedido de preço assinado sem chave. A listagem de identificadores responde sem chave.
 - **O endereço novo do serviço** para a geração atualizada é `pyth.dourolabs.app/hermes`, com a chave no cabeçalho
   `Authorization`. A chave se obtém no Pyth Terminal.
-- **A devnet aceita os mesmos preços assinados** que a rede principal: a configuração do receptor lista a mesma
-  fonte válida nas duas.
+- **A configuração do receptor lista a mesma fonte válida nas duas redes.** Que a devnet aceite os mesmos preços
+  assinados que a rede principal é inferência: não foi testado publicando um preço (seção 4).
 - **Há quem publique na devnet agora.** As 25 transações mais recentes do receptor anterior na devnet tinham entre
   0 e 28 segundos e vinham de pelo menos três pagadores diferentes.
 
@@ -122,7 +126,8 @@ Numa leitura da rede principal, o horário de publicação estava 2 segundos **�
   (fonte: API de lançamentos do repositório `txtx/surfpool`).
 - Binários publicados: Linux x64 e macOS. **Não há binário para Windows.**
 - Traz modelos de `PriceUpdateV2` para SOL/USD, BTC/USD, ETH/USD e ETH/BTC, e um sistema de cenários que regrava
-  contas ao longo do tempo (fonte: a skill de Solana instalada, `surfpool/overview.md`).
+  contas ao longo do tempo (fonte secundária e fora do repositório: a skill de Solana instalada na máquina, `surfpool/overview.md`; a
+  conferir no repositório do Surfpool na Sprint 03).
 - Se ele simula o stake de época: **não conferido**.
 
 ### 1.7 O relógio da rede (C12)
@@ -133,7 +138,8 @@ rede principal, zero. É uma amostra só, e não uma medida de desvio ao longo d
 ### 1.8 O que a própria rede diz dos programas
 
 Consulta direta às duas redes em 5/10/2026, depois da revisão adversarial da sprint: a conta de dados de cada
-programa guarda o slot da última instalação e quem pode atualizá-lo.
+programa guarda o slot da última instalação e quem pode atualizá-lo. A data de cada slot veio de `getBlockTime`. A
+conta de dados do receptor atualizado é `3UV7w2yTaqVcUAbWm1KUXdcE1Ziw8CfyyCpZvhKFkPfX`, nas duas redes.
 
 | Programa | Rede principal, última instalação | Devnet, última instalação |
 |---|---|---|
@@ -149,11 +155,12 @@ programa guarda o slot da última instalação e quem pode atualizá-lo.
   `Full`, nessa ordem. `PriceFeedMessage` tem `feedId`, `price` (i64), `conf` (u64), `exponent` (i32),
   `publishTime`, `prevPublishTime`, `emaPrice` e `emaConf`. O IDL é o que o programa declara, e não prova do
   código instalado; o código-fonte do receptor não foi lido.
-- **Qualquer pessoa posta um preço.** Em `postUpdate` assinam o pagador, a conta nova e o `writeAuthority`, todos
+- **Pelo IDL, qualquer pessoa posta um preço.** Em `postUpdate` assinam o pagador, a conta nova e o `writeAuthority`, todos
   escolhidos por quem chama. A lista de erros do receptor não tem erro de preço velho: se ele confere a idade do
   preço ao postar, **não conferido**; o leitor não conta com isso.
 - **O receptor tem instruções de governança** que trocam a fonte dos preços, o endereço do Wormhole e o mínimo de
-  assinaturas (`setDataSources`, `setWormholeAddress`, `setMinimumSignatures`), sem reinstalar o programa.
+  assinaturas (`setDataSources`, `setWormholeAddress`, `setMinimumSignatures`), sem reinstalar o programa. Quem pode chamá-las
+  (a autoridade de governança gravada na configuração): **não conferido**.
 - **Os códigos de rede**, usados pelo script de captura para não confundir as duas: rede principal
   `5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d`, devnet `EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG`.
 
@@ -181,7 +188,8 @@ programa guarda o slot da última instalação e quem pode atualizá-lo.
   menos publicação" recebe número negativo. A regra da Sprint 03 tem de tratar isso sem estouro e sem recusar preço
   bom.
 - **Depender da conta patrocinada é depender de um terceiro que paga por ela.** A documentação lista quais contas
-  são patrocinadas; a lista pode mudar.
+  são patrocinadas; a lista pode mudar. Não conferi se a lista lida cobre a geração atualizada (pergunta em aberto
+  2), e a página não ficou anotada nas fontes.
 - **A aposta e a prova do SIM deveriam aceitar contas diferentes.** Uma conta avulsa, postada por qualquer pessoa,
   pode trazer um preço legítimo e antigo. Se a aposta aceitar qualquer conta válida, quem aposta escolhe o preço
   mais velho que a regra admite, e a fresta de 30 segundos vira sempre a fresta inteira. A saída proposta pela
@@ -214,7 +222,12 @@ programa guarda o slot da última instalação e quem pode atualizá-lo.
 
 ## Fontes
 
-- Consultas diretas à devnet e à rede principal (`getAccountInfo`, `getSignaturesForAddress`), 5/10/2026.
+- Consultas diretas à devnet e à rede principal (`getAccountInfo`, `getSignaturesForAddress`, `getBlockTime`,
+  `getGenesisHash`), 5/10/2026.
+- O IDL que o receptor atualizado publica na devnet (`pyth_solana_receiver` 0.2.1), lido da conta de IDL do
+  programa em 5/10/2026.
+- Não anotadas: a página da documentação da Pyth com a frase "55 seconds heartbeat / 0.5% price deviation" e a
+  página que lista as contas patrocinadas. As duas afirmações ficam a reconferir.
 - Contas capturadas: `tests/fixtures/pyth-sol-usd-devnet.bin`, `pyth-btc-usd-devnet.bin` e
   `pyth-sol-usd-devnet-legacy.bin`, com o slot em `tests/fixtures/index.json`.
 - https://docs.pyth.network/price-feeds/core/upgrade/contracts

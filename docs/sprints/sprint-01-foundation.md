@@ -126,7 +126,8 @@ Surfpool simula o stake de época; medir a frequência das contas por mais de do
 ### Revisão adversarial
 
 Feita pelo `technical-security-red-team-agent` sobre o leitor, os testes, as contas capturadas e a nota. Nenhum
-achado crítico ou alto. Os fatos que ela trouxe sobre a Pyth foram conferidos de novo, direto nas duas redes, antes
+achado crítico ou alto para o que existe hoje (devnet, leitor sem instrução). Um deles sobe a alto na rede
+principal: quem controla o receptor da Pyth. Os fatos que ela trouxe sobre a Pyth foram conferidos de novo, direto nas duas redes, antes
 de entrarem na nota.
 
 | Achado | Gravidade | O que foi feito |
@@ -134,10 +135,28 @@ de entrarem na nota.
 | O leitor devolvia o preço de qualquer ativo, e quem chamasse podia esquecer de conferir | Média | Corrigido: o ativo esperado é parâmetro obrigatório, com erro próprio e teste |
 | Nenhum teste exercitava o leitor de bytes (`Cursor`) | Média | Corrigido: cinco testes diretos |
 | Aceitar qualquer conta válida na aposta deixa escolher o preço mais velho admitido | Média | Sprint 03, que decide o desenho. No plano técnico (3.4.8) e na seção "Herdado" da 03 |
-| Na devnet, uma chave comum controla a atualização do receptor | Baixa agora, alta na rede principal | Risco registrado na seção 13 do plano técnico; a vigia na Sprint 07; quem controla na rede principal, na Sprint 16 |
+| Na devnet, uma chave comum controla a atualização do receptor | Baixa na devnet, alta na rede principal | Risco registrado na seção 13 do plano técnico; a vigia na Sprint 07; quem controla na rede principal, na Sprint 16 |
 | Testes que passariam com o leitor errado | Baixa | Corrigido em parte: todos os níveis de verificação, conta zerada, bytes não lidos. Valores extremos e uma conta da rede principal, na Sprint 03 |
 | Contas capturadas trocáveis sem aviso | Baixa | Corrigido: SHA-256 no índice, teste, conferência da rede e do dono no script, `*.bin` marcado como binário |
 | A nota dizia que a atualização foi em 26/8, e os programas estão na rede desde 5/5 | Baixa | Corrigido: seção 1.8 da nota, com o que a rede mostra |
+
+### Revisão do coordenador
+
+Feita pelo `coordinator-agent` em 5/10/2026 sobre os documentos de fechamento, sem reler o código. Resultado:
+aprovada com ressalvas, e as correções entraram antes do merge.
+
+- **O ponto que impedia fechar:** a leitura no Surfpool estava na Sprint 03 só como nota herdada. Virou critério de
+  pronto de lá, e as Sprints 03, 06, 07 e 16 ganharam um critério que cobra os itens herdados.
+- **Texto velho** no plano técnico, no `CLAUDE.md` e no session-log; e três afirmações da nota de pesquisa mais
+  fortes que a medida (a frequência das contas, medida por um a dois minutos; a devnet aceitar os mesmos preços, que
+  é inferência; e o que se sabe do Surfpool, que vem de fonte secundária). Corrigidos.
+- **As duas perguntas novas para o fundador** ganharam recomendação, como as doze do plano técnico.
+
+**O que só fecha depois do merge.** O merge do pull request #6 na `main` e a tag `sprint-01`, que saem juntos. A
+execução da conferência automática na `main` e o artefato do programa ficam no GitHub, no commit da tag.
+
+**O que depende do fundador.** Esta sprint fecha com um critério não cumprido por decisão minha. Se ele discordar,
+a sprint reabre e a leitura no Surfpool é feita antes da Sprint 03.
 
 ### Retrospectiva
 

@@ -56,7 +56,7 @@ O que o repositório já fixa fica como está **[F]** (`CLAUDE.md`, `Cargo.toml`
 | Programa | Anchor `=1.1.2` (`anchor-lang`; `anchor-spl` com features padrão); Rust 1.89.0; Solana CLI 3.1.x | Mantida **[F]** |
 | Stake de validador | `solana-epoch-stake =3.0.0` | Mantida **[F]** |
 | Moeda | USDC clássico, endereço fixo por rede (`USDC_MINT`) | Mantida **[F]** |
-| Leitor de preço | Pyth, conta `PriceUpdateV2`, lida por leitor próprio | Nova **[DP]** **[AC]** |
+| Leitor de preço | Pyth, conta `PriceUpdateV2`, lida por leitor próprio | Nova **[DP]**. **Conferido na Sprint 01** |
 | Pacotes e testes | Bun 1.4.2; LiteSVM com `@solana/kit ~8.3.0` | Mantida **[F]** |
 | Testes com contas reais | Surfpool, versão a fixar | Nova **[DP]** **[AC]** |
 | Cliente da rede | `@anchor-lang/core ^1.2.0` com `@solana/web3.js ^1.99.0` | Mantida **[F]** |
@@ -74,7 +74,7 @@ Cada linha é **[DP]**.
 
 | Peça | Escolha | Alternativa descartada | Por quê |
 |---|---|---|---|
-| Leitor de preço | Escrito à mão, no estilo dos outros: confere dono, formato e cada campo, e é testado contra contas reais capturadas | A biblioteca da Pyth para Rust | Não foi lido se ela compila com `anchor-lang 1.1.2`, e o repositório já pagou por dependência fora de linha (`solana-epoch-stake` preso em 3.0.0 **[F]**). Revê-se depois da prova B1 |
+| Leitor de preço | Escrito à mão, no estilo dos outros: confere dono, formato e cada campo, e é testado contra contas reais capturadas | A biblioteca da Pyth para Rust | Não foi lido se ela compila com `anchor-lang 1.1.2`, e o repositório já pagou por dependência fora de linha (`solana-epoch-stake` preso em 3.0.0 **[F]**). **Revisto na Sprint 01 (T2): mantido à mão; a compilação da biblioteca não foi tentada** |
 | Tempo no programa | Data e hora (`Clock::unix_timestamp`) | Número de bloco, como hoje | R-07 fala em horas e dias; o bloco da devnet dura cerca de 235 ms, e não 400 **[F]** (`CLAUDE.md`) |
 | Serviços | Bun | Node com banco à parte | Já roda `@anchor-lang/core` e `web3.js` neste repositório **[F]** (`scripts/devnet*.ts`), traz SQLite embutido e se instala na pasta do usuário `brot` |
 | Banco | SQLite num arquivo | Postgres; ou nenhum banco | O Postgres do servidor é do outro projeto, e a regra é não mexer **[DF]**; um novo pediria contêiner. Sem banco não há classificação nem histórico (seção 3.5) |
@@ -326,7 +326,7 @@ anular, contestar, pausar e abrir pergunta seguem restritos à equipe. **[Q]** 1
 
 | Regra | Como |
 |---|---|
-| Conta aceita | `PriceUpdateV2` do programa receptor da Pyth, com verificação completa e o `feed_id` gravado na criação **[AC]** |
+| Conta aceita | `PriceUpdateV2` do receptor da Pyth da geração atualizada (`rec2HH...`), com exatamente 134 bytes, verificação completa e o `feed_id` gravado na criação. **Conferido na Sprint 01;** o receptor anterior e a verificação parcial são recusados |
 | Criação | Exige preço fresco, grava o expoente e recusa alvo já tocado |
 | Aposta | Preço com no máximo 30 segundos; recusa se `preço + margem de erro` alcança o alvo. Esses 30 segundos são a fresta que sobra |
 | SIM | `publish_time` dentro do prazo; `preço − margem de erro ≥ alvo`; margem de até 0,5% do preço; prova entregue em até 60 segundos da publicação |
@@ -741,8 +741,8 @@ Os riscos de negócio estão em P4, capítulo 8. Aqui, os deste plano.
 | Risco | Gravidade | O que reduz | Se acontecer |
 |---|---|---|---|
 | A Pyth não serve na devnet como o leitor precisa | Alta. **Afastado na Sprint 01: serve** | A prova B1 antes de tudo; o modelo de preço do Surfpool | Abrir com quatro tipos, ou voltar à decisão dos cinco (P1 §4.2) |
-| Quem controla a atualização e a governança do receptor da Pyth controla o que o leitor lê. Na devnet é uma chave comum; na rede principal, um endereço derivado cujo controle não foi conferido (Sprint 01) | Média na devnet, alta na rede principal | O leitor aceita um receptor só e um tamanho exato, então mudança de formato quebra a leitura em vez de ler errado; vigia sobre a instalação e a configuração do receptor (Sprint 07); saber quem controla a autoridade antes da rede principal (Sprint 16) | Pausar as perguntas de preço; a equipe anula na janela |
-| A conta patrocinada de preço é paga por terceiro e renova a cada 62 a 64 segundos na devnet (Sprint 01) | Média | Idade máxima como parâmetro; publicação própria pelo keeper, com a chave do serviço de preços | Sem preço fresco, a aposta em pergunta de preço é recusada; a pergunta segue aberta |
+| Quem controla a atualização e a governança do receptor da Pyth controla o que o leitor lê. Na devnet é uma chave comum; na rede principal, um endereço derivado cujo controle não foi conferido (Sprint 01) | Baixa na devnet, alta na rede principal | O leitor aceita um receptor só e um tamanho exato, então mudança de formato quebra a leitura em vez de ler errado; vigia sobre a instalação e a configuração do receptor (Sprint 07); saber quem controla a autoridade antes da rede principal (Sprint 16) | Pausar as perguntas de preço; a equipe anula na janela |
+| A conta patrocinada de preço é paga por terceiro e renovou a cada 62 a 64 segundos na devnet, numa medida de um a dois minutos (Sprint 01) | Média | Idade máxima como parâmetro; publicação própria pelo keeper, com a chave do serviço de preços | Sem preço fresco, a aposta em pergunta de preço é recusada; a pergunta segue aberta |
 | Toque curto não capturado; fresta de 30 segundos na aposta | Média | Leitura a cada 10 segundos; a regra escrita na pergunta | A equipe anula na janela se o serviço falhou |
 | O leitor de stake de validador nunca deu SIM em teste | Alta | Um SIM conferido na devnet antes de pergunta real | O tipo fica fechado; os outros quatro seguem |
 | Dois serviços com o mesmo código têm o mesmo defeito | Alta | Janela de 6 horas; segunda leitura por outro RPC | A equipe anula na janela |
@@ -799,7 +799,7 @@ e os nomes da pergunta 12.
 | # | Pergunta | Quando |
 |---|---|---|
 | T1 | Trazer `upstream/main` por merge, ou só os leitores e as contas capturadas | B0 |
-| T2 | Leitor de preço à mão ou com a biblioteca da Pyth; os números: idade máxima, prazo da prova, margem de erro, intervalo de publicação. **Decidido na Sprint 01: à mão. Os números ficam para a Sprint 03** | B1, B3 |
+| T2 | Leitor de preço à mão ou com a biblioteca da Pyth; os números: idade máxima, prazo da prova, margem de erro, intervalo de publicação. **Decidido na Sprint 01: à mão. Os números ficam para a Sprint 03.** Se o limite de 30 segundos vale também na devnet virou pergunta para o fundador (`docs/SPRINTS.md`, seção 5) | B1, B3 |
 | T3 | Tamanho do lote de pagamentos e o processamento de cada instrução | B4 |
 | T4 | `emit!` ou `emit_cpi!`; fuzzing dedicado | Antes da auditoria |
 | T5 | Provedores de RPC (um por keeper e o do repasse) e o serviço de email | B6 |
