@@ -11,17 +11,20 @@
   },
   "packageManager": "bun@1.4.2",
   "workspaces": [
-    "app"
+    "app",
+    "packages/*",
+    "services/*"
   ],
   "scripts": {
-    "build:program": "NO_DNA=1 anchor build && bun run --filter @pred-provable/app sync-idl",
+    "build:program": "NO_DNA=1 anchor build && bun run sync-idl",
+    "sync-idl": "bun run --filter @pred-provable/app sync-idl && mkdir -p packages/sdk/src/idl && cp target/idl/brot_markets.json target/types/brot_markets.ts packages/sdk/src/idl/",
     "test": "bun test tests/",
-    "test:rust": "cargo test -p pred-provable --features no-entrypoint",
+    "test:rust": "cargo test -p pred-provable --features no-entrypoint && cargo test -p brot-markets --features no-entrypoint",
     "deploy:devnet": "solana program deploy target/deploy/pred_provable.so --program-id target/deploy/pred_provable-keypair.json --keypair $HOME/.config/solana/pred-provable-devnet.json --url devnet",
     "smoke:devnet": "bun run scripts/devnet-smoke.ts",
     "seed:devnet": "bun run scripts/devnet-seed.ts",
     "dev": "bun --filter @pred-provable/app dev",
-    "lint": "prettier --check \"tests/**/*.ts\" \"scripts/**/*.ts\"",
+    "lint": "prettier --check \"tests/**/*.ts\" \"scripts/**/*.ts\" \"packages/**/*.ts\"",
     "test:os": "node scripts/run-tests.js",
     "self-test": "node scripts/os-self-test.js",
     "codemap": "node scripts/codemap.js",

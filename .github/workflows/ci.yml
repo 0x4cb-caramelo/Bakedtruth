@@ -79,18 +79,44 @@ jobs:
           cargo fmt --all -- --check
           bun run lint
 
-      - name: Build program and IDL
+      - name: Build programs and IDLs
         run: anchor build
 
-      - name: Check committed IDL is up to date
+      # The program is never built on the shared server (technical plan, section 10). What goes
+      # to a cluster is this artifact, after someone checks its SHA-256.
+      - name: Hash build artifacts
+        run: |
+          mkdir -p artifacts
+          cp target/deploy/*.so target/idl/*.json target/types/*.ts artifacts/
+          (cd artifacts && sha256sum -- * | tee SHA256SUMS)
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: programs-${{ github.sha }}
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 30
+
+      # `git status` rather than `git diff`: a generated file that was never committed is
+      # untracked, and `git diff` does not see it.
+      - name: Check committed IDLs are up to date
         run: |
           cp target/idl/pred_provable.json target/types/pred_provable.ts app/lib/idl/
-          git diff --exit-code -- target/idl target/types app/lib/idl \
-            || { echo "::error::IDL is stale. Run 'bun run build:program' and commit the result."; exit 1; }
+          mkdir -p packages/sdk/src/idl
+          cp target/idl/brot_markets.json target/types/brot_markets.ts packages/sdk/src/idl/
+          stale="$(git status --porcelain -- target/idl target/types app/lib/idl packages/sdk/src/idl)"
+          if [ -n "$stale" ]; then
+            echo "$stale"
+            echo "::error::IDL is stale. Run 'bun run build:program' and commit the result."
+            exit 1
+          fi
 
       # Runs after the build because the Rust tests embed target/deploy/pred_provable.so.
       - name: Clippy
-        run: cargo clippy -p pred-provable --all-targets --features no-entrypoint -- -D warnings
+        run: |
+          cargo clippy -p pred-provable --all-targets --features no-entrypoint -- -D warnings
+          cargo clippy -p brot-markets --all-targets --features no-entrypoint -- -D warnings
 
       - name: Typecheck tests
         run: bunx tsc --noEmit
@@ -100,6 +126,27 @@ jobs:
 
       - name: Rust tests (anchor-litesvm)
         run: bun run test:rust
+
+  repo:
+    name: Repo
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The secret scan compares the branch with its base.
+          fetch-depth: 0
+
+      - name: Code map is up to date
+        run: node scripts/codemap.js --check
+
+      - name: Project coherence (os-self-test)
+        run: node scripts/os-self-test.js
+
+      - name: Secret scan over the branch
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+        run: node scripts/ci-secret-scan.js "$BASE"
 
   app:
     name: App
