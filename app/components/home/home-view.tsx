@@ -1,74 +1,69 @@
 "use client";
 
-import { Landmark, ScanEye, ShieldHalf, TriangleAlert, type LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { TriangleAlert } from "lucide-react";
 
+import { BRAND } from "@/lib/brand";
 import { useClock, useMarkets } from "@/lib/hooks";
-import { closeSlot, phaseOf, statusOf } from "@/lib/view";
+import { statusOf } from "@/lib/view";
 import { Browse } from "@/components/home/browse";
-import { Featured } from "@/components/home/featured";
-import { ClosingSoon, TrendingList } from "@/components/home/sidebar";
+import { HeroMeter } from "@/components/home/hero-meter";
+import { usePublishTape } from "@/components/tape-context";
 
-const PRINCIPLES: { icon: LucideIcon; title: string; body: string }[] = [
-  {
-    icon: ScanEye,
-    title: "Resolution is a read",
-    body: "Each market reads one on-chain account. No oracle, no committee, no dispute window.",
-  },
-  {
-    icon: Landmark,
-    title: "Backed 1:1 in USDC",
-    body: "Every YES sits on one USDC in the market's vault. Winners redeem 1:1, any time after.",
-  },
-  {
-    icon: ShieldHalf,
-    title: "Guarded trading",
-    body: "Trading halts the moment a goal is met, so nobody buys a known winner at a stale price.",
-  },
-];
+const button =
+  "inline-flex items-center px-4 py-2.5 font-display text-xl leading-none shadow-hard transition hover:-translate-x-px hover:-translate-y-px active:translate-x-[3px] active:translate-y-[3px] active:shadow-hard-sm";
 
 export function HomeView() {
   const markets = useMarkets();
   const clock = useClock();
+  usePublishTape(markets.data);
   const all = markets.data ?? [];
   const active = all.filter((e) => statusOf(e.account) === "active");
-  // Biggest vaults first: the markets with the most at stake.
-  const byVault = [...(active.length ? active : all)].sort((a, b) => (b.vault > a.vault ? 1 : b.vault < a.vault ? -1 : 0));
-  const closing = active
-    .filter((e) => phaseOf(e.account, clock) === "trading")
-    .sort((a, b) => closeSlot(a.account, clock) - closeSlot(b.account, clock))
-    .slice(0, 4);
+  // The market with the most at stake leads the page.
+  const top = [...(active.length ? active : all)].sort((a, b) =>
+    b.vault > a.vault ? 1 : b.vault < a.vault ? -1 : 0,
+  )[0];
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-14">
       {markets.error && !markets.data && (
-        <div className="flex items-center gap-3 rounded-2xl border border-no/30 bg-no/5 p-4 text-sm text-no">
+        <div className="flex items-center gap-3 border-2 border-no bg-no/10 p-4 text-sm text-no">
           <TriangleAlert className="size-5 shrink-0" />
           Could not load markets from the RPC: {markets.error.message}
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-        {markets.data ? (
-          <Featured entries={byVault.slice(0, 7)} clock={clock} />
-        ) : (
-          <div className="h-[420px] animate-pulse rounded-2xl border border-line bg-surface" />
-        )}
-        <div className="space-y-6">
-          <TrendingList entries={byVault.slice(0, 5)} />
-          <ClosingSoon entries={closing} clock={clock} />
+      <section className="grid grid-cols-1 items-end gap-10 pt-24 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:pt-32">
+        <div>
+          <h1 className="font-display text-[clamp(44px,5.4vw,78px)] leading-[.92]">
+            {BRAND.headline[0]}
+            <br />
+            <span className="text-crust">{BRAND.headline[1]}</span>
+          </h1>
+          <p className="mt-4 max-w-md text-base text-muted">{BRAND.sub}</p>
+          <div className="mt-7 flex flex-wrap gap-4">
+            <Link href="/#browse" className={`${button} bg-crust text-[#1a0f02]`}>
+              Browse markets
+            </Link>
+            <Link href="/#how" className={`${button} border-2 border-line bg-surface text-ink`}>
+              How it works
+            </Link>
+          </div>
         </div>
-      </div>
+        {top ? <HeroMeter entry={top} /> : <div className="h-64 animate-pulse border-2 border-line bg-surface" />}
+      </section>
 
       <div id="how" className="grid scroll-mt-28 grid-cols-1 gap-4 md:grid-cols-3">
-        {PRINCIPLES.map(({ icon: Icon, title, body }) => (
-          <div key={title} className="flex gap-4 rounded-2xl border border-line bg-surface p-5">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand/15 text-brand">
-              <Icon className="size-5" />
-            </span>
-            <div>
-              <p className="font-semibold text-ink">{title}</p>
-              <p className="mt-1 text-sm leading-relaxed text-muted">{body}</p>
-            </div>
+        {BRAND.principles.map((p, i) => (
+          <div
+            key={p.title}
+            data-perch={`principle-${i}`}
+            data-perch-x="0.88"
+            data-perch-size="0.75"
+            className="border-2 border-line bg-surface p-4"
+          >
+            <h3 className="font-display text-[26px] leading-none text-ink">{p.title}</h3>
+            <p className="mt-1.5 text-sm text-muted">{p.body}</p>
           </div>
         ))}
       </div>

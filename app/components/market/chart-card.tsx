@@ -7,6 +7,7 @@ import { priceSeries, type Activity } from "@/lib/history";
 import type { MarketEntry } from "@/lib/hooks";
 import type { Side } from "@/lib/market";
 import { stakeEpoch, statusOf, yesPrice } from "@/lib/view";
+import { BRAND } from "@/lib/brand";
 import { Card } from "@/components/primitives";
 import { PriceChart, type Range } from "@/components/price-chart";
 
@@ -55,7 +56,7 @@ export function ChartCard({
     <Card className="p-5 sm:p-6">
       <div className="mb-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
         <span className="flex items-center gap-2 font-semibold">
-          <span className="size-2.5 rounded-full bg-yes" />
+          <span className="size-2.5 bg-yes" />
           Yes
           <span className="text-lg tabular-nums text-yes">{formatBps(yes)}</span>
           {change !== null && change !== 0 && (
@@ -65,7 +66,7 @@ export function ChartCard({
           )}
         </span>
         <span className="text-xs text-dim">{price.source === "pool" ? "pool price" : "sponsor sale price"}</span>
-        <span className="ml-auto font-display text-2xl font-bold text-ink/90">Provable</span>
+        <span className="ml-auto font-display text-2xl text-crust">{BRAND.name}</span>
       </div>
 
       {history ? (
@@ -107,7 +108,7 @@ export function ChartCard({
             type="button"
             disabled={!open}
             onClick={() => onPick("yes")}
-            className="h-10 flex-1 rounded-full border border-yes/60 px-5 text-sm font-bold text-yes transition hover:bg-yes/10 disabled:opacity-40 sm:w-32 sm:flex-none"
+            className="h-10 flex-1 border-2 border-yes px-5 text-sm font-bold text-yes transition hover:bg-yes/10 disabled:opacity-40 sm:w-32 sm:flex-none"
           >
             Yes {Math.round(yes / 100)}¢
           </button>
@@ -115,7 +116,7 @@ export function ChartCard({
             type="button"
             disabled={!open}
             onClick={() => onPick("no")}
-            className="h-10 flex-1 rounded-full border border-no/60 px-5 text-sm font-bold text-no transition hover:bg-no/10 disabled:opacity-40 sm:w-32 sm:flex-none"
+            className="h-10 flex-1 border-2 border-no px-5 text-sm font-bold text-no transition hover:bg-no/10 disabled:opacity-40 sm:w-32 sm:flex-none"
           >
             No {Math.round((10_000 - yes) / 100)}¢
           </button>

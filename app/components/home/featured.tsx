@@ -11,6 +11,7 @@ import { questionText } from "@/lib/metric";
 import { closeSlot, KIND_INFO, kindOf, phaseOf, statusOf, yesPrice } from "@/lib/view";
 import { Card, KindTile, OutcomeRow, ProgressLine, StatusPill } from "@/components/primitives";
 import { ActivityFeed } from "@/components/activity-feed";
+import { BRAND } from "@/lib/brand";
 import { PriceChart } from "@/components/price-chart";
 import { marketHref } from "@/components/home/market-tile";
 
@@ -22,11 +23,11 @@ function FeaturedChart({ entry, clock, history }: { entry: MarketEntry; clock: C
     <div className="flex min-h-[260px] min-w-0 flex-1 flex-col">
       <div className="mb-2 flex items-center justify-between text-sm">
         <span className="flex items-center gap-2 font-semibold">
-          <span className="size-2 rounded-full bg-yes" />
+          <span className="size-2 bg-yes" />
           Yes <span className="tabular-nums text-yes">{formatBps(price.bps)}</span>
           <span className="text-xs font-normal text-dim">{price.source === "pool" ? "pool price" : "sale price"}</span>
         </span>
-        <span className="font-display text-xl font-bold text-ink/90">Provable</span>
+        <span className="font-display text-xl text-crust">{BRAND.name}</span>
       </div>
       {history ? (
         <div className="min-h-0 flex-1">
@@ -53,7 +54,7 @@ export function Featured({ entries, clock }: { entries: MarketEntry[]; clock: Cl
         <button
           type="button"
           onClick={() => setIndex(i === 0 ? entries.length - 1 : i - 1)}
-          className="grid size-8 place-items-center rounded-full border border-line hover:border-muted hover:text-ink"
+          className="grid size-8 place-items-center border border-line hover:border-muted hover:text-ink"
           aria-label="Previous market"
         >
           <ChevronLeft className="size-4" />
@@ -64,7 +65,7 @@ export function Featured({ entries, clock }: { entries: MarketEntry[]; clock: Cl
         <button
           type="button"
           onClick={() => setIndex(i + 1)}
-          className="grid size-8 place-items-center rounded-full border border-line hover:border-muted hover:text-ink"
+          className="grid size-8 place-items-center border border-line hover:border-muted hover:text-ink"
           aria-label="Next market"
         >
           <ChevronRight className="size-4" />

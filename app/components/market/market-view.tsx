@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ExternalLink, Link2, SearchX, TriangleAlert } from "lucide-react";
 
 import { explorerAddress } from "@/lib/config";
@@ -17,6 +17,7 @@ import { Details } from "@/components/market/details";
 import { PositionCard } from "@/components/market/position-card";
 import { ProofCard } from "@/components/market/proof-card";
 import { TradeCard, type Balances } from "@/components/market/trade-card";
+import { usePublishTape } from "@/components/tape-context";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 export function MarketView({ address, initialSide }: { address: string; initialSide: lib.Side }) {
@@ -25,6 +26,9 @@ export function MarketView({ address, initialSide }: { address: string; initialS
   const clock = useClock();
   const { publicKey } = useWallet();
   const [side, setSide] = useState<lib.Side>(initialSide);
+  // A stable array, or publishing it would re-render this view in a loop.
+  const tape = useMemo(() => (market.data ? [market.data] : undefined), [market.data]);
+  usePublishTape(tape, true);
 
   const account = market.data?.account;
   const keys = account ? marketKeys(market.data!.address, account.metricAccount) : null;
@@ -110,7 +114,9 @@ export function MarketView({ address, initialSide }: { address: string; initialS
               <h1 className="mt-1 font-display text-4xl font-bold leading-[1.02] tracking-tight text-ink sm:text-5xl">
                 {questionText(account, entry.reading, entry.name)}
               </h1>
-              <p className="mt-1 text-sm text-muted">{goalText(account, entry.reading)} · resolved by an on-chain read</p>
+              <p className="mt-1 text-sm text-muted">
+                {goalText(account, entry.reading)} · resolved by an on-chain read
+              </p>
             </div>
             <div className="hidden shrink-0 gap-1 sm:flex">
               <button
@@ -135,13 +141,32 @@ export function MarketView({ address, initialSide }: { address: string; initialS
             </div>
           </header>
 
+          {/* The proof leads: it is what the market resolves on. The padding is the mascot's ledge. */}
+          <div
+            className="pt-20"
+            data-perch="proof"
+            data-perch-x="0.86"
+            data-perch-dy="80"
+            data-perch-size="1.3"
+            data-perch-pose="point"
+            data-perch-say="Read the account."
+          >
+            <ProofCard entry={entry} clock={clock} onDone={refresh} />
+          </div>
           <ChartCard entry={entry} clock={clock} history={history.data} onPick={pick} />
-          <ProofCard entry={entry} clock={clock} onDone={refresh} />
           <Details entry={entry} clock={clock} history={history.data} />
         </div>
 
         <aside id="trade" className="scroll-mt-28 space-y-4 lg:sticky lg:top-24">
-          <TradeCard entry={entry} clock={clock} side={side} onSide={setSide} balances={balances} onDone={refresh} />
+          <div
+            className="pt-20"
+            data-perch="trade"
+            data-perch-x="0.22"
+            data-perch-dy="80"
+            data-perch-pose={side === "yes" ? "deadpan" : "skeptical"}
+          >
+            <TradeCard entry={entry} clock={clock} side={side} onSide={setSide} balances={balances} onDone={refresh} />
+          </div>
           <PositionCard entry={entry} clock={clock} balances={balances} onDone={refresh} />
         </aside>
       </div>

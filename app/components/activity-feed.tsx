@@ -33,7 +33,7 @@ export function ActivityFeed({
         const market = marketOf(event).toBase58();
         return (
           <li key={`${signature}-${i}`} className="flex items-start gap-3 py-3 text-sm">
-            <span className={`mt-1.5 size-2 shrink-0 rounded-full ${TONE[tone]}`} />
+            <span className={`mt-1.5 size-2 shrink-0 ${TONE[tone]}`} />
             <div className="min-w-0 flex-1">
               <p className="text-ink/90">
                 {actor && <span className="font-mono text-muted">{shortAddress(actor.toBase58())} </span>}

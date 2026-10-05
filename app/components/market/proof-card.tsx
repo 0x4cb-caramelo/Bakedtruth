@@ -8,7 +8,7 @@ import { marketKeys, resolveIx } from "@/lib/instructions";
 import { goalText, ruleText, type Reading } from "@/lib/metric";
 import { useProgram } from "@/lib/program";
 import { stakeEpoch, statusOf } from "@/lib/view";
-import { AddressLink, Card } from "@/components/primitives";
+import { AddressLink, Blocks, Card } from "@/components/primitives";
 
 /** What `resolve` would do now, as far as the app can tell; the program has the final word. */
 function nextResolution(entry: MarketEntry, clock: ClockInfo | null) {
@@ -53,12 +53,7 @@ function ReadingView({ reading }: { reading?: Reading }) {
           </p>
         </div>
       </div>
-      <div className="h-2.5 rounded-full bg-line">
-        <div
-          className={`h-2.5 rounded-full transition-[width] duration-700 ${reading.met ? "bg-yes" : "bg-gradient-to-r from-warn/70 to-warn"}`}
-          style={{ width: `${Math.max(2, pct)}%` }}
-        />
-      </div>
+      <Blocks pct={pct} n={24} done={reading.met} label={`${pct}% of the way to the goal`} className="h-6" />
       <p className="text-sm text-muted">
         {reading.met ? "Goal met." : `${pct}% of the way to the target.`}
         {reading.note && <span className="block text-xs text-dim">{reading.note}</span>}

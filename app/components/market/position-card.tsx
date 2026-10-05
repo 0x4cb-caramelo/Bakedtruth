@@ -18,7 +18,7 @@ function Action({ label, onClick, busy, tone = "brand" }: { label: string; onCli
       onClick={onClick}
       disabled={busy}
       className={`mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold transition disabled:opacity-60 ${
-        tone === "yes" ? "bg-yes text-page hover:brightness-110" : "bg-brand text-white hover:bg-brand-strong"
+        tone === "yes" ? "bg-yes text-page hover:brightness-110" : "bg-crust text-page shadow-hard-sm hover:brightness-110"
       }`}
     >
       {busy && <Loader2 className="size-4 animate-spin" />}

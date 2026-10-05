@@ -215,7 +215,7 @@ export function TradeCard({
               }`}
             >
               {m.toUpperCase()}
-              {mode === m && <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-ink" />}
+              {mode === m && <span className="absolute inset-x-0 -bottom-px h-0.5 bg-ink" />}
             </button>
           ))}
         </div>
@@ -284,7 +284,7 @@ export function TradeCard({
           onClick={() => void submit()}
           disabled={disabled !== null || pending !== null}
           className={`flex h-12 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-bold transition disabled:cursor-not-allowed disabled:bg-raised disabled:text-dim ${
-            mode === "buy" ? (side === "yes" ? "bg-yes text-page hover:brightness-110" : "bg-no text-page hover:brightness-110") : "bg-brand text-white hover:bg-brand-strong"
+            mode === "buy" ? (side === "yes" ? "bg-yes text-page hover:brightness-110" : "bg-no text-page hover:brightness-110") : "bg-crust text-page shadow-hard-sm hover:brightness-110"
           }`}
         >
           {pending && <Loader2 className="size-4 animate-spin" />}
@@ -294,7 +294,7 @@ export function TradeCard({
         <button
           type="button"
           onClick={() => setVisible(true)}
-          className="h-12 w-full rounded-xl bg-brand text-[15px] font-bold text-white transition hover:bg-brand-strong"
+          className="h-12 w-full rounded-xl bg-crust text-[15px] font-bold text-page shadow-hard-sm transition hover:brightness-110"
         >
           Connect wallet to trade
         </button>
