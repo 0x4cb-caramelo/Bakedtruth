@@ -68,15 +68,16 @@ pagam a curadoria e o destaque. No lançamento, de 20 a 30 parceiros ganham um m
 
 ## 6. Como a gente ganha
 
-10% do lado que perdeu. **(novo)** A taxa sai do lado que perdeu.
+**(novo, pedido do fundador em 6/10/2026)** Simples: 3,5% de cada pote, cobrados quando o mercado é resolvido. Num
+pote de 1.000 dólares, 35 ficam com o Brot e 965 são divididos entre quem acertou.
 
-Compare com a taxa fixa sobre o pote todo: se você entra num favorito de 99% e acerta, a taxa fixa te devolve 98
-centavos por dólar. Você acertou e perdeu dinheiro. No Brot, você recebe 1 dólar e 1 centavo.
+E tem uma segunda receita: 30% de cada patrocínio.
 
-E o modelo rende mais quando o mercado está dividido: num pote meio a meio, a casa fica com 5%. **(novo)** O nosso
-negócio é a pergunta que divide opinião, porque é ela que enche o pote.
-
-**(novo)** São duas receitas: os 10% do lado perdedor em todo mercado, e 30% de cada patrocínio.
+> **Atenção, antes de apresentar.** O plano de negócio decidiu outra regra: 10% do lado perdedor (Parte 1, §3.3). O
+> slide passou a dizer 3,5% do pote por pedido do fundador, e o plano ainda não foi mudado. Com taxa sobre o pote
+> todo, quem entra num lado que tem mais de 96,5% do pote recebe menos do que pôs, mesmo acertando: com 99% do pote
+> no lado vencedor, volta 0,975 por dólar. Foi por causa disso que o plano trocou de regra. Se a banca perguntar,
+> a resposta honesta é essa.
 
 ## 7. Mercado
 
@@ -84,9 +85,13 @@ Por que agora? Mercados de previsão movimentaram 21,7 bilhões de dólares em 3
 de um quinto disso, quase 1 bilhão por mês, e são a porta de entrada de 40% dos novos usuários.
 
 **(novo)** Dentro da Solana isso mal começou: o World, na Phantom, fez 15 milhões em setembro. E a nossa conta fecha
-com 209 mil dólares por mês, que é 1,4% do que o World já faz.
+com cerca de 221 mil dólares por mês, que é 1,4% do que o World já faz.
 
-O público já está aqui: 80 milhões de carteiras no pump.fun, gente que já entra em narrativa todo dia.
+O público já está aqui: 80 milhões de carteiras no pump.fun, gente que já entra em narrativa todo dia. (Este dado
+saiu da tela no enxugamento e ficou só na fala.)
+
+> A conta dos 221 mil é a do plano, com a taxa de 3,5%: `5.500 ÷ (3,5% × 75% × 95%)`. Com a taxa do plano, de 10%
+> do lado perdedor, o número era 209 mil.
 
 ## 8. Crescimento e roteiro
 
@@ -115,12 +120,12 @@ galera!
 As três perguntas em que, na banca de 6/10/2026, a resposta saiu pior que o slide.
 
 **"Como é essa taxa, afinal?"**
-10% do lado que perdeu. Num pote meio a meio, isso dá 5% do pote. Num pote 90 a 10, se o favorito vence, dá 1%; na
-média, 1,8%. É diferente da Polymarket, que cobra por uma fórmula sobre o preço.
+3,5% de cada pote, cobrados na resolução. Num pote de 1.000, são 35. É diferente da Polymarket, que cobra por uma
+fórmula sobre o preço.
 
-**"Vocês ficam com 30% do patrocínio e mais 10%?"**
-São duas coisas. Os 10% vêm do lado perdedor de todo mercado. Os 30% são do patrocínio, e pagam a curadoria e o
-destaque; os outros 70% viram prêmio para a comunidade de quem patrocina.
+**"Vocês ficam com 30% do patrocínio e mais a taxa?"**
+São duas coisas. Os 3,5% vêm de todo pote. Os 30% são do patrocínio, e pagam a curadoria e o destaque; os outros
+70% viram prêmio para a comunidade de quem patrocina.
 
 **"E o token?"**
 Não faz parte do que estamos apresentando. Se um dia houver um, não dá direito a receita nem a voto, e a gente não
@@ -128,8 +133,8 @@ promete preço nem recompra.
 
 ## O que este roteiro não diz, de propósito
 
-- **"Quem acerta sempre ganha" e "quem acerta nunca perde".** Em pote de um lado só, quem entra depois do primeiro
-  paga 1% (plano, Parte 1, §3.4).
+- **"Quem acerta sempre ganha" e "quem acerta nunca perde".** Com 3,5% sobre o pote todo, quem acerta num favorito
+  muito forte recebe menos do que pôs. Não prometer o contrário.
 - **Exemplos com número de holders, carteiras ativas ou TVL.** O programa não lê nenhum dos três.
 - **Recompra e queima de token.** O plano a deixou em espera.
 - **Superteam, Jupiter e o caso da MicroStrategy.** Foram sugeridos pela banca e ainda não foram conferidos ou
