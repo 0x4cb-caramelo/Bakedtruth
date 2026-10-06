@@ -48,6 +48,7 @@
   --cta-ring: conic-gradient(from var(--spin), #2b4fc2 0 62%, #dfe8ff 80%, #2b4fc2 100%);
   --say-bg: #f3dfbd;
   --say-fg: #1c1408;
+  --pet-shadow: rgba(0, 0, 0, 0.5);
   --error: #fa9aac;
   --shadow: none;
   --r: 10px;
@@ -84,6 +85,7 @@
   --cta-ring: conic-gradient(from var(--spin), #1f43b0 0 62%, #c9d8ff 80%, #1f43b0 100%);
   --say-bg: #131a26;
   --say-fg: #fff;
+  --pet-shadow: rgba(19, 26, 38, 0.28);
   --error: #c0243f;
   --shadow: 0 1px 2px rgba(19, 26, 38, 0.05), 0 10px 24px -14px rgba(19, 26, 38, 0.18);
 }
@@ -347,37 +349,85 @@ main {
   background: var(--panel);
   box-shadow: var(--shadow);
 }
-.pet {
-  position: absolute;
-  right: 18px;
-  top: -62px;
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
+/* Baked, the mascot (mascot.js). It floats over the page and never takes a click away from what is under it. */
+.bk-pet {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 80;
+  pointer-events: none;
+  will-change: transform;
+  opacity: 0;
+  transition: opacity 0.25s;
 }
-.pet img {
-  width: 132px;
-  height: 84px;
-  object-fit: contain;
-  animation: breathe 3.4s ease-in-out infinite;
+.bk-pet.is-on {
+  opacity: 1;
+}
+.bk-pet-flip,
+.bk-pet-squash,
+.bk-pet-body {
+  position: absolute;
+  inset: 0;
+}
+.bk-pet-flip {
+  transition: transform 0.16s;
+}
+.bk-pet-squash,
+.bk-pet-body {
   transform-origin: 50% 100%;
 }
-.say {
-  margin-bottom: 44px;
-  padding: 5px 9px;
+.bk-pet-body {
+  animation: bk-pet-breathe 3.4s ease-in-out infinite;
+}
+.bk-pet-body img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  user-select: none;
+}
+.bk-pet-body img.is-on {
+  opacity: 1;
+}
+.bk-pet-shadow {
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  bottom: -2%;
+  height: 8%;
+  border-radius: 50%;
+  background: var(--pet-shadow);
+  filter: blur(3px);
+}
+.bk-pet-say {
+  position: absolute;
+  left: 50%;
+  bottom: 102%;
+  transform: translate(-50%, 6px);
+  padding: 7px 10px;
   border-radius: var(--r-sm);
   background: var(--say-bg);
   color: var(--say-fg);
   font: 600 12px/1.2 var(--body);
+  white-space: nowrap;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transition:
+    opacity 0.18s,
+    transform 0.18s;
 }
-@keyframes breathe {
+.bk-pet-say.is-on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.bk-pet-say.is-below {
+  bottom: auto;
+  top: 104%;
+}
+@keyframes bk-pet-breathe {
   50% {
-    transform: scaleY(1.035);
+    transform: scaleY(1.03) scaleX(0.988);
   }
 }
 .kicker {
@@ -624,8 +674,11 @@ footer nav {
 }
 @media (prefers-reduced-motion: reduce) {
   .cta,
-  .pet img {
+  .bk-pet-body {
     animation: none;
+  }
+  .bk-pet-flip {
+    transition: none;
   }
   body {
     transition: none;

@@ -59,13 +59,27 @@ html.js .frame {
 html.js .frame.on {
   display: block;
 }
-html.js .slide {
+html.js .scaler {
   position: absolute;
   left: 0;
   top: 0;
-  margin: 0;
+  width: 1920px;
+  height: 1080px;
   transform: scale(var(--scale));
   transform-origin: 0 0;
+}
+html.js .slide {
+  margin: 0;
+}
+
+/* The closing slide's arrow comes in with the finale (deck-motion.js). Where nothing moves, it is simply there. */
+html.stack [data-arrow] {
+  opacity: 1 !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-arrow] {
+    opacity: 1 !important;
+  }
 }
 
 /* A phone held upright: every slide, one under the other, each as wide as the screen. */
@@ -173,11 +187,17 @@ html.js.stack .bar {
     margin: 0;
     break-after: page;
   }
+  html.js .scaler {
+    position: static;
+    transform: none;
+  }
   .slide,
   html.js .slide {
     margin: 0;
-    transform: none;
     break-after: page;
+  }
+  [data-arrow] {
+    opacity: 1 !important;
   }
   .bar,
   html.js .bar {

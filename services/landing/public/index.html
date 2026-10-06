@@ -23,6 +23,7 @@
     <link rel="icon" type="image/png" href="img/favicon.png" />
     <link rel="preload" href="fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
     <script src="app.js"></script>
+    <script type="module" src="mascot.js"></script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -53,7 +54,7 @@
         <section class="hero">
           <div>
             <p class="eyebrow">Coming soon</p>
-            <h1>Prediction markets the chain resolves.</h1>
+            <h1 data-perch="hero" data-perch-x="0.9" data-perch-say="Prove it.">Prediction markets the chain resolves.</h1>
             <p class="lede">
               Bet USDC on YES or NO. Winners split the pool. The result is read from a Solana account, so nobody
               types it in: no vote, no judge, no opinion.
@@ -67,7 +68,7 @@
                   <label for="company">Company</label>
                   <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
                 </div>
-                <button class="cta" type="submit"><span>Notify me</span></button>
+                <button class="cta" type="submit" data-mood="tapping"><span>Notify me</span></button>
               </div>
               <p class="fine">
                 By sending, you agree that we keep your email to tell you when Brot Markets opens. Nothing else is
@@ -82,16 +83,19 @@
             </div>
           </div>
 
-          <aside class="read" aria-label="Example question">
-            <button class="pet" type="button" data-pet aria-label="Baked, the mascot. Press for a remark.">
-              <span class="say" data-say>It's a read. Not a vote.</span>
-              <img src="img/baked-skeptical.webp" alt="" width="132" height="84" />
-            </button>
+          <aside
+            class="read"
+            aria-label="Example question"
+            data-perch="read"
+            data-perch-x="0.84"
+            data-perch-pose="skeptical"
+            data-perch-say="It's a read. Not a vote."
+          >
             <p class="kicker">Example · not a live market</p>
             <h2>Does SOL touch $300 by Dec 31?</h2>
             <div class="sides">
-              <div class="side yes">Yes <b>30%</b></div>
-              <div class="side no">No <b>70%</b></div>
+              <div class="side yes" data-mood="approve">Yes <b>30%</b></div>
+              <div class="side no" data-mood="skeptical">No <b>70%</b></div>
             </div>
             <div class="bar"><i></i></div>
             <dl class="facts">
@@ -109,7 +113,13 @@
         </section>
 
         <section class="principles" aria-label="How it works">
-          <article class="principle">
+          <article
+            class="principle"
+            data-perch="chain"
+            data-perch-x="0.84"
+            data-perch-pose="point"
+            data-perch-say="I only believe accounts."
+          >
             <div class="ic" aria-hidden="true">1</div>
             <h3>The chain answers</h3>
             <p>
@@ -117,12 +127,18 @@
               settles.
             </p>
           </article>
-          <article class="principle">
+          <article class="principle" data-perch="pool" data-perch-x="0.84" data-perch-say="One pool. No order book.">
             <div class="ic" aria-hidden="true">2</div>
             <h3>One pool per question</h3>
             <p>USDC on YES or NO, in one pool. Winners split it in proportion to what they put in. No order book.</p>
           </article>
-          <article class="principle">
+          <article
+            class="principle"
+            data-perch="wallet"
+            data-perch-x="0.84"
+            data-perch-pose="approve"
+            data-perch-say="Fine. It checks out."
+          >
             <div class="ic" aria-hidden="true">3</div>
             <h3>Paid to your wallet</h3>
             <p>You connect a wallet and nothing else: no sign-up. Winnings arrive on their own, with no claim button.</p>
@@ -130,13 +146,31 @@
         </section>
 
         <section class="suggest">
-          <p><b>Have a question the chain can answer?</b> Tell us on X. The team reads every suggestion.</p>
-          <a class="ghost" href="https://x.com/brotmarkets" rel="noopener">Suggest on @brotmarkets</a>
+          <p>
+            <b>Have a question the chain can answer?</b> Post it on X. The button opens a draft with an example: swap
+            in your own question. The team reads every suggestion.
+          </p>
+          <!-- The draft: Question for @brotmarkets: / "Does SOL touch $300 by Dec 31?" / The chain can answer it.
+               #BrotMarkets. A test checks the mention and the hashtag stay in the link. -->
+          <a
+            class="ghost"
+            data-mood="point"
+            target="_blank"
+            rel="noopener"
+            href="https://x.com/intent/post?text=Question%20for%20%40brotmarkets%3A%0A%0A%22Does%20SOL%20touch%20%24300%20by%20Dec%2031%3F%22%0A%0AThe%20chain%20can%20answer%20it.%20%23BrotMarkets"
+            >Suggest a question on X</a
+          >
         </section>
       </div>
     </main>
 
-    <footer>
+    <footer
+      data-perch="footer"
+      data-perch-x="0.9"
+      data-perch-size="0.85"
+      data-perch-pose="tired"
+      data-perch-say="Not audited. Stay sharp."
+    >
       <div class="wrap">
         <p>
           Brot Markets is in a test phase on Solana devnet, with test tokens. The program is not audited. Nothing on

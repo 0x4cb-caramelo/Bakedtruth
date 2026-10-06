@@ -1,6 +1,6 @@
 /**
- * Purpose: browser script of the "coming soon" site: picks the theme before first paint, sends the waitlist forms and
- *          gives the mascot its remarks.
+ * Purpose: browser script of the "coming soon" site: picks the theme before first paint and sends the waitlist forms.
+ *          The mascot is a separate script, mascot.js.
  * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-05
  *
  * Theme rule, from docs/product/DESIGN-DIRECTION.md: ?theme=dark|light wins, then the stored choice, then light.
@@ -26,14 +26,6 @@
     waitlist_closed: "The list is closed for now. Follow @brotmarkets on X instead.",
     fallback: "Couldn't save that. Try again in a moment.",
   };
-  const QUIPS = [
-    "It's a read. Not a vote.",
-    "Prove it.",
-    "I only believe accounts.",
-    "Not audited. Stay sharp.",
-    "Devnet. Test money.",
-    "Still baking.",
-  ];
 
   async function postJson(url, body) {
     const res = await fetch(url, {
@@ -93,20 +85,8 @@
     });
   }
 
-  function wirePet() {
-    const pet = document.querySelector("[data-pet]");
-    const say = document.querySelector("[data-say]");
-    if (!pet || !say) return;
-    let index = 0;
-    pet.addEventListener("click", () => {
-      index = (index + 1) % QUIPS.length;
-      say.textContent = QUIPS[index];
-    });
-  }
-
   document.addEventListener("DOMContentLoaded", () => {
     wireTheme();
-    wirePet();
     const join = document.querySelector("form[data-join]");
     if (join) {
       wireForm(join, "/api/leads", (form) => {
@@ -114,6 +94,8 @@
         form.hidden = true;
         done.hidden = false;
         done.focus();
+        // The mascot (mascot.js) listens for this and approves.
+        document.dispatchEvent(new CustomEvent("baked:say", { detail: "Fine. You're in." }));
       });
     }
     const leave = document.querySelector("form[data-leave]");

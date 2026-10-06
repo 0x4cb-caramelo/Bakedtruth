@@ -14,10 +14,15 @@
   if (!slides.length) return;
 
   const frames = slides.map((slide, i) => {
+    // frame (the size of the scaled slide) > scaler (carries the scale) > slide. The slide itself has no transform,
+    // so deck-motion.js can animate it without undoing the scale.
     const frame = document.createElement("div");
     frame.className = "frame";
+    const scaler = document.createElement("div");
+    scaler.className = "scaler";
     slide.before(frame);
-    frame.append(slide);
+    scaler.append(slide);
+    frame.append(scaler);
     slide.setAttribute("role", "group");
     slide.setAttribute("aria-roledescription", "slide");
     slide.setAttribute("aria-label", `${i + 1} of ${slides.length}: ${slide.dataset.label || ""}`);
@@ -33,6 +38,7 @@
   const clamp = (n) => Math.min(slides.length - 1, Math.max(0, n));
   const fromHash = () => clamp((parseInt(location.hash.slice(1), 10) || 1) - 1);
   let index = fromHash();
+  let shown = -1;
 
   function layout() {
     const stack = upright.matches;
@@ -43,13 +49,20 @@
     deck.style.setProperty("--h", `${HEIGHT * scale}px`);
   }
 
-  function show(target) {
+  /** Shows one slide and tells deck-motion.js about it. `reason` is "init" on load and "nav" afterwards. */
+  function show(target, reason = "nav") {
+    const previousIndex = shown;
     index = clamp(target);
+    if (index === shown) return;
+    shown = index;
     frames.forEach((frame, i) => frame.classList.toggle("on", i === index));
+    slides.forEach((slide, i) => slide.toggleAttribute("data-deck-active", i === index));
     count.textContent = `${index + 1} / ${slides.length}`;
     prev.disabled = index === 0;
     next.disabled = index === slides.length - 1;
     if (location.hash !== `#${index + 1}`) history.replaceState(null, "", `#${index + 1}`);
+    const detail = { slide: slides[index], index, previousIndex, reason };
+    document.dispatchEvent(new CustomEvent("slidechange", { detail }));
   }
 
   const KEYS = {
@@ -117,5 +130,5 @@
   upright.addEventListener("change", layout);
 
   layout();
-  show(index);
+  show(index, "init");
 })();

@@ -153,11 +153,20 @@ O fundador montou um deck próprio, em inglês, para o hackathon Colosseum, e pe
 avalie a qualidade e conteúdo, e coloque online no site também depois de arrumado e melhorado no endereço /pitch".
 O deck é a apresentação; este documento continua sendo a fonte, e o deck não deve dizer o que o plano não diz.
 
-O deck revisado tem 13 slides e está em `services/landing/public/pitch/`. O roteiro de fala está em
-`services/landing/pitch-notes.md`. A avaliação e a lista do que mudou estão em
-`session-log/2026-10-05-pagina-em-breve-e-pitch.md`.
+O deck está em `services/landing/public/pitch/`, e o roteiro de fala em `services/landing/pitch-notes.md`. Houve
+duas versões no mesmo dia:
 
-**Onde o deck e o plano não batem.** Três pontos, todos a resolver na passada de coerência do plano:
+- **Primeira (13 slides):** os 12 do fundador, revisados, mais um de problema. A avaliação e a lista do que mudou
+  estão em `session-log/2026-10-05-pagina-em-breve-e-pitch.md`.
+- **Segunda (8 slides), a que está no ar:** o fundador refez o deck e pediu a troca ("o pitch foi atualizado, o novo
+  arquivo está em docs\technical\Brot Markets Pitch v2.html, coloque lá no lugar do /pitch no site"). Ficou mais
+  curto e mais voltado a projetos parceiros: saíram os slides de como funciona, tipos de pergunta, modelo de negócio,
+  segurança e roteiro; entrou um slide de problema dele, com três concorrentes pelo nome. O que foi ajustado e
+  conferido está em `session-log/2026-10-05-mascote-na-pagina-e-deck-v2.md`.
+
+**Onde a primeira versão do deck e o plano não batiam.** Três pontos. A segunda versão não traz nenhum dos três (o
+mercado do $LAPTOP, a contagem de fundadores e o prazo da rede principal saíram da tela), e todos os números que ela
+mostra constam na Parte 2 do plano. A tabela fica como registro:
 
 | Ponto | O deck diz | O plano diz |
 |---|---|---|
@@ -193,23 +202,25 @@ linha, com a recomendação de quem o revisou.
 | Registro de riscos | | | | Em geral, não publicar |
 | Equipe | | | | Dado pessoal. Não há consentimento registrado |
 
-**O que o deck mostra, linha por linha.** A recomendação é de quem revisou o deck. A decisão é do fundador.
+**O que o deck mostra, linha por linha.** Vale para a segunda versão, de oito slides, que está no ar. A recomendação
+é de quem revisou o deck. A decisão é do fundador.
 
 | Seção | O que o deck mostra | Recomendação |
 |---|---|---|
-| Em uma linha, solução, como funciona | Slides 1, 3, 4 e 5. Regra do produto, exemplo do SOL a 300 dólares, os cinco tipos de pergunta | Público. Falta o aviso de fase de testes: só o slide 12 diz "Devnet". O deck está em inglês, o que reduz, e não elimina, a dúvida do art. 16 da MP 1.394 |
-| Problema | Slide 2, novo. A plataforma aparece sem nome, com três números do plano | Público |
-| Mercado e fontes | Slide 8. World, Phantom e Polymarket com nome; três números de terceiros | Público, depois de conferir as três fontes na origem. Hoje duas são de segunda mão |
-| Por que nós | Slide 10. "Myriad's volume drop −94%" e "Opinion fell 81%" | **Trocar antes de abrir.** São dois concorrentes com nome ao lado de um ponto fraco. Sugestão: "two points-driven platforms lost 81% and 94% of their volume" |
-| Modelo de negócio: taxa e patrocínio | Slide 6: 10% do lado perdedor, média de 3,70%. Slide 7: faixas de 500, 1.500 e 5.000 dólares, 70/30, 20 a 30 parceiros | Publicar o deck é anunciar a taxa e as faixas. Decidir se é a hora |
-| Tokens | Slide 10, um cartão: token no pump.fun, sem direito na empresa, taxa de criador para prêmios | **Tirar do público** até a avaliação jurídica (P3 §7.1) |
-| Projeções e economia | Slide 9: custo de 5.500 por mês, equilíbrio em 208,6 mil de volume, mês 9, 7.500 antes do dinheiro real | **Restrito.** Serve para jurado e investidor, por link. Em página aberta vira promessa cobrada depois. O slide já diz que é modelo |
-| Roteiro | Slide 12: "Capped mainnet targeted for month 2" | Público, com a ressalva que já está na tela: só abre com auditoria, duas de três e teto |
+| Em uma linha, solução | Slides 1 e 3. A regra do produto: só abre pergunta cuja resposta está numa conta de Solana | Público. **Nenhum slide diz mais que é fase de testes** (na primeira versão o roteiro dizia "Devnet"). Pôr o aviso antes de abrir (P1 §4.7). O deck está em inglês, o que reduz, e não elimina, a dúvida do art. 16 da MP 1.394 |
+| Problema | Slide 2, do fundador. Polymarket, World (na Phantom) e PNP **pelo nome**, cada um com a forma como resolve: voto de token em 4 a 6 dias, chave da empresa, dois modelos de linguagem | As três afirmações constam no plano (P2 §3.2), com fonte, e estão ditas sem adjetivo. Ainda assim é concorrente com nome ao lado de um ponto fraco, e o portão pedia manter sem nome. **Decidir antes de abrir** |
+| Mercado e fontes | Slide 6. Polymarket, Kalshi e pump.fun com nome; sete números de terceiros, todos na Parte 2 do plano como fato de segunda mão; "~$0.9B" é estimativa nossa, e a tela diz isso | Público, depois de conferir cada fonte na origem |
+| Por que nós | Slide 7. "Myriad's volume drop −94%" e "Opinion fell 81%" | **Trocar antes de abrir.** São dois concorrentes com nome ao lado de um ponto fraco. Sugestão: "two points-driven platforms lost 81% and 94% of their volume" |
+| Modelo de negócio: taxa e patrocínio | Slide 5: 10% do lado perdedor, média modelada de 3,70%. Slide 4: faixas de 500, 1.500 e 5.000 dólares, 70/30, 20 a 30 parceiros com uma pergunta grátis | Publicar o deck é anunciar a taxa e as faixas. Decidir se é a hora |
+| Tokens | Slide 7, um cartão: token no pump.fun, sem direito na empresa, taxa de criador para prêmios. Slide 6: "80M pump.fun wallets" como público-alvo | **Tirar o cartão do público** até a avaliação jurídica (P3 §7.1) |
+| Chamada a parceiros | Slide 8: "Let's build your startup's question together", vagas limitadas a 20 a 30 projetos, código QR para `x.com/brotmarkets` (conferido: aponta para lá) | É uma oferta comercial pública. Por link, para quem recebe a apresentação, está no lugar certo |
+| Projeções, economia, roteiro | A segunda versão não traz. Saíram o custo mensal, o ponto de equilíbrio e o prazo da rede principal | Nada a decidir |
 | Tração, captação, valuation, riscos | O deck não traz | Nada a decidir |
-| Equipe | Slides 1 e 13: "Lucas · Founder". Slides 9 e 11: "3 founders" | O nome é do próprio fundador e foi ele quem o pôs. "3 founders" diverge do que vai na inscrição do hackathon: alinhar |
+| Equipe | Nenhum nome e nenhuma contagem de fundadores na tela. "I'm Lucas, founder" está só no roteiro de fala, que não é publicado | Nada a decidir |
 
-**Resumo da recomendação.** Manter o link direto como está, para jurados e investidores. Para a versão aberta,
-tirar o slide 9 e o cartão do token, e trocar os nomes do slide 10.
+**Resumo da recomendação.** Manter o link direto como está, para jurados, parceiros e investidores. Para a versão
+aberta: pôr o aviso de fase de testes, tirar o cartão do token, trocar os nomes do slide 7 e decidir sobre os nomes
+do slide 2.
 
 **As cinco perguntas da regra de privacidade.**
 
