@@ -52,6 +52,11 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 - **O endereço `brot.markets` está no ar desde 5/10/2026**, pelo túnel próprio do projeto, com HTTPS obrigatório. O
   que foi criado e como desfazer: `knowledge-base/tecnologia/servidor-e-dominio.md`, seção 2.1. Falta conferir se o
   país do visitante chega ao servidor e o que o Cloudflare registra dos visitantes.
+- **O Cloudflare tenta injetar o script de estatísticas dele nas páginas** (visto em 5/10/2026). A política de
+  conteúdo do site bloqueia, então nada é medido, mas fica um erro no console de cada visitante. Desligar na zona
+  espera o de acordo do fundador.
+- **Lista de espera sem cópia fora do servidor**, por decisão do fundador em 5/10/2026 ("por enquanto não precisa").
+  Também não há aviso quando entra um email novo.
 - **Portão de redação do deck:** o fundador mandou publicar, e falta aprovar linha por linha o que vai a público e
   dizer quem mantém o deck. Até lá ele fica só por link. A recomendação está no `PITCH.md`.
 - **Site provisório, pendências:** idioma (está em inglês, por escolha provisória; L-01 segue aberta); um email de

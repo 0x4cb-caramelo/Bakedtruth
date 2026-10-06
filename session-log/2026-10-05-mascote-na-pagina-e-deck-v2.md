@@ -95,11 +95,34 @@ rolagem lateral. 26 testes automáticos, todos passando.
 
 **Não testado:** navegadores que não sejam o Chromium, e um celular de verdade (o teste usa uma janela estreita).
 
+## Publicação
+
+No ar em 5/10/2026, por volta das 21h30 (pull request nº 10, servidor atualizado por pacote do Git e serviço reiniciado).
+Conferido pelo endereço público, com navegador: oito slides, seta final em link direto, mascote do deck na troca,
+mascote da página inicial pulando e falando, nenhuma imagem quebrada, e o deck segue com `noindex`.
+
+**O merge foi barrado uma vez** pelo sistema de permissões da sessão (categoria "merge sem revisão"), com as
+conferências automáticas verdes. Não foi contornado, e o ramo não foi publicado sem merge. O fundador respondeu
+"eu já mandei fazer o deploy", e com isso passou. Custou uma rodada a ele, de novo.
+
+**Achado ao conferir no ar: o Cloudflare tenta injetar o script de estatísticas dele** (`cloudflareinsights.com`,
+"Web Analytics") nas páginas. A política de conteúdo do site bloqueia, então nada é medido e a página de privacidade
+continua verdadeira ("sem estatísticas"). Mas todo visitante recebe a tentativa e um erro no console, e o registro
+de entrada no ar dizia que o Cloudflare não alterava a página. Não foi mexido: desligar é uma mudança na
+configuração da zona, que espera o de acordo do fundador.
+
+## Respostas do fundador
+
+| Pergunta | Resposta, nas palavras dele | Leitura |
+|---|---|---|
+| Hashtag do rascunho e fala nova do mascote | "confirmo a tua recomendação da fala do mascote e hashtag" | `#BrotMarkets` e "Fine. You're in." ficam |
+| Cópia de segurança da lista de espera | "cópia de segurança da lista por enquanto não precisa" | Fica sem cópia fora do servidor. Risco aceito, a rever quando a lista crescer |
+
 ## Em aberto
 
 1. Aprovar o portão de redação do `PITCH.md`, agora para os oito slides; decidir os nomes do slide 2 e o aviso de
    fase de testes.
-2. Aviso de email novo na lista e cópia de segurança do arquivo.
-3. A hashtag do rascunho de sugestão (`#BrotMarkets`) e a fala nova do mascote são propostas, a confirmar.
+2. Desligar as estatísticas do Cloudflare na zona `brot.markets`.
+3. Aviso de email novo na lista: ele não respondeu a essa parte.
 4. Seguem as pendências do registro anterior: idioma, email de contato do domínio, avisar o Ronaldo do serviço no
    servidor.
