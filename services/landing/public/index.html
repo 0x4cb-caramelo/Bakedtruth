@@ -22,9 +22,11 @@
     <link rel="canonical" href="https://brot.markets/" />
     <link rel="icon" type="image/png" href="img/favicon.png" />
     <link rel="preload" href="fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
-    <script src="app.js"></script>
-    <script type="module" src="mascot.js"></script>
-    <link rel="stylesheet" href="styles.css" />
+    <!-- Cloudflare tells browsers to keep scripts and styles for hours. Raise "v" here, in privacy.html and in
+         404.html whenever one of these files changes, so a returning visitor never gets a new page with old files. -->
+    <script src="app.js?v=2"></script>
+    <script type="module" src="mascot.js?v=2"></script>
+    <link rel="stylesheet" href="styles.css?v=2" />
   </head>
   <body>
     <div class="strip">

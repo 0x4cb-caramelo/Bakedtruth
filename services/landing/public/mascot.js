@@ -8,8 +8,9 @@
  *   data-perch-size="0.8"  scale here     data-perch-pose="skeptical"  resting pose     data-perch-say="Prove it."
  * Mood markup: data-mood="approve" changes the pose while the pointer is over that element.
  */
-import { createBody } from "./mascot-body.js";
-import { createSenses } from "./mascot-senses.js";
+// The "v" matches the one in index.html: raise them together when a mascot file changes.
+import { createBody } from "./mascot-body.js?v=2";
+import { createSenses } from "./mascot-senses.js?v=2";
 
 const SIZE = 84;
 const DWELL_MS = 170; // how long the pointer must favour a perch before the hop

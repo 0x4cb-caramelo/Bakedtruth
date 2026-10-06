@@ -11,10 +11,12 @@
 <link rel="icon" type="image/png" href="/img/favicon.png">
 <link rel="preload" href="fonts/ibm-plex-mono-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ibm-plex-sans-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="deck.css">
+<!-- Cloudflare tells browsers to keep scripts and styles for hours. Raise "v" on the three lines below whenever one of
+     these files changes, so a returning visitor never gets the new slides with the old stage. -->
+<link rel="stylesheet" href="deck.css?v=2">
 <!-- deck-motion.js goes first: it has to be listening when deck.js announces the slide the page opened on. -->
-<script src="deck-motion.js" defer></script>
-<script src="deck.js" defer></script>
+<script src="deck-motion.js?v=2" defer></script>
+<script src="deck.js?v=2" defer></script>
 </head>
 <body>
 <!-- Slide design and copy by the founder (1920 x 1080 canvas, inline styles kept as authored). The speaking notes are

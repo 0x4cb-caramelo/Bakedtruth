@@ -16,7 +16,7 @@ const deck = read("pitch/index.html");
 
 /** Local files a page asks for through src="" and href="", resolved from the page's own folder. */
 function localFiles(html, folder) {
-  const found = [...html.matchAll(/\s(?:src|href)="([^"#?]+)"/g)].map((match) => match[1]);
+  const found = [...html.matchAll(/\s(?:src|href)="([^"#?]+)(?:\?v=\d+)?"/g)].map((match) => match[1]);
   return found
     .filter((ref) => !/^[a-z]+:/.test(ref) && ref !== "/" && ref !== "/privacy")
     .map((ref) => (ref.startsWith("/") ? ref.slice(1) : join(folder, ref)));
@@ -47,7 +47,27 @@ test("the mascot has an image for every pose the page and the scripts ask for", 
   assert.ok(asked.length >= 6, "the page sets poses on its perches and moods");
   for (const pose of asked) assert.ok(poses.includes(pose), `the page asks for an unknown pose: ${pose}`);
   assert.ok([...home.matchAll(/data-perch="/g)].length >= 3, "the page gives the mascot places to stand");
-  assert.match(home, /<script type="module" src="mascot\.js"><\/script>/);
+  assert.match(home, /<script type="module" src="mascot\.js\?v=\d+"><\/script>/);
+});
+
+test("every script and style is asked for with a version, and the pages agree on it", () => {
+  // Cloudflare tells browsers to keep these files for hours. Without the version, a returning visitor gets the new
+  // page with the old script and style, which is how the mascot went missing on the day it shipped.
+  const pages = [home, read("privacy.html"), read("404.html"), deck];
+  const versions = new Set();
+  for (const page of pages) {
+    const refs = [...page.matchAll(/\s(?:src|href)="([^"]+\.(?:js|css))(\?v=(\d+))?"/g)];
+    assert.ok(refs.length >= 2, "the page loads its script and its style");
+    for (const [, file, , version] of refs) {
+      assert.ok(version, `${file} has no version`);
+      versions.add(version);
+    }
+  }
+  for (const [, , version] of read("mascot.js").matchAll(/from "\.\/mascot-[a-z]+\.js(\?v=(\d+))?"/g)) {
+    assert.ok(version, "mascot.js imports its parts with a version");
+    versions.add(version);
+  }
+  assert.equal(versions.size, 1, `one version everywhere, found: ${[...versions].join(", ")}`);
 });
 
 test("the landing page keeps to its content policy: no inline style and no inline script", () => {
@@ -72,8 +92,8 @@ test("the deck has eight slides, its motion script loads before the stage and th
   ]);
   assert.match(deck, /<span data-count aria-live="polite">1 \/ 8<\/span>/);
   // deck.js announces the opening slide as it runs: the listener in deck-motion.js has to exist by then.
-  assert.ok(deck.indexOf('src="deck-motion.js"') < deck.indexOf('src="deck.js"'), "deck-motion.js comes first");
-  assert.ok(deck.indexOf('src="deck-motion.js"') > 0);
+  assert.ok(deck.indexOf('src="deck-motion.js?') < deck.indexOf('src="deck.js?'), "deck-motion.js comes first");
+  assert.ok(deck.indexOf('src="deck-motion.js?') > 0);
   for (const pose of [0, 1, 2, 3]) assert.match(deck, new RegExp(`<img data-pose="${pose}" src="img/`));
   for (const part of ["data-badge", "data-arrow", "data-lid", "data-spark"]) assert.ok(deck.includes(part), part);
   assert.ok(!/src="[0-9a-f]{8}-[0-9a-f-]{27}"/.test(deck), "no image id from the original export is left");
