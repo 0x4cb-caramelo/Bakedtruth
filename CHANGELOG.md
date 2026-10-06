@@ -42,6 +42,10 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Changed
 
+- **`/pitch2` enxuto, a pedido do fundador em 6/10/2026:** cerca de 39% menos texto na tela (de 789 para 482
+  palavras), sem a frase das faixas no slide de patrocínio, e o slide de receita passa a dizer uma taxa simples de
+  **3,5% de cada pote**. O ponto de equilíbrio do slide de mercado foi recalculado pela conta do plano (cerca de 221
+  mil por mês). **O plano de negócio ainda diz 10% do lado perdedor**; ver o bloco "Em aberto".
 - **Deck em `/pitch` trocado pela segunda versão do fundador**, de oito slides, com a animação que ela trazia: entrada
   de cada slide, o mascote correndo na troca e o final do último slide. Dois ajustes de texto foram repetidos da
   primeira revisão (slide 5) e o roteiro de fala foi refeito. Segue só por link.
@@ -70,6 +74,11 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   Também não há aviso quando entra um email novo.
 - **Portão de redação do deck:** o fundador mandou publicar, e falta aprovar linha por linha o que vai a público e
   dizer quem mantém o deck. Até lá ele fica só por link. A recomendação está no `PITCH.md`.
+- **A taxa no `/pitch2` diverge do plano.** O fundador pediu para o deck dizer 3,5% do pote ("voltar ao projeto
+  anterior que era simplesmente 3%, e aumente para 3.5%"). O plano (Parte 1, §3.3) decidiu 10% do lado perdedor,
+  justamente porque a taxa sobre o pote todo faz quem acerta num favorito muito forte receber menos do que pôs (com
+  99% do pote no lado vencedor, volta 0,975 por dólar). Falta ele dizer se a regra do produto muda, o que pede a
+  revisão de impacto no plano, ou se é só a forma de contar no deck.
 - **Terceira versão do deck, depois da banca:** a análise recomenda montá-la como prévia, fora do ar. Esperam o
   fundador seis decisões (a palavra "bet", o slide de equipe, o patrocínio em faixas ou com piso, o cartão do
   token, os nomes de concorrentes no slide 2 e o título do slide 5) e a confirmação de que os avaliadores sabiam da

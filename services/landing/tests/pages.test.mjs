@@ -115,4 +115,6 @@ test("the third version of the deck has nine slides on the same stage, and keeps
     assert.ok(!word.test(text), `the deck should not say ${word}`);
   }
   assert.match(text, /not audited/, "the cover says the product is in a test phase");
+  // The founder's call of 2026-10-06 for this deck: one flat fee, said plainly. The plan still says otherwise.
+  assert.match(text, /3\.5%\s+of every pot/);
 });
