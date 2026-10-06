@@ -28,6 +28,17 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 - **Testes das páginas** (`services/landing/tests/pages.test.mjs`): todo arquivo citado existe, o rascunho de
   sugestão mantém a menção e a hashtag, o mascote tem imagem para cada pose e o deck tem os oito slides. O site
   provisório passa a ter 26 testes.
+- **Terceira versão do deck, em `/pitch2`,** feita a pedido do fundador a partir da análise da banca, para ele
+  avaliar no ar. Nove slides no mesmo palco e na mesma linguagem visual do `/pitch`, que continua como estava: abre
+  pelo caso de 7 milhões de dólares, ganha um slide de exemplos de mercado e outro de crescimento com roteiro, troca
+  o mercado por TAM, SAM e SOM com números do plano, tira a palavra "bet", o token e o "parimutuel", e diz na capa
+  que é fase de testes. Só por link, como o `/pitch`. O roteiro de fala, em português, está em
+  `services/landing/pitch2-notes.md`. O site provisório passa a ter 28 testes.
+- **Banca do pitch de 6/10/2026, em dois documentos.** A transcrição corrigida e organizada da apresentação e da
+  sabatina (`knowledge-base/pitch/2026-10-06-banca-transcricao.md`), com os avaliadores sem nome, a lista das
+  correções feitas e o roteiro em português do fundador. E a análise
+  (`docs/business/_review/banca-do-pitch-2026-10-06.md`): 42 pontos da banca e 8 da fala, cada um com avaliação e
+  veredito, a proposta de uma terceira versão do deck com nove slides e a lista do que não foi conferido.
 
 ### Changed
 
@@ -59,6 +70,13 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   Também não há aviso quando entra um email novo.
 - **Portão de redação do deck:** o fundador mandou publicar, e falta aprovar linha por linha o que vai a público e
   dizer quem mantém o deck. Até lá ele fica só por link. A recomendação está no `PITCH.md`.
+- **Terceira versão do deck, depois da banca:** a análise recomenda montá-la como prévia, fora do ar. Esperam o
+  fundador seis decisões (a palavra "bet", o slide de equipe, o patrocínio em faixas ou com piso, o cartão do
+  token, os nomes de concorrentes no slide 2 e o título do slide 5) e a confirmação de que os avaliadores sabiam da
+  gravação. Cinco fatos citados pela banca não foram conferidos; a lista está na seção 9 da análise.
+- **O título do slide 5 do deck no ar exagera** ("so being right never costs you"): em pote de um lado só, quem
+  entra depois do primeiro paga 1%. A frase proposta diz só a regra: "the fee comes out of the losing side". O plano
+  usa "ninguém perde por acertar" na Parte 1, §3.3, e entra na passada de coerência.
 - **Site provisório, pendências:** idioma (está em inglês, por escolha provisória; L-01 segue aberta); um email de
   contato do domínio para a página de privacidade; revisão jurídica do texto de privacidade; a conta do X não foi
   conferida; o Ronaldo ser avisado do serviço novo no servidor.

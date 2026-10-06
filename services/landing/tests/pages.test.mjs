@@ -13,6 +13,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const read = (path) => readFileSync(join(ROOT, path), "utf8");
 const home = read("index.html");
 const deck = read("pitch/index.html");
+const deck2 = read("pitch2/index.html");
 
 /** Local files a page asks for through src="" and href="", resolved from the page's own folder. */
 function localFiles(html, folder) {
@@ -23,7 +24,7 @@ function localFiles(html, folder) {
 }
 
 test("every file the landing page and the deck point at exists", () => {
-  const files = [...localFiles(home, ""), ...localFiles(deck, "pitch")];
+  const files = [...localFiles(home, ""), ...localFiles(deck, "pitch"), ...localFiles(deck2, "pitch2")];
   assert.ok(files.length > 15, "the pages reference their scripts, styles, fonts and images");
   for (const file of files) assert.ok(existsSync(join(ROOT, file)), `${file} is missing`);
 });
@@ -53,7 +54,7 @@ test("the mascot has an image for every pose the page and the scripts ask for", 
 test("every script and style is asked for with a version, and the pages agree on it", () => {
   // Cloudflare tells browsers to keep these files for hours. Without the version, a returning visitor gets the new
   // page with the old script and style, which is how the mascot went missing on the day it shipped.
-  const pages = [home, read("privacy.html"), read("404.html"), deck];
+  const pages = [home, read("privacy.html"), read("404.html"), deck, deck2];
   const versions = new Set();
   for (const page of pages) {
     const refs = [...page.matchAll(/\s(?:src|href)="([^"]+\.(?:js|css))(\?v=(\d+))?"/g)];
@@ -98,4 +99,20 @@ test("the deck has eight slides, its motion script loads before the stage and th
   for (const part of ["data-badge", "data-arrow", "data-lid", "data-spark"]) assert.ok(deck.includes(part), part);
   assert.ok(!/src="[0-9a-f]{8}-[0-9a-f-]{27}"/.test(deck), "no image id from the original export is left");
   assert.ok(!deck.includes("data-speaker-notes"), "the speaking notes are not published");
+});
+
+test("the third version of the deck has nine slides on the same stage, and keeps what the panel asked for", () => {
+  const slides = [...deck2.matchAll(/<section class="slide" data-label="([^"]+)"/g)].map((match) => match[1]);
+  const labels = "Title, Problem, Solution, Markets, Sponsors, How we earn, Market, Growth, Close";
+  assert.equal(slides.join(", "), labels);
+  assert.match(deck2, /<span data-count aria-live="polite">1 \/ 9<\/span>/);
+  assert.ok(deck2.indexOf("deck-motion.js?") > 0 && deck2.indexOf("deck-motion.js?") < deck2.indexOf("deck.js?"));
+  for (const pose of [0, 1, 2, 3]) assert.match(deck2, new RegExp(`<img data-pose="${pose}" src="\\.\\./pitch/img/`));
+  for (const part of ["data-badge", "data-arrow", "data-lid", "data-spark"]) assert.ok(deck2.includes(part), part);
+  const text = deck2.replace(/<!--[\s\S]*?-->/g, "").replace(/<[^>]+>/g, " ");
+  // From the panel of 2026-10-06: no "bet", no jargon on the cover, no token card, and no universal promise on the fee.
+  for (const word of [/\bbet(s|ting)?\b/i, /parimutuel/i, /pump\.fun token/i, /never costs/i, /always profit/i]) {
+    assert.ok(!word.test(text), `the deck should not say ${word}`);
+  }
+  assert.match(text, /not audited/, "the cover says the product is in a test phase");
 });
