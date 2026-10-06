@@ -19,14 +19,15 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 // The privacy page promises twelve months. Change the two together.
 const RETENTION_MS = 365 * DAY_MS;
 
-// The deck keeps its author's inline styles, so /pitch allows style attributes. Nothing else does.
+// The decks keep their author's inline styles, so /pitch and /pitch2 allow style attributes. Nothing else does.
 const CSP_BASE =
   "default-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
 const CSP_SITE = `${CSP_BASE}; style-src 'self'; script-src 'self'`;
 const CSP_PITCH = `${CSP_BASE}; style-src 'self' 'unsafe-inline'; script-src 'self'`;
 
+/** True for the deck and its later versions: /pitch, /pitch2, /pitch3 and what is under them. */
 function isPitch(path) {
-  return path === "/pitch" || path.startsWith("/pitch/");
+  return /^\/pitch\d*(\/|$)/.test(path);
 }
 
 function setSecurityHeaders(res, path) {

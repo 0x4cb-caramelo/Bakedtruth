@@ -17,7 +17,8 @@ Não tem dependências. Roda com o Node que já existe no servidor (22 ou mais n
 | `public/` | Página inicial, privacidade, 404, fontes e imagens |
 | `public/mascot*.js` | O Baked andando pela página inicial: `mascot.js` decide onde ele fica, `mascot-body.js` desenha, `mascot-senses.js` percebe o ponteiro, a rolagem e o teclado. Não guarda nem envia nada |
 | `public/pitch/` | O deck: 8 slides do fundador (segunda versão), um palco leve (`deck.js`, `deck.css`) e a animação (`deck-motion.js`) |
-| `pitch-notes.md` | O roteiro de fala de cada slide. Não é publicado |
+| `public/pitch2/` | A terceira versão do deck, de 6/10/2026, com as respostas à banca: nove slides, só a página. Usa o palco, as fontes e as imagens de `public/pitch/`. Proposta, a aprovar pelo fundador |
+| `pitch-notes.md`, `pitch2-notes.md` | O roteiro de fala de cada deck. Não são publicados |
 | `deploy/` | As duas unidades do systemd: o site e o túnel do Cloudflare |
 | `tests/` | Testes do armazenamento, do limitador, do servidor por HTTP e do que as páginas prometem (`pages.test.mjs`) |
 
