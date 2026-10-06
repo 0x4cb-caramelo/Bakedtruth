@@ -181,7 +181,9 @@ jobs:
 
       # The "coming soon" site has no dependencies, so it needs no install step.
       - name: Landing site tests
-        run: node --test services/landing/tests/leads.test.mjs services/landing/tests/server.test.mjs
+        run: >-
+          node --test services/landing/tests/leads.test.mjs services/landing/tests/server.test.mjs
+          services/landing/tests/pages.test.mjs
 
       - name: Secret scan over the branch
         env:

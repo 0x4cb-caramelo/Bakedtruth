@@ -21,8 +21,21 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 - **Deck de pitch revisado:** os 12 slides do fundador mais um de problema, num palco de 39 KB no lugar do pacote de
   10 MB. Onze correções de conteúdo, listadas no registro de sessão. Servido só por link, fora dos buscadores.
 - **Nota de pesquisa** sobre o mercado do token $LAPTOP na Polymarket, que dá fonte a um número do deck.
+- **Mascote vivo na página inicial do site provisório:** o Baked fica em pé em cinco pontos da página, pula para o
+  mais próximo de onde o ponteiro para, muda de pose conforme o que está sob o ponteiro, fala ao pousar e ao ser
+  cutucado, e aprova quando alguém entra na lista. É o comportamento do protótipo aprovado, portado em três arquivos
+  curtos. Não guarda nem envia nada, e fica parado para quem pede menos movimento.
+- **Testes das páginas** (`services/landing/tests/pages.test.mjs`): todo arquivo citado existe, o rascunho de
+  sugestão mantém a menção e a hashtag, o mascote tem imagem para cada pose e o deck tem os oito slides. O site
+  provisório passa a ter 26 testes.
 
 ### Changed
+
+- **Deck em `/pitch` trocado pela segunda versão do fundador**, de oito slides, com a animação que ela trazia: entrada
+  de cada slide, o mascote correndo na troca e o final do último slide. Dois ajustes de texto foram repetidos da
+  primeira revisão (slide 5) e o roteiro de fala foi refeito. Segue só por link.
+- **Botão de sugestão da página inicial** abre no X um rascunho pronto, com a menção a `@brotmarkets`, uma pergunta
+  de exemplo e a hashtag `#BrotMarkets`.
 
 - **Respostas do fundador de 5/10/2026 registradas** no roteiro, no plano técnico e na Sprint 02: chaves com o Lucas
   e o Ronaldo; idade do preço como parâmetro por pergunta, com piso de 30 segundos; chave da Pyth à espera da
@@ -44,7 +57,8 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 - **Site provisório, pendências:** idioma (está em inglês, por escolha provisória; L-01 segue aberta); um email de
   contato do domínio para a página de privacidade; revisão jurídica do texto de privacidade; a conta do X não foi
   conferida; o Ronaldo ser avisado do serviço novo no servidor.
-- **Arquivo original do deck** (10 MB) em `docs/technical/`, fora do Git. Não foi commitado nem apagado.
+- **Arquivos originais do deck** (as duas versões, 10 MB e 13 MB) em `docs/technical/`, fora do Git. Não foram
+  commitados nem apagados.
 - **Sprints:** a 00 e a 01 estão concluídas. A 02 está destravada: as chaves ficam com o Lucas e o Ronaldo. Falta
   confirmar a leitura de que os dois têm chave de equipe.
 - **Leitura no Surfpool:** era critério de pronto da Sprint 01 e não foi feita. Está na Sprint 03, com o de acordo

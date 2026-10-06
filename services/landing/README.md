@@ -15,10 +15,11 @@ Não tem dependências. Roda com o Node que já existe no servidor (22 ou mais n
 | `lib/rate-limit.mjs` | Limite de pedidos por endereço, só em memória |
 | `lib/static.mjs` | Serve `public/`, sem deixar sair da pasta |
 | `public/` | Página inicial, privacidade, 404, fontes e imagens |
-| `public/pitch/` | O deck: 13 slides do fundador, um palco leve (`deck.js`, `deck.css`) |
+| `public/mascot*.js` | O Baked andando pela página inicial: `mascot.js` decide onde ele fica, `mascot-body.js` desenha, `mascot-senses.js` percebe o ponteiro, a rolagem e o teclado. Não guarda nem envia nada |
+| `public/pitch/` | O deck: 8 slides do fundador (segunda versão), um palco leve (`deck.js`, `deck.css`) e a animação (`deck-motion.js`) |
 | `pitch-notes.md` | O roteiro de fala de cada slide. Não é publicado |
 | `deploy/` | As duas unidades do systemd: o site e o túnel do Cloudflare |
-| `tests/` | Testes do armazenamento, do limitador e do servidor por HTTP |
+| `tests/` | Testes do armazenamento, do limitador, do servidor por HTTP e do que as páginas prometem (`pages.test.mjs`) |
 
 ## Rodar e testar
 
