@@ -1,7 +1,7 @@
 /**
  * Purpose: the mascot's scenes of the deck at /pitch3, by the slide that arrives: what plays when it comes going
  *          forward, going back, or when the page opens on it. A slide with no scene gets the plain run.
- * Version: 0.4.0 · Sprint: out of band (landing page), 2026-10-07
+ * Version: 0.5.0 · Sprint: out of band (landing page), 2026-10-07
  *
  * A scene is `scene(stage, slide, how)`, with `how` being "forward", "back" or "open". `stage` comes from motion.js:
  * stage.enter(slide, forward) is the slide's usual entrance; stage.keep(thing) registers an element, an animation or
@@ -10,6 +10,7 @@
  * Team slide and the closing finale are the two longer moments.
  */
 import { bite } from "./bite.js?v=2";
+import { approve, creators } from "./creators.js?v=1";
 import { partners } from "./partners.js?v=3";
 import { run } from "./runner.js?v=1";
 import { pointing, swingIn } from "./sponsors.js?v=1";
@@ -97,10 +98,11 @@ export const SCENES = {
     }
   },
   Creators(stage, slide, how) {
-    // Added after the founder's list for the lighter setting: there it only comes in, like the other unlisted slides.
-    if (how === "open") return;
-    if (stage.lite) stage.enter(slide, how === "forward");
-    else plain(stage, slide, how === "forward");
+    // The founder asked for it on 2026-10-07, in the three settings: all of it, the thumbs up only, or standing still.
+    if (how === "back" && !stage.lite) plain(stage, slide, false);
+    else if (how !== "open") stage.enter(slide, how === "forward");
+    if (stage.lite) return approve(stage, slide);
+    creators(stage, slide, { drop: how === "forward", wait: how === "open" ? 200 : 560 });
   },
   Growth(stage, slide, how) {
     // The mascot with three smaller ones behind it: the community coming along. Not in the lighter setting.

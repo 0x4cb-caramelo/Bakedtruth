@@ -117,8 +117,18 @@ Há dois jeitos de evitar, e nenhum foi escolhido:
 2. **O 1% sai da taxa do Brot.** Quem acerta nunca paga, mas o Brot abre mão de muito: num pote meio a meio a taxa
    é 5% do pote e o criador leva um quinto dela; num pote 90 a 10 a taxa é 1% do pote, e o criador levaria tudo.
 
-**Cena.** O slide novo não tem cena própria: no modo completo o pãozinho atravessa correndo, como nos slides sem
-cena; no leve, só a entrada suave.
+**Cena.** Na primeira versão o slide novo não tinha cena própria. O fundador pediu um pãozinho nele, "seguindo nosso
+estilo, e dentro da ideia do nosso controle de pãozinhos e meio pãozinho", e a cena entrou no mesmo dia, nos três
+níveis do controle:
+
+| Controle | O que acontece no slide de criadores |
+|---|---|
+| Completo (pãozinho inteiro) | Um pãozinho cai do alto em cima do cartão do 1%, amassa ao pousar e faz joinha. Em seguida dois menores sobem de trás dos outros dois cartões, espiando: qualquer um abre um mercado. Voltando do slide seguinte, ele já está lá e só os menores sobem |
+| Leve (meio pãozinho, tecla `N`) | O pãozinho já está em cima do cartão, olhando de frente, e faz joinha com um pulinho quando o slide termina de entrar. Sem queda e sem os menores |
+| Desligado (tecla `M`) | O pãozinho parado em cima do cartão, de joinha |
+
+A pose de joinha é a `e07-aprovando`, que já existia na biblioteca e ainda não era usada no deck. A cena dura 1,5
+segundo, dentro da regra.
 
 ## Como os slides ficam
 
@@ -244,6 +254,7 @@ para a direita, porque o código espelha; os dois quadros de corrida com o corpo
 | A9 | Receita para Mercado | Chega em cima do círculo grande, que rola para dentro | nenhuma | feito |
 | A9 | Mercado para Crescimento | Entra seguido por uma fila de pãezinhos | nenhuma | feito |
 | A9 | Para o Fechamento | Corre e o selo recebe: pisca, joinha, seta para o código QR | nenhuma | feito |
+| C7 | Patrocínio para Criadores | Cai em cima do cartão do 1% e faz joinha; dois menores espiam de trás dos outros cartões | 2, a de frente e a de joinha | feito |
 
 Até a imagem de uma cena chegar, a troca usa a corrida de três pulos que já existe.
 

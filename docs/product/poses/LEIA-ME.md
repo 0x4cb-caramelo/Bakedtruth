@@ -41,8 +41,9 @@ As oito poses anteriores e as duas peças prontas foram trazidas para as mesmas 
 - **`e09-adesivo-cheio` foi ajustado ao contorno do `01-adesivo-vazio`**, pixel a pixel nos limites visíveis, para
   um poder trocar pelo outro sem a imagem pular. É o par usado na capa do deck.
 
-**O que o deck usa.** As 17 novas, o `e01-neutro` e o `e09-adesivo-cheio`, convertidos para WebP em
-`services/landing/public/pitch3/img/`. O nome de cada pose no código está em `public/pitch3/sprites.js`.
+**O que o deck usa.** As 17 novas, o `e01-neutro`, o `e07-aprovando` (no slide de criadores) e o
+`e09-adesivo-cheio`, convertidos para WebP em `services/landing/public/pitch3/img/`. O nome de cada pose no código
+está em `public/pitch3/sprites.js`; a de joinha é citada direto na página.
 
 **O que não está aqui.** O `manifest.json`, o `prompts.json` e a prévia em GIF citados acima não vieram com as
 imagens. Os pontos de encaixe usados pelas cenas (o punho na pose pendurada, o punho na corda da cortina) foram
