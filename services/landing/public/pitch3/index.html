@@ -49,10 +49,35 @@ html.calm [data-arrow] { opacity: 1 !important; }
 html.calm .glow, html.stack .glow { animation: none; }
 @media (prefers-reduced-motion: reduce) { .glow { animation: none; } .demo-flip { transition: none; } }
 .bar button[aria-pressed="false"] { color: #4a5567; }
+/* Growth: the four cards, and the partners' logos, which fan out once the count has stopped. */
+.g-card { background: #171e29; border: 2px solid #263041; border-radius: 20px; padding: 28px 36px; display: flex; flex-direction: column; gap: 10px; }
+.g-partners { flex-direction: row; align-items: center; justify-content: space-between; gap: 20px; }
+.g-words { display: flex; flex-direction: column; gap: 10px; }
+.g-title { font: 600 38px/1.15 "IBM Plex Mono", monospace; }
+.g-body { font: 400 30px/1.35 "IBM Plex Sans", sans-serif; color: #d9d1c1; }
+.g-body b { color: #eea546; font: 600 38px/1 "IBM Plex Mono", monospace; }
+.g-logos { display: flex; flex: none; padding-right: 12px; }
+.g-logo { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; background: #f6eddb; border: 3px solid #171e29; margin-left: -26px; transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), margin 0.35s; }
+.g-logos.is-fanned .g-logo { margin-left: -8px; }
+.g-logos.is-fanned .g-logo:nth-last-child(4) { transform: rotate(-14deg) translateY(6px); }
+.g-logos.is-fanned .g-logo:nth-last-child(3) { transform: rotate(-5deg) translateY(-4px); }
+.g-logos.is-fanned .g-logo:nth-last-child(2) { transform: rotate(5deg) translateY(-4px); }
+.g-logos.is-fanned .g-logo:nth-last-child(1) { transform: rotate(14deg) translateY(6px); }
+/* Team: one window per person, with a curtain that the mascot pulls open. Without motion the curtains are open. */
+.member { display: flex; flex-direction: column; gap: 8px; }
+.member-window { position: relative; height: 380px; margin-bottom: 14px; border-radius: 24px; overflow: hidden; background: #1b1611; }
+.member-photo { position: absolute; left: 50%; bottom: -6%; height: 104%; transform: translateX(-50%); image-rendering: pixelated; }
+.curtain { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #a8481b 0 38px, #8f3a14 38px 76px); border-bottom: 10px solid #eea546; transform: translateY(-104%); transition: transform 0.3s cubic-bezier(0.3, 0.7, 0.2, 1); }
+.member.is-closed .curtain { transform: none; transition: none; }
+.rope { position: absolute; right: 40px; top: 0; width: 6px; height: 240px; border-radius: 3px; background: #eea546; z-index: 2; }
+.rope i { position: absolute; left: -9px; bottom: -12px; width: 24px; height: 24px; border-radius: 50%; background: #eea546; }
+.member-name { font: 600 42px/1.1 "IBM Plex Mono", monospace; }
+.member-role { font: 500 22px/1.3 "IBM Plex Mono", monospace; letter-spacing: 0.06em; color: #a8481b; }
+.member-line { font: 400 28px/1.35 "IBM Plex Sans", sans-serif; color: #3d3328; }
 @media print { .demo-cursor { display: none; } }
 </style>
 <!-- motion.js goes first: it has to be listening when deck.js announces the slide the page opened on. -->
-<script type="module" src="motion.js?v=1"></script>
+<script type="module" src="motion.js?v=2"></script>
 <script src="../pitch/deck.js?v=2" defer></script>
 </head>
 <body>
@@ -63,9 +88,8 @@ html.calm .glow, html.stack .glow { animation: none; }
 
 <section class="slide" data-label="Title" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:grid;grid-template-columns:1.15fr 0.85fr;align-items:center;gap:60px;">
   <div style="display:flex;flex-direction:column;gap:44px;">
-    <img src="../pitch/img/logo-wordmark.webp" alt="brot.markets" style="mix-blend-mode:lighten;width:760px;margin-left:-120px;margin-top:-60px;margin-bottom:-60px;display:block;">
     <h1 style="margin:0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:92px;line-height:1.05;letter-spacing:-0.03em;text-wrap:balance;">Prediction markets the chain resolves.</h1>
-    <p style="margin:0;font-size:36px;line-height:1.4;color:#a3acba;max-width:900px;text-wrap:pretty;">USDC pools on Solana. Winners split the pot.</p>
+    <p style="margin:0;font-size:36px;line-height:1.4;color:#a3acba;max-width:900px;text-wrap:pretty;">The prediction market where projects put money behind their own promises, and the chain proves whether they delivered.</p>
     <div style="display:flex;gap:16px;align-items:center;">
       <div style="height:6px;width:180px;border-radius:3px;background:linear-gradient(90deg,#ff9ad5,#9ad0ff,#a6ffcf,#fff59a,#ffb37a);"></div>
       <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;letter-spacing:0.08em;color:#eea546;">PROOF &gt; PROMISES</span>
@@ -73,7 +97,8 @@ html.calm .glow, html.stack .glow { animation: none; }
     <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;letter-spacing:0.04em;color:#a3acba;">brot.markets &nbsp;·&nbsp; x.com/brotmarkets</span>
   </div>
   <div style="display:flex;justify-content:center;">
-    <img src="../pitch/img/baked-arms-crossed.webp" alt="Baked, the mascot, arms crossed" style="width:118%;max-width:none;margin:0 -9%;display:block;image-rendering:pixelated;">
+    <!-- The sticker with the mascot in it. When the deck moves on, exits.js swaps it for the empty one. -->
+    <img data-sticker src="img/e09-adesivo-cheio.webp" alt="Baked, the mascot, on its brot.markets sticker" style="width:124%;max-width:none;margin:0 -12%;display:block;">
   </div>
 </section>
 
@@ -181,7 +206,8 @@ html.calm .glow, html.stack .glow { animation: none; }
       <span style="font-family:'IBM Plex Mono',monospace;font-size:22px;color:#6b5e4e;">Curated: the team lists every market</span>
     </div>
     <div style="display:flex;justify-content:center;">
-      <img src="../pitch/img/baked-hips.webp" alt="Baked, hands on hips" style="width:100%;max-width:500px;display:block;">
+      <!-- Flipped, so it points left, at the last step. sponsors.js runs the three frames of the gesture. -->
+      <img data-pointer src="img/10-apontando.webp" alt="Baked pointing at the last step" style="width:122%;max-width:none;margin:0 -11%;display:block;image-rendering:pixelated;transform:scaleX(-1);">
     </div>
   </div>
 </section>
@@ -250,15 +276,27 @@ html.calm .glow, html.stack .glow { animation: none; }
 <section class="slide" data-label="Growth" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
   <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">06 · GROWTH</span>
   <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">Partners bring their communities. Referrals keep them coming</h2>
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:48px;">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
-      <div style="background:#171e29;border:2px solid #263041;border-radius:20px;padding:40px 42px;display:flex;flex-direction:column;gap:16px;">
-        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:44px;">Launch partners</span>
-        <span style="font-size:32px;line-height:1.4;color:#d9d1c1;"><span style="white-space:nowrap;">20–30 projects</span> get one market free.</span>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:34px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <!-- partners.js turns the sentence into a count and brings the logos in, once there are partners to show. -->
+      <div class="g-card g-partners" data-partners>
+        <div class="g-words">
+          <span class="g-title">Launch partners</span>
+          <span class="g-body" data-partners-text><span style="white-space:nowrap;">20–30 projects</span> get one market free.</span>
+        </div>
+        <div class="g-logos" data-partners-logos></div>
       </div>
-      <div style="background:#171e29;border:2px solid #263041;border-radius:20px;padding:40px 42px;display:flex;flex-direction:column;gap:16px;">
-        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:44px;">Referrals, day one</span>
-        <span style="font-size:32px;line-height:1.4;color:#d9d1c1;">20% of the fee, for 90 days.</span>
+      <div class="g-card">
+        <span class="g-title">Referrals, day one</span>
+        <span class="g-body">20% of the fee, for 90 days.</span>
+      </div>
+      <div class="g-card">
+        <span class="g-title">Share to take a side</span>
+        <span class="g-body">Every market is a card you post on X.</span>
+      </div>
+      <div class="g-card">
+        <span class="g-title">Proof cards</span>
+        <span class="g-body">A milestone met becomes a receipt to post.</span>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px;border-top:2px solid #f7eedb;padding-top:30px;">
@@ -278,7 +316,46 @@ html.calm .glow, html.stack .glow { animation: none; }
   </div>
 </section>
 
-<section class="slide" data-label="Close" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:grid;grid-template-columns:0.7fr 1.3fr;gap:80px;align-items:center;">
+<section class="slide" data-label="Team" style="background:#f6eddb;color:#1b1611;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#a8481b;">07 · TEAM</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">The bakers behind the oven</h2>
+  <!-- Proposal, to be confirmed by the founder: who holds which role, the bakery titles and the one line each.
+       The pictures are the mascot's poses until there are photos. team.js closes the curtains and has them pulled open. -->
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:44px;align-items:start;align-content:center;">
+    <div class="member" data-member>
+      <div class="member-window">
+        <img class="member-photo" src="../pitch/img/baked-arms-crossed.webp" alt="">
+        <div class="curtain"></div>
+        <div class="rope"><i data-knob></i></div>
+      </div>
+      <span class="member-name">Bernardo Nery</span>
+      <span class="member-role">Head Baker · CEO</span>
+      <span class="member-line">Decides what goes in the oven.</span>
+    </div>
+    <div class="member" data-member>
+      <div class="member-window">
+        <img class="member-photo" src="../pitch/img/baked-hips.webp" alt="">
+        <div class="curtain"></div>
+        <div class="rope"><i data-knob></i></div>
+      </div>
+      <span class="member-name">Lucas Galvão</span>
+      <span class="member-role">Chief Oven Officer · COO and CLO</span>
+      <span class="member-line">Keeps the oven running and the recipe legal.</span>
+    </div>
+    <div class="member" data-member>
+      <div class="member-window">
+        <img class="member-photo" src="../pitch/img/baked-standing.webp" alt="">
+        <div class="curtain"></div>
+        <div class="rope"><i data-knob></i></div>
+      </div>
+      <span class="member-name">Ronaldo Pereira</span>
+      <span class="member-role">Chief Toasting Officer · CTO</span>
+      <span class="member-line">Wrote the program that reads the chain.</span>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-label="Close"style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:grid;grid-template-columns:0.7fr 1.3fr;gap:80px;align-items:center;">
   <div style="display:flex;justify-content:center;">
     <div data-badge="" style="position:relative;width:100%;max-width:560px;">
       <img src="../pitch/img/badge-proof.webp" alt="Proof &gt; Promises badge" style="width:100%;display:block;">
@@ -311,20 +388,14 @@ html.calm .glow, html.stack .glow { animation: none; }
 
 </main>
 
-<!-- The four poses of the mascot that hops across the slide on a change (deck-motion.js), loaded ahead of time. -->
-<div aria-hidden="true" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;left:-9999px;top:0;">
-  <img data-pose="0" src="../pitch/img/baked-standing.webp" alt="">
-  <img data-pose="1" src="../pitch/img/baked-hips.webp" alt="">
-  <img data-pose="2" src="../pitch/img/baked-arms-crossed.webp" alt="">
-  <img data-pose="3" src="../pitch/img/baked-sit-grumpy.webp" alt="">
-</div>
+<!-- The mascot's poses are loaded by sprites.js, from img/. -->
 
 <nav class="bar" data-bar aria-label="Slide controls">
   <a href="/" title="brot.markets">brot.markets</a>
   <button type="button" data-prev aria-label="Previous slide">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
-  <span data-count aria-live="polite">1 / 8</span>
+  <span data-count aria-live="polite">1 / 9</span>
   <button type="button" data-next aria-label="Next slide">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>

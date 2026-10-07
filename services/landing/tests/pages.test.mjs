@@ -4,7 +4,7 @@
  * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-05
  */
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
@@ -67,11 +67,16 @@ test("every script and style is asked for with a version, and files that are sha
     assert.ok(refs.length >= 2, "the page loads its script and its style");
     for (const [, file, , version] of refs) note(file, version);
   }
-  for (const script of ["mascot.js", "pitch3/motion.js"]) {
-    const imports = [...read(script).matchAll(/from "\.\/([a-z-]+\.js)(\?v=(\d+))?"/g)];
-    assert.ok(imports.length >= 2, `${script} imports its parts`);
-    for (const [, file, , version] of imports) note(file, version);
+  const modules = readdirSync(join(ROOT, "pitch3")).filter((name) => name.endsWith(".js"));
+  assert.ok(modules.length >= 8, "the deck's motion is split in modules");
+  let imported = 0;
+  for (const script of ["mascot.js", ...modules.map((name) => `pitch3/${name}`)]) {
+    for (const [, file, , version] of read(script).matchAll(/from "\.\/([a-z-]+\.js)(\?v=(\d+))?"/g)) {
+      note(file, version);
+      imported += 1;
+    }
   }
+  assert.ok(imported >= 10, "the modules import one another");
   for (const [name, asked] of versions) assert.equal(asked.size, 1, `${name} is asked for with ${[...asked]}`);
 });
 
@@ -125,12 +130,24 @@ test("the third version of the deck has nine slides on the same stage, and keeps
 
 test("the fourth version of the deck has its demo, its own motion and what the founder asked for on 2026-10-07", () => {
   const slides = [...deck3.matchAll(/<section class="slide" data-label="([^"]+)"/g)].map((match) => match[1]);
-  assert.equal(slides.join(", "), "Title, Problem, Solution, Sponsors, How we earn, Market, Growth, Close");
+  assert.equal(slides.join(", "), "Title, Problem, Solution, Sponsors, How we earn, Market, Growth, Team, Close");
+  assert.equal([...deck3.matchAll(/data-member/g)].length, 3, "the team slide has its three people");
+  // The partners list starts empty: no invented partner is shown.
+  assert.match(read("pitch3/partners.js"), /export const PARTNERS = \[\];/);
   assert.match(deck3, new RegExp(`<span data-count aria-live="polite">1 / ${slides.length}</span>`));
   // motion.js is a module and deck.js is deferred: both run in document order, and the listener has to come first.
   assert.ok(deck3.indexOf('src="motion.js?') > 0 && deck3.indexOf('src="motion.js?') < deck3.indexOf("deck.js?"));
-  for (const part of ["data-demo", 'data-face="a"', 'data-face="b"', "data-cursor", "data-motion", "data-tam"]) {
-    assert.ok(deck3.includes(part), `${part} is missing`);
+  const hooks = ["data-demo", 'data-face="a"', 'data-face="b"', "data-cursor", "data-motion", "data-tam"];
+  for (const part of [...hooks, "data-sticker", "data-pointer"]) assert.ok(deck3.includes(part), `${part} is missing`);
+  // Every pose the scenes name has its image, and the scenes only name poses that exist.
+  const poses = Object.fromEntries(
+    [...read("pitch3/sprites.js").matchAll(/^ {2}([a-zA-Z]+): "([^"]+)",$/gm)].map((match) => [match[1], match[2]]),
+  );
+  assert.ok(Object.keys(poses).length >= 15, "sprites.js lists the poses");
+  for (const file of Object.values(poses)) assert.ok(existsSync(join(ROOT, "pitch3/img", `${file}.webp`)), file);
+  for (const name of readdirSync(join(ROOT, "pitch3")).filter((file) => file.endsWith(".js"))) {
+    const asked = read(`pitch3/${name}`).matchAll(/(?:url|show|sprite\([a-z]+,)\(?\s*"([a-zA-Z]+)"/g);
+    for (const [, pose] of asked) assert.ok(poses[pose], `${name} asks for the pose "${pose}", which is not listed`);
   }
   const text = deck3
     .replace(/<!--[\s\S]*?-->/g, "")
