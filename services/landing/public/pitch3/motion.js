@@ -1,17 +1,18 @@
 /**
  * Purpose: the motion of the deck at /pitch3: it decides what plays when a slide arrives or is left (the scenes are
  *          in scenes.js and exits.js), starts the product demo and the finale, and holds the switch that turns it off.
- * Version: 0.2.0 · Sprint: out of band (landing page), 2026-10-07
+ * Version: 0.3.0 · Sprint: out of band (landing page), 2026-10-07
  *
  * Three rules, from the founder's review of 2026-10-07 (docs/business/_review/plano-do-pitch3.md): a transition lasts
  * 1.5 seconds at most, the next slide change cancels whatever is playing, and the "M" key or the bar button turns all
- * motion off. With "reduce motion" on, or with the slides stacked on a phone, nothing moves either.
+ * motion off. The "N" key is the setting in between. With "reduce motion" on, or with the slides stacked on a phone,
+ * nothing moves either.
  * It listens to the "slidechange" event that ../pitch/deck.js sends.
  */
 import { startDemo, stopDemo } from "./demo.js?v=1";
 import { EXITS } from "./exits.js?v=1";
 import { finale, resetFinale } from "./finale.js?v=1";
-import { SCENES, plain, settled } from "./scenes.js?v=2";
+import { SCENES, plain, settled } from "./scenes.js?v=3";
 import { preload } from "./sprites.js?v=1";
 
 const EASE = "cubic-bezier(.2,.8,.2,1)";
@@ -19,6 +20,9 @@ const NEXT_KEYS = ["ArrowRight", "ArrowDown", "PageDown", " "];
 const root = document.documentElement;
 const still = matchMedia("(prefers-reduced-motion: reduce)");
 const button = document.querySelector("[data-motion]");
+const liteButton = document.querySelector("[data-lite]");
+let mode = "full";
+let before = "full"; // the setting "M" goes back to
 let timers = [];
 let ticking = [];
 let kept = [];
@@ -63,7 +67,15 @@ function enter(slide, forward) {
   });
 }
 
-const stage = { enter, keep, later, every };
+const stage = {
+  enter,
+  keep,
+  later,
+  every,
+  get lite() {
+    return mode === "lite";
+  },
+};
 
 /** `how` is "forward", "back" or "open" (the page opened on this slide: nothing runs in, the slide plays its own). */
 function arrive(slide, how) {
@@ -121,17 +133,31 @@ function beforeLeaving(event) {
 document.addEventListener("keydown", beforeLeaving, true);
 document.addEventListener("click", beforeLeaving, true);
 
-function setCalm(on) {
-  root.classList.toggle("calm", on);
-  if (button) button.setAttribute("aria-pressed", String(!on));
-  if (on) cancelAll();
+/**
+ * Three settings. "full": every scene. "lite", the "N" key: only the scenes the founder picked on 2026-10-07 (scenes.js
+ * reads stage.lite). "off", the "M" key: nothing moves. Changing it puts the slide on screen in its new state at rest.
+ */
+function setMode(next) {
+  if (next === "off" && mode !== "off") before = mode;
+  mode = next;
+  root.classList.toggle("calm", mode === "off");
+  if (button) button.setAttribute("aria-pressed", String(mode !== "off"));
+  if (liteButton) liteButton.setAttribute("aria-pressed", String(mode === "lite"));
+  const active = document.querySelector("[data-deck-active]");
+  if (active) arrive(active, "open");
 }
-if (button) button.addEventListener("click", () => setCalm(!root.classList.contains("calm")));
+const toggleOff = () => setMode(mode === "off" ? before : "off");
+const toggleLite = () => setMode(mode === "lite" ? "full" : "lite");
+if (button) button.addEventListener("click", toggleOff);
+if (liteButton) liteButton.addEventListener("click", toggleLite);
 document.addEventListener("keydown", (event) => {
-  if (event.ctrlKey || event.metaKey || event.altKey || event.key.toLowerCase() !== "m") return;
-  setCalm(!root.classList.contains("calm"));
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
+  const key = event.key.toLowerCase();
+  if (key === "m") toggleOff();
+  if (key === "n") toggleLite();
 });
-if (new URLSearchParams(location.search).get("motion") === "off") setCalm(true);
+const asked = new URLSearchParams(location.search).get("motion");
+if (asked === "off" || asked === "lite") setMode(asked);
 
 // A click on the demo plays it again. Caught on the way down, so the stage does not read it as "next slide".
 document.addEventListener(

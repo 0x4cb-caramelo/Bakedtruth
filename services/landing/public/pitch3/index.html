@@ -56,7 +56,11 @@ html.calm .glow, html.stack .glow { animation: none; }
 .g-title { font: 600 38px/1.15 "IBM Plex Mono", monospace; }
 .g-body { font: 400 30px/1.35 "IBM Plex Sans", sans-serif; color: #d9d1c1; }
 .g-body b { color: #eea546; font: 600 38px/1 "IBM Plex Mono", monospace; }
-.g-logos { display: flex; flex: none; padding-right: 12px; }
+.g-tag { margin-left: 10px; padding: 3px 9px; border: 1px solid #3a4558; border-radius: 6px; font: 500 16px/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase; color: #a3acba; vertical-align: middle; }
+.g-tag[hidden] { display: none; }
+.bar button[data-lite][aria-pressed="true"] { color: #eea546; }
+.g-partners .g-title { white-space: nowrap; }
+.g-logos { display: flex; flex: none; justify-content: flex-end; min-width: 250px; padding-right: 12px; }
 .g-logo { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; background: #f6eddb; border: 3px solid #171e29; margin-left: -26px; transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), margin 0.35s; }
 .g-logos.is-fanned .g-logo { margin-left: -8px; }
 .g-logos.is-fanned .g-logo:nth-last-child(4) { transform: rotate(-14deg) translateY(6px); }
@@ -77,7 +81,7 @@ html.calm .glow, html.stack .glow { animation: none; }
 @media print { .demo-cursor { display: none; } }
 </style>
 <!-- motion.js goes first: it has to be listening when deck.js announces the slide the page opened on. -->
-<script type="module" src="motion.js?v=2"></script>
+<script type="module" src="motion.js?v=3"></script>
 <script src="../pitch/deck.js?v=2" defer></script>
 </head>
 <body>
@@ -281,7 +285,7 @@ html.calm .glow, html.stack .glow { animation: none; }
       <!-- partners.js turns the sentence into a count and brings the logos in, once there are partners to show. -->
       <div class="g-card g-partners" data-partners>
         <div class="g-words">
-          <span class="g-title">Launch partners</span>
+          <span class="g-title">Launch partners <span class="g-tag" data-partners-tag hidden>example</span></span>
           <span class="g-body" data-partners-text><span style="white-space:nowrap;">20–30 projects</span> get one market free.</span>
         </div>
         <div class="g-logos" data-partners-logos></div>
@@ -398,6 +402,9 @@ html.calm .glow, html.stack .glow { animation: none; }
   <span data-count aria-live="polite">1 / 9</span>
   <button type="button" data-next aria-label="Next slide">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button type="button" data-lite aria-pressed="false" aria-label="Lighter motion" title="Lighter motion: only the main scenes (N)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></svg>
   </button>
   <button type="button" data-motion aria-pressed="true" aria-label="Mascot and motion" title="Motion on or off (M)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 12h4l2-6 4 12 2-6h4" stroke-linecap="round" stroke-linejoin="round"/></svg>

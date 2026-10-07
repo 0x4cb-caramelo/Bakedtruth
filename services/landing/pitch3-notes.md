@@ -12,6 +12,10 @@ com as correções da análise, e abre pela frase de elevador que ele aprovou em
 - **O pãozinho faz uma cena em cada troca.** Cada uma dura até 1,5 segundo. Se estiver com pressa, aperte "próximo"
   de novo: a cena é pulada. A cortina da equipe e o final do último slide são mais longos, de propósito.
 - **A tecla `M` desliga todo o movimento**, e o botão ao lado da tela cheia faz o mesmo. Use no vídeo cronometrado.
+- **A tecla `N` liga o modo leve**, o meio-termo (o botão do círculo meio cheio). Nele só tocam: a troca inteira da
+  capa para o problema; o slide de solução sendo puxado, e a demo; o brilho em "the chain" no patrocínio; nada no
+  slide de receita; a bola do TAM com o pãozinho em cima; o contador de parceiros; a cortina da equipe; e o final.
+  Apertar `N` de novo volta ao movimento completo.
 - **A demo do slide 3 leva uns 12 segundos.** Ela toca sozinha enquanto você fala. Um clique no cartão a repete.
 - **No slide 5, um clique no pãozinho ou no pão** faz ele morder de novo. É a surpresa escondida.
 
@@ -82,8 +86,12 @@ quando a meta é cumprida, o projeto ganha um comprovante para mostrar.
 Onde estamos: na rede de testes. Depois, o lançamento com os parceiros. E a rede principal só com auditoria,
 assinatura de mais de uma pessoa e um teto.
 
-> Os retângulos "Share to take a side" e "Proof cards" são proposta. O contador de parceiros aparece sozinho quando a
-> lista de `public/pitch3/partners.js` tiver o primeiro parceiro fechado, com o logo e o de acordo dele.
+> Os retângulos "Share to take a side" e "Proof cards" são proposta.
+>
+> **O contador mostra "7 of 30" com sete logos de EXEMPLO**, a pedido do fundador, para a animação poder ser vista.
+> Não são parceiros, e por isso o cartão traz a etiqueta "example". **Não apresente esse número como real.** Antes de
+> uma apresentação de verdade, troque a lista de `public/pitch3/partners.js` pelos parceiros fechados, com o logo e o
+> de acordo de cada um, ou esvazie a lista: vazio, o cartão volta à frase "20–30 projects get one market free".
 
 ## 8. Equipe
 
