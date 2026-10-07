@@ -9,10 +9,10 @@
  * nothing moves either.
  * It listens to the "slidechange" event that ../pitch/deck.js sends.
  */
-import { startDemo, stopDemo } from "./demo.js?v=1";
+import { startDemo, stopDemo } from "./demo.js?v=2";
 import { EXITS } from "./exits.js?v=1";
 import { finale, resetFinale } from "./finale.js?v=1";
-import { SCENES, plain, settled } from "./scenes.js?v=4";
+import { SCENES, plain, settled } from "./scenes.js?v=5";
 import { preload } from "./sprites.js?v=1";
 
 const EASE = "cubic-bezier(.2,.8,.2,1)";

@@ -5,21 +5,21 @@
  */
 import { running, sprite } from "./sprites.js?v=1";
 
-const FLOOR = 1040; // where the feet stand, in the slide's coordinates
+const FLOOR = 1052; // where the feet stand, in the slide's coordinates
 const MONO = "font:600 34px/1 'IBM Plex Mono',monospace";
 
 /** `runIn` is true when the slide just arrived going forward: it runs to the loaf. Otherwise it is already there. */
 export function bite(stage, slide, { runIn }) {
   // The loaf is flipped so that its bitten end is the one next to the mascot's mouth.
-  const loaf = sprite(slide, runIn ? "loaf" : "loafBitten", { x: 548, y: FLOOR - 150, h: 150, flip: true, z: 19 });
-  const bun = sprite(slide, runIn ? "runA" : "chew", { x: 250, y: FLOOR - 230, h: 230 });
+  const loaf = sprite(slide, runIn ? "loaf" : "loafBitten", { x: 500, y: FLOOR - 126, h: 126, flip: true, z: 19 });
+  const bun = sprite(slide, runIn ? "runA" : "chew", { x: 250, y: FLOOR - 196, h: 196 });
   stage.keep(loaf.box);
   stage.keep(bun.box);
 
   const pop = () => {
     const tag = document.createElement("span");
-    tag.textContent = "35 USDC";
-    tag.style.cssText = `position:absolute;left:600px;top:${FLOOR - 220}px;${MONO};color:#eea546;pointer-events:none;z-index:21;`;
+    tag.textContent = "40 USDC"; // the slice of the slide's own example: 10% of the 400 on the losing side
+    tag.style.cssText = `position:absolute;left:560px;top:${FLOOR - 190}px;${MONO};color:#eea546;pointer-events:none;z-index:21;`;
     slide.append(stage.keep(tag));
     const rise = [
       { opacity: 0, transform: "translateY(12px)" },

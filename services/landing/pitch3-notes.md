@@ -4,122 +4,243 @@ O que dizer em cada slide de `public/pitch3/index.html`, em português, que é c
 não é publicado: o servidor só entrega o que está em `public/`. O plano que guiou esta versão está em
 `docs/business/_review/plano-do-pitch3.md`.
 
-**É proposta, a aprovar.** O deck tem nove slides. A fala parte do roteiro que o fundador levou à banca de 6/10/2026,
-com as correções da análise, e abre pela frase de elevador que ele aprovou em 7/10/2026 (`PITCH.md`).
+**De onde vem.** É o roteiro que o fundador levou à banca de 6/10/2026, com as frases dele, mexido só onde o slide
+mudou. Está no formato em que ele escreve: asteriscos marcam a ênfase da voz. O deck tem dez slides.
 
 ## Antes de apresentar
 
-- **O pãozinho faz uma cena em cada troca.** Cada uma dura até 1,5 segundo. Se estiver com pressa, aperte "próximo"
-  de novo: a cena é pulada. A cortina da equipe e o final do último slide são mais longos, de propósito.
-- **A tecla `M` desliga todo o movimento**, e o botão ao lado da tela cheia faz o mesmo. Use no vídeo cronometrado.
-- **A tecla `N` liga o modo leve**, o meio-termo (o botão do círculo meio cheio). Nele só tocam: a troca inteira da
-  capa para o problema; o slide de solução sendo puxado, e a demo; o brilho em "the chain" no patrocínio; nada no
-  slide de receita; a bola do TAM com o pãozinho em cima; o contador de parceiros; a cortina da equipe; e o final.
-  Apertar `N` de novo volta ao movimento completo.
-- **A demo do slide 3 leva uns 12 segundos.** Ela toca sozinha enquanto você fala. Um clique no cartão a repete.
-- **No slide 5, um clique no pãozinho ou no pão** faz ele morder de novo. É a surpresa escondida.
+- **O pãozinho faz uma cena em cada troca.** Cada uma dura até 1,5 segundo. Um segundo "próximo" pula a cena. A
+  cortina da equipe e o final do último slide são mais longos, de propósito.
+- **Tecla `M`:** liga e desliga todo o movimento. **Tecla `N`:** o modo leve, só com as cenas principais.
+- **A demo do slide 3 leva uns 12 segundos** e toca sozinha. Um clique no cartão a repete.
+- **No slide 5, um clique no pãozinho ou no pão** faz ele morder de novo.
 
-## 1. Capa
+## O roteiro
 
-Boa noite, galerinha! Eu sou o Lucas, e estamos fundando o Brot Markets. "Brot" é pão em alemão, e esse pãozinho
-rabugento é o Cacetinho.
+```
+*1 · CAPA*
 
-O Brot é um mercado de previsão feito para fazer projeto on-chain crescer: o projeto põe dinheiro atrás da própria
-promessa, e a blockchain prova se ele cumpriu.
+Boa noite, galerinha!
 
-## 2. Problema
+Eu sou o Lucas, e estamos fundando o *Brot Markets*.
 
-Em março de 2025, um mercado de 7 milhões de dólares na Polymarket pagou por um acordo que nunca foi assinado. Um
-único detentor de token deu 25% dos votos. Ninguém foi reembolsado.
+"Brot" é pão em alemão,
+e esse pãozinho rabugento é o *Cacetinho*. (É us guri!)
 
-Isso acontece porque, na hora H, alguém precisa dizer o que é verdade. Na Polymarket, a disputa vai para os
-detentores de um token, e leva de 4 a 6 dias. No World, é uma chave da empresa. No PNP, são dois modelos de IA, e um
-modelo de IA pode ser enganado por uma notícia falsa.
+Um mercado de previsão na Solana em que a *própria blockchain* decide o resultado,
+e em que os projetos põem dinheiro atrás das próprias promessas.
 
-Sempre tem alguém entre o fato e o seu pagamento.
 
-## 3. Solução (a demo toca sozinha)
+*2 · PROBLEMA*
 
-A gente inverteu a lógica: só abrimos mercados que a própria blockchain responde. Se a resposta não está gravada
-numa conta da Solana, o mercado nem existe.
+Mercado de previsão vende uma promessa:
+entre no que você sabe e seja pago pela verdade.
 
-Olha o cartão. Um mercado de preço: o SOL encosta em 300 dólares? Escolho o SIM. Outro, patrocinado por um projeto:
-ele queima 100 milhões de tokens até o dia 30? Escolho o NÃO. Chega o prazo, e quem resolve é a rede: no primeiro eu
-ganhei, e o dinheiro caiu na carteira; no segundo eu perdi. Sem votação, sem chave da empresa, sem IA. E qualquer
-pessoa pode conferir a mesma conta.
+Só que, na hora H, *quem diz o que é verdade?*
 
-## 4. Mercado
+Em março de 2025, um mercado de *7 milhões de dólares* na Polymarket
+foi resolvido por um acordo que nunca foi assinado.
+E ninguém foi reembolsado.
 
-Por que agora? Mercados de previsão movimentaram 21,7 bilhões de dólares em 30 dias. Os mercados de cripto são cerca
-de um quinto disso, quase 1 bilhão por mês.
+Na *Polymarket*, a disputa vira votação de detentores de token e leva de 4 a 6 dias.
+Quem tem mais token tem mais voz sobre o seu dinheiro.
 
-E dentro da Solana isso está só começando: o World, na Phantom, foi de 1 milhão por mês em junho para 15 milhões em
-setembro. Treze vezes em três meses.
+No *World*, é uma chave da empresa.
 
-## 5. Como a gente ganha
+No *PNP*, dois modelos de IA.
 
-Simples: 3,5% de cada pote, cobrados quando o mercado é resolvido. Num pote de 1.000 dólares, 35 ficam com o Brot e
-965 são divididos entre quem acertou. A segunda receita são 30% de cada patrocínio.
+Sempre tem alguém entre o fato e o seu pagamento,
+e isso pode atrasar, errar ou ser manipulado.
 
-> **Atenção, antes de apresentar.** O plano de negócio decidiu outra regra: 10% do lado perdedor (Parte 1, §3.3). O
-> slide diz 3,5% do pote por pedido do fundador, e o plano ainda não foi mudado. Com taxa sobre o pote todo, quem
-> entra num lado que tem mais de 96,5% do pote recebe menos do que pôs, mesmo acertando. Se a banca perguntar, a
-> resposta honesta é essa. O valor do ganho na demo do slide 3 usa a mesma taxa.
+A gente veio pra blockchain por um motivo:
+*don't trust, verify.*
 
-## 6. Patrocínio
 
-E aqui vem a parte que ninguém está fazendo: o mercado trata projeto cripto como assunto. A gente trata como cliente.
+*3 · SOLUÇÃO*
 
-Um projeto prometeu queimar tokens? Hoje a promessa vive num post no X e ninguém cobra. No Brot, o próprio projeto
-patrocina o mercado sobre a meta dele: "vamos queimar 100 milhões de tokens até o dia 30?" A comunidade escolhe um
-lado, discute, compartilha, e a rede mostra o resultado. É marketing que se prova sozinho.
+A gente inverteu a lógica:
+só abrimos mercados que a *própria blockchain* responde.
 
-O patrocínio começa em 500 dólares, e 70% vira prêmio para a comunidade do próprio projeto. E não é qualquer um que
-abre mercado: a equipe escolhe cada um.
+Se a resposta não está gravada numa conta da Solana, o mercado nem existe.
 
-## 7. Crescimento e roteiro
+O programa lê e decide.
+*Sem votação, sem chave da empresa, sem IA.*
+E qualquer um pode conferir a mesma conta.
 
-Sem patrocinador não tem mercado. Por isso os primeiros parceiros entram de graça e levam o mercado para a
-comunidade deles. A indicação paga 20% da taxa desde o primeiro dia. Cada mercado vira um cartão que se posta no X. E
-quando a meta é cumprida, o projeto ganha um comprovante para mostrar.
+Olha a demo: você entra só com a carteira, escolhe um lado em USDC
+e, se acertar, o dinheiro cai na sua carteira.
 
-Onde estamos: na rede de testes. Depois, o lançamento com os parceiros. E a rede principal só com auditoria,
-assinatura de mais de uma pessoa e um teto.
+*É prova, não promessa.*
 
-> Os retângulos "Share to take a side" e "Proof cards" são proposta.
->
-> **O contador mostra "7 of 30" com sete marcas FICTÍCIAS** (Vaultide, Meshora, Lumint, Swaploom, Orbynd, Zkrove e
-> Chainquill), desenhadas pelo fundador para a animação poder ser vista.
-> Não são parceiros, e por isso o cartão traz a etiqueta "example". **Não apresente esse número como real.** Antes de
-> uma apresentação de verdade, troque a lista de `public/pitch3/partners.js` pelos parceiros fechados, com o logo e o
-> de acordo de cada um, ou esvazie a lista: vazio, o cartão volta à frase "20–30 projects get one market free".
 
-## 8. Equipe
+*4 · MERCADO*
 
-Quem está atrás do forno. O Bernardo, nosso padeiro-chefe. Eu, que cuido do forno e da receita dentro da lei. E o
-Ronaldo, que escreveu aquelas receitas deliciosas: o programa que lê a rede.
+Por que agora?
 
-> Tudo neste slide é proposta: quem ocupa qual cargo, os nomes de padaria e a frase de cada um. As figuras são poses
-> do pãozinho até haver fotos. Falta o de acordo do Bernardo e do Ronaldo para aparecerem.
+Mercados de previsão movimentaram *21,7 bilhões de dólares* em 30 dias.
 
-## 9. Encerramento
+A Polymarket foi de 1,9 para 4,6 bilhões por mês em dez meses,
+e só começou a cobrar taxa este ano:
+de zero para *93 milhões de dólares em setembro*.
 
-Proof > Promises. Esse é o nosso lema e o nosso convite.
+O setor provou que dá dinheiro.
 
-Tem uma startup web3 e quer provar o que promete? Vamos montar juntos um mercado sobre o seu projeto. As vagas de
-parceiro de lançamento são limitadas. Escaneia o QR, segue @brotmarkets no X e chama na DM. Valeu, galera!
+Cripto é cerca de um quinto do volume, quase *1 bilhão por mês*,
+e a porta de entrada de *40% dos novos usuários*.
+É o nosso público.
 
----
+Na Solana a demanda aparece rápido:
+o World, dentro da Phantom, foi de 1 milhão por mês em junho
+para *15 milhões em setembro*.
+*Treze vezes em três meses.*
+
+E são *80 milhões de carteiras no pump.fun*,
+gente que já entra em narrativa todo dia.
+
+A gente só dá a elas um mercado que *se prova on-chain.*
+
+
+*5 · COMO A GENTE GANHA*
+
+Como a gente ganha:
+*10% do lado que perdeu.*
+Só do lado que perdeu.
+
+Olha o pote: mil dólares.
+Seiscentos no lado que acertou, quatrocentos no lado que errou.
+
+A gente tira 10% dos quatrocentos: *40 dólares*.
+Os outros *960* vão pra quem acertou.
+
+Quem acerta recebe o dele de volta, e mais o resto.
+
+E esse modelo rende mais quando a pergunta está *dividida*.
+Ou seja: o nosso negócio é a *pergunta polêmica*,
+a que divide a timeline.
+
+Treta gera FOMO,
+FOMO enche o pote.
+
+
+*6 · PATROCÍNIO*
+
+E aqui vem a parte que ninguém está fazendo:
+o mercado trata projeto cripto como assunto.
+*A gente trata como cliente.*
+
+Um projeto prometeu queimar tokens?
+Hoje a promessa vive num post no X e ninguém cobra.
+
+No Brot, o próprio projeto patrocina o mercado sobre a meta dele:
+_"vamos queimar 100 milhões de tokens até o dia 30?"_
+
+A comunidade escolhe um lado, SIM ou NÃO, discute, compartilha,
+e quem resolve o resultado é a rede.
+
+*É marketing que se prova sozinho.*
+
+Patrocínio a partir de *500 dólares*:
+*90% vai pro pote*, como prêmio pra comunidade,
+e 10% é a nossa taxa de marketing.
+
+
+*7 · CRIADORES*
+
+E não é só projeto que abre mercado.
+*Qualquer um abre*, no estilo pump.fun.
+
+Custa *0,02 SOL* pra abrir.
+
+Mas é dentro das nossas regras:
+só entra mercado que a blockchain consegue responder.
+
+E quem abriu fica com *1% do pote* do mercado dele.
+
+Ou seja: a galera vai caçar a pergunta que dá treta
+e fazer a própria propaganda, porque ganha com isso.
+
+
+*8 · CRESCIMENTO*
+
+Não vamos comprar volume com campanha de pontos.
+*Volume comprado vai embora.*
+
+A gente quer gente com motivo pra entrar:
+
+- comunidades dos parceiros entrando na meta do próprio projeto:
+  no lançamento, *de 20 a 30 parceiros entram de graça*
+- indicação pagando *20% da taxa* desde o dia um
+- cada mercado vira um cartão pra postar no X
+- e cada criador divulga o próprio mercado, porque leva *1%*
+
+É distribuição distribuída: quem cria, vende.
+
+Hoje estamos na rede de testes.
+Depois, o lançamento com os parceiros.
+E a rede principal só com auditoria, mais de uma assinatura e um teto.
+
+
+*9 · EQUIPE*
+
+E quem tá atrás do forno:
+
+o *Bernardo*, nosso padeiro-chefe;
+eu, que cuido do forno e da receita dentro da lei;
+e o *Ronaldo*, que escreveu essas receitas deliciosas.
+
+
+*10 · ENCERRAMENTO*
+
+*Proof > Promises.*
+
+Esse é o nosso lema e o nosso convite.
+
+Tem uma startup web3 e quer provar o que promete?
+
+Vamos montar juntos um mercado sobre o seu projeto:
+a comunidade escolhe um lado, a fofoca circula,
+e a sua meta fica *provada on-chain.*
+
+As vagas de parceiro de lançamento são *limitadas*.
+
+Escaneia o QR,
+segue *@brotmarkets* no X
+e chama na DM.
+
+Valeu, galera!
+```
+
+## Cuidados ao falar
+
+- **Parceiros.** O slide 8 mostra "7 of 30" com sete marcas fictícias (Vaultide, Meshora, Lumint, Swaploom, Orbynd,
+  Zkrove e Chainquill), e por isso a etiqueta "example". A fala não cita esse número de propósito. **Não o apresente
+  como real.** Antes de uma apresentação de verdade, troque a lista de `public/pitch3/partners.js` pelos parceiros
+  fechados, ou esvazie-a.
+- **Três regras do deck ainda não estão no plano de negócio:** o patrocínio 90/10 (o plano diz 70/30), qualquer um
+  abrir mercado por 0,02 SOL (o plano diz que a equipe abre) e o 1% do criador. Se a banca perguntar "isso já
+  funciona assim?", a resposta honesta é que é o desenho que estamos fechando. A conta de cada uma está em
+  `docs/business/_review/plano-do-pitch3.md`, "A rodada das regras".
+- **O 1% do criador e "só do lado que perdeu".** Se o 1% sair do pote inteiro, quem acerta também paga uma parte
+  dele, e a frase "a gente só ganha do lado que perdeu" continua verdadeira para a taxa do Brot, mas não para o
+  custo total de quem acertou. Com mais de 98,9% do pote de um lado só, quem acertou recebe um pouco menos do que
+  pôs. Falta definir de onde sai o 1%.
+- **Equipe.** Quem ocupa qual cargo, os nomes de padaria e as frases são proposta. As figuras são poses do pãozinho
+  até haver fotos. Falta o de acordo do Bernardo e do Ronaldo para aparecerem.
+- **"Aposta".** A fala usa "escolher um lado" e "entrar", na linha de "não somos bets".
 
 ## Respostas prontas para a sabatina
 
 **"Como é essa taxa, afinal?"**
-3,5% de cada pote, cobrados na resolução. Num pote de 1.000, são 35. É diferente da Polymarket, que cobra por uma
-fórmula sobre o preço.
+10% do lado que perdeu. Num pote de mil com 400 no lado que errou, são 40. Num pote meio a meio dá 5% do pote; num
+pote 90 a 10, se o favorito vence, dá 1%. É diferente da Polymarket, que cobra por uma fórmula sobre o preço.
 
-**"Vocês ficam com 30% do patrocínio e mais a taxa?"**
-São duas coisas. Os 3,5% vêm de todo pote. Os 30% são do patrocínio, e pagam a curadoria e o destaque; os outros
-70% viram prêmio para a comunidade de quem patrocina.
+**"E o patrocínio, quanto fica com vocês?"**
+10%, como taxa de marketing. Os outros 90% viram prêmio para a comunidade de quem patrocina.
+
+**"Qualquer um abre mercado? E a qualidade?"**
+Qualquer um abre, mas só dentro das regras: o mercado tem que ser de um tipo que o programa sabe ler numa conta da
+Solana. Não existe mercado de opinião. Os 0,02 SOL seguram o lixo, e o 1% faz o criador querer um mercado que
+movimente.
 
 **"E o token?"**
 Não faz parte do que estamos apresentando. Se um dia houver um, não dá direito a receita nem a voto, e a gente não
@@ -131,9 +252,7 @@ dias, mais uma devolução de até 5 dólares.
 
 ## O que este roteiro não diz, de propósito
 
-- **"Quem acerta sempre ganha" e "quem acerta nunca perde".** Com 3,5% sobre o pote todo, quem acerta num favorito
-  muito forte recebe menos do que pôs.
-- **"Aposta".** A fala usa "escolher um lado" e "entrar".
+- **"Quem acerta sempre ganha".** Em pote de um lado só não há perdedor para pagar o vencedor.
 - **Exemplos com número de holders, carteiras ativas ou TVL.** O programa não lê nenhum dos três.
 - **Recompra e queima de token.** O plano a deixou em espera.
 - **Superteam, Jupiter e o caso da MicroStrategy.** Foram sugeridos pela banca e ainda não foram conferidos ou

@@ -21,10 +21,10 @@ atualizado a cada rodada.
 
 | Nº | O que está no ar | O que ainda falta dele |
 |---|---|---|
-| B1 | Nada mudou: o slide de receita e a demo usam 3,5% do pote | A decisão da taxa |
+| B1 | O slide de receita e a demo usam 10% do lado perdedor, como o plano (ver "A rodada das regras") | Nada sobre a taxa. Faltam as três decisões que a rodada abriu: patrocínio 90/10, qualquer um abrir mercado, e de onde sai o 1% do criador |
 | B2 | A frase de uma linha é o subtítulo da capa | Aprovar ou trocar |
 | B3 | O contador de parceiros está ligado com sete logos de exemplo e a etiqueta "example" (ver "O modo leve", abaixo) | Os parceiros fechados, os logos e o de acordo de cada um, para trocar os exemplos |
-| B4 | Os dois retângulos novos: "Share to take a side" e "Proof cards" | Aprovar ou trocar |
+| B4 | "Share to take a side" e, no lugar de "Proof cards", "Creators earn 1%" | Aprovar ou trocar |
 | B5 | O slide de equipe, com os três nomes e a cortina. As figuras são poses do pãozinho | Confirmar quem ocupa qual cargo; as fotos; o de acordo do Bernardo e do Ronaldo; fatos para a frase de cada um |
 | B6 | Os cargos de padaria, com o cargo real ao lado | Aprovar ou trocar |
 | B7 | `/pitch3` | Nada |
@@ -69,9 +69,61 @@ lista pelos parceiros fechados, ou esvazia-se: vazia, o cartão volta à frase d
 E a frase de cada pessoa no slide de equipe descreve a função, e não a biografia: nenhum fato sobre os três foi
 inventado.
 
+### A rodada das regras (7/10/2026, à noite)
+
+Pedido do fundador depois de receber o roteiro de fala: voltar a taxa para 10% do lado perdedor, "de um jeito mais
+inteligente de passar essa informação, de forma simples"; baixar a parte do Brot no patrocínio para 10%, chamada de
+taxa de marketing; deixar mais claros os passos 3 e 4 do slide de patrocínio; um slide novo antes do de crescimento,
+dizendo que qualquer um abre um mercado, como no pump.fun; e trocar o retângulo "Proof cards" pelo 1% do criador.
+
+| O que | Como ficou no ar |
+|---|---|
+| Slide de receita | Título "We only earn from the losing side". Um "10%" grande, "of the losing side", e uma barra do pote em escala: 600 no lado que acertou, 400 no que errou, e a fatia do Brot. Embaixo, "40 USDC to Brot" e "960 USDC to the winners" |
+| Demo do slide de solução | Usa a mesma regra. O ganho do exemplo passou a ser de 90 USDC |
+| Mordida do mascote | A etiqueta que sobe diz "40 USDC", o número do próprio slide |
+| Patrocínio, passo 3 | "Its community picks a side: YES or NO" |
+| Patrocínio, passo 4 | "The chain resolves the result", com o brilho em "The chain" |
+| Patrocínio, frase final | "90% becomes the prize pool. 10% is a marketing fee." |
+| Slide novo, "Creators" | "Anyone can open a market, pump.fun style". Três cartões: 0.02 SOL para abrir; só mercados que a rede responde; 1% do pote para quem abriu |
+| Crescimento, quarto retângulo | "Creators earn 1%", no lugar de "Proof cards" |
+
+O deck passa a ter **dez slides**. O roteiro de fala (`services/landing/pitch3-notes.md`) foi refeito no formato do
+fundador.
+
+**Uma palavra trocada de propósito.** Ele sugeriu "a comunidade vota o seu lado". O slide diz "picks a side", porque
+o deck inteiro vende "no votes, no judges", e "vota" no passo 3 daria a entender o contrário.
+
+**O que esta rodada muda nas regras do produto, e não só no deck.** Só a taxa voltou ao que o plano de negócio diz.
+Os outros três pontos saem dele, e o plano não foi alterado: cada um pede a decisão do fundador e a revisão de
+impacto antes de virar regra.
+
+| Ponto | O deck diz | O plano diz | O que pesa |
+|---|---|---|---|
+| Patrocínio | 90% para o pote, 10% para o Brot | 70% e 30% (P1 §3.7) | A receita por patrocínio cai a um terço: num de 500 dólares, de 150 para 50. As projeções da Parte 2 usam os 30% |
+| Quem abre mercado | Qualquer um, por 0.02 SOL | A equipe abre, o patrocinador pede e o público só sugere (P1 §4.1). O Product Brief lista a criação pelo público entre o que o produto não faz | Muda o desenho do programa da Sprint 02: quem pode criar, com que limites, e quem paga o aluguel das contas. Sai também a revisão humana de cada pergunta, que o plano exige |
+| Moeda da taxa de abertura | SOL | O produto só usa USDC | Uma segunda moeda no programa e no caixa |
+| 1% do criador | 1% do pote | Não existe | Ver abaixo |
+
+**O 1% do criador, na conta.** O slide de receita diz que o Brot só ganha do lado perdedor, e isso continua verdade
+para a taxa do Brot. Mas, se o 1% sair do pote inteiro, quem acerta paga uma parte dele. Com `V` no lado vencedor e
+`P` no perdedor, os vencedores recebem `0,99 V + 0,89 P`. Eles só recebem menos do que puseram quando o lado
+perdedor é menor que 1,12% do vencedor, ou seja, com mais de 98,9% do pote de um lado só. É raro, mas é o mesmo
+defeito que fez o plano trocar a taxa sobre o pote pela taxa sobre o lado perdedor.
+
+Há dois jeitos de evitar, e nenhum foi escolhido:
+
+1. **O 1% sai do lado perdedor,** como a taxa do Brot, limitado ao que houver lá. Quem acerta nunca paga. O criador
+   recebe o prometido em quase todo mercado.
+2. **O 1% sai da taxa do Brot.** Quem acerta nunca paga, mas o Brot abre mão de muito: num pote meio a meio a taxa
+   é 5% do pote e o criador leva um quinto dela; num pote 90 a 10 a taxa é 1% do pote, e o criador levaria tudo.
+
+**Cena.** O slide novo não tem cena própria: no modo completo o pãozinho atravessa correndo, como nos slides sem
+cena; no leve, só a entrada suave.
+
 ## Como os slides ficam
 
-O slide de mercados sai, e entra o de equipe. A numeração dos rótulos acompanha.
+O slide de mercados sai, e entram o de equipe e, na rodada das regras, o de criadores. A numeração dos rótulos
+acompanha.
 
 **Ordem pedida pelo fundador em 7/10/2026, depois de ver o deck no ar:** capa, problema, solução, mercado, receita,
 patrocínio, crescimento, equipe, fechamento. É a da tabela. Antes disso o patrocínio vinha logo depois da solução e
@@ -84,11 +136,12 @@ slide: a bola do TAM agora chega depois da solução, a mordida depois do mercad
 | 2 | Problema | 01 | Fica |
 | 3 | Solução | 02 | Demo animada no lugar do cartão parado |
 | 4 | Mercado | 03 | Sai o ponto de equilíbrio; entra um fato favorável |
-| 5 | Receita | 04 | Espera a decisão da taxa |
-| 6 | Patrocínio | 05 | Recebe "on-chain KPI markets" e "curated by the team"; brilho em "the chain" |
-| 7 | Crescimento | 06 | Contador de parceiros e dois retângulos novos, quando houver resposta |
-| 8 | Equipe | 07 | Slide novo, quando houver os dados |
-| 9 | Fechamento | sem rótulo | Fica |
+| 5 | Receita | 04 | 10% do lado perdedor, com a barra do pote em escala |
+| 6 | Patrocínio | 05 | Recebe "on-chain KPI markets"; brilho em "the chain"; 90% para o pote e 10% de taxa de marketing. O "curated by the team" saiu quando entrou o slide de criadores |
+| 7 | Criadores | 06 | Slide novo: qualquer um abre um mercado por 0.02 SOL, dentro das regras, e leva 1% do pote |
+| 8 | Crescimento | 07 | Contador de parceiros, dois retângulos novos e o 1% do criador |
+| 9 | Equipe | 08 | Slide novo, quando houver os dados |
+| 10 | Fechamento | sem rótulo | Fica |
 
 ## Bloco A. Sem depender de nada
 
@@ -119,7 +172,7 @@ Quem pede menos movimento no sistema, e o celular em pé, já não veem animaç�
 
 | Nº | Slide | Tarefa | O que falta | Estado |
 |---|---|---|---|---|
-| B1 | Receita | Fechar o slide e os valores da demo | A taxa: 3,5% do pote é a regra do produto, ou só a do deck? O plano diz 10% do lado perdedor (P1 §3.3) | espera resposta |
+| B1 | Receita | Fechar o slide e os valores da demo | Respondido em 7/10/2026: 10% do lado perdedor, como o plano (P1 §3.3) | feito |
 | B2 | Capa | Subtítulo com a frase de uma linha | Aprovar: "The prediction market where projects put money behind their own promises, and the chain proves whether they delivered." | espera resposta |
 | B3 | Crescimento | Contador de parceiros, com os logos entrando no ritmo e abrindo em leque nos quatro últimos | Quantos parceiros estão fechados, quais, os logos e o de acordo de cada um. Formato sugerido: "N of 30", que mantém a escassez | espera resposta |
 | B4 | Crescimento | Dois retângulos novos | Aprovar os dois propostos (cartão compartilhável no X; comprovante para o projeto postar) ou pedir outros | espera resposta |
@@ -167,7 +220,7 @@ pose de lado, correndo, pulando, segurando ou puxando.
 | 9 | Braço subindo, a meio caminho (grande) | Patrocínio: sequência apontando | sim |
 | 10 | Apontando (grande) | Patrocínio: sequência apontando | sim |
 | 11 | Apontando com ênfase (grande) | Patrocínio: último quadro | não |
-| 12 | Boca aberta, mordendo | Receita: a fatia de 3,5% e a surpresa escondida | sim |
+| 12 | Boca aberta, mordendo | Receita: a fatia da taxa e a surpresa escondida | sim |
 | 13 | Mastigando | A mesma cena | não |
 | 14 | Pão inteiro (objeto) | A mesma cena | sim |
 | 15 | Pão com a mordida (objeto) | A mesma cena | sim |
@@ -186,7 +239,7 @@ para a direita, porque o código espelha; os dois quadros de corrida com o corpo
 | C2 | Problema para Solução | Espia pelo canto, agarra e puxa o slide | 5, 6 | feito |
 | C3 | Solução para Patrocínio | Voa pendurado numa corda | 7, 8 | feito |
 | C4 | No slide de Patrocínio | Sequência apontando para o quadrado final | 9, 10, 11 | feito |
-| C5 | Patrocínio para Receita | Morde a fatia de 3,5%; clicar nele repete a mordida (a surpresa escondida) | 12 a 15 | feito |
+| C5 | Mercado para Receita | Morde a fatia da taxa; clicar nele repete a mordida (a surpresa escondida) | 12 a 15 | feito |
 | C6 | Crescimento para Equipe | Puxa a corda e abre a cortina de cada um | 16, 17 | feito |
 | A9 | Receita para Mercado | Chega em cima do círculo grande, que rola para dentro | nenhuma | feito |
 | A9 | Mercado para Crescimento | Entra seguido por uma fila de pãezinhos | nenhuma | feito |
