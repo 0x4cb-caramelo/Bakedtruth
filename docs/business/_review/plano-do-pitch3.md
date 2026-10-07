@@ -37,21 +37,27 @@ do que toca no leve é dele:
 
 | Slide | No modo leve |
 |---|---|
-| 1 para 2 | A troca inteira: sai do adesivo, cai, corre, e atravessa o slide 2 |
-| 3 | O slide sendo puxado (com a espiada e a pegada antes, no slide 2) e a demo |
-| 4 | Só o brilho em "the chain". Sem a corda e sem a sequência apontando |
-| 5 | Nada |
-| 6 | A bola do TAM chegando com o pãozinho em cima |
-| 7 | O contador de parceiros. Sem a fila de pãezinhos |
-| 8 | A cortina, inteira |
-| 9 | Tudo: a corrida e o final |
+| Capa para Problema | A troca inteira: sai do adesivo, cai, corre, e atravessa o slide seguinte |
+| Solução | O slide sendo puxado (com a espiada e a pegada antes, no slide do problema) e a demo |
+| Patrocínio | Só o brilho em "the chain". Sem a corda e sem a sequência apontando |
+| Receita | Nada |
+| Mercado | A bola do TAM chegando com o pãozinho em cima |
+| Crescimento | O contador de parceiros. Sem a fila de pãezinhos |
+| Equipe | A cortina, inteira |
+| Fechamento | Tudo: a corrida e o final |
+
+A lista dele veio por número de slide, na ordem antiga. Depois que ele reordenou os slides (ver abaixo), cada
+comportamento ficou com o **conteúdo** do slide, e não com a posição: o de mercado segue com a bola, o de receita
+segue sem nada, o de patrocínio segue só com o brilho.
 
 Onde um slide "não toca nada", ele ainda entra com a transição suave de sempre. Foi leitura de quem construiu: a
 lista dele fala das cenas, e sem a transição a troca fica seca.
 
 **O contador de parceiros foi ligado com sete logos de exemplo,** também a pedido dele ("vou criar umas 7 imagens de
 logos fictícios"). Conta de 0 a 7, o 7 fica com o mesmo brilho de "the chain", e os quatro últimos logos abrem em
-leque. Os sete logos atuais são marcadores feitos por código (uma letra num círculo), até os dele chegarem.
+leque. Os logos são as sete marcas fictícias que ele desenhou em seguida (`docs/product/poses/fic_partners`:
+Vaultide, Meshora, Lumint, Swaploom, Orbynd, Zkrove e Chainquill). São cartões retangulares com o nome, e não
+círculos, então o cartão do slide os mostra como cartõezinhos que se empilham e abrem em leque.
 
 **O cuidado.** "7 of 30 launch spots taken" é uma afirmação sobre o negócio, e não há sete parceiros. Por isso cada
 entrada da lista é marcada como exemplo e o cartão mostra a etiqueta "example" enquanto houver uma. Um teste falha
@@ -67,14 +73,19 @@ inventado.
 
 O slide de mercados sai, e entra o de equipe. A numeração dos rótulos acompanha.
 
+**Ordem pedida pelo fundador em 7/10/2026, depois de ver o deck no ar:** capa, problema, solução, mercado, receita,
+patrocínio, crescimento, equipe, fechamento. É a da tabela. Antes disso o patrocínio vinha logo depois da solução e
+o mercado depois da receita. As cenas do mascote são ligadas ao slide que chega, então cada uma foi junto com o seu
+slide: a bola do TAM agora chega depois da solução, a mordida depois do mercado, e a corda depois da receita.
+
 | Posição | Slide | Rótulo | Mudança principal |
 |---|---|---|---|
 | 1 | Capa | sem rótulo | Mascote sem etiqueta; links na linha de baixo |
 | 2 | Problema | 01 | Fica |
 | 3 | Solução | 02 | Demo animada no lugar do cartão parado |
-| 4 | Patrocínio | 03 | Recebe "on-chain KPI markets" e "curated by the team"; brilho em "the chain" |
+| 4 | Mercado | 03 | Sai o ponto de equilíbrio; entra um fato favorável |
 | 5 | Receita | 04 | Espera a decisão da taxa |
-| 6 | Mercado | 05 | Sai o ponto de equilíbrio; entra um fato favorável |
+| 6 | Patrocínio | 05 | Recebe "on-chain KPI markets" e "curated by the team"; brilho em "the chain" |
 | 7 | Crescimento | 06 | Contador de parceiros e dois retângulos novos, quando houver resposta |
 | 8 | Equipe | 07 | Slide novo, quando houver os dados |
 | 9 | Fechamento | sem rótulo | Fica |

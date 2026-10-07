@@ -10,7 +10,7 @@
  * Team slide and the closing finale are the two longer moments.
  */
 import { bite } from "./bite.js?v=1";
-import { partners } from "./partners.js?v=2";
+import { partners } from "./partners.js?v=3";
 import { run } from "./runner.js?v=1";
 import { pointing, swingIn } from "./sponsors.js?v=1";
 import { running, sprite } from "./sprites.js?v=1";

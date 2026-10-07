@@ -48,16 +48,13 @@ ele queima 100 milhões de tokens até o dia 30? Escolho o NÃO. Chega o prazo, 
 ganhei, e o dinheiro caiu na carteira; no segundo eu perdi. Sem votação, sem chave da empresa, sem IA. E qualquer
 pessoa pode conferir a mesma conta.
 
-## 4. Patrocínio
+## 4. Mercado
 
-E aqui vem a parte que ninguém está fazendo: o mercado trata projeto cripto como assunto. A gente trata como cliente.
+Por que agora? Mercados de previsão movimentaram 21,7 bilhões de dólares em 30 dias. Os mercados de cripto são cerca
+de um quinto disso, quase 1 bilhão por mês.
 
-Um projeto prometeu queimar tokens? Hoje a promessa vive num post no X e ninguém cobra. No Brot, o próprio projeto
-patrocina o mercado sobre a meta dele: "vamos queimar 100 milhões de tokens até o dia 30?" A comunidade escolhe um
-lado, discute, compartilha, e a rede mostra o resultado. É marketing que se prova sozinho.
-
-O patrocínio começa em 500 dólares, e 70% vira prêmio para a comunidade do próprio projeto. E não é qualquer um que
-abre mercado: a equipe escolhe cada um.
+E dentro da Solana isso está só começando: o World, na Phantom, foi de 1 milhão por mês em junho para 15 milhões em
+setembro. Treze vezes em três meses.
 
 ## 5. Como a gente ganha
 
@@ -69,13 +66,16 @@ Simples: 3,5% de cada pote, cobrados quando o mercado é resolvido. Num pote de 
 > entra num lado que tem mais de 96,5% do pote recebe menos do que pôs, mesmo acertando. Se a banca perguntar, a
 > resposta honesta é essa. O valor do ganho na demo do slide 3 usa a mesma taxa.
 
-## 6. Mercado
+## 6. Patrocínio
 
-Por que agora? Mercados de previsão movimentaram 21,7 bilhões de dólares em 30 dias. Os mercados de cripto são cerca
-de um quinto disso, quase 1 bilhão por mês.
+E aqui vem a parte que ninguém está fazendo: o mercado trata projeto cripto como assunto. A gente trata como cliente.
 
-E dentro da Solana isso está só começando: o World, na Phantom, foi de 1 milhão por mês em junho para 15 milhões em
-setembro. Treze vezes em três meses.
+Um projeto prometeu queimar tokens? Hoje a promessa vive num post no X e ninguém cobra. No Brot, o próprio projeto
+patrocina o mercado sobre a meta dele: "vamos queimar 100 milhões de tokens até o dia 30?" A comunidade escolhe um
+lado, discute, compartilha, e a rede mostra o resultado. É marketing que se prova sozinho.
+
+O patrocínio começa em 500 dólares, e 70% vira prêmio para a comunidade do próprio projeto. E não é qualquer um que
+abre mercado: a equipe escolhe cada um.
 
 ## 7. Crescimento e roteiro
 
@@ -88,7 +88,8 @@ assinatura de mais de uma pessoa e um teto.
 
 > Os retângulos "Share to take a side" e "Proof cards" são proposta.
 >
-> **O contador mostra "7 of 30" com sete logos de EXEMPLO**, a pedido do fundador, para a animação poder ser vista.
+> **O contador mostra "7 of 30" com sete marcas FICTÍCIAS** (Vaultide, Meshora, Lumint, Swaploom, Orbynd, Zkrove e
+> Chainquill), desenhadas pelo fundador para a animação poder ser vista.
 > Não são parceiros, e por isso o cartão traz a etiqueta "example". **Não apresente esse número como real.** Antes de
 > uma apresentação de verdade, troque a lista de `public/pitch3/partners.js` pelos parceiros fechados, com o logo e o
 > de acordo de cada um, ou esvazie a lista: vazio, o cartão volta à frase "20–30 projects get one market free".
@@ -96,7 +97,7 @@ assinatura de mais de uma pessoa e um teto.
 ## 8. Equipe
 
 Quem está atrás do forno. O Bernardo, nosso padeiro-chefe. Eu, que cuido do forno e da receita dentro da lei. E o
-Ronaldo, que escreveu o programa que lê a rede.
+Ronaldo, que escreveu aquelas receitas deliciosas: o programa que lê a rede.
 
 > Tudo neste slide é proposta: quem ocupa qual cargo, os nomes de padaria e a frase de cada um. As figuras são poses
 > do pãozinho até haver fotos. Falta o de acordo do Bernardo e do Ronaldo para aparecerem.

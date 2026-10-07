@@ -1,0 +1,58 @@
+[
+  {
+    "name": "VAULTIDE",
+    "segment": "DeFi",
+    "file": "01-vaultide.png",
+    "width": 440,
+    "height": 280,
+    "fictional": true
+  },
+  {
+    "name": "MESHORA",
+    "segment": "Infraestrutura",
+    "file": "02-meshora.png",
+    "width": 440,
+    "height": 280,
+    "fictional": true
+  },
+  {
+    "name": "LUMINT",
+    "segment": "NFT",
+    "file": "03-lumint.png",
+    "width": 440,
+    "height": 280,
+    "fictional": true
+  },
+  {
+    "name": "SWAPLOOM",
+    "segment": "DEX",
+    "file": "04-swaploom.png",
+    "width": 440,
+    "height": 280,
+    "fictional": true
+  },
+  {
+    "name": "ORBYND",
+    "segment": "DAO",
+    "file": "05-orbynd.png",
+    "width": 440,
+    "height": 280,
+    "fictional": true
+  },
+  {
+    "name": "ZKROVE",
+    "segment": "Privacidade",
+    "file": "06-zkrove.png",
+    "width": 440,
+    "height": 280,
+    "fictional": true
+  },
+  {
+    "name": "CHAINQUILL",
+    "segment": "Analytics",
+    "file": "07-chainquill.png",
+    "width": 440,
+    "height": 280,
+    "fictional": true
+  }
+]
