@@ -1,7 +1,7 @@
 /**
  * Purpose: the mascot's scenes of the deck at /pitch3, by the slide that arrives: what plays when it comes going
  *          forward, going back, or when the page opens on it. A slide with no scene gets the plain run.
- * Version: 0.3.0 · Sprint: out of band (landing page), 2026-10-07
+ * Version: 0.4.0 · Sprint: out of band (landing page), 2026-10-07
  *
  * A scene is `scene(stage, slide, how)`, with `how` being "forward", "back" or "open". `stage` comes from motion.js:
  * stage.enter(slide, forward) is the slide's usual entrance; stage.keep(thing) registers an element, an animation or
@@ -10,7 +10,7 @@
  * Team slide and the closing finale are the two longer moments.
  */
 import { bite } from "./bite.js?v=1";
-import { partners } from "./partners.js?v=1";
+import { partners } from "./partners.js?v=2";
 import { run } from "./runner.js?v=1";
 import { pointing, swingIn } from "./sponsors.js?v=1";
 import { running, sprite } from "./sprites.js?v=1";
@@ -58,12 +58,24 @@ function tamBall(stage, slide) {
   rider.box.animate(off, { duration: 1500, easing: "linear", fill: "forwards" });
 }
 
+/**
+ * `stage.lite` is the lighter setting (the "N" key). The founder's list of what plays in it, of 2026-10-07: the whole
+ * change from the cover to the Problem slide; the Solution slide pulled in, and its demo; on Sponsors only the glow;
+ * nothing on How we earn; the circle and its rider on Market; the partners count on Growth; all of Team; all of
+ * Close. Where a slide plays nothing it still comes in with its usual entrance.
+ */
 export const SCENES = {
+  Title(stage, slide, how) {
+    if (how === "open") return;
+    if (stage.lite) stage.enter(slide, how === "forward");
+    else plain(stage, slide, how === "forward");
+  },
   Solution(stage, slide, how) {
     if (how === "forward") pulled(stage, slide);
-    else if (how === "back") plain(stage, slide, false);
+    else if (how === "back") stage.lite ? stage.enter(slide, false) : plain(stage, slide, false);
   },
   Sponsors(stage, slide, how) {
+    if (stage.lite) return how === "open" ? undefined : stage.enter(slide, how === "forward");
     if (how !== "forward") {
       if (how === "back") plain(stage, slide, false);
       return pointing(stage, slide);
@@ -73,19 +85,21 @@ export const SCENES = {
   },
   "How we earn"(stage, slide, how) {
     if (how !== "open") stage.enter(slide, how === "forward");
+    if (stage.lite) return;
     if (how === "back") run(stage, slide, false);
     bite(stage, slide, { runIn: how === "forward" });
   },
   Market(stage, slide, how) {
-    if (how === "back") return plain(stage, slide, false);
+    if (how === "back") return stage.lite ? stage.enter(slide, false) : plain(stage, slide, false);
     if (how === "forward") {
       stage.enter(slide, true);
       tamBall(stage, slide);
     }
   },
   Growth(stage, slide, how) {
-    // The mascot with three smaller ones behind it: the community coming along.
-    if (how !== "open") plain(stage, slide, how === "forward", { followers: 3, ms: 1100 });
+    // The mascot with three smaller ones behind it: the community coming along. Not in the lighter setting.
+    if (how !== "open" && stage.lite) stage.enter(slide, how === "forward");
+    else if (how !== "open") plain(stage, slide, how === "forward", { followers: 3, ms: 1100 });
     partners(stage, slide);
   },
   Team(stage, slide, how) {

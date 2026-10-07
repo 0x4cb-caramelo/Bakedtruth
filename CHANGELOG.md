@@ -39,6 +39,11 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   - **Slide de equipe, dois retângulos novos de crescimento e o contador de parceiros,** como proposta à espera de
     confirmação. A lista de parceiros nasce vazia: nenhum parceiro inventado.
   - Sai o slide de exemplos de mercado e o ponto de equilíbrio; a capa abre pela frase de uma linha.
+  - **Modo leve, tecla `N`,** entre o movimento completo e o desligado (`M`): só as cenas que o fundador escolheu,
+    slide a slide. A lista está no plano.
+  - **Contador de parceiros ligado com sete logos de exemplo,** a pedido do fundador, para a animação poder ser
+    vista: conta de 0 a 7 e abre os quatro últimos em leque. O cartão traz a etiqueta "example", porque não são
+    parceiros; ver o bloco "Em aberto".
 - **Biblioteca de poses do mascote** em `docs/product/poses`: as 17 novas do fundador e as 10 peças que já existiam,
   nas mesmas duas pastas e no mesmo quadro. O `LEIA-ME` de lá diz o que foi arrumado em cada uma.
 - **Frase de elevador aprovada** pelo fundador em 7/10/2026, no `PITCH.md`, com o porquê de cada escolha.
@@ -88,6 +93,9 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   Também não há aviso quando entra um email novo.
 - **Portão de redação do deck:** o fundador mandou publicar, e falta aprovar linha por linha o que vai a público e
   dizer quem mantém o deck. Até lá ele fica só por link. A recomendação está no `PITCH.md`.
+- **O `/pitch3` mostra "7 of 30 launch spots taken" com sete logos de exemplo.** Não há sete parceiros: foi pedido
+  do fundador para ver a animação, e o cartão diz "example". Antes de qualquer apresentação de verdade, trocar a
+  lista (`services/landing/public/pitch3/partners.js`) pelos parceiros fechados ou esvaziá-la.
 - **A taxa no `/pitch2` diverge do plano.** O fundador pediu para o deck dizer 3,5% do pote ("voltar ao projeto
   anterior que era simplesmente 3%, e aumente para 3.5%"). O plano (Parte 1, §3.3) decidiu 10% do lado perdedor,
   justamente porque a taxa sobre o pote todo faz quem acerta num favorito muito forte receber menos do que pôs (com

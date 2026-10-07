@@ -23,11 +23,40 @@ atualizado a cada rodada.
 |---|---|---|
 | B1 | Nada mudou: o slide de receita e a demo usam 3,5% do pote | A decisão da taxa |
 | B2 | A frase de uma linha é o subtítulo da capa | Aprovar ou trocar |
-| B3 | O contador de parceiros está pronto e desligado: a lista (`public/pitch3/partners.js`) nasce vazia, e o cartão mostra a frase de sempre. Foi testado com uma lista fictícia que só existe dentro do teste | Os parceiros fechados, os logos e o de acordo de cada um |
+| B3 | O contador de parceiros está ligado com sete logos de exemplo e a etiqueta "example" (ver "O modo leve", abaixo) | Os parceiros fechados, os logos e o de acordo de cada um, para trocar os exemplos |
 | B4 | Os dois retângulos novos: "Share to take a side" e "Proof cards" | Aprovar ou trocar |
 | B5 | O slide de equipe, com os três nomes e a cortina. As figuras são poses do pãozinho | Confirmar quem ocupa qual cargo; as fotos; o de acordo do Bernardo e do Ronaldo; fatos para a frase de cada um |
 | B6 | Os cargos de padaria, com o cargo real ao lado | Aprovar ou trocar |
 | B7 | `/pitch3` | Nada |
+
+### O modo leve, tecla `N` (pedido de 7/10/2026, depois de ver o deck no ar)
+
+O fundador gostou do resultado e pediu um meio-termo entre o movimento completo e o desligado, com tecla e ícone
+próprios. São três modos: completo (o padrão), leve (`N`, o círculo meio cheio na barra) e desligado (`M`). A lista
+do que toca no leve é dele:
+
+| Slide | No modo leve |
+|---|---|
+| 1 para 2 | A troca inteira: sai do adesivo, cai, corre, e atravessa o slide 2 |
+| 3 | O slide sendo puxado (com a espiada e a pegada antes, no slide 2) e a demo |
+| 4 | Só o brilho em "the chain". Sem a corda e sem a sequência apontando |
+| 5 | Nada |
+| 6 | A bola do TAM chegando com o pãozinho em cima |
+| 7 | O contador de parceiros. Sem a fila de pãezinhos |
+| 8 | A cortina, inteira |
+| 9 | Tudo: a corrida e o final |
+
+Onde um slide "não toca nada", ele ainda entra com a transição suave de sempre. Foi leitura de quem construiu: a
+lista dele fala das cenas, e sem a transição a troca fica seca.
+
+**O contador de parceiros foi ligado com sete logos de exemplo,** também a pedido dele ("vou criar umas 7 imagens de
+logos fictícios"). Conta de 0 a 7, o 7 fica com o mesmo brilho de "the chain", e os quatro últimos logos abrem em
+leque. Os sete logos atuais são marcadores feitos por código (uma letra num círculo), até os dele chegarem.
+
+**O cuidado.** "7 of 30 launch spots taken" é uma afirmação sobre o negócio, e não há sete parceiros. Por isso cada
+entrada da lista é marcada como exemplo e o cartão mostra a etiqueta "example" enquanto houver uma. Um teste falha
+se alguém puser na lista uma entrada sem essa marca e sem o arquivo do logo. Para apresentar de verdade, troca-se a
+lista pelos parceiros fechados, ou esvazia-se: vazia, o cartão volta à frase de sempre.
 
 **Duas escolhas feitas ao aplicar as imagens, que ele pode desfazer.** Na capa voltou o adesivo com a etiqueta
 `brot.markets`, porque é dele que o pãozinho sai, e para o nome não aparecer duas vezes saiu a logo do canto de cima.

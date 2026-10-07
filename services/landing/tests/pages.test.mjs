@@ -128,12 +128,17 @@ test("the third version of the deck has nine slides on the same stage, and keeps
   assert.match(text, /3\.5%\s+of every pot/);
 });
 
-test("the fourth version of the deck has its demo, its own motion and what the founder asked for on 2026-10-07", () => {
+test("the fourth version of the deck has its demo, its own motion and what the founder asked for on 2026-10-07", async () => {
   const slides = [...deck3.matchAll(/<section class="slide" data-label="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(slides.join(", "), "Title, Problem, Solution, Sponsors, How we earn, Market, Growth, Team, Close");
   assert.equal([...deck3.matchAll(/data-member/g)].length, 3, "the team slide has its three people");
-  // The partners list starts empty: no invented partner is shown.
-  assert.match(read("pitch3/partners.js"), /export const PARTNERS = \[\];/);
+  // A count of partners is a claim about the business. The list holds examples for now, at the founder's request:
+  // every one is marked as an example, has its image, and the card has the tag that says so.
+  const { PARTNERS } = await import("../public/pitch3/partners.js");
+  assert.ok(PARTNERS.length > 0 && PARTNERS.every((partner) => partner.example === true), "only marked examples");
+  for (const partner of PARTNERS) assert.ok(existsSync(join(ROOT, "pitch3/img/partners", partner.logo)), partner.logo);
+  assert.match(deck3, /data-partners-tag hidden>example</);
+  assert.ok(deck3.includes("data-lite"), "the bar has the button of the lighter setting");
   assert.match(deck3, new RegExp(`<span data-count aria-live="polite">1 / ${slides.length}</span>`));
   // motion.js is a module and deck.js is deferred: both run in document order, and the listener has to come first.
   assert.ok(deck3.indexOf('src="motion.js?') > 0 && deck3.indexOf('src="motion.js?') < deck3.indexOf("deck.js?"));
