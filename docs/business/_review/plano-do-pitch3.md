@@ -11,6 +11,29 @@
 **Estado de cada item:** `feito`, `fazendo`, `espera resposta`, `espera imagem` ou `depois`. Este arquivo é
 atualizado a cada rodada.
 
+## Onde o plano está (7/10/2026, fim do dia)
+
+- **Bloco A: feito e no ar.**
+- **Bloco C: feito.** O fundador entregou as 17 imagens no mesmo dia (`docs/product/poses`), e as seis cenas foram
+  montadas. As poses que já existiam foram trazidas para as mesmas duas pastas (o `LEIA-ME` de lá explica).
+- **Bloco B: construído como proposta, à espera de confirmação.** A pedido dele ("comece o bloco B dentro do que você
+  conseguir entregar"), o que não dependia de dado novo foi feito e está no ar para ele avaliar:
+
+| Nº | O que está no ar | O que ainda falta dele |
+|---|---|---|
+| B1 | Nada mudou: o slide de receita e a demo usam 3,5% do pote | A decisão da taxa |
+| B2 | A frase de uma linha é o subtítulo da capa | Aprovar ou trocar |
+| B3 | O contador de parceiros está pronto e desligado: a lista (`public/pitch3/partners.js`) nasce vazia, e o cartão mostra a frase de sempre. Foi testado com uma lista fictícia que só existe dentro do teste | Os parceiros fechados, os logos e o de acordo de cada um |
+| B4 | Os dois retângulos novos: "Share to take a side" e "Proof cards" | Aprovar ou trocar |
+| B5 | O slide de equipe, com os três nomes e a cortina. As figuras são poses do pãozinho | Confirmar quem ocupa qual cargo; as fotos; o de acordo do Bernardo e do Ronaldo; fatos para a frase de cada um |
+| B6 | Os cargos de padaria, com o cargo real ao lado | Aprovar ou trocar |
+| B7 | `/pitch3` | Nada |
+
+**Duas escolhas feitas ao aplicar as imagens, que ele pode desfazer.** Na capa voltou o adesivo com a etiqueta
+`brot.markets`, porque é dele que o pãozinho sai, e para o nome não aparecer duas vezes saiu a logo do canto de cima.
+E a frase de cada pessoa no slide de equipe descreve a função, e não a biografia: nenhum fato sobre os três foi
+inventado.
+
 ## Como os slides ficam
 
 O slide de mercados sai, e entra o de equipe. A numeração dos rótulos acompanha.
@@ -31,17 +54,17 @@ O slide de mercados sai, e entra o de equipe. A numeração dos rótulos acompan
 
 | Nº | Slide | Tarefa | Estado |
 |---|---|---|---|
-| A1 | Capa | Trocar o adesivo pelo mascote sem etiqueta, para o nome não aparecer duas vezes | fazendo |
-| A2 | Capa | Linha de baixo vira `brot.markets · x.com/brotmarkets` | fazendo |
+| A1 | Capa | Trocar o adesivo pelo mascote sem etiqueta, para o nome não aparecer duas vezes | feito |
+| A2 | Capa | Linha de baixo vira `brot.markets · x.com/brotmarkets` | feito |
 | A3 | Problema | Fica como está | feito |
-| A4 | Solução | Demo animada: o ponteiro escolhe YES, o cartão vira, segunda pergunta (queima patrocinada), escolhe NO, vira de volta e mostra o ganho, vira de novo e mostra a perda. Carimbo "resolved by the chain" antes de cada resultado. Os valores saem de uma linha só do código | fazendo |
-| A5 | Mercados | Sai o slide. A frase "on-chain KPI markets" e o "curated by the team" vão para o de patrocínio | fazendo |
-| A6 | Patrocínio | Brilho sutil em "the chain" | fazendo |
-| A7 | Mercado | Sai o ponto de equilíbrio. Entra: o World foi de 1,1 para 15,4 milhões por mês em três meses, dentro da Solana (P2, FATO SECUNDÁRIO, DefiLlama) | fazendo |
+| A4 | Solução | Demo animada: o ponteiro escolhe YES, o cartão vira, segunda pergunta (queima patrocinada), escolhe NO, vira de volta e mostra o ganho, vira de novo e mostra a perda. Carimbo "resolved by the chain" antes de cada resultado. Os valores saem de uma linha só do código | feito |
+| A5 | Mercados | Sai o slide. A frase "on-chain KPI markets" e o "curated by the team" vão para o de patrocínio | feito |
+| A6 | Patrocínio | Brilho sutil em "the chain" | feito |
+| A7 | Mercado | Sai o ponto de equilíbrio. Entra: o World foi de 1,1 para 15,4 milhões por mês em três meses, dentro da Solana (P2, FATO SECUNDÁRIO, DefiLlama) | feito |
 | A8 | Fechamento | Fica como está | feito |
-| A9 | Animação | As cenas que não pedem imagem nova: a bola do TAM rolando para dentro, a fila de pãezinhos e a saída para o selo final | fazendo |
-| A10 | Animação | As três regras (abaixo) | fazendo |
-| A11 | Geral | Renumerar os rótulos, atualizar o roteiro de fala e os testes | fazendo |
+| A9 | Animação | As cenas que não pedem imagem nova: a bola do TAM rolando para dentro, a fila de pãezinhos e a saída para o selo final | feito |
+| A10 | Animação | As três regras (abaixo) | feito |
+| A11 | Geral | Renumerar os rótulos, atualizar o roteiro de fala e os testes | feito |
 
 **As três regras da animação.** A banca pediu menos pãozinho; o fundador quer uma cena por troca, contando uma
 história. As regras existem para as duas coisas caberem:
@@ -62,7 +85,7 @@ Quem pede menos movimento no sistema, e o celular em pé, já não veem animaç�
 | B4 | Crescimento | Dois retângulos novos | Aprovar os dois propostos (cartão compartilhável no X; comprovante para o projeto postar) ou pedir outros | espera resposta |
 | B5 | Equipe | Slide novo com os três | Quem é quem, as fotos, o de acordo do Bernardo e do Ronaldo, e dois ou três fatos verificáveis de cada um | espera resposta |
 | B6 | Equipe | Cargos de padaria | Aprovar: Head Baker (CEO), Chief Oven Officer e Chief Loaf Officer (COO e CLO), Chief Toasting Officer (CTO), sempre com o cargo real ao lado | espera resposta |
-| B7 | Geral | Onde publicar | `/pitch3`, assumido; trocar se ele quiser outro endereço | fazendo |
+| B7 | Geral | Onde publicar | `/pitch3`, assumido; trocar se ele quiser outro endereço | feito |
 
 **Sobre o abuso de indicação sem cadastro**, que o fundador levantou no slide de crescimento: o plano já tratou (P4,
 "A autoindicação"). Não há trava possível num produto que só conhece carteiras, e o ganho tem teto: 20% de desconto
@@ -119,14 +142,14 @@ para a direita, porque o código espelha; os dois quadros de corrida com o corpo
 
 | Nº | Troca | Cena | Imagens | Estado |
 |---|---|---|---|---|
-| C1 | Capa para Problema | Sai da imagem, cai e corre | 1, 2, 3, 4 | espera imagem |
-| C2 | Problema para Solução | Espia pelo canto, agarra e puxa o slide | 5, 6 | espera imagem |
-| C3 | Solução para Patrocínio | Voa pendurado numa corda | 7, 8 | espera imagem |
-| C4 | No slide de Patrocínio | Sequência apontando para o quadrado final | 9, 10, 11 | espera imagem |
-| C5 | Patrocínio para Receita | Morde a fatia de 3,5%; clicar nele repete a mordida (a surpresa escondida) | 12 a 15 | espera imagem |
-| C6 | Crescimento para Equipe | Puxa a corda e abre a cortina de cada um | 16, 17 | espera imagem |
-| A9 | Receita para Mercado | Chega em cima do círculo grande, que rola para dentro | nenhuma | fazendo |
-| A9 | Mercado para Crescimento | Entra seguido por uma fila de pãezinhos | nenhuma | fazendo |
+| C1 | Capa para Problema | Sai da imagem, cai e corre | 1, 2, 3, 4 | feito |
+| C2 | Problema para Solução | Espia pelo canto, agarra e puxa o slide | 5, 6 | feito |
+| C3 | Solução para Patrocínio | Voa pendurado numa corda | 7, 8 | feito |
+| C4 | No slide de Patrocínio | Sequência apontando para o quadrado final | 9, 10, 11 | feito |
+| C5 | Patrocínio para Receita | Morde a fatia de 3,5%; clicar nele repete a mordida (a surpresa escondida) | 12 a 15 | feito |
+| C6 | Crescimento para Equipe | Puxa a corda e abre a cortina de cada um | 16, 17 | feito |
+| A9 | Receita para Mercado | Chega em cima do círculo grande, que rola para dentro | nenhuma | feito |
+| A9 | Mercado para Crescimento | Entra seguido por uma fila de pãezinhos | nenhuma | feito |
 | A9 | Para o Fechamento | Corre e o selo recebe: pisca, joinha, seta para o código QR | nenhuma | feito |
 
 Até a imagem de uma cena chegar, a troca usa a corrida de três pulos que já existe.

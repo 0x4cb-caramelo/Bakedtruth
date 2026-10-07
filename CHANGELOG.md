@@ -28,6 +28,20 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 - **Testes das páginas** (`services/landing/tests/pages.test.mjs`): todo arquivo citado existe, o rascunho de
   sugestão mantém a menção e a hashtag, o mascote tem imagem para cada pose e o deck tem os oito slides. O site
   provisório passa a ter 26 testes.
+- **Deck em `/pitch3`,** feito em 7/10/2026 a partir da pauta do fundador depois de ver o `/pitch2`, que fica como
+  está. Nove slides. O plano, bloco a bloco, está em `docs/business/_review/plano-do-pitch3.md`.
+  - **Demo animada** no slide de solução: escolhe YES num mercado, o cartão vira, escolhe NO em outro, e a rede
+    resolve os dois, um ganho e uma perda.
+  - **Uma cena do mascote por troca de slide,** com as 17 imagens que o fundador desenhou: sai do adesivo e cai,
+    espia e puxa o slide, voa numa corda, aponta para o último passo, morde a fatia da taxa (com uma surpresa
+    escondida no clique), chega em cima da bola do TAM, vem seguido por uma fila, abre a cortina de cada pessoa da
+    equipe. Três regras: até 1,5 segundo por troca, a troca seguinte cancela, e a tecla `M` desliga tudo.
+  - **Slide de equipe, dois retângulos novos de crescimento e o contador de parceiros,** como proposta à espera de
+    confirmação. A lista de parceiros nasce vazia: nenhum parceiro inventado.
+  - Sai o slide de exemplos de mercado e o ponto de equilíbrio; a capa abre pela frase de uma linha.
+- **Biblioteca de poses do mascote** em `docs/product/poses`: as 17 novas do fundador e as 10 peças que já existiam,
+  nas mesmas duas pastas e no mesmo quadro. O `LEIA-ME` de lá diz o que foi arrumado em cada uma.
+- **Frase de elevador aprovada** pelo fundador em 7/10/2026, no `PITCH.md`, com o porquê de cada escolha.
 - **Terceira versão do deck, em `/pitch2`,** feita a pedido do fundador a partir da análise da banca, para ele
   avaliar no ar. Nove slides no mesmo palco e na mesma linguagem visual do `/pitch`, que continua como estava: abre
   pelo caso de 7 milhões de dólares, ganha um slide de exemplos de mercado e outro de crescimento com roteiro, troca

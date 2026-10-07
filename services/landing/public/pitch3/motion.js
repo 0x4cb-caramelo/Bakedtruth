@@ -1,7 +1,7 @@
 /**
- * Purpose: the motion of the deck at /pitch3: each slide's entrance, the mascot's scene on a slide change (a run by
- *          default, a scene of its own where scenes.js has one), the product demo, and the switch that turns it off.
- * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-07
+ * Purpose: the motion of the deck at /pitch3: it decides what plays when a slide arrives or is left (the scenes are
+ *          in scenes.js and exits.js), starts the product demo and the finale, and holds the switch that turns it off.
+ * Version: 0.2.0 · Sprint: out of band (landing page), 2026-10-07
  *
  * Three rules, from the founder's review of 2026-10-07 (docs/business/_review/plano-do-pitch3.md): a transition lasts
  * 1.5 seconds at most, the next slide change cancels whatever is playing, and the "M" key or the bar button turns all
@@ -9,27 +9,41 @@
  * It listens to the "slidechange" event that ../pitch/deck.js sends.
  */
 import { startDemo, stopDemo } from "./demo.js?v=1";
-import { SCENES, finale, resetFinale } from "./scenes.js?v=1";
+import { EXITS } from "./exits.js?v=1";
+import { finale, resetFinale } from "./finale.js?v=1";
+import { SCENES, plain, settled } from "./scenes.js?v=2";
+import { preload } from "./sprites.js?v=1";
 
 const EASE = "cubic-bezier(.2,.8,.2,1)";
+const NEXT_KEYS = ["ArrowRight", "ArrowDown", "PageDown", " "];
 const root = document.documentElement;
 const still = matchMedia("(prefers-reduced-motion: reduce)");
 const button = document.querySelector("[data-motion]");
 let timers = [];
+let ticking = [];
 let kept = [];
+let leaving = null; // the function that changes the slide, while an exit scene plays
 let heard = false;
 
 const calm = () => still.matches || root.classList.contains("stack") || root.classList.contains("calm");
-const pose = (i) => document.querySelector(`img[data-pose="${i}"]`);
 const later = (fn, ms) => timers.push(setTimeout(fn, ms));
 const keep = (thing) => (kept.push(thing), thing);
+/** Repeats `fn`. Returns the function that stops it; the next slide change stops it too. */
+function every(fn, ms) {
+  const id = setInterval(fn, ms);
+  ticking.push(id);
+  return () => clearInterval(id);
+}
 
-/** Stops everything a scene started: timers, the elements it added, its animations, the finale and the demo. */
+/** Undoes everything a scene started: timers, what it added or changed, its animations, the finale and the demo. */
 function cancelAll() {
   timers.forEach(clearTimeout);
+  ticking.forEach(clearInterval);
   timers = [];
+  ticking = [];
   for (const thing of kept) (thing.cancel || thing.remove).call(thing);
   kept = [];
+  leaving = null;
   resetFinale();
   stopDemo();
 }
@@ -49,76 +63,63 @@ function enter(slide, forward) {
   });
 }
 
-/** The plain run: three hops across the bottom of the slide. `followers` smaller mascots may come behind it. */
-function run(slide, forward, { followers = 0, ms = 1500 } = {}) {
-  const r = slide.getBoundingClientRect();
-  const poses = [0, 1, 2, 3].map(pose);
-  if (!r.width || poses.some((img) => !img || !img.complete || !img.naturalWidth)) return;
-  const wrap = document.createElement("div");
-  wrap.style.cssText = `position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;pointer-events:none;overflow:hidden;z-index:30;`;
-  document.body.append(keep(wrap));
-  for (let n = 0; n <= followers; n++) {
-    const size = r.height * (n ? 0.15 : 0.26);
-    const width = size * 1.4;
-    const bun = document.createElement("div");
-    bun.style.cssText = `position:absolute;left:0;bottom:${r.height * 0.02}px;width:${width}px;height:${size}px;transform-origin:50% 100%;`;
-    const img = document.createElement("img");
-    img.alt = "";
-    img.src = poses[n % 4].currentSrc || poses[n % 4].src;
-    const shadow = `drop-shadow(0 ${size * 0.04}px ${size * 0.05}px rgba(0,0,0,.35))`;
-    img.style.cssText = `width:100%;height:100%;object-fit:contain;display:block;image-rendering:pixelated;transform:scaleX(${forward ? 1 : -1});filter:${shadow};`;
-    bun.append(img);
-    wrap.append(bun);
-    const x0 = forward ? -width : r.width;
-    const x1 = forward ? r.width : -width;
-    const lift = size * 0.75;
-    const at = (k) => x0 + (x1 - x0) * (k / 3);
-    const frames = [];
-    for (let k = 0; k <= 3; k++) {
-      if (k > 0)
-        frames.push({ offset: (k - 0.5) / 3, transform: `translate(${at(k - 0.5)}px,${-lift}px) scale(0.95,1.08)` });
-      frames.push({ offset: Math.max(0, k / 3 - 0.0001), transform: `translate(${at(k)}px,0) scale(1.12,0.86)` });
-      if (k < 3)
-        frames.push({
-          offset: k / 3 + 0.05,
-          transform: `translate(${at(k + 0.15)}px,${-lift * 0.4}px) scale(0.94,1.08)`,
-        });
-    }
-    frames.sort((a, b) => a.offset - b.offset);
-    frames[0].offset = 0;
-    frames[frames.length - 1].offset = 1;
-    bun.animate(frames, { duration: ms, delay: n * 100, easing: "linear", fill: "both" });
-    // Only the one in front changes pose on each landing.
-    if (!n) for (const k of [1, 2, 3]) later(() => (img.src = poses[k].currentSrc || poses[k].src), ms * (k / 3) - 40);
-  }
-  later(() => wrap.remove(), ms + followers * 100 + 60);
-}
+const stage = { enter, keep, later, every };
 
-const stage = { run, pose, keep, later };
-
-/** `opening` is true when the page opened on this slide: no entrance and no run, only what the slide itself plays. */
-function arrive(slide, forward, opening) {
+/** `how` is "forward", "back" or "open" (the page opened on this slide: nothing runs in, the slide plays its own). */
+function arrive(slide, how) {
   cancelAll();
-  if (calm()) return;
-  if (slide.querySelector("[data-demo]")) later(() => startDemo(slide), opening ? 400 : 900);
-  const closing = slide.querySelector("[data-badge]");
-  if (opening) {
-    if (closing) later(() => finale(slide), 600);
-    return;
-  }
-  enter(slide, forward);
+  if (calm()) return settled(stage, slide);
   const scene = SCENES[slide.dataset.label];
-  if (scene) scene(stage, slide, forward);
-  else run(slide, forward);
-  if (closing) later(() => finale(slide), 1450);
+  if (scene) scene(stage, slide, how);
+  else if (how !== "open") plain(stage, slide, how === "forward");
+  if (slide.querySelector("[data-demo]")) later(() => startDemo(slide), how === "open" ? 400 : 950);
+  if (slide.querySelector("[data-badge]")) later(() => finale(slide), how === "open" ? 600 : 1000);
 }
 
 document.addEventListener("slidechange", (event) => {
   const { slide, index, previousIndex, reason } = event.detail || {};
   if (!slide) return;
   heard = true;
-  arrive(slide, index >= previousIndex, reason === "init" || previousIndex < 0);
+  const opening = reason === "init" || previousIndex < 0;
+  arrive(slide, opening ? "open" : index >= previousIndex ? "forward" : "back");
 });
+
+/** True when the event is the presenter asking for the next slide, the way ../pitch/deck.js reads it. */
+function asksNext(event) {
+  const target = event.target.closest ? event.target : document.body;
+  if (event.type === "keydown") {
+    if (event.ctrlKey || event.metaKey || event.altKey || !NEXT_KEYS.includes(event.key)) return false;
+    return !(event.key === " " && target.closest("button, a"));
+  }
+  if (target.closest("[data-next]")) return true;
+  if (target.closest("a, button, [data-demo], [data-egg]")) return false;
+  return Boolean(target.closest("[data-deck]")) && event.clientX >= innerWidth / 3;
+}
+
+/** Plays the exit scene of the slide being left, then lets the deck move on. A second "next" skips the scene. */
+function beforeLeaving(event) {
+  if (!asksNext(event)) return;
+  const skip = leaving;
+  if (!skip && calm()) return;
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  const slide = document.querySelector("[data-deck-active]");
+  const exit = slide && EXITS[slide.dataset.label];
+  const next = slides.indexOf(slide) + 1;
+  if (!skip && (!exit || next >= slides.length)) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  if (skip) {
+    cancelAll();
+    return skip();
+  }
+  leaving = () => {
+    leaving = null;
+    location.hash = `#${next + 1}`;
+  };
+  exit(stage, slide, () => leaving && leaving());
+}
+document.addEventListener("keydown", beforeLeaving, true);
+document.addEventListener("click", beforeLeaving, true);
 
 function setCalm(on) {
   root.classList.toggle("calm", on);
@@ -144,6 +145,7 @@ document.addEventListener(
   true,
 );
 
+preload();
 // If the stage announced the opening slide before this script was listening, pick it up here.
 const active = document.querySelector("[data-deck-active]");
-if (!heard && active) arrive(active, true, true);
+if (!heard && active) arrive(active, "open");
