@@ -130,7 +130,7 @@ test("the third version of the deck has nine slides on the same stage, and keeps
 
 test("the fourth version of the deck has its demo, its own motion and what the founder asked for on 2026-10-07", async () => {
   const slides = [...deck3.matchAll(/<section class="slide" data-label="([^"]+)"/g)].map((match) => match[1]);
-  assert.equal(slides.join(", "), "Title, Problem, Solution, Sponsors, How we earn, Market, Growth, Team, Close");
+  assert.equal(slides.join(", "), "Title, Problem, Solution, Market, How we earn, Sponsors, Growth, Team, Close");
   assert.equal([...deck3.matchAll(/data-member/g)].length, 3, "the team slide has its three people");
   // A count of partners is a claim about the business. The list holds examples for now, at the founder's request:
   // every one is marked as an example, has its image, and the card has the tag that says so.

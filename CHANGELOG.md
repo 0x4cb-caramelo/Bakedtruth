@@ -41,9 +41,11 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   - Sai o slide de exemplos de mercado e o ponto de equilíbrio; a capa abre pela frase de uma linha.
   - **Modo leve, tecla `N`,** entre o movimento completo e o desligado (`M`): só as cenas que o fundador escolheu,
     slide a slide. A lista está no plano.
-  - **Contador de parceiros ligado com sete logos de exemplo,** a pedido do fundador, para a animação poder ser
-    vista: conta de 0 a 7 e abre os quatro últimos em leque. O cartão traz a etiqueta "example", porque não são
-    parceiros; ver o bloco "Em aberto".
+  - **Contador de parceiros ligado com sete marcas fictícias** que o fundador desenhou
+    (`docs/product/poses/fic_partners`), para a animação poder ser vista: conta de 0 a 7 e abre os quatro últimos
+    cartões em leque. O cartão traz a etiqueta "example", porque não são parceiros; ver o bloco "Em aberto".
+  - **Ordem nova dos slides,** pedida pelo fundador: capa, problema, solução, mercado, receita, patrocínio,
+    crescimento, equipe, fechamento. Os dois endereços da capa passaram a ser links, que abrem em outra aba.
 - **Biblioteca de poses do mascote** em `docs/product/poses`: as 17 novas do fundador e as 10 peças que já existiam,
   nas mesmas duas pastas e no mesmo quadro. O `LEIA-ME` de lá diz o que foi arrumado em cada uma.
 - **Frase de elevador aprovada** pelo fundador em 7/10/2026, no `PITCH.md`, com o porquê de cada escolha.

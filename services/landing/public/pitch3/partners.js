@@ -2,15 +2,21 @@
  * Purpose: the launch partners counter of the Growth slide of /pitch3: two seconds after the slide arrives the number
  *          climbs to the partners in the list, their logos come in at the same pace, the number starts to glow and
  *          the last four logos fan out.
- * Version: 0.2.0 · Sprint: out of band (landing page), 2026-10-07
+ * Version: 0.3.0 · Sprint: out of band (landing page), 2026-10-07
  *
- * PARTNERS is the list. Today it holds seven EXAMPLES, at the founder's request, so the animation can be seen and
- * judged; while any entry is an example the card says "example", because a count of partners is a claim about the
- * business and these are not partners. A real entry is { name: "Project", logo: "project.webp" }, with the file in
- * img/partners/, added only when that partner has signed and agreed to be shown. Remove the examples then.
+ * PARTNERS is the list. Today it holds seven FICTITIOUS brands the founder drew (docs/product/poses/fic_partners),
+ * so the animation can be seen and judged; while any entry is an example the card says "example", because a count
+ * of partners is a claim about the business and these are not partners. A real entry is
+ * { name: "Project", logo: "project.webp" }, with the file in img/partners/, added only when that partner has signed
+ * and agreed to be shown. Remove the fictitious ones then.
  */
-const example = (n) => ({ name: `Example ${n}`, logo: `example-${n}.webp`, example: true });
-export const PARTNERS = [1, 2, 3, 4, 5, 6, 7].map(example);
+const FICTITIOUS = ["vaultide", "meshora", "lumint", "swaploom", "orbynd", "zkrove", "chainquill"];
+const example = (brand, i) => ({
+  name: `${brand[0].toUpperCase()}${brand.slice(1)} (fictitious)`,
+  logo: `fic-0${i + 1}-${brand}.webp`,
+  example: true,
+});
+export const PARTNERS = FICTITIOUS.map(example);
 const SPOTS = 30;
 
 function logo(partner) {
