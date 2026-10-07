@@ -14,6 +14,8 @@ mudou. Está no formato em que ele escreve: asteriscos marcam a ênfase da voz. 
 - **Tecla `M`:** liga e desliga todo o movimento. **Tecla `N`:** o modo leve, só com as cenas principais.
 - **A demo do slide 3 leva uns 12 segundos** e toca sozinha. Um clique no cartão a repete.
 - **No slide 5, um clique no pãozinho ou no pão** faz ele morder de novo.
+- **No slide 7, o pãozinho cai em cima do cartão do 1%** e faz joinha, e dois menores espiam de trás dos outros
+  cartões. No modo leve ele já está lá e só faz o joinha.
 
 ## O roteiro
 

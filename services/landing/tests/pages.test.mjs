@@ -146,7 +146,8 @@ test("the fourth version of the deck has its demo, its own motion and what the f
   // motion.js is a module and deck.js is deferred: both run in document order, and the listener has to come first.
   assert.ok(deck3.indexOf('src="motion.js?') > 0 && deck3.indexOf('src="motion.js?') < deck3.indexOf("deck.js?"));
   const hooks = ["data-demo", 'data-face="a"', 'data-face="b"', "data-cursor", "data-motion", "data-tam"];
-  for (const part of [...hooks, "data-sticker", "data-pointer"]) assert.ok(deck3.includes(part), `${part} is missing`);
+  for (const part of [...hooks, "data-sticker", "data-pointer", "data-creator"])
+    assert.ok(deck3.includes(part), `${part} is missing`);
   // Every pose the scenes name has its image, and the scenes only name poses that exist.
   const poses = Object.fromEntries(
     [...read("pitch3/sprites.js").matchAll(/^ {2}([a-zA-Z]+): "([^"]+)",$/gm)].map((match) => [match[1], match[2]]),
