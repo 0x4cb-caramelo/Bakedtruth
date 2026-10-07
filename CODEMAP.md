@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **147** |
+| Arquivos mapeados | **150** |
 | Acima de 200 linhas | **30** ⚠️ |
 | Sem cabeçalho `Purpose:` | **102** ⚠️ |
 
@@ -408,13 +408,21 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`deck-motion.js`](services/landing/public/pitch/deck-motion.js) | the motion of the pitch deck at /pitch: each slide's entrance, the mascot hopping across the bottom on a slide change, and the closing slide's finale (blink, th | 179 |
 | [`deck.js`](services/landing/public/pitch/deck.js) | runs the pitch deck at /pitch: scales the 1920 x 1080 slides to the window and moves between them by keyboard, click, swipe and the address (#3 opens slide 3) | 135 |
 
+## `services/landing/public/pitch3/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`demo.js`](services/landing/public/pitch3/demo.js) | plays the product demo on the Solution slide of /pitch3: a pointer picks YES on one market and NO on another, the card flips between them, and each is resolved  | 149 |
+| [`motion.js`](services/landing/public/pitch3/motion.js) | the motion of the deck at /pitch3: each slide's entrance, the mascot's scene on a slide change (a run by default, a scene of its own where scenes.js has one), t | 150 |
+| [`scenes.js`](services/landing/public/pitch3/scenes.js) | the mascot's scenes of the deck at /pitch3: what it does when a given slide arrives, beyond the plain run, and the finale of the closing slide. A scene is a fun | 96 |
+
 ## `services/landing/tests/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`leads.test.mjs`](services/landing/tests/leads.test.mjs) | tests the waitlist store and the request limiter of the "coming soon" site (node --test) | 113 |
-| [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 121 |
-| [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 189 |
+| [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 151 |
+| [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 193 |
 
 ## `target/types/`
 
