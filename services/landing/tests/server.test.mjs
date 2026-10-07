@@ -141,6 +141,10 @@ test("/pitch is served, is reachable by link only and is kept out of search engi
   assert.match(second.headers.get("content-security-policy"), /style-src 'self' 'unsafe-inline'/);
   assert.match(await second.text(), /<meta name="robots" content="noindex/);
   assert.equal((await fetch(`${base}/pitch2`, { redirect: "manual" })).headers.get("location"), "/pitch2/");
+  const third = await fetch(`${base}/pitch3/`);
+  assert.equal(third.status, 200);
+  assert.match(third.headers.get("x-robots-tag"), /noindex/);
+  assert.match((await fetch(`${base}/pitch3/motion.js?v=1`)).headers.get("content-type"), /javascript/);
   const home = await (await fetch(`${base}/`)).text();
   assert.ok(!home.includes("/pitch"), "the landing page does not link to the deck");
   assert.ok(!(await (await fetch(`${base}/robots.txt`)).text()).includes("pitch"), "robots.txt does not announce it");

@@ -14,6 +14,7 @@ const read = (path) => readFileSync(join(ROOT, path), "utf8");
 const home = read("index.html");
 const deck = read("pitch/index.html");
 const deck2 = read("pitch2/index.html");
+const deck3 = read("pitch3/index.html");
 
 /** Local files a page asks for through src="" and href="", resolved from the page's own folder. */
 function localFiles(html, folder) {
@@ -24,7 +25,8 @@ function localFiles(html, folder) {
 }
 
 test("every file the landing page and the deck point at exists", () => {
-  const files = [...localFiles(home, ""), ...localFiles(deck, "pitch"), ...localFiles(deck2, "pitch2")];
+  const decks = [...localFiles(deck, "pitch"), ...localFiles(deck2, "pitch2"), ...localFiles(deck3, "pitch3")];
+  const files = [...localFiles(home, ""), ...decks];
   assert.ok(files.length > 15, "the pages reference their scripts, styles, fonts and images");
   for (const file of files) assert.ok(existsSync(join(ROOT, file)), `${file} is missing`);
 });
@@ -51,24 +53,26 @@ test("the mascot has an image for every pose the page and the scripts ask for", 
   assert.match(home, /<script type="module" src="mascot\.js\?v=\d+"><\/script>/);
 });
 
-test("every script and style is asked for with a version, and the pages agree on it", () => {
+test("every script and style is asked for with a version, and files that are shared agree on it", () => {
   // Cloudflare tells browsers to keep these files for hours. Without the version, a returning visitor gets the new
   // page with the old script and style, which is how the mascot went missing on the day it shipped.
-  const pages = [home, read("privacy.html"), read("404.html"), deck, deck2];
-  const versions = new Set();
-  for (const page of pages) {
+  const versions = new Map(); // file name -> the versions it is asked for with
+  const note = (file, version) => {
+    assert.ok(version, `${file} has no version`);
+    const name = file.split("/").pop();
+    versions.set(name, (versions.get(name) ?? new Set()).add(version));
+  };
+  for (const page of [home, read("privacy.html"), read("404.html"), deck, deck2, deck3]) {
     const refs = [...page.matchAll(/\s(?:src|href)="([^"]+\.(?:js|css))(\?v=(\d+))?"/g)];
     assert.ok(refs.length >= 2, "the page loads its script and its style");
-    for (const [, file, , version] of refs) {
-      assert.ok(version, `${file} has no version`);
-      versions.add(version);
-    }
+    for (const [, file, , version] of refs) note(file, version);
   }
-  for (const [, , version] of read("mascot.js").matchAll(/from "\.\/mascot-[a-z]+\.js(\?v=(\d+))?"/g)) {
-    assert.ok(version, "mascot.js imports its parts with a version");
-    versions.add(version);
+  for (const script of ["mascot.js", "pitch3/motion.js"]) {
+    const imports = [...read(script).matchAll(/from "\.\/([a-z-]+\.js)(\?v=(\d+))?"/g)];
+    assert.ok(imports.length >= 2, `${script} imports its parts`);
+    for (const [, file, , version] of imports) note(file, version);
   }
-  assert.equal(versions.size, 1, `one version everywhere, found: ${[...versions].join(", ")}`);
+  for (const [name, asked] of versions) assert.equal(asked.size, 1, `${name} is asked for with ${[...asked]}`);
 });
 
 test("the landing page keeps to its content policy: no inline style and no inline script", () => {
@@ -117,4 +121,30 @@ test("the third version of the deck has nine slides on the same stage, and keeps
   assert.match(text, /not audited/, "the cover says the product is in a test phase");
   // The founder's call of 2026-10-06 for this deck: one flat fee, said plainly. The plan still says otherwise.
   assert.match(text, /3\.5%\s+of every pot/);
+});
+
+test("the fourth version of the deck has its demo, its own motion and what the founder asked for on 2026-10-07", () => {
+  const slides = [...deck3.matchAll(/<section class="slide" data-label="([^"]+)"/g)].map((match) => match[1]);
+  assert.equal(slides.join(", "), "Title, Problem, Solution, Sponsors, How we earn, Market, Growth, Close");
+  assert.match(deck3, new RegExp(`<span data-count aria-live="polite">1 / ${slides.length}</span>`));
+  // motion.js is a module and deck.js is deferred: both run in document order, and the listener has to come first.
+  assert.ok(deck3.indexOf('src="motion.js?') > 0 && deck3.indexOf('src="motion.js?') < deck3.indexOf("deck.js?"));
+  for (const part of ["data-demo", 'data-face="a"', 'data-face="b"', "data-cursor", "data-motion", "data-tam"]) {
+    assert.ok(deck3.includes(part), `${part} is missing`);
+  }
+  const text = deck3
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<style[\s\S]*?<\/style>/g, "")
+    .replace(/<[^>]+>/g, " ");
+  for (const word of [/\bbet(s|ting)?\b/i, /parimutuel/i, /break-even/i]) {
+    assert.ok(!word.test(text), `the deck should not say ${word}`);
+  }
+  const gap = "(?:\\s|&nbsp;)+";
+  assert.match(
+    text,
+    new RegExp(`brot\\.markets${gap}·${gap}x\\.com/brotmarkets`),
+    "the cover ends with the two addresses",
+  );
+  assert.match(text, /On-chain KPI markets/i, "the line of the dropped Markets slide lives on the Sponsors slide");
+  assert.match(text, /RESOLVED BY THE CHAIN/, "the demo says who resolved the market before showing the result");
 });
