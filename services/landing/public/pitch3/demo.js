@@ -1,12 +1,13 @@
 /**
  * Purpose: plays the product demo on the Solution slide of /pitch3: a pointer picks YES on one market and NO on
  *          another, the card flips between them, and each is resolved by the chain, one a win and one a loss.
- * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-07
+ * Version: 0.2.0 · Sprint: out of band (landing page), 2026-10-07
  *
- * Every figure is an example, and the card says so. FEE is the one line to change when the fee rule is settled:
- * the deck says 3.5% of the pot; the business plan says 10% of the losing side ({ of: "losers", rate: 0.1 }).
+ * Every figure is an example, and the card says so. FEE is the one line that holds the fee rule: 10% of the losing
+ * side, which is what the business plan decided and what the founder went back to on 2026-10-07 after trying a
+ * flat 3.5% of the pot ({ of: "pot", rate: 0.035 }). The creator's share of the pot is not in this sum.
  */
-const FEE = { of: "pot", rate: 0.035 };
+const FEE = { of: "losers", rate: 0.1 };
 const STAKE = 50;
 const MARKETS = {
   a: { yes: 300, no: 700, pick: "yes", outcome: "yes" },

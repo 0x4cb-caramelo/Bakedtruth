@@ -46,6 +46,15 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
     cartões em leque. O cartão traz a etiqueta "example", porque não são parceiros; ver o bloco "Em aberto".
   - **Ordem nova dos slides,** pedida pelo fundador: capa, problema, solução, mercado, receita, patrocínio,
     crescimento, equipe, fechamento. Os dois endereços da capa passaram a ser links, que abrem em outra aba.
+  - **Rodada das regras,** pedida pelo fundador na noite de 7/10/2026. O deck passa a ter dez slides. O de receita
+    volta aos **10% do lado perdedor**, mostrados numa barra do pote em escala (600 no lado que acertou, 400 no que
+    errou, 40 para o Brot, 960 para quem acertou), e a demo usa a mesma regra. No de patrocínio, os passos 3 e 4
+    ficaram mais claros e a frase final diz 90% para o pote e 10% de taxa de marketing. Entra o slide **"Creators"**
+    antes do de crescimento: qualquer um abre um mercado por 0.02 SOL, dentro das regras, e leva 1% do pote. No de
+    crescimento, "Creators earn 1%" substitui "Proof cards". Três desses pontos saem do plano de negócio; ver o
+    bloco "Em aberto".
+  - **Roteiro de fala do `/pitch3`** refeito no formato do fundador, a partir do que ele levou à banca, com as
+    respostas prontas para a sabatina (`services/landing/pitch3-notes.md`).
 - **Biblioteca de poses do mascote** em `docs/product/poses`: as 17 novas do fundador e as 10 peças que já existiam,
   nas mesmas duas pastas e no mesmo quadro. O `LEIA-ME` de lá diz o que foi arrumado em cada uma.
 - **Frase de elevador aprovada** pelo fundador em 7/10/2026, no `PITCH.md`, com o porquê de cada escolha.
@@ -98,16 +107,27 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 - **O `/pitch3` mostra "7 of 30 launch spots taken" com sete logos de exemplo.** Não há sete parceiros: foi pedido
   do fundador para ver a animação, e o cartão diz "example". Antes de qualquer apresentação de verdade, trocar a
   lista (`services/landing/public/pitch3/partners.js`) pelos parceiros fechados ou esvaziá-la.
-- **A taxa no `/pitch2` diverge do plano.** O fundador pediu para o deck dizer 3,5% do pote ("voltar ao projeto
+- **O `/pitch3` diz três regras que o plano de negócio não tem,** a pedido do fundador em 7/10/2026. O plano não
+  foi alterado; cada uma pede a decisão dele e a revisão de impacto. (1) **Patrocínio 90/10:** o plano diz 70% para
+  o pote e 30% para o Brot (Parte 1, §3.7), e as projeções usam os 30%; num patrocínio de 500 dólares a receita cai
+  de 150 para 50. (2) **Qualquer um abre mercado, por 0.02 SOL:** o plano diz que a equipe abre as perguntas, o
+  patrocinador pede e o público só sugere (Parte 1, §4.1), e o Product Brief põe a criação pelo público fora do
+  produto; a moeda do produto é o USDC. Muda o desenho do programa da Sprint 02, então precisa ser decidido antes dela. (3) **1% do
+  pote para quem abriu:** se sair do pote inteiro, quem acerta paga parte dele, e com mais de 98,9% do pote de um
+  lado só o vencedor recebe menos do que pôs. As duas saídas (tirar do lado perdedor, ou da taxa do Brot) estão em
+  `docs/business/_review/plano-do-pitch3.md`, "A rodada das regras".
+- **A taxa no `/pitch2` diverge do plano.** O `/pitch3` voltou aos 10% do lado perdedor em 7/10/2026, e o `/pitch2`
+  ficou como estava. O fundador pediu para o deck dizer 3,5% do pote ("voltar ao projeto
   anterior que era simplesmente 3%, e aumente para 3.5%"). O plano (Parte 1, §3.3) decidiu 10% do lado perdedor,
   justamente porque a taxa sobre o pote todo faz quem acerta num favorito muito forte receber menos do que pôs (com
   99% do pote no lado vencedor, volta 0,975 por dólar). Falta ele dizer se a regra do produto muda, o que pede a
-  revisão de impacto no plano, ou se é só a forma de contar no deck.
+  revisão de impacto no plano, ou se é só a forma de contar no deck. A volta aos 10% no `/pitch3` indica que a
+  regra do produto não mudou; falta ele confirmar, ou pedir a mesma troca no `/pitch2`.
 - **Terceira versão do deck, depois da banca:** a análise recomenda montá-la como prévia, fora do ar. Esperam o
   fundador seis decisões (a palavra "bet", o slide de equipe, o patrocínio em faixas ou com piso, o cartão do
   token, os nomes de concorrentes no slide 2 e o título do slide 5) e a confirmação de que os avaliadores sabiam da
   gravação. Cinco fatos citados pela banca não foram conferidos; a lista está na seção 9 da análise.
-- **O título do slide 5 do deck no ar exagera** ("so being right never costs you"): em pote de um lado só, quem
+- **O título do slide 5 do `/pitch` exagera** ("so being right never costs you"): em pote de um lado só, quem
   entra depois do primeiro paga 1%. A frase proposta diz só a regra: "the fee comes out of the losing side". O plano
   usa "ninguém perde por acertar" na Parte 1, §3.3, e entra na passada de coerência.
 - **Site provisório, pendências:** idioma (está em inglês, por escolha provisória; L-01 segue aberta); um email de

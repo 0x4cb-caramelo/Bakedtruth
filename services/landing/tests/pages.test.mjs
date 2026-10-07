@@ -130,7 +130,10 @@ test("the third version of the deck has nine slides on the same stage, and keeps
 
 test("the fourth version of the deck has its demo, its own motion and what the founder asked for on 2026-10-07", async () => {
   const slides = [...deck3.matchAll(/<section class="slide" data-label="([^"]+)"/g)].map((match) => match[1]);
-  assert.equal(slides.join(", "), "Title, Problem, Solution, Market, How we earn, Sponsors, Growth, Team, Close");
+  assert.equal(
+    slides.join(", "),
+    "Title, Problem, Solution, Market, How we earn, Sponsors, Creators, Growth, Team, Close",
+  );
   assert.equal([...deck3.matchAll(/data-member/g)].length, 3, "the team slide has its three people");
   // A count of partners is a claim about the business. The list holds examples for now, at the founder's request:
   // every one is marked as an example, has its image, and the card has the tag that says so.
@@ -169,4 +172,9 @@ test("the fourth version of the deck has its demo, its own motion and what the f
   );
   assert.match(text, /On-chain KPI markets/i, "the line of the dropped Markets slide lives on the Sponsors slide");
   assert.match(text, /RESOLVED BY THE CHAIN/, "the demo says who resolved the market before showing the result");
+  // The fee is the plan's again, 10% of the losing side, and the slide and the demo use the same rule.
+  assert.match(text, /10%\s+of the losing side/);
+  assert.ok(!/3\.5%/.test(text), "the flat fee the founder tried is gone from this deck");
+  assert.match(read("pitch3/demo.js"), /const FEE = \{ of: "losers", rate: 0\.1 \};/);
+  assert.match(text, /90% becomes the prize pool\. 10% is a marketing fee\./);
 });

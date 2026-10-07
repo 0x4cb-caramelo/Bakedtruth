@@ -9,7 +9,7 @@
  * cancelled the same way. A scene, with the exit before it (exits.js), lasts 1.5 seconds at most; the curtains of the
  * Team slide and the closing finale are the two longer moments.
  */
-import { bite } from "./bite.js?v=1";
+import { bite } from "./bite.js?v=2";
 import { partners } from "./partners.js?v=3";
 import { run } from "./runner.js?v=1";
 import { pointing, swingIn } from "./sponsors.js?v=1";
@@ -95,6 +95,12 @@ export const SCENES = {
       stage.enter(slide, true);
       tamBall(stage, slide);
     }
+  },
+  Creators(stage, slide, how) {
+    // Added after the founder's list for the lighter setting: there it only comes in, like the other unlisted slides.
+    if (how === "open") return;
+    if (stage.lite) stage.enter(slide, how === "forward");
+    else plain(stage, slide, how === "forward");
   },
   Growth(stage, slide, how) {
     // The mascot with three smaller ones behind it: the community coming along. Not in the lighter setting.
