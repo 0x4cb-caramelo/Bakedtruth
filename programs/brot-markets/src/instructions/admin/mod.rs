@@ -10,4 +10,5 @@ pub mod resume_entries;
 pub mod set_creation_params;
 pub mod set_fee_recipient;
 pub mod set_team;
+pub mod shared;
 pub mod transfer_admin;

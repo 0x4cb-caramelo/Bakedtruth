@@ -6,7 +6,16 @@
 
 use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 
-use crate::instructions::no_args;
+use crate::{
+    checks,
+    error::BrotError,
+    events,
+    instructions::{
+        admin::shared::{config_changed, is_zero, ZERO_ADDRESS},
+        no_args,
+    },
+    state::{config::GlobalConfig, enums::ConfigChange},
+};
 
 pub fn admin_accept_admin(
     program_id: &Address,
@@ -17,6 +26,19 @@ pub fn admin_accept_admin(
     let [new_admin, config, event_authority, program, ..] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    let _ = (program_id, new_admin, config, event_authority, program);
-    todo!("Sprint 02 lane B")
+    checks::signer(new_admin)?;
+    checks::writable(config)?;
+    checks::event_accounts(event_authority, program, program_id)?;
+    let mut state = GlobalConfig::load_mut(config, program_id)?;
+    if is_zero(&state.pending_admin) {
+        return Err(BrotError::NoPendingAdmin.into());
+    }
+    if state.pending_admin != *new_admin.address() {
+        return Err(BrotError::NotPendingAdmin.into());
+    }
+    state.admin = *new_admin.address();
+    state.pending_admin = ZERO_ADDRESS;
+    let event = config_changed(ConfigChange::Admin, new_admin.address(), &state);
+    drop(state);
+    events::emit(&event, event_authority, program, program_id)
 }
