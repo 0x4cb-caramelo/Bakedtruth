@@ -1,0 +1,199 @@
+//! Purpose: `Campaign` (`["campaign", id]`): everything about one campaign, and the loaders that
+//!          check it. Its vault (`["vault", campaign]`) is data-less and its bump lives here.
+//! Version: 0.0.2
+//! Sprint: 02 (pot core on Pinocchio)
+//!
+//! Balances are bookkept in fields and never read from the vault (I15): anyone can send lamports
+//! to a vault, and those never become an entry or move the chance. The result and settlement
+//! groups are written from Sprint 03 on; in Sprint 02 they stay zero.
+
+use pinocchio::{
+    account::{Ref, RefMut},
+    error::ProgramError,
+    AccountView, Address,
+};
+use shank::ShankAccount;
+
+use crate::{
+    constants::CAMPAIGN_SEED,
+    layout::{LeI128, LeI32, LeI64, LeU16, LeU32, LeU64, Pubkey},
+    state::{AccountState, AccountTag},
+    zero_copy,
+};
+
+#[derive(ShankAccount)]
+#[repr(C)]
+pub struct Campaign {
+    // --- Identity and one-byte fields -----------------------------------------------------
+    pub tag: u8,
+    pub version: u8,
+    pub bump: u8,
+    pub vault_bump: u8,
+    #[idl_type("ReaderKind")]
+    pub kind: u8,
+    /// Price kind only.
+    #[idl_type("Direction")]
+    pub direction: u8,
+    #[idl_type("Status")]
+    pub status: u8,
+    #[idl_type("Outcome")]
+    pub outcome: u8,
+    #[idl_type("SettleMode")]
+    pub settle_mode: u8,
+    #[idl_type("VoidReason")]
+    pub void_reason: u8,
+    #[idl_type("ContestStage")]
+    pub contest_stage: u8,
+    /// A team key opened it: no creator share (P-3, I12).
+    #[idl_type("bool")]
+    pub creator_is_team: u8,
+    #[idl_type("bool")]
+    pub met_late: u8,
+    #[idl_type("bool")]
+    pub creator_share_settled: u8,
+    #[idl_type("bool")]
+    pub fee_collected: u8,
+    #[idl_type("bool")]
+    pub prize_settled: u8,
+    /// Drawn at random by the client and saved before signing: the retry guard (T17).
+    #[idl_type("u64")]
+    pub id: LeU64,
+    pub creator: Pubkey,
+    /// Paid the rent of the campaign and its vault; gets it back at close (I14).
+    pub rent_payer: Pubkey,
+    /// The sentence template the site renders (D-j).
+    #[idl_type("u16")]
+    pub template_version: LeU16,
+    /// Copied from the config at opening, or 0 when a team key opened (P-3).
+    #[idl_type("u16")]
+    pub creator_share_bps: LeU16,
+    /// Copied from the config at opening; never change.
+    #[idl_type("u16")]
+    pub fee_bps: LeU16,
+    #[idl_type("u16")]
+    pub one_sided_fee_bps: LeU16,
+    // --- Reading ------------------------------------------------------------------------------
+    /// Price kind only: the Pyth feed id.
+    pub feed_id: [u8; 32],
+    /// The account the reader reads, locked at opening (for price, the sponsored account).
+    pub metric_account: Pubkey,
+    /// The number the reading is compared with, in the account's own units.
+    #[idl_type("i128")]
+    pub target: LeI128,
+    /// Price kind only: the feed's exponent at opening.
+    #[idl_type("i32")]
+    pub price_exponent: LeI32,
+    /// Price kind only: the join-time price age, copied from the config (never below 30 s).
+    #[idl_type("u32")]
+    pub max_age: LeU32,
+    // --- Time (Unix seconds) --------------------------------------------------------------------
+    #[idl_type("i64")]
+    pub opens_at: LeI64,
+    #[idl_type("i64")]
+    pub entries_close_at: LeI64,
+    #[idl_type("i64")]
+    pub deadline_at: LeI64,
+    // --- Opening (zero for a team opening that adds no prize) ----------------------------------
+    #[idl_type("u64")]
+    pub opening_usd: LeU64,
+    #[idl_type("u64")]
+    pub opening_paid_lamports: LeU64,
+    /// The SOL/USD price the opening was charged at: price, exponent, publish time.
+    #[idl_type("i64")]
+    pub opening_price: LeI64,
+    #[idl_type("i32")]
+    pub opening_price_exponent: LeI32,
+    #[idl_type("i64")]
+    pub opening_price_publish_time: LeI64,
+    #[idl_type("u64")]
+    pub prize_lamports: LeU64,
+    /// Brot's 10%, held in the vault until the outcome (T23).
+    #[idl_type("u64")]
+    pub opening_fee_lamports: LeU64,
+    // --- Pot (bookkept) ------------------------------------------------------------------------
+    #[idl_type("u64")]
+    pub pool_yes: LeU64,
+    #[idl_type("u64")]
+    pub pool_no: LeU64,
+    /// The wallet whose entry landed in an empty pot; zero until then (Q3).
+    pub first_baker: Pubkey,
+    /// `Entry` accounts not yet settled.
+    #[idl_type("u32")]
+    pub entries_open: LeU32,
+    /// Events emitted for this campaign so far: the next event's `seq` (X0.4).
+    #[idl_type("u64")]
+    pub event_seq: LeU64,
+    // --- Result (Sprint 03) ----------------------------------------------------------------------
+    #[idl_type("i128")]
+    pub observed_value: LeI128,
+    #[idl_type("i64")]
+    pub resolved_at: LeI64,
+    #[idl_type("i64")]
+    pub review_ends_at: LeI64,
+    #[idl_type("i64")]
+    pub contest_ends_at: LeI64,
+    pub void_note_hash: [u8; 32],
+    // --- Settlement snapshot (Sprint 04) ------------------------------------------------------
+    #[idl_type("u64")]
+    pub winning_total: LeU64,
+    #[idl_type("u64")]
+    pub losing_total: LeU64,
+    #[idl_type("u64")]
+    pub distributable: LeU64,
+    #[idl_type("u64")]
+    pub fee_total: LeU64,
+    #[idl_type("u64")]
+    pub creator_share: LeU64,
+    #[idl_type("u64")]
+    pub creator_share_from_fee: LeU64,
+    #[idl_type("u64")]
+    pub paid_out_total: LeU64,
+    #[padding]
+    pub _reserved: [u8; 64],
+}
+
+zero_copy!(Campaign = 512);
+// `stored_id` reads the id at this offset before the full checks run.
+const _: () = assert!(core::mem::offset_of!(Campaign, id) == 16);
+
+impl AccountState for Campaign {
+    const TAG: AccountTag = AccountTag::Campaign;
+
+    fn bump(&self) -> u8 {
+        self.bump
+    }
+}
+
+impl Campaign {
+    /// Loads a campaign for reading; the address is re-derived from `id` and compared.
+    pub fn load<'a>(
+        account: &'a AccountView,
+        id: u64,
+        program_id: &Address,
+    ) -> Result<Ref<'a, Self>, ProgramError> {
+        crate::state::load(account, &[CAMPAIGN_SEED, &id.to_le_bytes()], program_id)
+    }
+
+    /// Loads a campaign for writing; the address is re-derived from its stored id and compared.
+    pub fn load_mut<'a>(
+        account: &'a mut AccountView,
+        program_id: &Address,
+    ) -> Result<RefMut<'a, Self>, ProgramError> {
+        // Slot and owner first: no byte is read from an account the program does not own.
+        crate::checks::writable(account)?;
+        crate::checks::owned_by(account, program_id)?;
+        let id = stored_id(account)?;
+        crate::state::load_mut(account, &[CAMPAIGN_SEED, &id.to_le_bytes()], program_id)
+    }
+}
+
+/// The stored `id` of a campaign the program owns; trusted once `load_mut` re-derives the address.
+fn stored_id(account: &AccountView) -> Result<u64, ProgramError> {
+    let data = account.try_borrow()?;
+    crate::checks::len(&data, <Campaign as crate::layout::ZeroCopy>::LEN)?;
+    let bytes = data
+        .get(16..24)
+        .and_then(|slice| <[u8; 8]>::try_from(slice).ok())
+        .ok_or(crate::error::BrotError::WrongLength)?;
+    Ok(u64::from_le_bytes(bytes))
+}

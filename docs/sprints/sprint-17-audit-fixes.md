@@ -1,95 +1,124 @@
-# Sprint 17 — Auditoria e correções
+# Sprint 17 — Audits and fixes
 
-**Estado:** planejada · **Branch:** `sprint-17-audit-fixes` · **Datas:** sem datas, por decisão do fundador
+**Status:** planned · **Branch:** `sprint-17-audit-fixes` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
-| Bloco do plano técnico | Seções 7 e 8; resumo de produto, seção 6.2 |
-| Depende de | Sprint 16 |
-| Regras e fluxos cobertos | R-32 (o que a equipe faz fica público); os requisitos de confiança do resumo de produto, seção 11 |
+| Technical Plan block | B9 (TP §7 "Before mainnet", §8) |
+| Depends on | Sprint 16 |
+| Requirements covered | BR-40 (both audit reports), BR-28 (the country switch's content), BR-46 (the SODAX page), BR-47 (mainnet notices); C-08, C-12, C-14 |
 
-## Objetivo
+## Goal
 
-Duas empresas de fora leem a versão exata, as falhas graves são corrigidas e conferidas por quem as apontou, e os
-relatórios ficam públicos. Enquanto elas leem, o site ganha o que a rede principal exige e que não toca o programa:
-os termos, o bloqueio por país e a página do SODAX.
+Two outside firms read the exact version; every serious finding is fixed and confirmed by whoever found it; the
+reports go public. While they read, the site gains what mainnet needs and the program does not touch: the terms, the
+country switch's content and the SODAX page.
 
-## Critério de pronto
+## Definition of done
 
-**Auditoria.**
+**The audits.**
 
-- [ ] Há dois relatórios sobre a versão exata, com commit e hash, cobrindo no mínimo: aposta, resolução, acerto,
-      pagamento, os cinco leitores, patrocínio e configuração.
-- [ ] Toda falha grave foi corrigida, com um teste que a reproduz, e conferida por quem a apontou.
-- [ ] Depois das correções, a conferência padrão, o teste aleatório e `solana-verify build` passam, e a versão final
-      tem hash novo.
-- [ ] Os relatórios estão públicos, com link no site.
+- [ ] Two reports on the exact version, with commit and hash, covering at least: the opening (the ten checks of
+      TP §3.4.10, the Pyth-priced charge, `max_lamports`, the retry guard on `id`); entries (the minimum,
+      `expected_entry_total`, the sealed entry); the five readers, the price split and `StaleFeed`; the window, the
+      contest and the dispute; settlement and lamport payouts with the reserve path; the fee, the one-sided fee and
+      the creator share (P-2); `VoidReason` and the 10% path (T23); closing and revival; the `checks` module (T24);
+      the referral link; `sponsor_add_prize`, if kept; configuration, powers and the pause.
+- [ ] Every serious finding is fixed, with a test that reproduces it, and confirmed by the firm that found it.
+- [ ] After the fixes, the standard checks, the seeded randomized test (I1 to I15) and `solana-verify build` pass; the
+      final version has a new hash.
+- [ ] Both reports are public, linked from the site.
 
-**Em paralelo, no site.**
+**On the site, in parallel.**
 
-- [ ] Termos de uso, aviso de risco e política de privacidade estão publicados, com o conteúdo vindo da avaliação
-      jurídica. A política diz que a aposta é pública e permanente, e cita o limitador e o Cloudflare.
-- [ ] `GEO_BLOCK` e `GEO_BLOCK_COUNTRIES`: com o interruptor ligado, o painel de aposta some para o país listado;
-      posições e pagamentos seguem visíveis (teste).
-- [ ] A página do SODAX existe em rota própria, com o aviso de carteira sem SOL.
-- [ ] Os avisos da rede principal estão prontos: o de fase de testes sai; "programa ainda sem auditoria" só sai com
-      os relatórios públicos.
-- [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
+- [ ] The terms of use, the risk notice and the privacy policy are published, their content from the lawyer's written
+      review (L0). The policy says entries are public and permanent on-chain, names the rate limiter and Cloudflare,
+      and gives the deletion path for off-chain data (C-08).
+- [ ] The country switch: `GEO_BLOCK` and its country list, per L0 (L-20). With it on, the entry panel and the creation
+      box disappear for a listed country; states, entries and payouts stay visible (K-11); `brot-rpc` refuses a join
+      or an opening from it (X1.7). Tested on and off.
+- [ ] The SODAX page exists on its own route, with no SODAX code on any entry page (K-10), only if P-8 confirms SODAX
+      works with SOL.
+- [ ] The mainnet notices are ready: the devnet notice leaves; "Programa ainda sem auditoria" leaves only once both
+      reports are public (BR-47).
+- [ ] The `privacy-audit` skill answers the nine questions for the visitor's country and IP before closure (gate 5).
+      The IP never reaches disk; whether Brazilian law requires access logs (C-14) is answered by L0; the policy says
+      what Cloudflare logs (TP §14.4 C13).
+- [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
-## Entregas
+## Deliverables
 
-- As correções, cada uma com teste, e a versão final.
-- Os textos legais, o interruptor de país e a página do SODAX.
+- The fixes, each with its test, and the final version with its hash.
+- The legal texts, the country switch's content and the SODAX page.
 
-## Fora desta sprint
+## Out of scope
 
-Qualquer função nova no programa: o que entra depois da auditoria não foi auditado (P4 §4.1). A opinião jurídica: o
-agente escreve o rascunho, e quem decide é o advogado. O SODAX funcionando, que só existe na rede principal.
+Any new program feature: what enters after the audit was not audited. The legal opinion itself: the
+`legal-compliance-agent` drafts, the team's lawyer decides (D-s). SODAX working end to end, which exists only on
+mainnet.
 
-## Decisões do fundador que travam a sprint
+## Founder decisions that block the sprint
 
-- A pergunta às duas empresas: prazo, escopo e de que versão precisam; e o nome da segunda (P4 §9.3). Convém fazer
-  já.
-- A avaliação jurídica concluída (P5), que dá o conteúdo dos termos (L-21) e do bloqueio (L-20).
-- **L-18:** o desenho da página do SODAX.
-- Usar ou não a exceção combinada de P2: abrir com uma auditoria concluída e teto menor.
+- **The two firms:** timeline, scope, the version they need, and the second firm's name. One appears as
+  proofofexploit.com, in negotiation; the other has no name (P4 §4.1). Whether they have read Pinocchio programs.
+  Worth asking now, long before this sprint.
+- **L0** (proposal §5.2): the team lawyer's written review (D-s). It gives the terms (L-21), the country list (L-20),
+  Brazil in the app (C-06), age (C-07) and log retention (C-14). An outside colleague's reading stays a proposal.
+- **The new open item** (P4 §3.4): the one-report exception, opening with one report and a lower cap, lost its cap.
+  The BP recommends waiting for both reports, which this plan assumes (K-12).
+- **P-8** (open): SODAX and Cloak with SOL. **L-18** (Product Brief v0.0.1 gap): the SODAX page's design.
+- **D5**, if it was not settled before Sprint 14.
+- **[Q]** Whether to record terms acceptance when real money starts (C-12). It needs the optional H1 sign-in store
+  (proposal §3.5), a founder decision and a privacy audit.
 
-## Agentes e skills
+## Agents and skills
 
-- **Agentes:** `technical-security-red-team-agent`, `bug-triage-agent`, `legal-compliance-agent` (rascunho dos
-  textos), `copywriter-agent`, `coordinator-agent`.
+- **Agents:** `technical-security-red-team-agent`, `bug-triage-agent`, `legal-compliance-agent` (drafts of the legal
+  texts), `copywriter-agent`, `coordinator-agent`.
 - **Skills:** `privacy-audit`, `multi-ai-review`, `release-check`, `secrets-scan`, `decision-log`,
   `sprint-management`, `codemap`.
 
-## Portões de segurança
+## Security gates
 
-- Toda correção passa pelo teste aleatório antes de voltar a quem auditou.
-- **Dado pessoal:** o país do visitante e o IP passam pela skill `privacy-audit` antes de fechar. O IP não vai para
-  disco.
-- O código do SODAX não entra na página de aposta.
-- Nenhum texto promete preço, retorno ou rendimento. `secrets-scan` no fechamento.
+- Every fix passes the randomized test before it goes back to the firm that found the issue.
+- **Personal data (gate 5):** the visitor's country and IP pass the `privacy-audit` skill before closure; the IP never
+  reaches disk.
+- No SODAX or Cloak code on an entry page (K-10).
+- No text promises price, return or yield.
+- `secrets-scan` at closure.
 
-## Testes
+## Tests
 
-Um teste por falha corrigida. O teste aleatório e a conferência padrão sobre a versão final. O interruptor de país,
-ligado e desligado.
+```bash
+export PATH="$HOME/.bun/bin:$PATH"
+bun run build:program && bun run test && bun run test:rust
+cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint,mainnet -- -D warnings
+solana-verify build                                       # the final hash [AC: flags]
+bun test tests/ -t "<finding id>"                         # to add: one reproducing test per serious finding
+bun test tests/ -t "country switch hides entries only"    # to add: on and off
+bun test services/ -t "relay refuses a blocked country"   # Sprint 08's relay rules (X1.7)
+(cd app && bun run lint && bun run build)
+```
 
-## Riscos
+## Risks
 
-- O prazo é de terceiros e não está nos arquivos lidos.
-- Uma correção que muda o programa pede nova leitura.
-- O Cloudflare não entregar o país pelo túnel (C9).
+- The timeline belongs to third parties and is not in the files read.
+- A fix that changes the program needs a new reading.
+- Cloudflare may not pass the visitor's country through the tunnel (TP §14.4 C9 **[AC]**).
+- Auditors new to Pinocchio read hand-written checks that Anchor used to generate; the `checks` module's negative
+  tests (T24) are their map.
 
-## Artefatos esperados
+## Expected artifacts
 
-Os dois relatórios, o commit e o hash da versão final, os textos legais, `app/features/` (bloqueio, SODAX),
-`CODEMAP.md`.
+Both reports, the commit and hash of the final version, the legal texts, `app/features/` (country switch, SODAX
+page), `CODEMAP.md`.
 
-## Changelog e session-log
+## Changelog and session log
 
-- **Changelog:** auditorias concluídas e correções; termos; bloqueio por país; página do SODAX.
-- **Session-log:** cada falha grave e a correção; o que a avaliação jurídica concluiu; se a exceção de P2 foi usada.
+- **Changelog:** audits done and findings fixed; terms; country switch; SODAX page.
+- **Session log:** each serious finding and its fix; what the lawyer's review concluded; that the one-report exception
+  was not used, or why it was.
 
-## Registro e retrospectiva
+## Record and retrospective
 
-Preenchidos durante a sprint e no fechamento.
+Filled in during the sprint and at closure.

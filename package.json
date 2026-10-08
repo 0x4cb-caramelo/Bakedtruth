@@ -16,10 +16,11 @@
     "services/*"
   ],
   "scripts": {
-    "build:program": "NO_DNA=1 anchor build && bun run sync-idl",
-    "sync-idl": "bun run --filter @pred-provable/app sync-idl && mkdir -p packages/sdk/src/idl && cp target/idl/brot_markets.json target/types/brot_markets.ts packages/sdk/src/idl/",
+    "build:program": "NO_DNA=1 anchor build -p pred_provable && cargo build-sbf --manifest-path programs/brot-markets/Cargo.toml --sbf-out-dir target/deploy -- --locked && bun run idl && bun run sync-idl",
+    "idl": "bun run scripts/build-idl.ts",
+    "sync-idl": "bun run --filter @pred-provable/app sync-idl",
     "test": "bun test tests/",
-    "test:rust": "cargo test -p pred-provable --features no-entrypoint && cargo test -p brot-markets --features no-entrypoint",
+    "test:rust": "cargo test -p pred-provable --features no-entrypoint && SBF_OUT_DIR=$PWD/target/deploy cargo test -p brot-markets --features no-entrypoint",
     "deploy:devnet": "solana program deploy target/deploy/pred_provable.so --program-id target/deploy/pred_provable-keypair.json --keypair $HOME/.config/solana/pred-provable-devnet.json --url devnet",
     "smoke:devnet": "bun run scripts/devnet-smoke.ts",
     "seed:devnet": "bun run scripts/devnet-seed.ts",
@@ -32,17 +33,16 @@
   },
   "devDependencies": {
     "@anchor-lang/core": "^1.2.0",
-    "@solana/web3.js": "^1.99.0",
+    "@codama/nodes-from-anchor": "1.5.6",
+    "@codama/renderers-js": "2.5.0",
     "@solana/kit": "~8.3.0",
     "@solana/kit-plugin-litesvm": "^0.19.0",
     "@solana/kit-plugin-signer": "^0.19.0",
-    "litesvm": "^1.5.0",
+    "@solana/web3.js": "^1.99.0",
     "@types/bun": "^1.4.2",
+    "codama": "1.11.0",
+    "litesvm": "^1.5.0",
     "prettier": "^3.9.9",
     "typescript": "^5"
-  },
-  "trustedDependencies": [
-    "sharp",
-    "unrs-resolver"
-  ]
+  }
 }

@@ -1,105 +1,157 @@
-# Sprint 06 — Servidor e keeper principal
+# Sprint 06 — Server and primary keeper (Bun check first)
 
-**Estado:** planejada · **Branch:** `sprint-06-keeper-server` · **Datas:** sem datas, por decisão do fundador
+**Status:** planned · **Branch:** `sprint-06-keeper-server` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
-| Bloco do plano técnico | B6, primeira metade (seções 3.5, 10, 11 e 12) |
-| Depende de | Sprint 05 |
-| Regras e fluxos cobertos | R-22 (o serviço principal), R-24 (envio e nova tentativa), R-09 (publicação de preço). F3 |
+| Technical Plan block | B6, first half (TP §3.5, §7, §10, §11, §12) |
+| Depends on | Sprint 05 |
+| Requirements covered | BR-04 (the SOL refill runbook), BR-13 (automatic payout and the daily retry), BR-14 (a SOL-only keeper), BR-24 (the primary service) |
 
-## Objetivo
+## Goal
 
-A resolução e o pagamento passam a sair sozinhos. O `brot-keeper` roda no servidor que já existe e, a cada 60
-segundos, resolve o que já pode, publica preço, acerta o que venceu a janela e paga em lotes.
+Resolution and payout happen on their own. Before anything else, Bun 1.4.2 is checked on the shared server (D-p).
+Then `brot-keeper` runs there: every 60 seconds it reads the open campaigns in batches, resolves what it can,
+finalizes after the window, settles in batches and retries reserved credits, holding and spending only SOL. The units
+move to one identity each, with secrets loaded as credentials, so that code running in one service cannot read
+another's keys.
 
-## Critério de pronto
+## Definition of done
 
-- [ ] `services/keeper/src` tem `loop.ts`, `tasks/`, `health.ts`, `signer.ts` e `rpc.ts`. O serviço decide com os
-      leitores do SDK, simula antes de enviar e não guarda estado.
-- [ ] `bun test` do laço: resolve, acerta, paga em lote, tira do lote a instrução que falha, tenta de novo a posição
-      reservada e nunca cria conta de USDC para ninguém.
-- [ ] No servidor, o Bun está na pasta do usuário `brot` (C8, conferida antes de tudo), e `brot-keeper.service` roda
-      como `brot`, com `MemoryMax` e `CPUQuota`.
-- [ ] `ss -ltn` mostra a porta 4210 só em `127.0.0.1`. Nenhuma porta nova para fora.
-- [ ] Os segredos estão só em `/etc/brot-markets/keeper.env` (root, `0640`, grupo `brot`).
-- [ ] `deploy/vps/push-deploy.sh` leva o pacote do Git por SSH, monta a versão em `releases/<sha>` e volta à
-      anterior se a saúde não responder. `deploy/vps/README.md` diz onde vive cada segredo e como trocar.
-- [ ] Existe um túnel do Cloudflare só do Brot Markets, com token próprio (T6, C9).
-- [ ] `GET /healthz` devolve a hora do último ciclo completo, o saldo de SOL e as pendências.
-- [ ] Uma pergunta da devnet é resolvida, acertada e paga sem ninguém acionar.
-- [ ] Depois de cada mudança no servidor, os serviços dos vizinhos seguem de pé.
-- [ ] Cada item da seção "Herdado da Sprint 01" está feito, ou decidido por escrito com o motivo.
-- [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
+- [ ] **First step, on the server as the service user:** glibc 2.17 or newer, kernel 5.6 or newer recommended, SSE4.2
+      in the CPU flags; the Bun 1.4.2 binary's checksum matches the pinned one. The result is recorded. If it fails,
+      D-p goes back to the founder before anything else (proposal §2.1, TP C8).
+- [ ] `services/keeper/src` has `loop.ts`, `tasks/`, `health.ts`, `signer.ts`, `rpc.ts` and `landing.ts` (TP §3.2). The
+      keeper keeps no state: it re-reads the chain each cycle, decides with the SDK's `read` half, builds with `tx`, and
+      simulates before sending.
+- [ ] **Its tasks** (proposal §1.7): resolve; `finalize_campaign` after `review_ends_at`; `settle_entry` in simulated
+      batches, then `settle_creator_share`; a daily retry of reserved credits; then `collect_fee`, `settle_prize`,
+      `close_campaign` and `sweep_fees`. Each is idempotent. The keeper never creates an account for anyone.
+- [ ] **Batched reads:** every open campaign's metric account, 100 per `getMultipleAccounts`. **Price per feed, not
+      per campaign** (proposal §2.5): with a Hermes key, it streams the feeds of open price campaigns, posts the signed
+      update to its own account and resolves every touched campaign of that feed; with no key, it resolves when the
+      sponsored account shows a touch, on devnet only.
+- [ ] **Transaction landing** (proposal §2.6): simulate with `replaceRecentBlockhash` and drop failing instructions
+      from a batch; set the compute limit from the simulation with a margin, under 1.4M; set the priority fee from
+      `getRecentPrioritizationFees` over the written accounts, clamped between a configured floor and ceiling; send
+      with `maxRetries: 0` and rebroadcast the same bytes every 2 s until `lastValidBlockHeight`; confirm with
+      `getSignatureStatuses`.
+- [ ] `GET /healthz` returns the last full cycle, the SOL balance, the pending items and the open campaigns against
+      `max_open_campaigns`.
+- [ ] `bun test services/keeper` covers: resolve, finalize, settle in batches, drop the failing instruction, retry a
+      reserved credit, and never send to a destination the program did not fix.
+- [ ] **Load:** with 1,000 open campaigns on Surfpool, one keeper cycle completes within 60 s (X1.8).
+- [ ] **Per-unit identities** (T13, proposal §2.10), with the server owner's agreement recorded: `DynamicUser=yes` or
+      one user per service; secrets through `LoadCredential=` from root-only `0600` files, never in the environment;
+      `ProtectProc=invisible` and `ProcSubset=pid`; the landing unit's sandbox on every unit; `MemoryMax` and
+      `CPUQuota`. `systemd-analyze security` scores are recorded per unit. No unit can read another's credentials
+      (X1.6).
+- [ ] The tunnel token leaves the unit's environment for a credential and is rotated; an alert on unknown connectors
+      is set up [AC: the Cloudflare notification to use].
+- [ ] `ss -ltn` shows port 4210 on `127.0.0.1` only. No new public port.
+- [ ] `deploy/vps/push-deploy.sh` ships the Git package over SSH, builds the release in `releases/<sha>`, rolls back
+      when health does not answer, and refuses a Bun binary whose checksum differs (X1.10). `deploy/vps/README.md`
+      says where each secret lives and how to rotate it.
+- [ ] **Runbooks:** the SOL refill of the keeper wallet from `fee_recipient` (a multisig transfer on mainnet, a
+      team-held key on devnet), triggered by the low-SOL signal; the program upgrade, with clients and services
+      tolerating both IDLs during the public wait. The monthly conversion half waits for P-7.
+- [ ] **A Bun soak test** of the keeper passes and is recorded (X1.10).
+- [ ] **A devnet campaign resolves and pays with nobody triggering anything,** using the drill constants (X1.1).
+- [ ] After each change on the server, the neighbours' services are still up.
+- [ ] Each item of "Carried over" below is done, or decided in writing with the reason.
+- [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
-## Entregas
+## Deliverables
 
-- O keeper, com as tarefas de resolver, publicar preço a cada 10 segundos enquanto houver pergunta de preço aberta,
-  acertar, pagar e tentar de novo todo dia.
-- A base do servidor em `deploy/vps/`, e a escolha do provedor de RPC do keeper (T5).
+- The Bun check on the server, first (S).
+- The keeper with batched reads and price per feed (M), and its transaction landing.
+- Per-unit identities, credentials and the tunnel-token rotation (M).
+- `deploy/vps/` with units, the deploy script and the runbooks; the soak test (S).
+- The keeper's RPC provider chosen (T5, within D4).
 
-## Herdado da Sprint 01
+## Out of scope
 
-Da prova do leitor de preço (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`).
+The standby, the watchdog, `POST /restart` and the email alerts (Sprint 07). The indexer and the relay (08). The site
+(09). A paid Hermes plan (D4, before mainnet price campaigns, Sprint 16).
 
-- **O serviço de preços da Pyth exige chave desde 26/8/2026.** Publicar preço por conta própria, que é uma tarefa
-  deste keeper, precisa dela. Há plano gratuito de teste e planos pagos; o preço não foi levantado. A chave é
-  segredo: vai em `/etc/brot-markets/keeper.env`, nunca no repositório.
-- **Antes de construir a tarefa de publicar preço, medir se ela é necessária.** Na rede principal a conta
-  patrocinada renovou a cada 5 a 11 segundos, o que cumpre o limite de 30 segundos sem publicação nossa. A medida
-  foi de um a dois minutos, numa tarde: falta medir por dias e saber o que acontece quando o patrocínio acaba. Na
-  devnet a conta leva de 62 a 64 segundos, e aí a publicação própria é a única forma de cumprir 30 segundos.
-- **A taxa do receptor por atualização é zero lamports** nas duas redes, hoje. O custo de publicar é a taxa da
-  transação e o aluguel da conta.
+## Founder decisions that block the sprint
 
-## Fora desta sprint
+- **Open: D4 for the keeper's RPC account.** The proposal recommends Helius Developer (US$49 a month) for the keeper
+  on devnet. Q8 is folded into D4.
+- **Open: the server owner's agreement** to one identity per unit, which changes the house pattern of one user per
+  project (proposal §2.10).
+- **Open: P-7 (treasury),** for the monthly conversion half of the SOL runbook. The refill half does not wait.
+- **If the Bun check fails:** D-p goes back to the founder.
+- **Answered:** Q11 (the domain is bought and on Cloudflare); the Hermes key waits for measurement ("ok",
+  2026-10-05), and paid openings need no Pyth plan, since the SOL/USD account is free to read (D4).
 
-O keeper reserva, a vigia, `POST /restart` e os alertas por email (07). O indexer (08). O site (09).
+## Agents and skills
 
-## Decisões do fundador que travam a sprint
+- **Agents:** `technical-security-red-team-agent` (keys, the tunnel, the units, the credentials); `dev-product-agent`;
+  `bug-triage-agent`; `coordinator-agent`.
+- **Skills:** `sprint-management`, `secrets-discipline`, `secrets-scan`, `cost-watchdog` (the RPC plan),
+  `verify-build-works`, `codemap`, `decision-log`, `release-check`.
 
-- **Q8:** a verba para o acesso pago à rede.
-- **Q11:** o domínio. Sem ele o túnel não tem endereço; a opção provisória é um subdomínio já na conta.
-- **Q12:** o Ronaldo saber que o projeto vai para o servidor que ele também usa. A regra da casa pede aviso antes de
-  instalar.
-- **Da Sprint 01:** obter a chave do serviço de preços da Pyth. Só é necessária se este serviço publicar preço;
-  depende da resposta sobre o limite de 30 segundos (Sprint 03) e da medida pedida em "Herdado da Sprint 01".
+## Security gates
 
-## Agentes e skills
+- **Shared server:** no Docker, sudo or SSH for service identities; ports only on `127.0.0.1`; secrets only in
+  root-owned files loaded as credentials; nothing installed system-wide.
+- Restarts, `apt upgrade` and firewall changes only with notice to the other side. The other project's tunnel,
+  database and email are not touched.
+- The keeper wallet holds only SOL for network fees and has no privilege on-chain; it never receives fees
+  automatically (A-1).
+- The devnet `fee_recipient` and admin keys live on team machines, never on the server (proposal §2.10).
+- The Sprint 04 randomized test is green on the deployed version (gate 1). `secrets-scan` at closure.
 
-- **Agentes:** `technical-security-red-team-agent` (chave, túnel, unidades), `dev-product-agent`, `bug-triage-agent`,
-  `coordinator-agent`.
-- **Skills:** `sprint-management`, `secrets-discipline`, `secrets-scan`, `cost-watchdog`, `verify-build-works`,
-  `codemap`, `decision-log`, `release-check`.
+## Tests
 
-## Portões de segurança
+`bun test services/keeper` with a simulated cluster; the load run on Surfpool; the drill on devnet with the real
+service.
 
-- **Servidor compartilhado:** usuário `brot`, sem docker, sudo nem SSH; porta só em `127.0.0.1`; segredo em
-  `/etc/brot-markets`; nada instalado no sistema.
-- Reinício, `apt upgrade` e mudança de firewall só com aviso ao outro lado. O túnel, o banco e o email do outro
-  projeto não são tocados.
-- A carteira do keeper guarda só o SOL das taxas e não tem privilégio na rede.
-- O teste aleatório da Sprint 04 está verde na versão publicada.
-- `secrets-scan` no fechamento.
+```bash
+# first step, on the server as the service user
+ldd --version | head -1; uname -r; grep -m1 -o -w sse4_2 /proc/cpuinfo
+sha256sum -c deploy/vps/bun-1.4.2.sha256 && bun --version
+bun test services/keeper
+bun run scripts/load/open-campaigns.ts --campaigns 1000 --cluster surfpool   # to add: one cycle under 60 s
+curl -fsS http://127.0.0.1:4210/healthz
+systemd-analyze security brot-keeper.service
+```
 
-## Testes
+## Carried over
 
-`bun test` do laço, com a rede simulada. O ensaio na devnet, com o serviço de verdade.
+From the price-reader proof of Sprint 01 (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`), re-read against
+proposal §2.5.
 
-## Riscos
+- **Pyth's price service (Hermes) has required a key since 2026-08-26.** The Free plan has no API access, and
+  Starter costs US$500 a month (proposal §2.5, E51). Posting our own proofs needs it; the key is a secret, loaded as
+  a credential. Devnet runs without it, and mainnet price campaigns wait for it (D4).
+- **Measure before building the publishing task.** The sponsored account updated every 5–11 s on mainnet and every
+  62–64 s on devnet, in a one-to-two-minute sample. The keyed path stays behind a configuration switch [INF], and
+  the measurement over days is recorded here.
+- **The receiver charges zero lamports per update** on both clusters (Sprint 01). Posting costs the transaction fee
+  and the account's rent.
 
-- O Bun não rodar no Ubuntu 22.04 do servidor (C8), ou o túnel não rodar sem root (C9).
-- O servidor é dividido. Reduz: limites por unidade. Se preciso, param-se só as unidades `brot-*`.
+## Risks
 
-## Artefatos esperados
+- Bun 1.4.2 may not run on the server's CPU or kernel (TP C8). Reduces: the check comes first; SQLite sits behind a
+  small adapter, so a failed check reopens D-p without rewriting services.
+- The server is shared. Reduces: limits per unit; if needed, only the `brot-*` units are stopped.
+- One identity per unit changes the house pattern; without the owner's agreement, the tunnel token stays readable by
+  every process of the same user (proposal §2.10).
+- Without a Hermes key, a baker on NO can erase a short touch before the keeper resolves; devnet only.
 
-`services/keeper/`, `deploy/vps/`, `services/keeper/.env.example` sem valores, `CODEMAP.md`.
+## Expected artifacts
 
-## Changelog e session-log
+`services/keeper/`, `deploy/vps/` (units, `push-deploy.sh`, the checksum file, `README.md`, the runbooks),
+`scripts/load/open-campaigns.ts`, `services/keeper/.env.example` with no values, `CODEMAP.md`.
 
-- **Changelog:** keeper principal no ar na devnet; deploy no servidor.
-- **Session-log:** o que foi instalado e criado no servidor, o aviso dado ao outro lado, T5 e T6.
+## Changelog and session log
 
-## Registro e retrospectiva
+- **Changelog:** the primary keeper live on devnet; per-unit identities on the server.
+- **Session log:** the Bun check's result; what was installed and created on the server and the notice given; the
+  owner's agreement; the RPC provider (T5) and its cost.
 
-Preenchidos durante a sprint e no fechamento.
+## Record and retrospective
+
+Filled in during the sprint and at closure.

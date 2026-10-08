@@ -8,9 +8,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.md`).
+A Sprint 02, o núcleo do pote em Pinocchio, está em revisão no pull request #30 (branch `sprint-02-pot-core`), sem
+mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-02-pot-core.md`).
 
 ### Added
+
+- **Sprint 02: o núcleo do pote, o programa novo em Pinocchio** (`programs/brot-markets`, 8/10/2026). Sai o
+  esqueleto Anchor; entra o programa que guarda SOL de verdade, ainda sem leitura de resultado nem pagamento:
+  - **A configuração e a equipe:** `admin_initialize_config` (só a autoridade de upgrade, lida da conta ProgramData),
+    até cinco chaves da equipe, os parâmetros de criação dentro dos tetos do código, o destino das taxas, a troca de
+    admin em dois passos, a pausa por uma chave da equipe e a volta pelo admin. Os parâmetros valem só para as
+    próximas campanhas, menos a entrada mínima, que cada entrada lê da configuração na hora (a confirmar com o
+    fundador: o plano técnico diz as duas coisas, e os termos publicados prometem que a campanha aberta mantém as
+    regras com que abriu).
+  - **A abertura paga:** `user_open_campaign` do tipo preço cobra US$ 500 em SOL ao preço da Pyth SOL/USD, lido na
+    hora da conta patrocinada que o programa deriva da configuração; tudo vai para o cofre da campanha, 90% como
+    prêmio e 10% guardados para a Brot até o resultado. Ao preço capturado da devnet, US$ 119,22, são 4,1940 SOL. Das
+    dez regras de abertura do plano técnico, oito têm o seu erro; as outras duas (o criador não passa taxa nem texto
+    livre) valem pela forma dos argumentos, e um argumento a mais cai no erro de dados. Uma chave da equipe abre de
+    graça, sem o 1% do criador; se quiser pôr prêmio, paga como qualquer carteira (a leitura de trabalho, a
+    confirmar). Repetir a abertura com o mesmo número falha sem cobrar duas vezes.
+  - **A entrada:** `user_join_campaign` leva o SOL da carteira do baker para o cofre, a partir de 0,01 SOL, com a
+    trava contra a transação repetida e o retorno mínimo assinado. O pote é escriturado: SOL mandado à mão para o
+    cofre não vira entrada.
+  - **O módulo `checks`:** cada checagem que o Anchor fazia sozinho, escrita à mão num lugar só, com um teste que
+    recusa a conta errada e a prova de que, sem a checagem, o teste falha.
+  - **Eventos por chamada do programa a si mesmo**, um por instrução, com sequência contínua por campanha.
+  - **O IDL do Shank** em `packages/sdk/src/idl` e um cliente gerado pelo Codama no ensaio do T9; a decisão sobre o
+    Codama é da Sprint 05.
+  - **Testes do programa novo:** 146 em Rust (a matemática com casos aleatórios, as checagens no Mollusk, o leitor de
+    preço) e 130 em TypeScript, quase todos no LiteSVM sobre o binário; os nove filtros da sprint passam, e tirar
+    qualquer checagem, ou qualquer assinatura e papel conferido dentro das instruções, derruba o teste dela.
+- **O `bun.lock` baixa do `registry.npmjs.org`** (T15), e os dois `trustedDependencies` saíram depois da revisão.
+- **Build e CI:** `bun run build:program` compila o programa novo com `cargo build-sbf` e escreve o IDL do Shank; o
+  `anchor build` fica só para o `pred-provable`, até a Sprint 03. O CI instala o shank-cli 0.4.9 fixo, confere o IDL
+  e o cliente gerado, e roda os testes com a feature `mainnet` para provar que ela não carrega valores de treino.
 
 - **`docs.brot.markets` no ar,** fora dos buscadores, depois de o fundador escrever "pode liberar o endereço e colocar
   online, pois vou ler online" (8/10/2026). Sem dependência nova: o mesmo serviço do site responde pelo endereço
@@ -137,9 +169,83 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   correções feitas e o roteiro em português do fundador. E a análise
   (`docs/business/_review/banca-do-pitch-2026-10-06.md`): 42 pontos da banca e 8 da fala, cada um com avaliação e
   veredito, a proposta de uma terceira versão do deck com nove slides e a lista do que não foi conferido.
+- **Proposta de arquitetura do sistema, versão 0.2** (`docs/technical/SYSTEM-ARCHITECTURE-PROPOSAL.md`, em inglês,
+  como o pedido mandou). Liga cada requisito do plano de negócio a um componente e a uma sprint; escolhe a stack
+  dizendo o porquê e o que faria mudar cada recusa; desenha a camada para o Seeker (registro explícito da carteira
+  móvel no site, PWA e, se o fundador quiser, o APK da loja feito com o `solana-mobile webshell`) e uma camada de IA
+  opcional, por padrão desligada até a rede principal; encaixa quatro fases nas sprints aprovadas, com critérios de
+  saída e comandos de conferência; e lista sete decisões para o fundador, mais o pedido do parecer jurídico. A versão
+  0.1 passou por quatro revisões independentes (segurança, viabilidade, advogado do diabo e checagem de fontes), e a
+  0.2 incorpora o que elas acharam. É proposta: o plano técnico e o roteiro não mudaram.
+- **A proposta de arquitetura refeita sobre o BP v0.0.3, versão 0.3** (8/10/2026). O plano de negócio novo deixa
+  qualquer carteira abrir mercado por 0,02 SOL e dá 1% do pote a quem abriu. A proposta:
+  - põe as regras de abertura dentro do programa, numa instrução nova, sem texto livre;
+  - escreve o 1% como uma função só, que serve aos três desenhos do BP, e constrói o recomendado, em que quem acerta
+    nunca recebe menos do que pôs;
+  - deixa a taxa de 0,02 SOL exata, com o aluguel das contas descontado dela e devolvido à carteira de várias
+    assinaturas no fechamento;
+  - mostra que o teto global se ocupa com 0,2 SOL e propõe uma regra de equilíbrio entre os lados, que encarece o
+    ataque sem eliminá-lo;
+  - prepara os serviços para muitos mercados;
+  - acrescenta o cartão para o X, o painel "confira você mesmo" e a caixa de abertura.
+
+  A stack não muda. A decisão sobre a base da taxa (D1) fecha em 10% do lado perdedor, e entra a D8, a tela de
+  abertura, que o protótipo não tem. Continua sendo proposta: o plano técnico, o resumo de produto e o roteiro não
+  mudaram.
+- **Business Plan v0.0.4** (8/10/2026), a partir das decisões do fundador sobre a v0.0.3. O índice em
+  `docs/business/BUSINESS-PLAN.md` e quatro partes (`BP-v0.0.4-parte-*.md`), com a numeração da v0.0.3. O que muda:
+  - tudo em SOL;
+  - abrir uma campanha custa US$ 500 em SOL, com 90% virando prêmio no pote e 10% indo para o Brot;
+  - o 1% do criador sai do pote, e da taxa do Brot só no caso extremo;
+  - sem teto, nem global nem por campanha, e sem lista de contas aprovadas;
+  - o vocabulário passa a ser "campanhas on-chain", com baker, criador, SIM/NÃO e pote;
+  - na construção: Pinocchio, Bun, app Android, sem IA e sem prazo de hackathon.
+
+  As contas usam o preço da CoinGecko de 8/10/2026 (US$ 109,27 por SOL). O volume de equilíbrio cai com cada abertura
+  paga (110 por mês pagam o custo sozinhas). Os cenários de caixa mês a mês são os da v0.0.3 e não foram refeitos.
+  Junto vieram:
+  - a revisão de impacto (`docs/business/_review/bp-impact-review-v0.0.4.md`);
+  - as respostas de 8/10 no registro de perguntas e respostas, inclusive a P-1 e a P-3, decididas depois: nada de
+    1% ao criador na campanha anulada, no pote de um lado só e sobre o prêmio; a equipe abre sem pagar e sem o 1%; os
+    parceiros também não ficam com o 1%; a P-2, a P-4, a P-5 e a D-f como recomendado; a proposta de arquitetura 0.4
+    aprovada.
+- **Proposta de arquitetura, versão 0.4**, sobre o BP v0.0.4:
+  - Pinocchio no lugar do Anchor;
+  - cofres em SOL nativo e pagamento direto à carteira;
+  - a abertura lê o preço SOL/USD da Pyth para cobrar os US$ 500;
+  - sem teto e sem lista;
+  - sai a camada de IA;
+  - entra o app Android, com o mesmo backend;
+  - os serviços em Bun, e o site também se passar no teste.
+- **O plano de implementação, em inglês** (8/10/2026), a pedido do fundador, a partir da proposta de arquitetura 0.4
+  aprovada no mesmo dia:
+  - `docs/technical/TECHNICAL-PLAN.md` v0.1.0 substitui a v0.0.1, que fica no histórico do git (commit `0b40554`). O programa em
+    Pinocchio está descrito por inteiro, e entra uma seção sobre o app Android;
+  - `docs/SPRINTS.md` v0.1.0 e os arquivos das Sprints -1 e 02 a 22. Quatro arquivos mudaram de nome (10, 11, 12 e
+    18), e quatro sprints são novas: a 19, a caixa de abertura no site, e de 20 a 22, o app Android;
+  - o `CLAUDE.md` descreve o produto novo.
+
+  As recomendações D6, D7 e D8 da proposta foram lidas como aprovadas com ela, e isso está escrito para o fundador
+  confirmar. O resumo de produto e o documento de design ainda não foram alinhados.
+- **Pesquisa "o pump.fun dos mercados on-chain"** (`knowledge-base/market/pumpfun-model-for-open-markets.md`, em
+  inglês, a pedido do usuário em 7/10/2026), com as sete notas de fonte em `knowledge-base/market/pumpfun-model-notes/`.
+  Cobre a receita, as taxas, o token e o valor de mercado do pump.fun; a decisão judicial de 31/8/2026 contra ele; o
+  tamanho do setor e os comparáveis; 35 tentativas de criação aberta de mercados; o catálogo do que um programa
+  consegue conferir sozinho na rede, com o teto de pote pelo custo de forçar o resultado; o desenho da caixa de
+  criação que completa a frase; a conta do criador; e o escopo de cinco dias para o Colosseum. Abrir a criação ao
+  público desfaz quatro decisões aprovadas e fica com o fundador. A cota de busca acabou no meio da pesquisa, então
+  alguns itens se apoiam em fonte secundária, e a seção de lacunas os lista. Nenhum outro documento foi alterado.
 
 ### Changed
 
+- **A página em breve com o vocabulário do D6** (8/10/2026): título, meta tags, título principal, texto de abertura,
+  formulário, exemplo e princípios passam de "prediction markets", "bet", "pool" e USDC para On-Chain Campaigns,
+  entrar no YES ou NO, pote e SOL. O aviso legal do rodapé e o deck em `/pitch` não mudaram.
+
+- **Vocabulário, a pedido do usuário em 7/10/2026:** o produto passa a ser descrito só como "mercados", com
+  "posição" e "participante". A proposta de arquitetura já segue a regra. Os documentos anteriores e o site no ar
+  ainda não foram revistos (a página inicial usa as palavras antigas no título, na descrição e no cabeçalho), e os
+  nomes no código são a decisão D6 da proposta.
 - **`/pitch2` enxuto, a pedido do fundador em 6/10/2026:** cerca de 39% menos texto na tela (de 789 para 482
   palavras), sem a frase das faixas no slide de patrocínio, e o slide de receita passa a dizer uma taxa simples de
   **3,5% de cada pote**. O ponto de equilíbrio do slide de mercado foi recalculado pela conta do plano (cerca de 221
@@ -157,6 +263,18 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Fixed
 
+- **Sprint 02, o que as revisões acharam e foi corrigido antes da mescla** (8/10/2026; três revisores e o
+  coordenador, nenhum achou como tirar SOL de ninguém):
+  - um preço da Pyth com horário mais de 60 segundos à frente do relógio da rede passa a ser recusado como velho;
+    antes, um horário adiantado por falha na origem nunca envelhecia;
+  - a entrada confere que o cofre pertence ao programa, além do endereço;
+  - a escrita da marca de tipo numa conta nova recusa uma conta que já tenha marca, qualquer que seja a instrução;
+  - testes novos: a assinatura que falta quando alguém já pagou o aluguel das contas (a inicialização e a abertura
+    gratuita da equipe, onde a assinatura é a única defesa), o cofre de outro dono na entrada, e a abertura paga de
+    uma campanha sobre o próprio SOL/USD, que usa a mesma conta nas duas posições de preço;
+  - a prova de que cada assinatura e cada papel conferido dentro das instruções tem um teste que cai sem ele: 21
+    remoções, uma de cada vez, todas derrubaram o seu teste.
+
 - **Conferência automática vermelha no `main` desde a troca do deck para `/pitch`** (8/10/2026). O índice do plano
   apontava para o roteiro do `/pitch3`, que foi para o histórico, e o `os-self-test` barra link quebrado. O pull
   request foi juntado mesmo assim, por erro meu no comando que juntava. O link agora leva ao histórico, e o `LEIA-ME`
@@ -166,6 +284,22 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Em aberto
 
+- **Sprint 02, para o fundador confirmar:** que aprovar a proposta de arquitetura aprovou também a troca de nomes
+  do D6; que o Lucas e o Ronaldo têm, os dois, chaves da equipe (Q12); a leitura de trabalho de "a equipe põe
+  prêmio" (paga como qualquer carteira); se a entrada mínima de uma campanha aberta muda quando a configuração
+  muda (hoje muda); e se o PR #27, o plano v0.1.0 que a branch da sprint carrega, é revisto e mesclado antes. O R4,
+  abertura mais barata nos primeiros meses, não foi construído.
+- **Sprint 02, decisões que as revisões pedem antes da Sprint 03:** a campanha de preço aceita qualquer feed da Pyth,
+  e o plano diz "preço de um ativo grande" (uma lista fechada de feeds pediria a decisão dele, porque o D-i tirou a
+  lista de contas); uma chave da equipe vazada pode ocupar todas as vagas de campanhas abertas por até 90 dias (uma
+  cota própria para as aberturas gratuitas resolveria); cobrar a abertura na borda de baixo do preço, `p − conf`,
+  tira de quem abre a vantagem de escolher a atualização mais alta; e o feed do SOL/USD pode virar uma constante do
+  programa, em vez de um parâmetro que um erro de digitação do admin muda.
+
+- **Autoria no Colosseum, prazo 12/10/2026:** o plano diz que a equipe se apresenta como uma pessoa, mas o git mostra
+  quatro autores desde 14/9/2026, e o regulamento pede todos os membros e verifica quem fez o trabalho. O código vindo
+  do `pred-provable` também precisa ser declarado. Detalhe na seção do hackathon de
+  `knowledge-base/market/pumpfun-model-for-open-markets.md`.
 - **O endereço `brot.markets` está no ar desde 5/10/2026**, pelo túnel próprio do projeto, com HTTPS obrigatório. O
   que foi criado e como desfazer: `knowledge-base/tecnologia/servidor-e-dominio.md`, seção 2.1. Falta conferir se o
   país do visitante chega ao servidor e o que o Cloudflare registra dos visitantes.
@@ -221,8 +355,8 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   conferida; o Ronaldo ser avisado do serviço novo no servidor.
 - **Arquivos originais do deck** (as duas versões, 10 MB e 13 MB) em `docs/technical/`, fora do Git. Não foram
   commitados nem apagados.
-- **Sprints:** a 00 e a 01 estão concluídas. A 02 está destravada: as chaves ficam com o Lucas e o Ronaldo. Falta
-  confirmar a leitura de que os dois têm chave de equipe.
+- **Sprints:** a 00 e a 01 estão concluídas; a 02 está em revisão no pull request #30, sem mesclar. Falta
+  confirmar a leitura de que o Lucas e o Ronaldo têm, os dois, chave de equipe.
 - **Leitura no Surfpool:** era critério de pronto da Sprint 01 e não foi feita. Está na Sprint 03, com o de acordo
   do fundador.
 - **Desenho da pergunta de preço:** a revisão da Sprint 01 propõe aceitar, na aposta, só a conta patrocinada do
@@ -241,20 +375,35 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 - **Nome:** Brot Markets. O app, os protótipos e o `package.json` da raiz ainda dizem "baked" ou `pred-provable`.
 - **Servidor:** o projeto tem espaço próprio no servidor compartilhado, com o código e o site provisório rodando.
   Falta o lugar do segundo serviço agendado.
-- **Ferramentas locais:** a máquina de desenvolvimento tem Anchor 1.0.0 e Solana 2.2.16, e o projeto fixa 1.1.2 e
-  3.1.x. O programa só compila na conferência automática.
+- **Ferramentas locais:** a máquina de desenvolvimento da Sprint 02 (não o servidor compartilhado) tem Solana CLI
+  3.1.10 e Anchor 1.1.2, e compila os dois programas para os testes. O que for para uma rede sai só dos artefatos da
+  conferência automática.
 - **Chave do endereço do programa:** só na máquina do fundador, em `target/deploy/`. Precisa de cópia de segurança.
 - **Proteção da `main`:** indisponível em repositório privado da conta gratuita do GitHub.
-- **`bun.lock`** aponta para `registry.npmmirror.com`, herdado do upstream. Falta decidir se volta ao registro
-  oficial do npm.
-- **Achados de segurança adiados:** os da Sprint 00, na seção 7.1 do plano técnico e nas Sprints 02, 05, 09 e 16;
-  os da Sprint 01, nas Sprints 03, 07 e 16.
+- **Achados de segurança adiados:** os da Sprint 00 que cabiam na 02 foram tratados nela (com o SOL não há mais
+  casa da moeda a conferir, e uma conta com marca de tipo nunca é reiniciada); os outros seguem nas Sprints 05, 09 e
+  16. Os da Sprint 01, nas Sprints 03, 07 e 16; os da Sprint 02, nas Sprints 03, 04 e 05
+  (`docs/sprints/sprint-02-pot-core.md`, "Reviews").
 - **Regulação:** falta conferir a tramitação da MP 1.394 no Congresso e ler o Decreto 13.128, de 2026.
 - **BP v0.0.2:** fechado, sem proposta em aberto. Faltam o primeiro valor do teto global e os nomes de quem assina a
   carteira com várias assinaturas.
 - **Não verificado:** transações no app (conectar, comprar, vender, resolver) e o shader WebGPU da direção I.
 - **`CODEMAP.md`:** o gerador aponta arquivos acima de 200 linhas e sem cabeçalho `Purpose:`, quase todos do
   programa e do app antigos; os números atuais estão no topo do próprio mapa.
+- **O que o BP v0.0.4 deixa para o fundador:**
+  - o teto da indicação em SOL;
+  - a tesouraria, com tudo em SOL;
+  - Cloak e SODAX com SOL;
+  - as decisões da v0.0.3 que continuam abertas.
+- **Documentos aprovados que contradizem o BP v0.0.4:** o resumo de produto e o design ainda falam em USDC, teto e
+  abertura pela equipe; o plano técnico, o roteiro e o `CLAUDE.md` já foram refeitos. O deck e o site no ar dizem
+  "0.02 SOL", "a cap" e "markets". A revisão de impacto lista o que muda em cada um.
+- **A confirmar com o fundador:** a leitura de que a aprovação da proposta 0.4 "como está" aprovou também as
+  recomendações D6 (renomear os termos no código), D7 (anular a campanha de preço cuja fonte parou) e D8 (desenhar a
+  tela de abertura na Sprint -1).
+- **Achados de segurança da revisão da proposta**, que valem para o servidor de hoje: o token do túnel do Cloudflare
+  fica no ambiente de um processo que roda como o mesmo usuário do site provisório, então qualquer serviço desse
+  usuário consegue lê-lo. A proposta recomenda um usuário por serviço e segredos carregados como credencial (seção 2.9).
 
 ---
 

@@ -1,0 +1,7 @@
+# Purpose: keeps `cargo update` on dependency versions the pinned Rust 1.89 can build.
+# Sprint: 02. Agave 4.3 crates (pulled by mollusk-svm 0.15 and later) declare rust-version 1.97.1;
+# with this setting the resolver prefers releases whose declared rust-version fits the workspace's
+# (1.89.0) and falls back only when nothing else satisfies a requirement. Builds with --locked
+# read Cargo.lock and are not affected.
+[resolver]
+incompatible-rust-versions = "fallback"

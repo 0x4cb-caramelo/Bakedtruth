@@ -1,94 +1,156 @@
-# Sprint -1 — Design system
+# Sprint -1 — Design system, the opening screen and phone layouts
 
-**Estado:** planejada · **Branch:** `sprint--1-design-system` · **Datas:** sem datas, por decisão do fundador
+**Status:** planned · **Branch:** `sprint--1-design-system` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
-| Bloco do plano técnico | Pré-requisito de B8 (seção 3.6) |
-| Depende de | Sprint 00, só pelo repositório e pelo CI. Não depende do programa |
-| Regras e fluxos cobertos | Nenhuma regra de dinheiro. Prepara as telas de F1 a F7, F9 e F12 |
+| Technical Plan block | Prerequisite of B8 (TP §3.6); input to M, the Android app (TP §3.7) |
+| Depends on | Sprint 00, for the repository and CI only. It does not read the program |
+| Requirements covered | The screens of BR-01, BR-02, BR-05, BR-09 to BR-12, BR-19, BR-23, BR-26, BR-27, BR-33, BR-44 and BR-47. No money rule |
 
-**Onde entra na ordem.** Na prioridade do fundador, depois do programa e dos serviços. Como não depende deles, pode
-correr em paralelo. É pré-requisito só das Sprints 09 a 13.
+**Where it fits.** It runs in parallel with Sprints 00 to 08 and blocks only the site (09 to 13, and 19). Its tokens
+and phone layouts are the input of the Android app's own design pass, which opens Sprint 20.
 
-## Objetivo
+**What changed from v0.0.1.** D8, option (a), taken as approved with the architecture proposal (the founder can
+correct it), adds two things to this sprint: the design pass for the creation screen, at web and phone widths, and a
+layout below 700 px for every web screen (proposal §2.9, §3.11, §6) **[DP]**. The approved prototype has neither: no
+creation screen, and no breakpoint below 700 px **[F]** (`docs/product/DESIGN-DIRECTION.md`, "Gaps" and the breakpoint
+table).
 
-Transformar o protótipo aprovado (`prototype-lab/prototype-n/`) e o `docs/product/DESIGN-DIRECTION.md` em tokens,
-componentes e primitivas de layout de verdade, dentro de `app/`, e redesenhar o conteúdo das telas que ainda
-mostram o modelo antigo: preço, compra e venda, resgate.
+## Goal
 
-## Critério de pronto
+Turn the approved Ledger² prototype (`prototype-lab/prototype-n/`) and `docs/product/DESIGN-DIRECTION.md` into real
+tokens, components and layout primitives in `app/`; redesign the content that still shows the old model (price,
+buying, redemption, test dollars, a sponsor request); design the creation box at `/abrir`; and give every web screen
+a phone layout. The visual language does not change.
 
-- [ ] `app/styles/tokens.css` traz as variáveis de cor do documento de design: o escuro em `:root`, o claro em
-      `:root[data-theme='light']`. O `@theme` do Tailwind v4 aponta para elas, e nenhum componente usa cor literal.
-- [ ] O tema é decidido por um script no `<head>`, antes do CSS, com a chave `brot-theme`.
-- [ ] Barlow Condensed 700 e Inter 400, 500 e 600 são servidas pelo próprio site (C10).
-- [ ] Cada componente do inventário do documento de design tem um primitivo em `app/components/ui/`, nos dois temas,
-      ou está marcado como cortado.
-- [ ] Cada um dos 19 conflitos e cada linha da tabela de lacunas de tela tem desenho novo, aprovado pelo fundador, e
-      o `DESIGN-DIRECTION.md` registra o resultado (último item do handoff checklist).
-- [ ] Os três pares de contraste abaixo de 4,5 e os quatro problemas de acessibilidade listados no documento estão
-      corrigidos.
-- [ ] `cd app && bun run lint && bun run build` passa.
-- [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
+## Definition of done
 
-## Entregas
+- [ ] `app/styles/tokens.css` carries the colour variables of the design direction: dark in `:root`, light in
+      `:root[data-theme='light']`. Tailwind v4's `@theme` points at them, and no component uses a literal colour.
+- [ ] The theme is set by a script in `<head>`, before the CSS, with the storage key `brot-theme` (TP §3.6).
+- [ ] Barlow Condensed 700 and Inter 400, 500 and 600 are served by the site itself, with no third-party font host
+      (K-10). How this Next.js version serves fonts is checked first **[AC]** (TP §14.4).
+- [ ] Every component of the design direction's inventory has a primitive in `app/components/ui/`, in both themes, or
+      is marked as cut, with the reason.
+- [ ] The conflicts table (19 rows) and the gaps table are re-read against BP v0.0.4. Each row has a new design that
+      the founder approved, or is marked gone with its source: the sponsor request form (D-t), the suggestions page
+      (P1 §4.1: "quem tem uma ideia abre"), the cap-reached state (D-h), test dollars (D-a), "Upcoming" and "Notify"
+      (no campaign exists before it opens).
+- [ ] **The creation box (D8):** the founder approved its design at desktop width and at phone width, with every
+      state listed under Deliverables.
+- [ ] **Phone layouts:** every web screen has an approved layout at about 412 CSS px (proposal §3.11) and down to
+      360 CSS px **[INF]** (a common narrow Android width, not from the sources), with a breakpoint below 700 px. The
+      mascot's bubble does not cut at the right edge, and "How it works" has a path on phones.
+- [ ] The three text pairs below 4.5:1 and the four accessibility problems listed in the design direction are fixed.
+- [ ] `docs/product/DESIGN-DIRECTION.md` records the result: a section for the creation screen, a section for the
+      phone layouts, the resolved conflicts, and the last item of its handoff checklist ticked.
+- [ ] `cd app && bun run lint && bun run build` passes.
+- [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
-- Um primitivo por componente do inventário do documento de design, da faixa de status ao rodapé. O mascote é
-  mantido.
-- Primitivas de layout: página, mosaico, grade, a tela da pergunta em duas colunas e um ponto de quebra abaixo de
-  700px.
-- Cores para os cinco tipos de R-13, no lugar das cinco categorias antigas.
-- O desenho do conteúdo novo: chance e retorno estimado, pote com dois totais, dois prazos, os cinco estados, a
-  janela de 6 horas, pote de um lado só, carteira conectada, minhas apostas, confirmação antes de assinar,
-  carregamento, erro, pergunta de preço e classificação.
+## Deliverables
 
-O meio do redesenho (protótipo em `prototype-lab/` ou direto em `app/`) é escolhido na abertura da sprint.
+- One primitive per inventory component, from the status strip to the footer. The mascot stays.
+- Layout primitives: page, mosaic, grid, the two-column campaign page, and a breakpoint below 700 px.
+- Colours for the five kinds (P1 §4.2: large-asset price, supply burn, Meteora locked liquidity, stake pool size,
+  validator stake), in place of the five old categories.
+- The new content:
+  - chance and estimated return, net of the fee and the creator share (BR-09);
+  - the pot with two totals in SOL, the prize line, and the US$ display value with its source and time (D-e);
+  - entries close and deadline, as two moments (BR-06);
+  - the five public states, "Aberta", "Fechada", "Em revisão", "Paga" and "Anulada" (P1 §3.1), the six-hour
+    countdown, the contested state, the one-sided pot and the void with its reason;
+  - the wallet: disconnected, "Use Installed Wallet" (proposal §3.4), connected with address, SOL balance and
+    disconnect, and no SOL;
+  - "my entries", with what the wallet received as baker, creator or opener;
+  - the confirmation before signing: the deterministic summary (A-3) and the lock notice (BR-12);
+  - loading, errors, the price kind (current price, target, no fresh price), the leaderboard, the partner's seal and
+    72-hour highlight, and the devnet and "Programa ainda sem auditoria" notices (BR-47).
+- **The creation box at `/abrir`** (proposal §2.9 and flow F0), at both widths:
+  - the typeahead over one sentence template per kind and over the known names, with typed slots (number, date,
+    account picker) rather than inline blanks, so it works with a screen reader; text outside the grammar answers
+    "we can't check this on-chain" with the nearest templates;
+  - the account slot's states: checking; accepted with a reviewed name; accepted without one, shown as a shortened
+    address with an explorer link (A-11); refused for owner or layout;
+  - the preview card: the generated sentence; the rule in plain words (account and explorer link, deadline in UTC and
+    local time, entries close, what a missing value means, early resolution, one-sided and void refunds); the live
+    value with "if resolved now: YES/NO"; the money (house fee, creator share, the opening in SOL with its US$ value
+    and the 90/10 split, `max_lamports`, the rent returned at close, no cap); the share-card preview; and, on burn,
+    lock and stake kinds, the notice "quem abriu pode controlar o resultado e pode ter entrado no SIM ou no NÃO"
+    (P1 §4.2);
+  - one message per refusal of `user_open_campaign` (TP §3.4.10, rows 1 to 10), paid openings blocked while the
+    SOL/USD price is stale, the pause, and the `max_open_campaigns` valve;
+  - signing, pending and confirmed, and the retried opening that finds its campaign already open (T17);
+  - the team-key variant: no payment and no creator share (P-3).
+- **[NEW]** The share card (the `/c/[id]` image) and the re-check panel (proposal §2.9). Reason: both are new surfaces
+  the design direction does not show, and Sprints 10 and 11 build them; designing them here keeps a design round out
+  of those sprints.
 
-## Fora desta sprint
+The medium of the redesign, a prototype in `prototype-lab/` or straight in `app/`, is chosen at the sprint's opening.
 
-Telas ligadas a dados reais (09 a 13). Indicação, patrocínio, Cloak e SODAX (14, 15 e 17). Trocar a direção
-aprovada. Mexer no programa.
+## Out of scope
 
-## Decisões do fundador que travam a sprint
+Screens bound to real data (09 to 13, and 19). The Android app's screens: Sprint 20 opens with their own design pass,
+built from this sprint's tokens and phone layouts (proposal §6). Referral, sealed entry, Cloak and SODAX screens (14,
+15, 17). Changing the approved direction. Touching the program.
 
-- Qual dos dois escuros é o oficial, e qual é o tema padrão (plano técnico, seção 3.6).
-- O idioma do site (L-01).
-- Se a pergunta mostra o histórico da chance e a atividade (L-23).
-- O texto do aviso de dinheiro preso (L-03); o lugar do selo e do destaque do parceiro (L-24).
-- Para fechar: a aprovação das telas redesenhadas.
+## Founder decisions that block the sprint
 
-## Agentes e skills
+- Which of the two dark themes is official, and which theme is the default (TP §3.6; the design direction's last
+  section).
+- The site's language: L-01 (Product Brief v0.0.1 gap). It sets the copy and the language of the sentence templates.
+- Whether the campaign page shows the chance history and recent activity: L-23 (Product Brief v0.0.1 gap).
+- The text of the lock notice, L-03, and the place of the partner's seal and highlight, L-24 (Product Brief v0.0.1
+  gaps).
+- The creator notice is drawn as BP-14's recommendation ("permitir, com aviso automático"), still open in P-9.
+- To close: the founder's approval of the redesigned screens, the creation box and the phone layouts.
+- **Taken as approved with the proposal:** D8, option (a) (`docs/SPRINTS.md`, section 5). **Answered:** D-j (no free
+  text), D-m (vocabulary).
 
-- **Agentes:** `dev-product-agent` (nada do modelo antigo sobrou), `copywriter-agent` (os textos das telas),
-  `coordinator-agent`.
+## Agents and skills
+
+- **Agents:** `dev-product-agent` (nothing of the old model left), `copywriter-agent` (screen copy in the D-m
+  vocabulary), `coordinator-agent`.
 - **Skills:** `sprint-management`, `codemap`, `verify-build-works`, `decision-log`, `secrets-scan`.
 
-## Portões de segurança
+## Security gates
 
-- Nenhum script e nenhuma fonte de terceiros nas páginas.
-- Ler `app/node_modules/next/dist/docs/` antes de escrever código do app (`app/AGENTS.md`).
-- `secrets-scan` no fechamento.
+- No third-party script or font on any page (K-10).
+- Read `app/node_modules/next/dist/docs/` before writing app code (`app/AGENTS.md`).
+- No creator-supplied text appears anywhere in the creation box: names come from `content/account-names.json` or the
+  pinned Pyth feed list (A-11).
+- `secrets-scan` at closure.
 
-## Testes
+## Tests
 
-Build e lint do app. Conferência visual nos dois temas e em largura de celular. Contraste dos pares corrigidos.
-Teclado, com foco visível.
+```bash
+export PATH="$HOME/.bun/bin:$PATH"
+(cd app && bun run lint && bun run build)
+bun test tests/ -t "design tokens meet contrast"   # to add: every text pair in both themes at 4.5:1 or more
+```
 
-## Riscos
+A visual check in both themes at desktop width, 412 and 360 CSS px. A keyboard pass with visible focus. A
+screen-reader pass over the creation box's typed slots.
 
-- O redesenho virar nova rodada de protótipo. Reduz: prender-se ao inventário e à tabela de conflitos.
-- O site herdar o modelo antigo por inércia (resumo de produto, seção 15).
+## Risks
 
-## Artefatos esperados
+- The redesign turns into a new prototype round. Mitigation: hold to the inventory, the conflicts table and the state
+  lists above.
+- The site inherits the old model by inertia. The design direction's conflicts table is the checklist.
+- The creation box is designed before `validateOpenCampaign` exists (Sprint 05). Mitigation: the ten refusals of
+  TP §3.4.10 are the contract; a refusal added later adds a message, not a layout.
+- An open L-01 doubles the copy work.
 
-`app/styles/tokens.css`, `app/components/ui/*`, `docs/product/DESIGN-DIRECTION.md` atualizado, `CODEMAP.md`.
+## Expected artifacts
 
-## Changelog e session-log
+`app/styles/tokens.css`, `app/components/ui/*`, the updated `docs/product/DESIGN-DIRECTION.md`, `CODEMAP.md`.
 
-- **Changelog:** design system criado; documento de design atualizado.
-- **Session-log:** escuro oficial, tema padrão, idioma, e cada conflito resolvido de forma diferente da esperada.
+## Changelog and session log
 
-## Registro e retrospectiva
+- **Changelog:** design system created; creation screen and phone layouts designed; design direction updated.
+- **Session log:** the official dark theme, the default theme, the language, and every conflict resolved differently
+  from what was expected.
 
-Preenchidos durante a sprint e no fechamento.
+## Record and retrospective
+
+Filled in during the sprint and at closure.

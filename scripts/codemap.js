@@ -55,7 +55,8 @@ const CODE_EXT = new Set([
 ]);
 
 // Generated or vendored directories — mapping them adds noise, not signal.
-const SKIP_DIR = /(^|\/)(node_modules|dist|build|out|coverage|\.next|\.turbo|vendor|__pycache__)(\/|$)/;
+// `generated`: code a tool writes and rewrites (the Codama client of packages/sdk), with its own banner.
+const SKIP_DIR = /(^|\/)(node_modules|dist|build|out|coverage|\.next|\.turbo|vendor|generated|__pycache__)(\/|$)/;
 
 const isOsRepo = fs.existsSync(path.join(ROOT, '.aios-self'));
 

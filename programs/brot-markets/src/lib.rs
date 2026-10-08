@@ -1,23 +1,25 @@
-//! Purpose: entry point of the Brot Markets program; declares the program id and wires the modules.
-//! Version: 0.0.1
-//! Sprint: 00 (setup)
+//! Purpose: the Brot Markets program on Pinocchio: On-Chain Campaigns paid in SOL; declares the
+//!          program id and wires the modules and the entrypoint.
+//! Version: 0.0.2
+//! Sprint: 02 (pot core on Pinocchio)
 //!
-//! Sprint 00 ships the skeleton only: no instruction exists yet. The pot core (config, question,
-//! position, bet) arrives in Sprint 02; see docs/technical/TECHNICAL-PLAN.md, section 3.4.
+//! Every account check Anchor used to make is written by hand in `checks`, and every balance is
+//! bookkept in account fields, never read from a vault. The crate links `std` because the Shank
+//! attributes crate does; the entrypoint therefore uses Pinocchio's std panic hook.
 
+pub mod checks;
 pub mod constants;
+pub mod entrypoint;
 pub mod error;
 pub mod events;
 pub mod instructions;
+pub mod layout;
 pub mod math;
 pub mod readers;
 pub mod state;
+pub mod vault;
 
-use anchor_lang::prelude::*;
+pinocchio::address::declare_id!("6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN");
 
-pub use constants::*;
-
-declare_id!("6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN");
-
-#[program]
-pub mod brot_markets {}
+#[cfg(not(feature = "no-entrypoint"))]
+pinocchio::entrypoint!(entrypoint::process_instruction);

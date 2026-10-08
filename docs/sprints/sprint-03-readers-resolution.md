@@ -1,134 +1,217 @@
-# Sprint 03 — Leitores e resolução
+# Sprint 03 — Readers and resolution; Anchor leaves the workspace
 
-**Estado:** planejada · **Branch:** `sprint-03-readers-resolution` · **Datas:** sem datas, por decisão do fundador
+**Status:** planned · **Branch:** `sprint-03-readers-resolution` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
-| Bloco do plano técnico | B3 (seções 3.4.6 e 3.4.8) |
-| Depende de | Sprints 01 e 02 |
-| Regras e fluxos cobertos | R-08, R-09, R-13, R-14; R-11 na anulação automática. F3 (a leitura), F5, F7 (a conferência da conta) |
+| Technical Plan block | B3 (TP §3.4.6, §3.4.8, §3.4.10 for the other four kinds; §3.2 and §10 for the frozen program leaving) |
+| Depends on | Sprints 01 and 02 |
+| Requirements covered | BR-01 and BR-02 for the other four kinds; BR-05, BR-06 (the lock on the fact), BR-21, BR-22, BR-23 (the program reads and compares), BR-39 |
 
-## Objetivo
+## Goal
 
-O programa lê o resultado sozinho. Entram os quatro leitores portados de `upstream/main` e o leitor de preço por
-toque; `resolve_question` grava o resultado e abre a janela; e a aposta trava quando o fato acontece.
+The program reads the result by itself. The four readers of `pred-provable` are ported to Pinocchio next to the price
+reader; `user_open_campaign` accepts all five kinds; `resolve_campaign` records the outcome and opens the six-hour
+window; joining locks once the outcome is knowable. The price reader gets its split: on joining, only the sponsored
+account; for a YES, any fully verified account of the feed; and a stale feed voids instead of turning to NO (D7).
+Then the frozen program leaves, and Anchor with it.
 
-## Critério de pronto
+## Definition of done
 
-- [ ] `readers/` tem um arquivo por leitor, abaixo de 200 linhas: `spl_mint.rs` (`SupplyAtMost`), `damm_v2.rs`
+- [ ] `readers/` holds one file per reader, under 200 lines: `spl_mint.rs` (`SupplyAtMost`), `damm_v2.rs`
       (`DammV2LockedAtLeast`), `stake_pool.rs` (`StakePoolTvlAtLeast`), `vote_stake.rs` (`StakeAtLeast`),
-      `price_touch.rs` (`PriceTouch`) e `cursor.rs`.
-- [ ] Cada leitor passa contra as contas reais de `tests/fixtures/*.bin`. Conta cortada ou malformada dá erro, nunca
-      pânico.
-- [ ] Cada leitor portado dá o mesmo resultado que o original de `pred-provable` sobre a mesma conta.
-- [ ] `resolve_question` só aceita chamada no nível da transação e grava `InReview`, `outcome`, `observed_value` e
-      `review_ends_at`.
-- [ ] A tabela da seção 3.4.6 virou casos de teste: `Yes` antes do prazo, `No` depois, `met_late`, e `Void` por
-      `MissedWindow` e por `UnreadableAccount`.
-- [ ] `user_place_bet` recusa quando `outcome_knowable` diz que o resultado já é conhecível; em preço, também sem
-      preço fresco ou com o alvo tocado.
-- [ ] Leitor de preço testado com preço fresco, velho, com margem larga, de outro ativo, com conta falsa e com toque
-      dentro e fora do prazo.
-- [ ] Token do padrão novo (Token-2022) é recusado na pergunta de queima.
-- [ ] `programs/pred-provable` sai do workspace, num commit só, e `tests/pred-provable.test.ts` sai com ele.
-- [ ] A leitura de preço passa no Surfpool, dentro de uma instrução, com a versão fixada na conferência automática
-      e o SHA-256 do binário conferido (C4). É o critério que a Sprint 01 não cumpriu e trouxe para cá.
-- [ ] Cada item da seção "Herdado da Sprint 01" está feito, ou decidido por escrito com o motivo.
-- [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
+      `price_touch.rs` (`PriceTouch`) and `cursor.rs`. Each exposes `validate_at_creation`, `outcome_knowable` and
+      `try_resolve`, and checks owner and layout before reading. `ReaderKind` is closed at five.
+- [ ] Each reader passes on the real accounts of `tests/fixtures/*.bin`. A truncated, stretched or zeroed account
+      returns an error, never a panic.
+- [ ] Each ported reader gives the same result as the original in `pred-provable` on the same account, run before
+      the original leaves. Ported files keep the MIT notice.
+- [ ] **`user_open_campaign` for the other four kinds** refuses rows 1 to 3 of TP §3.4.10 with their own
+      errors: a kind outside the five; an account the reader rejects (owner, size, discriminator); a target already
+      met or too close to the current value, with the minimum distance per kind set and recorded here [AC]. A
+      Token-2022 mint is refused for the burn kind. `StakeAtLeast` stays closed until a devnet YES is recorded; how (a
+      kind switch in `GlobalConfig` or a build flag) is decided here [AC].
+- [ ] **The epoch kinds and the duration rule** [AC] (TP §3.4.8). The proposal's parameter sketch gives
+      `StakePoolTvlAtLeast` and `StakeAtLeast` an `epoch` and no `deadline_at`, while the 3-to-90-day rule and the
+      entry close need times. The TP's working reading [INF] is built and tested unless the sprint records another: the
+      creator also passes `deadline_at`; the epoch must start before it; entries close at the earlier of
+      `entries_close_at` and the epoch's start; a missed epoch voids as `MissedWindow`.
+- [ ] **`resolve_campaign`** accepts only a top-level call (`checks::top_level`, with its negative test), records
+      `InReview`, `outcome`, `observed_value` and `review_ends_at = now + 6 h`, and emits `CampaignResolved` with the
+      value read; for a price campaign, also `publish_time`, `posted_slot` and the proof account.
+- [ ] **The resolution table of TP §3.4.6 as test cases:** `Yes` before the deadline; `No` after it; `met_late`;
+      `Void` for `MissedWindow`, `UnreadableAccount` and `StaleFeed`.
+- [ ] **The price split** (proposal §2.5, TP §3.4.8). Joining a price campaign accepts only the sponsored account,
+      derived on-chain from the push-oracle id, shard 0 and the campaign's feed: owner `rec2HH…`, 134 bytes, Full
+      verification, the right feed, age at most the campaign's `max_age` (copied from `campaign_max_age` at opening,
+      never below 30 s); it refuses when price plus confidence reaches the target. A YES proof accepts any Full
+      `rec2HH…` account of the feed whose `publish_time` is inside the campaign's window, at most 60 s old, within a
+      bound on `Clock::slot − posted_slot` whose value is set here [AC], with price minus confidence across the target
+      in the campaign's direction.
+- [ ] **`StaleFeed` (D7):** after the deadline with no proof, the outcome is NO, unless the sponsored feed's last
+      update before the deadline is older than `deadline − max_age`; then the campaign is voided with `StaleFeed`.
+      The program sees only the account's `publish_time` and `prev_publish_time`, so it can prove staleness only when
+      at most one update landed after the deadline; otherwise it records NO and the indexer's feed history lets the
+      team void within the window (TP §3.4.6). The exact test is written here [AC].
+- [ ] Price math runs in `i128` or through `try_from`, and is tested with a negative price, the largest confidence,
+      an unexpected exponent and a `publish_time` ahead of the cluster clock (no overflow, no refusal of a good price).
+- [ ] `user_join_campaign` refuses once `outcome_knowable` says the outcome is known (BR-06).
+- [ ] A test on a live cluster or in Surfpool shows that the sponsored account only moves forward (the receiver
+      declares `UpdatesNotMonotonic`; the code was not read) [AC].
+- [ ] **Surfpool 1.6.0** is pinned in CI with the binary's SHA-256 checked, and the price reader runs inside an
+      instruction against its `PriceUpdateV2` model, with a scenario that moves the price across the target. Whether
+      it simulates epoch stake is recorded. This is the criterion Sprint 01 carried here.
+- [ ] A mainnet `PriceUpdateV2` is captured by `scripts/capture-fixtures.ts`, with its SHA-256 in `index.json`.
+- [ ] The list of sponsored feeds that stay fresh on devnet and on mainnet is recorded in `knowledge-base/` (64 were
+      sponsored on mainnet and only SOL and BTC fresh on devnet in one snapshot of 2026-10-07 [F]).
+- [ ] **Alpenglow on devnet** is checked and recorded: confirmed against finalized, the leader-set Clock timestamp, the
+      slot time, and the drift of `unix_timestamp` against wall time (TP §14.4 C12, C23). Deadlines and the 60 s proof
+      window are retested, and proof and SOL/USD freshness are bounded by slot as well as by time.
+- [ ] The `StakeAtLeast` YES path is tested in the Rust `litesvm` crate with `set_epoch_stake`, if it works there
+      [AC]; otherwise it stays devnet-only (Sprint 05). Sprint 02 found that `litesvm` 0.17.0, which itself declares
+      Rust 1.89, needs `solana-program-runtime` 4.3.0 (Agave 4.3), which declares Rust 1.97.1, above the pinned 1.89:
+      use the newest version that builds under 1.89 (0.16 [AC]), or record a Rust bump first.
+- [ ] The Lighthouse program id is recorded for the relay's allowlist of Sprint 08 [AC].
+- [ ] **`pred-provable` leaves, in one commit:** `programs/pred-provable`, `tests/pred-provable.test.ts`, the Anchor
+      parts of `tests/helpers.ts`, `target/idl/pred_provable.json`, `target/types/pred_provable.ts` and `Anchor.toml`.
+      `Cargo.lock` holds no `anchor-lang` or `anchor-spl`. Whether `brot-markets` needs the `solana-epoch-stake` pin
+      is decided and recorded (proposal §5.4).
+- [ ] **CI drops the Anchor toolchain:** no Anchor CLI install, no `anchor build`, no `pred-provable` clippy line; the
+      IDL check covers the Shank output and the generated client only. `build:program`, `sync-idl`, `test:rust` and
+      `deploy:devnet` in `package.json` no longer name `pred-provable`, and the root package's name and description stop
+      describing it (TP §14.1). The app keeps its committed copy of the old IDL until Sprint 09, and
+      `cd app && bun run build` still passes [INF].
+- [ ] **`CLAUDE.md` follows** (proposal §6): the build commands with `cargo build-sbf`, Shank and Codama; the Anchor
+      CLI line, the Anchor gotchas, the USDC notes and the `pred-provable` architecture go; the `init-if-needed` rule
+      is restated for Pinocchio; Bun 1.4.2.
+- [ ] Each item of "Carried over" below is done, or decided in writing with the reason.
+- [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
-## Entregas
+## Deliverables
 
-- Os cinco leitores, cada um com `validate_at_creation`, `outcome_knowable` e `try_resolve`.
-- `resolve_question` e o evento `QuestionResolved`, com o número lido.
-- `ReaderKind` fechado em cinco variantes: saem os quatro leitores de R-14 e o `LockedAtLeast`.
-- Os números do leitor de preço (idade máxima, prazo da prova, margem de erro), como ponto de partida (T2).
+- The five readers on Pinocchio, and rows 1 to 3 of TP §3.4.10 for the other four kinds (S).
+- `resolve_campaign`, the price split, the slot bounds and `StaleFeed` (M).
+- The Surfpool run; the mainnet price fixture; the note on sponsored feeds; the Alpenglow check (S).
+- The workspace, CI and `CLAUDE.md` without Anchor and without `pred-provable` (S).
 
-## Fora desta sprint
+## Out of scope
 
-Confirmar, anular à mão, contestar, acertar e pagar (04). O serviço que publica preço (06). Token-2022 e
-`LockedAtLeast` (fase 1.2).
+Confirming, voiding by hand, contesting, settling and paying (Sprint 04). The keeper's price task and Hermes (06).
+The second read (07 and 14). Token-2022 and the locked-tokens kind (phase 1.2). Mainnet price campaigns open only once
+the keeper can post its own proofs (D4, Sprint 16).
 
-## Decisões do fundador que travam a sprint
+## Founder decisions that block the sprint
 
-- **Q1:** quem pode acionar a leitura e o pagamento, só os dois serviços ou qualquer carteira.
-- **Q4:** o que conta como "encostou no alvo" na pergunta de preço.
-- **Da Sprint 01:** o limite de 30 segundos para a idade do preço vale também na devnet, ou vira um parâmetro por
-  pergunta. A Sprint 01 concluiu que a Pyth serve, então a escolha entre quatro e cinco tipos não se coloca.
+- **Q1, answered (the working default of TP v0.0.1):** B, any wallet may trigger resolution and payout; it chooses no
+  outcome, amount or destination. No public resolve button.
+- **Q4, answered:** a YES is the price proved on-chain within 60 s (the working default of TP v0.0.1); the maximum
+  price age is set per campaign, with a 30 s floor (the founder's answer of 2026-10-05).
+- **D7, taken as approved with the proposal:** `StaleFeed` voids a price campaign whose feed went stale.
+- None open.
 
-## Agentes e skills
+## Agents and skills
 
-- **Agentes:** `technical-security-red-team-agent` (dono, formato e pânico em cada leitor; a fresta de 30 segundos),
-  `dev-product-agent`, `bug-triage-agent` (divergência entre o leitor portado e o original), `coordinator-agent`.
-- **Skills:** `sprint-management`, `multi-ai-review` (o leitor de preço), `codemap`, `verify-build-works`,
+- **Agents:** `technical-security-red-team-agent` (owner, layout and panic in each reader; the price split; the
+  freshness bounds); `dev-product-agent`; `bug-triage-agent` (any divergence between a ported reader and its
+  original); `coordinator-agent`.
+- **Skills:** `sprint-management`, `multi-ai-review` (the price reader), `codemap`, `verify-build-works`,
   `decision-log`, `secrets-scan`.
 
-## Portões de segurança
+## Security gates
 
-- Não existe leitor genérico. Cada leitor confere dono e formato antes de ler.
-- `resolve_question` rejeita chamada por outro programa.
-- Arquivo portado mantém o aviso de autoria da licença MIT.
-- `secrets-scan` no fechamento.
+- No generic reader. Each reader checks owner and layout before reading.
+- `resolve_campaign` refuses a CPI.
+- Only the upgraded Pyth receiver (`rec2HH…`) is trusted, and joining accepts only the sponsored account.
+- Ported files keep the MIT notice.
+- `secrets-scan` at closure.
 
-## Testes
+## Tests
 
-`bun run test:rust` com as contas capturadas. `bun run test` para a resolução e a trava da aposta. Surfpool para o
-leitor de preço.
+`bun run test:rust` with the captured accounts; `bun run test` for resolution and the join lock; Surfpool for the
+price reader. Filters to add in this sprint:
 
-## Herdado da Sprint 01
+```bash
+bun test tests/ -t "readers match fixtures"
+bun test tests/ -t "ported reader matches pred-provable"           # runs before pred-provable leaves
+bun test tests/ -t "open campaign refuses"                         # extended to the other four kinds
+bun test tests/ -t "resolve refuses a cpi"
+bun test tests/ -t "resolution table"                              # Yes, No, met_late, MissedWindow, UnreadableAccount, StaleFeed
+bun test tests/ -t "price join accepts only the sponsored account"
+bun test tests/ -t "yes proof window"
+bun test tests/ -t "join refuses once the outcome is knowable"
+```
 
-Da prova do leitor de preço (`docs/sprints/sprint-01-foundation.md`; a pesquisa está em
-`knowledge-base/tecnologia/pyth-leitor-de-preco.md`).
+## Carried over
 
-- **A leitura no Surfpool, que a Sprint 01 não fez.** Fixar o Surfpool v1.6.0 na conferência automática (só há
-  binário para Linux e macOS), com o SHA-256 do binário conferido, e rodar o leitor de preço dentro de uma instrução
-  contra o modelo de `PriceUpdateV2` dele. Usar o sistema de cenários para simular o preço encostando no alvo ao
-  longo do tempo. Conferir também se ele simula o stake de época (a metade de C4 que ficou sem resposta).
-- **`price_touch.rs` já existe, só com a leitura.** `read_price_update` confere dono, tamanho, discriminador,
-  verificação completa e o ativo esperado, que é parâmetro obrigatório. Não confere a idade do preço: quem chama
-  confere. Instrução usa `read_price_account`, que tira dono e bytes da mesma conta.
-- **Separar a conta aceita na aposta da conta aceita na prova** (revisão adversarial da Sprint 01). O plano técnico
-  diz "o programa aceita qualquer conta válida"; isso deixa quem aposta apresentar uma conta avulsa com o preço mais
-  velho que a regra admite, anterior ao toque. Proposta: na aposta, exigir a conta patrocinada do ativo, cujo
-  endereço é derivado do identificador no programa `pyt2F4...`, mais a idade máxima; na prova do SIM, aceitar
-  qualquer conta completa do ativo dentro do prazo. Antes de decidir, conferir se a conta patrocinada só anda para
-  a frente (o programa declara o erro `UpdatesNotMonotonic`; o código não foi lido).
-- **A conta `preço − margem` precisa alargar os tipos.** `price` é `i64` e pode ser negativo; `conf` é `u64`. Usar
-  `i128` ou `try_from`, e testar com valores extremos: preço negativo, margem máxima, expoente fora do esperado.
-- **O risco de quem controla a Pyth já está na seção 13 do plano técnico.** Na devnet uma chave comum atualiza o
-  receptor; na rede principal é um endereço derivado cujo controle não foi conferido. A governança do receptor
-  troca a fonte dos preços e o mínimo de assinaturas sem reinstalar o programa. O vigia está na Sprint 07 e a
-  conferência da rede principal na 16. Aqui, basta o desenho da pergunta de preço contar com esse risco.
-- **Uma conta de preço da rede principal entre as contas capturadas.** As três de hoje são da devnet.
-- **O horário de publicação pode estar à frente do relógio da rede.** Calcular a idade como "agora menos publicação"
-  dá número negativo. A regra tem de tratar isso sem estouro e sem recusar preço bom.
-- **A idade máxima do preço como parâmetro, e não número fixo.** Numa medida de um a dois minutos, a conta
-  patrocinada renovou a cada 5 a 11 segundos na rede principal e a cada 62 a 64 na devnet, onde o preço teve de 5 a
-  64 segundos de idade. Com 30 segundos fixos, a aposta em pergunta de preço só entra na devnet numa parte de cada
-  ciclo, enquanto o preço ainda tem menos de 30 segundos, a não ser que o nosso serviço publique preço. Depende da
-  resposta do fundador (seção acima).
-- **Levantar quais ativos têm conta patrocinada na geração atualizada** (pergunta em aberto 2 da nota). Se a aposta
-  exigir a conta patrocinada, essa lista limita de quais ativos se abre pergunta.
-- **Só a geração atualizada da Pyth é aceita** (`rec2HH...`). A conta de preço que a pergunta grava na criação tem
-  de ser dessa geração.
+From the price-reader proof of Sprint 01 (`docs/sprints/sprint-01-foundation.md`;
+`knowledge-base/tecnologia/pyth-leitor-de-preco.md`), re-read against proposal §2.5.
 
-## Riscos
+- **The Surfpool read Sprint 01 did not do** is a criterion above. Surfpool has binaries for Linux and macOS only, so
+  it runs in CI.
+- **`price_touch.rs` reads only.** It checks owner, size, discriminator, full verification and the expected feed,
+  which is a required parameter; it does not check age, which the caller must. Instructions use
+  `read_price_account`, which takes owner and bytes from the same account.
+- **Split the account accepted on joining from the one accepted as proof.** Decided by the approved proposal: the
+  sponsored account on joining, any Full account of the feed as proof (above).
+- **`price − confidence` needs wider types:** `price` is `i64` and may be negative, `conf` is `u64`. Above.
+- **The Pyth governance risk** is in TP §13. The watchdog watches the receiver in Sprint 07, and who controls it on
+  mainnet is Sprint 16's. Here, the price kind's design counts with it.
+- **A mainnet price account among the fixtures.** Above.
+- **`publish_time` may be ahead of the cluster clock.** Above.
+- **The maximum price age is a per-campaign parameter**, answered by the founder (30 s floor). Devnet's sponsored
+  account updates every 62–64 s [F], so devnet price campaigns use at least 90 s (proposal §2.5).
+- **The list of sponsored feeds** limits which assets a price campaign can name. Above.
+- **Only the upgraded receiver (`rec2HH…`) is accepted.** Unchanged.
 
-- `StakeAtLeast` nunca deu SIM em teste, porque o LiteSVM devolve zero. O tipo não abre pergunta real antes de um
-  SIM conferido na devnet (Sprint 05).
-- Toque curto não capturado, e a fresta de 30 segundos na aposta.
-- Com o programa antigo fora, o site atual fica sem programa por trás até a Sprint 09. Conferir que o build do app
-  segue passando.
+From Sprint 02 and its reviews (`docs/sprints/sprint-02-pot-core.md`, "Reviews"; 2026-10-08).
 
-## Artefatos esperados
+- **`outcome_knowable` and `try_resolve` replace `ReaderNotReady`** (6070), the code every kind returns today.
+- **Codes of its own for the SOL/USD read:** an owner, layout, verification or feed refusal on the SOL/USD account
+  surfaces the reader's codes (6001 to 6004), not row 7's. Decide whether row 7 gets four codes; new codes are
+  appended from the first free number.
+- **Which feeds a price campaign may name, before row 2 is extended** (all three reviewers; a founder decision). The
+  price kind accepts any feed whose shard-0 sponsored account is Full, fresh and within 0.5%; TP §3.4.8 ("price of a
+  large asset") and §3.4.10 ("only the price kind is out of any creator's reach") are not enforced by that. First
+  check on devnet whether the push oracle lets any payer create the shard-0 account of an unsponsored feed. Then
+  either a compiled, append-only list of feed ids with its own error and a test that a fresh, valid, unlisted feed is
+  refused, or the TP and BP claims narrowed to what the code enforces.
+- **Row 3, both ends:** refuse a target the price can never reach (`Below` with `target ≤ 0`, an `Above` far past any
+  price) and set the minimum distance per kind (C45), with negative tests one tick past the band and at the far side.
+  Today a `Below` target of 1 opens.
+- **The future-publish bound is shared:** an opening refuses a price published more than 60 s ahead of the clock
+  (`MAX_PRICE_CLOCK_LEAD_SECONDS`, Sprint 02 review); the join lock and the YES proof reuse the rule, with the slot
+  bound above.
+- **A reading whose exponent differs from the stored `price_exponent`** is refused, at the join lock and as proof.
+- **The terms the creator saw:** `max_lamports` bounds the lamports, not the prize share or the creator share, which
+  an admin change between preview and signature can move. While the argument layout is unreleased (before Sprint 05's
+  SDK), decide whether `OpenCampaignArgs` carries an expected `params_version` (or the two values) and refuses on a
+  mismatch, or record it as an accepted risk.
+- **Founder decisions asked in PR #30, built here if he says yes:** charge the opening at `p − conf` instead of `p`
+  (it removes the creator's choice of the highest recent update, worth up to about 1% at the 300 s age ceiling); the
+  SOL/USD feed id as a compiled constant instead of a config value only checked non-zero; and a separate budget for
+  free team openings, so that one leaked team key cannot fill `max_open_campaigns` for up to 90 days.
 
-`programs/brot-markets/src/readers/`, `instructions/resolution/resolve_question.rs`, os testes em
-`programs/brot-markets/tests/`, o IDL, `CODEMAP.md`.
+## Risks
 
-## Changelog e session-log
+- `StakeAtLeast` has never returned YES in a test: LiteSVM's npm package returns zero epoch stake [F]. The kind stays
+  closed until a devnet YES (Sprint 05).
+- A short touch can go uncaptured; with no key, devnet resolves only when the sponsored account shows the touch, which
+  is weak against erasure (proposal §2.5). Mainnet waits for the keyed keeper.
+- Alpenglow's rollout dates disagree between sources [AC]; slot time and timestamp rules may change under the tests.
+- With `pred-provable` gone, the current site has no program behind it until Sprint 09. The app build must still pass.
 
-- **Changelog:** cinco leitores e resolução; programa antigo retirado.
-- **Session-log:** as respostas de Q1 e Q4; os números do leitor de preço e o porquê.
+## Expected artifacts
 
-## Registro e retrospectiva
+`programs/brot-markets/src/readers/`, `instructions/resolution/resolve_campaign.rs`, the tests in `tests/` and
+`programs/brot-markets/tests/`, the new fixture and `index.json`, the IDL, `.github/workflows/ci.yml`, `package.json`,
+`CLAUDE.md`, the note in `knowledge-base/tecnologia/`, `CODEMAP.md`.
 
-Preenchidos durante a sprint e no fechamento.
+## Changelog and session log
+
+- **Changelog:** five readers and resolution; the frozen program and Anchor removed.
+- **Session log:** the price-reader numbers and why; how `StakeAtLeast` stays closed; the Alpenglow finding; the
+  Surfpool result.
+
+## Record and retrospective
+
+Filled in during the sprint and at closure.

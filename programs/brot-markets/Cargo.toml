@@ -1,7 +1,7 @@
 [package]
 name = "brot-markets"
-version = "0.0.1"
-description = "Brot Markets: pot-based prediction markets resolved by on-chain account reads"
+version = "0.0.2"
+description = "Brot Markets: On-Chain Campaigns paid in SOL and answered by reading on-chain accounts"
 authors = ["Brot Markets"]
 edition.workspace = true
 rust-version.workspace = true
@@ -12,22 +12,41 @@ name = "brot_markets"
 
 [features]
 default = []
-cpi = ["no-entrypoint"]
+# The library without the program entrypoint, for host tests and for crates that link this one.
 no-entrypoint = []
-no-log-ix-name = []
-idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
-anchor-debug = []
-custom-heap = []
-custom-panic = []
-# Collateral is mainnet USDC instead of Circle devnet USDC.
+# Devnet-only drill values: a short review window and a short minimum duration (T12). The
+# `mainnet` feature refuses it at compile time, and CI checks the mainnet values.
+drill = []
+# The mainnet build. Since money is SOL (D-a) it no longer switches a mint; it only fixes the
+# real review window and minimum duration (T12, TP section 3.3).
 mainnet = []
 
 [dependencies]
-# Same pins as programs/pred-provable; see CLAUDE.md "Gotchas" before changing either.
-# `init-if-needed` is off on purpose: it is the classic re-initialisation door. An instruction
-# that needs it turns it on with a written reason and a re-initialisation test.
-anchor-lang = "=1.1.2"
-anchor-spl = "=1.1.2"
+# Exact pins for program crates (TP section 7). Pinocchio 0.11.2 and its System Program CPIs
+# passed the day-one build on 2026-10-08 (Rust 1.89, Solana CLI 3.1.10, platform-tools v1.52).
+pinocchio = "=0.11.2"
+pinocchio-system = "=0.6.1"
+# Attributes only: ShankAccount and ShankInstruction generate no runtime code; shank-cli reads
+# them from the source to write the IDL (T9).
+shank = "=0.4.9"
+# shank-cli reads error codes and messages only from a thiserror-derived enum (T9, lane F). The
+# derive's Display and Error impls are never called on-chain. 2.0.21 is the version Cargo.lock
+# already held; it declares rust-version 1.77.
+thiserror = { version = "=2.0.21", default-features = false }
+
+# Host builds only: deriving a PDA off-chain needs the curve check. The SBF binary uses the
+# runtime's syscalls instead, so this never reaches the program.
+[target.'cfg(not(target_os = "solana"))'.dependencies]
+solana-address = { version = "=2.8.0", features = ["curve25519"] }
+
+[dev-dependencies]
+# The `checks` negatives run the real SBF binary in Mollusk (TP section 9). 0.14.0, not the TP's
+# 0.16.0: 0.15 and later build on Agave 4.3, which needs Rust 1.97.1 against the pinned 1.89
+# (session log 2026-10-08). Its Solana types are pinned to the versions Mollusk itself uses.
+mollusk-svm = "=0.14.0"
+solana-account = "=4.7.0"
+solana-instruction = "=3.5.1"
+solana-pubkey = "=4.4.0"
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))'] }

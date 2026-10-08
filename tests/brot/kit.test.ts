@@ -1,0 +1,91 @@
+/**
+ * Purpose: checks the test kit itself, without the program binary: addresses, layout sizes against
+ *          the Rust structs, the codec, and the instruction shapes of the frozen contract.
+ * Version: 0.0.1
+ * Sprint:  02 (pot core on Pinocchio)
+ */
+import { describe, expect, test } from "bun:test";
+import { generateKeyPairSigner } from "@solana/kit";
+
+import { openingLamports, DEFAULT_PARAMS } from "./flows";
+import * as I from "./instructions";
+import { decode, encode, layoutSize, offsetOf } from "./layouts";
+import * as P from "./program";
+import { EVENTS } from "./events";
+import * as S from "./structs";
+
+describe("test kit", () => {
+  test("derives the program's and Pyth's addresses", async () => {
+    expect(await P.eventAuthorityPda()).toBe(P.EVENT_AUTHORITY);
+    expect(await P.sponsoredPriceAccount(P.SOL_USD_FEED_ID)).toBe(P.SOL_USD_ACCOUNT);
+    expect(await P.sponsoredPriceAccount(P.BTC_USD_FEED_ID)).toBe(P.BTC_USD_ACCOUNT);
+    expect(String(await P.programDataPda())).toBe("Du61i6KnNVrTLnU5n2Nn9JcxQKzdyxM3owSqqVrkns6h");
+    expect(String(await P.configPda())).toBe("FSFeeWWVwNKL8LWSNGejM6ZLKSw79WaP1GwmpZcxLFqw");
+  });
+
+  test("layouts have the sizes of the Rust structs (programs/brot-markets/tests/layout.rs)", () => {
+    expect(layoutSize(S.GLOBAL_CONFIG)).toBe(400);
+    expect(layoutSize(S.CAMPAIGN)).toBe(512);
+    expect(layoutSize(S.ENTRY)).toBe(100);
+    expect(layoutSize(S.CREATION_PARAMS)).toBe(70);
+    expect(layoutSize(S.INITIALIZE_CONFIG_ARGS)).toBe(134);
+    expect(layoutSize(S.SET_TEAM_ARGS)).toBe(161);
+    expect(layoutSize(S.OPEN_CAMPAIGN_ARGS)).toBe(82);
+    expect(layoutSize(S.JOIN_CAMPAIGN_ARGS)).toBe(21);
+    const events = Object.fromEntries(Object.entries(EVENTS).map(([n, e]) => [n, layoutSize(e.layout)]));
+    expect(events).toEqual({
+      ConfigInitialized: 166,
+      ConfigChanged: 360,
+      EntriesPaused: 32,
+      EntriesResumed: 32,
+      CampaignOpened: 255,
+      EntryAdded: 114,
+    });
+    expect(offsetOf(S.CAMPAIGN, "id")).toBe(16);
+  });
+
+  test("encodes and decodes every scalar, negative i128 included", () => {
+    const values = { id: 7n, kind: 0, direction: 1, feed_id: P.BTC_USD_FEED_ID, target: -12345678901234567890n };
+    const round = decode(S.OPEN_CAMPAIGN_ARGS, encode(S.OPEN_CAMPAIGN_ARGS, { ...values, deadline_at: -5n }));
+    expect(round.target).toBe(-12345678901234567890n);
+    expect(round.deadline_at).toBe(-5n);
+    expect(round.direction).toBe(1);
+    const params = decode(S.CREATION_PARAMS, encode(S.CREATION_PARAMS, DEFAULT_PARAMS));
+    expect(params.min_entry_lamports).toBe(10_000_000n);
+    expect(params.campaign_max_age).toBe(120);
+  });
+
+  test("prices the TP's worked example A", () => {
+    // TP section 3.4.16: p = 10,927,000,000, e = -8, US$500 -> 4,575,821,360 lamports.
+    expect(openingLamports(500n, 10_927_000_000n)).toBe(4_575_821_360n);
+  });
+
+  test("builds each instruction with its frozen slots and data size", async () => {
+    const who = await generateKeyPairSigner();
+    const init = await I.initializeConfigIx({
+      authority: who,
+      admin: who.address,
+      feeRecipient: who.address,
+      params: DEFAULT_PARAMS,
+    });
+    expect([init.accounts?.length, init.data?.length]).toEqual([7, 135]);
+    const team = await I.setTeamIx(who, [who.address]);
+    expect([team.accounts?.length, team.data?.length]).toEqual([4, 162]);
+    const pause = await I.pauseEntriesIx(who);
+    expect([pause.accounts?.length, pause.data?.length]).toEqual([4, 1]);
+    const open = await I.openCampaignIx(who, {
+      id: 1n,
+      feedId: P.BTC_USD_FEED_ID,
+      target: 1n,
+      deadlineAt: 1n,
+      openingUsd: 500n,
+      maxLamports: 1n,
+    });
+    expect([open.accounts?.length, open.data?.length, open.data?.[0]]).toEqual([9, 83, P.IX.USER_OPEN_CAMPAIGN]);
+    expect(open.accounts?.[4].address).toBe(P.BTC_USD_ACCOUNT);
+    const joinIx = await I.joinCampaignIx(who, P.SOL_USD_ACCOUNT, P.BTC_USD_ACCOUNT, { side: 0, amount: 1n });
+    expect([joinIx.accounts?.length, joinIx.data?.length]).toEqual([9, 22]);
+    expect(joinIx.accounts?.[7].address).toBe(P.EVENT_AUTHORITY);
+    expect(joinIx.accounts?.[8].address).toBe(P.PROGRAM_ID);
+  });
+});

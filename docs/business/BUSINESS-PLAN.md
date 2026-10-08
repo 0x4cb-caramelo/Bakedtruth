@@ -1,57 +1,80 @@
-# Brot Markets — Business Plan v0.0.3
+# Brot Markets — Business Plan v0.0.4
 
-**Versão:** 0.0.3, de 8 de outubro de 2026. Derivada do pitch de 7 de outubro de 2026, por ordem do fundador: "tomar
-o pitch como verdade, e transformar o Business plan conforme o pitch". Onde o pitch e a v0.0.2 discordam, vale o
-pitch; onde ele se cala, vale a v0.0.2, mais curta. Estado: rascunho para revisão do fundador.
+**Versão:** 0.0.4, de 8 de outubro de 2026. Derivada da v0.0.3 com as decisões que o fundador tomou em 8/10/2026.
+Onde elas e a v0.0.3 discordam, valem as de 8/10; onde se calam, vale a v0.0.3. Estado: rascunho para revisão do
+fundador.
 
-**A versão anterior fica na pasta.** Os quatro arquivos da v0.0.2 (`BP-v0.0.2-parte-1-produto.md` a
-`BP-v0.0.2-parte-4-construcao-e-risco.md`) continuam aqui, porque o resumo de produto, o plano técnico e os arquivos
-das sprints citam os números das seções deles. Eles também guardam o detalhe que a v0.0.3 resume, sobretudo nos
-tokens. O que mudou, seção por seção, e cada conta refeita estão na revisão de impacto,
-[`_review/bp-impact-review-v0.0.3.md`](_review/bp-impact-review-v0.0.3.md).
+**As versões anteriores ficam guardadas.** A v0.0.3, de 8/10/2026, está nas quatro partes
+[`BP-v0.0.3-parte-1-produto.md`](BP-v0.0.3-parte-1-produto.md) a
+[`BP-v0.0.3-parte-4-construcao-e-risco.md`](BP-v0.0.3-parte-4-construcao-e-risco.md), com a revisão de impacto em
+[`_review/bp-impact-review-v0.0.3.md`](_review/bp-impact-review-v0.0.3.md). O arquivo único que o fundador enviou
+(`BP-v0.0.3-completo.md`) é uma cópia montada dessas partes e fica fora do git. Os quatro arquivos da v0.0.2
+(`BP-v0.0.2-parte-1-produto.md` a `BP-v0.0.2-parte-4-construcao-e-risco.md`) continuam na pasta, porque o resumo de
+produto, o plano técnico e os arquivos das sprints citam as seções deles. O que mudou, item por item, e o que cada
+mudança move nos outros documentos está na revisão de impacto,
+[`_review/bp-impact-review-v0.0.4.md`](_review/bp-impact-review-v0.0.4.md).
 
-O plano está em quatro partes. Este arquivo é o índice e o resumo. Cada número e cada regra abaixo está explicado,
-com a fonte ou a conta, na parte indicada.
+O plano está em quatro partes. Este arquivo é o índice e o resumo. A numeração das seções é a mesma da v0.0.3, para
+as citações continuarem certas.
 
-**Como ler as partes.** **Decisão** é o que o fundador decidiu em 4 ou 5/10/2026, com as palavras dele entre aspas.
-**Decisão do pitch** é uma regra que está no deck de 7/10/2026, citada em inglês como está na tela. **Proposta,
+**Como ler as partes.** **Decisão** é o que o fundador decidiu em 4 ou 5/10/2026. **Decisão do pitch** é uma regra do
+deck de 7/10/2026. **Decisão, de 8/10/2026** é uma das respostas novas, com as palavras dele entre aspas. **Proposta,
 aguardando decisão** é sugestão que o fundador ainda não aprovou. Números de fora trazem etiqueta: FATO (lido na
 fonte), FATO SECUNDÁRIO (lido em quem citou a fonte) e INFERÊNCIA (conta ou conclusão nossa). Toda projeção é
 inferência.
+
+**As palavras.** Desde 8/10/2026 o produto é uma **campanha on-chain** ("On-Chain Campaign"). Quem entra numa campanha
+é um **baker**; quem a abre é o **criador**; os lados são **SIM** e **NÃO**; o dinheiro fica no **pote**. A marca
+continua Brot Markets. Para o nosso produto, os documentos não usam mais "mercado", "aposta" nem "escolher um lado".
 
 ## As quatro partes
 
 | Parte | Arquivo | O que responde |
 |---|---|---|
-| 1. Produto | [`BP-v0.0.3-parte-1-produto.md`](BP-v0.0.3-parte-1-produto.md) | O que é o Brot Markets, os três públicos, o pote, a taxa, quem abre um mercado e como ele se resolve |
-| 2. Mercado e negócio | [`BP-v0.0.3-parte-2-mercado-e-negocio.md`](BP-v0.0.3-parte-2-mercado-e-negocio.md) | O tamanho do mercado, os concorrentes, as quatro receitas, as projeções e os quatro motores de crescimento |
-| 3. Tokens | [`BP-v0.0.3-parte-3-tokens.md`](BP-v0.0.3-parte-3-tokens.md) | O que está decidido sobre os dois tokens, que o pitch não apresenta, e o conflito com a resposta pronta do roteiro |
-| 4. Construção e risco | [`BP-v0.0.3-parte-4-construcao-e-risco.md`](BP-v0.0.3-parte-4-construcao-e-risco.md) | O que será construído e em que ordem, as regras de criação no programa, o que protege o dinheiro, a equipe, a regulação e os riscos |
+| 1. Produto | [`BP-v0.0.4-parte-1-produto.md`](BP-v0.0.4-parte-1-produto.md) | O que é o Brot Markets, os três públicos, o pote em SOL, a taxa, quem abre uma campanha, o 1% do criador e como ela se resolve |
+| 2. Mercado e negócio | [`BP-v0.0.4-parte-2-mercado-e-negocio.md`](BP-v0.0.4-parte-2-mercado-e-negocio.md) | O tamanho do setor, os concorrentes, as receitas, o equilíbrio com aberturas pagas, o risco do preço do SOL e os motores de crescimento |
+| 3. Tokens | [`BP-v0.0.4-parte-3-tokens.md`](BP-v0.0.4-parte-3-tokens.md) | O que está decidido sobre os dois tokens, que não mudou em 8/10/2026 |
+| 4. Construção e risco | [`BP-v0.0.4-parte-4-construcao-e-risco.md`](BP-v0.0.4-parte-4-construcao-e-risco.md) | O que será construído e com quê (Pinocchio, Bun, app Android), em que ordem, o que protege o dinheiro sem teto, a equipe, a regulação e os riscos |
 
 ## O plano em uma página
 
-**O que é.** A frase da capa do pitch, em português: "Mercados de previsão que a rede resolve. O mercado de previsão
-em que os projetos põem dinheiro atrás das próprias promessas, e a rede prova se eles cumpriram." Cada mercado é um
-pote em USDC, a moeda digital que vale 1 dólar. Quem entra escolhe um lado, SIM ou NÃO, e quem acerta divide o pote.
-A resposta está gravada numa conta da Solana, e o programa só a lê: não há voto, juiz nem modelo de linguagem.
+**O que é.** Campanhas on-chain que a rede resolve: projetos põem dinheiro atrás das próprias promessas, e a rede
+prova se eles cumpriram. Cada campanha é um pote em SOL. Os bakers entram no SIM ou no NÃO, e quem acerta divide o
+pote. A resposta está gravada numa conta da Solana, e o programa só a lê: não há voto, juiz nem modelo de linguagem.
 Entra-se só com a carteira, sem cadastro.
 
-**Para quem.** Três públicos: o projeto cripto que patrocina o mercado sobre a própria meta, e que é o cliente; quem
-escolhe um lado; e quem abre mercados.
+**Uma moeda só.** **Decisão, de 8/10/2026:** "tudo em sol". Entradas, pote, prêmio, pagamentos, devoluções, indicação
+e taxas são em SOL. Isso desfaz a decisão de 4/10/2026, que tinha escolhido o USDC. Para as contas, o plano usa o
+preço da CoinGecko de 8/10/2026, 15:29 UTC: **US$ 109,27 por SOL** (FATO). Os exemplos seguem em dólares, para
+facilitar a leitura.
 
-**Como funciona, no exemplo do slide.** Entram 600 USDC no SIM e 400 no NÃO, e dá SIM. A taxa do Brot é de 10% do
-lado perdedor: 40 USDC. Sobram 960 para quem acertou, e cada 1 USDC posto no SIM recebe 1,60. Quem abriu o mercado
-fica com 1% do pote, 10 USDC; ao pé da letra, esses 10 saem do pote, e cada 1 USDC no SIM recebe 1,583. De onde sai
-esse 1% é a decisão mais importante em aberto (Parte 1, seção 3.4).
+**Para quem.** Três públicos: o projeto cripto que abre e patrocina a campanha sobre a própria meta, e que é o
+cliente; os bakers; e quem abre campanhas.
 
-**Como o Brot ganha.** Quatro receitas (Parte 2, seção 4.1). A taxa do pote dá, na média, 3,70% do volume (de 2,70%
-a 4,18%, conforme a mistura de mercados); dela, 25% vão para a tesouraria e 75% para a operação. A taxa de marketing:
-o projeto patrocina a partir de 500 dólares, 90% viram prêmio e 10% ficam com o Brot, ou 50 dólares num patrocínio
-de 500. A taxa de abertura: 0,02 SOL por mercado, cuja receita depende de quantos mercados serão abertos e do preço
-do SOL, dois números que ninguém tem. E o 1% do pote de um lado só, pequeno e fora do modelo.
+**Abrir uma campanha.** **Decisão, de 8/10/2026:** custa **US$ 500, pagos em SOL** (4,58 SOL ao preço de referência).
+Desses, 90% (US$ 450) viram prêmio no pote e 10% (US$ 50) ficam com o Brot. Abrir é, portanto, patrocinar com o
+mínimo: a regra de abertura e a do patrocínio passam a ser a mesma. A equipe também abre campanhas, e os 20 a 30
+parceiros de lançamento abrem de graça. Para cobrar os US$ 500, a proposta é o programa ler o preço SOL/USD da Pyth
+na hora; a CoinGecko não pode ser lida pelo programa e fica para mostrar preço no site (Parte 1, seção 4.1).
 
-**As contas.** O custo de referência é de 5.500 dólares por mês. Com a taxa média de 3,70%, a empresa o paga com
-**208.630 dólares por mês** de volume, e esse número não muda com o pitch ao pé da letra.
+**Como funciona, no exemplo do slide.** Entram 600 no SIM e 400 no NÃO, e dá SIM. A taxa do Brot é de 10% do lado
+perdedor: 40. O criador recebe 1% do pote, 10, que sai do pote. Sobram 950 para quem acertou: cada 1 posto no SIM
+recebe 1,583. Numa campanha paga, os US$ 450 de prêmio somam-se a isso: os vencedores dividem 1.400, ou 2,333 por 1.
+
+**O 1% do criador.** **Decisão, de 8/10/2026:** sai do pote; só quando isso faria quem acertou receber menos do que
+pôs, sai da taxa do Brot. Esse caso acontece quando quase todo o pote está no lado que ganhou (acima de 98,89% do pote,
+sem prêmio), e não quando a disputa é apertada. Nesse caso, também decidido em 8/10/2026, sai do pote o que der
+sem deixar ninguém abaixo do que pôs, e só a diferença sai da taxa (Parte 1, seção 3.4).
+
+**Como o Brot ganha.** A taxa do pote dá, na média, 3,70% do volume (de 2,70% a 4,18%, conforme a mistura de
+campanhas); dela, 25% vão para a tesouraria e 75% para a operação. Cada abertura paga deixa US$ 50 para a operação. O
+patrocínio acima dos US$ 500 deixa 10%. E o 1% do pote de um lado só, pequeno e fora do modelo. O 1% do criador quase
+não custa nada ao Brot, porque sai do pote.
+
+**As contas.** O custo de referência é de US$ 5.500 por mês (50,3 SOL). Sem aberturas pagas, a empresa o paga com
+**US$ 208.630 por mês** de volume. Cada abertura paga reduz esse número: com 30 por mês, ele cai para US$ 151.731; com
+110 por mês, as aberturas pagam o custo sozinhas. Ninguém sabe quantas campanhas pagas serão abertas (Parte 2, seção
+5.2). Os cenários de caixa são os da v0.0.3, em dólares, e não foram recalculados mês a mês:
 
 | | Ruim | Razoável | Otimista |
 |---|---|---|---|
@@ -59,109 +82,115 @@ do SOL, dois números que ninguém tem. E o 1% do pote de um lado só, pequeno e
 | Ponto mais baixo do caixa | −116.565 | −27.674 | −9.705 |
 | Caixa no mês 24 | −116.565 | 21.467 | 783.963 |
 
-O patrocínio a 10%, e não a 30%, baixa o caixa do razoável no mês 24 de 27.767 para 21.467. O cenário ruim não se
-paga com capital nenhum, e por isso há um critério de parada: aos 180 dias na rede principal, com volume mensal de
-até 45 mil dólares, a empresa para ou muda de rumo.
+O critério de parada continua: aos 180 dias na rede principal, com volume mensal de até US$ 45 mil, a empresa para ou
+muda de rumo.
 
-**Os mercados.** Qualquer carteira abre um mercado, por 0,02 SOL, "inside the rules": só tipos que a rede responde.
-No primeiro dia são cinco: preço de ativo grande pela Pyth (o serviço de preços assinados que o programa lê), queima
-de tokens, liquidez travada na Meteora (uma das plataformas de troca da Solana), tamanho de pool de staking e stake de
-validador. As entradas fecham quando faltam 5% da duração, e os mercados duram até 90
-dias. Não há saída antecipada. O que o programa precisa conferir para "inside the rules" valer está em proposta
-(Parte 4, seção 4.3).
+**As regras de abertura.** Só os cinco tipos que a rede responde: preço de ativo grande pela Pyth, queima de tokens,
+liquidez travada na Meteora, tamanho de pool de staking e stake de validador. A conta lida é conferida na abertura. O
+site monta a frase, sem texto livre. A campanha dura de 3 a 90 dias. As taxas são fixas. **Decisão, de 8/10/2026:** não
+há lista de contas aprovadas ("nao lidaremos com tokenomics") e não há teto, nem global nem por campanha.
 
 **A resolução.** Dois serviços agendados, em provedores diferentes, acionam a leitura. Depois dela há uma janela de 6
-horas em que a equipe só confirma ou anula. Mercado anulado devolve tudo, sem taxa. O pagamento sai sozinho.
+horas em que a equipe só confirma ou anula. Campanha anulada devolve tudo, sem taxa. O pagamento sai sozinho, em SOL,
+direto para a carteira.
 
-**O crescimento.** Quatro motores, sem mídia paga: de 20 a 30 parceiros de lançamento com um mercado grátis; a
-indicação, com 20% da taxa por 90 dias; o cartão de cada mercado para publicar no X; e quem abre mercados, que ganha
-1% e divulga o próprio. Nenhum parceiro está fechado.
+**O crescimento.** Os quatro motores do pitch continuam: de 20 a 30 parceiros com uma campanha grátis; a indicação,
+com 20% da taxa por 90 dias; o cartão de cada campanha para publicar no X; e quem abre campanhas. Este último fica mais
+fraco: com US$ 500 de entrada, quem abre tende a ser projeto, e não pessoa caçando a pergunta que divide. Nenhum
+parceiro está fechado.
 
-**Os tokens.** O pitch não apresenta token. O desenho decidido em 5/10/2026 fica guardado na Parte 3: o token A no
-pump.fun, como canal de tração, e o token B, em espera até o equilíbrio. A resposta pronta do roteiro ("não dá
-direito a receita nem a voto") contradiz o cofre e o voto do B.
+**Os tokens.** Nada mudou em 8/10/2026 (Parte 3).
 
-**A construção.** O programa é escrito do zero; hoje tem um leitor de preço e nenhuma instrução, isto é, ainda não
-aceita nenhuma operação. O roteiro do slide é "NOW Devnet, test tokens. LAUNCH Partner markets live. MAINNET After an
-audit, a multisig and a cap.": agora, na rede de testes (devnet), com dinheiro de teste; no lançamento, os mercados
-dos parceiros; na rede principal, com dinheiro real, só depois de uma auditoria externa, de uma carteira que exige
-várias assinaturas (multisig) e de um teto para o total nos potes. Se um dos três critérios faltar, a data anda.
+**A construção.** **Decisões, de 8/10/2026:** o programa é escrito em **Pinocchio**, e não em Anchor; os serviços
+rodam em **Bun**, e o site também, se passar no teste; há um **app Android**, com o mesmo backend e front próprio,
+publicado na loja de dApps da Solana; **não há IA** no escopo; e **não há prazo** de hackathon. A rede principal abre
+depois de uma auditoria externa e de uma carteira que exige várias assinaturas. O teto, terceiro critério do slide
+("After an audit, a multisig and a cap"), saiu, e o slide precisa mudar.
 
 **A equipe.** Como no slide: Bernardo Nery, Head Baker · CEO; Lucas Galvão, Chief Oven Officer · COO and CLO; Ronaldo
-Pereira, Chief Toasting Officer · CTO. O roteiro do próprio fundador chama os cargos de proposta, e falta o acordo
-escrito do Bernardo e do Ronaldo para aparecerem.
+Pereira, Chief Toasting Officer · CTO. **Decisão, de 8/10/2026:** a avaliação jurídica é feita pelo advogado da equipe.
+Falta o acordo escrito do Bernardo e do Ronaldo para aparecerem nas versões públicas.
 
 ## Os riscos que o plano não esconde
 
-- **A demanda não foi demonstrada.** Nenhuma plataforma pesquisada tem mercado sobre queima ou trava de tokens. E a
-  criação aberta não provou trazer volume: o PNP, aberto a qualquer pessoa, teve 206 transações em seis meses.
-- **Quem abre pode empurrar o resultado.** Sem a equipe escolhendo as metas, um mercado sobre um token sem valor pode
-  ser decidido de graça por quem o abriu. A defesa proposta é uma lista de contas aceitas e um teto por mercado.
-- **A regra brasileira.** A Medida Provisória 1.394, de 25/9/2026, proíbe a aposta de quota fixa no país, inclusive
-  por empresa do exterior. Se o pote é esse tipo de aposta é a primeira pergunta da avaliação jurídica. A tramitação
-  da medida não foi conferida.
-- **O prazo.** O programa novo não tem instrução, e o escopo cresceu com a criação aberta. A rede principal depende
-  de duas auditorias cujo prazo ninguém conhece.
-- **"No human in the loop".** A frase do slide contradiz a janela de 6 horas, a pausa e a anulação, que o plano
-  mantém. A proposta é dizer "nenhuma pessoa escolhe o vencedor" (decisão 5).
-- **A mistura de mercados e o 1%.** Se a maioria tiver favorito claro, ou se o 1% sair da taxa do Brot em todo o
-  volume, a taxa média cai para 2,70% e o razoável só se paga no mês 12.
+- **A demanda não foi demonstrada.** Nenhuma plataforma pesquisada tem campanhas sobre queima ou trava de tokens. A
+  criação aberta não provou trazer volume, e agora custa US$ 500.
+- **Sem teto, um erro no programa não tem limite de perda.** O teto existia para limitar o prejuízo enquanto o código é
+  novo. Restam as duas auditorias, a carteira de várias assinaturas e a pausa.
+- **Quem abre pode empurrar o resultado.** Sem lista de contas, quem cria um token sem valor, abre uma campanha sobre a
+  queima dele e queima os próprios tokens decide o resultado. Sobram como defesa os US$ 500 e o aviso automático, e
+  eles pesam pouco: se ele estiver sozinho no lado que forçou, os US$ 450 de prêmio voltam para ele, o custo líquido
+  cai para cerca de US$ 50, e a manobra compensa com pouco mais de US$ 56 de terceiros do outro lado (INFERÊNCIA:
+  `0,9 × X > 50`). Como a entrada dele no lado que ele mesmo força não corre risco, ele pode entrar grande e ficar com
+  quase todo o prêmio, de modo que esse limite baixo vale quase sempre.
+- **O preço do SOL.** A receita chega em SOL e os custos são em dólar. Se o SOL cair entre receber e pagar, a mesma
+  receita paga menos. Uma campanha de 90 dias muda de valor em dólar enquanto está aberta.
+- **A regra brasileira.** A Medida Provisória 1.394, de 25/9/2026, proíbe a "aposta de quota fixa" no país. Se o pote é
+  esse tipo de "aposta" é a primeira pergunta da avaliação jurídica, agora a cargo do advogado da equipe. Trocar as
+  palavras não muda a classificação: a Nota Técnica da Fazenda diz que ela "não decorre da nomenclatura".
+- **A técnica nova.** O Pinocchio não confere as contas sozinho: cada checagem esquecida é uma falha. O Bun 1.4 é a
+  primeira versão reescrita em Rust.
 - **Poucas pessoas.** Um programa novo, com dinheiro de terceiros, numa equipe de três.
 
 ## Situação das decisões
 
-As decisões de 4 e 5/10/2026 continuam valendo onde o pitch não as mudou. O pitch decidiu quem abre, a parte de quem
-abriu, o patrocínio a 90% e 10%, o projeto como cliente e as palavras do produto (Parte 1, seção 5.1), e os quatro
-motores de crescimento (Parte 2, seção 6.2). Ficaram dezenove decisões para o fundador. As de 1 a 14 têm a numeração
-da revisão de impacto. A 15 junta as regras mínimas de criação, que a revisão propôs sem número, e as de 16 a 19 são
-propostas que esta versão acrescentou. Na coluna "Onde", "P1 3.4" quer dizer Parte 1, seção 3.4.
+**Decididas em 8/10/2026:** tudo em SOL; o preço de referência da CoinGecko (US$ 109,27); abertura por US$ 500 em SOL,
+com 90% de prêmio e 10% para o Brot; a equipe abre; os parceiros abrem de graça; o 1% do criador sai do pote, e da taxa
+do Brot só no caso extremo; nada de 1% na campanha anulada, no pote de um lado só e sobre o prêmio; a equipe não paga os
+US$ 500 nem fica com o 1%, porque o Brot já cobra a taxa; os parceiros também não ficam com o 1%; no caso extremo, o 1%
+sai do pote até onde der e só a diferença sai da taxa; os US$ 450 voltam a quem abriu na campanha anulada e no pote de
+um lado só, e os US$ 50 seguem a causa; entrada mínima de 0,01 SOL; o preço para cobrar a abertura vem da Pyth, e a
+CoinGecko só mostra preço no site; a proposta de arquitetura 0.4 aprovada, e com ela o site em Bun se passar no teste,
+com o Node de reserva; sem teto global nem por campanha; sem lista de contas aprovadas; sem texto livre; as regras
+mínimas de abertura (cinco tipos, conta conferida, 3 a 90 dias, taxas fixas); abertura, taxa e 1% no núcleo; o pedido de
+pergunta sai e o patrocínio 90/10 fica; o vocabulário das campanhas; Pinocchio; Bun; app Android; sem IA; sem prazo;
+advogado na equipe. Das dezenove decisões da v0.0.3, ficam resolvidas a 1, a 2, a 4, a 7, a 13, a 15, a 16 e a 18; a 6
+(a equipe abre, de graça e sem o 1%); a 10, repetida como P-1, foi decidida; e a 19 virou a P-7.
+
+**Esperam o fundador:**
 
 | Nº | Decisão | Recomendação | Onde |
 |---|---|---|---|
-| 1 | De onde sai o 1% de quem abriu | Do prêmio de quem acertou, com teto | P1 3.4; P2 4.4; P4 4.6 |
-| 2 | Para onde vão os 0,02 SOL | Para o Brot, sem devolução, descontado o aluguel | P1 4.1; P4 4.7 |
-| 3 | Patrocínio acima de 500 e contrapartidas | 500 como piso, sem faixas fixas | P1 3.7; P2 4.3 |
-| 4 | O pedido de pergunta com resposta em 14 dias | Sai | P1 3.7; P4 4.6 |
-| 5 | "No human in the loop" e a janela | Manter a janela até a auditoria; dizer "no human picks the winner" | P1 4.5; P4 4.5 |
-| 6 | A equipe abre mercados? Fica com o 1%? | Abre, sem o 1% | P1 4.1; P4 4.6 |
-| 7 | Tipos em que dá para empurrar, abertos a todos | Lista de contas aceitas e teto por mercado; o preço abre a todos | P1 4.2; P4 4.3 |
-| 8 | Token B: cofre e voto diante da resposta pronta | Confirmar a resposta; o B fica só com o desconto | P3 3 |
-| 9 | "Referrals, day one" | O primeiro dia na rede principal | P1 3.9; P4 3.3 |
-| 10 | O 1% no anulado, no pote de um lado só e sobre o prêmio | Nada nos três casos | P1 3.5; P4 4.6 |
-| 11 | O nome do mascote | Baked na escrita; Cacetinho na fala | P1 4.6 |
-| 12 | Cargos e o acordo do Bernardo e do Ronaldo | Pedir por escrito; até lá, sem sobrenome nas versões públicas | P4 5.1 |
-| 13 | Texto livre no mercado | Não | P1 4.2; P4 4.3 |
-| 14 | Quem abriu escolhendo lado | Permitir, com aviso automático | P1 4.2; P4 4.3 |
-| 15 | As regras mínimas de criação | Só os cinco tipos; conta conferida na abertura; de 3 a 90 dias; taxas fixas | P1 3.6, 4.2; P4 4.3 |
-| 16 | A abertura, a taxa em SOL e a parte de quem abriu no núcleo | Entram no núcleo, com as regras na instrução que abre | P4 3.3 |
-| 17 | Um quarto item no "pronto" para a rede principal | Regras de criação, lista de contas e teto por mercado na versão auditada | P4 3.4 |
-| 18 | Teto por mercado ou por carteira em todos os tipos | Sim, também no de preço, para ninguém ocupar sozinho o teto global | P4 4.4 |
-| 19 | Onde fica o SOL das taxas de abertura | Conta da carteira de várias assinaturas; repõe o serviço; o resto vira USDC | P2 7; P4 4.7 |
+| P-6 | O teto da devolução da indicação | 0,05 SOL | P1 3.9 |
+| P-7 | A tesouraria, com tudo em SOL | A plataforma recebe e paga em SOL; a empresa converte por mês o que precisa para os custos | P4 4.7 |
+| P-8 | Cloak e SODAX com SOL | Conferir antes de usar | P4 2.2 |
+| Slide | O roteiro da rede principal no deck | "MAINNET After an audit and a multisig." | P4 3.1 |
+| Jurídico | A conclusão da avaliação jurídica | Por escrito, lida por um colega de fora, como a v0.0.3 recomendava | P4 5.1 |
+| Nova | A exceção de 5/10/2026 (abrir a rede principal com um relatório de auditoria e um teto menor) perdeu o teto | Esperar os dois relatórios | P4 3.4 |
+| R4 | Taxa reduzida nos três primeiros meses: qual valor e de qual taxa (revisão dos mentores de 8/10/2026) | Zerar só a taxa de abertura nas três primeiras campanhas de cada criador; mexer na taxa do pote mexe no equilíbrio | `_review/revisao-do-pitch-2026-10-08.md` |
+| Nova | "nao lidaremos com tokenomics" vale também para os tokens A e B, ou só para a lista de contas? | Confirmar que foi só sobre a lista | P3 |
+| 3, 5, 8, 9, 11, 12, 14, 17 | As da v0.0.3 que continuam | As recomendações da v0.0.3 | Cada parte |
 
-Faltam também os valores e nomes que a v0.0.2 deixou: o primeiro valor do teto e quem assina a carteira.
+Faltam ainda quem assina a carteira de várias assinaturas e o acordo escrito entre os sócios.
 
 O registro das perguntas e respostas do fundador, na ordem em que aconteceram, está em
-[`ideacao-perguntas-e-respostas.md`](ideacao-perguntas-e-respostas.md).
+[`ideacao-perguntas-e-respostas.md`](ideacao-perguntas-e-respostas.md). As respostas de 8/10/2026 estão registradas em
+`session-log/2026-10-08-decisoes-do-fundador-bp-v0.0.4.md`.
 
 ## O que vem depois
 
-1. **As respostas do fundador às dezenove decisões.** Oito delas (1, 2, 6, 7, 10, 13, 15 e 16) travam a Sprint 02,
-   que escreve o núcleo do programa.
-2. **A revisão do resumo de produto, do plano técnico e da Sprint 02** contra esta versão. Eles ainda descrevem a
-   equipe abrindo as perguntas e o pedido do patrocinador.
-3. **O acordo escrito do Bernardo e do Ronaldo** sobre nome e cargo, e o termo entre os sócios sobre o código.
-4. **A avaliação jurídica**, pela lista da Parte 4, seção 6.2, com as seis perguntas novas.
+1. **O plano de implementação**, em inglês, a partir da proposta de arquitetura 0.4: o plano técnico, o roteiro de
+   sprints e os arquivos de cada sprint. Depois, a resposta à P-7 (tesouraria), antes da Sprint 06.
+2. **A revisão do resumo de produto, do plano técnico, da Sprint 02 e do documento de design** contra esta versão. A
+   proposta de arquitetura, `docs/technical/SYSTEM-ARCHITECTURE-PROPOSAL.md`, versão 0.4, é a base técnica. O roteiro
+   de sprints precisa de um lugar para o app Android e para a tela de abertura.
+3. **O deck e o site no ar.** O `/pitch` e o `/pitch2` ainda dizem USDC, 0,02 SOL, teto e "markets".
+4. **O modelo financeiro mês a mês**, refeito com as aberturas pagas, quando o script da revisão da v0.0.3 estiver no
+   repositório.
 
 ## Histórico e bastidores
 
-- O pitch que originou esta versão, o `/pitch3`, hoje fora do ar e guardado com o roteiro e as respostas prontas em
-  [`../../services/landing/history/pitch-3/`](../../services/landing/history/pitch-3/roteiro.md); o deck no ar,
-  em `/pitch`, é o v4, que nasceu dele. A frase de elevador está em [`PITCH.md`](PITCH.md).
-- [`_review/bp-impact-review-v0.0.3.md`](_review/bp-impact-review-v0.0.3.md): o que o pitch muda no plano, as contas
-  refeitas, os riscos novos e as catorze primeiras decisões.
-- [`_review/revisao-bp-v0.0.3.md`](_review/revisao-bp-v0.0.3.md): a revisão final desta versão, com os defeitos
-  encontrados e as contas conferidas.
-- `BP-v0.0.2-parte-1-produto.md` a `BP-v0.0.2-parte-4-construcao-e-risco.md`: a versão anterior, de 5/10/2026.
+- [`_review/bp-impact-review-v0.0.4.md`](_review/bp-impact-review-v0.0.4.md): o que as decisões de 8/10/2026 mudam no
+  plano e nos outros documentos.
+- `BP-v0.0.3-parte-1-produto.md` a `BP-v0.0.3-parte-4-construcao-e-risco.md`: a versão anterior, de 8/10/2026, feita a
+  partir do pitch. O pitch que a originou, o `/pitch3`, está guardado com o roteiro em
+  [`../../services/landing/history/pitch-3/`](../../services/landing/history/pitch-3/roteiro.md); o deck no ar, em
+  `/pitch`, é o v4. A frase de elevador está em [`PITCH.md`](PITCH.md).
+- [`_review/bp-impact-review-v0.0.3.md`](_review/bp-impact-review-v0.0.3.md) e
+  [`_review/revisao-bp-v0.0.3.md`](_review/revisao-bp-v0.0.3.md): a revisão de impacto e a revisão final da v0.0.3.
+- [`_review/revisao-do-pitch-2026-10-08.md`](_review/revisao-do-pitch-2026-10-08.md): a revisão do `/pitch3` com os
+  mentores, com as decisões R1 a R6.
+- `BP-v0.0.2-parte-1-produto.md` a `BP-v0.0.2-parte-4-construcao-e-risco.md`: a versão de 5/10/2026.
 - [`_review/BUSINESS-PLAN-v0.0.1.md`](_review/BUSINESS-PLAN-v0.0.1.md): a primeira versão, com 16 capítulos.
 - [`_review/user-review-v0.0.1.md`](_review/user-review-v0.0.1.md): a leitura do fundador sobre a v0.0.1.
 - [`_review/bp-impact-review-v0.0.2.md`](_review/bp-impact-review-v0.0.2.md) e
