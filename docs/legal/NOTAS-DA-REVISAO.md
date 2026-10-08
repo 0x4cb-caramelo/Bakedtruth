@@ -1,6 +1,6 @@
 # Notas para a revisão dos termos e da privacidade
 
-Rascunho 0.1, de 8/10/2026. Este arquivo não vai ao ar: é o que o revisor precisa saber sobre os dois textos ao
+Termos no rascunho 0.2 (enxugados a pedido do fundador: "os termos de serviço ficaram muito longos"), privacidade no 0.1, de 8/10/2026. Este arquivo não vai ao ar: é o que o revisor precisa saber sobre os dois textos ao
 lado, `TERMS-OF-SERVICE.md` e `PRIVACY-POLICY.md`. Nada foi publicado. A página `brot.markets/privacy` continua
 sendo a que vale, e cobre só a lista de espera.
 
@@ -56,7 +56,7 @@ Cada uma está marcada no texto. Se a decisão for outra, o texto muda junto.
    projeto pôr a própria promessa em jogo é o que se vende.
 6. **Duração de 3 a 90 dias:** o piso de 3 dias é proposta (decisão 15).
 7. **Disputa em duas etapas e janela de 6 horas:** decididas. Os termos as descrevem sem dizer "No human in the
-   loop", porque a janela é uma pessoa no caminho; usam "no judge picks the winner".
+   loop", porque a janela é uma pessoa no caminho; dizem "Nobody votes" e que ninguém pode inverter um resultado.
 
 ## 4. O que os textos não resolvem
 
