@@ -6,7 +6,17 @@
 
 use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 
-use crate::{instructions::args, state::config::CreationParams};
+use crate::{
+    checks, events,
+    instructions::{
+        admin::shared::{config_changed, require_admin},
+        args,
+    },
+    state::{
+        config::{CreationParams, GlobalConfig},
+        enums::ConfigChange,
+    },
+};
 
 pub fn admin_set_creation_params(
     program_id: &Address,
@@ -14,10 +24,19 @@ pub fn admin_set_creation_params(
     data: &[u8],
 ) -> ProgramResult {
     let params = args::<CreationParams>(data)?;
-    let _ = params;
     let [admin, config, event_authority, program, ..] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    let _ = (program_id, admin, config, event_authority, program);
-    todo!("Sprint 02 lane B")
+    checks::signer(admin)?;
+    checks::writable(config)?;
+    checks::event_accounts(event_authority, program, program_id)?;
+    let mut state = GlobalConfig::load_mut(config, program_id)?;
+    require_admin(&state, admin.address())?;
+    params.validate()?;
+    // Future campaigns only: an open campaign keeps what it copied at opening, and the
+    // `open_campaigns` counter is not a parameter, so it is left as it is.
+    state.params = *params;
+    let event = config_changed(ConfigChange::CreationParams, admin.address(), &state);
+    drop(state);
+    events::emit(&event, event_authority, program, program_id)
 }

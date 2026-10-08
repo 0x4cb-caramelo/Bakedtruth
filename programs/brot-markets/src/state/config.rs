@@ -131,9 +131,59 @@ impl GlobalConfig {
 }
 
 impl CreationParams {
-    /// Checks every parameter against its floor and ceiling (TP section 3.4.1). Used by
-    /// `admin_initialize_config` and `admin_set_creation_params`. Lane B implements it.
+    /// Checks every parameter against its floor and ceiling (TP section 3.4.1), in field order,
+    /// each with its own error; a bound itself passes. Used by `admin_initialize_config` and
+    /// `admin_set_creation_params`.
     pub fn validate(&self) -> Result<(), ProgramError> {
-        todo!("Sprint 02 lane B: floors and ceilings of constants.rs, one error per parameter")
+        use crate::{
+            constants::{
+                BPS_DENOMINATOR, CAMPAIGN_MAX_AGE_CEILING, CAMPAIGN_MAX_AGE_FLOOR,
+                MAX_CREATOR_SHARE_BPS, MAX_FEE_BPS, MAX_ONE_SIDED_FEE_BPS, MAX_OPENING_FEE_USD,
+                MAX_OPEN_CAMPAIGNS_CEILING, MAX_PRICE_AGE_CEILING, MAX_PRICE_CONF_BPS_CEILING,
+                MIN_ENTRY_CEILING_LAMPORTS, MIN_ENTRY_FLOOR_LAMPORTS, MIN_OPENING_FEE_USD,
+                MIN_OPENING_PRIZE_BPS,
+            },
+            error::BrotError,
+        };
+
+        // The prize share is at most the whole payment; compared in u64, the constant's type.
+        let prize_bps = u64::from(self.opening_prize_bps.get());
+        let min_entry = self.min_entry_lamports.get();
+        let join_age = self.campaign_max_age.get();
+
+        if !(MIN_OPENING_FEE_USD..=MAX_OPENING_FEE_USD).contains(&self.opening_fee_usd.get()) {
+            return Err(BrotError::OpeningFeeUsdOutOfRange.into());
+        }
+        if !(u64::from(MIN_OPENING_PRIZE_BPS)..=BPS_DENOMINATOR).contains(&prize_bps) {
+            return Err(BrotError::OpeningPrizeBpsOutOfRange.into());
+        }
+        if self.fee_bps.get() > MAX_FEE_BPS {
+            return Err(BrotError::FeeBpsAboveCeiling.into());
+        }
+        if self.one_sided_fee_bps.get() > MAX_ONE_SIDED_FEE_BPS {
+            return Err(BrotError::OneSidedFeeBpsAboveCeiling.into());
+        }
+        if self.creator_share_bps.get() > MAX_CREATOR_SHARE_BPS {
+            return Err(BrotError::CreatorShareBpsAboveCeiling.into());
+        }
+        if !(1..=MAX_OPEN_CAMPAIGNS_CEILING).contains(&self.max_open_campaigns.get()) {
+            return Err(BrotError::MaxOpenCampaignsOutOfRange.into());
+        }
+        if !(MIN_ENTRY_FLOOR_LAMPORTS..=MIN_ENTRY_CEILING_LAMPORTS).contains(&min_entry) {
+            return Err(BrotError::MinEntryOutOfRange.into());
+        }
+        if self.sol_usd_feed_id == [0; 32] {
+            return Err(BrotError::SolUsdFeedIdZero.into());
+        }
+        if !(1..=MAX_PRICE_AGE_CEILING).contains(&self.max_price_age.get()) {
+            return Err(BrotError::MaxPriceAgeOutOfRange.into());
+        }
+        if !(1..=MAX_PRICE_CONF_BPS_CEILING).contains(&self.max_price_conf_bps.get()) {
+            return Err(BrotError::MaxPriceConfOutOfRange.into());
+        }
+        if !(CAMPAIGN_MAX_AGE_FLOOR..=CAMPAIGN_MAX_AGE_CEILING).contains(&join_age) {
+            return Err(BrotError::CampaignMaxAgeOutOfRange.into());
+        }
+        Ok(())
     }
 }

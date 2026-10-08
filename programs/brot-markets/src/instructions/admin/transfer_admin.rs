@@ -7,7 +7,16 @@
 use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 use shank::ShankType;
 
-use crate::{instructions::args, layout::Pubkey, zero_copy};
+use crate::{
+    checks, events,
+    instructions::{
+        admin::shared::{config_changed, require_admin},
+        args,
+    },
+    layout::Pubkey,
+    state::{config::GlobalConfig, enums::ConfigChange},
+    zero_copy,
+};
 
 #[derive(ShankType)]
 #[repr(C)]
@@ -24,10 +33,18 @@ pub fn admin_transfer_admin(
     data: &[u8],
 ) -> ProgramResult {
     let args = args::<TransferAdminArgs>(data)?;
-    let _ = args;
     let [admin, config, event_authority, program, ..] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    let _ = (program_id, admin, config, event_authority, program);
-    todo!("Sprint 02 lane B")
+    checks::signer(admin)?;
+    checks::writable(config)?;
+    checks::event_accounts(event_authority, program, program_id)?;
+    let mut state = GlobalConfig::load_mut(config, program_id)?;
+    require_admin(&state, admin.address())?;
+    // Only names the key; the admin changes when that key signs `admin_accept_admin`. A new
+    // transfer replaces a pending one, and zero cancels it.
+    state.pending_admin = args.new_admin;
+    let event = config_changed(ConfigChange::PendingAdmin, admin.address(), &state);
+    drop(state);
+    events::emit(&event, event_authority, program, program_id)
 }
