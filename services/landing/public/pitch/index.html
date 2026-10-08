@@ -3,244 +3,431 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Brot Markets — pitch deck</title>
-<!-- Reachable by link only. Do not remove "noindex" before the founder approves every row of the redaction table in
-     docs/business/PITCH.md. The server sends the same rule in the X-Robots-Tag header. -->
+<title>Brot Markets — pitch deck v4</title>
+<!-- Reachable by link only, like /pitch. Do not remove "noindex" before the founder approves every row of the redaction
+     table in docs/business/PITCH.md. The server sends the same rule in the X-Robots-Tag header. -->
 <meta name="robots" content="noindex, nofollow, noarchive">
-<meta name="description" content="Brot Markets pitch deck: prediction markets on Solana that the chain resolves.">
+<meta name="description" content="Brot Markets pitch deck v4: permissionless prediction markets, settled by on-chain data.">
 <link rel="icon" type="image/png" href="/img/favicon.png">
 <link rel="preload" href="fonts/ibm-plex-mono-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ibm-plex-sans-400.woff2" as="font" type="font/woff2" crossorigin>
-<!-- Cloudflare tells browsers to keep scripts and styles for hours. Raise "v" on the three lines below whenever one of
-     these files changes, so a returning visitor never gets the new slides with the old stage. -->
+<!-- The stage, the fonts and the images are the ones of /pitch. The motion is this deck's own (motion.js).
+     Cloudflare tells browsers to keep scripts and styles for hours: raise the "v" of a file whenever it changes, here
+     and in the import lines of motion.js. -->
 <link rel="stylesheet" href="deck.css?v=2">
-<!-- deck-motion.js goes first: it has to be listening when deck.js announces the slide the page opened on. -->
-<script src="deck-motion.js?v=2" defer></script>
+<style>
+/* What only this deck needs: the demo card of the Solution slide, the glow, and motion switched off. */
+.demo { position: relative; height: 660px; perspective: 2200px; cursor: pointer; }
+.demo-flip { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.demo-flip.is-turned { transform: rotateY(180deg); }
+.demo-face { position: absolute; inset: 0; box-sizing: border-box; padding: 44px; border-radius: 24px; background: #10151c; color: #f7eedb; display: flex; flex-direction: column; gap: 24px; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.demo-back { transform: rotateY(180deg); }
+.demo-kicker { font: 400 20px/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em; color: #a3acba; }
+.demo-q { font: 600 44px/1.15 "IBM Plex Mono", monospace; }
+.demo-sides { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.demo-side { display: flex; align-items: baseline; justify-content: space-between; padding: 18px 24px; border-radius: 14px; border: 3px solid transparent; transition: border-color 0.2s, transform 0.2s, opacity 0.3s; }
+.demo-side span { font: 400 24px/1 "IBM Plex Mono", monospace; }
+.demo-side b { font: 600 54px/1 "IBM Plex Mono", monospace; }
+.demo-side.yes { background: #1c3a30; color: #a6ffcf; }
+.demo-side.no { background: #3d2422; color: #ff9a7a; }
+.demo-side.is-picked { border-color: currentColor; transform: scale(1.03); }
+.demo-face.is-picked .demo-side:not(.is-picked) { opacity: 0.55; }
+.demo-status { font: 400 28px/1.3 "IBM Plex Sans", sans-serif; color: #d9d1c1; }
+.demo-result { display: none; align-items: center; gap: 22px; margin-top: auto; padding: 20px 26px; border-radius: 16px; }
+.demo-face.is-resolved .demo-result { display: flex; }
+.demo-face.is-won .demo-result { background: #1c3a30; color: #a6ffcf; }
+.demo-face.is-lost .demo-result { background: #3d2422; color: #ff9a7a; }
+.demo-result img { width: 170px; flex: none; image-rendering: pixelated; }
+.demo-words { display: flex; flex-direction: column; gap: 10px; }
+.demo-stamp { font: 500 19px/1.3 "IBM Plex Mono", monospace; letter-spacing: 0.08em; opacity: 0.85; }
+.demo-amount { font: 600 46px/1.1 "IBM Plex Mono", monospace; white-space: pre-line; }
+.demo-cursor { position: absolute; left: 0; top: 0; margin: -6px 0 0 -10px; opacity: 0; pointer-events: none; z-index: 5; transition: opacity 0.25s; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.5)); }
+.demo-cursor.is-on { opacity: 1; }
+.glow { animation: glow 2.6s ease-in-out infinite; }
+@keyframes glow { 50% { text-shadow: 0 0 18px #ffd9a0, 0 0 38px rgba(255, 217, 160, 0.6); } }
+html.calm .glow, html.stack .glow { animation: none; }
+@media (prefers-reduced-motion: reduce) { .glow { animation: none; } .demo-flip { transition: none; } }
+.bar button[aria-pressed="false"] { color: #4a5567; }
+/* Growth: the four cards, and the partners' logos, which fan out once the count has stopped. */
+.g-card { background: #171e29; border: 2px solid #263041; border-radius: 20px; padding: 28px 36px; display: flex; flex-direction: column; gap: 10px; }
+.g-partners { flex-direction: row; align-items: center; justify-content: space-between; gap: 20px; }
+.g-words { display: flex; flex-direction: column; gap: 10px; }
+.g-title { font: 600 38px/1.15 "IBM Plex Mono", monospace; }
+.g-body { font: 400 30px/1.35 "IBM Plex Sans", sans-serif; color: #d9d1c1; }
+.g-body b { color: #eea546; font: 600 38px/1 "IBM Plex Mono", monospace; }
+.g-tag { margin-left: 10px; padding: 3px 9px; border: 1px solid #3a4558; border-radius: 6px; font: 500 16px/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase; color: #a3acba; vertical-align: middle; }
+.g-tag[hidden] { display: none; }
+.bar button[data-lite][aria-pressed="true"] { color: #eea546; }
+.g-partners .g-title { white-space: nowrap; }
+/* The logos are small cards. They pile up while the number climbs, then spread like a hand of cards. */
+.g-logos { display: flex; flex: none; justify-content: flex-end; align-items: center; min-width: 400px; height: 96px; padding-right: 16px; }
+.g-logo { width: 132px; height: 84px; border-radius: 12px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45); margin-left: -104px; transform-origin: 50% 140%; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), margin 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.g-logos.is-fanned .g-logo { margin-left: -50px; }
+.g-logos.is-fanned .g-logo:nth-last-child(4) { transform: rotate(-15deg); }
+.g-logos.is-fanned .g-logo:nth-last-child(3) { transform: rotate(-5deg); }
+.g-logos.is-fanned .g-logo:nth-last-child(2) { transform: rotate(5deg); }
+.g-logos.is-fanned .g-logo:nth-last-child(1) { transform: rotate(15deg); }
+/* Team: one window per person, with a curtain that the mascot pulls open. Without motion the curtains are open. */
+.member { display: flex; flex-direction: column; gap: 8px; }
+.member-window { position: relative; height: 500px; margin-bottom: 14px; border-radius: 24px; overflow: hidden; background: #fffaf0; box-shadow: inset 0 0 0 4px #1b1611; }
+.member-photo { position: absolute; left: 50%; bottom: 4px; height: 94%; transform: translateX(-50%); }
+.curtain { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #a8481b 0 38px, #8f3a14 38px 76px); border-bottom: 10px solid #eea546; transform: translateY(-104%); transition: transform 0.3s cubic-bezier(0.3, 0.7, 0.2, 1); }
+.member.is-closed .curtain { transform: none; transition: none; }
+.rope { position: absolute; right: 40px; top: 0; width: 6px; height: 300px; border-radius: 3px; background: #eea546; z-index: 2; }
+.rope i { position: absolute; left: -9px; bottom: -12px; width: 24px; height: 24px; border-radius: 50%; background: #eea546; }
+.member-name { font: 600 42px/1.1 "IBM Plex Mono", monospace; }
+.member-role { font: 500 22px/1.3 "IBM Plex Mono", monospace; letter-spacing: 0.06em; color: #a8481b; }
+.member-line { font: 400 28px/1.35 "IBM Plex Sans", sans-serif; color: #3d3328; }
+/* Open a market: the lever the mascot pulls, from the smallest seed to a large one. lever.js moves it. */
+.lever { display: flex; flex-direction: column; gap: 18px; }
+.lever-kicker { font: 400 22px/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em; color: #6b5e4e; }
+.lever-amount { font: 600 104px/1 "IBM Plex Mono", monospace; letter-spacing: -0.03em; color: #a8481b; }
+.lever-rank { font: 500 26px/1.2 "IBM Plex Mono", monospace; color: #3d3328; }
+.lever-rank b { color: #1b1611; }
+.lever-rig { position: relative; height: 330px; }
+.lever-track { position: absolute; left: 250px; top: 14px; width: 14px; height: 300px; border-radius: 7px; background: #1b1611; }
+.lever-knob { position: absolute; left: -21px; top: -14px; width: 56px; height: 56px; box-sizing: border-box; border-radius: 50%; background: #a8481b; border: 6px solid #1b1611; }
+.lever-meter { position: absolute; left: 320px; top: 14px; width: 110px; height: 300px; box-sizing: border-box; border: 5px solid #1b1611; border-radius: 20px; overflow: hidden; background: #fffaf0; }
+.lever-fill { position: absolute; left: 0; right: 0; bottom: 0; height: 6%; background: linear-gradient(0deg, #a8481b, #eea546); }
+.lever-mark { position: absolute; left: 446px; font: 500 22px/1 "IBM Plex Mono", monospace; color: #6b5e4e; }
+.lever.is-pulled .lever-knob { transform: translateY(230px); }
+.lever.is-pulled .lever-fill { height: 100%; }
+.lever-note { font: 400 28px/1.35 "IBM Plex Sans", sans-serif; color: #3d3328; }
+/* Team, v4: each window turns from the drawing to the photo (team.js), and each name links to the person's LinkedIn. */
+.member-window { perspective: 1600px; }
+.member-card { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.member-card.is-real { transform: rotateY(180deg); }
+.member-photo { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.member-real { position: absolute; inset: 0; width: 100%; height: 100%; box-sizing: border-box; object-fit: contain; background: #0b0e13; border: 4px solid #1b1611; border-radius: 24px; transform: rotateY(180deg); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+a.member-name { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 14px; }
+a.member-name:hover { text-decoration: underline; text-underline-offset: 8px; }
+.member-in { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 7px; background: #1b1611; color: #f6eddb; font: 600 20px/1 "IBM Plex Sans", sans-serif; }
+.member-line { font-size: 26px; }
+.member-card.is-real ~ .rope { opacity: 0; transition: opacity 0.3s; }
+.member-brands { font: 500 22px/1.3 "IBM Plex Mono", monospace; letter-spacing: 0.04em; color: #6b5e4e; }
+@media print { .demo-cursor { display: none; } }
+</style>
+<!-- motion.js goes first: it has to be listening when deck.js announces the slide the page opened on. -->
+<script type="module" src="motion.js?v=6"></script>
 <script src="deck.js?v=2" defer></script>
 </head>
 <body>
-<!-- Slide design and copy by the founder (1920 x 1080 canvas, inline styles kept as authored). The speaking notes are
-     in services/landing/pitch-notes.md. What was changed from the original and why: session-log, 2026-10-05. -->
-<main class="deck" data-deck aria-label="Brot Markets pitch deck">
+<!-- v4 of the deck, made from /pitch3 on 2026-10-08 with the founder's answers to the mentors' review
+     (docs/business/_review/revisao-do-pitch-2026-10-08.md). The plan of /pitch3 is in plano-do-pitch3.md, same folder. Same canvas and visual language: 1920 x 1080, inline styles.
+     The old decks and their speaking notes are kept, not served, in services/landing/history/. -->
+<main class="deck" data-deck aria-label="Brot Markets pitch deck v4">
 
 <section class="slide" data-label="Title" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:grid;grid-template-columns:1.15fr 0.85fr;align-items:center;gap:60px;">
-  <div style="display:flex;flex-direction:column;gap:48px;">
-    <img src="img/logo-wordmark.webp" alt="brot.markets" style="mix-blend-mode:lighten;width:760px;margin-left:-120px;margin-top:-60px;margin-bottom:-60px;display:block;">
+  <div style="display:flex;flex-direction:column;gap:44px;">
     <h1 style="margin:0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:92px;line-height:1.05;letter-spacing:-0.03em;text-wrap:balance;">Prediction markets the chain resolves.</h1>
-    <p style="margin:0;font-size:36px;line-height:1.4;color:#a3acba;max-width:900px;text-wrap:pretty;">Parimutuel USDC pools on Solana, settled by data anyone can verify on-chain.</p>
-    <div style="display:flex;gap:16px;align-items:center;">
-      <div style="height:6px;width:180px;border-radius:3px;background:linear-gradient(90deg,#ff9ad5,#9ad0ff,#a6ffcf,#fff59a,#ffb37a);"></div>
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;letter-spacing:0.08em;color:#eea546;">COLOSSEUM HACKATHON · 2026</span>
-    </div>
+    <p style="margin:0;font-size:36px;line-height:1.4;color:#a3acba;max-width:900px;text-wrap:pretty;">Permissionless prediction markets, settled by <span style="white-space:nowrap;">on-chain data.</span></p>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;letter-spacing:0.04em;color:#a3acba;"><a href="https://brot.markets/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:#4a5567;text-underline-offset:8px;">brot.markets</a> &nbsp;·&nbsp; <a href="https://x.com/brotmarkets" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:#4a5567;text-underline-offset:8px;">x.com/brotmarkets</a></span>
   </div>
   <div style="display:flex;justify-content:center;">
-    <img src="img/baked-sticker.webp" alt="Baked mascot sticker" style="width:100%;max-width:720px;display:block;">
+    <!-- The sticker with the mascot in it. When the deck moves on, exits.js swaps it for the empty one. -->
+    <img data-sticker src="img/e09-adesivo-cheio.webp" alt="Baked, the mascot, on its brot.markets sticker" style="width:124%;max-width:none;margin:0 -12%;display:block;">
   </div>
 </section>
 
 <section class="slide" data-label="Problem" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
   <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">01 · PROBLEM</span>
-  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">Prediction markets today resolve by vote, company key or AI</h2>
-  <div style="flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:36px;align-items:center;">
-    <div style="background:#171e29;border:2px solid #263041;border-radius:20px;padding:48px 44px;display:flex;flex-direction:column;gap:24px;">
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:#a3acba;">Polymarket</span>
-      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:56px;line-height:1.05;">Token vote</span>
-      <span style="font-size:30px;line-height:1.4;color:#d9d1c1;">Disputes go to token holders and take 4–6 days.</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">Someone always stands between the event and your payout</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.05fr 0.95fr;gap:70px;align-items:center;">
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:230px;line-height:0.95;letter-spacing:-0.05em;color:#ff9a7a;">$7M</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;line-height:1.2;">one market settled on an event that never happened.</span>
+      <span style="font-size:30px;line-height:1.4;color:#d9d1c1;">Polymarket, March 2025. No refunds.</span>
     </div>
-    <div style="background:#171e29;border:2px solid #263041;border-radius:20px;padding:48px 44px;display:flex;flex-direction:column;gap:24px;">
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:#a3acba;">World, inside Phantom</span>
-      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:56px;line-height:1.05;">Company key</span>
-      <span style="font-size:30px;line-height:1.4;color:#d9d1c1;">One key held by the operator writes the result.</span>
-    </div>
-    <div style="background:#171e29;border:2px solid #263041;border-radius:20px;padding:48px 44px;display:flex;flex-direction:column;gap:24px;">
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:26px;color:#a3acba;">PNP</span>
-      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:56px;line-height:1.05;">Two LLMs</span>
-      <span style="font-size:30px;line-height:1.4;color:#d9d1c1;">Language models read the news and decide.</span>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div style="display:grid;grid-template-columns:320px 1fr;gap:28px;align-items:center;padding:26px 32px;background:#171e29;border:2px solid #263041;border-radius:18px;">
+        <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:22px;color:#a3acba;">Polymarket</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;line-height:1.05;">Token vote</span></div>
+        <span style="font-size:28px;line-height:1.35;color:#d9d1c1;">Disputes take <span style="white-space:nowrap;">4–6 days</span></span>
+      </div>
+      <div style="display:grid;grid-template-columns:320px 1fr;gap:28px;align-items:center;padding:26px 32px;background:#171e29;border:2px solid #263041;border-radius:18px;">
+        <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:22px;color:#a3acba;">World, inside Phantom</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;line-height:1.05;">Admin key</span></div>
+        <span style="font-size:28px;line-height:1.35;color:#d9d1c1;">One company key writes the result</span>
+      </div>
+      <div style="display:grid;grid-template-columns:320px 1fr;gap:28px;align-items:center;padding:26px 32px;background:#171e29;border:2px solid #263041;border-radius:18px;">
+        <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:22px;color:#a3acba;">PNP</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;line-height:1.05;">Two LLMs</span></div>
+        <span style="font-size:28px;line-height:1.35;color:#d9d1c1;">Language models decide</span>
+      </div>
     </div>
   </div>
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:40px;">
-    <span style="font-size:30px;color:#a3acba;max-width:1300px;">Each one puts a party between the event and the payout.</span>
-    <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6f7a8c;">Sources: Polymarket docs, Chainstack Labs, PNP docs · Sep–Oct 2026</span>
-  </div>
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:22px;color:#6f7a8c;">Sources: CoinDesk and Cointelegraph (Mar 2025) · Polymarket docs · Chainstack Labs · PNP docs</span>
 </section>
 
-<section class="slide" data-label="Solution" style="background:#f6eddb;color:#1b1611;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:grid;grid-template-columns:1.2fr 0.8fr;gap:60px;align-items:center;">
-  <div style="display:flex;flex-direction:column;gap:28px;">
+<section class="slide" data-label="Solution" style="background:#f6eddb;color:#1b1611;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:grid;grid-template-columns:1.15fr 0.85fr;gap:70px;align-items:center;">
+  <div style="display:flex;flex-direction:column;gap:26px;">
     <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#a8481b;">02 · SOLUTION</span>
-    <h2 style="margin:0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;text-wrap:balance;">Brot only lists questions the chain can answer</h2>
-    <p style="margin:12px 0 0;font-size:36px;line-height:1.45;color:#3d3328;max-width:1000px;text-wrap:pretty;">If the answer isn't stored in a Solana account, the market doesn't open. The program reads that account and settles. Nobody types in a result.</p>
-    <div style="display:flex;flex-direction:column;gap:0;margin-top:28px;border-top:2px solid #1b1611;max-width:1000px;">
-      <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;padding:22px 0;border-bottom:1px solid #cdbfa6;">
-        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:30px;">Wallet-only</span>
-        <span style="font-size:30px;color:#3d3328;">No account, no KYC sign-up.</span>
+    <h2 style="margin:0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;text-wrap:balance;">Brot only lists markets the chain can answer</h2>
+    <p style="margin:8px 0 0;font-size:36px;line-height:1.4;color:#3d3328;max-width:980px;text-wrap:pretty;">If the answer isn't stored in a Solana account, the market doesn't open.</p>
+    <div style="display:flex;flex-direction:column;gap:0;margin-top:22px;border-top:2px solid #1b1611;max-width:1000px;">
+      <div style="display:grid;grid-template-columns:400px 1fr;gap:24px;padding:22px 0;border-bottom:1px solid #cdbfa6;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:30px;">No human in the loop</span>
+        <span style="font-size:30px;color:#3d3328;">The program reads the account.</span>
       </div>
-      <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;padding:22px 0;border-bottom:1px solid #cdbfa6;">
-        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:30px;">USDC pools</span>
-        <span style="font-size:30px;color:#3d3328;">One pool per question, YES or NO.</span>
+      <div style="display:grid;grid-template-columns:400px 1fr;gap:24px;padding:22px 0;border-bottom:1px solid #cdbfa6;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:30px;">Anyone can re-check</span>
+        <span style="font-size:30px;color:#3d3328;">Same account, same answer.</span>
       </div>
-      <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;padding:22px 0;border-bottom:1px solid #cdbfa6;">
+      <div style="display:grid;grid-template-columns:400px 1fr;gap:24px;padding:22px 0;border-bottom:1px solid #cdbfa6;">
         <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:30px;">Auto payout</span>
-        <span style="font-size:30px;color:#3d3328;">Winnings arrive in the wallet. No claim button.</span>
+        <span style="font-size:30px;color:#3d3328;">No claim button.</span>
       </div>
     </div>
   </div>
-  <div style="display:flex;justify-content:center;">
-    <img src="img/baked-standing.webp" alt="Baked, standing" style="width:100%;max-width:640px;display:block;">
-  </div>
-</section>
-
-<section class="slide" data-label="Sponsors" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
-  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">03 · SPONSORS</span>
-  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">Projects sponsor questions about their own promises</h2>
-  <div style="flex:1;display:grid;grid-template-columns:1.25fr 0.75fr;gap:60px;align-items:center;">
-    <div style="display:flex;flex-direction:column;gap:44px;">
-      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;">
-        <div style="display:flex;flex-direction:column;gap:14px;padding:28px 26px;background:#171e29;border-radius:16px;">
-          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#eea546;">1</span>
-          <span style="font-size:28px;line-height:1.35;">Project promises a token burn</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:14px;padding:28px 26px;background:#171e29;border-radius:16px;">
-          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#eea546;">2</span>
-          <span style="font-size:28px;line-height:1.35;">It sponsors the question about it</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:14px;padding:28px 26px;background:#171e29;border-radius:16px;">
-          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#eea546;">3</span>
-          <span style="font-size:28px;line-height:1.35;">Its community bets and shares</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:14px;padding:28px 26px;background:#f6eddb;color:#1b1611;border-radius:16px;">
-          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a8481b;">4</span>
-          <span style="font-size:28px;line-height:1.35;font-weight:600;">The burn is proven on-chain</span>
+  <div class="demo" data-demo>
+    <div class="demo-flip" data-flip>
+      <div class="demo-face" data-face="a" data-info="Resolved by reading the Pyth price account">
+        <span class="demo-kicker">EXAMPLE · PRICE MARKET</span>
+        <span class="demo-q" data-question>Does SOL touch $300 by Dec 31?</span>
+        <div class="demo-sides"><div class="demo-side yes" data-side="yes" data-start="30%"><span>YES</span><b>30%</b></div><div class="demo-side no" data-side="no" data-start="70%"><span>NO</span><b>70%</b></div></div>
+        <span class="demo-status" data-status>Resolved by reading the Pyth price account</span>
+        <div class="demo-result">
+          <img data-mood src="../img/baked-approve.webp" alt="">
+          <div class="demo-words"><span class="demo-stamp">RESOLVED BY THE CHAIN · SOL TOUCHED $300</span><span class="demo-amount" data-amount></span></div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:2px solid #f7eedb;">
-        <div style="display:flex;flex-direction:column;gap:8px;padding:26px 0;">
-          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:56px;">$500</span>
-          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;">TIER 1</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px;padding:26px 0;">
-          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:56px;">$1,500</span>
-          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;">TIER 2</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px;padding:26px 0;">
-          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:56px;">$5,000</span>
-          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;">TIER 3</span>
+      <div class="demo-face demo-back" data-face="b" data-info="Resolved by reading the token's mint account">
+        <span class="demo-kicker">EXAMPLE · SPONSORED BY $TOKEN</span>
+        <span class="demo-q" data-question>Does $TOKEN burn 100M tokens by Nov 30?</span>
+        <div class="demo-sides"><div class="demo-side yes" data-side="yes" data-start="60%"><span>YES</span><b>60%</b></div><div class="demo-side no" data-side="no" data-start="40%"><span>NO</span><b>40%</b></div></div>
+        <span class="demo-status" data-status>Resolved by reading the token's mint account</span>
+        <div class="demo-result">
+          <img data-mood src="../img/baked-approve.webp" alt="">
+          <div class="demo-words"><span class="demo-stamp">RESOLVED BY THE CHAIN · THE BURN HAPPENED</span><span class="demo-amount" data-amount></span></div>
         </div>
       </div>
-      <span style="font-size:30px;line-height:1.4;color:#d9d1c1;">70% goes into the pool, 30% to the platform. 20–30 launch partners get one free question, featured for 72 hours.</span>
     </div>
-    <div style="display:flex;justify-content:center;">
-      <img src="img/baked-hips.webp" alt="Baked, hands on hips" style="width:100%;max-width:620px;display:block;">
-    </div>
+    <div class="demo-cursor" data-cursor aria-hidden="true"><svg viewBox="0 0 24 24" width="48" height="48"><path d="M5 3l14 8-6 2-2 6z" fill="#fff" stroke="#10151c" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
   </div>
 </section>
 
-<section class="slide" data-label="Fee model" style="background:#f6eddb;color:#1b1611;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
-  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#a8481b;">04 · FEE MODEL</span>
-  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">The fee is 10% of the losing side, so being right never costs you</h2>
-  <div style="flex:1;display:grid;grid-template-columns:0.8fr 1.2fr;gap:90px;align-items:center;">
-    <div style="display:flex;flex-direction:column;gap:40px;">
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:120px;line-height:1;letter-spacing:-0.04em;color:#a8481b;">3.70%</span>
-        <span style="font-size:30px;line-height:1.4;color:#3d3328;">Modelled average take on volume. Range 2.70–4.18%, depending on a question mix nobody has measured yet.</span>
-      </div>
-      <span style="font-size:30px;line-height:1.4;color:#3d3328;">No order book, no market makers. Winners split the pool pro rata.</span>
-    </div>
-    <div style="display:flex;flex-direction:column;">
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6b5e4e;margin-bottom:18px;">Winner's return per 1 USDC · 1,000 USDC pool</span>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:0 0 16px;border-bottom:2px solid #1b1611;font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.06em;color:#6b5e4e;">
-        <span>WINNING SIDE</span><span>FLAT 3% OF POT</span><span>BROT · 10% OF LOSERS</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:22px 0;border-bottom:1px solid #cdbfa6;font-family:'IBM Plex Mono',monospace;font-size:34px;">
-        <span>50%</span><span>1.940</span><span style="font-weight:600;">1.900</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:22px 0;border-bottom:1px solid #cdbfa6;font-family:'IBM Plex Mono',monospace;font-size:34px;">
-        <span>90%</span><span>1.078</span><span style="font-weight:600;">1.100</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:22px 0;border-bottom:1px solid #cdbfa6;font-family:'IBM Plex Mono',monospace;font-size:34px;">
-        <span>97%</span><span>1.000</span><span style="font-weight:600;">1.028</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:22px 20px;margin:0 -20px;background:#1b1611;color:#f6eddb;border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:34px;">
-        <span>99%</span><span style="color:#ff9a7a;">0.980</span><span style="font-weight:600;color:#eea546;">1.009</span>
-      </div>
-      <span style="margin-top:20px;font-size:26px;color:#6b5e4e;">With a flat pot fee, backing a 99% favourite loses money even when you're right.</span>
-    </div>
-  </div>
-</section>
-
-<section class="slide" data-label="Market" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
-  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">05 · MARKET</span>
-  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">A fast-growing market, still early on Solana</h2>
-  <div style="flex:1;margin-top:44px;display:grid;grid-template-columns:0.8fr 1.2fr;gap:90px;align-items:center;">
-    <div style="display:flex;flex-direction:column;gap:22px;">
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.06em;color:#a3acba;">POLYMARKET MONTHLY VOLUME</span>
-      <div style="display:flex;align-items:flex-end;gap:40px;height:320px;border-bottom:2px solid #f7eedb;">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:14px;width:170px;">
-          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:34px;">$1.88B</span>
-          <div style="width:100%;height:101px;background:#3a4558;border-radius:8px 8px 0 0;"></div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:14px;width:170px;">
-          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:34px;color:#eea546;">$4.63B</span>
-          <div style="width:100%;height:250px;background:#eea546;border-radius:8px 8px 0 0;"></div>
+<section class="slide" data-label="Market" style="background:#f6eddb;color:#1b1611;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#a8481b;">03 · MARKET</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">A fast-growing category, barely started on Solana</h2>
+  <div style="flex:1;display:grid;grid-template-columns:0.72fr 1.28fr;gap:80px;align-items:center;">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:18px;">
+      <div data-tam-wrap style="position:relative;"><div data-tam style="position:relative;width:500px;height:500px;border-radius:50%;background:#1b1611;">
+        <span style="position:absolute;left:0;right:0;top:54px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:34px;color:#f6eddb;">TAM</span>
+        <div style="position:absolute;left:105px;bottom:26px;width:290px;height:290px;border-radius:50%;background:#a8481b;">
+          <span style="position:absolute;left:0;right:0;top:40px;text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:30px;color:#fff8ea;">SAM</span>
+          <div style="position:absolute;left:85px;bottom:26px;width:120px;height:120px;border-radius:50%;background:#eea546;display:grid;place-items:center;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:26px;color:#1b1611;">SOM</span>
+          </div>
         </div>
       </div>
-      <div style="display:flex;gap:40px;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;">
-        <span style="width:170px;text-align:center;">Nov 2025</span><span style="width:170px;text-align:center;">Sep 2026</span>
       </div>
-      <span style="font-size:30px;line-height:1.4;color:#d9d1c1;">2.5× in ten months. Fees went from zero in 2025 to $93.6M in Sep 2026.</span>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px;">
-      <div style="display:grid;grid-template-columns:240px 1fr;gap:28px;align-items:center;padding:18px 30px;background:#171e29;border:2px solid #263041;border-radius:18px;">
-        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:48px;letter-spacing:-0.03em;">$21.7B</span>
-        <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.08em;color:#a3acba;">ALL PREDICTION MARKETS</span><span style="font-size:28px;color:#d9d1c1;">Volume in 30 days, dollars actually paid</span></div>
+      <div style="display:grid;grid-template-columns:260px 1fr;gap:28px;align-items:center;padding:18px 0;border-bottom:1px solid #cdbfa6;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:64px;letter-spacing:-0.03em;">$21.7B</span>
+        <div style="display:flex;flex-direction:column;gap:4px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:22px;letter-spacing:0.08em;color:#6b5e4e;">TAM · ALL PREDICTION MARKETS</span><span style="font-size:28px;color:#3d3328;">Volume in 30 days</span></div>
       </div>
-      <div style="display:grid;grid-template-columns:240px 1fr;gap:28px;align-items:center;padding:18px 30px;background:#171e29;border:2px solid #263041;border-radius:18px;">
-        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:48px;letter-spacing:-0.03em;">~$0.9B</span>
-        <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.08em;color:#a3acba;">CRYPTO QUESTIONS / MONTH</span><span style="font-size:28px;color:#d9d1c1;">~20% of Polymarket; entry point for 40% of new users</span></div>
+      <div style="display:grid;grid-template-columns:260px 1fr;gap:28px;align-items:center;padding:18px 0;border-bottom:1px solid #cdbfa6;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:64px;letter-spacing:-0.03em;color:#a8481b;">~$0.9B</span>
+        <div style="display:flex;flex-direction:column;gap:4px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:22px;letter-spacing:0.08em;color:#6b5e4e;">SAM · CRYPTO MARKETS</span><span style="font-size:28px;color:#3d3328;">Per month, our estimate</span></div>
       </div>
-      <div style="display:grid;grid-template-columns:240px 1fr;gap:28px;align-items:center;padding:18px 30px;background:#171e29;border:2px solid #263041;border-radius:18px;">
-        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:48px;letter-spacing:-0.03em;">$28.6M</span>
-        <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.08em;color:#a3acba;">KALSHI ON SOLANA</span><span style="font-size:28px;color:#d9d1c1;">In ~3 weeks after launch, from ~21k wallets</span></div>
+      <div style="display:grid;grid-template-columns:260px 1fr;gap:28px;align-items:center;padding:18px 0;border-bottom:1px solid #cdbfa6;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:64px;letter-spacing:-0.03em;">$15.4M</span>
+        <div style="display:flex;flex-direction:column;gap:4px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:22px;letter-spacing:0.08em;color:#6b5e4e;">SOM · INSIDE SOLANA</span><span style="font-size:28px;color:#3d3328;">World in Phantom, Sep 2026</span></div>
       </div>
-      <div style="display:grid;grid-template-columns:240px 1fr;gap:28px;align-items:center;padding:18px 30px;background:#f6eddb;color:#1b1611;border-radius:18px;">
-        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:48px;letter-spacing:-0.03em;color:#a8481b;">80M</span>
-        <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.08em;color:#6b5e4e;">OUR AUDIENCE</span><span style="font-size:28px;color:#3d3328;">pump.fun wallets: Solana users who already bet on narratives</span></div>
+      <div style="margin-top:14px;padding:26px 32px;background:#1b1611;color:#f6eddb;border-radius:18px;font-size:32px;line-height:1.4;"><b style="color:#eea546;">13×</b> in three months inside Solana: from <b style="color:#eea546;">$1.1M</b> a month in June to <b style="color:#eea546;">$15.4M</b> in September.</div>
+    </div>
+  </div>
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:22px;color:#6b5e4e;margin-top:18px;">Sources: DefiRate, DefiLlama · 2026 · crypto share is our own estimate</span>
+</section>
+
+<section class="slide" data-label="How we earn" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">04 · HOW WE EARN</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">We only earn from the losing side</h2>
+  <div style="flex:1;display:grid;grid-template-columns:0.7fr 1.3fr;gap:80px;align-items:center;">
+    <div style="display:flex;flex-direction:column;gap:22px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:250px;line-height:0.95;letter-spacing:-0.05em;color:#eea546;">10%</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:40px;line-height:1.2;">of the losing side.</span>
+      <span style="font-size:30px;line-height:1.4;color:#a3acba;">Winners get their money back, plus the rest.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:22px;letter-spacing:0.08em;color:#a3acba;">EXAMPLE · A 1,000 USDC POT</span>
+      <!-- The pot, to scale: 600 on the side that won, 400 on the side that lost; of the 1,000, 40 are ours (10% of the
+           losing side) and 10 go to whoever opened the market (1% of the volume). The winners get the other 950. -->
+      <div style="display:flex;height:132px;border-radius:18px;overflow:hidden;font-family:'IBM Plex Mono',monospace;">
+        <div style="flex:600;background:#1c3a30;color:#a6ffcf;padding:22px 28px;display:flex;flex-direction:column;gap:8px;"><span style="font-size:22px;letter-spacing:0.08em;">WINNING SIDE</span><span style="font-weight:600;font-size:54px;line-height:1;">600</span></div>
+        <div style="flex:350;background:#3d2422;color:#ff9a7a;padding:22px 28px;display:flex;flex-direction:column;gap:8px;"><span style="font-size:22px;letter-spacing:0.08em;">LOSING SIDE</span><span style="font-weight:600;font-size:54px;line-height:1;">400</span></div>
+        <div style="flex:10;background:#9ad0ff;"></div>
+        <div style="flex:40;background:#eea546;"></div>
+      </div>
+      <span style="align-self:flex-end;font-family:'IBM Plex Mono',monospace;font-size:24px;color:#a3acba;"><span style="color:#9ad0ff;">creator: 1% of the volume</span> &nbsp;·&nbsp; <span style="color:#eea546;">ours: 10% of the losing side ↑</span></span>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1.15fr;gap:20px;margin-top:6px;">
+        <div style="display:flex;flex-direction:column;gap:8px;padding:24px 30px;background:#171e29;border:2px solid #263041;border-radius:18px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:76px;line-height:1;color:#eea546;">40</span>
+          <span style="font-size:28px;color:#d9d1c1;">USDC to Brot</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:24px 30px;background:#171e29;border:2px solid #263041;border-radius:18px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:76px;line-height:1;color:#9ad0ff;">10</span>
+          <span style="font-size:28px;color:#d9d1c1;">USDC to the creator</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:24px 30px;background:#f6eddb;color:#1b1611;border-radius:18px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:76px;line-height:1;color:#a8481b;">950</span>
+          <span style="font-size:28px;color:#3d3328;">USDC to the winners</span>
+        </div>
       </div>
     </div>
   </div>
-  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6f7a8c;margin-top:24px;white-space:nowrap;">Sources: DefiRate, DefiLlama, The Defiant, Step Data, The Block · 2026 · crypto share is our estimate</span>
 </section>
 
-<section class="slide" data-label="Go-to-market" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
-  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">06 · GO-TO-MARKET</span>
-  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">Distribution comes from partners, not paid points</h2>
-  <div style="flex:1;display:grid;grid-template-columns:1.3fr 0.7fr;gap:60px;align-items:center;">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
-      <div style="background:#171e29;border:2px solid #263041;border-radius:20px;padding:36px 38px;display:flex;flex-direction:column;gap:16px;">
-        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:36px;">Launch partners</span>
-        <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">20–30 projects post their question to their own communities.</span>
+<section class="slide" data-label="Open a market" style="background:#f6eddb;color:#1b1611;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#a8481b;">05 · OPEN A MARKET · PERMISSIONLESS</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">Anyone opens a market with an initial seed</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.3fr 0.7fr;gap:60px;align-items:center;margin-top:22px;">
+    <div style="display:flex;flex-direction:column;gap:40px;">
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;">
+        <div style="display:flex;flex-direction:column;gap:14px;padding:28px 26px;background:#1b1611;color:#f6eddb;border-radius:16px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#eea546;">1</span>
+          <span style="font-size:28px;line-height:1.35;">Pick a target the chain can read: burn 100M tokens by Nov 30</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;padding:28px 26px;background:#1b1611;color:#f6eddb;border-radius:16px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#eea546;">2</span>
+          <span style="font-size:28px;line-height:1.35;">Put in the initial seed, from $500</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;padding:28px 26px;background:#1b1611;color:#f6eddb;border-radius:16px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#eea546;">3</span>
+          <span style="font-size:28px;line-height:1.35;">The community picks a side: YES or NO</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;padding:28px 26px;background:#a8481b;color:#fff8ea;border-radius:16px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#ffd9a0;">4</span>
+          <span style="font-size:28px;line-height:1.35;font-weight:600;"><span class="glow">The chain</span> resolves the result</span>
+        </div>
       </div>
-      <div style="background:#171e29;border:2px solid #263041;border-radius:20px;padding:36px 38px;display:flex;flex-direction:column;gap:16px;">
-        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:36px;">Referrals, day one</span>
-        <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">Referrers earn 20% of fees for 90 days, paid from the fee itself.</span>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:36px;border-top:2px solid #1b1611;padding-top:30px;">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:76px;line-height:1;letter-spacing:-0.03em;color:#a8481b;">90%</span>
+          <span style="font-size:28px;line-height:1.35;color:#3d3328;">of the seed becomes the prize pool.</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:76px;line-height:1;letter-spacing:-0.03em;color:#1b1611;">10%</span>
+          <span style="font-size:28px;line-height:1.35;color:#3d3328;">of the seed is our protocol fee.</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:76px;line-height:1;letter-spacing:-0.03em;color:#a8481b;">1%</span>
+          <span style="font-size:28px;line-height:1.35;color:#3d3328;">of the market's volume goes to whoever opened it.</span>
+        </div>
       </div>
-      <div style="background:#171e29;border:2px solid #263041;border-radius:20px;padding:36px 38px;display:flex;flex-direction:column;gap:16px;">
-        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:36px;">Ideas from X</span>
-        <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">Users suggest questions; the team reviews every one.</span>
-      </div>
-      <div style="background:#171e29;border:2px solid #263041;border-radius:20px;padding:36px 38px;display:flex;flex-direction:column;gap:16px;">
-        <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:36px;">pump.fun token</span>
-        <span style="font-size:28px;line-height:1.4;color:#d9d1c1;">A traction channel with no company rights. Creator fees fund prizes.</span>
-      </div>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:22px;color:#6b5e4e;">Projects seed markets on their own promises. Anyone else can too, inside the same on-chain rules.</span>
     </div>
-    <div style="display:flex;flex-direction:column;gap:20px;">
-      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:150px;line-height:1;letter-spacing:-0.05em;color:#ff9a7a;">−94%</span>
-      <span style="font-size:30px;line-height:1.4;color:#d9d1c1;">Myriad's volume drop, Q1 to Q2 2026, after points campaigns. Opinion fell 81%.</span>
-      <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;color:#6f7a8c;">Predictefy · 2026</span>
+    <!-- lever.js: the mascot pulls the lever, the seed climbs from $500 to $10,000 and the market climbs the site.
+         Without motion the lever rests pulled down, at the top of the range. -->
+    <div class="lever" data-lever>
+      <span class="lever-kicker">INITIAL SEED</span>
+      <span class="lever-amount" data-lever-amount>$500</span>
+      <span class="lever-rank">Spot on the site: <b data-lever-rank>#9</b></span>
+      <div class="lever-rig">
+        <div class="lever-track"><i class="lever-knob" data-lever-knob></i></div>
+        <div class="lever-meter"><div class="lever-fill" data-lever-fill></div></div>
+        <span class="lever-mark" style="top:14px;">$10K</span>
+        <span class="lever-mark" style="top:292px;">$500</span>
+      </div>
+      <span class="lever-note">Bigger seed, higher on the site.</span>
     </div>
   </div>
 </section>
 
-<section class="slide" data-label="Close" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:grid;grid-template-columns:0.7fr 1.3fr;gap:80px;align-items:center;">
+
+<section class="slide" data-label="Growth" style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">06 · GROWTH</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">Partners bring their communities. Referrals keep them coming</h2>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:34px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <!-- partners.js turns the sentence into a count and brings the logos in, once there are partners to show. -->
+      <div class="g-card g-partners" data-partners>
+        <div class="g-words">
+          <span class="g-title">Launch partners <span class="g-tag" data-partners-tag hidden>example</span></span>
+          <span class="g-body" data-partners-text><span style="white-space:nowrap;">20–30 projects</span> get one market free.</span>
+        </div>
+        <div class="g-logos" data-partners-logos></div>
+      </div>
+      <div class="g-card">
+        <span class="g-title">Referrals, day one</span>
+        <span class="g-body">20% of the fee, for 90 days.</span>
+      </div>
+      <div class="g-card">
+        <span class="g-title">Launch fees, first 3 months</span>
+        <span class="g-body">Lower fees to onboard, then the standard rate.</span>
+      </div>
+      <div class="g-card">
+        <span class="g-title">Creators earn 1%</span>
+        <span class="g-body">Every creator promotes their own market.</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px;border-top:2px solid #f7eedb;padding-top:30px;">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">NOW</span>
+        <span style="font-size:30px;line-height:1.4;color:#d9d1c1;">Devnet, test tokens.</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">LAUNCH</span>
+        <span style="font-size:30px;line-height:1.4;color:#d9d1c1;">Partner markets live.</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">MAINNET</span>
+        <span style="font-size:30px;line-height:1.4;color:#d9d1c1;">After an audit, a multisig and a cap.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-label="Team" style="background:#f6eddb;color:#1b1611;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:flex;flex-direction:column;">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#a8481b;">07 · TEAM</span>
+  <h2 style="margin:28px 0 0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:68px;line-height:1.1;letter-spacing:-0.02em;max-width:1500px;text-wrap:balance;">The bakers behind the oven</h2>
+  <!-- Names, roles, LinkedIn pages and the two lines of each person: the founder's, of 2026-10-08. The drawings and
+       the photos are his too (docs/product/team). team.js opens the curtains, then turns each drawing into the photo. -->
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:44px;align-items:start;align-content:center;">
+    <div class="member" data-member>
+      <div class="member-window">
+        <div class="member-card" data-card>
+          <img class="member-photo" src="img/team/bernardo.webp" alt="">
+          <img class="member-real" src="img/team/bernardo-real.webp" alt="Bernardo Nery">
+        </div>
+        <div class="curtain"></div>
+        <div class="rope"><i data-knob></i></div>
+      </div>
+      <a class="member-name" href="https://www.linkedin.com/in/bernardo-nery/" target="_blank" rel="noopener">Bernardo Nery <span class="member-in" aria-label="LinkedIn">in</span></a>
+      <span class="member-role">Head Baker · CEO</span>
+      <span class="member-line">Decides what goes in the oven.</span>
+      <span class="member-brands">Vega Crypto · hōl</span>
+    </div>
+    <div class="member" data-member>
+      <div class="member-window">
+        <div class="member-card" data-card>
+          <img class="member-photo" src="img/team/lucas.webp" alt="">
+          <img class="member-real" src="img/team/lucas-real.webp" alt="Lucas Galvão">
+        </div>
+        <div class="curtain"></div>
+        <div class="rope"><i data-knob></i></div>
+      </div>
+      <a class="member-name" href="https://www.linkedin.com/in/lucasgalvao/" target="_blank" rel="noopener">Lucas Galvão <span class="member-in" aria-label="LinkedIn">in</span></a>
+      <span class="member-role">Chief Oven Officer · COO and CLO</span>
+      <span class="member-line">Keeps the oven running and the recipe legal.</span>
+      <span class="member-brands">Lopes Galvão Advogados · Complian.cc</span>
+    </div>
+    <div class="member" data-member>
+      <div class="member-window">
+        <div class="member-card" data-card>
+          <img class="member-photo" src="img/team/ronaldo.webp" alt="">
+          <img class="member-real" src="img/team/ronaldo-real.webp" alt="Ronaldo Pereira">
+        </div>
+        <div class="curtain"></div>
+        <div class="rope"><i data-knob></i></div>
+      </div>
+      <a class="member-name" href="https://www.linkedin.com/in/ron-per/" target="_blank" rel="noopener">Ronaldo Pereira <span class="member-in" aria-label="LinkedIn">in</span></a>
+      <span class="member-role">Chief Toasting Officer · CTO</span>
+      <span class="member-line">Wrote those delicious recipes.</span>
+      <span class="member-brands">Young Market · RealSet</span>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-label="Close"style="background-color:#10151c;background-image:radial-gradient(#253042 1.6px, transparent 1.8px);background-size:36px 36px;color:#f7eedb;font-family:'IBM Plex Sans',sans-serif;padding:100px 110px 80px;box-sizing:border-box;display:grid;grid-template-columns:0.7fr 1.3fr;gap:80px;align-items:center;">
   <div style="display:flex;justify-content:center;">
     <div data-badge="" style="position:relative;width:100%;max-width:560px;">
       <img src="img/badge-proof.webp" alt="Proof &gt; Promises badge" style="width:100%;display:block;">
@@ -250,13 +437,12 @@
       <div data-spark="" style="position:absolute;left:72%;top:58%;width:10px;height:10px;background:#9ad0ff;opacity:0;"></div>
       <div data-spark="" style="position:absolute;left:72%;top:58%;width:12px;height:12px;background:#ff9ad5;opacity:0;"></div>
       <div data-spark="" style="position:absolute;left:72%;top:58%;width:10px;height:10px;background:#a6ffcf;opacity:0;"></div>
-      <span data-arrow="" style="position:absolute;right:-62px;top:80%;margin-top:-40px;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:64px;line-height:1;color:#eea546;opacity:0;">→</span>
     </div>
   </div>
   <div style="display:flex;flex-direction:column;gap:40px;">
     <span style="font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:0.1em;color:#eea546;">PROOF &gt; PROMISES</span>
-    <h2 style="margin:0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:76px;line-height:1.08;letter-spacing:-0.03em;text-wrap:balance;">Let's build your startup's question together</h2>
-    <p style="margin:0;font-size:34px;line-height:1.45;color:#d9d1c1;max-width:1000px;text-wrap:pretty;">Your community bets, the question spreads, and your milestone is proven on-chain. Launch partner spots are limited to <span style="white-space:nowrap;">20–30 projects.</span></p>
+    <h2 style="margin:0;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:76px;line-height:1.08;letter-spacing:-0.03em;text-wrap:balance;">Let's build your startup's market together</h2>
+    <p style="margin:0;font-size:34px;line-height:1.45;color:#d9d1c1;max-width:1000px;text-wrap:pretty;">Launch partner spots are limited to <span style="white-space:nowrap;">20–30 projects.</span></p>
     <div style="display:flex;align-items:center;gap:48px;margin-top:8px;">
       <div style="background:#f6eddb;border-radius:24px;padding:20px;display:flex;">
         <img src="img/qr-x.png" alt="QR code to x.com/brotmarkets" style="width:280px;height:280px;display:block;image-rendering:pixelated;">
@@ -273,22 +459,22 @@
 
 </main>
 
-<!-- The four poses of the mascot that hops across the slide on a change (deck-motion.js), loaded ahead of time. -->
-<div aria-hidden="true" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;left:-9999px;top:0;">
-  <img data-pose="0" src="img/baked-standing.webp" alt="">
-  <img data-pose="1" src="img/baked-hips.webp" alt="">
-  <img data-pose="2" src="img/baked-arms-crossed.webp" alt="">
-  <img data-pose="3" src="img/baked-sit-grumpy.webp" alt="">
-</div>
+<!-- The mascot's poses are loaded by sprites.js, from img/. -->
 
 <nav class="bar" data-bar aria-label="Slide controls">
   <a href="/" title="brot.markets">brot.markets</a>
   <button type="button" data-prev aria-label="Previous slide">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
-  <span data-count aria-live="polite">1 / 8</span>
+  <span data-count aria-live="polite">1 / 9</span>
   <button type="button" data-next aria-label="Next slide">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button type="button" data-lite aria-pressed="false" aria-label="Lighter motion" title="Lighter motion: only the main scenes (N)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></svg>
+  </button>
+  <button type="button" data-motion aria-pressed="true" aria-label="Mascot and motion" title="Motion on or off (M)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 12h4l2-6 4 12 2-6h4" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
   <button type="button" data-full aria-label="Full screen">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke-linecap="round" stroke-linejoin="round"/></svg>

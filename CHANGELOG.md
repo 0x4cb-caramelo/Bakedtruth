@@ -12,6 +12,13 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Added
 
+- **Um deck só no ar: o v4 passa para `/pitch`,** em 8/10/2026, a pedido do fundador. Os decks anteriores (o de oito
+  slides que estava em `/pitch`, o `/pitch2` e o `/pitch3`) saem do ar e ficam em `services/landing/history/`, com os
+  roteiros de fala, só como história. Os endereços `/pitch2`, `/pitch3` e `/pitch4` redirecionam para `/pitch/`, para
+  nenhum link já enviado quebrar. Ajustes no mesmo dia: sai o "Not to scale" do slide de mercado; "on-chain" não
+  quebra mais no hífen da capa; a janela da equipe cresce para a foto caber inteira depois da virada, e a corda some;
+  voltam as frases de cada um, e abaixo delas só as marcas (Vega Crypto e hōl; Lopes Galvão Advogados e Complian.cc;
+  Young Market e RealSet), no lugar dos cargos que eu tinha escrito.
 - **Deck v4 em `/pitch4`,** em 8/10/2026, com as respostas do fundador à revisão dos mentores. O `/pitch3` fica como
   estava. Nove slides:
   - **Capa:** "Permissionless prediction markets, settled by on-chain data."; o "Proof > Promises" sai da capa.

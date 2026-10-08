@@ -16,11 +16,8 @@ Não tem dependências. Roda com o Node que já existe no servidor (22 ou mais n
 | `lib/static.mjs` | Serve `public/`, sem deixar sair da pasta |
 | `public/` | Página inicial, privacidade, 404, fontes e imagens |
 | `public/mascot*.js` | O Baked andando pela página inicial: `mascot.js` decide onde ele fica, `mascot-body.js` desenha, `mascot-senses.js` percebe o ponteiro, a rolagem e o teclado. Não guarda nem envia nada |
-| `public/pitch/` | O deck: 8 slides do fundador (segunda versão), um palco leve (`deck.js`, `deck.css`) e a animação (`deck-motion.js`) |
-| `public/pitch2/` | A terceira versão do deck, de 6/10/2026, com as respostas à banca: nove slides, só a página. Usa o palco, as fontes e as imagens de `public/pitch/`. Proposta, a aprovar pelo fundador |
-| `public/pitch3/` | O deck de 7/10/2026: dez slides, a demo animada e uma cena do mascote por troca. Tem movimento próprio, em módulos curtos (`motion.js` decide, `scenes.js` e `exits.js` têm as cenas, `sprites.js` as imagens de `img/`). Usa o palco e as fontes de `public/pitch/`. Proposta, a aprovar pelo fundador |
-| `public/pitch4/` | O v4 do deck, de 8/10/2026, com as respostas do fundador à revisão dos mentores: nove slides; patrocínio e criadores num slide só, com a semente inicial e a alavanca (`lever.js`); a equipe vira foto e tem os links do LinkedIn (`team.js`). Cópia do `pitch3` com essas mudanças; o `pitch3` fica como estava |
-| `pitch-notes.md`, `pitch2-notes.md`, `pitch3-notes.md` | O roteiro de fala de cada deck. Não são publicados |
+| `public/pitch/` | O deck, desde 8/10/2026 o v4: nove slides, a demo animada e uma cena do mascote por troca, com os modos completo, leve (`N`) e desligado (`M`). Um palco leve (`deck.js`, `deck.css`) e o movimento em módulos curtos (`motion.js` decide; `scenes.js`, `exits.js`, `lever.js`, `team.js` têm as cenas; `sprites.js` as imagens de `img/`) |
+| `history/` | Os decks anteriores, guardados só como história, sem ser servidos: `pitch-1` (os oito slides do fundador), `pitch-2` (a resposta à banca) e `pitch-3` (o de dez slides), cada um com o seu roteiro de fala. Os endereços `/pitch2`, `/pitch3` e `/pitch4` levam ao deck atual |
 | `deploy/` | As duas unidades do systemd: o site e o túnel do Cloudflare |
 | `tests/` | Testes do armazenamento, do limitador, do servidor por HTTP e do que as páginas prometem (`pages.test.mjs`) |
 
@@ -68,6 +65,8 @@ As nove perguntas de privacidade respondidas estão em `docs/technical/TECHNICAL
 - **Navegação:** setas, espaço, clique, deslizar, `F` para tela cheia, `#3` no endereço abre o slide 3. No celular
   em pé os slides ficam empilhados.
 - **PDF:** imprimir a página (Ctrl+P) gera um slide por folha, em 1920 × 1080.
+- **Um deck só no ar.** As versões anteriores ficam em `history/`, fora do que o servidor entrega; o `README` de lá
+  diz como abrir uma delas de novo. Os endereços antigos (`/pitch2` a `/pitch9`) redirecionam para `/pitch/`.
 - **Editar um slide:** cada `<section class="slide">` de `public/pitch/index.html` é um slide, num quadro de
   1920 × 1080, com os estilos na própria marcação, como o fundador desenhou.
 
