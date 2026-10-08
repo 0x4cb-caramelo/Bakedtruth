@@ -12,6 +12,11 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Added
 
+- **As primeiras sete páginas do `docs.brot.markets`** (`docs/wiki/`), em inglês, ainda fora do ar: o que é o Brot,
+  por que a rede decide, onde estamos, o pote, a vida de um mercado, como ele se decide e os cinco tipos de mercado.
+  Cada uma abre com "In one bite", uma linha no tom do Baked. Os números saem do BP v0.0.3 e dos termos; o que os dois
+  ainda não decidiram está listado no `docs/wiki/README.md`, junto com o índice e o estado de cada página. O
+  fundador pediu em 8/10/2026 ("Depois podemos começar o docs"); a ferramenta e o endereço esperam a escolha dele.
 - **Termos de serviço e política de privacidade no ar,** em `brot.markets/terms` e `/privacy`, com link no rodapé,
   depois de o fundador revisar ("revisado e pode inserir no site, no rodapé"), em 8/10/2026. Cada página abre com o
   Baked que ele desenhou (lista de conferência nos termos, escudo com cadeado na privacidade). As páginas são geradas
@@ -178,7 +183,9 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   foro dizem "será definido antes de dinheiro real". Seis regras dos termos dependem de decisões abertas do plano, e
   o texto não resolve o risco da MP 1.394 para sócios no Brasil sem bloqueio de país
   (`docs/legal/NOTAS-DA-REVISAO.md`). Faltam o resumo comparativo dos concorrentes e a lista completa de documentos.
-- **Índice do `docs.brot.markets`** (documentação estilo wiki, pedida em 8/10/2026): não começado.
+- **`docs.brot.markets`:** sete páginas escritas em `docs/wiki/`, fora do ar. Esperam a escolha da ferramenta (framework
+  de documentação, gerador próprio ou serviço pronto), a liberação do endereço no Cloudflare e a mesma dúvida da MP
+  1.394, art. 16, sobre publicidade. As seções de projetos, taxas e equipe esperam decisões do plano.
 - **`docs/business/BP-v0.0.3-completo.md`,** o plano num arquivo só, pedido pelo fundador, fica fora do Git: é uma
   cópia das partes e envelhece na primeira edição.
 - **19 decisões abertas no BP v0.0.3** (quadro no `docs/business/BUSINESS-PLAN.md`), oito delas antes da Sprint 02:
