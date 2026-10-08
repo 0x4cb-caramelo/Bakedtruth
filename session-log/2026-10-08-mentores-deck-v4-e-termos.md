@@ -108,3 +108,29 @@ nossa empresa ... comece me mostrar um roteiro/índice". Nada foi feito.
 - `docs/business/BP-v0.0.3-completo.md`, pelo motivo da seção 1.
 - `docs/technical/Brot Markets Pitch.html` e `Brot Markets Pitch v2.html`, os originais do fundador (10 e 13 MB),
   já listados no `CHANGELOG.md` desde 5/10.
+
+## 8. Os termos e a privacidade, do rascunho ao ar (mesmo dia, à tarde)
+
+Depois do registro acima, o item dos termos foi retomado e terminou no ar.
+
+- **Rascunho (PR 25).** O fundador estreitou o pedido: "termos de serviço e privacidade, me monte estes dois
+  arquivos". Os dois saíram em inglês, em `docs/legal/`, com "the crumb", uma linha do Baked, no topo de cada seção.
+  A piada fica no resumo e nunca dentro da regra, para o humor não mudar o que a regra diz. Os 13 documentos dos
+  concorrentes entraram no Git junto.
+- **Enxuto (PR 26).** "os termos de serviço ficaram muito longos, podemos e conseguimos reduzir?" De 2.962 para
+  1.520 palavras, com as mesmas 13 seções e as mesmas regras. O que saiu foi detalhe repetido. Cortar mais tiraria
+  regra, e eu disse isso a ele.
+- **No ar (PR 28).** "revisado e pode inserir no site, no rodapé", com dois desenhos novos do Baked, um para cada
+  página. Ele aprovou sem preencher as lacunas (empresa, países, teto, lei, foro, email). **Decisão minha, contada a
+  ele:** colchete não vai ao ar, então cada lacuna virou uma frase verdadeira de "será definido antes de dinheiro
+  real". A tabela está em `docs/legal/NOTAS-DA-REVISAO.md`, seção 2.
+- **Uma fonte só.** As páginas são geradas dos arquivos de `docs/legal/` por `services/landing/scripts/build-legal.mjs`,
+  e um teste falha se um título ou uma frase do Baked divergir entre texto e página. Foi conferido de propósito,
+  mudando uma frase só no arquivo: o teste acusou.
+- **O que deu errado.** Para desfazer essa mudança de teste usei `git checkout` no arquivo, o que o voltou à versão
+  comitada e apagou também a troca das lacunas feita minutos antes. Eu tinha guardado uma cópia antes do teste e a
+  restaurei; nada se perdeu. Para não repetir: desfazer uma mudança de teste pela cópia, nunca pelo `git checkout`
+  de um arquivo com edição não comitada.
+- **Conferido no ar,** depois da troca no servidor (commit `e1a54d8`): `/terms`, `/privacy`, as duas imagens, o
+  estilo novo e o `/pitch` respondem 200; o rodapé da página inicial tem "Terms"; o formulário de sair da lista
+  funciona (testado localmente, contra um arquivo temporário, e não contra a lista real).
