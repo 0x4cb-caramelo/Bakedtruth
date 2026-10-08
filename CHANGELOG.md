@@ -44,6 +44,13 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
   `anchor build` fica só para o `pred-provable`, até a Sprint 03. O CI instala o shank-cli 0.4.9 fixo, confere o IDL
   e o cliente gerado, e roda os testes com a feature `mainnet` para provar que ela não carrega valores de treino.
 
+- **`docs.brot.markets` no ar,** fora dos buscadores, depois de o fundador escrever "pode liberar o endereço e colocar
+  online, pois vou ler online" (8/10/2026). Sem dependência nova: o mesmo serviço do site responde pelo endereço
+  `docs.`, com menu lateral (um menu suspenso no celular), uma página inicial com um cartão por página, anterior e
+  próxima, e os dois temas. As páginas são geradas de `docs/wiki/` por `services/landing/scripts/build-docs.mjs`, e um
+  teste novo falha se título, "In one bite" ou descrição divergirem. O conversor de Markdown passou a ser um arquivo
+  só para os termos e o docs; as páginas dos termos e da privacidade saem idênticas, byte a byte. O site passa a ter
+  33 testes.
 - **As primeiras sete páginas do `docs.brot.markets`** (`docs/wiki/`), em inglês, ainda fora do ar: o que é o Brot,
   por que a rede decide, onde estamos, o pote, a vida de um mercado, como ele se decide e os cinco tipos de mercado.
   Cada uma abre com "In one bite", uma linha no tom do Baked. Os números saem do BP v0.0.3 e dos termos; o que os dois
@@ -317,9 +324,9 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
   foro dizem "será definido antes de dinheiro real". Seis regras dos termos dependem de decisões abertas do plano, e
   o texto não resolve o risco da MP 1.394 para sócios no Brasil sem bloqueio de país
   (`docs/legal/NOTAS-DA-REVISAO.md`). Faltam o resumo comparativo dos concorrentes e a lista completa de documentos.
-- **`docs.brot.markets`:** sete páginas escritas em `docs/wiki/`, fora do ar. Esperam a escolha da ferramenta (framework
-  de documentação, gerador próprio ou serviço pronto), a liberação do endereço no Cloudflare e a mesma dúvida da MP
-  1.394, art. 16, sobre publicidade. As seções de projetos, taxas e equipe esperam decisões do plano.
+- **`docs.brot.markets`:** no ar com sete páginas, fora dos buscadores até o fundador ler e aprovar; abrir para eles
+  traz a mesma dúvida da MP 1.394, art. 16, sobre publicidade. As seções de projetos, taxas e equipe esperam decisões
+  do plano; segurança e perguntas frequentes estão prontas para escrever.
 - **`docs/business/BP-v0.0.3-completo.md`,** o plano num arquivo só, pedido pelo fundador, fica fora do Git: é uma
   cópia das partes e envelhece na primeira edição.
 - **19 decisões abertas no BP v0.0.3** (quadro no `docs/business/BUSINESS-PLAN.md`), oito delas antes da Sprint 02:
