@@ -25,7 +25,7 @@ atualizado a cada rodada.
 | B2 | A frase de uma linha é o subtítulo da capa | Aprovar ou trocar |
 | B3 | O contador de parceiros está ligado com sete logos de exemplo e a etiqueta "example" (ver "O modo leve", abaixo) | Os parceiros fechados, os logos e o de acordo de cada um, para trocar os exemplos |
 | B4 | "Share to take a side" e, no lugar de "Proof cards", "Creators earn 1%" | Aprovar ou trocar |
-| B5 | O slide de equipe, com os três nomes e a cortina. As figuras são poses do pãozinho | Confirmar quem ocupa qual cargo; as fotos; o de acordo do Bernardo e do Ronaldo; fatos para a frase de cada um |
+| B5 | O slide de equipe, com os três nomes e a cortina. As figuras são os retratos que o fundador desenhou de cada um como pãozinho (`docs/product/team`), no ar desde 7/10/2026 | Confirmar quem ocupa qual cargo; as fotos; o de acordo do Bernardo e do Ronaldo; fatos para a frase de cada um |
 | B6 | Os cargos de padaria, com o cargo real ao lado | Aprovar ou trocar |
 | B7 | `/pitch3` | Nada |
 

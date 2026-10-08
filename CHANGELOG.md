@@ -56,6 +56,8 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   - **Cena do mascote no slide de criadores,** pedida pelo fundador em seguida, nos três níveis do controle de
     movimento: no completo ele cai em cima do cartão do 1%, faz joinha, e dois menores espiam de trás dos outros
     cartões; no leve já está lá e só faz o joinha; no desligado fica parado. Usa a pose de joinha que já existia.
+  - **Retratos da equipe no slide de equipe:** os três desenhos que o fundador fez de cada sócio como pãozinho
+    (`docs/product/team`) entram no lugar das poses do mascote.
   - **Roteiro de fala do `/pitch3`** refeito no formato do fundador, a partir do que ele levou à banca, com as
     respostas prontas para a sabatina (`services/landing/pitch3-notes.md`).
 - **Biblioteca de poses do mascote** em `docs/product/poses`: as 17 novas do fundador e as 10 peças que já existiam,
