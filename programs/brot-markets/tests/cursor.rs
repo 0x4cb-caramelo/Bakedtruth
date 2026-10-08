@@ -1,19 +1,14 @@
 //! Purpose: the bounds-checked cursor on its own. Readers of variable layouts lean on it, so "an
 //!          error, never a panic" is proved here and not through one reader's fixed size.
-//! Version: 0.0.1
-//! Sprint: 01 (price reader proof)
+//! Version: 0.0.2
+//! Sprint: 01 (price reader proof); ported to Pinocchio in 02
 
-use anchor_lang::prelude::*;
 use brot_markets::error::BrotError;
 use brot_markets::readers::cursor::Cursor;
 
 /// True when the read failed with `ReaderBadLayout`, the only error the cursor returns.
-fn bad_layout<T>(result: Result<T>) -> bool {
-    matches!(
-        result,
-        Err(Error::AnchorError(e))
-            if e.error_code_number == u32::from(BrotError::ReaderBadLayout)
-    )
+fn bad_layout<T>(result: Result<T, BrotError>) -> bool {
+    matches!(result, Err(BrotError::ReaderBadLayout))
 }
 
 #[test]

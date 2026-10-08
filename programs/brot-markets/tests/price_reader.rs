@@ -1,18 +1,18 @@
 //! Purpose: the price reader against real Pyth accounts captured from devnet, and against the
 //!          malformed versions of them. A wrong account must be an error, never a panic.
-//! Version: 0.0.2
-//! Sprint: 01 (price reader proof)
+//! Version: 0.0.3
+//! Sprint: 01 (price reader proof); ported to Pinocchio in 02
 
-use anchor_lang::prelude::*;
 use brot_markets::error::BrotError;
 use brot_markets::readers::price_touch::{read_price_update, PriceReading, PYTH_RECEIVER_ID};
+use pinocchio::{address::address, Address};
 
 // Real devnet accounts (scripts/capture-fixtures.ts pyth), sponsored push feeds, shard 0.
 const SOL: &[u8] = include_bytes!("../../../tests/fixtures/pyth-sol-usd-devnet.bin");
 const BTC: &[u8] = include_bytes!("../../../tests/fixtures/pyth-btc-usd-devnet.bin");
 // The same SOL feed under the pre-upgrade receiver.
 const SOL_LEGACY: &[u8] = include_bytes!("../../../tests/fixtures/pyth-sol-usd-devnet-legacy.bin");
-const LEGACY_RECEIVER: Pubkey = pubkey!("rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ");
+const LEGACY_RECEIVER: Address = address!("rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ");
 
 const SOL_FEED: [u8; 32] = [
     0xef, 0x0d, 0x8b, 0x6f, 0xda, 0x2c, 0xeb, 0xa4, 0x1d, 0xa1, 0x5d, 0x40, 0x95, 0xd1, 0xda, 0x39,
@@ -24,16 +24,13 @@ const BTC_FEED: [u8; 32] = [
 ];
 
 /// A SOL read from the trusted receiver: what every test below varies one thing of.
-fn read_sol(data: &[u8]) -> Result<PriceReading> {
+fn read_sol(data: &[u8]) -> Result<PriceReading, BrotError> {
     read_price_update(&PYTH_RECEIVER_ID, data, &SOL_FEED)
 }
 
 /// The program error number, so a test can tell which check refused the account.
-fn code(result: Result<PriceReading>) -> u32 {
-    match result.expect_err("the reader accepted an account it must refuse") {
-        Error::AnchorError(e) => e.error_code_number,
-        Error::ProgramError(_) => 0,
-    }
+fn code(result: Result<PriceReading, BrotError>) -> u32 {
+    u32::from(result.expect_err("the reader accepted an account it must refuse"))
 }
 
 #[test]
