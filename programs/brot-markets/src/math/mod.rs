@@ -7,8 +7,10 @@
 //! payouts and the share round down, and the opening rounds toward Brot. Every error is
 //! `BrotError::MathOverflow` unless a function documents another. Each function will also
 //! generate the vectors the SDK's TypeScript mirror must match (X0.3, Sprints 04 and 05).
+//! `rounding` holds the multiply-divide every formula shares, so each direction is written once.
 
 pub mod fees;
 pub mod opening;
 pub mod payout;
+pub mod rounding;
 pub mod schedule;
