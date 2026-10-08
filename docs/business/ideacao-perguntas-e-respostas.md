@@ -9,7 +9,45 @@ Quando uma resposta posterior muda uma anterior, vale a posterior. A seção 1 t
 
 ## 1. Estado consolidado (vale este)
 
-### Decisões de 5 de outubro de 2026, sobre as Partes 1 e 2 do BP v0.0.2 — prevalecem sobre tudo abaixo
+### Decisões de 8 de outubro de 2026, sobre o BP v0.0.3 — prevalecem sobre tudo abaixo
+
+Dadas em sessão de trabalho com o assistente, em resposta às perguntas sobre o BP v0.0.3 e a proposta de arquitetura.
+Registro completo, com as contas, em `session-log/2026-10-08-decisoes-do-fundador-bp-v0.0.4.md` e no BP v0.0.4
+([`BUSINESS-PLAN.md`](BUSINESS-PLAN.md)).
+
+- **Moeda: tudo em SOL.** "we use only SOL in the entire platform"; "tudo em sol". Desfaz "a moeda vai ser usdc, vamos
+  abandonar a ideia de sol" (rodada 5).
+- **Abrir uma campanha custa US$ 500, pagos em SOL.** "for open a market, we will charge $500,00 (in SOL)"; "dos 500
+  dolares 90% vira pot e 10% vai para o brot". "Our team can open markets too." Os parceiros de lançamento continuam
+  abrindo de graça ("sim").
+- **Preço do SOL.** Para as contas: "pegue o preco na coingecko" (US$ 109,27 em 8/10/2026, 15:29 UTC). Para cobrar os
+  US$ 500: "coingecko ou outro, pesquise". A pesquisa propõe a Pyth, lida pelo programa.
+- **O 1% do criador:** "1% do criador sai do pot, mas quando a disputa for muito acirrada, e no caso do 1% do creator
+  fizer com que o usuario que ganhou receba menos do que colocou, entao somente nesse caso, 1% do creator sai da taxa do
+  brot." O caso acontece quando quase todo o pote está no lado vencedor.
+- **Tetos:** "sem teto, nem global nem individual".
+- **Lista de contas aprovadas:** "nao tem lista de contas aprovadas, nao lidaremos com tokenomics".
+- **Texto livre:** "site monta a frase". **Regras mínimas de abertura:** "ok". **Abertura, taxa e 1% no núcleo:** "sim".
+- **Patrocínio:** fica, e o pedido de pergunta sai ("keep it, and ok for removal").
+- **Vocabulário:** "we will adopt the therm On-Chain Campaigns. we will not use markets, or bets, or take sides or
+  something like this." Ficam a marca, "creator", "yes/no" e "pot". Quem entra: "baker".
+- **Construção:** "i want to change anchor for pinocchio"; "o ideal seria rodar tudo em bun, verifique a viabilidade e
+  seguranca disso"; "there is not ai in the scope"; app de celular só Android ("a"), com o mesmo backend; "nao se
+  preocupe com deadline".
+- **Jurídico:** "we have a lawyer in our team that kind of question is gonna be checked."
+- **O 1% em campanha anulada, em pote de um lado só e sobre o prêmio:** a primeira resposta foi "opção c", e a
+  pergunta só tinha "a" e "b". Repetida a pergunta, com a recomendação "nada nos três casos": "ok para recomendacao
+  sobre o 1% em caso de campanha anulada". Registrado como valendo para os três casos, que formavam um item só.
+- **Equipe e parceiros, sem o 1%:** "nao, a equipe nao paga nem fica com 1% porque nos ja cobramos taxa.nao, parceiros nao ficam com 1%". A equipe abre de graça e sem o 1%; os
+  parceiros de lançamento também não ficam com o 1%.
+- **As propostas restantes que travavam o começo:** "sim para todos", em resposta a seis perguntas: o 1% no caso
+  extremo sai do pote até onde der e só a diferença da taxa do Brot (P-2); os US$ 450 voltam a quem abriu na campanha
+  anulada e no pote de um lado só, e os US$ 50 seguem a causa (P-4); entrada mínima de 0,01 SOL (P-5); o preço para
+  cobrar os US$ 500 vem da Pyth, lida pelo programa, e a CoinGecko só mostra o preço no site (D-f); a proposta de
+  arquitetura 0.4 aprovada como está; o trabalho salvo no GitHub. Em seguida: "faca o plano de implementacao. todo em
+  ingles".
+
+### Decisões de 5 de outubro de 2026, sobre as Partes 1 e 2 do BP v0.0.2
 
 Registro completo, com as contas, em [`_review/correcoes-bp-v0.0.2-partes-1-e-2.md`](_review/correcoes-bp-v0.0.2-partes-1-e-2.md).
 

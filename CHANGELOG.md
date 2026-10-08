@@ -39,9 +39,70 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   correções feitas e o roteiro em português do fundador. E a análise
   (`docs/business/_review/banca-do-pitch-2026-10-06.md`): 42 pontos da banca e 8 da fala, cada um com avaliação e
   veredito, a proposta de uma terceira versão do deck com nove slides e a lista do que não foi conferido.
+- **Proposta de arquitetura do sistema, versão 0.2** (`docs/technical/SYSTEM-ARCHITECTURE-PROPOSAL.md`, em inglês,
+  como o pedido mandou). Liga cada requisito do plano de negócio a um componente e a uma sprint; escolhe a stack
+  dizendo o porquê e o que faria mudar cada recusa; desenha a camada para o Seeker (registro explícito da carteira
+  móvel no site, PWA e, se o fundador quiser, o APK da loja feito com o `solana-mobile webshell`) e uma camada de IA
+  opcional, por padrão desligada até a rede principal; encaixa quatro fases nas sprints aprovadas, com critérios de
+  saída e comandos de conferência; e lista sete decisões para o fundador, mais o pedido do parecer jurídico. A versão
+  0.1 passou por quatro revisões independentes (segurança, viabilidade, advogado do diabo e checagem de fontes), e a
+  0.2 incorpora o que elas acharam. É proposta: o plano técnico e o roteiro não mudaram.
+- **A proposta de arquitetura refeita sobre o BP v0.0.3, versão 0.3** (8/10/2026). O plano de negócio novo deixa
+  qualquer carteira abrir mercado por 0,02 SOL e dá 1% do pote a quem abriu. A proposta:
+  - põe as regras de abertura dentro do programa, numa instrução nova, sem texto livre;
+  - escreve o 1% como uma função só, que serve aos três desenhos do BP, e constrói o recomendado, em que quem acerta
+    nunca recebe menos do que pôs;
+  - deixa a taxa de 0,02 SOL exata, com o aluguel das contas descontado dela e devolvido à carteira de várias
+    assinaturas no fechamento;
+  - mostra que o teto global se ocupa com 0,2 SOL e propõe uma regra de equilíbrio entre os lados, que encarece o
+    ataque sem eliminá-lo;
+  - prepara os serviços para muitos mercados;
+  - acrescenta o cartão para o X, o painel "confira você mesmo" e a caixa de abertura.
+
+  A stack não muda. A decisão sobre a base da taxa (D1) fecha em 10% do lado perdedor, e entra a D8, a tela de
+  abertura, que o protótipo não tem. Continua sendo proposta: o plano técnico, o resumo de produto e o roteiro não
+  mudaram.
+- **Business Plan v0.0.4** (8/10/2026), a partir das decisões do fundador sobre a v0.0.3. O índice em
+  `docs/business/BUSINESS-PLAN.md` e quatro partes (`BP-v0.0.4-parte-*.md`), com a numeração da v0.0.3. O que muda:
+  - tudo em SOL;
+  - abrir uma campanha custa US$ 500 em SOL, com 90% virando prêmio no pote e 10% indo para o Brot;
+  - o 1% do criador sai do pote, e da taxa do Brot só no caso extremo;
+  - sem teto, nem global nem por campanha, e sem lista de contas aprovadas;
+  - o vocabulário passa a ser "campanhas on-chain", com baker, criador, SIM/NÃO e pote;
+  - na construção: Pinocchio, Bun, app Android, sem IA e sem prazo de hackathon.
+
+  As contas usam o preço da CoinGecko de 8/10/2026 (US$ 109,27 por SOL). O volume de equilíbrio cai com cada abertura
+  paga (110 por mês pagam o custo sozinhas). Os cenários de caixa mês a mês são os da v0.0.3 e não foram refeitos.
+  Junto vieram:
+  - a revisão de impacto (`docs/business/_review/bp-impact-review-v0.0.4.md`);
+  - a cópia da v0.0.3 que o fundador enviou, com os links mortos virados texto (`docs/business/_review/BP-v0.0.3-completo.md`);
+  - as respostas de 8/10 no registro de perguntas e respostas, inclusive a P-1 e a P-3, decididas depois: nada de
+    1% ao criador na campanha anulada, no pote de um lado só e sobre o prêmio; a equipe abre sem pagar e sem o 1%; os
+    parceiros também não ficam com o 1%; a P-2, a P-4, a P-5 e a D-f como recomendado; a proposta de arquitetura 0.4
+    aprovada.
+- **Proposta de arquitetura, versão 0.4**, sobre o BP v0.0.4:
+  - Pinocchio no lugar do Anchor;
+  - cofres em SOL nativo e pagamento direto à carteira;
+  - a abertura lê o preço SOL/USD da Pyth para cobrar os US$ 500;
+  - sem teto e sem lista;
+  - sai a camada de IA;
+  - entra o app Android, com o mesmo backend;
+  - os serviços em Bun, e o site também se passar no teste.
+- **Pesquisa "o pump.fun dos mercados on-chain"** (`knowledge-base/market/pumpfun-model-for-open-markets.md`, em
+  inglês, a pedido do usuário em 7/10/2026), com as sete notas de fonte em `knowledge-base/market/pumpfun-model-notes/`.
+  Cobre a receita, as taxas, o token e o valor de mercado do pump.fun; a decisão judicial de 31/8/2026 contra ele; o
+  tamanho do setor e os comparáveis; 35 tentativas de criação aberta de mercados; o catálogo do que um programa
+  consegue conferir sozinho na rede, com o teto de pote pelo custo de forçar o resultado; o desenho da caixa de
+  criação que completa a frase; a conta do criador; e o escopo de cinco dias para o Colosseum. Abrir a criação ao
+  público desfaz quatro decisões aprovadas e fica com o fundador. A cota de busca acabou no meio da pesquisa, então
+  alguns itens se apoiam em fonte secundária, e a seção de lacunas os lista. Nenhum outro documento foi alterado.
 
 ### Changed
 
+- **Vocabulário, a pedido do usuário em 7/10/2026:** o produto passa a ser descrito só como "mercados", com
+  "posição" e "participante". A proposta de arquitetura já segue a regra. Os documentos anteriores e o site no ar
+  ainda não foram revistos (a página inicial usa as palavras antigas no título, na descrição e no cabeçalho), e os
+  nomes no código são a decisão D6 da proposta.
 - **`/pitch2` enxuto, a pedido do fundador em 6/10/2026:** cerca de 39% menos texto na tela (de 789 para 482
   palavras), sem a frase das faixas no slide de patrocínio, e o slide de receita passa a dizer uma taxa simples de
   **3,5% de cada pote**. O ponto de equilíbrio do slide de mercado foi recalculado pela conta do plano (cerca de 221
@@ -64,6 +125,10 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Em aberto
 
+- **Autoria no Colosseum, prazo 12/10/2026:** o plano diz que a equipe se apresenta como uma pessoa, mas o git mostra
+  quatro autores desde 14/9/2026, e o regulamento pede todos os membros e verifica quem fez o trabalho. O código vindo
+  do `pred-provable` também precisa ser declarado. Detalhe na seção do hackathon de
+  `knowledge-base/market/pumpfun-model-for-open-markets.md`.
 - **O endereço `brot.markets` está no ar desde 5/10/2026**, pelo túnel próprio do projeto, com HTTPS obrigatório. O
   que foi criado e como desfazer: `knowledge-base/tecnologia/servidor-e-dominio.md`, seção 2.1. Falta conferir se o
   país do visitante chega ao servidor e o que o Cloudflare registra dos visitantes.
@@ -125,6 +190,17 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 - **Não verificado:** transações no app (conectar, comprar, vender, resolver) e o shader WebGPU da direção I.
 - **`CODEMAP.md`:** o gerador aponta arquivos acima de 200 linhas e sem cabeçalho `Purpose:`, quase todos do
   programa e do app antigos; os números atuais estão no topo do próprio mapa.
+- **O que o BP v0.0.4 deixa para o fundador:**
+  - o teto da indicação em SOL;
+  - a tesouraria, com tudo em SOL;
+  - Cloak e SODAX com SOL;
+  - as decisões da v0.0.3 que continuam abertas.
+- **Documentos aprovados que contradizem o BP v0.0.4:** o resumo de produto, o plano técnico, o roteiro e o design
+  ainda falam em USDC, teto, Anchor e abertura pela equipe. O deck e o site no ar dizem "0.02 SOL", "a cap" e
+  "markets", e o `CLAUDE.md` descreve o produto em USDC. A revisão de impacto lista o que muda em cada um.
+- **Achados de segurança da revisão da proposta**, que valem para o servidor de hoje: o token do túnel do Cloudflare
+  fica no ambiente de um processo que roda como o mesmo usuário do site provisório, então qualquer serviço desse
+  usuário consegue lê-lo. A proposta recomenda um usuário por serviço e segredos carregados como credencial (seção 2.9).
 
 ---
 
