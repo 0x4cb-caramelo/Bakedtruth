@@ -2,4 +2,5 @@
 //! Version: 0.0.2
 //! Sprint: 02 (pot core on Pinocchio)
 
+mod entry_account;
 pub mod join_campaign;
