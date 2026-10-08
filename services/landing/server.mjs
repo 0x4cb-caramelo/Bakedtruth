@@ -1,7 +1,7 @@
 /**
- * Purpose: HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API), bound to localhost behind the
- *          project's Cloudflare tunnel.
- * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-05
+ * Purpose: HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API) and of docs.brot.markets (the
+ *          docs. host, from docs-site/), bound to localhost behind the project's Cloudflare tunnel.
+ * Version: 0.2.0 · Sprint: out of band (landing page), 2026-10-05; docs host 2026-10-08
  *
  * Run: `node services/landing/server.mjs`. No dependencies. Configuration comes from the environment
  * (see .env.example): PORT, HOST, SITE_ORIGIN, LEADS_FILE.
@@ -30,7 +30,10 @@ function isPitch(path) {
   return /^\/pitch\d*(\/|$)/.test(path);
 }
 
-function setSecurityHeaders(res, path) {
+// What the docs host borrows from the site's folder: the theme script, the styles, the fonts and the images.
+const SHARED = /^\/(img|fonts)\/|^\/(styles\.css|app\.js)$/;
+
+function setSecurityHeaders(res, path, docs) {
   res.setHeader("Content-Security-Policy", isPitch(path) ? CSP_PITCH : CSP_SITE);
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "no-referrer");
@@ -38,6 +41,8 @@ function setSecurityHeaders(res, path) {
   res.setHeader("Strict-Transport-Security", "max-age=31536000");
   // The deck is reachable by link only until the founder approves each row of the redaction table in PITCH.md.
   if (isPitch(path)) res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+  // The docs stay out of search engines until the founder approves them for indexing (docs/wiki/README.md).
+  if (docs) res.setHeader("X-Robots-Tag", "noindex, nofollow");
 }
 
 function sendNotFound(root, req, res) {
@@ -50,8 +55,20 @@ function sendNotFound(root, req, res) {
 }
 
 /** Builds the request handler. Tests call this with a temporary folder and their own store. */
-export function createApp({ root, store, limiter, allowedOrigins, siteOrigin, log = () => {} }) {
+export function createApp({ root, docsRoot, store, limiter, allowedOrigins, siteOrigin, log = () => {} }) {
   const canonical = siteOrigin ? new URL(siteOrigin) : null;
+  const docsHost = canonical && docsRoot ? `docs.${canonical.host}` : null;
+  // The docs host answers pages from docsRoot and only the shared files from root; never the waitlist API.
+  function serveDocs(req, res, path) {
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      res.writeHead(405, { Allow: "GET, HEAD" }).end();
+      return;
+    }
+    if (path !== "/404.html" && serveStatic(docsRoot, req, res, path)) return;
+    if (SHARED.test(path) && serveStatic(root, req, res, path)) return;
+    sendNotFound(docsRoot, req, res);
+  }
+
   return async function app(req, res) {
     let path;
     let search;
@@ -61,7 +78,8 @@ export function createApp({ root, store, limiter, allowedOrigins, siteOrigin, lo
       res.writeHead(400).end();
       return;
     }
-    setSecurityHeaders(res, path);
+    const onDocs = docsHost !== null && req.headers.host === docsHost;
+    setSecurityHeaders(res, path, onDocs);
     // One address for the site: "www" goes to the bare domain. The target is ours; only path and query are kept.
     if (canonical && req.headers.host === `www.${canonical.host}`) {
       res.writeHead(301, { Location: `${canonical.origin}${path}${search}` }).end();
@@ -71,6 +89,10 @@ export function createApp({ root, store, limiter, allowedOrigins, siteOrigin, lo
       if (path === "/healthz") {
         res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
         res.end("ok");
+        return;
+      }
+      if (onDocs) {
+        serveDocs(req, res, path);
         return;
       }
       if (await handleLeadApi(req, res, path, { store, limiter, allowedOrigins, log })) return;
@@ -112,6 +134,7 @@ function start() {
 
   const app = createApp({
     root: join(HERE, "public"),
+    docsRoot: join(HERE, "docs-site"),
     store,
     limiter: createRateLimiter({ limit: 5, windowMs: 60_000 }),
     allowedOrigins: [siteOrigin, `http://${host}:${port}`, `http://localhost:${port}`],

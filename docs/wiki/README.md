@@ -5,9 +5,14 @@ O texto da documentação pública do Brot Markets, que vai morar em `docs.brot.
 justamente mostrarmos que temos a coisa dominada. Ali é que vamos trazer bastante coisa do que somos, estilo um
 whitepaper, porém soft, explicando a nossa plataforma, seus funcionamentos e etc".
 
-**Nada daqui está no ar.** As páginas são Markdown simples, com `title` e `description` no topo, e servem para
-qualquer das três formas de montar o site que estão em discussão (framework de documentação, gerador próprio como o dos
-termos, ou serviço pronto). A escolha e a criação do endereço no Cloudflare dependem do fundador.
+**No ar em `docs.brot.markets` desde 8/10/2026,** fora dos buscadores, depois de o fundador escrever "pode liberar o
+endereço e colocar online, pois vou ler online". As páginas são geradas destes arquivos por
+`services/landing/scripts/build-docs.mjs`, que também guarda o menu, e servidas pelo mesmo serviço do site. Um teste
+(`services/landing/tests/docs.test.mjs`) falha se um título, a linha "In one bite" ou a descrição divergirem entre
+o arquivo e a página. Este README não vai ao ar.
+
+**Para mudar uma página:** edite o arquivo aqui, rode o script e publique as duas coisas juntas. **Página nova:**
+crie o arquivo com `title` e `description` no topo e uma linha "In one bite", e ponha o caminho no menu do script.
 
 ## Como as páginas são escritas
 
@@ -58,9 +63,12 @@ Igual aos termos, que já estão no ar com as mesmas frases. Se a decisão for o
 5. **"Markets where the opener may control the result carry a warning"**: a página não diz em quais tipos, porque a
    lista de contas aceitas e o teto por mercado ainda são proposta (decisões 7 e 18).
 
-## Antes de publicar
+## Antes de abrir para os buscadores
 
-- **A escolha da ferramenta e o endereço** `docs.brot.markets` no Cloudflare, com liberação por escrito do fundador.
+Hoje o servidor manda `X-Robots-Tag: noindex, nofollow` em tudo de `docs.brot.markets`. Para abrir, tire essa linha
+de `services/landing/server.mjs` e ajuste o teste.
+
+- **A leitura e a aprovação do fundador.**
 - **A Medida Provisória 1.394, art. 16,** veda publicidade de aposta de quota fixa "direcionada ao público
   brasileiro". Um site de documentação indexado é mais exposto que o deck por link. O inglês reduz a dúvida e não a
   elimina; é a mesma pergunta jurídica dos termos (BP v0.0.3, Parte 4, §6).

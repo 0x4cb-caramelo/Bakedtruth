@@ -1,0 +1,166 @@
+/* Purpose: the layout of docs.brot.markets on top of the site's styles.css (tokens, header, footer, .doc and .legal):
+   side menu, a drop-down menu on phones, the home page cards and the previous/next links.
+   Sprint: out of band (landing page), 2026-10-08. Raise "?v=" in scripts/docs-layout.mjs when this file changes. */
+
+.docs-tag {
+  margin-left: 4px;
+  padding: 3px 7px 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  color: var(--muted);
+  font: 700 15px/1 var(--display);
+  font-style: normal;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+.docs-grid {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 48px;
+  align-items: start;
+}
+.docs-nav {
+  position: sticky;
+  top: 62px;
+  max-height: calc(100vh - 62px);
+  overflow-y: auto;
+  padding: 56px 0 24px;
+}
+.docs-nav-h {
+  margin-top: 22px;
+  color: var(--dim);
+  font: 700 14px/1 var(--display);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+.docs-nav-h:first-child,
+.docs-menu .docs-nav-h:first-of-type {
+  margin-top: 0;
+}
+.docs-nav ul,
+.docs-menu ul {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.docs-nav li a,
+.docs-menu li a {
+  display: block;
+  padding: 5px 10px;
+  border-left: 2px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+.docs-nav li a:hover,
+.docs-menu li a:hover {
+  border-left-color: var(--line-strong);
+  color: var(--text);
+  text-decoration: none;
+}
+.docs-nav a[aria-current="page"],
+.docs-menu a[aria-current="page"] {
+  border-left-color: var(--crust);
+  color: var(--text);
+  font-weight: 600;
+}
+.docs-menu {
+  display: none;
+}
+.docs-page {
+  max-width: 760px;
+  min-width: 0;
+}
+.docs-page h1 {
+  margin-bottom: 4px;
+}
+.docs-page h2 {
+  scroll-margin-top: 80px;
+}
+.docs-page code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--raised);
+  color: var(--text);
+  font-size: 12px;
+}
+.docs-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+.docs-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 13px;
+}
+.docs-card:hover {
+  border-color: var(--crust);
+  color: var(--muted);
+  text-decoration: none;
+}
+.docs-card strong {
+  font: 700 19px/1.05 var(--display);
+  letter-spacing: 0.2px;
+}
+.docs-steps {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 44px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.docs-step {
+  display: grid;
+  gap: 3px;
+  max-width: 48%;
+  font-weight: 600;
+}
+.docs-step:last-child {
+  margin-left: auto;
+  text-align: right;
+}
+.docs-step small {
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+@media (max-width: 860px) {
+  .docs-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .docs-nav {
+    display: none;
+  }
+  .docs-menu {
+    display: block;
+    margin-top: 18px;
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    background: var(--panel);
+  }
+  .docs-menu summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .docs-menu[open] summary {
+    margin-bottom: 12px;
+  }
+  .docs-page {
+    padding-top: 28px;
+  }
+  .docs-tag {
+    font-size: 13px;
+  }
+}
