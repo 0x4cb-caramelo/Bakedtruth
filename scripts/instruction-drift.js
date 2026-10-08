@@ -21,6 +21,9 @@ const ALLOWED_COMMANDS = new Set([
   'codex', // gstack's external cross-review command, cited by multi-ai-review
   'investors', // product route the pitch skill may create, not a Claude command
   'health', // HTTP path of Cloak's API, cited by upstream's PRIVACY_PLAN.md; not a Claude command
+  'abrir', // the site's route for opening a campaign (docs/SPRINTS.md, Sprint 19); not a Claude command
+  'rpc', // the site's JSON-RPC relay path, served by brot-rpc (Technical Plan §3.5); not a Claude command
+  'pitch2', // the provisional site's second deck, served by services/landing; not a Claude command
 ]);
 const ALLOWED_AGENT_WORDS = new Set([
   'multi-agent', // ordinary word ("multi-agent review"), not an agent name
