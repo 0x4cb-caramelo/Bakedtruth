@@ -9,12 +9,16 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-brot_markets = "6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN"
 pred_provable = "F9KfegHTBzeHmkhUxgvpTzYD8xvwRmV3sue2BVXiKoE2"
 
 [programs.devnet]
-brot_markets = "6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN"
 pred_provable = "F9KfegHTBzeHmkhUxgvpTzYD8xvwRmV3sue2BVXiKoE2"
+
+# Anchor builds only the frozen pred-provable, until Sprint 03 removes it with the Anchor CLI.
+# programs/brot-markets is a Pinocchio program since Sprint 02: `cargo build-sbf` builds it and
+# shank-cli writes its IDL (`bun run build:program`).
+[workspace]
+exclude = ["programs/brot-markets"]
 
 [provider]
 cluster = "localnet"
@@ -25,5 +29,5 @@ wallet = "~/.config/solana/id.json"
 # `bun test` takes directory filters; a `tests/**/*.ts` glob would be expanded by sh
 # without globstar and miss files directly under tests/.
 test = "bun test tests/"
-test-rust = "cargo test -p pred-provable --features no-entrypoint && cargo test -p brot-markets --features no-entrypoint"
+test-rust = "bun run test:rust"
 
