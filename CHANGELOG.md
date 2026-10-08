@@ -12,6 +12,13 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Added
 
+- **Termos de serviço e política de privacidade no ar,** em `brot.markets/terms` e `/privacy`, com link no rodapé,
+  depois de o fundador revisar ("revisado e pode inserir no site, no rodapé"), em 8/10/2026. Cada página abre com o
+  Baked que ele desenhou (lista de conferência nos termos, escudo com cadeado na privacidade). As páginas são geradas
+  dos arquivos de `docs/legal/`, e um teste novo falha se um título ou uma frase do Baked divergir entre os dois. As
+  lacunas que ele não preencheu foram ao ar como frases de "ainda não definido"; a lista está em
+  `docs/legal/NOTAS-DA-REVISAO.md`. A política nova substitui a antiga, que cobria só a lista de espera, e mantém o
+  formulário de sair da lista. O site passa a ter 28 testes.
 - **Termos de serviço e política de privacidade, primeiro rascunho** (`docs/legal/`), pedidos pelo fundador em
   8/10/2026: curtos, sem juridiquês e no tom do pãozinho. Cada seção abre com "the crumb", uma linha do Baked que
   resume a regra; a piada fica no resumo, nunca dentro da regra. Os termos descrevem o produto do BP v0.0.3 e do deck
@@ -167,11 +174,10 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 - **Da revisão dos mentores ficam com o fundador:** R3 (que métricas entram no lançamento; o slide de proteção contra
   manipulação não entrou), R4 (o valor da taxa reduzida dos três primeiros meses) e R6 (o prazo de entrega). Detalhe
   em `docs/business/_review/revisao-do-pitch-2026-10-08.md`, seção 6.
-- **Termos de serviço e política de privacidade, em rascunho à espera de revisão jurídica** (`docs/legal/`). Nada
-  foi publicado; `/privacy` continua valendo. Estão em branco a empresa, os países bloqueados, o teto de
-  responsabilidade, a lei, o foro e um email de contato. Seis regras dos termos dependem de decisões do plano ainda
-  abertas, e o texto não resolve o risco da MP 1.394 para sócios no Brasil sem bloqueio de país. A lista está em
-  `docs/legal/NOTAS-DA-REVISAO.md`. Faltam o resumo comparativo dos concorrentes e a lista completa de documentos.
+- **Termos e privacidade no ar com lacunas declaradas:** empresa, países bloqueados, teto de responsabilidade, lei e
+  foro dizem "será definido antes de dinheiro real". Seis regras dos termos dependem de decisões abertas do plano, e
+  o texto não resolve o risco da MP 1.394 para sócios no Brasil sem bloqueio de país
+  (`docs/legal/NOTAS-DA-REVISAO.md`). Faltam o resumo comparativo dos concorrentes e a lista completa de documentos.
 - **Índice do `docs.brot.markets`** (documentação estilo wiki, pedida em 8/10/2026): não começado.
 - **`docs/business/BP-v0.0.3-completo.md`,** o plano num arquivo só, pedido pelo fundador, fica fora do Git: é uma
   cópia das partes e envelhece na primeira edição.

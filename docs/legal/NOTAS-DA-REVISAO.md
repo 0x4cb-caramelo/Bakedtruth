@@ -1,8 +1,9 @@
 # Notas para a revisão dos termos e da privacidade
 
-Termos no rascunho 0.2 (enxugados a pedido do fundador: "os termos de serviço ficaram muito longos"), privacidade no 0.1, de 8/10/2026. Este arquivo não vai ao ar: é o que o revisor precisa saber sobre os dois textos ao
-lado, `TERMS-OF-SERVICE.md` e `PRIVACY-POLICY.md`. Nada foi publicado. A página `brot.markets/privacy` continua
-sendo a que vale, e cobre só a lista de espera.
+**No ar desde 8/10/2026,** em `brot.markets/terms` e `brot.markets/privacy`, depois de o fundador escrever "revisado e
+pode inserir no site, no rodapé". As páginas são geradas destes dois arquivos; um teste do site
+(`services/landing/tests/pages.test.mjs`) falha se um título ou uma frase do Baked divergir entre o arquivo e a
+página. Este arquivo de notas não vai ao ar.
 
 **Pedido do fundador, 8/10/2026:** "crie um nosso, com o que você julgar ser um contrato bom pra gente, porém
 minimalista, e sem juridiquês, direto ao ponto, e inclusive trazendo um pouco de brincadeira do nosso tom do
@@ -27,15 +28,22 @@ Não é parecer jurídico. É um rascunho para um advogado revisar.
   World (`world/terms-of-service.md`) é o mais próximo de nós: protocolo na Solana, só carteira, mercados abertos
   por terceiros.
 
-## 2. O que está em branco, para o revisor preencher
+## 2. As lacunas, e o que foi ao ar no lugar delas
 
-| Marca no texto | Onde | O que falta |
+O fundador aprovou sem preencher as lacunas. Colchete não vai ao ar, então cada uma virou uma frase verdadeira de
+"ainda não definido". Trocar qualquer uma é editar o arquivo e regenerar a página.
+
+| Lacuna | O que diz agora | Onde |
 |---|---|---|
-| `[COMPANY NAME, COUNTRY]` | Termos §1; Privacidade §1 | A empresa ainda não existe (BP v0.0.3, Parte 4, §5.2) |
-| `[RESTRICTED LIST]` | Termos §2 | Os países bloqueados. Ver a seção 4 abaixo |
-| `[LIMIT]` | Termos §11 | O teto de responsabilidade. O World usa 10 mil dólares; a sugestão no texto é o que a pessoa pagou de taxa em 12 meses |
-| `[GOVERNING LAW]` e `[FORUM]` | Termos §13 | Lei e foro. O World usa Ilhas Cayman e arbitragem; a Polymarket, arbitragem com renúncia a ação coletiva |
-| `[CONTACT EMAIL]` | Termos §13; Privacidade §1 | Um email do domínio, que o site ainda não tem |
+| Empresa | "A company is being set up; when it exists, these terms will name it" | Termos §1; Privacidade §1 |
+| Países bloqueados | "While everything runs on devnet with test tokens, we block no country; the list will be published here before any real money" | Termos §2 |
+| Detalhes da parte de quem abre | "The fine print of the opener's share, and whether the opening fee comes back when we caused an annulment, will be written here before the first market opens" | Termos §7 |
+| Teto de responsabilidade | "capped at an amount we'll state here before any real money is in play" | Termos §11 |
+| Lei e foro | "will be set when the company exists, before any real money" | Termos §13 |
+| Email de contato | Saiu; o contato é só o X | Termos §13; Privacidade §1 |
+
+O nome dos três sócios está nas duas páginas, que são públicas e indexáveis, diferente do deck, que é só por link. O
+acordo escrito do Bernardo e do Ronaldo sobre nome continua sem registro.
 
 ## 3. Regras que os termos afirmam e o plano ainda não decidiu
 

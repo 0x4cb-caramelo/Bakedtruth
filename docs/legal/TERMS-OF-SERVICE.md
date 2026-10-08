@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Brot Markets** · Draft 0.2 · 8 October 2026 · Not in force yet: waiting for legal review.
+**Brot Markets** · Last updated: 8 October 2026
 
 We wrote these to be read. Each section opens with **the crumb**, a one-line summary from Baked, our grumpy bread
 roll. The crumb helps you read; the text under it is the rule.
@@ -18,8 +18,8 @@ roll. The crumb helps you read; the text under it is the rule.
 
 > **The crumb:** a few bakers, one oven, no company yet.
 
-Brot Markets is run by Bernardo Nery, Lucas Galvão and Ronaldo Pereira until its company, **[COMPANY NAME,
-COUNTRY]**, exists and takes our place. You accept these terms when you connect a wallet or sign a transaction
+Brot Markets is run by Bernardo Nery, Lucas Galvão and Ronaldo Pereira. A company is being set up; when it exists,
+these terms will name it, and it takes our place. You accept these terms when you connect a wallet or sign a transaction
 through brot.markets. If you don't agree, don't connect.
 
 ## 2. Who can use it
@@ -27,7 +27,8 @@ through brot.markets. If you don't agree, don't connect.
 > **The crumb:** adults only, and only where it's legal for you.
 
 You must be 18 or older (or the age of majority where you live, if higher), not on a sanctions list, and not in a
-place on our restricted list: **[RESTRICTED LIST: to be set by the legal review]**. Checking that prediction markets
+place where we block access. While everything runs on devnet with test tokens, we block no country; the list will be
+published here before any real money. Checking that prediction markets
 are legal where you are is your job. Don't use a VPN to get around a block.
 
 ## 3. Your wallet
@@ -82,10 +83,9 @@ market gets thrown out, not sold.
 > **The crumb:** anyone can open one. You bring the dough, we bring the oven.
 
 You pick the kind, the account to read, the target and the date, and put in a **seed of at least 500 USDC**: 90%
-becomes prize money for whoever wins, 10% is our opening fee. You earn **1% of the market's volume**. **[TO CONFIRM:
-volume or pot, and a cap so winners never get back less than they put in.]** If the market ends one-sided or is
-annulled, the prize comes back to you and you earn nothing. **[TO CONFIRM: whether the opening fee comes back when we
-caused the annulment, and whether our team keeps the 1% on markets it opens.]**
+becomes prize money for whoever wins, 10% is our opening fee. You earn **1% of the market's volume**. If the market ends one-sided or is annulled, the prize comes back to you and
+you earn nothing. The fine print of the opener's share, and whether the opening fee comes back when we caused an
+annulment, will be written here before the first market opens.
 
 The site writes the question from what you picked, and the program refuses accounts that don't fit.
 
@@ -130,8 +130,8 @@ or close, in which case we'll annul open markets and refund if the program lets 
 > **The crumb:** we'll own our mistakes. We can't insure the blockchain.
 
 Brot Markets is provided "as is". We're not liable for losses caused by your wallet, your choices, Solana, Pyth,
-Circle or anything else we don't control. Where the law allows, our total liability is limited to **[LIMIT: to be set
-by the legal review]**. Nothing here limits what your local law won't let us limit. Nothing we, the site or Baked say
+Circle or anything else we don't control. Where the law allows, our total liability will be capped at an amount we'll state
+here before any real money is in play. Nothing here limits what your local law won't let us limit. Nothing we, the site or Baked say
 is financial, legal or tax advice. Especially Baked.
 
 ## 12. Changes
@@ -144,8 +144,9 @@ We'll update the date above and post on X when these terms change. An open marke
 
 > **The crumb:** talk to us first. Most problems fit in a direct message.
 
-Write to [@brotmarkets](https://x.com/brotmarkets) on X or **[CONTACT EMAIL]**. For a legal dispute, give us 30 days
-to fix it first; after that, **[GOVERNING LAW]** applies and disputes go to **[FORUM]**. If one part of these terms is
+Write to [@brotmarkets](https://x.com/brotmarkets) on X. For a legal dispute, give us 30 days to fix it first. The
+law that governs these terms and the place for disputes will be set when the company exists, before any real
+money. If one part of these terms is
 invalid, the rest stands. These terms and the [Privacy Policy](PRIVACY-POLICY.md) are the whole agreement.
 
 ---

@@ -632,6 +632,83 @@ footer nav {
 .doc .form-msg.ok {
   color: var(--yes-fg);
 }
+.doc-hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.doc-hero img {
+  flex: none;
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+}
+.doc .meta {
+  margin-top: 8px;
+  font-size: 13px;
+}
+.legal h2 {
+  margin-top: 38px;
+}
+.legal h3 {
+  margin-top: 22px;
+  font: 700 17px/1.1 var(--display);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.legal ol {
+  margin: 0;
+  padding-left: 20px;
+}
+.legal .crumb {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-left: 3px solid var(--crust);
+  border-radius: var(--r-sm);
+  background: var(--panel);
+  color: var(--text);
+}
+.legal .crumb strong {
+  color: var(--crust);
+}
+.legal .table {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+.legal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.legal th,
+.legal td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.legal th {
+  color: var(--text);
+  font-weight: 600;
+}
+.legal td {
+  color: var(--muted);
+}
+.legal hr {
+  margin: 36px 0 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 560px) {
+  .doc-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .doc-hero img {
+    width: 112px;
+    height: 112px;
+  }
+}
 .lost {
   display: grid;
   justify-items: start;

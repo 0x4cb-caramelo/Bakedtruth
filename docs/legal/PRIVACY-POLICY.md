@@ -1,7 +1,6 @@
 # Privacy Policy
 
-**Brot Markets** · Draft 0.1 · 8 October 2026 · Not in force yet: waiting for legal review. Until then, the page at
-brot.markets/privacy, which covers the waitlist, is the one that applies.
+**Brot Markets** · Last updated: 8 October 2026
 
 Most privacy policies are long because the company collects a lot. Ours is short because we don't. We need almost
 nothing about you to run a market, so we keep almost nothing.
@@ -19,9 +18,8 @@ nothing about you to run a market, so we keep almost nothing.
 
 ## 1. Who is responsible
 
-Brot Markets is run by its founders, Bernardo Nery, Lucas Galvão and Ronaldo Pereira, until the company exists. Then
-it will be **[COMPANY NAME, COUNTRY]**, and this page will say so. Contact: [@brotmarkets](https://x.com/brotmarkets)
-on X, or **[CONTACT EMAIL]**.
+Brot Markets is run by its founders, Bernardo Nery, Lucas Galvão and Ronaldo Pereira. A company is being set up, and
+this page will name it when it exists. Contact: [@brotmarkets](https://x.com/brotmarkets) on X.
 
 ## 2. What we collect, and why
 
