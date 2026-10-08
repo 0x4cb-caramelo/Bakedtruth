@@ -57,9 +57,10 @@ O que o assistente pesquisou e propôs, a pedido:
 
 ## Consequences
 
-- **BP v0.0.4** em `docs/business/`: o índice em `BUSINESS-PLAN.md` e quatro partes. A v0.0.3 ficou guardada em
-  `docs/business/_review/BP-v0.0.3-completo.md`, cópia do arquivo enviado, só com os links mortos virados texto. A revisão de impacto está em
-  `docs/business/_review/bp-impact-review-v0.0.4.md`.
+- **BP v0.0.4** em `docs/business/`: o índice em `BUSINESS-PLAN.md` e quatro partes. A v0.0.3 fica nas quatro
+  partes `docs/business/BP-v0.0.3-parte-*.md`, que entraram na `main` pelo pull request #20; o arquivo único que o
+  fundador enviou é uma cópia montada delas e ficou fora do git, como a sessão da `main` tinha decidido. A revisão de
+  impacto está em `docs/business/_review/bp-impact-review-v0.0.4.md`.
 - **A proposta de arquitetura passa à versão 0.4**: Pinocchio, SOL nativo, abertura com preço da Pyth, sem teto, sem
   lista, sem IA, app Android, Bun.
 - **Os cenários de caixa mês a mês não foram refeitos,** porque o modelo da v0.0.3 não está no repositório. O plano

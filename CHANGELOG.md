@@ -12,6 +12,50 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Added
 
+- **Termos de serviço e política de privacidade, primeiro rascunho** (`docs/legal/`), pedidos pelo fundador em
+  8/10/2026: curtos, sem juridiquês e no tom do pãozinho. Cada seção abre com "the crumb", uma linha do Baked que
+  resume a regra; a piada fica no resumo, nunca dentro da regra. Os termos descrevem o produto do BP v0.0.3 e do deck
+  v4, mostram numa tabela o que a equipe pode e não pode fazer, e prometem que um mercado aberto mantém as regras com
+  que abriu. A política diz o que o site guarda e o que não guarda, item por item. Um terceiro arquivo, em português,
+  traz as notas para a revisão. Junto entram, para consulta interna, os 13 documentos da Polymarket, Kalshi, World e
+  Robinhood em que o rascunho se apoiou (`knowledge-base/legal/concorrentes/`), cada um com fonte e data.
+  No mesmo dia o fundador achou os termos longos ("ficaram muito longos, podemos e conseguimos reduzir?"): a versão
+  0.2 cai de 2.962 para 1.520 palavras, com as mesmas 13 seções e as mesmas regras, perto do tamanho da política.
+- **Um deck só no ar: o v4 passa para `/pitch`,** em 8/10/2026, a pedido do fundador. Os decks anteriores (o de oito
+  slides que estava em `/pitch`, o `/pitch2` e o `/pitch3`) saem do ar e ficam em `services/landing/history/`, com os
+  roteiros de fala, só como história. Os endereços `/pitch2`, `/pitch3` e `/pitch4` redirecionam para `/pitch/`, para
+  nenhum link já enviado quebrar. Ajustes no mesmo dia: sai o "Not to scale" do slide de mercado; "on-chain" não
+  quebra mais no hífen da capa; a janela da equipe cresce para a foto caber inteira depois da virada, e a corda some;
+  voltam as frases de cada um, e abaixo delas só as marcas (Vega Crypto e hōl; Lopes Galvão Advogados e Complian.cc;
+  Young Market e RealSet), no lugar dos cargos que eu tinha escrito.
+- **Deck v4 em `/pitch4`,** em 8/10/2026, com as respostas do fundador à revisão dos mentores. O `/pitch3` fica como
+  estava. Nove slides:
+  - **Capa:** "Permissionless prediction markets, settled by on-chain data."; o "Proof > Promises" sai da capa.
+  - **Problema:** "$7M · one market settled on an event that never happened."
+  - **Receita:** a barra do pote mostra também o 1% de quem abriu o mercado; quem acertou recebe 950, e não 960. A
+    demo do slide de solução conta o mesmo 1%.
+  - **Patrocínio e criadores num slide só, "Open a market":** qualquer um abre um mercado com uma semente inicial de
+    500 dólares ou mais; 90% da semente vira prêmio, 10% é a taxa, 1% do volume vai para quem abriu. Cena nova: o
+    pãozinho puxa uma alavanca, e a semente sobe de 500 a 10 mil dólares e o mercado sobe no site. Sai o 0,02 SOL.
+  - **Crescimento:** "Launch fees, first 3 months" no lugar de "Share to take a side".
+  - **Equipe:** cada retrato de pãozinho vira a foto real uns três segundos depois de a cortina abrir; o nome de cada
+    um leva ao LinkedIn; as linhas trazem duas atuações de cada um, ditadas pelo fundador.
+  - **Fechamento:** sem a seta.
+- **Revisão do `/pitch3` com dois mentores, em 8/10/2026,** organizada por slide em
+  `docs/business/_review/revisao-do-pitch-2026-10-08.md`, com as transcrições brutas em `knowledge-base/pitch/`.
+  Quem é quem por dedução, o que foi dito com a marca de tempo, a avaliação de cada ponto e seis decisões do
+  fundador (R1 a R6). As maiores: juntar patrocínio e criadores num slide só, com uma semente mínima de 500 dólares
+  no lugar dos 0,02 SOL, e usar o slide que sobra para a proteção contra manipulação. Nada foi mudado no deck nem
+  no plano.
+- **Business Plan v0.0.3, refeito a partir do pitch** por ordem do fundador em 7/10/2026 ("tomar o pitch como
+  verdade, e transformar o Business plan conforme o pitch"), com três agentes em sequência: mapa de impacto
+  (`docs/business/_review/bp-impact-review-v0.0.3.md`), redação e revisão (`_review/revisao-bp-v0.0.3.md`). Quatro
+  partes, 31.742 palavras, cerca de 66 páginas; o `BUSINESS-PLAN.md` passa a ser o índice da v0.0.3, e a v0.0.2 fica
+  na pasta porque o resumo de produto, o plano técnico e as sprints citam as seções dela. Entram como regra, marcada
+  "Decisão do pitch": qualquer carteira abre mercado por 0,02 SOL e fica com 1% do pote; patrocínio a partir de 500
+  dólares, 90% para o prêmio e 10% de taxa de marketing; o projeto patrocinador como cliente; a equipe com nome e
+  cargo. A parte de tokens cai para cerca de 2.800 palavras. Ficam 19 decisões abertas; ver "Em aberto".
+
 - **Site provisório do `brot.markets`** (`services/landing`), fora do roteiro, a pedido do fundador: página "em
   breve" na direção Ledger², em claro e escuro, com lista de espera; página de privacidade com formulário para sair;
   e o deck de pitch em `/pitch`. Node puro, sem dependências, com 21 testes que entraram na conferência automática.
@@ -28,6 +72,41 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 - **Testes das páginas** (`services/landing/tests/pages.test.mjs`): todo arquivo citado existe, o rascunho de
   sugestão mantém a menção e a hashtag, o mascote tem imagem para cada pose e o deck tem os oito slides. O site
   provisório passa a ter 26 testes.
+- **Deck em `/pitch3`,** feito em 7/10/2026 a partir da pauta do fundador depois de ver o `/pitch2`, que fica como
+  está. Nove slides. O plano, bloco a bloco, está em `docs/business/_review/plano-do-pitch3.md`.
+  - **Demo animada** no slide de solução: escolhe YES num mercado, o cartão vira, escolhe NO em outro, e a rede
+    resolve os dois, um ganho e uma perda.
+  - **Uma cena do mascote por troca de slide,** com as 17 imagens que o fundador desenhou: sai do adesivo e cai,
+    espia e puxa o slide, voa numa corda, aponta para o último passo, morde a fatia da taxa (com uma surpresa
+    escondida no clique), chega em cima da bola do TAM, vem seguido por uma fila, abre a cortina de cada pessoa da
+    equipe. Três regras: até 1,5 segundo por troca, a troca seguinte cancela, e a tecla `M` desliga tudo.
+  - **Slide de equipe, dois retângulos novos de crescimento e o contador de parceiros,** como proposta à espera de
+    confirmação. A lista de parceiros nasce vazia: nenhum parceiro inventado.
+  - Sai o slide de exemplos de mercado e o ponto de equilíbrio; a capa abre pela frase de uma linha.
+  - **Modo leve, tecla `N`,** entre o movimento completo e o desligado (`M`): só as cenas que o fundador escolheu,
+    slide a slide. A lista está no plano.
+  - **Contador de parceiros ligado com sete marcas fictícias** que o fundador desenhou
+    (`docs/product/poses/fic_partners`), para a animação poder ser vista: conta de 0 a 7 e abre os quatro últimos
+    cartões em leque. O cartão traz a etiqueta "example", porque não são parceiros; ver o bloco "Em aberto".
+  - **Ordem nova dos slides,** pedida pelo fundador: capa, problema, solução, mercado, receita, patrocínio,
+    crescimento, equipe, fechamento. Os dois endereços da capa passaram a ser links, que abrem em outra aba.
+  - **Rodada das regras,** pedida pelo fundador na noite de 7/10/2026. O deck passa a ter dez slides. O de receita
+    volta aos **10% do lado perdedor**, mostrados numa barra do pote em escala (600 no lado que acertou, 400 no que
+    errou, 40 para o Brot, 960 para quem acertou), e a demo usa a mesma regra. No de patrocínio, os passos 3 e 4
+    ficaram mais claros e a frase final diz 90% para o pote e 10% de taxa de marketing. Entra o slide **"Creators"**
+    antes do de crescimento: qualquer um abre um mercado por 0.02 SOL, dentro das regras, e leva 1% do pote. No de
+    crescimento, "Creators earn 1%" substitui "Proof cards". Três desses pontos saem do plano de negócio; ver o
+    bloco "Em aberto".
+  - **Cena do mascote no slide de criadores,** pedida pelo fundador em seguida, nos três níveis do controle de
+    movimento: no completo ele cai em cima do cartão do 1%, faz joinha, e dois menores espiam de trás dos outros
+    cartões; no leve já está lá e só faz o joinha; no desligado fica parado. Usa a pose de joinha que já existia.
+  - **Retratos da equipe no slide de equipe:** os três desenhos que o fundador fez de cada sócio como pãozinho
+    (`docs/product/team`) entram no lugar das poses do mascote.
+  - **Roteiro de fala do `/pitch3`** refeito no formato do fundador, a partir do que ele levou à banca, com as
+    respostas prontas para a sabatina (`services/landing/pitch3-notes.md`).
+- **Biblioteca de poses do mascote** em `docs/product/poses`: as 17 novas do fundador e as 10 peças que já existiam,
+  nas mesmas duas pastas e no mesmo quadro. O `LEIA-ME` de lá diz o que foi arrumado em cada uma.
+- **Frase de elevador aprovada** pelo fundador em 7/10/2026, no `PITCH.md`, com o porquê de cada escolha.
 - **Terceira versão do deck, em `/pitch2`,** feita a pedido do fundador a partir da análise da banca, para ele
   avaliar no ar. Nove slides no mesmo palco e na mesma linguagem visual do `/pitch`, que continua como estava: abre
   pelo caso de 7 milhões de dólares, ganha um slide de exemplos de mercado e outro de crescimento com roteiro, troca
@@ -75,7 +154,6 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   paga (110 por mês pagam o custo sozinhas). Os cenários de caixa mês a mês são os da v0.0.3 e não foram refeitos.
   Junto vieram:
   - a revisão de impacto (`docs/business/_review/bp-impact-review-v0.0.4.md`);
-  - a cópia da v0.0.3 que o fundador enviou, com os links mortos virados texto (`docs/business/_review/BP-v0.0.3-completo.md`);
   - as respostas de 8/10 no registro de perguntas e respostas, inclusive a P-1 e a P-3, decididas depois: nada de
     1% ao criador na campanha anulada, no pote de um lado só e sobre o prêmio; a equipe abre sem pagar e sem o 1%; os
     parceiros também não ficam com o 1%; a P-2, a P-4, a P-5 e a D-f como recomendado; a proposta de arquitetura 0.4
@@ -130,6 +208,10 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Fixed
 
+- **Conferência automática vermelha no `main` desde a troca do deck para `/pitch`** (8/10/2026). O índice do plano
+  apontava para o roteiro do `/pitch3`, que foi para o histórico, e o `os-self-test` barra link quebrado. O pull
+  request foi juntado mesmo assim, por erro meu no comando que juntava. O link agora leva ao histórico, e o `LEIA-ME`
+  das poses aponta para as imagens do deck no ar. O site não foi afetado.
 - **Redirecionamento de pasta** do site provisório montado a partir do caminho validado, e não do texto enviado pelo
   visitante. Apontado pela revisão de segurança do commit; nenhum caso testado saía do domínio.
 
@@ -149,18 +231,43 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   Também não há aviso quando entra um email novo.
 - **Portão de redação do deck:** o fundador mandou publicar, e falta aprovar linha por linha o que vai a público e
   dizer quem mantém o deck. Até lá ele fica só por link. A recomendação está no `PITCH.md`.
-- **A taxa no `/pitch2` diverge do plano.** O fundador pediu para o deck dizer 3,5% do pote ("voltar ao projeto
-  anterior que era simplesmente 3%, e aumente para 3.5%"). O plano (Parte 1, §3.3) decidiu 10% do lado perdedor,
-  justamente porque a taxa sobre o pote todo faz quem acerta num favorito muito forte receber menos do que pôs (com
-  99% do pote no lado vencedor, volta 0,975 por dólar). Falta ele dizer se a regra do produto muda, o que pede a
-  revisão de impacto no plano, ou se é só a forma de contar no deck.
-- **Terceira versão do deck, depois da banca:** a análise recomenda montá-la como prévia, fora do ar. Esperam o
-  fundador seis decisões (a palavra "bet", o slide de equipe, o patrocínio em faixas ou com piso, o cartão do
-  token, os nomes de concorrentes no slide 2 e o título do slide 5) e a confirmação de que os avaliadores sabiam da
-  gravação. Cinco fatos citados pela banca não foram conferidos; a lista está na seção 9 da análise.
-- **O título do slide 5 do deck no ar exagera** ("so being right never costs you"): em pote de um lado só, quem
-  entra depois do primeiro paga 1%. A frase proposta diz só a regra: "the fee comes out of the losing side". O plano
-  usa "ninguém perde por acertar" na Parte 1, §3.3, e entra na passada de coerência.
+- **O deck no ar (`/pitch`, v4) mostra "7 of 30 launch spots taken" com sete logos de exemplo.** Não há sete
+  parceiros: foi pedido do fundador para ver a animação, e o cartão diz "example". Antes de qualquer apresentação de
+  verdade, trocar a lista (`services/landing/public/pitch/partners.js`) pelos parceiros fechados ou esvaziá-la.
+- **O v4 mudou duas regras que o BP v0.0.3 acabou de registrar,** por resposta do fundador à revisão dos mentores em
+  8/10/2026: abrir mercado pede uma semente de 500 dólares ou mais (90% prêmio, 10% taxa), no lugar dos 0,02 SOL
+  (decisões 2 e 15 do plano); e quem abre leva "1% of the market's volume", e não 1% do pote, que não são o mesmo
+  número. O plano não foi tocado; as duas pedem a revisão de impacto.
+- **Da revisão dos mentores ficam com o fundador:** R3 (que métricas entram no lançamento; o slide de proteção contra
+  manipulação não entrou), R4 (o valor da taxa reduzida dos três primeiros meses) e R6 (o prazo de entrega). Detalhe
+  em `docs/business/_review/revisao-do-pitch-2026-10-08.md`, seção 6.
+- **Termos de serviço e política de privacidade, em rascunho à espera de revisão jurídica** (`docs/legal/`). Nada
+  foi publicado; `/privacy` continua valendo. Estão em branco a empresa, os países bloqueados, o teto de
+  responsabilidade, a lei, o foro e um email de contato. Seis regras dos termos dependem de decisões do plano ainda
+  abertas, e o texto não resolve o risco da MP 1.394 para sócios no Brasil sem bloqueio de país. A lista está em
+  `docs/legal/NOTAS-DA-REVISAO.md`. Faltam o resumo comparativo dos concorrentes e a lista completa de documentos.
+- **Índice do `docs.brot.markets`** (documentação estilo wiki, pedida em 8/10/2026): não começado.
+- **`docs/business/BP-v0.0.3-completo.md`,** o plano num arquivo só, pedido pelo fundador, fica fora do Git: é uma
+  cópia das partes e envelhece na primeira edição.
+- **19 decisões abertas no BP v0.0.3** (quadro no `docs/business/BUSINESS-PLAN.md`), oito delas antes da Sprint 02:
+  1 (de onde sai o 1% de quem abriu), 2 (os 0,02 SOL), 6 (a equipe abre mercados), 7 (tipos em que dá para empurrar o
+  resultado), 10, 13, 15 e 16. O resumo de produto, o plano técnico e a Sprint 02 ainda descrevem a criação só pela
+  equipe e precisam ser revistos depois dessas respostas. O plano traz os nomes completos da equipe antes do de acordo
+  escrito do Bernardo e do Ronaldo. O slide de receita do `/pitch3` mostrava 960 para quem acertou; o v4 já mostra
+  950, com o 1% de quem abriu.
+- **O `/pitch3` diz três regras que o plano de negócio não tinha,** a pedido do fundador em 7/10/2026. Desde 8/10/2026
+  estão na v0.0.3 como "Decisão do pitch"; o registro abaixo fica como histórico. O plano não
+  foi alterado; cada uma pede a decisão dele e a revisão de impacto. (1) **Patrocínio 90/10:** o plano diz 70% para
+  o pote e 30% para o Brot (Parte 1, §3.7), e as projeções usam os 30%; num patrocínio de 500 dólares a receita cai
+  de 150 para 50. (2) **Qualquer um abre mercado, por 0.02 SOL:** o plano diz que a equipe abre as perguntas, o
+  patrocinador pede e o público só sugere (Parte 1, §4.1), e o Product Brief põe a criação pelo público fora do
+  produto; a moeda do produto é o USDC. Muda o desenho do programa da Sprint 02, então precisa ser decidido antes dela. (3) **1% do
+  pote para quem abriu:** se sair do pote inteiro, quem acerta paga parte dele, e com mais de 98,9% do pote de um
+  lado só o vencedor recebe menos do que pôs. As duas saídas (tirar do lado perdedor, ou da taxa do Brot) estão em
+  `docs/business/_review/plano-do-pitch3.md`, "A rodada das regras".
+- **"Ninguém perde por acertar" exagera** (Parte 1, §3.3 do plano; era também o título do slide 5 do deck de oito
+  slides, hoje fora do ar): em pote de um lado só, quem entra depois do primeiro paga 1%. Entra na passada de
+  coerência.
 - **Site provisório, pendências:** idioma (está em inglês, por escolha provisória; L-01 segue aberta); um email de
   contato do domínio para a página de privacidade; revisão jurídica do texto de privacidade; a conta do X não foi
   conferida; o Ronaldo ser avisado do serviço novo no servidor.

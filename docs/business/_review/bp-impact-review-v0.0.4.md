@@ -1,8 +1,8 @@
 # Revisão de impacto: BP v0.0.3 → v0.0.4
 
 **Data:** 8 de outubro de 2026. **Origem:** as respostas do fundador de 8/10/2026, nesta sessão
-(`session-log/2026-10-08-decisoes-do-fundador-bp-v0.0.4.md`). **Base:** a v0.0.3, guardada em
-[`BP-v0.0.3-completo.md`](BP-v0.0.3-completo.md). **Regra do método:** toda mudança no plano de negócio é conferida
+(`session-log/2026-10-08-decisoes-do-fundador-bp-v0.0.4.md`). **Base:** a v0.0.3, nas quatro partes
+`docs/business/BP-v0.0.3-parte-*.md`. **Regra do método:** toda mudança no plano de negócio é conferida
 contra o que ela move nos outros documentos (skill `business-plan-impact-review`).
 
 Esta revisão não muda os documentos que ela lista, exceto o próprio plano (v0.0.4) e a proposta de arquitetura (versão

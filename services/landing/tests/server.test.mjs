@@ -134,13 +134,16 @@ test("/pitch is served, is reachable by link only and is kept out of search engi
   assert.equal(res.status, 200);
   assert.match(res.headers.get("x-robots-tag"), /noindex/);
   assert.match(await res.text(), /<meta name="robots" content="noindex/);
-  // The later version of the deck gets the same treatment, and the inline styles its slides need.
-  const second = await fetch(`${base}/pitch2/`);
-  assert.equal(second.status, 200);
-  assert.match(second.headers.get("x-robots-tag"), /noindex/);
-  assert.match(second.headers.get("content-security-policy"), /style-src 'self' 'unsafe-inline'/);
-  assert.match(await second.text(), /<meta name="robots" content="noindex/);
-  assert.equal((await fetch(`${base}/pitch2`, { redirect: "manual" })).headers.get("location"), "/pitch2/");
+  // The deck keeps its author's inline styles, and its motion is served as a script.
+  assert.match(res.headers.get("content-security-policy"), /style-src 'self' 'unsafe-inline'/);
+  assert.match((await fetch(`${base}/pitch/motion.js?v=6`)).headers.get("content-type"), /javascript/);
+  // The earlier decks are no longer served: their addresses, and anything under them, go to the current deck.
+  for (const old of ["/pitch2", "/pitch2/", "/pitch3/", "/pitch3/motion.js?v=6", "/pitch4/"]) {
+    const moved = await fetch(`${base}${old}`, { redirect: "manual" });
+    assert.equal(moved.status, 302, old);
+    assert.equal(moved.headers.get("location"), "/pitch/", old);
+  }
+  assert.equal((await fetch(`${base}/pitchfork`)).status, 404, "only /pitch followed by digits is redirected");
   const home = await (await fetch(`${base}/`)).text();
   assert.ok(!home.includes("/pitch"), "the landing page does not link to the deck");
   assert.ok(!(await (await fetch(`${base}/robots.txt`)).text()).includes("pitch"), "robots.txt does not announce it");

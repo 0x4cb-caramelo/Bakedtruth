@@ -147,6 +147,51 @@ ano, e o plano não depende disso (P2 §5.5). O cenário razoável pede cerca de
 
 ---
 
+## Frase de elevador
+
+**Aprovada pelo fundador em 7/10/2026** ("Esse 1 ficou bom"). Em inglês, cerca de 20 segundos falada. É a referência
+para qualquer texto que apresente o Brot em poucas linhas: abertura da fala, inscrição do hackathon, mensagem a um
+projeto parceiro.
+
+> Brot Markets is a prediction market built as a growth engine for on-chain projects. You pick a milestone the
+> blockchain can measure, like a burn, locked liquidity or staked SOL, and sponsor a market on it. Your community
+> takes sides, talks about it and shares it. At the deadline, the chain itself reads the result and pays the
+> winners. No votes, no judges. Your milestone becomes a campaign that proves itself.
+
+**O que ela faz de propósito.** São as quatro escolhas que saíram da banca de 6/10/2026 e das rodadas com o
+fundador:
+
+1. **Começa por nós,** e não pela dor dos concorrentes. O pedido dele: "mais do que começar pelas dores dos outros,
+   vamos direto ao ponto".
+2. **Mantém "prediction market"** como o nome da categoria, porque é por ele que jurado e investidor nos encaixam, e
+   diz logo em seguida o que nos separa: "built as a growth engine for on-chain projects".
+3. **Fala com o projeto, na segunda pessoa.** O cliente da frase é quem patrocina, e não quem dá o palpite.
+4. **Não usa "bet".** Usa "takes sides".
+
+**Cuidados ao reusar.**
+
+- "Growth engine" é o enquadramento que a banca pediu ("camada de incentivo"). O plano chama a mesma coisa de
+  patrocínio (P1 §3.7). As duas palavras descrevem a mesma regra; a frase não cria regra nova.
+- Os três exemplos (queima, liquidez travada, SOL em staking) são tipos que o programa lê. Não trocar por número de
+  holders, carteiras ativas ou TVL, que ele não lê.
+- A frase não diz a taxa, de propósito: ela estava em discussão quando a frase foi aprovada.
+
+**Versão de uma linha, candidata, ainda não aprovada:**
+
+> The prediction market where projects put money behind their own promises, and the chain proves whether they
+> delivered.
+
+**Outras frases da mesma rodada, guardadas como inspiração.** Nenhuma foi aprovada.
+
+- Para jurado e investidor, com a receita: "Brot Markets turns prediction markets into an incentive layer for
+  on-chain goals. Projects pay to open a market on their own KPI: tokens burned, liquidity locked, SOL staked.
+  Seventy percent becomes the prize pool for their community. The crowd takes sides, the metric becomes a story, and
+  Solana settles it: the program reads the account and pays the winners. We earn on every pot and every
+  sponsorship."
+- Curta: "Brot is the prediction market the chain resolves, and projects use it as marketing."
+- Pelo contraste: "Every other prediction market asks someone who won. Brot just reads the blockchain."
+- Três palavras: "Don't trust. Read the chain."
+
 ## O deck em `/pitch`
 
 O fundador montou um deck próprio, em inglês, para o hackathon Colosseum, e pediu em 5/10/2026: "quero que você

@@ -56,7 +56,7 @@ classifies the activity **[INF]**; that goes to the team's lawyer (§3.10). Iden
 **Short names.**
 - BP = BP v0.0.4; P1–P4 = its parts. "BP-14" = decision 14 of v0.0.3's list of nineteen; those still open are
   carried in P-9. "v0.0.2 P1:772" = a line of an older part file. "v0.0.3 P4 §2.2" = a section of v0.0.3
-  (`docs/business/_review/BP-v0.0.3-completo.md`) whose rule v0.0.4 keeps by leaving it unchanged.
+  (`docs/business/BP-v0.0.3-parte-*.md`) whose rule v0.0.4 keeps by leaving it unchanged.
 - TP = Technical Plan. PB = `docs/product/PRODUCT-BRIEF.md`. OCR = the open-creation research of 2026-10-07,
   `knowledge-base/market/pumpfun-model-for-open-markets.md`. R-xx, F-x, L-xx = the Product Brief's rules, flows and
   gaps. BR-xx = Appendix A.

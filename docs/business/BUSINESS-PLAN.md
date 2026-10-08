@@ -4,9 +4,11 @@
 Onde elas e a v0.0.3 discordam, valem as de 8/10; onde se calam, vale a v0.0.3. Estado: rascunho para revisão do
 fundador.
 
-**As versões anteriores ficam guardadas.** A v0.0.3, de 8/10/2026, está em
-[`_review/BP-v0.0.3-completo.md`](_review/BP-v0.0.3-completo.md), a cópia montada que o fundador enviou; as partes
-avulsas e a revisão de impacto dela não estão neste repositório. Os quatro arquivos da v0.0.2
+**As versões anteriores ficam guardadas.** A v0.0.3, de 8/10/2026, está nas quatro partes
+[`BP-v0.0.3-parte-1-produto.md`](BP-v0.0.3-parte-1-produto.md) a
+[`BP-v0.0.3-parte-4-construcao-e-risco.md`](BP-v0.0.3-parte-4-construcao-e-risco.md), com a revisão de impacto em
+[`_review/bp-impact-review-v0.0.3.md`](_review/bp-impact-review-v0.0.3.md). O arquivo único que o fundador enviou
+(`BP-v0.0.3-completo.md`) é uma cópia montada dessas partes e fica fora do git. Os quatro arquivos da v0.0.2
 (`BP-v0.0.2-parte-1-produto.md` a `BP-v0.0.2-parte-4-construcao-e-risco.md`) continuam na pasta, porque o resumo de
 produto, o plano técnico e os arquivos das sprints citam as seções deles. O que mudou, item por item, e o que cada
 mudança move nos outros documentos está na revisão de impacto,
@@ -155,6 +157,7 @@ advogado na equipe. Das dezenove decisões da v0.0.3, ficam resolvidas a 1, a 2,
 | Slide | O roteiro da rede principal no deck | "MAINNET After an audit and a multisig." | P4 3.1 |
 | Jurídico | A conclusão da avaliação jurídica | Por escrito, lida por um colega de fora, como a v0.0.3 recomendava | P4 5.1 |
 | Nova | A exceção de 5/10/2026 (abrir a rede principal com um relatório de auditoria e um teto menor) perdeu o teto | Esperar os dois relatórios | P4 3.4 |
+| R4 | Taxa reduzida nos três primeiros meses: qual valor e de qual taxa (revisão dos mentores de 8/10/2026) | Zerar só a taxa de abertura nas três primeiras campanhas de cada criador; mexer na taxa do pote mexe no equilíbrio | `_review/revisao-do-pitch-2026-10-08.md` |
 | Nova | "nao lidaremos com tokenomics" vale também para os tokens A e B, ou só para a lista de contas? | Confirmar que foi só sobre a lista | P3 |
 | 3, 5, 8, 9, 11, 12, 14, 17 | As da v0.0.3 que continuam | As recomendações da v0.0.3 | Cada parte |
 
@@ -179,8 +182,14 @@ O registro das perguntas e respostas do fundador, na ordem em que aconteceram, e
 
 - [`_review/bp-impact-review-v0.0.4.md`](_review/bp-impact-review-v0.0.4.md): o que as decisões de 8/10/2026 mudam no
   plano e nos outros documentos.
-- [`_review/BP-v0.0.3-completo.md`](_review/BP-v0.0.3-completo.md): a versão anterior, como o fundador a enviou, só com os links para arquivos
-  ausentes virados texto.
+- `BP-v0.0.3-parte-1-produto.md` a `BP-v0.0.3-parte-4-construcao-e-risco.md`: a versão anterior, de 8/10/2026, feita a
+  partir do pitch. O pitch que a originou, o `/pitch3`, está guardado com o roteiro em
+  [`../../services/landing/history/pitch-3/`](../../services/landing/history/pitch-3/roteiro.md); o deck no ar, em
+  `/pitch`, é o v4. A frase de elevador está em [`PITCH.md`](PITCH.md).
+- [`_review/bp-impact-review-v0.0.3.md`](_review/bp-impact-review-v0.0.3.md) e
+  [`_review/revisao-bp-v0.0.3.md`](_review/revisao-bp-v0.0.3.md): a revisão de impacto e a revisão final da v0.0.3.
+- [`_review/revisao-do-pitch-2026-10-08.md`](_review/revisao-do-pitch-2026-10-08.md): a revisão do `/pitch3` com os
+  mentores, com as decisões R1 a R6.
 - `BP-v0.0.2-parte-1-produto.md` a `BP-v0.0.2-parte-4-construcao-e-risco.md`: a versão de 5/10/2026.
 - [`_review/BUSINESS-PLAN-v0.0.1.md`](_review/BUSINESS-PLAN-v0.0.1.md): a primeira versão, com 16 capítulos.
 - [`_review/user-review-v0.0.1.md`](_review/user-review-v0.0.1.md): a leitura do fundador sobre a v0.0.1.
