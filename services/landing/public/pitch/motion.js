@@ -7,7 +7,7 @@
  * 1.5 seconds at most, the next slide change cancels whatever is playing, and the "M" key or the bar button turns all
  * motion off. The "N" key is the setting in between. With "reduce motion" on, or with the slides stacked on a phone,
  * nothing moves either.
- * It listens to the "slidechange" event that ../pitch/deck.js sends.
+ * It listens to the "slidechange" event that deck.js sends.
  */
 import { startDemo, stopDemo } from "./demo.js?v=2";
 import { EXITS } from "./exits.js?v=1";
@@ -96,7 +96,7 @@ document.addEventListener("slidechange", (event) => {
   arrive(slide, opening ? "open" : index >= previousIndex ? "forward" : "back");
 });
 
-/** True when the event is the presenter asking for the next slide, the way ../pitch/deck.js reads it. */
+/** True when the event is the presenter asking for the next slide, the way deck.js reads it. */
 function asksNext(event) {
   const target = event.target.closest ? event.target : document.body;
   if (event.type === "keydown") {

@@ -78,6 +78,12 @@ export function createApp({ root, store, limiter, allowedOrigins, siteOrigin, lo
         res.writeHead(405, { Allow: "GET, HEAD" }).end();
         return;
       }
+      // The earlier decks are kept in history/, not served (founder, 2026-10-08). Links already sent to /pitch2,
+      // /pitch3 or /pitch4 land on the current deck. Temporary on purpose: browsers do not keep a 302.
+      if (/^\/pitch[2-9]\d*(\/|$)/.test(path)) {
+        res.writeHead(302, { Location: "/pitch/" }).end();
+        return;
+      }
       if (path !== "/404.html" && serveStatic(root, req, res, path)) return;
       sendNotFound(root, req, res);
     } catch (error) {
