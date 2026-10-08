@@ -18,11 +18,14 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { junitCases, unxml } from "./bun-junit.mjs";
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CHECKS = join(ROOT, "programs/brot-markets/src/checks.rs");
 const DEPLOY = join(ROOT, "target/deploy");
 const SO = join(DEPLOY, "brot_markets.so");
 const SAVED = join(ROOT, "target/checks-mutation/brot_markets.so");
+const JUNIT = join(ROOT, "target/checks-mutation/junit.xml");
 const RUST_TARGETS = ["checks_mollusk", "checks_mollusk_init"];
 const TS_FILES = ["tests/brot/checks.test.ts", "tests/brot/checks-init.test.ts"];
 const PATH = `${process.env.HOME}/.bun/bin:${process.env.PATH}`;
@@ -130,13 +133,24 @@ function runTests(list) {
   }
   const ts = list.filter((t) => t.kind === "LiteSVM").map((t) => t.name);
   if (ts.length) {
-    const lines = run("bun", ["test", ...TS_FILES, "-t", ts.map(escape).join("|")]).out.split("\n");
+    // Bun names each test only on a terminal; the JUnit file lists every test wherever it runs.
+    mkdirSync(dirname(JUNIT), { recursive: true });
+    writeFileSync(JUNIT, "");
+    run("bun", [
+      "test",
+      ...TS_FILES,
+      "-t",
+      ts.map(escape).join("|"),
+      "--reporter=junit",
+      `--reporter-outfile=${JUNIT}`,
+    ]);
+    const cases = junitCases(readFileSync(JUNIT, "utf8"));
     for (const name of ts) {
-      const line = new RegExp(`^\\((pass|fail)\\) .*> ${escape(name)}( \\[|$)`);
-      const at = lines.findIndex((l) => line.test(l.trim()));
-      const result = at < 0 ? "not run" : lines[at].trim().startsWith("(pass)") ? "pass" : "fail";
-      const error = result === "fail" ? lines.slice(0, at).findLast((l) => l.startsWith("error:")) : undefined;
-      outcome[name] = { result, got: error?.match(/got (.*)/)?.[1] ?? error?.slice(7) };
+      const body = cases.get(name);
+      const result =
+        body === undefined || body.includes("<skipped") ? "not run" : body.includes("<failure") ? "fail" : "pass";
+      const message = body?.match(/<failure[^>]*message="([^"]*)"/)?.[1];
+      outcome[name] = { result, got: message && unxml(message).match(/got (.*)/)?.[1] };
     }
   }
   return outcome;
