@@ -172,3 +172,8 @@ Depois do registro acima, o item dos termos foi retomado e terminou no ar.
 - **Conferido antes de publicar:** 33 testes do site; uma mudança de título feita só no texto fez o teste falhar (e
   foi desfeita pela cópia, não pelo `git checkout`, como aprendido na seção 8); um navegador sem tela abriu as páginas
   em tela larga e de celular, nos dois temas, sem estouro de largura, imagem quebrada nem erro.
+- **Publicado (PR 32, servidor em `f335372`).** No Cloudflare, com a liberação dele: a rota `docs.brot.markets` no
+  túnel `brot-markets`, antes da regra final de 404, e um registro CNAME `docs` para o túnel, com proxy. Nada mudou
+  nas rotas do site. Conferido no ar: as páginas do docs, `docs.css`, o estilo, as imagens e o
+  `noindex` respondem; `/privacy` e a API da lista dão 404 no `docs.`; o site, os termos, a privacidade e o `/pitch`
+  seguem com 200. Para desfazer: tirar a rota do túnel e o registro `docs`.
