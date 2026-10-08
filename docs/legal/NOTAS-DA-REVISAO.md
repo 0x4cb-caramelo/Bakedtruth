@@ -102,4 +102,3 @@ Cada uma está marcada no texto. Se a decisão for outra, o texto muda junto.
   separado: aviso de risco (§10), regras de mercado (§4 a §7) e uso aceitável (§8). Ficam faltando, para a rede
   principal: a lista pública de países bloqueados, uma página de integridade de mercado com exemplos (como a da
   Polymarket) e o aviso de risco na tela antes da primeira entrada.
-- **A troca da página `/privacy`** pelo texto novo, depois da revisão.

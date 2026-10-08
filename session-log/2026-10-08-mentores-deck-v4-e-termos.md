@@ -134,3 +134,21 @@ Depois do registro acima, o item dos termos foi retomado e terminou no ar.
 - **Conferido no ar,** depois da troca no servidor (commit `e1a54d8`): `/terms`, `/privacy`, as duas imagens, o
   estilo novo e o `/pitch` respondem 200; o rodapé da página inicial tem "Terms"; o formulário de sair da lista
   funciona (testado localmente, contra um arquivo temporário, e não contra a lista real).
+
+## 9. O docs começou: sete páginas, fora do ar (mesmo dia, à noite)
+
+- **O índice foi apresentado** ao fundador, com onze seções e três formas de montar o site (framework de
+  documentação, gerador próprio como o dos termos, serviço pronto). A recomendação foi o framework, pela busca e pelo
+  menu. Ele respondeu "continue de onde parou", sem escolher a ferramenta.
+- **Leitura minha:** escrever o texto não depende da ferramenta, porque Markdown com `title` e `description` no topo
+  serve às três. Escrevi as sete páginas das seções 1 a 3 (`docs/wiki/`), que são as marcadas "pronta" e as que
+  explicam o produto. Não criei o endereço, não escolhi a ferramenta e não publiquei nada.
+- **Por que as seções 4, 5 e 9 ficaram de fora:** abrir mercado, taxas e equipe dependem das decisões 1, 2, 9, 12, 15
+  e 16 do plano. As páginas escritas apontam para os termos, §7, onde precisam falar do custo de abrir e da parte de
+  quem abriu, para a regra não existir em dois lugares.
+- **Tom:** o pedido era "estilo um whitepaper, porém soft" e "a parte séria da nossa empresa". Cada página abre com
+  "In one bite", no tom do Baked, e o corpo é sério. O que nenhuma página diz: projeções, caixa, tokens e "bet".
+- **Contas conferidas** contra o BP v0.0.3, Parte 1, §3.2 a §3.6: o exemplo 600/400 (950, 1,583), a tabela de retorno
+  só com a taxa, o 300/700 que vira 1,63, o 5.000 a 5.000 que cai para 1,30, o pote de um lado só (0, 2, 3) e o
+  oportunista do último minuto (409 de lucro, 1,08 para quem estava antes).
+- **Notas da revisão:** saiu da lista de pendências a troca da página `/privacy`, feita na seção 8.
