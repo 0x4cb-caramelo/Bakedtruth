@@ -33,6 +33,10 @@ pub const EVENT_BUFFER_LEN: usize = HEADER_LEN + MAX_EVENT_LEN;
 /// `[EVENT_IX_TAG, E::DISCRIMINATOR, event bytes]` whose only account is the event authority,
 /// signing through its seeds (`EVENT_AUTHORITY_SEED`, `EVENT_AUTHORITY_BUMP`). The caller passes
 /// its two trailing slots; `checks::event_accounts` verifies them first.
+///
+/// Never inlined: the buffer and the CPI structures take their own stack frame instead of
+/// adding to the handler's, which SBF caps at 4 KiB per frame.
+#[inline(never)]
 pub fn emit<E: Event>(
     event: &E,
     event_authority: &AccountView,
