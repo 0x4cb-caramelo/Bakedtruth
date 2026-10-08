@@ -1,107 +1,153 @@
-# Sprint 16 — Endurecimento
+# Sprint 16 — Hardening (multisig, pause, incident plan, creation rules frozen)
 
-**Estado:** planejada · **Branch:** `sprint-16-hardening` · **Datas:** sem datas, por decisão do fundador
+**Status:** planned · **Branch:** `sprint-16-hardening` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
-| Bloco do plano técnico | B9, em parte, e a seção 7 ("Antes da rede principal") |
-| Depende de | Sprints 14 e 15, ou a decisão do fundador de abrir sem elas; e a 07 |
-| Regras e fluxos cobertos | R-30, R-31 e R-32 |
+| Technical Plan block | B9 in part, and TP §7 ("Before mainnet"), §7.1 |
+| Depends on | Sprints 14 and 15, or the founder's decision to go on without one of them; Sprint 07 |
+| Requirements covered | BR-08 (no cap; mainnet after audit and multisig), BR-40 (creation rules audited, BP-17), BR-41 (powers table), BR-42 (pause and incident plan) |
 
-## Objetivo
+**What changed from v0.0.1.** There is no cap to set (D-h): `CapState`, the first cap value and the cap test leave the
+sprint **[FD]**. In their place the sprint freezes the creation rules into the version both firms read (BP-17, open in
+P-9; proposal §4.0) and puts the exposure alert under test, because no cap bounds what a bug could drain (proposal
+§2.4.7) **[DP]**.
 
-Deixar o programa e a operação no estado que vai para a auditoria: compilação verificável, carteira 2 de 3, teto com
-o valor decidido, pausa testada, plano de incidente e quadro público de quem pode o quê. A versão que sai daqui é a
-que as duas empresas leem.
+## Goal
 
-## Critério de pronto
+Bring the program and its operation to the state that goes to audit: a verifiable build, a 2-of-3 multisig, the pause
+tested with every instruction, an incident plan, the public table of powers, and the creation rules frozen into the
+release candidate. The version that leaves this sprint is the one the two firms read.
 
-- [ ] `solana-verify build` roda no CI, e o hash é o mesmo em duas execuções.
-- [ ] A carteira 2 de 3 existe, com aparelhos físicos e espera pública de 24 a 48 horas. Na devnet, ela é dona da
-      chave de atualização e do `admin` (pela troca em dois passos) e fez uma assinatura de teste (T7, C11).
-- [ ] `CapState` tem o valor decidido e foi testado na devnet: a aposta que passaria do teto é recusada, e volta a
-      entrar quando uma pergunta paga.
-- [ ] Pausa: o teste I10 roda com todas as instruções da versão. Resolução, pagamento e devolução funcionam com a
-      pausa ligada, e só o `admin` retoma.
-- [ ] `content/powers.md` está publicado em `/registro`: quem guarda cada chave e o limite de cada poder.
-- [ ] O plano de incidente existe, em uma página: quem pausa, quem fala, onde publica, em quanto tempo, e quem
-      substitui o CTO no alerta.
-- [ ] `deploy/vps/README.md` diz onde vive cada chave e como trocar. Nenhuma chave ligada à internet tem poder sobre
-      dinheiro. O keeper tem cofre de chaves.
-- [ ] Domínio, Cloudflare, servidor e GitHub têm segundo fator com chave física; a `main` tem proteção de ramo.
-- [ ] T4 está decidida: `emit!` ou `emit_cpi!`, e se há fuzzing dedicado.
-- [ ] A versão candidata está marcada, com commit e hash, e foi enviada às duas empresas.
-- [ ] Cada item da seção "Herdado da Sprint 01" está feito, ou decidido por escrito com o motivo.
-- [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
+## Definition of done
 
-## Entregas
+- [ ] `solana-verify build` runs in CI and gives the same hash in two runs **[AC: its support for a Pinocchio crate
+      built with `cargo build-sbf`]**.
+- [ ] The `.so`'s origin is attested with `actions/attest-build-provenance` in a job of its own, and checked with
+      `gh attestation verify` (every `gh` call passes `--repo 0x4cb-caramelo/Bakedtruth`).
+- [ ] The 2-of-3 multisig exists, on hardware devices, with a public wait of 24 to 48 hours. On devnet it owns the
+      upgrade authority and `admin` (by the two-step handover) and has made a test signature (T7; TP §14.4 C11 **[AC]**:
+      a product with a public wait for program upgrades).
+- [ ] **The creation rules are frozen (BP-17):** the release candidate carries `user_open_campaign` with the ten
+      checks of TP §3.4.10, the Pyth-priced opening with `max_lamports`, the creator share per P-2, `VoidReason`
+      with the 10% path (T23), and every creation parameter under its code ceiling. The audit's scope names each.
+- [ ] **No cap:** the code has no `CapState` and no `max_pot`. The exposure alert (SOL held in all open vaults,
+      proposal §2.11) fires in a devnet test, and so does the alert at 80% of `max_open_campaigns`.
+- [ ] **The pause:** I10′ runs with every instruction of the version. Only `user_join_campaign`, `user_open_campaign`,
+      the sealed entry and, if kept, `sponsor_add_prize` fail; resolution, payout and refund work with the pause on;
+      only `admin` resumes.
+- [ ] Every opening by a team key raises an alert, and removing a team key through the multisig is rehearsed on
+      devnet: a leaked team key opens for free (proposal §2.10 item 8).
+- [ ] `content/powers.md` is updated with who holds each key, the multisig included, and the limit of each power.
+- [ ] The incident plan exists, on one page: who pauses, who speaks for the house, where it is published, how fast,
+      and who backs up the CTO on alerts. The site publishes it as the incident page (TP §3.6, BR-42).
+- [ ] Every alert reaches two inboxes, and the review queue has a named reviewer per day (proposal §2.11; T22).
+- [ ] `deploy/vps/README.md` says where each key lives and how to rotate it. No internet-connected key has power over
+      money. The keeper's wallet sits in a key vault **[AC: which one]** (TP v0.0.1 §7, deferred to before mainnet).
+- [ ] The domain, Cloudflare, the server and GitHub use hardware-key second factors; `main` has branch protection, or
+      the carried-over decision below is recorded.
+- [ ] The mainnet values of the creation parameters are recorded: opening fee US$500, prize 9,000 bps, creator share
+      100 bps, fee 1,000 bps, `min_entry_lamports` 10,000,000, `max_open_campaigns`, and the SOL/USD `max_price_age`
+      and `max_price_conf_bps` for mainnet's cadence.
+- [ ] A CI check proves the `mainnet` artifact carries the real review window and minimum duration, not the devnet
+      drill constants (T12).
+- [ ] The release candidate is tagged, with commit and hash, and sent to both firms. The audit scope links
+      Pinocchio's own audit report (TP §14.4 C38 [AC]).
+- [ ] Each carried-over item below is done, or decided in writing with the reason.
+- [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
-O passo de `solana-verify` no CI; a carteira 2 de 3, com o produto escolhido; o plano de incidente; o quadro de
-poderes; a versão candidata.
+## Deliverables
 
-## Fora desta sprint
+The `solana-verify` and attestation jobs in CI; the multisig, with the product chosen; the incident plan; the updated
+powers table; the recorded mainnet parameters; the tagged release candidate.
 
-As correções de auditoria, os termos e o bloqueio por país (17). O teto por pergunta (fase futura). Subir o teto por
-degraus, que é operação depois da abertura.
+## Out of scope
 
-## Decisões do fundador que travam a sprint
+Audit fixes, terms and the country list (17). Any cap, global or per campaign (D-h). An accepted-account list (D-i).
+New program features: after this sprint the program changes only by audit fix.
 
-- **P3:** os nomes dos três que assinam. O terceiro sócio não aparece com nome nos arquivos lidos.
-- **P4 (L-19):** o primeiro valor do teto.
-- Quem é o dono da rotina de conferir cada resolução, e quem substitui o CTO (P4 §4.6, §6.1).
-- Se a 14 ou a 15 não estiverem prontas: mover a data ou abrir sem elas (P4 §3.3).
+## Founder decisions that block the sprint
 
-## Agentes e skills
+- The three signers' names (P4 §4.1). BP-12 (P-9, open) recommends the partners' written agreement first.
+- The owner of the daily review and the CTO's backup on alerts (P4 §5.1, "sem dono").
+- **D4** (proposal §5.2): a Pyth Hermes key (Starter, US$500 a month [E51]) before mainnet price campaigns, or the
+  price kind waits on mainnet. Paid openings of the other four kinds need no key.
+- **[Q]** If Sprint 14 or 15 is not ready: wait, or cut the candidate without it and audit it later (v0.0.1 roadmap
+  rule).
+- **BP-17** (P-9, open): the creation rules as a third mainnet item. This plan freezes them here either way.
+- **Answered:** D-h (no cap), D-i (no list), D-o (Pinocchio).
 
-- **Agentes:** `technical-security-red-team-agent`, `devils-advocate-agent` (o plano de incidente),
-  `coordinator-agent`.
+## Agents and skills
+
+- **Agents:** `technical-security-red-team-agent`, `devils-advocate-agent` (the incident plan), `coordinator-agent`.
 - **Skills:** `multi-ai-review`, `secrets-discipline`, `secrets-scan`, `decision-log`, `plain-portuguese-explainer`,
   `release-check`, `sprint-management`, `codemap`.
 
-## Portões de segurança
+## Security gates
 
-- Depois desta sprint o programa só muda por correção de auditoria.
-- Nenhuma assinatura da carteira 2 de 3 fica em arquivo.
-- `secrets-scan` no fechamento, sobre a versão candidata.
+- After this sprint the program changes only by audit fix.
+- No multisig signature lives in a file.
+- `secrets-scan` at closure, over the release candidate.
 
-## Testes
+## Tests
 
-A conferência padrão e o teste aleatório sobre a versão candidata. O ensaio de pausa e de retomada na devnet, pela
-carteira 2 de 3.
+```bash
+export PATH="$HOME/.bun/bin:$PATH"
+bun run build:program && bun run test && bun run test:rust
+cargo fmt --all -- --check
+cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint -- -D warnings
+cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint,mainnet -- -D warnings
+solana-verify build                                            # twice; the hashes must match [AC: flags]
+bun test tests/ -t "paused campaign refuses new money, never payouts"   # I10′ with every instruction
+bun test tests/ -t "mainnet artifact carries the real constants"        # to add (T12)
+node scripts/codemap.js --check && node scripts/os-self-test.js && node scripts/ci-secret-scan.js origin/main
+```
 
-## Herdado da Sprint 01
+The pause and resume rehearsal on devnet through the multisig. The team-key removal rehearsal.
 
-Da revisão adversarial do leitor de preço (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`, seção 1.8).
+## Carried over
 
-- Antes da rede principal, saber quem controla a atualização dos programas da Pyth lá: a autoridade é o endereço derivado `6oXTdojyfDS8m5VtTaYB9xRCxpKGSvKJFndLUPV3V3wT`, e não foi conferido que programa ou carteira com várias assinaturas está por trás dele. Conferir também quem é a autoridade de governança gravada na configuração do receptor, que troca a fonte dos preços e o mínimo de assinaturas sem reinstalar o programa. O risco está na seção 13 do plano técnico.
+From Sprint 00's security review (`docs/sprints/sprint-00-setup.md`; TP §7.1), re-read for Pinocchio and SOL:
 
-## Herdado da Sprint 00
+- Attest the `.so`'s origin and reproduce its hash with `solana-verify` (above).
+- Pin the SHA-256 of the Solana installer and of every tool CI downloads, and build the publishing artifact in a job
+  without cache. The Anchor binary left with `pred-provable` in Sprint 03; the Shank and Codama tools take its place.
+- Build and publish the `mainnet` variant under its own name (`brot_markets.mainnet.so`), with an IDL per cluster and a
+  deploy script that checks the cluster first. The USDC address that Sprint 02 was to record is gone (D-a); the
+  feature now holds only the real review window and minimum duration (T12).
+- Replace or back the secret scan with `gitleaks` (`docs/technical/registry-pick.md`): base58 keys, URLs with
+  credentials, hex secrets, binaries; add `*.keystore` and `*.jks` for the Android app (proposal §2.10 item 9).
+- `CODEOWNERS` for `.github/`, `scripts/ci-secret-scan.js` and `.claude/hooks/`. Branch protection on `main` is not
+  available to a private repository on the free plan: decide between a paid plan and a public repository.
+- The `bun.lock` registry moved from npmmirror.com to npmjs.org at the opening of Sprint 02 (T15): confirm it stayed
+  there.
 
-Da revisão de segurança que fechou a Sprint 00 (`docs/sprints/sprint-00-setup.md`).
+From Sprint 01's review of the price reader (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`, §1.8):
 
-- Atestar a origem do `.so` com `actions/attest-build-provenance`, num trabalho próprio, e conferir com `gh attestation verify`. O `SHA256SUMS` de hoje é escrito pelo mesmo trabalho que compila e só detecta download corrompido.
-- Fixar o SHA-256 do instalador da Solana e do binário do Anchor no workflow, e compilar o artefato de publicação num trabalho sem cache.
-- Compilar e publicar a variante `mainnet` com nome próprio (`brot_markets.mainnet.so`), com IDL por rede, e um roteiro de publicação que confere a rede antes de publicar.
-- Trocar ou reforçar a varredura de segredos com o `gitleaks` (recomendado em `docs/technical/registry-pick.md`): ela ainda não pega chave em base58, URL com usuário e senha, segredo em hexadecimal nem arquivo binário.
-- `CODEOWNERS` para `.github/`, `scripts/ci-secret-scan.js` e `.claude/hooks/`. A proteção da `main` não existe em repositório privado da conta gratuita: decidir entre mudar de plano e tornar o repositório público.
-- Decidir o registro do `bun.lock`, hoje `registry.npmmirror.com`. Teste: trocar o host pelo registro oficial numa branch e rodar `bun install --frozen-lockfile`.
+- Before mainnet, find out who controls the upgrade of Pyth's programs there (the authority PDA
+  `6oXTdojyfDS8m5VtTaYB9xRCxpKGSvKJFndLUPV3V3wT`) and who holds the governance authority in the receiver's
+  configuration. It now matters twice: for price campaigns and for the SOL/USD read that prices every paid opening.
+  The risk is in TP §13.
 
-## Riscos
+## Risks
 
-- O produto de carteira não ter espera pública para atualizar programa (C11).
-- Os três que assinam serem da mesma empresa (P4 §4.2).
-- O plano de incidente depender de uma pessoa só (P4 §6.2).
+- The multisig product has no public wait for program upgrades (C11).
+- The three signers are the three partners (P4 §4.1), so the multisig guards against one person, not against the
+  company **[INF]**.
+- The incident plan depends on one person (P4 §5.1).
+- With no cap, a bug's loss has no ceiling: the audit, the multisig, the pause and the exposure alert are what is left
+  (proposal §2.4.7).
 
-## Artefatos esperados
+## Expected artifacts
 
-`.github/workflows/ci.yml`, `content/powers.md`, o plano de incidente, `deploy/vps/README.md`, o commit e o hash da
-versão candidata.
+`.github/workflows/ci.yml`, `content/powers.md`, the incident plan and its page in `app/features/`,
+`deploy/vps/README.md`, the commit and hash of the release candidate, `CODEMAP.md`.
 
-## Changelog e session-log
+## Changelog and session log
 
-- **Changelog:** compilação verificável; carteira 2 de 3; teto; plano de incidente; quadro de poderes.
-- **Session-log:** o produto de carteira escolhido, o valor do teto e o porquê, T4.
+- **Changelog:** verifiable build; 2-of-3 multisig; pause tested; incident plan; powers table; creation rules frozen.
+- **Session log:** the multisig product chosen; the signers; the mainnet parameters and why; D4's answer for Pyth.
 
-## Registro e retrospectiva
+## Record and retrospective
 
-Preenchidos durante a sprint e no fechamento.
+Filled in during the sprint and at closure.

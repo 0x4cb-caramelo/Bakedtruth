@@ -61,8 +61,8 @@ recebe 1,583. Numa campanha paga, os US$ 450 de prêmio somam-se a isso: os venc
 
 **O 1% do criador.** **Decisão, de 8/10/2026:** sai do pote; só quando isso faria quem acertou receber menos do que
 pôs, sai da taxa do Brot. Esse caso acontece quando quase todo o pote está no lado que ganhou (acima de 98,89% do pote,
-sem prêmio), e não quando a disputa é apertada. Como o programa aplica a regra nesse caso ainda espera confirmação
-(Parte 1, seção 3.4).
+sem prêmio), e não quando a disputa é apertada. Nesse caso, também decidido em 8/10/2026, sai do pote o que der
+sem deixar ninguém abaixo do que pôs, e só a diferença sai da taxa (Parte 1, seção 3.4).
 
 **Como o Brot ganha.** A taxa do pote dá, na média, 3,70% do volume (de 2,70% a 4,18%, conforme a mistura de
 campanhas); dela, 25% vão para a tesouraria e 75% para a operação. Cada abertura paga deixa US$ 50 para a operação. O
@@ -134,11 +134,12 @@ Falta o acordo escrito do Bernardo e do Ronaldo para aparecerem nas versões pú
 
 **Decididas em 8/10/2026:** tudo em SOL; o preço de referência da CoinGecko (US$ 109,27); abertura por US$ 500 em SOL,
 com 90% de prêmio e 10% para o Brot; a equipe abre; os parceiros abrem de graça; o 1% do criador sai do pote, e da taxa
-do Brot só no caso extremo; nada de 1% na campanha anulada, no pote de um lado só e sobre o prêmio; a equipe não paga os US$ 500 nem fica com o
-1%, porque o Brot já cobra a taxa; os parceiros também não ficam com o 1%; no caso extremo, o 1% sai do pote até onde der e só a diferença sai da taxa;
-os US$ 450 voltam a quem abriu na campanha anulada e no pote de um lado só, e os US$ 50 seguem a causa; entrada mínima
-de 0,01 SOL; o preço para cobrar a abertura vem da Pyth, e a CoinGecko só mostra preço no site; a proposta de
-arquitetura 0.4 aprovada; sem teto global nem por campanha; sem lista de contas aprovadas; sem texto livre; as regras
+do Brot só no caso extremo; nada de 1% na campanha anulada, no pote de um lado só e sobre o prêmio; a equipe não paga os
+US$ 500 nem fica com o 1%, porque o Brot já cobra a taxa; os parceiros também não ficam com o 1%; no caso extremo, o 1%
+sai do pote até onde der e só a diferença sai da taxa; os US$ 450 voltam a quem abriu na campanha anulada e no pote de
+um lado só, e os US$ 50 seguem a causa; entrada mínima de 0,01 SOL; o preço para cobrar a abertura vem da Pyth, e a
+CoinGecko só mostra preço no site; a proposta de arquitetura 0.4 aprovada, e com ela o site em Bun se passar no teste,
+com o Node de reserva; sem teto global nem por campanha; sem lista de contas aprovadas; sem texto livre; as regras
 mínimas de abertura (cinco tipos, conta conferida, 3 a 90 dias, taxas fixas); abertura, taxa e 1% no núcleo; o pedido de
 pergunta sai e o patrocínio 90/10 fica; o vocabulário das campanhas; Pinocchio; Bun; app Android; sem IA; sem prazo;
 advogado na equipe. Das dezenove decisões da v0.0.3, ficam resolvidas a 1, a 2, a 4, a 7, a 13, a 15, a 16 e a 18; a 6
@@ -151,7 +152,6 @@ advogado na equipe. Das dezenove decisões da v0.0.3, ficam resolvidas a 1, a 2,
 | P-6 | O teto da devolução da indicação | 0,05 SOL | P1 3.9 |
 | P-7 | A tesouraria, com tudo em SOL | A plataforma recebe e paga em SOL; a empresa converte por mês o que precisa para os custos | P4 4.7 |
 | P-8 | Cloak e SODAX com SOL | Conferir antes de usar | P4 2.2 |
-| Bun | O site também em Bun | Só se passar no teste, com o Node de reserva | P4 2.2 |
 | Slide | O roteiro da rede principal no deck | "MAINNET After an audit and a multisig." | P4 3.1 |
 | Jurídico | A conclusão da avaliação jurídica | Por escrito, lida por um colega de fora, como a v0.0.3 recomendava | P4 5.1 |
 | Nova | A exceção de 5/10/2026 (abrir a rede principal com um relatório de auditoria e um teto menor) perdeu o teto | Esperar os dois relatórios | P4 3.4 |

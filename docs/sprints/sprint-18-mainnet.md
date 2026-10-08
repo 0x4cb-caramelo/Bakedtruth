@@ -1,89 +1,123 @@
-# Sprint 18 — Rede principal com teto
+# Sprint 18 — Mainnet
 
-**Estado:** planejada · **Branch:** `sprint-18-mainnet-capped` · **Datas:** sem datas, por decisão do fundador
+**Status:** planned · **Branch:** `sprint-18-mainnet` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
-| Bloco do plano técnico | Seção 7 ("Antes da rede principal") e seção 10; P4 §3.4 |
-| Depende de | Sprint 17 |
-| Regras e fluxos cobertos | R-29 (a regra escrita da divisão), R-30 e R-32. Todos os fluxos, agora com dinheiro real |
+| Technical Plan block | B9 (TP §7 "Before mainnet", §12); P4 §3.4 |
+| Depends on | Sprint 17 |
+| Requirements covered | BR-04 and BR-43 (treasury per P-7), BR-15 (the 25/75 split of the fee), BR-35 (the volume report the stop rule reads), BR-40 (both reports and the multisig); every flow, now with real money |
 
-## Objetivo
+The file was renamed with `git mv` from its v0.0.1 name: the cap left the mainnet criteria (D-h).
 
-Abrir com dinheiro real, com o teto global no primeiro degrau, só depois dos três critérios cumpridos por inteiro.
+## Goal
 
-## Critério de pronto
+Open with real money only once both criteria are met in full: the two audit reports, with every serious finding
+fixed, and the 2-of-3 multisig. There is no cap criterion any more (D-h). The company, the lawyer's written review and
+the treasury rule are the founder's items that also gate the day.
 
-- [ ] Os três critérios de P4 §3.4 foram conferidos, um por um, com evidência: dois relatórios públicos, sem falha
-      grave aberta; carteira 2 de 3 dona da chave de atualização, com assinatura de teste; teto gravado no programa
-      auditado.
-- [ ] O programa publicado é o artefato de `solana-verify build`, com a feature `mainnet`. A publicação é uma
-      proposta na carteira 2 de 3. `verify-from-repo` confere, e o repositório é público no commit que está na
-      rede.
-- [ ] Publicar e inicializar aconteceram na mesma sessão. O `admin` e o `fee_owner` são a carteira 2 de 3.
-- [ ] Um ciclo completo rodou na rede principal, com pote mínimo.
-- [ ] O keeper principal, o reserva e o indexer apontam para a rede principal, com carteiras só de SOL e RPC pago.
-      Os alertas foram testados.
-- [ ] O plano de incidente foi ensaiado uma vez: pausar e retomar.
-- [ ] A regra da tesouraria está escrita: 25% e 75% da taxa (R-29), quem assina e em que dia (P8).
-- [ ] No site: os avisos certos, os termos e o bloqueio por país conforme a avaliação jurídica.
-- [ ] A skill `release-check` passa.
-- [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
+## Definition of done
 
-## Entregas
+- [ ] **Criterion 1, the audits**, checked with evidence: two public reports on the exact version deployed, no
+      serious finding open, every fix confirmed by the firm that found it (P4 §3.4).
+- [ ] **Criterion 2, the multisig**, checked with evidence: the 2-of-3 multisig, on hardware devices, owns the upgrade
+      authority and `admin`, has made a test signature, and every upgrade waits 24 to 48 hours in public (P4 §4.1).
+- [ ] The deployed program is the `solana-verify build` artifact with the `mainnet` feature. The deploy is a multisig
+      proposal. `verify-from-repo` passes, and the repository is public at the deployed commit.
+- [ ] Deploy and initialize happen in one session. `admin` and `fee_recipient` are the multisig; `GlobalConfig` holds
+      the values recorded in Sprint 16.
+- [ ] The primary keeper, the standby, the indexer and `brot-rpc` point to mainnet, with SOL-only keeper wallets and
+      separate paid RPC accounts sized by measurement (D4). The alerts reach two inboxes, tested. The low-SOL alert and
+      the refill runbook from the fee account (a multisig transfer) are rehearsed.
+- [ ] Price campaigns open on mainnet only if the keeper posts its own proofs with a Hermes key (D4; proposal §2.5).
+      Otherwise the creation box offers the other four kinds and says why.
+- [ ] One full cycle runs on mainnet with minimum entries (0.01 SOL): a team-key opening, entries on both sides,
+      resolution, the six-hour window, and the payout received in the wallets.
+- [ ] The incident plan is rehearsed once: pause and resume.
+- [ ] **The treasury rule is written (P-7):** the platform receives and pays in SOL; the company converts monthly,
+      outside the platform, what dollar costs need; the fee is split 25% treasury and 75% operations (BR-15); who
+      signs and on which day; a monthly report in SOL with its US$ value at that day's CoinGecko price (BR-43).
+- [ ] The monthly volume report that the 180-day stop rule reads exists from the first mainnet day (BR-35).
+- [ ] The site shows the mainnet notices, the terms and the country switch as L0 set them; the devnet notice is gone.
+- [ ] Referral is live from the first mainnet day, if BP-9's reading holds (P-9).
+- [ ] The `release-check` skill passes, and the `usage-monitor` skill is set up for RPC credits, the Pyth and
+      CoinGecko plans, and SOL received and spent.
+- [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
-- O programa na rede principal, com o endereço publicado.
-- Os serviços e o site apontados para ela.
-- O registro público do que foi conferido em cada critério.
+## Deliverables
 
-## Fora desta sprint
+- The program on mainnet, its address published.
+- The services and the site pointed at it.
+- The public record of the evidence for each criterion.
+- The treasury rule, the refill and conversion runbook, and the monthly reports.
 
-Subir o teto: cada degrau vem depois de duas semanas sem incidente, como rotina (P4 §4.4). A fase 1.2. Os tokens.
+## Out of scope
 
-## Decisões do fundador que travam a sprint
+Phase 1.2 (the contest with a deposit; Token-2022). Phase 2 (early exit; sports). Tokens A and B (P3). The Android
+app's release (Sprint 22). Any cap.
 
-- Confirmar que os três critérios estão cumpridos. Se faltar um, a abertura espera (P2).
-- A empresa aberta e a avaliação jurídica concluída (P4 §3.1, P5).
-- O valor do primeiro degrau do teto e a regra dos degraus (P4).
-- A guarda da tesouraria (P8).
+## Founder decisions that block the sprint
 
-## Agentes e skills
+- **Confirm both criteria.** If one is missing, the opening waits (P4 §3.4).
+- **The company exists** (P4 §5.2), so it can sign contracts and publish the app later (C-01).
+- **L0, the lawyer's written review** (D-s; proposal §3.10). The BP's recommendation that an outside colleague reads
+  it stays a proposal.
+- **P-7, the treasury rule** (open; recommended as written above).
+- **The new open item** (P4 §3.4): the one-report exception lost its cap; the BP recommends waiting for both reports.
+- **BP-17** (P-9, open): whether the creation rules in the audited version become a third criterion. Sprint 16
+  froze them either way.
+- **The deck's line** "MAINNET After an audit, a multisig and a cap" must change; the BP proposes "MAINNET After an
+  audit and a multisig." (P4 §3.1; K-12).
+- **[Q]** Whether the first mainnet cycle also includes a paid opening (US$500 in SOL), to prove the Pyth-priced
+  charge with real money.
+- **Answered:** D-h (no cap), D-a (SOL only).
 
-- **Agentes:** `coordinator-agent`, `technical-security-red-team-agent`, `legal-compliance-agent`, `launch-agent`.
-- **Skills:** `release-check`, `multi-ai-review` (a decisão de abrir), `secrets-discipline`, `secrets-scan`,
-  `verify-build-works`, `usage-monitor` (o custo real de RPC e das máquinas depois da abertura), `decision-log`,
-  `sprint-management`.
+## Agents and skills
 
-## Portões de segurança
+- **Agents:** `coordinator-agent`, `technical-security-red-team-agent`, `legal-compliance-agent`, `launch-agent`.
+- **Skills:** `release-check`, `multi-ai-review` (the decision to open), `secrets-discipline`, `secrets-scan`,
+  `verify-build-works`, `usage-monitor`, `decision-log`, `sprint-management`.
 
-- **Rede principal só depois de auditoria, carteira 2 de 3 e teto global.** Sem os três, a sprint não abre.
-- A chave de atualização nunca esteve em arquivo nem em máquina ligada à internet.
-- Quem chama primeiro a inicialização vira administrador: publicar e inicializar na mesma sessão.
-- Qualquer mudança no programa depois da auditoria pede nova revisão.
-- `secrets-scan` no fechamento.
+## Security gates
 
-## Testes
+- **Mainnet only after both audit reports and the 2-of-3 multisig (gate 6).** Without both, the sprint does not open.
+- The upgrade key was never in a file nor on an internet-connected machine.
+- Whoever first calls initialize becomes `admin`: deploy and initialize in the same session.
+- Any program change after the audit needs a new review.
+- `secrets-scan` at closure.
 
-`verify-from-repo` sobre o programa publicado. O ciclo completo com pote mínimo. A aposta que passaria do teto,
-recusada na rede principal. O ensaio de pausa.
+## Tests
 
-## Riscos
+```bash
+export PATH="$HOME/.bun/bin:$PATH"
+solana-verify verify-from-repo                          # against the deployed program [AC: flags]
+bun run smoke:devnet                                    # a last devnet cycle on the commit being deployed
+curl -fsS https://brot.markets/api/v1/health | jq '.cluster, .entries_allowed, .program_last_deploy_slot'
+```
 
-- Programa novo com dinheiro real (gravidade crítica). O teto baixo limita a perda.
-- A equipe não conferir uma resolução, e um resultado errado ser pago: não há correção depois de `Settling`.
-- Uma pergunta só ocupar o teto inteiro, porque não há teto por pergunta (P4 §4.4).
-- A regra brasileira (P4, capítulo 7).
+The full cycle on mainnet with minimum entries. The pause rehearsal. Each alert fired once.
 
-## Artefatos esperados
+## Risks
 
-O endereço do programa na rede principal, a saída de `verify-from-repo`, o registro dos três critérios, a regra da
-tesouraria, os arquivos de ambiente de produção em `/etc/brot-markets` (nunca no repositório).
+- A new program with real money and no cap (critical): a bug's loss has no ceiling. What is left: both audits, the
+  multisig, the pause and the exposure alert (proposal §2.4.7).
+- The team does not review a resolution and a wrong result is paid: nothing corrects it after `Settling`.
+- A creator who controls the measured account can force the outcome of a campaign on a worthless token; it pays once
+  the other side holds just over US$56 of third-party money (`0.9 × X > 50`). Written risk; the founder's decision
+  stands (D-h, D-i).
+- The Brazilian rule (MP 1.394; P4 §6) and its removal duties for app stores (K-14).
+- SOL's price: revenue arrives in SOL while costs are in dollars (P4 §4.7).
 
-## Changelog e session-log
+## Expected artifacts
 
-- **Changelog:** abertura na rede principal, com o teto.
-- **Session-log:** a evidência de cada critério; o valor do teto; o que ficou para a fase 1.2.
+The program's mainnet address, the `verify-from-repo` output, the evidence for both criteria, the treasury rule,
+production environment files in `/etc/brot-markets` (never in the repository).
 
-## Registro e retrospectiva
+## Changelog and session log
 
-Preenchidos durante a sprint e no fechamento.
+- **Changelog:** mainnet opened, on the two criteria.
+- **Session log:** the evidence for each criterion; the treasury rule; what was left for phase 1.2.
+
+## Record and retrospective
+
+Filled in during the sprint and at closure.

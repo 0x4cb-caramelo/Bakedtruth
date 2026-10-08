@@ -1,94 +1,143 @@
-# Sprint 14 — Indicação e segunda leitura da disputa
+# Sprint 14 — Referral and second read
 
-**Estado:** planejada · **Branch:** `sprint-14-referral-second-read` · **Datas:** sem datas, por decisão do fundador
+**Status:** planned · **Branch:** `sprint-14-referral-second-read` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
-| Bloco do plano técnico | B9 (seções 3.4.7 e 3.4.11) |
-| Depende de | Sprint 04 (programa), 07 e 08 (serviços), 12 (site) |
-| Regras e fluxos cobertos | R-27 e R-28; R-25 e R-26. F10; F6 (etapas 1 e 2) |
+| Technical Plan block | B9 (TP §3.4.7, §3.4.11; the routine and the second read in TP §3.5) |
+| Depends on | Sprint 04 (program), Sprints 07 and 08 (services), Sprint 12 (site) |
+| Requirements covered | BR-20 (referral), BR-25 (the two-stage dispute) |
 
-## Objetivo
+**Where it fits.** Track A: 14 and 15 run in parallel, then 16, 17 and 18 (proposal §4.0). No Track B work runs from
+here to Sprint 17.
 
-As duas peças pequenas de programa que entram antes da rede principal. As duas metades são independentes: o
-fundador pode levar uma sem a outra (P4 §3.3).
+## Goal
 
-## Critério de pronto
+The two small program pieces that go in before mainnet. The halves are independent, and the founder can take one
+without the other.
 
-**Metade A, a indicação.**
+## Definition of done
 
-- [ ] Existem a conta `ReferralLink` (`["referral", referee]`) e a instrução `user_link_referrer`: assinada pelo
-      indicado, uma vez, imutável. O evento é `ReferralLinked`.
-- [ ] O indexer ganha a tabela `referrals`, confere "antes da primeira aposta" pelas duas datas da rede e calcula a
-      taxa de cada aposta vencedora do indicado (`fee_total × aposta ÷ V`).
-- [ ] A rotina semanal calcula os 20% por 90 dias (R-27) e a devolução de até 5 USDC depois de 250 apostados (R-28),
-      e publica o relatório.
-- [ ] O site aceita o link `?ref=<carteira>`, propõe a assinatura antes da primeira aposta e mostra o saldo.
+**Half A, the referral.**
 
-**Metade B, a disputa.**
+- [ ] The `ReferralLink` account (`["referral", referee]`) and the `user_link_referrer` instruction exist, one file
+      each under the house rules: signed by the referee, once, immutable. The event is `ReferralLinked`. Every check
+      the instruction uses has a negative test that fails without it (T24).
+- [ ] The indexer gains the `referrals` table. "Before the first entry" is checked from the two on-chain times. The
+      basis of each winning entry of the referee is the fee Brot actually kept, `(fee − from_fee) × entry ÷ V`, from
+      the events and checked against the `Campaign` (P1 §3.9, "a taxa que o Brot de fato recebeu"; TP §3.4.16).
+- [ ] The weekly routine pays the referrer 20% of that basis for 90 days from the referee's first entry (TP v0.0.1 Q9,
+      answered b). It refunds the referee the fee on the first US$50 of entries once they pass US$250, capped at
+      0.05 SOL (P-6, open; built as recommended). The thresholds are SOL constants: 0.4576 and 2.2879 SOL at the
+      reference price (P1 §3.9, inference).
+- [ ] The routine reads finalized rows only. Each payout is written to the `referral_payouts` evidence table, which is
+      snapshotted nightly to VM 2 (K-05, A-4). A public report lists wallets and amounts only.
+- [ ] A transfer that would leave an empty wallet below the rent-exempt minimum (650,240 lamports) is not sent; it
+      carries to the next week and shows as pending **[INF]** (proposal §2.4.6; P-6's "small rebates may hit the
+      reserve path").
+- [ ] The site accepts `?ref=<address>`, records nothing until the new baker signs `user_link_referrer` before their
+      first entry (proposal §3.8), and shows the referral balance where L-10 says.
 
-- [ ] `reread_question`: leitura igual, paga; leitura diferente, etapa 2, com 48 horas. `admin_decide_contest` só
-      confirma ou anula. O evento é `ContestClosed`.
-- [ ] `team_open_contest` tem prazo de 1 hora. O pior caso, de 55 horas, é caso de teste.
-- [ ] A decisão é publicada com o motivo em `/registro`.
+**Half B, the dispute.**
 
-**As duas.**
+- [ ] `reread_campaign`: the same reading pays; a different one goes to stage 2, with 48 hours. `admin_decide_contest`
+      only confirms or voids and never inverts. The event is `ContestClosed`.
+- [ ] Stage 1 completes within 1 hour of `team_open_contest`. The worst case, 55 hours from resolution to payout, is a
+      test case (P1 §4.5).
+- [ ] On a price campaign, the second read fetches the proof transaction at `posted_slot` through RPC B, on the
+      standby (Sprint 07; proposal §2.5). On the other kinds, it re-reads the account and compares it with
+      `observed_value`.
+- [ ] The decision is published, with its reason, on the public record route (`content/void-log/`).
 
-- [ ] O teste aleatório, ampliado com as instruções novas, mantém I1 a I10.
-- [ ] O IDL e o SDK foram regenerados, e o programa foi republicado na devnet pelo artefato do CI.
-- [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
+**Both halves.**
 
-## Entregas
+- [ ] The seeded randomized test, extended with the new instructions, keeps I1 to I15. The pause list of I10′ does not
+      grow: linking and contesting are never paused.
+- [ ] Two users: wallet A cannot create, change or remove B's link.
+- [ ] The IDL, the generated client and the SDK are regenerated; the program is redeployed to devnet from the CI
+      artifact.
+- [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
-- No programa: `state/referral.rs`, `instructions/referral/` e as duas instruções da disputa.
-- Nos serviços: a tabela, o cálculo e a rotina de repasse; a segunda leitura pelo keeper reserva.
-- No site: o vínculo, o saldo e o estado de disputa com a decisão publicada.
+## Deliverables
 
-## Fora desta sprint
+- In the program: `state/referral.rs`, the `user_link_referrer` file, and the `reread_campaign` and
+  `admin_decide_contest` files.
+- In the services: the `referrals` table, the basis computation, the weekly routine and its report; the second read
+  wired into the dispute.
+- On the site: the link, the balance and the contested state with the published decision.
 
-A contestação pelo apostador, com depósito, e a arbitragem interna (fase 1.2). Repartir a taxa dentro de
-`settle_position`, que o plano técnico descartou. Trava contra autoindicação: é risco aceito (P4 §4.7).
+## Out of scope
 
-## Decisões do fundador que travam a sprint
+The contest by any baker, with a deposit, and internal arbitration (phase 1.2). Splitting the fee inside
+`settle_entry`, which the TP rejected (TP §3.4.11). A lock against self-referral: an accepted risk ("isso memso", P1
+§3.9).
 
-- **Q9 (L-10):** quando começam os 90 dias. E onde a pessoa vê o saldo.
-- **L-14:** se a etapa 2 já vale antes da fase 1.2, e qual é o segundo oráculo da pergunta de preço (T8).
-- Quem assina o repasse semanal, que sai da carteira da operação. O plano técnico não diz.
+## Founder decisions that block the sprint
 
-## Agentes e skills
+- **D5** (proposal §5.2): attestation of each entry and wallet screening. Recommendation: (a), none, on devnet; decide
+  after L0 and before this sprint. If (b), `user_join_campaign` also checks a backend ed25519 attestation, bound to
+  program, cluster, campaign, baker, amount, expiry slot and nonce, and never gating settlement.
+- **P-6** (open): the rebate ceiling of 0.05 SOL and the SOL value of the US$50 and US$250 thresholds.
+- **BP-9** (P-9, open): "Referrals, day one" read as the first day on mainnet.
+- **L-10** (Product Brief v0.0.1 gap): where the baker sees the referral balance.
+- **L-14** (Product Brief v0.0.1 gap): whether stage 2 applies before phase 1.2, and the second oracle for price
+  campaigns (T8).
+- **[Q]** Who signs the weekly payout, and from which account. On mainnet the fee account is a multisig (P-7); a weekly
+  multisig transfer or a funded operations wallet are the two shapes. Carried open from TP v0.0.1.
+- **[Q]** Whether the 1% a referee pays in a one-sided pot counts toward the 20%. P1 §3.9 counts winning entries only.
+- **Answered:** TP v0.0.1 Q9 (b: the 90 days start at the referee's first entry).
 
-- **Agentes:** `technical-security-red-team-agent`, `business-red-team-agent` (o custo da autoindicação),
+## Agents and skills
+
+- **Agents:** `technical-security-red-team-agent`, `business-red-team-agent` (the cost of self-referral),
   `dev-product-agent`, `coordinator-agent`.
-- **Skills:** `sprint-management`, `multi-ai-review` (o programa muda depois do portão da Sprint 04),
-  `secrets-discipline`, `secrets-scan`, `codemap`, `verify-build-works`, `decision-log`, `release-check`.
+- **Skills:** `sprint-management`, `multi-ai-review` (the program changes after gate 1), `privacy-audit` (the referral
+  report), `secrets-discipline`, `secrets-scan`, `codemap`, `verify-build-works`, `decision-log`, `release-check`.
 
-## Portões de segurança
+## Security gates
 
-- O teste aleatório volta a passar antes de qualquer republicação.
-- O repasse move dinheiro da operação: a chave dele não vai para o servidor sem decisão registrada.
-- `admin_decide_contest` nunca inverte o resultado.
-- O relatório público traz só carteiras e valores. `secrets-scan` no fechamento.
+- The randomized test passes again before any redeploy (gate 1).
+- The weekly payout moves operations money: its key does not go on the server without a recorded decision.
+- `admin_decide_contest` never inverts a result.
+- The public report carries wallets and amounts only.
+- `secrets-scan` at closure.
 
-## Testes
+## Tests
 
-Um teste por instrução e por erro. Dois usuários: A não cria o vínculo de B. O cálculo do repasse contra os eventos
-de uma pergunta de exemplo. A disputa pelos dois caminhos, na devnet.
+```bash
+export PATH="$HOME/.bun/bin:$PATH"
+bun run build:program && bun run test && bun run test:rust
+cargo fmt --all -- --check
+cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint -- -D warnings
+cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint,mainnet -- -D warnings
+bun test tests/ -t "link referrer refuses"            # to add: a second link, a late link, another signer
+bun test tests/ -t "checks refuse"                    # Sprint 02's negatives, extended to the new instructions
+bun test tests/ -t "decide contest never inverts"     # to add
+bun test tests/ -t "contest worst case is 55 hours"   # to add
+bun test services/                                    # to extend: the referral basis against a campaign's events
+node scripts/codemap.js --check && node scripts/ci-secret-scan.js origin/main
+```
 
-## Riscos
+The dispute by both paths on devnet: a matching re-read that pays, and a different one that goes to stage 2.
 
-- Quem indica depende da empresa para receber: é o custo aceito de manter o repasse fora do programa.
-- O segundo oráculo não estar escolhido quando a sprint abrir.
-- A fatia da taxa que sai em indicação passar do previsto: a regra volta ao fundador (P4 §4.7).
+## Risks
 
-## Artefatos esperados
+- A referrer depends on the company to be paid: the accepted cost of keeping the payout off the program.
+- The second oracle is not chosen when the sprint opens (L-14, T8).
+- The share of the fee paid out in referrals exceeds the plan: the rule goes back to the founder.
+- A program change after gate 1 must pass the randomized test again, and the audit reads it.
 
-Os arquivos do programa e dos serviços listados em Entregas, o relatório de repasse de exemplo, o IDL, `CODEMAP.md`.
+## Expected artifacts
 
-## Changelog e session-log
+The program and service files listed under Deliverables, an example payout report, the IDL and generated client,
+`CODEMAP.md`.
 
-- **Changelog:** indicação; disputa em duas etapas.
-- **Session-log:** as respostas de Q9 e L-14; quem assina o repasse; qual metade entrou, se só uma.
+## Changelog and session log
 
-## Registro e retrospectiva
+- **Changelog:** referral; two-stage dispute.
+- **Session log:** the answers to D5, P-6, L-10 and L-14; who signs the weekly payout; which half went in, if only
+  one.
 
-Preenchidos durante a sprint e no fechamento.
+## Record and retrospective
+
+Filled in during the sprint and at closure.

@@ -88,6 +88,16 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   - sai a camada de IA;
   - entra o app Android, com o mesmo backend;
   - os serviços em Bun, e o site também se passar no teste.
+- **O plano de implementação, em inglês** (8/10/2026), a pedido do fundador, a partir da proposta de arquitetura 0.4
+  aprovada no mesmo dia:
+  - `docs/technical/TECHNICAL-PLAN.md` v0.1.0 substitui a v0.0.1, que fica no histórico do git (commit `0b40554`). O programa em
+    Pinocchio está descrito por inteiro, e entra uma seção sobre o app Android;
+  - `docs/SPRINTS.md` v0.1.0 e os arquivos das Sprints -1 e 02 a 22. Quatro arquivos mudaram de nome (10, 11, 12 e
+    18), e quatro sprints são novas: a 19, a caixa de abertura no site, e de 20 a 22, o app Android;
+  - o `CLAUDE.md` descreve o produto novo.
+
+  As recomendações D6, D7 e D8 da proposta foram lidas como aprovadas com ela, e isso está escrito para o fundador
+  confirmar. O resumo de produto e o documento de design ainda não foram alinhados.
 - **Pesquisa "o pump.fun dos mercados on-chain"** (`knowledge-base/market/pumpfun-model-for-open-markets.md`, em
   inglês, a pedido do usuário em 7/10/2026), com as sete notas de fonte em `knowledge-base/market/pumpfun-model-notes/`.
   Cobre a receita, as taxas, o token e o valor de mercado do pump.fun; a decisão judicial de 31/8/2026 contra ele; o
@@ -195,9 +205,12 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   - a tesouraria, com tudo em SOL;
   - Cloak e SODAX com SOL;
   - as decisões da v0.0.3 que continuam abertas.
-- **Documentos aprovados que contradizem o BP v0.0.4:** o resumo de produto, o plano técnico, o roteiro e o design
-  ainda falam em USDC, teto, Anchor e abertura pela equipe. O deck e o site no ar dizem "0.02 SOL", "a cap" e
-  "markets", e o `CLAUDE.md` descreve o produto em USDC. A revisão de impacto lista o que muda em cada um.
+- **Documentos aprovados que contradizem o BP v0.0.4:** o resumo de produto e o design ainda falam em USDC, teto e
+  abertura pela equipe; o plano técnico, o roteiro e o `CLAUDE.md` já foram refeitos. O deck e o site no ar dizem
+  "0.02 SOL", "a cap" e "markets". A revisão de impacto lista o que muda em cada um.
+- **A confirmar com o fundador:** a leitura de que a aprovação da proposta 0.4 "como está" aprovou também as
+  recomendações D6 (renomear os termos no código), D7 (anular a campanha de preço cuja fonte parou) e D8 (desenhar a
+  tela de abertura na Sprint -1).
 - **Achados de segurança da revisão da proposta**, que valem para o servidor de hoje: o token do túnel do Cloudflare
   fica no ambiente de um processo que roda como o mesmo usuário do site provisório, então qualquer serviço desse
   usuário consegue lê-lo. A proposta recomenda um usuário por serviço e segredos carregados como credencial (seção 2.9).

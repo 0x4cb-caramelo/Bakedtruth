@@ -1,98 +1,127 @@
-# Sprint 07 — Keeper reserva e vigia
+# Sprint 07 — Standby keeper and watchdog
 
-**Estado:** planejada · **Branch:** `sprint-07-standby-watchdog` · **Datas:** sem datas, por decisão do fundador
+**Status:** planned · **Branch:** `sprint-07-standby-watchdog` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
-| Bloco do plano técnico | B6, segunda metade (seção 3.5) |
-| Depende de | Sprint 06 |
-| Regras e fluxos cobertos | R-22, inteira; R-26, só a leitura de conferência com alerta. F3, quando o principal falha |
+| Technical Plan block | B6, second half (TP §3.5, §12) |
+| Depends on | Sprint 06 |
+| Requirements covered | BR-24 (in full), BR-25 (the review queue fed by the second read), BR-08 (the exposure alert) |
 
-## Objetivo
+## Goal
 
-Se o serviço principal cair, o segundo assume e o CTO fica sabendo. O segundo roda em outro provedor, com outra
-carteira e outro RPC.
+If the primary keeper falls, the second takes over and the CTO knows. The standby runs at another provider, with
+another wallet and another company's RPC, sized for a full takeover. It also re-reads every resolution through that
+other RPC and puts any mismatch in front of a person, so that review happens by exception (T22).
 
-## Critério de pronto
+## Definition of done
 
-- [ ] `services/keeper/src` ganha `watchdog.ts` e `alert.ts`; o mesmo pacote roda com `KEEPER_MODE=standby`.
-- [ ] A vigia confere o principal a cada 5 minutos. Com 10 minutos sem resposta, pede o religamento até 3 vezes;
-      depois assume o mesmo laço, a cada 5 minutos, e manda email ao CTO. Há teste com o principal derrubado.
-- [ ] `POST /restart` confere a assinatura HMAC e a data, grava um arquivo-sinal, e uma unidade `path` do systemd,
-      do root, reinicia o keeper. O usuário `brot` segue sem sudo.
-- [ ] Um pedido de `/restart` sem assinatura, ou velho, é recusado (teste).
-- [ ] A vigia também olha a rede: pergunta resolvível parada há mais de 10 minutos é alarme.
-- [ ] O reserva relê por outro RPC a conta de cada pergunta resolvida, compara com `observed_value` e avisa a equipe
-      se diferir.
-- [ ] Os seis alertas saem por email: principal caiu; reserva assumiu; SOL baixo; NÃO gravado com `met_late`; segunda
-      leitura diferente; posição reservada há mais de 7 dias.
-- [ ] Com os dois keepers ligados, a segunda chamada da mesma instrução recebe erro e nada muda (teste).
-- [ ] Ensaio na devnet: parar `brot-keeper.service`, ver o reserva assumir e o email chegar.
-- [ ] A vigia alerta quando o receptor da Pyth é reinstalado ou a configuração dele muda (seção "Herdado da Sprint
-      01"), ou está decidido por escrito, com o motivo, que isso fica para depois.
-- [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
+- [ ] `services/keeper/src` gains `watchdog.ts` and `alert.ts`; the same package runs with `KEEPER_MODE=standby` on a
+      small VM at a second provider, with keeper wallet 2 (different from wallet 1, SOL only) and an RPC account at
+      another company, sized for a full takeover.
+- [ ] **The takeover** (BR-24; P1 §4.4): the watchdog checks the primary every 5 minutes; after 10 minutes without an
+      answer it asks for a restart up to 3 times; then it runs the same loop itself and emails the CTO. Tested with
+      the primary down.
+- [ ] **The standby watches the price feeds of open price campaigns continuously,** since its 5-minute loop would
+      miss every touch (proposal §2.5).
+- [ ] **`POST /restart`** checks an HMAC-SHA256 over the timestamp and the body, writes a flag file, and a root-owned
+      systemd `path` unit restarts the keeper. No service identity gains sudo. An unsigned or stale request is refused
+      (test).
+- [ ] The tunnel's separate ops host exposes only `GET /healthz` and `POST /restart` of the keeper on 4210, for the
+      watchdog; any other path returns nothing (TP §5, §12).
+- [ ] **On-chain liveness:** a resolvable campaign idle for more than 10 minutes, a settling campaign idle for more
+      than 30 minutes, and a keeper wallet below its SOL floor each raise an alert.
+- [ ] **The second read** (proposal §2.11): for a price campaign, the transaction that wrote the proof account at
+      `posted_slot` is fetched through RPC B and compared on price, `publish_time` and account; for the other kinds,
+      the metric account is re-read and compared with `observed_value`. A mismatch puts the campaign in the review
+      queue (T22). Tested with a forged mismatch.
+- [ ] **Alerts by email, to two inboxes:** primary down; standby took over; keeper SOL low; NO recorded with
+      `met_late`; second read differs; a reserved credit older than 7 days; `open_campaigns` above 80% of
+      `max_open_campaigns`; openings per hour above a threshold; any opening by a team key; SOL/USD older than
+      `max_price_age` (paid openings blocked); the SOL held in all open vaults (the exposure no cap bounds); the Pyth
+      receiver's or push oracle's upgrade slot or configuration changed.
+- [ ] With both keepers on, the second call of the same instruction fails and nothing changes (test).
+- [ ] VM 2 is ready to receive the nightly snapshot that Sprint 08 produces.
+- [ ] **Drill on devnet, without `/rpc` load:** `brot-keeper.service` stopped; the standby takes over within the
+      timings above; the email reaches both inboxes (X1.2, first half). Sprint 08, which builds the relay, repeats the
+      drill under `/rpc` load.
+- [ ] **A runbook per alert** in `deploy/vps/` says who acts, how, and how fast (proposal Phase 1).
+- [ ] Each item of "Carried over" below is done, or decided in writing with the reason.
+- [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
-## Entregas
+## Deliverables
 
-- O modo reserva e a vigia, numa máquina pequena fora da Hostinger.
-- O religamento remoto e os alertas.
-- A escolha do segundo provedor, do segundo RPC e do serviço de email (T5).
+- The standby mode, the continuous feed watcher and the watchdog, on VM 2 (S each).
+- The remote restart, the second read feeding the review queue, and the alerts (S each).
+- The second provider, the second RPC company and the email provider chosen (T5, within D4).
 
-## Fora desta sprint
+## Out of scope
 
-`reread_question` gravada na rede (14). O aviso por Telegram (fase 2). O plano de incidente e o cofre de chaves do
-keeper (16).
+`reread_campaign` and `admin_decide_contest` on-chain (Sprint 14). Telegram alerts (phase 2). The incident plan, the
+named reviewer per day and the keeper key custody before mainnet (16). The alerts fed by the indexer (08).
 
-## Decisões do fundador que travam a sprint
+## Founder decisions that block the sprint
 
-- **Q8:** qual provedor recebe a segunda máquina, qual serviço manda o email e com que verba; ou adiar o segundo
-  serviço. A recomendação do plano técnico é contratar já.
+- **Open: D4** for the second provider's VM, the RPC account at another company (the proposal names Alchemy Free or
+  QuickNode Build, US$49 a month) and the email provider. v0.0.1 recommended buying now rather than postponing the
+  second service; that recommendation stands.
 
-## Agentes e skills
+## Agents and skills
 
-- **Agentes:** `technical-security-red-team-agent` (o HMAC, a unidade `path`, o que a carteira 2 alcança),
-  `devils-advocate-agent` (dois serviços com o mesmo código têm o mesmo defeito), `coordinator-agent`.
-- **Skills:** `sprint-management`, `cost-watchdog` (a segunda máquina e o email), `secrets-discipline`,
+- **Agents:** `technical-security-red-team-agent` (the HMAC, the `path` unit, what wallet 2 can reach);
+  `devils-advocate-agent` (two services with the same code share the same defect); `coordinator-agent`.
+- **Skills:** `sprint-management`, `cost-watchdog` (the second VM, the RPC and the email), `secrets-discipline`,
   `secrets-scan`, `verify-build-works`, `codemap`, `decision-log`, `release-check`.
 
-## Portões de segurança
+## Security gates
 
-- A carteira 2 é diferente da 1 e guarda só SOL de taxa.
-- `RESTART_HMAC_SECRET` vive só nos dois `keeper.env`. O endereço público expõe apenas `/healthz` e `/restart`.
-- O email sai do segundo provedor. O servidor de email do projeto vizinho não é usado.
-- O ensaio para apenas unidades `brot-*`. Qualquer coisa além disso pede aviso ao outro lado.
-- `secrets-scan` no fechamento.
+- Wallet 2 differs from wallet 1 and holds only SOL for network fees.
+- The HMAC secret lives only in the two keepers' credentials. The public ops host exposes only `/healthz` and
+  `/restart`.
+- Email leaves from the second provider; the neighbouring project's mail server is not used.
+- The drill stops only `brot-*` units. Anything beyond that needs notice to the other side.
+- `secrets-scan` at closure.
 
-## Testes
+## Tests
 
-`bun test` da vigia, com o principal simulado como derrubado. O ensaio na devnet, com as duas máquinas.
+`bun test services/keeper -t "watchdog"` with the primary simulated as down; the drill on devnet with both machines.
 
-## Herdado da Sprint 01
+```bash
+bun test services/keeper -t "watchdog"
+bun test services/keeper -t "restart refuses unsigned or stale requests"
+bun test services/keeper -t "second read mismatch goes to the review queue"
+bun test services/keeper -t "two keepers change nothing twice"
+```
 
-Da revisão adversarial do leitor de preço (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`, seção 1.8).
+## Carried over
 
-- **A vigia olha também a Pyth.** O leitor de preço confia num programa de fora, o receptor `rec2HH...`. A vigia
-  acompanha o slot da última instalação dele (conta `3UV7w2yTaqVcUAbWm1KUXdcE1Ziw8CfyyCpZvhKFkPfX`) e a
-  configuração (fonte dos preços, mínimo de assinaturas). Se um dos dois mudar, alerta, e a equipe decide se pausa
-  as perguntas de preço.
+From the adversarial review of the price reader (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`, section 1.8),
+re-read against proposal §2.11.
 
-## Riscos
+- **The watchdog also watches Pyth.** The reader trusts an outside program, the receiver `rec2HH…`. The watchdog
+  follows its last upgrade slot (data account `3UV7w2yTaqVcUAbWm1KUXdcE1Ziw8CfyyCpZvhKFkPfX`, the same on both
+  clusters [F]) and its configuration (price source, minimum signatures). The approved proposal adds the push
+  oracle's upgrade slot and configuration. If either changes, an alert fires and the team decides whether to pause
+  price campaigns.
 
-- Dois serviços com o mesmo código têm o mesmo defeito (gravidade alta). A janela de 6 horas e a anulação continuam
-  atrás deles.
-- A rotina de conferir cada resolução ainda não tem dono (P4 §4.6). O alerta chega, mas alguém precisa agir.
-- O email de alerta cair na caixa de spam.
+## Risks
 
-## Artefatos esperados
+- Two services with the same code share the same defect (high). The six-hour window and the void stay behind them.
+- The daily review still has no owner (P4 §5.1): the alert arrives, but someone must act. A named reviewer per day is
+  a mainnet criterion (Sprint 16).
+- The alert email lands in spam. Reduces: two inboxes, and a test email at the drill.
+- The CTO receives the alerts and has no backup person (K-08); before mainnet, every alert goes to two inboxes.
 
-`services/keeper/src/watchdog.ts`, `alert.ts`, a unidade `path` em `deploy/vps/`, o README com a troca de cada
-segredo, `CODEMAP.md`.
+## Expected artifacts
 
-## Changelog e session-log
+`services/keeper/src/watchdog.ts`, `alert.ts`, the `path` unit and the alert runbooks in `deploy/vps/`, the VM 2 setup
+notes, the README with the rotation of each secret, `CODEMAP.md`.
 
-- **Changelog:** keeper reserva e vigia; alertas por email.
-- **Session-log:** o provedor escolhido e o custo; o resultado do ensaio de queda.
+## Changelog and session log
 
-## Registro e retrospectiva
+- **Changelog:** the standby keeper and watchdog; alerts by email; the second read and the review queue.
+- **Session log:** the provider chosen and its cost; the drill's result.
 
-Preenchidos durante a sprint e no fechamento.
+## Record and retrospective
+
+Filled in during the sprint and at closure.

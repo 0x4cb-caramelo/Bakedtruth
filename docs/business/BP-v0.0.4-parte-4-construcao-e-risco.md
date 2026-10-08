@@ -135,8 +135,8 @@ SOL antes de usar.
 **Bun: o resultado da pesquisa pedida** ("verifique a viabilidade e segurança disso"). O Bun 1.4.2 é a versão estável
 da primeira reescrita em Rust, com as 19 regressões conhecidas corrigidas; teve um aviso de segurança médio em 2026, já
 corrigido (FATO SECUNDÁRIO, blog do Bun e bases de avisos). A documentação do Next.js encontrada não confirma o site
-sob Bun. **Proposta, aguardando decisão:** serviços em Bun 1.4.2, versão fixa e arquivo conferido; o site também, se
-passar no teste, com o Node de reserva.
+sob Bun. **Decisão, de 8/10/2026, com a aprovação da proposta de arquitetura 0.4:** serviços em Bun 1.4.2, versão fixa
+e arquivo conferido; o site também, se passar no teste, com o Node de reserva.
 
 ## 3. O roteiro
 
@@ -580,7 +580,7 @@ com "tudo em sol", e a P-7 propõe o substituto.
 | P-7 | A tesouraria, com tudo em SOL | Receber e pagar em SOL; converter por mês o necessário | 4.7 |
 | P-8 | Cloak e SODAX com SOL | Conferir antes de usar | 2.2 |
 | D-f | A fonte do preço dos US$ 500 | **Decidida em 8/10/2026:** Pyth no programa; CoinGecko no site | 2.2 |
-| Bun | O site também em Bun | Só se passar no teste | 2.2 |
+| Bun | O site também em Bun | **Decidida em 8/10/2026**, com a proposta 0.4: só se passar no teste | 2.2 |
 | Slide | O roteiro da rede principal | "After an audit and a multisig" | 3.1 |
 | Nova | A exceção de 5/10/2026 sem o teto | Esperar os dois relatórios | 3.4 |
 | 5 | "No human in the loop" e a janela | Manter a janela; "no human picks the winner" | 4.5 |

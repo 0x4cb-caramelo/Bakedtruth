@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-**Brot Markets**, a pot-based prediction market on Solana (devnet, unaudited), being rebuilt in this repository.
+**Brot Markets**, a platform of On-Chain Campaigns on Solana (devnet, unaudited), being rebuilt in this repository.
 
 The code it grew from is `pred-provable`, "Provable KPI Markets": a sponsor sells YES outcome tokens below face value
 as a bounty on an on-chain goal, and anyone resolves the market by reading the target account on-chain. That program
@@ -13,17 +13,24 @@ README still describes the old economics and stays as the record of the upstream
 of truth for the product; the next section says what is.
 
 Bun workspace (root, `app/`, `packages/*`, `services/*`), two Anchor programs (`programs/brot-markets`, new, and
-`programs/pred-provable`, frozen), Next.js frontend (`app/`).
+`programs/pred-provable`, frozen), Next.js frontend (`app/`). Sprint 02 moves `programs/brot-markets` to Pinocchio,
+and Sprint 03 removes `pred-provable` and the Anchor toolchain.
 
 ## State of the rewrite (read this before the rest)
 
-The product is being rebuilt as **Brot Markets**: a pot-based prediction market. People bet USDC on YES or NO, the
-winners split the pot, the house keeps 10% of the losing side, and there are no outcome tokens, no pool and no early
-exit. The sections below still describe the earlier program (`programs/pred-provable`, sponsor-subsidised YES
+The product is being rebuilt as **Brot Markets**, a platform of On-Chain Campaigns: a YES/NO question that an
+on-chain account answers. Any wallet opens a campaign for US$500 in SOL, charged at the Pyth SOL/USD price (90% becomes
+a prize in the pot, 10% goes to Brot); the team and launch partners open free. Bakers join YES or NO with SOL, the
+winners split the pot, Brot keeps 10% of the losing side and the creator 1% of the entries. Everything is in SOL; there
+are no outcome tokens, no pool, no early exit, no cap and no accepted-account list. Words: campaign, entry, baker,
+creator, pot, YES/NO; never "market" or "bet" outside the brand. The sections below still describe the earlier program (`programs/pred-provable`, sponsor-subsidised YES
 tokens), which is **frozen**: it stays in the workspace only until its readers are ported.
 
-- What to build: `docs/product/PRODUCT-BRIEF.md`. How: `docs/technical/TECHNICAL-PLAN.md`. In what order:
-  `docs/SPRINTS.md` and `docs/sprints/`. Why: `docs/business/BUSINESS-PLAN.md`. The founder's answers in
+- What to build: BP v0.0.4 (`docs/business/BUSINESS-PLAN.md` and its four parts), until the Product Brief
+  (`docs/product/PRODUCT-BRIEF.md`, still v0.0.1 with USDC and the cap) is revised. How:
+  `docs/technical/TECHNICAL-PLAN.md` v0.1.0, derived from the architecture proposal 0.4
+  (`docs/technical/SYSTEM-ARCHITECTURE-PROPOSAL.md`, approved 2026-10-08). In what order: `docs/SPRINTS.md` and
+  `docs/sprints/`, rewritten the same day. The founder's answers in
   `docs/business/ideacao-perguntas-e-respostas.md` outrank the README and the old code.
 - The new program is `programs/brot-markets` (id `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN`). After Sprint 01
   it still has no instruction. It has one reader, `readers/price_touch.rs`, which parses a Pyth `PriceUpdateV2`
@@ -43,6 +50,9 @@ tokens), which is **frozen**: it stays in the workspace only until its readers a
 - `gh` resolves to the upstream repository here. Pass `--repo 0x4cb-caramelo/Bakedtruth` on every `gh` command.
 
 ## Commands
+
+These are the commands for the code as it is today (Anchor). Section 10 of the Technical Plan v0.1.0 lists what
+replaces them from Sprint 02 on (`cargo build-sbf`, Shank and Codama).
 
 Bun is at `~/.bun/bin` and may not be on PATH in tool shells (`export PATH="$HOME/.bun/bin:$PATH"`). Anchor CLI must be
 1.1.2, Solana CLI 3.1.x, Rust 1.89 (pinned by `rust-toolchain.toml`).
@@ -114,7 +124,8 @@ before writing app code.
 **In-app chat** (`app/app/api/chat/route.ts`, `app/components/chat/chat.tsx`, `app/lib/chat.ts`): a read-only explainer
 that streams from OpenRouter (`OPENROUTER_API_KEY`, optional `OPENROUTER_MODEL`, server-only in `app/.env.local`). The
 market page feeds it a text summary through `useChatContext`. It cannot sign or trade. The per-IP rate limit is
-in-memory, so a multi-instance deploy needs a shared store.
+in-memory, so a multi-instance deploy needs a shared store. There is no AI in the new scope (2026-10-08): Sprint 09
+removes this route and `OPENROUTER_API_KEY`.
 
 ## Gotchas
 
@@ -150,7 +161,9 @@ This repository also carries the AI Dev Operating System (`.claude/rules`, `.cla
 are applied where they still add value rather than from zero. Phases 1 to 4 are done: BP v0.0.2 in `docs/business/`,
 the prototype lab with fourteen directions and the approved one in `docs/product/DESIGN-DIRECTION.md`, the Product
 Brief, the Technical Plan and the sprint roadmap. Phase 5 is under way: Sprints 00 and 01 are closed (tags `sprint-00`,
-`sprint-01`) and Sprint 02 is next. The pitch (wizard stage 2.9) is written in `docs/business/PITCH.md`; the founder's
+`sprint-01`) and Sprint 02 is next. On 2026-10-08 BP v0.0.4 changed the product, and the Technical Plan and the
+roadmap were rewritten in English from the approved architecture proposal 0.4; the Product Brief and the design
+direction are still to be aligned. The pitch (wizard stage 2.9) is written in `docs/business/PITCH.md`; the founder's
 own deck is served at `/pitch` by link only, and stays out of search engines until he approves the redaction table there.
 
 Golden rules carried over from the OS:

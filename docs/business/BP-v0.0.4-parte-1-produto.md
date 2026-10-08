@@ -767,8 +767,8 @@ entra com SOL de teste, que não vale dinheiro."
 | D-o | Programa em Pinocchio | — | 2.3 |
 | D-t | O pedido de pergunta sai | 4 | 3.7 |
 
-D-p (Bun), D-q (sem IA), D-r (sem preocupação com prazo) e D-s (advogado na equipe) tocam as Partes 2 e 4; a D-f é
-proposta (seção 5.2). As decisões de 4 e 5/10/2026 e as do pitch continuam valendo, salvo a moeda em dólar digital
+D-p (Bun), D-q (sem IA), D-r (sem preocupação com prazo) e D-s (advogado na equipe) tocam as Partes 2 e 4; a D-f, a
+fonte do preço, foi decidida depois, também em 8/10/2026 (seção 5.2). As decisões de 4 e 5/10/2026 e as do pitch continuam valendo, salvo a moeda em dólar digital
 (D-a), os 0,02 SOL (D-b) e o teto global (D-h). A tesouraria em dólar digital, de 5/10/2026, virou a P-7.
 
 ### 5.2 O que espera decisão do fundador

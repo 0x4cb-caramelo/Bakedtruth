@@ -1,96 +1,151 @@
-# Sprint 05 — SDK e ciclo inteiro na devnet
+# Sprint 05 — SDK and the devnet cycle
 
-**Estado:** planejada · **Branch:** `sprint-05-sdk-devnet-cycle` · **Datas:** sem datas, por decisão do fundador
+**Status:** planned · **Branch:** `sprint-05-sdk-devnet-cycle` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
-| Bloco do plano técnico | B5 (seções 3.2, 3.3 e 10) |
-| Depende de | Sprint 04 |
-| Regras e fluxos cobertos | R-01 a R-04, nas contas do cliente; R-13, com o SIM de stake conferido. F7, por script |
+| Technical Plan block | B5 (TP §3.2, §3.3, §3.4.14 for the decoder rules, §9, §10, §12; Appendix B) |
+| Depends on | Sprint 04 |
+| Requirements covered | BR-01 (the preview mirror and a paid opening on devnet), BR-02 (the SDK mirror of the creation rules), BR-03 and BR-09 (the math mirror), BR-05 (public state), BR-23 (`recheck`), BR-39 |
 
-## Objetivo
+## Goal
 
-Juntar as peças. `packages/sdk` vira a biblioteca que o site, os serviços, os scripts e os testes usam; o programa
-vai para a devnet; e um ciclo inteiro roda lá, acionado por script.
+Join the pieces. `packages/sdk` becomes the one library the site, the Android app, the services, the scripts and the
+tests import (A-6), split into a read half and a transaction half. The program goes to devnet from CI's artifact, and a
+full cycle runs there by script: a wallet outside the team opens a campaign and pays, two wallets join, the result is
+read, the window passes, the winners and the creator are paid.
 
-## Critério de pronto
+## Definition of done
 
-- [ ] `packages/sdk/src` tem `idl/`, `pdas.ts`, `math.ts`, `readers/`, `instructions/`, `events.ts`, `view.ts`,
-      `format.ts` e `errors.ts`. Não importa React nem Next, e a regra `no-restricted-imports` do ESLint falha se
-      importar.
-- [ ] `math.ts` (chance; retorno estimado com a aposta do usuário já no pote; "sem chance" com pote vazio) dá, em
-      teste, o mesmo número que o programa.
-- [ ] `errors.ts` tem uma mensagem por código de erro do programa (L-06).
-- [ ] `tests/helpers.ts` usa o SDK; `app/lib` deixa de ser a biblioteca compartilhada.
-- [ ] O `.so` publicado na devnet é o artefato do CI, com o SHA-256 conferido. Publicar e chamar
-      `admin_initialize_config` acontecem na mesma sessão.
-- [ ] `scripts/team/` propõe, aprova, cancela, confirma, anula, contesta e pausa, cada pessoa com a própria chave.
-- [ ] `bun run smoke:devnet`, reescrito, roda propor, aprovar, apostar, resolver, janela e pagar, e sai com código
-      zero.
-- [ ] Conferido na devnet e anotado: um SIM do `StakeAtLeast`; a Pyth; a virada de época; o tamanho real do lote de
-      pagamentos (C7); o aluguel de uma `Position` (C6); o desvio do relógio (C12).
-- [ ] `bun run seed:devnet`, reescrito, abre perguntas de exemplo dos tipos que passaram.
-- [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
+- [ ] **The SDK split** (proposal §2.3; TP §3.2). The `read` entry point holds PDAs, codecs, the math mirror (fees,
+      payouts, the creator share, the opening conversion and quote, the schedule), public state (`view`), the event
+      decoders, `validateOpenCampaign`, `recheck`, the error messages and the constants. The `tx` entry point holds the
+      transaction builders, simulation and the deterministic summary (A-3). A `dependency-cruiser` rule (pinned here)
+      keeps the read path from importing `tx`. The read API's schemas join `read` in Sprint 08. The proposal and the TP
+      name the package `@brot/sdk`; `packages/sdk/package.json` names it `@brot-markets/sdk` today [F]. The two names
+      are aligned here, and the choice is recorded [AC].
+- [ ] The SDK imports no React, Next.js, Node built-in or DOM API; `Buffer` comes from `buffer`. A lint rule fails if
+      it does.
+- [ ] **T9 is decided and recorded:** the Codama client generated from the Shank IDL, or hand-written codecs with a
+      byte-for-byte test against the Rust serializer.
+- [ ] **The decoder rules** (proposal §2.3) have tests: a failed transaction is skipped; only this program's events
+      are accepted (signed by its event-authority PDA, or inside its own frame with `sol_log_data`); inner account
+      indexes resolve through `loadedAddresses`; each event is keyed by signature, top-level index and inner index.
+- [ ] **The TypeScript math replays the at least 10,000 Rust vectors** of Sprint 04 with no mismatch (X0.3).
+- [ ] **`validateOpenCampaign` refuses at least every case the program refuses:** one test per refused case, fed to
+      both (A-10; X0.7, SDK half).
+- [ ] The opening quote turns US$500 into lamports from the Pyth SOL/USD account, with the `max_lamports` the creator
+      signs (T25).
+- [ ] `recheck(campaign, rpcUrl)` reads the same account through any RPC and returns the value the program recorded
+      (BR-23).
+- [ ] `view` computes the public state from chain time, never the device clock (A-7); one unit test per state.
+- [ ] `errors` holds one message per program error code.
+- [ ] **The React Native check** (proposal §3.2): the SDK ships ESM with `exports`; a CI job bundles both halves with
+      Metro for Android and runs the math vectors under the React Native engine [AC: the tool, with no app yet]. What
+      the app must polyfill (`crypto.getRandomValues`, `crypto.subtle`, `bigint`) is recorded.
+- [ ] `@solana/kit` moves to 8.4.0 if a frozen install and the typecheck pass; otherwise the reason is recorded
+      (`CLAUDE.md` gotcha). zod 4 is pinned.
+- [ ] `tests/helpers.ts` uses the SDK. `app/lib` stops being the shared library; the old site keeps its copy until
+      Sprint 09 [INF].
+- [ ] **Deploy from CI's artifact** (TP §10, §12): downloaded by run id
+      (`gh run download <run id> --repo 0x4cb-caramelo/Bakedtruth`), its `SHA256SUMS` checked; the program keypair
+      taken from its backup outside `target/deploy/`; the deploy and `admin_initialize_config` in the same session.
+      The procedure is written in `deploy/`.
+- [ ] `scripts/team/` opens (team key, free), confirms, voids, contests, pauses and sets the creation params; each
+      person uses their own key. A void saves its public text under `content/void-log/` and passes that text's hash
+      with the `VoidReason` (TP §3.4.7); Sprint 12 gives the record its public format.
+- [ ] **`bun run smoke:devnet`, rewritten for SOL, exits 0 on a full cycle** (X0.2, manual at closure): a wallet
+      outside the team opens a campaign and pays at the Pyth price; two wallets join YES and NO; the result is read;
+      the window ends (drill constants or a team confirmation); the winners and the creator share are paid.
+- [ ] On devnet, a retried entry fails on `expected_entry_total` and a retried opening fails on its `id` (X0.5).
+- [ ] `bun run seed:devnet`, rewritten, opens example campaigns with a team key, of the kinds that passed.
+- [ ] **Checked on devnet and recorded:** a `StakeAtLeast` YES (or the kind stays closed); the SOL/USD account's age
+      against `max_price_age`; an epoch turn; the real settle batch with self-CPI events and its compute cost (T3,
+      C7); the rent of `Campaign` and `Entry`; the clock drift (C12).
+- [ ] Whether the public devnet deployment carries the drill constants or the real ones is decided and recorded [AC].
+- [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
-## Entregas
+## Deliverables
 
-- O SDK completo, adaptado de `app/lib` (plano técnico, seção 3.3).
-- Os scripts da equipe e os dois scripts de devnet reescritos.
-- O programa na devnet, com o teto ligado num valor de teste (L-19).
-- A nota com o resultado das conferências que só uma rede de verdade permite.
+- The SDK with both halves, its decoder, client, preview and `recheck` (M); the React Native check (S); the Kit bump
+  (S).
+- The team scripts, and `smoke:devnet` and `seed:devnet` rewritten for SOL.
+- The program on devnet, with no cap.
+- A note on what only a real cluster could check, in `knowledge-base/tecnologia/`.
 
-## Fora desta sprint
+## Out of scope
 
-O serviço que resolve e paga sozinho (06): aqui o script aciona. O indexer (08). O site (09). A migração para
-`@solana/kit` (T9).
+The service that resolves and pays on its own (Sprint 06): here, the script triggers everything. The indexer and the
+read API schemas (08). The site (09). The Android app (20).
 
-## Decisões do fundador que travam a sprint
+## Founder decisions that block the sprint
 
-Nenhuma nova. A resposta de **Q12** (quem guarda a chave de atualização na devnet) precisa existir para publicar.
+- **Open (Q12's remainder):** which of Lucas and Ronaldo holds the devnet upgrade key on deploy day.
+- **Open (from Sprint 00's review, a founder action):** the program-address keypair backed up outside
+  `target/deploy/`, before the deploy.
+- **Answered:** Q10 falls away: devnet SOL comes from the faucet, and there is no test USDC.
 
-## Agentes e skills
+## Agents and skills
 
-- **Agentes:** `dev-product-agent`, `technical-security-red-team-agent` (o procedimento de publicar e inicializar),
-  `bug-triage-agent`, `coordinator-agent`.
-- **Skills:** `sprint-management`, `secrets-discipline` (chaves de devnet e de equipe, na máquina de quem roda),
+- **Agents:** `dev-product-agent`; `technical-security-red-team-agent` (the deploy and initialization procedure; the
+  deterministic summary); `bug-triage-agent`; `coordinator-agent`.
+- **Skills:** `sprint-management`, `secrets-discipline` (devnet and team keys on the machine of whoever runs them),
   `secrets-scan`, `codemap`, `verify-build-works`, `decision-log`, `release-check`.
 
-## Portões de segurança
+## Security gates
 
-- O programa é compilado no CI. Nada compilado em máquina local nem no servidor vai para a rede.
-- A chave de atualização não vai para o GitHub nem para o servidor.
-- Quem chama primeiro a inicialização vira administrador: publicar e inicializar na mesma sessão.
-- `StakeAtLeast` não abre pergunta real sem um SIM conferido.
-- `secrets-scan` no fechamento.
+- The program is built in CI. Nothing built on a laptop or on the server goes to a cluster.
+- The upgrade key goes neither to GitHub nor to the server.
+- Whoever runs the initialization first becomes admin: deploy and initialize in the same session.
+- `StakeAtLeast` opens no real campaign without a checked YES.
+- No paid key in the SDK or any client bundle (A-5). `secrets-scan` at closure.
 
-## Testes
+## Tests
 
-`bun run test` em `packages/sdk`, com as contas conferidas contra o programa. `bun run smoke:devnet` na rede.
+`bun test` in `packages/sdk`, checked against the program; `bun run smoke:devnet` on the cluster. Filters to add in
+this sprint:
 
-## Herdado da Sprint 00
+```bash
+bun test tests/ -t "sdk math matches rust vectors"
+bun test tests/ -t "decoder rejects foreign, failed and duplicate events"
+bun test tests/ -t "sdk refuses at least what the program refuses"
+bun test tests/ -t "public state follows chain time"
+bun run smoke:devnet                                   # exits 0 at closure (X0.2)
+```
 
-Da revisão de segurança que fechou a Sprint 00 (`docs/sprints/sprint-00-setup.md`).
+## Carried over
 
-- Na primeira publicação na devnet, baixar o artefato sempre pelo número da execução de push na `main` (`gh run download <número>`), nunca só pelo nome, e conferir o `SHA256SUMS`. O roteiro de publicação escreve isso.
-- A chave do endereço do programa precisa de cópia de segurança fora de `target/deploy/` antes da publicação, e o comando de publicação aponta para essa cópia.
-- O endereço do programa no SDK vem do IDL (`idl.address`). Manter assim ao mover `app/lib`.
+From the security review that closed Sprint 00 (`docs/sprints/sprint-00-setup.md`; TP §7.1), re-read for the new
+build.
 
-## Riscos
+- **Download the artifact by run id, never by name, and check `SHA256SUMS`.** Still applies, now to the
+  `cargo build-sbf` artifact. Above.
+- **Back up the program-address keypair outside `target/deploy/`** before the first deploy, and point the deploy
+  command at the backup. Still applies; it is a founder action (above).
+- **The SDK takes the program address from the IDL (`idl.address`).** Re-read for Shank: if the Shank IDL carries the
+  address [AC], keep it as the single source; otherwise one SDK constant, checked in CI against the program's declared
+  id.
 
-- O limite da torneira de USDC da Circle travar os testes (C5).
-- Os limites do RPC público.
-- O SIM do stake de validador não sair: o tipo fica fechado, e os outros quatro seguem.
+## Risks
 
-## Artefatos esperados
+- **A paid opening needs several devnet SOL:** 4.5758 SOL at the reference price of US$109.27, if devnet's SOL/USD
+  account carries a similar price [INF]. The devnet faucet's per-request and rate limits were not read [AC]. Smoke
+  runs and outside creators may stall on faucet SOL.
+- The limits of the public RPC endpoint ("not intended for production") slow the smoke runs.
+- No `StakeAtLeast` YES on devnet: the kind stays closed, and the other four go ahead.
+- Kit 8.4.0 shipped once with unpublished sub-packages (`CLAUDE.md`); the bump waits for a clean frozen install.
 
-`packages/sdk/`, `scripts/team/`, `scripts/devnet-smoke.ts`, `scripts/devnet-seed.ts`, o endereço do programa na
-devnet anotado, a nota das conferências em `knowledge-base/tecnologia/`, `CODEMAP.md`.
+## Expected artifacts
 
-## Changelog e session-log
+`packages/sdk/`, `scripts/team/`, `content/void-log/`, `scripts/devnet-smoke.ts`, `scripts/devnet-seed.ts`, the deploy
+procedure, the devnet program address recorded, the note in `knowledge-base/tecnologia/`, `CODEMAP.md`.
 
-- **Changelog:** SDK; primeira publicação do programa na devnet.
-- **Session-log:** o resultado das conferências de rede e quais tipos abriram.
+## Changelog and session log
 
-## Registro e retrospectiva
+- **Changelog:** the SDK; the first deploy of the program to devnet; the smoke cycle in SOL.
+- **Session log:** T9's decision; who held the upgrade key on deploy day; the devnet checks and which kinds opened;
+  the drill-constants choice.
 
-Preenchidos durante a sprint e no fechamento.
+## Record and retrospective
+
+Filled in during the sprint and at closure.

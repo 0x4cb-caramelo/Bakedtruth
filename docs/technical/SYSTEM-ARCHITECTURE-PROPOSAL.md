@@ -668,9 +668,9 @@ the rent-exempt minimum: 650,240 lamports, about 0.00065 SOL, for a data-less wa
 already holds SOL is above that minimum, so only an empty wallet is at risk.
 - With a minimum entry of 0.01 SOL (P-5, about US$1.09), every winning payout is at least its entry and every
   one-sided refund at least 99% of it, so entries are safe.
-- The creator share and a referral rebate can be smaller. Such a credit stays reserved in the vault; the keeper drops
-  it from its batch by simulation and retries daily, and the recipient can fund the wallet and call the instruction
-  themselves.
+- The creator share can be smaller. Such a credit stays reserved in the vault; the keeper drops it from its batch by
+  simulation and retries daily, and the recipient can fund the wallet and call the instruction themselves. A referral
+  rebate is not paid from the vault: it is a weekly transfer outside the program (K-05).
 
 **Closing.** `close_campaign`, after the last settlement, returns the rent of both accounts to `rent_payer`, sweeps
 any hand-sent surplus to `fee_recipient`, zeroes the campaign's data and reassigns both accounts to the System
@@ -684,7 +684,7 @@ the real review window and minimum duration (T12). The keeper uses SOL only (D-a
 The founder removed the global cap, the per-campaign cap and the accepted list. What that costs, plainly:
 
 1. **A program bug has no ceiling.** In 0.3 the global cap bounded what an exploit could drain. Now every lamport in
-   every open vault is exposed. What remains: the audit (Sprint 16), the 2-of-3 multisig on upgrades, the pause
+   every open vault is exposed. What remains: the two audits (Sprint 17), the 2-of-3 multisig on upgrades, the pause
    (`team_pause_entries`, which stops new entries and never payouts), the randomized invariant test, the negative
    test per check (T24), and an alert on the SOL held in open vaults, which measures the exposure without limiting it
    (§2.11).
@@ -1379,8 +1379,8 @@ where the BP puts it.
 
 ### Phase 0 — Environment and core contracts / data models (Sprints 02–05)
 
-**Entry.** P-1 to P-5 and D-f, which Sprints 02 and 04 needed, were decided on 2026-10-08 (§5.1). The team records T4, T9, T10–T12, T17–T19 and T23–T25 at the
-opening of Sprint 02. On its first day, Pinocchio 0.11 is built with `cargo build-sbf` under Rust 1.89 and Solana
+**Entry.** P-1 to P-5 and D-f, which Sprints 02 and 04 needed, were decided on 2026-10-08 (§5.1). The team records
+T4, T9, T10–T12, T17–T19 and T23–T25 at the opening of Sprint 02. On its first day, Pinocchio 0.11 is built with `cargo build-sbf` under Rust 1.89 and Solana
 CLI 3.1.10.
 
 **Actions.**
@@ -1490,8 +1490,8 @@ systemd-analyze security brot-keeper.service brot-indexer.service brot-rpc.servi
 **Exit criteria X1.**
 - X1.1 A devnet campaign resolves and pays with nobody triggering anything (Sprint 06 DoD), using the devnet drill
   constants.
-- X1.2 Failover drill under `/rpc` load: with the primary stopped, the standby takes over within the R-22 timings, and
-  the email arrives in both inboxes (Sprint 07 DoD).
+- X1.2 Failover drill: with the primary stopped, the standby takes over within the R-22 timings, and the email arrives
+  in both inboxes (Sprint 07 DoD); repeated under `/rpc` load in Sprint 08, where `brot-rpc` is built.
 - X1.3 A rebuild equals the live file, and its totals equal the on-chain `Campaign` accounts and vault balances.
 - X1.4 20 entries made by the smoke script appear in `/activity` within 90 s.
 - X1.5 `/api/v1/campaigns` p99 at or under 300 ms at the origin with 20 concurrent clients.
@@ -1581,7 +1581,7 @@ Tokens A and B, staking, the vault and the bridge (P3) are outside the roadmap, 
 (`docs/SPRINTS.md:238`). The BP puts them on hold and records that the pitch's ready answer, "não dá direito a receita
 nem a voto", contradicts token B's vault and vote (P3 §3; BP-8, open in P-9). It also reads "nao lidaremos com
 tokenomics" as a refusal to judge third-party tokens, not a decision on tokens A and B, and asks the founder to
-confirm that reading (P3, "O que mudou" item 5; a new open item, §5.1). If he meant A and B too, this note falls away.
+confirm that reading (P3, "O que mudou" item 5; a new open item, §5.1). If the founder meant A and B too, this note falls away.
 Two rules should hold if they arrive **[NEW]**:
 - Each is a separate program with its own audit, so the pot program never reads staking state.
 - Token-B fee discounts (P3 §3; the fee stack of P4 §4.6) are paid as off-chain rebates computed by the indexer from
@@ -1628,7 +1628,7 @@ recommendation and keeps it switchable.
 | P-3 | Does the team keep the 1% of what it opens, and pay the US$500? | **Decided 2026-10-08 [FD]:** no and no, "porque nos ja cobramos taxa"; launch partners keep no 1% either ("parceiros nao ficam com 1%") | No payment and `creator_share_bps = 0` for every team-key opening; no `partner` argument (§2.4.5) | Sprint 02 |
 | P-4 | The US$450 prize and the 10% in a one-sided pot and on a void | **Decided 2026-10-08 [FD]:** the prize returns to whoever opened; the 10% follows the cause | `VoidReason`; the 10% held in the vault until the outcome, so the program refunds a house void itself (T23) | Sprint 04 |
 | P-5 | Minimum entry in SOL | **Decided 2026-10-08 [FD]:** 0.01 SOL | `min_entry_lamports`; it keeps entry payouts above the rent minimum (§2.4.6) | Sprint 02 |
-| P-6 | Ceiling on the referral rebate in SOL | 0.05 SOL (was 5 USDC); the US$50 and US$250 thresholds also in SOL | A Sprint 14 constant; small rebates may hit the reserve path | Sprint 14 |
+| P-6 | Ceiling on the referral rebate in SOL | 0.05 SOL (was 5 USDC); the US$50 and US$250 thresholds also in SOL | A Sprint 14 constant; a rebate below the rent minimum to an empty wallet waits for the next week **[INF]** | Sprint 14 |
 | P-7 | The treasury, with a SOL-only platform | The platform receives and pays in SOL; the company converts monthly what it needs, outside it | Fee account under the multisig; refill and conversion runbook | Sprints 06, 18 |
 | P-8 | Cloak and SODAX with SOL | Check before use | The Cloak page for undisclosed sponsors waits for the check | Sprints 13, 17 |
 | P-9 | Still open from v0.0.3: BP-3, 5, 8, 9, 11, 12, 14, 17 (the BP index's row "3, 5, 8, 9, 11, 12, 14, 17"; P1 §5.2 labels each P-9) | v0.0.3's recommendations | BP-5: window in code (04), copy (13). BP-9: Sprint 14. BP-14: creator flag and notice (08, 11). BP-17: frozen in 16. BP-3, 8, 11, 12: no architecture impact | As listed |

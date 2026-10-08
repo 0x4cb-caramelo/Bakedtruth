@@ -1,84 +1,119 @@
-# Sprint 10 — Site: lista de perguntas
+# Sprint 10 — Site: campaign list
 
-**Estado:** planejada · **Branch:** `sprint-10-site-question-list` · **Datas:** sem datas, por decisão do fundador
+**Status:** planned · **Branch:** `sprint-10-site-campaign-list` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
-| Bloco do plano técnico | B8 (seções 3.6 e 4) |
-| Depende de | Sprint 09 |
-| Regras e fluxos cobertos | R-03, R-04 e R-07, na tela; R-19 (o aviso na pergunta de parceiro); R-21 (selo e destaque). F1 (a lista) e F9 |
+| Technical Plan block | B8 (TP §3.6, §4) |
+| Depends on | Sprint 09 |
+| Requirements covered | BR-05 and BR-09 on the card, BR-19 (partner highlight), BR-21, BR-26 (creator notice), BR-33 (share card), BR-44 (home ordering) |
 
-## Objetivo
+The file was renamed with `git mv` from its v0.0.1 name, under D6.
 
-A página inicial com dados reais: filtrar, buscar, ordenar e ver, em cada card, a chance, o retorno estimado, o
-pote e os prazos.
+## Goal
 
-## Critério de pronto
+The home page with real data: the campaigns in the indexer's order, with filters and search, and on each card the
+generated sentence, the chance, the estimated return, the pot in SOL and the two deadlines. Each campaign also gets the
+share card it carries to X.
 
-- [ ] `/` lê `/api/v1/questions`.
-- [ ] O card mostra: o tipo; o texto gerado dos parâmetros, conferido contra o `text_hash`; a chance de cada lado; o
-      retorno estimado, com a palavra "estimativa"; o total do pote e de cada lado; o fechamento das apostas e a
-      data final; a prova, com a barra; e o estado.
-- [ ] As categorias são os cinco tipos de R-13. Os filtros são os cinco estados e "Saved", guardado no
-      `localStorage`. A ordenação é por tamanho do pote, fechamento e chance do SIM.
-- [ ] O card existe nos cinco estados. "Em revisão" tem relógio. Não há "Redemption".
-- [ ] Pote vazio mostra "sem chance" (L-05).
-- [ ] O destaque mostra a pergunta de parceiro com selo, nome, link e 72 horas, lidos de `content/partners.json`. O
-      aviso de R-19 aparece em toda pergunta de parceiro.
-- [ ] "Closing soon" conta o fechamento das apostas. "Upcoming" e "Notify" não existem.
-- [ ] Há tela de carregamento, de erro de rede e de vazio para a grade, o carrossel e a lista lateral.
-- [ ] "Como funciona" traz os passos do pote e abre também no celular.
-- [ ] A lista longa pagina ou carrega por partes.
-- [ ] A busca tem anel de foco, e o carrossel não anuncia cada troca ao leitor de tela.
-- [ ] `cd app && bun run lint && bun run build` passa.
-- [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
+## Definition of done
 
-## Entregas
+- [ ] `/` reads `/api/v1/campaigns` and follows the indexer's `rank` and `listed` (proposal §2.7): partner campaigns
+      during their 72-hour highlight, then two-sided campaigns by entries and by time left before entries close, then
+      one-sided ones. A campaign with no entry 24 hours after opening leaves the home page and stays reachable by
+      link and in an "all campaigns" list with filters (BR-44). Nothing a creator can pay for, the prize included,
+      moves a card up.
+- [ ] The card shows:
+  - the kind;
+  - the sentence, rendered by `template_version` from the stored fields, with names from
+    `content/account-names.json` or the pinned Pyth feed list, and otherwise the shortened address (A-11);
+  - the chance on each side, the share of entries (P1 §3.2);
+  - the estimated return, with the word "estimativa", net of the fee and the creator share, from the SDK math;
+  - the pot and each side in SOL, the prize when there is one, and the US$ display value with its source and time
+    (D-e), with CoinGecko's attribution if the plan in use requires it **[AC]** (D4; [E79]);
+  - entries close and deadline; the proof with its bar; the state.
+- [ ] The categories are the five kinds. The filters are the five states and "Saved", kept in `localStorage`. The sort
+      is by pot, by entries close and by YES chance.
+- [ ] The card exists in the five states. "Em revisão" has a clock. There is no redemption.
+- [ ] An empty pot shows no chance (L-05, Product Brief v0.0.1 gap).
+- [ ] A partner campaign shows the seal, name, link and 72-hour highlight from `content/partners.json`. Burn, lock and
+      stake cards, partner campaigns included, carry the notice "quem abriu pode controlar o resultado e pode ter
+      entrado no SIM ou no NÃO" (BR-26).
+- [ ] "Closing soon" counts to entries close. "Upcoming", "Notify" and "Sponsor a goal" do not exist (D-t). The link
+      to open a campaign points to `/abrir` and appears with Sprint 19.
+- [ ] **The share card:** `app/c/[id]/opengraph-image.tsx` renders the sentence, the live value, the deadline, the pot
+      and the YES/NO split from the indexer's DTO, with self-hosted fonts; after resolution, the value read, the target
+      and the result. The route convention is checked in `app/node_modules/next/dist/docs/` first **[AC]**. Cards are
+      cached at the edge with a short TTL (proposal §2.8).
+- [ ] The share button is a plain intent link. No X script or widget on any page (K-10).
+- [ ] Loading, network-error and empty states exist for the grid, the carousel and the side list.
+- [ ] "How it works" shows the steps of the pot and opens on phones.
+- [ ] A long list paginates or loads in parts.
+- [ ] The search has a focus ring, and the carousel does not announce every change to a screen reader.
+- [ ] The phone layouts of Sprint -1 are in place.
+- [ ] `cd app && bun run lint && bun run build` passes.
+- [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
-- A funcionalidade da lista em `app/features/`, com o mosaico, os princípios, os filtros e a grade.
-- `content/partners.json`, com o formato do selo.
-- Os textos dos passos e dos princípios, revistos pela tabela de conflitos do documento de design.
+## Deliverables
 
-## Fora desta sprint
+- The list feature in `app/features/`: mosaic, principles, filters and grid.
+- The share-card route and the share button (size S, proposal §4.0).
+- The seal's display fields (seal, name, link) added to `content/partners.json`, which Sprint 08 created, and to its
+  JSON Schema check in CI (proposal §2.3).
+- The copy of the steps and principles, reviewed against the design direction's conflicts table.
 
-A página da pergunta (11). "Sponsor a goal" e o pedido de pergunta (15): o link fica fora até lá. Avisar o usuário
-da abertura de uma pergunta (L-16).
+## Out of scope
 
-## Decisões do fundador que travam a sprint
+The campaign page (11). The creation box (19). Notifying anyone that a campaign opened (L-16: no channel in the MVP).
+The sponsor's seal on a sealed entry (15).
 
-Nenhuma nova. Precisa estar respondido, da Sprint -1, onde ficam o selo e o destaque do parceiro (L-24).
+## Founder decisions that block the sprint
 
-## Agentes e skills
+None open. Sprint -1 must have answered L-24 (where the partner's seal and highlight go). **Answered:** D-d (partners
+open free, with a 72-hour highlight), D-e (CoinGecko for display), D-t (no sponsor request).
 
-- **Agentes:** `dev-product-agent`, `copywriter-agent` (passos e princípios), `coordinator-agent`.
+## Agents and skills
+
+- **Agents:** `dev-product-agent`, `copywriter-agent` (steps and principles), `coordinator-agent`.
 - **Skills:** `feature-scaffold`, `sprint-management`, `verify-build-works`, `codemap`, `secrets-scan`.
 
-## Portões de segurança
+## Security gates
 
-- `content/partners.json` fica no Git e entra com a revisão de duas pessoas.
-- Nenhuma tela promete retorno: o número é sempre "estimativa".
-- Nenhum script de terceiro. `secrets-scan` no fechamento.
+- `content/partners.json` lives in Git and changes only with two people's review.
+- No screen promises a return: the number is always "estimativa".
+- The share card renders only fields of the indexer's DTO, never text from a request.
+- No third-party script. `secrets-scan` at closure.
 
-## Testes
+## Tests
 
-Build e lint. Conferência da lista contra as perguntas abertas pelo `seed:devnet`: a chance e o retorno da tela
-batem com `packages/sdk/math.ts`. Filtros, busca e ordenação à mão. Teclado e largura de celular.
+```bash
+export PATH="$HOME/.bun/bin:$PATH"
+(cd app && bun run lint && bun run build)
+bun test tests/ -t "card estimate matches sdk math"      # to add
+bun test tests/ -t "home follows the indexer ranking"    # to add; the ranking itself is tested in Sprint 08 (X1.9)
+bun test tests/ -t "share card renders only dto fields"  # to add
+```
 
-## Riscos
+The list against the campaigns that `seed:devnet` opens: chance and return on screen match the SDK. Filters, search
+and sort by hand. Keyboard and phone widths. A card fetched twice is served from the edge the second time.
 
-- O card herdar "preço" e "volume" do protótipo. Reduz: a tabela de conflitos como lista de conferência.
-- O texto da pergunta divergir do `text_hash`.
-- Poucas perguntas na devnet deixarem o mosaico vazio: o estado vazio precisa existir.
+## Risks
 
-## Artefatos esperados
+- The card inherits "price" and "volume" from the prototype. Mitigation: the conflicts table as a checklist.
+- Few devnet campaigns leave the mosaic empty: the empty states must exist.
+- Card rendering costs CPU on the 2-vCPU server (K-06), so a card that spreads must come from the edge cache.
+- The sentence drifts from the program's template: it is rendered only from the SDK's template table, by
+  `template_version`.
 
-`app/features/` (a lista), `content/partners.json`, `CODEMAP.md`.
+## Expected artifacts
 
-## Changelog e session-log
+`app/features/` (the list), `app/c/[id]/opengraph-image.tsx`, `content/partners.json`, `CODEMAP.md`.
 
-- **Changelog:** página inicial com dados reais; selo e destaque de parceiro.
-- **Session-log:** o que mudou em relação ao desenho aprovado na Sprint -1, e o porquê.
+## Changelog and session log
 
-## Registro e retrospectiva
+- **Changelog:** home page with real data and the indexer's ordering; partner seal and highlight; share card.
+- **Session log:** what changed from the design Sprint -1 approved, and why.
 
-Preenchidos durante a sprint e no fechamento.
+## Record and retrospective
+
+Filled in during the sprint and at closure.

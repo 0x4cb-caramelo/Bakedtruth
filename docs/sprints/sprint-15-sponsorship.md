@@ -1,93 +1,131 @@
-# Sprint 15 — Patrocínio pago com pedido de pergunta
+# Sprint 15 — Sponsorship: the sealed entry
 
-**Estado:** planejada · **Branch:** `sprint-15-sponsorship` · **Datas:** sem datas, por decisão do fundador
+**Status:** planned · **Branch:** `sprint-15-sponsorship` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
-| Bloco do plano técnico | B9 (seção 3.4.12) |
-| Depende de | Sprints 04, 05 e 12 |
-| Regras e fluxos cobertos | R-12, R-15, R-16, R-17, R-18, R-19 e R-20. F8 |
+| Technical Plan block | B9 (TP §3.4.12) |
+| Depends on | Sprints 04, 05 and 12 |
+| Requirements covered | BR-16 (sponsorship is the opening; the request is removed), BR-17 (neutral prize or sealed entry), BR-18 (seal, name and link), BR-46 (the Cloak page, if P-8 allows) |
 
-## Objetivo
+**Where it fits.** Track A, in parallel with Sprint 14 (proposal §4.0).
 
-Um projeto paga para pôr prêmio numa pergunta ou para pedir uma nova. O dinheiro fica travado até a equipe
-responder e nunca fica preso.
+**What changed from v0.0.1.** With D-b, opening a campaign already is sponsoring at the minimum: US$500 in SOL, 90%
+a neutral prize and 10% to Brot, built in Sprint 02. D-t removed the sponsor request, so its account, its escrow, the
+team's accept and refuse path and the 14-day self-cancel are gone. The sprint shrinks to the sealed entry and, only if
+the founder keeps it, `sponsor_add_prize` (proposal §2.4.8) **[FD]**.
 
-## Critério de pronto
+## Goal
 
-- [ ] Existem a conta `SponsorRequest` (`["sponsor_request", requester, n]`), o cofre do pedido
-      (`["sponsor_escrow", request]`) e as quatro instruções de patrocínio: `sponsor_create_request`,
-      `team_accept_request`, a recusa e `sponsor_withdraw_request`.
-- [ ] `amount` é conferido contra as três faixas (500, 1.500 e 5.000). `disclosed = false` é recusado com
-      `SponsorBet`.
-- [ ] O aceite abre a pergunta e aplica o dinheiro na mesma instrução: 70% viram `prize_amount` ou uma `Position` do
-      patrocinador, e 30% ficam em `platform_cut_held`. Casos de teste: 350 e 150; 1.050 e 450; 3.500 e 1.500.
-- [ ] A recusa só muda o estado. O saque é assinado pelo patrocinador, depois da recusa ou de 14 dias pendente
-      (teste com o relógio avançado).
-- [ ] `settle_prize` devolve o prêmio inteiro no pote de um lado só e na anulada (R-12). Os 30% seguem o
-      `void_reason` (R-18).
-- [ ] Dois usuários: A não saca o pedido de B.
-- [ ] Com a pausa ligada, `sponsor_create_request` falha, e o saque não.
-- [ ] O teste aleatório, ampliado com o patrocínio, mantém I1 a I10.
-- [ ] No site: o pedido, com faixa, forma e divulgação; o selo, o texto e o aviso de R-19 em toda pergunta
-      patrocinada.
-- [ ] A página do Cloak existe em rota própria, com o aviso de carteira sem SOL.
-- [ ] O IDL e o SDK foram regenerados, e o programa foi republicado na devnet.
-- [ ] Fechamento comum (`docs/SPRINTS.md`, seção 4).
+A sponsor puts money on one side of a campaign under its own name, and Brot's 10% of it waits in the vault until the
+outcome. If the founder says yes, a third party can also add a prize to a campaign someone else opened.
 
-## Entregas
+## Definition of done
 
-- No programa: `state/sponsor.rs` e `instructions/sponsorship/`, no molde de `escrow` que o plano técnico cita.
-- Os scripts da equipe para aceitar e recusar.
+- [ ] **The sealed entry** (`SponsorEntry` in the D6 table) is an entry on YES or NO that also charges 10% (proposal
+      §2.4.8). Whether it is a variant of `user_join_campaign` or its own instruction file is recorded at the sprint's
+      opening; either way one instruction lives in one file. Of the amount paid, 90% becomes the entry and 10% the
+      sponsor fee **[INF]** (P1 §3.7's 90/10, applied to the entry as TP v0.0.1 §3.4.12 applied 70/30).
+- [ ] The 10% waits in the campaign vault, bookkept, until the outcome (TP v0.0.1 Q6, answered a; the same path as the
+      opening's 10%, T23). Then it is swept to `fee_recipient`, or refunded on a house-failure void (`VoidReason`).
+- [ ] The sealed entry follows the common rule of any entry in a one-sided pot and on a void (TP v0.0.1 Q5, answered
+      a): refunded without fee on a void; charged 1% in a one-sided pot unless it is the first baker.
+- [ ] The seal, the sponsor's name and its link live in `content/partners.json`, reviewed by two people; the card and
+      the campaign page show them (BR-18). The perks beyond seal, name and link follow BP-3 (P-9, open).
+- [ ] A sealed entry is disclosed by definition. An undisclosed sponsor gives only a neutral prize ("quem não mostra o
+      nome só entra com prêmio neutro", P1 §3.7). The program cannot tell an undisclosed sponsor joining as a plain
+      baker from any baker **[INF]**, so the sponsored campaign shows the notice that "o patrocinador pode controlar o
+      resultado e pode ter entrado num dos lados" (P1 §3.7). The screen says "não divulgado", never "anônimo".
+- [ ] **`sponsor_add_prize(lamports, disclosed)`**, built only if the founder keeps it (P1 §3.7's open question): a
+      later prize on an existing campaign, at the same 90/10; the prize returns whole to that sponsor in a one-sided
+      pot and on a void, and its 10% follows the cause, as P-4 rules for the opening **[INF]**; it stays outside the
+      creator share's base (P-1, I12). If the answer is no, it is not built and the reason is recorded.
+- [ ] With the pause on, the sealed entry and, if kept, `sponsor_add_prize` fail; resolution, payouts and refunds work
+      (I10′).
+- [ ] Two users: wallet A cannot settle, redirect or refund B's sealed entry or added prize.
+- [ ] **The Cloak page (BR-17):** its own route, with no Cloak code on the entry page (K-10), built only if P-8
+      confirms Cloak works with SOL. On devnet it is a demonstration.
+- [ ] The seeded randomized test, extended with the sealed entry and, if kept, the added prize, keeps I1 to I15 (I3′
+      and I15 with the sponsor fee in the bookkeeping).
+- [ ] The IDL, the generated client and the SDK are regenerated; the program is redeployed to devnet from the CI
+      artifact.
+- [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
-## Fora desta sprint
+## Deliverables
 
-A página do SODAX (17). O patrocínio não divulgado de ponta a ponta: o Cloak só existe na rede principal. As
-contrapartidas das faixas pagas, que são proposta, não decisão.
+- In the program: the sealed entry and, if kept, `sponsor_add_prize`, each in its own file, with negative tests per
+  check (T24). Size S–M (proposal §4.0).
+- On the site: the sealed entry and, if kept, the added prize, with the screens L-11 asks for; the seal on cards and
+  pages; the Cloak page if P-8 allows it.
+- The `content/partners.json` fields for sponsors.
 
-## Decisões do fundador que travam a sprint
+## Out of scope
 
-- **Q5:** a aposta de patrocinador, que tem lado, no pote de um lado só e na anulada.
-- **Q6:** onde ficam os 30% até a pergunta terminar.
-- **L-11** e **L-18:** as telas do pedido, do aceite, da recusa e do saque, e a página do Cloak.
-- As contrapartidas de cada faixa paga (resumo de produto, seção 16, item 5).
+The sponsor request, its escrow and its 14-day self-cancel (D-t). Fixed paid tiers (BP-3 proposes 500 as a floor,
+with no tiers). The SODAX page (17). An undisclosed sponsorship end to end: Cloak works only on mainnet. Any change to
+the opening, which already is the US$500 sponsorship (Sprint 02).
 
-## Agentes e skills
+## Founder decisions that block the sprint
 
-- **Agentes:** `technical-security-red-team-agent`, `business-red-team-agent` (faixas e contrapartidas),
+- **[Q]** May a third party add a prize to someone else's campaign (P1 §3.7, "Continua sem regra")? It is the only
+  reason to keep `sponsor_add_prize`.
+- **[Q]** The sealed entry's minimum: the US$500 floor of the pitch ("From $500") and of BP-3, or none. If the floor
+  applies, the program prices it at the Pyth SOL/USD price with `max_lamports`, reusing the opening's conversion (TP
+  §3.4.16).
+- **BP-3** (P-9, open): the perks; recommended: seal, name and link for all, posts and highlight case by case.
+- **P-8** (open): whether Cloak works with SOL.
+- **L-11 and L-18** (Product Brief v0.0.1 gaps): the screens of the sealed entry and of the Cloak page.
+- **Answered:** D-b and D-t (opening is sponsoring; no request); TP v0.0.1 Q5 (a) and Q6 (a); P-1; P-4.
+
+## Agents and skills
+
+- **Agents:** `technical-security-red-team-agent`, `business-red-team-agent` (the perks and the floor),
   `copywriter-agent`, `coordinator-agent`.
-- **Skills:** `sprint-management`, `multi-ai-review`, `feature-scaffold`, `secrets-scan`, `codemap`,
-  `verify-build-works`, `decision-log`, `release-check`.
+- **Skills:** `sprint-management`, `multi-ai-review`, `feature-scaffold`, `privacy-audit` (sponsor names and links),
+  `secrets-scan`, `codemap`, `verify-build-works`, `decision-log`, `release-check`.
 
-## Portões de segurança
+## Security gates
 
-- O teste aleatório volta a passar antes de qualquer republicação.
-- O dinheiro do patrocinador nunca fica preso: recusa, 14 dias e anulação têm saída testada.
-- O código do Cloak não entra na página de aposta.
-- A tela diz "não divulgado", nunca "anônimo", com o aviso de R-19.
-- `secrets-scan` no fechamento.
+- The randomized test passes again before any redeploy (gate 1).
+- The sponsor's money is never stuck: void, one-sided pot and close each have a tested exit.
+- No Cloak code on the entry page (K-10).
+- The copy says "não divulgado", never "anônimo", with the notice above.
+- `secrets-scan` at closure.
 
-## Testes
+## Tests
 
-Um teste por instrução e por erro. As três faixas, nas duas formas. Os desfechos: resolvida, de um lado só, anulada
-por causa de fora e anulada por falha da casa.
+```bash
+export PATH="$HOME/.bun/bin:$PATH"
+bun run build:program && bun run test && bun run test:rust
+cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint -- -D warnings
+cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint,mainnet -- -D warnings
+bun test tests/ -t "sealed entry holds its 10 percent until the outcome"   # to add
+bun test tests/ -t "sealed entry follows the common rule"                  # to add: one-sided, void by cause
+bun test tests/ -t "added prize returns to its sponsor"                    # to add, only if kept
+bun test tests/ -t "paused campaign refuses new money, never payouts"      # I10′, extended
+node scripts/codemap.js --check && node scripts/ci-secret-scan.js origin/main
+```
 
-## Riscos
+One test per instruction and per error. The outcomes on devnet: resolved, one-sided, voided by an outside cause and
+voided by a house failure.
 
-- O patrocinador que controla o resultado e aposta. As travas de R-19 reduzem; o risco continua.
-- O bloco não estar pronto quando o código for para a auditoria: o fundador escolhe entre mover a data e abrir sem
-  ele (P4 §3.3).
-- O cofre do Cloak ser pequeno para esconder um patrocínio grande (P4 §5.2).
+## Risks
 
-## Artefatos esperados
+- A sponsor who controls the result also enters. The notice reduces the harm; the risk stays (P1 §3.7).
+- The sprint is not ready when Sprint 16 cuts the release candidate: the founder chooses between waiting and auditing
+  without it (Sprint 16).
+- Cloak hides only small amounts well (P1 §3.7, citing P4 §2.2), so a large undisclosed prize may not stay hidden.
 
-Os arquivos de Entregas, `app/features/` (patrocínio, Cloak), o IDL, `CODEMAP.md`.
+## Expected artifacts
 
-## Changelog e session-log
+The program files of Deliverables, `app/features/` (sealed entry, Cloak page if built), `content/partners.json`, the
+IDL and generated client, `CODEMAP.md`.
 
-- **Changelog:** patrocínio pago com pedido de pergunta; página do Cloak.
-- **Session-log:** as respostas de Q5 e Q6; as contrapartidas decididas.
+## Changelog and session log
 
-## Registro e retrospectiva
+- **Changelog:** the sealed entry; the added prize, if kept; the Cloak page, if built.
+- **Session log:** the answers on the added prize and the floor; the perks decided; P-8's result.
 
-Preenchidos durante a sprint e no fechamento.
+## Record and retrospective
+
+Filled in during the sprint and at closure.
