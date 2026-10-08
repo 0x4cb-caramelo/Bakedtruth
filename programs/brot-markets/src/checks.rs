@@ -119,10 +119,9 @@ pub fn system_program(account: &AccountView) -> ProgramResult {
     require(is_system, BrotError::WrongSystemProgram)
 }
 
-/// Initialisation only: `program_data` is this program's ProgramData account (owned by the
-/// upgradeable loader, at the PDA of `program_id`, with an upgrade authority set;
-/// `WrongProgramData` otherwise) and its upgrade authority is `authority`
-/// (`UpgradeAuthorityMismatch`). The caller checks separately that `authority` signed.
+/// Initialisation only: `program_data` is this program's ProgramData account (loader-owned, at the
+/// PDA of `program_id`, with an upgrade authority set; `WrongProgramData` otherwise) and that
+/// authority is `authority` (`UpgradeAuthorityMismatch`). The caller checks that it signed.
 pub fn upgrade_authority(
     program_data: &AccountView,
     program_id: &Address,
