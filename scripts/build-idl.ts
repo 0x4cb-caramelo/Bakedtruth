@@ -46,8 +46,13 @@ function checkedShank(): string {
 }
 
 if (import.meta.main) {
-  const shank = checkedShank();
-  run([shank, "idl", "--crate-root", CRATE_ROOT, "--out-dir", PACKAGE_FOLDER]);
-  console.log(`shank-cli ${SHANK_VERSION}: ${CRATE_ROOT} -> ${IDL_PATH}`);
-  console.log(describeRender(await renderCodamaClient()));
+  try {
+    const shank = checkedShank();
+    run([shank, "idl", "--crate-root", CRATE_ROOT, "--out-dir", PACKAGE_FOLDER]);
+    console.log(`shank-cli ${SHANK_VERSION}: ${CRATE_ROOT} -> ${IDL_PATH}`);
+    console.log(describeRender(await renderCodamaClient()));
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
+  }
 }
