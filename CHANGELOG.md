@@ -8,9 +8,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.md`).
+A Sprint 02, o núcleo do pote em Pinocchio, está em revisão no pull request da branch `sprint-02-pot-core`, sem
+mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-02-pot-core.md`).
 
 ### Added
+
+- **Sprint 02: o núcleo do pote, o programa novo em Pinocchio** (`programs/brot-markets`, 8/10/2026). Sai o
+  esqueleto Anchor; entra o programa que guarda SOL de verdade, ainda sem leitura de resultado nem pagamento:
+  - **A configuração e a equipe:** `admin_initialize_config` (só a autoridade de upgrade, lida da conta ProgramData),
+    até cinco chaves da equipe, os parâmetros de criação dentro dos tetos do código e só para as próximas campanhas,
+    o destino das taxas, a troca de admin em dois passos, a pausa por uma chave da equipe e a volta pelo admin.
+  - **A abertura paga:** `user_open_campaign` do tipo preço cobra US$ 500 em SOL ao preço da Pyth SOL/USD, lido na
+    hora da conta patrocinada que o programa deriva da configuração; tudo vai para o cofre da campanha, 90% como
+    prêmio e 10% guardados para a Brot até o resultado. Ao preço capturado da devnet, US$ 119,22, são 4,1940 SOL. As
+    dez regras de abertura do plano técnico têm cada uma o seu erro. Uma chave da equipe abre de graça, sem o 1% do
+    criador; se quiser pôr prêmio, paga como qualquer carteira (a leitura de trabalho, a confirmar). Repetir a
+    abertura com o mesmo número falha sem cobrar duas vezes.
+  - **A entrada:** `user_join_campaign` leva o SOL da carteira do baker para o cofre, a partir de 0,01 SOL, com a
+    trava contra a transação repetida e o retorno mínimo assinado. O pote é escriturado: SOL mandado à mão para o
+    cofre não vira entrada.
+  - **O módulo `checks`:** cada checagem que o Anchor fazia sozinho, escrita à mão num lugar só, com um teste que
+    recusa a conta errada e a prova de que, sem a checagem, o teste falha.
+  - **Eventos por chamada do programa a si mesmo**, um por instrução, com sequência contínua por campanha.
+  - **O IDL do Shank** em `packages/sdk/src/idl` e um cliente gerado pelo Codama no ensaio do T9; a decisão sobre o
+    Codama é da Sprint 05.
+  - **Testes do programa novo:** 145 em Rust (a matemática com casos aleatórios, as checagens no Mollusk, o leitor de
+    preço) e 126 em LiteSVM; os nove filtros da sprint passam, e tirar qualquer checagem derruba o teste dela.
+- **O `bun.lock` baixa do `registry.npmjs.org`** (T15), e os dois `trustedDependencies` saíram depois da revisão.
+- **Build e CI:** `bun run build:program` compila o programa novo com `cargo build-sbf` e escreve o IDL do Shank; o
+  `anchor build` fica só para o `pred-provable`, até a Sprint 03. O CI instala o shank-cli 0.4.9 fixo, confere o IDL
+  e o cliente gerado, e roda os testes com a feature `mainnet` para provar que ela não carrega valores de treino.
 
 - **Termos de serviço e política de privacidade, primeiro rascunho** (`docs/legal/`), pedidos pelo fundador em
   8/10/2026: curtos, sem juridiquês e no tom do pãozinho. Cada seção abre com "the crumb", uma linha do Baked que
@@ -187,6 +214,10 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Changed
 
+- **A página em breve com o vocabulário do D6** (8/10/2026): título, meta tags, título principal, texto de abertura,
+  formulário, exemplo e princípios passam de "prediction markets", "bet", "pool" e USDC para On-Chain Campaigns,
+  entrar no YES ou NO, pote e SOL. O aviso legal do rodapé e o deck em `/pitch` não mudaram.
+
 - **Vocabulário, a pedido do usuário em 7/10/2026:** o produto passa a ser descrito só como "mercados", com
   "posição" e "participante". A proposta de arquitetura já segue a regra. Os documentos anteriores e o site no ar
   ainda não foram revistos (a página inicial usa as palavras antigas no título, na descrição e no cabeçalho), e os
@@ -216,6 +247,10 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   visitante. Apontado pela revisão de segurança do commit; nenhum caso testado saía do domínio.
 
 ### Em aberto
+
+- **Sprint 02, para o fundador confirmar:** que aprovar a proposta de arquitetura aprovou também a troca de nomes
+  do D6; que o Lucas e o Ronaldo têm, os dois, chaves da equipe (Q12); a leitura de trabalho de "a equipe põe
+  prêmio" (paga como qualquer carteira). O R4, abertura mais barata nos primeiros meses, não foi construído.
 
 - **Autoria no Colosseum, prazo 12/10/2026:** o plano diz que a equipe se apresenta como uma pessoa, mas o git mostra
   quatro autores desde 14/9/2026, e o regulamento pede todos os membros e verifica quem fez o trabalho. O código vindo
