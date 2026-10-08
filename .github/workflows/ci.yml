@@ -213,10 +213,10 @@ jobs:
         run: node scripts/os-self-test.js
 
       # The "coming soon" site has no dependencies, so it needs no install step.
+      # A glob, as CLAUDE.md documents: a new test file (docs.test.mjs came with docs.brot.markets) runs without
+      # anyone remembering to list it here.
       - name: Landing site tests
-        run: >-
-          node --test services/landing/tests/leads.test.mjs services/landing/tests/server.test.mjs
-          services/landing/tests/pages.test.mjs
+        run: node --test services/landing/tests/*.test.mjs
 
       - name: Secret scan over the branch
         env:
