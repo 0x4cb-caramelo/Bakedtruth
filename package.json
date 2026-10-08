@@ -20,7 +20,7 @@
     "idl": "bun run scripts/build-idl.ts",
     "sync-idl": "bun run --filter @pred-provable/app sync-idl",
     "test": "bun test tests/",
-    "test:rust": "cargo test -p pred-provable --features no-entrypoint && cargo test -p brot-markets --features no-entrypoint",
+    "test:rust": "cargo test -p pred-provable --features no-entrypoint && SBF_OUT_DIR=$PWD/target/deploy cargo test -p brot-markets --features no-entrypoint",
     "deploy:devnet": "solana program deploy target/deploy/pred_provable.so --program-id target/deploy/pred_provable-keypair.json --keypair $HOME/.config/solana/pred-provable-devnet.json --url devnet",
     "smoke:devnet": "bun run scripts/devnet-smoke.ts",
     "seed:devnet": "bun run scripts/devnet-seed.ts",

@@ -12,9 +12,9 @@ is frozen. What carries over is its way of resolving: typed reads of on-chain ac
 README still describes the old economics and stays as the record of the upstream program. It is no longer the source
 of truth for the product; the next section says what is.
 
-Bun workspace (root, `app/`, `packages/*`, `services/*`), two Anchor programs (`programs/brot-markets`, new, and
-`programs/pred-provable`, frozen), Next.js frontend (`app/`). Sprint 02 moves `programs/brot-markets` to Pinocchio,
-and Sprint 03 removes `pred-provable` and the Anchor toolchain.
+Bun workspace (root, `app/`, `packages/*`, `services/*`), two programs (`programs/brot-markets`, new, on Pinocchio
+since Sprint 02, and `programs/pred-provable`, frozen, still on Anchor), Next.js frontend (`app/`). Sprint 03 removes
+`pred-provable` and the Anchor toolchain.
 
 ## State of the rewrite (read this before the rest)
 
@@ -32,9 +32,11 @@ tokens), which is **frozen**: it stays in the workspace only until its readers a
   (`docs/technical/SYSTEM-ARCHITECTURE-PROPOSAL.md`, approved 2026-10-08). In what order: `docs/SPRINTS.md` and
   `docs/sprints/`, rewritten the same day. The founder's answers in
   `docs/business/ideacao-perguntas-e-respostas.md` outrank the README and the old code.
-- The new program is `programs/brot-markets` (id `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN`). After Sprint 01
-  it still has no instruction. It has one reader, `readers/price_touch.rs`, which parses a Pyth `PriceUpdateV2`
-  of a feed the caller must name, and is called by nothing until Sprint 03. Its client library is `packages/sdk`; `app/lib` moves there in Sprint 05.
+- The new program is `programs/brot-markets` (id `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN`), on Pinocchio.
+  Sprint 02 adds its first instructions: the config, the team and the pause, the paid opening of a price campaign
+  and the SOL entry, each emitting one event by self-CPI. Its reader `readers/price_touch.rs` parses a Pyth
+  `PriceUpdateV2` of a feed the caller must name. Its client library is `packages/sdk`, which holds the Shank IDL and
+  the Codama client of the T9 spike; `app/lib` moves there in Sprint 05.
 - `services/landing` is the provisional `brot.markets` site: a "coming soon" page with a waitlist, a privacy page and
   the pitch deck under the `pitch/` path. Plain Node, no dependencies, its own tests (`node --test services/landing/tests/*.test.mjs`).
   It stores emails, so read section 8.1 of the technical plan before changing what it keeps. It goes away in Sprint 09.
@@ -45,23 +47,28 @@ tokens), which is **frozen**: it stays in the workspace only until its readers a
 - New program code follows the house rules: one instruction and one reader per file, under 200 lines, a
   `Purpose:` header, checked math (clippy denies unchecked arithmetic and truncating casts in that crate), and
   `init-if-needed` off unless an instruction justifies it.
-- The program is built in CI, never on the shared server. A machine without the pinned toolchain takes the
-  generated IDL from the `idl-preview-<run id>` artifact of a pull-request run and commits it.
+- The programs are built in CI, never on the shared server. The brot-markets IDL needs no build: `bun run idl`
+  writes it from the source with shank-cli 0.4.9. For pred-provable's IDL, a machine without the pinned toolchain
+  takes it from the `idl-preview-<run id>` artifact of a pull-request run and commits it.
 - `gh` resolves to the upstream repository here. Pass `--repo 0x4cb-caramelo/Bakedtruth` on every `gh` command.
 
 ## Commands
 
-These are the commands for the code as it is today (Anchor). Section 10 of the Technical Plan v0.1.0 lists what
-replaces them from Sprint 02 on (`cargo build-sbf`, Shank and Codama).
+Until Sprint 03 both programs are in the workspace: `brot-markets` builds with `cargo build-sbf` and Shank writes its
+IDL; `pred-provable` builds with `anchor build`. Section 10 of the Technical Plan v0.1.0 lists what changes when Anchor
+leaves.
 
 Bun is at `~/.bun/bin` and may not be on PATH in tool shells (`export PATH="$HOME/.bun/bin:$PATH"`). Anchor CLI must be
-1.1.2, Solana CLI 3.1.x, Rust 1.89 (pinned by `rust-toolchain.toml`).
+1.1.2, Solana CLI 3.1.x, Rust 1.89 (pinned by `rust-toolchain.toml`), shank-cli 0.4.9 in the ignored `target/tools`
+(`cargo install --locked --version 0.4.9 --root target/tools shank-cli`; `bun run idl` refuses any other version).
 
 ```bash
 bun install
-bun run build:program      # NO_DNA=1 anchor build (both programs), then sync-idl: app/lib/idl and packages/sdk/src/idl
+bun run build:program      # anchor build -p pred_provable; cargo build-sbf (brot-markets, into target/deploy); bun run idl; sync-idl (app/lib/idl)
+bun run idl                # brot-markets: Shank IDL from the source into packages/sdk/src/idl, then the Codama client into idl/generated
 bun run test               # bun test tests/  (TypeScript, LiteSVM, in-process; no validator)
 bun run test:rust          # cargo test for pred-provable and brot-markets, --features no-entrypoint
+cargo test --locked -p brot-markets --features no-entrypoint,mainnet   # the mainnet values, never the drill ones (T12)
 bun run lint               # prettier --check on tests/, scripts/ and packages/
 cargo fmt --all -- --check
 cargo clippy --locked -p pred-provable --all-targets --features no-entrypoint -- -D warnings
@@ -75,9 +82,11 @@ cd app && bun run lint && bun run build
 
 Single tests: `bun test tests/ -t "<describe or test name substring>"`; `cargo test -p pred-provable --features no-entrypoint <name>`.
 
-Both test suites load `target/deploy/pred_provable.so`, so **run `anchor build` before testing** after any program change.
-CI (`.github/workflows/ci.yml`) runs all of the above and fails if a committed IDL or `CODEMAP.md` is stale, if
-`Cargo.lock` disagrees with the manifests, or if the branch adds something shaped like a credential.
+The test suites load the program binaries (`target/deploy/pred_provable.so`; `target/deploy/brot_markets.so` for
+`tests/brot/` and the Mollusk checks), so **run `bun run build:program` before testing** after any program change.
+`tests/brot/kit.test.ts` and `tests/brot/idl.test.ts` need no binary. CI (`.github/workflows/ci.yml`) runs all of the
+above and fails if a committed IDL (the Codama client included) or `CODEMAP.md` is stale, if `Cargo.lock` disagrees
+with the manifests, or if the branch adds something shaped like a credential.
 
 Devnet: `deploy:devnet`, `smoke:devnet` (full USDC lifecycle with the app's client stack), `seed:devnet` (demo markets).
 Scripts use `~/.config/solana/pred-provable-devnet.json` (`DEVNET_WALLET`, `DEVNET_RPC_URL` override).
@@ -111,8 +120,10 @@ app *and* the test suite (`tests/helpers.ts`), so tests exercise the exact math/
 `metric.ts`, `view.ts`, `format.ts`, `history.ts`, `hooks.ts` are also shared with `scripts/devnet-*.ts`. Keep these
 free of React/Next imports where they are used by scripts or tests.
 
-**IDL flow**: `target/idl` and `target/types` are committed (gitignore re-includes them) and copied to `app/lib/idl`.
-Program signature changes require `bun run build:program` and committing the regenerated files.
+**IDL flow**: pred-provable's `target/idl` and `target/types` are committed (gitignore re-includes them) and copied to
+`app/lib/idl`. brot-markets' Shank IDL and its Codama client are committed in `packages/sdk/src/idl` (`bun run idl`),
+and `tests/brot/idl.test.ts` checks the hand-written test kit against them. Program signature changes require
+`bun run build:program` (or `bun run idl`) and committing the regenerated files.
 
 **Frontend** (`app/`): Next.js App Router, Tailwind v4, wallet-adapter. The UI follows the approved design direction in
 `docs/product/DESIGN-DIRECTION.md` (Ledger²: lab direction D in dark and N in light, consolidated in `prototype-lab/prototype-n/`,
