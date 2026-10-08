@@ -200,7 +200,9 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   resultado), 10, 13, 15 e 16. O resumo de produto, o plano técnico e a Sprint 02 ainda descrevem a criação só pela
   equipe e precisam ser revistos depois dessas respostas. O plano traz os nomes completos da equipe antes do de acordo
   escrito do Bernardo e do Ronaldo. O slide de receita do `/pitch3` mostrava 960 para quem acertou; o v4 já mostra
-  950, com o 1% de quem abriu.
+  950, com o 1% de quem abriu. Em 8/10/2026, à noite, as oito foram apresentadas ao fundador num quadro, cada uma com
+  a recomendação do plano, para resposta numa sessão só ("ok em todas" ou ajustes); a 2 já pergunta se a semente de
+  500 do v4 substitui os 0,02 SOL e se o 1% é do volume ou do pote. Sem resposta até o fechamento do dia.
 - **O `/pitch3` diz três regras que o plano de negócio não tinha,** a pedido do fundador em 7/10/2026. Desde 8/10/2026
   estão na v0.0.3 como "Decisão do pitch"; o registro abaixo fica como histórico. O plano não
   foi alterado; cada uma pede a decisão dele e a revisão de impacto. (1) **Patrocínio 90/10:** o plano diz 70% para

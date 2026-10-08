@@ -177,3 +177,24 @@ Depois do registro acima, o item dos termos foi retomado e terminou no ar.
   nas rotas do site. Conferido no ar: as páginas do docs, `docs.css`, o estilo, as imagens e o
   `noindex` respondem; `/privacy` e a API da lista dão 404 no `docs.`; o site, os termos, a privacidade e o `/pitch`
   seguem com 200. Para desfazer: tirar a rota do túnel e o registro `docs`.
+
+## 11. O fechamento do dia: os próximos passos
+
+- **O retorno dele:** "Ok, gostei, quais os próximos passos?", depois de ver o docs no ar. Sobre os termos e a
+  privacidade, antes: "ficaram excelentes".
+- **O que propus:** quatro caminhos, pela ordem do roteiro.
+  1. Destravar a Sprint 02.
+  2. Completar o docs com a seção de segurança e as perguntas frequentes.
+  3. Abrir o docs aos buscadores, depois de olhar a MP 1.394.
+  4. Fechar R3, R4 e R6.
+- **A recomendação:** a Sprint 02, com o docs em paralelo. Termos, docs e deck já descrevem regras que o programa
+  ainda não executa.
+- **As oito decisões que travam a Sprint 02** (1, 2, 6, 7, 10, 13, 15 e 16) foram a ele num quadro só, cada uma com a
+  recomendação do plano, para responder de uma vez. A decisão 2 foi reescrita para o que o deck v4 mudou: se a
+  semente de 500 substitui os 0,02 SOL, e se o 1% de quem abriu é do volume (a soma das entradas, sem a semente) ou
+  do pote.
+- **O pedido seguinte:** "vamos documentar tudo o que fizemos até aqui, changelog, sessions, memories e codemap, e
+  tbm commitar e push". Este registro, o índice das sessões, o "Em aberto" do CHANGELOG e a memória foram atualizados.
+  O mapa do código já estava em dia (175 arquivos), porque cada pull request do dia o regenerou.
+- **Continuam fora do Git, por decisão:** `docs/business/BP-v0.0.3-completo.md` e os dois arquivos "Brot Markets Pitch"
+  em `docs/technical/`.
