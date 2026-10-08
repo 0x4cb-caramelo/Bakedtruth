@@ -12,6 +12,15 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Added
 
+- **Business Plan v0.0.3, refeito a partir do pitch** por ordem do fundador em 7/10/2026 ("tomar o pitch como
+  verdade, e transformar o Business plan conforme o pitch"), com três agentes em sequência: mapa de impacto
+  (`docs/business/_review/bp-impact-review-v0.0.3.md`), redação e revisão (`_review/revisao-bp-v0.0.3.md`). Quatro
+  partes, 31.742 palavras, cerca de 66 páginas; o `BUSINESS-PLAN.md` passa a ser o índice da v0.0.3, e a v0.0.2 fica
+  na pasta porque o resumo de produto, o plano técnico e as sprints citam as seções dela. Entram como regra, marcada
+  "Decisão do pitch": qualquer carteira abre mercado por 0,02 SOL e fica com 1% do pote; patrocínio a partir de 500
+  dólares, 90% para o prêmio e 10% de taxa de marketing; o projeto patrocinador como cliente; a equipe com nome e
+  cargo. A parte de tokens cai para cerca de 2.800 palavras. Ficam 19 decisões abertas; ver "Em aberto".
+
 - **Site provisório do `brot.markets`** (`services/landing`), fora do roteiro, a pedido do fundador: página "em
   breve" na direção Ledger², em claro e escuro, com lista de espera; página de privacidade com formulário para sair;
   e o deck de pitch em `/pitch`. Node puro, sem dependências, com 21 testes que entraram na conferência automática.
@@ -112,7 +121,14 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 - **O `/pitch3` mostra "7 of 30 launch spots taken" com sete logos de exemplo.** Não há sete parceiros: foi pedido
   do fundador para ver a animação, e o cartão diz "example". Antes de qualquer apresentação de verdade, trocar a
   lista (`services/landing/public/pitch3/partners.js`) pelos parceiros fechados ou esvaziá-la.
-- **O `/pitch3` diz três regras que o plano de negócio não tem,** a pedido do fundador em 7/10/2026. O plano não
+- **19 decisões abertas no BP v0.0.3** (quadro no `docs/business/BUSINESS-PLAN.md`), oito delas antes da Sprint 02:
+  1 (de onde sai o 1% de quem abriu), 2 (os 0,02 SOL), 6 (a equipe abre mercados), 7 (tipos em que dá para empurrar o
+  resultado), 10, 13, 15 e 16. O resumo de produto, o plano técnico e a Sprint 02 ainda descrevem a criação só pela
+  equipe e precisam ser revistos depois dessas respostas. O plano traz os nomes completos da equipe antes do de acordo
+  escrito do Bernardo e do Ronaldo. O slide de receita mostra 960 para quem acertou; com o 1% do slide de criadores,
+  são 950.
+- **O `/pitch3` diz três regras que o plano de negócio não tinha,** a pedido do fundador em 7/10/2026. Desde 8/10/2026
+  estão na v0.0.3 como "Decisão do pitch"; o registro abaixo fica como histórico. O plano não
   foi alterado; cada uma pede a decisão dele e a revisão de impacto. (1) **Patrocínio 90/10:** o plano diz 70% para
   o pote e 30% para o Brot (Parte 1, §3.7), e as projeções usam os 30%; num patrocínio de 500 dólares a receita cai
   de 150 para 50. (2) **Qualquer um abre mercado, por 0.02 SOL:** o plano diz que a equipe abre as perguntas, o
