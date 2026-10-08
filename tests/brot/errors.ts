@@ -1,7 +1,6 @@
 /**
  * Purpose: the program's custom error codes by name, so tests assert the exact refusal (X0.7).
- *          Mirrors programs/brot-markets/src/error.rs; a lane that appends an error there appends
- *          it here, in the same range.
+ *          Mirrors programs/brot-markets/src/error.rs; a code appended there is appended here.
  * Version: 0.0.1
  * Sprint:  02 (pot core on Pinocchio)
  */
@@ -86,17 +85,7 @@ export const BrotError = {
   // Readers
   ReaderNotReady: 6070,
 
-  // --- Sprint 02 lane A (checks) appends below, from 6100 ---
-
-  // --- Sprint 02 lane B (admin) appends below, from 6120 ---
-
-  // --- Sprint 02 lane C (math) appends below, from 6140 ---
-
-  // --- Sprint 02 lane D (opening) appends below, from 6160 ---
-
-  // --- Sprint 02 lane E (entries) appends below, from 6180 ---
-
-  // --- Sprint 02 lane F (tooling) appends below, from 6200 ---
+  // New codes are appended here, numbered from 6071, as in error.rs.
 } as const;
 
 export type BrotErrorName = keyof typeof BrotError;

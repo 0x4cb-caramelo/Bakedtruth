@@ -1986,7 +1986,7 @@
     {
       "code": 6008,
       "name": "WrongTag",
-      "msg": "The account's type tag is not the one this slot expects"
+      "msg": "The account's type tag is not the one this slot expects (a zeroed account included)"
     },
     {
       "code": 6009,
@@ -2086,7 +2086,7 @@
     {
       "code": 6028,
       "name": "TeamSlotNotEmpty",
-      "msg": "A team slot past team_len is not zero"
+      "msg": "A team slot past `team_len` is not zero"
     },
     {
       "code": 6029,
@@ -2096,57 +2096,57 @@
     {
       "code": 6030,
       "name": "OpeningFeeUsdOutOfRange",
-      "msg": "opening_fee_usd is outside its floor and ceiling"
+      "msg": "`opening_fee_usd` is outside its floor and ceiling"
     },
     {
       "code": 6031,
       "name": "OpeningPrizeBpsOutOfRange",
-      "msg": "opening_prize_bps is outside its floor and ceiling"
+      "msg": "`opening_prize_bps` is outside its floor and ceiling"
     },
     {
       "code": 6032,
       "name": "FeeBpsAboveCeiling",
-      "msg": "fee_bps is above MAX_FEE_BPS"
+      "msg": "`fee_bps` is above `MAX_FEE_BPS`"
     },
     {
       "code": 6033,
       "name": "OneSidedFeeBpsAboveCeiling",
-      "msg": "one_sided_fee_bps is above its ceiling"
+      "msg": "`one_sided_fee_bps` is above its ceiling"
     },
     {
       "code": 6034,
       "name": "CreatorShareBpsAboveCeiling",
-      "msg": "creator_share_bps is above MAX_CREATOR_SHARE_BPS"
+      "msg": "`creator_share_bps` is above `MAX_CREATOR_SHARE_BPS`"
     },
     {
       "code": 6035,
       "name": "MaxOpenCampaignsOutOfRange",
-      "msg": "max_open_campaigns is outside its floor and ceiling"
+      "msg": "`max_open_campaigns` is outside its floor and ceiling"
     },
     {
       "code": 6036,
       "name": "MinEntryOutOfRange",
-      "msg": "min_entry_lamports is outside its floor and ceiling"
+      "msg": "`min_entry_lamports` is outside its floor and ceiling"
     },
     {
       "code": 6037,
       "name": "SolUsdFeedIdZero",
-      "msg": "sol_usd_feed_id is all zeros"
+      "msg": "`sol_usd_feed_id` is all zeros"
     },
     {
       "code": 6038,
       "name": "MaxPriceAgeOutOfRange",
-      "msg": "max_price_age is outside its floor and ceiling"
+      "msg": "`max_price_age` is outside its floor and ceiling"
     },
     {
       "code": 6039,
       "name": "MaxPriceConfOutOfRange",
-      "msg": "max_price_conf_bps is outside its floor and ceiling"
+      "msg": "`max_price_conf_bps` is outside its floor and ceiling"
     },
     {
       "code": 6040,
       "name": "CampaignMaxAgeOutOfRange",
-      "msg": "campaign_max_age is below 30 seconds or above its ceiling"
+      "msg": "`campaign_max_age` is below 30 seconds or above its ceiling"
     },
     {
       "code": 6041,
@@ -2161,107 +2161,107 @@
     {
       "code": 6043,
       "name": "UnknownReaderKind",
-      "msg": "The kind byte names no reader"
+      "msg": "Row 1: the kind byte names no reader"
     },
     {
       "code": 6044,
       "name": "ReaderKindNotOpen",
-      "msg": "This kind of campaign does not open yet"
+      "msg": "Row 1: this kind does not open yet (the four non-price kinds until Sprint 03)"
     },
     {
       "code": 6045,
       "name": "MetricAccountMismatch",
-      "msg": "The metric account is not the one the campaign's parameters name"
+      "msg": "Row 2: the metric account is not the one the campaign's parameters name"
     },
     {
       "code": 6046,
       "name": "TargetAlreadyTouched",
-      "msg": "The target is already touched or met; the campaign would be decided at birth"
+      "msg": "Row 3: the target is already touched or met; the campaign would be decided at birth"
     },
     {
       "code": 6047,
       "name": "PriceStale",
-      "msg": "The price is older than the campaign's maximum age"
+      "msg": "Row 4: the price is older than the campaign's maximum age"
     },
     {
       "code": 6048,
       "name": "PriceConfidenceTooWide",
-      "msg": "The confidence interval is wider than 0.5% of the price"
+      "msg": "Row 4: the confidence interval is wider than 0.5% of the price"
     },
     {
       "code": 6049,
       "name": "PriceNonPositive",
-      "msg": "The price is zero or negative"
+      "msg": "Row 4: the price is zero or negative"
     },
     {
       "code": 6050,
       "name": "InvalidDirection",
-      "msg": "The direction byte is neither Above nor Below"
+      "msg": "Row 4: the direction byte is neither `Above` nor `Below`"
     },
     {
       "code": 6051,
       "name": "DurationTooShort",
-      "msg": "The deadline is less than three days away"
+      "msg": "Row 5: the deadline is less than three days away"
     },
     {
       "code": 6052,
       "name": "DurationTooLong",
-      "msg": "The deadline is more than ninety days away"
+      "msg": "Row 5: the deadline is more than ninety days away"
     },
     {
       "code": 6053,
       "name": "OpeningUsdBelowFee",
-      "msg": "The opening pays less than opening_fee_usd"
+      "msg": "Row 7: the opening pays less than `opening_fee_usd` (a non-team signer always pays)"
     },
     {
       "code": 6054,
       "name": "OpeningAboveMaxLamports",
-      "msg": "The opening would cost more lamports than the signed max_lamports"
+      "msg": "Row 7: the opening would cost more lamports than the signed `max_lamports`"
     },
     {
       "code": 6055,
       "name": "SolUsdAccountMismatch",
-      "msg": "The SOL/USD slot is not the sponsored account of sol_usd_feed_id"
+      "msg": "Row 7: the SOL/USD slot is not the sponsored account of `sol_usd_feed_id`"
     },
     {
       "code": 6056,
       "name": "SolUsdStale",
-      "msg": "The SOL/USD price is older than max_price_age"
+      "msg": "Row 7: the SOL/USD price is older than `max_price_age`"
     },
     {
       "code": 6057,
       "name": "SolUsdConfidenceTooWide",
-      "msg": "The SOL/USD confidence is wider than max_price_conf_bps"
+      "msg": "Row 7: the SOL/USD confidence is wider than `max_price_conf_bps`"
     },
     {
       "code": 6058,
       "name": "SolUsdPriceNonPositive",
-      "msg": "The SOL/USD price is zero or negative"
+      "msg": "Row 7: the SOL/USD price is zero or negative"
     },
     {
       "code": 6059,
       "name": "PriceExponentOutOfRange",
-      "msg": "The SOL/USD exponent is outside the range the conversion supports"
+      "msg": "Row 7: the SOL/USD exponent is outside the range the conversion supports"
     },
     {
       "code": 6060,
       "name": "OpenWhilePaused",
-      "msg": "Entries are paused, which also stops openings"
+      "msg": "Row 8: entries are paused, which also stops openings"
     },
     {
       "code": 6061,
       "name": "TooManyOpenCampaigns",
-      "msg": "open_campaigns has reached max_open_campaigns"
+      "msg": "Row 8: `open_campaigns` has reached `max_open_campaigns`"
     },
     {
       "code": 6062,
       "name": "CampaignNotOpen",
-      "msg": "The campaign is not Open"
+      "msg": "The campaign is not `Open`"
     },
     {
       "code": 6063,
       "name": "EntriesClosed",
-      "msg": "Entries closed at entries_close_at"
+      "msg": "Entries closed at `entries_close_at`"
     },
     {
       "code": 6064,
@@ -2271,32 +2271,32 @@
     {
       "code": 6065,
       "name": "EntryBelowMinimum",
-      "msg": "The entry is below min_entry_lamports"
+      "msg": "The entry is below `min_entry_lamports`"
     },
     {
       "code": 6066,
       "name": "EntryTotalMismatch",
-      "msg": "The baker's entry total is not the expected_entry_total the client signed"
+      "msg": "The baker's entry total is not the `expected_entry_total` the client signed"
     },
     {
       "code": 6067,
       "name": "ReturnBelowMinimum",
-      "msg": "The estimated return is below the signed min_return_bps"
+      "msg": "The estimated return is below the signed `min_return_bps`"
     },
     {
       "code": 6068,
       "name": "InvalidSide",
-      "msg": "The side byte is neither Yes nor No"
+      "msg": "The side byte is neither `Yes` nor `No`"
     },
     {
       "code": 6069,
       "name": "EntryMismatch",
-      "msg": "The Entry account belongs to another campaign or another baker"
+      "msg": "The `Entry` account belongs to another campaign or another baker"
     },
     {
       "code": 6070,
       "name": "ReaderNotReady",
-      "msg": "This reader method arrives in a later sprint"
+      "msg": "This reader method arrives in Sprint 03 (`outcome_knowable`, `try_resolve`)"
     }
   ],
   "metadata": {

@@ -30,7 +30,7 @@ export const BROT_MARKETS_ERROR__WRONG_OWNER = 0x1775; // 6005
 export const BROT_MARKETS_ERROR__MISSING_SIGNATURE = 0x1776; // 6006
 /** NotWritable: A slot that must be writable was passed read-only */
 export const BROT_MARKETS_ERROR__NOT_WRITABLE = 0x1777; // 6007
-/** WrongTag: The account's type tag is not the one this slot expects */
+/** WrongTag: The account's type tag is not the one this slot expects (a zeroed account included) */
 export const BROT_MARKETS_ERROR__WRONG_TAG = 0x1778; // 6008
 /** WrongLength: The account's data is not exactly the size of its type */
 export const BROT_MARKETS_ERROR__WRONG_LENGTH = 0x1779; // 6009
@@ -70,91 +70,91 @@ export const BROT_MARKETS_ERROR__NO_PENDING_ADMIN = 0x1789; // 6025
 export const BROT_MARKETS_ERROR__ZERO_ADDRESS = 0x178a; // 6026
 /** TeamTooLarge: More than five team keys */
 export const BROT_MARKETS_ERROR__TEAM_TOO_LARGE = 0x178b; // 6027
-/** TeamSlotNotEmpty: A team slot past team_len is not zero */
+/** TeamSlotNotEmpty: A team slot past `team_len` is not zero */
 export const BROT_MARKETS_ERROR__TEAM_SLOT_NOT_EMPTY = 0x178c; // 6028
 /** DuplicateTeamKey: The same team key appears twice */
 export const BROT_MARKETS_ERROR__DUPLICATE_TEAM_KEY = 0x178d; // 6029
-/** OpeningFeeUsdOutOfRange: opening_fee_usd is outside its floor and ceiling */
+/** OpeningFeeUsdOutOfRange: `opening_fee_usd` is outside its floor and ceiling */
 export const BROT_MARKETS_ERROR__OPENING_FEE_USD_OUT_OF_RANGE = 0x178e; // 6030
-/** OpeningPrizeBpsOutOfRange: opening_prize_bps is outside its floor and ceiling */
+/** OpeningPrizeBpsOutOfRange: `opening_prize_bps` is outside its floor and ceiling */
 export const BROT_MARKETS_ERROR__OPENING_PRIZE_BPS_OUT_OF_RANGE = 0x178f; // 6031
-/** FeeBpsAboveCeiling: fee_bps is above MAX_FEE_BPS */
+/** FeeBpsAboveCeiling: `fee_bps` is above `MAX_FEE_BPS` */
 export const BROT_MARKETS_ERROR__FEE_BPS_ABOVE_CEILING = 0x1790; // 6032
-/** OneSidedFeeBpsAboveCeiling: one_sided_fee_bps is above its ceiling */
+/** OneSidedFeeBpsAboveCeiling: `one_sided_fee_bps` is above its ceiling */
 export const BROT_MARKETS_ERROR__ONE_SIDED_FEE_BPS_ABOVE_CEILING = 0x1791; // 6033
-/** CreatorShareBpsAboveCeiling: creator_share_bps is above MAX_CREATOR_SHARE_BPS */
+/** CreatorShareBpsAboveCeiling: `creator_share_bps` is above `MAX_CREATOR_SHARE_BPS` */
 export const BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING = 0x1792; // 6034
-/** MaxOpenCampaignsOutOfRange: max_open_campaigns is outside its floor and ceiling */
+/** MaxOpenCampaignsOutOfRange: `max_open_campaigns` is outside its floor and ceiling */
 export const BROT_MARKETS_ERROR__MAX_OPEN_CAMPAIGNS_OUT_OF_RANGE = 0x1793; // 6035
-/** MinEntryOutOfRange: min_entry_lamports is outside its floor and ceiling */
+/** MinEntryOutOfRange: `min_entry_lamports` is outside its floor and ceiling */
 export const BROT_MARKETS_ERROR__MIN_ENTRY_OUT_OF_RANGE = 0x1794; // 6036
-/** SolUsdFeedIdZero: sol_usd_feed_id is all zeros */
+/** SolUsdFeedIdZero: `sol_usd_feed_id` is all zeros */
 export const BROT_MARKETS_ERROR__SOL_USD_FEED_ID_ZERO = 0x1795; // 6037
-/** MaxPriceAgeOutOfRange: max_price_age is outside its floor and ceiling */
+/** MaxPriceAgeOutOfRange: `max_price_age` is outside its floor and ceiling */
 export const BROT_MARKETS_ERROR__MAX_PRICE_AGE_OUT_OF_RANGE = 0x1796; // 6038
-/** MaxPriceConfOutOfRange: max_price_conf_bps is outside its floor and ceiling */
+/** MaxPriceConfOutOfRange: `max_price_conf_bps` is outside its floor and ceiling */
 export const BROT_MARKETS_ERROR__MAX_PRICE_CONF_OUT_OF_RANGE = 0x1797; // 6039
-/** CampaignMaxAgeOutOfRange: campaign_max_age is below 30 seconds or above its ceiling */
+/** CampaignMaxAgeOutOfRange: `campaign_max_age` is below 30 seconds or above its ceiling */
 export const BROT_MARKETS_ERROR__CAMPAIGN_MAX_AGE_OUT_OF_RANGE = 0x1798; // 6040
 /** AlreadyPaused: Entries are already paused */
 export const BROT_MARKETS_ERROR__ALREADY_PAUSED = 0x1799; // 6041
 /** NotPaused: Entries are not paused */
 export const BROT_MARKETS_ERROR__NOT_PAUSED = 0x179a; // 6042
-/** UnknownReaderKind: The kind byte names no reader */
+/** UnknownReaderKind: Row 1: the kind byte names no reader */
 export const BROT_MARKETS_ERROR__UNKNOWN_READER_KIND = 0x179b; // 6043
-/** ReaderKindNotOpen: This kind of campaign does not open yet */
+/** ReaderKindNotOpen: Row 1: this kind does not open yet (the four non-price kinds until Sprint 03) */
 export const BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN = 0x179c; // 6044
-/** MetricAccountMismatch: The metric account is not the one the campaign's parameters name */
+/** MetricAccountMismatch: Row 2: the metric account is not the one the campaign's parameters name */
 export const BROT_MARKETS_ERROR__METRIC_ACCOUNT_MISMATCH = 0x179d; // 6045
-/** TargetAlreadyTouched: The target is already touched or met; the campaign would be decided at birth */
+/** TargetAlreadyTouched: Row 3: the target is already touched or met; the campaign would be decided at birth */
 export const BROT_MARKETS_ERROR__TARGET_ALREADY_TOUCHED = 0x179e; // 6046
-/** PriceStale: The price is older than the campaign's maximum age */
+/** PriceStale: Row 4: the price is older than the campaign's maximum age */
 export const BROT_MARKETS_ERROR__PRICE_STALE = 0x179f; // 6047
-/** PriceConfidenceTooWide: The confidence interval is wider than 0.5% of the price */
+/** PriceConfidenceTooWide: Row 4: the confidence interval is wider than 0.5% of the price */
 export const BROT_MARKETS_ERROR__PRICE_CONFIDENCE_TOO_WIDE = 0x17a0; // 6048
-/** PriceNonPositive: The price is zero or negative */
+/** PriceNonPositive: Row 4: the price is zero or negative */
 export const BROT_MARKETS_ERROR__PRICE_NON_POSITIVE = 0x17a1; // 6049
-/** InvalidDirection: The direction byte is neither Above nor Below */
+/** InvalidDirection: Row 4: the direction byte is neither `Above` nor `Below` */
 export const BROT_MARKETS_ERROR__INVALID_DIRECTION = 0x17a2; // 6050
-/** DurationTooShort: The deadline is less than three days away */
+/** DurationTooShort: Row 5: the deadline is less than three days away */
 export const BROT_MARKETS_ERROR__DURATION_TOO_SHORT = 0x17a3; // 6051
-/** DurationTooLong: The deadline is more than ninety days away */
+/** DurationTooLong: Row 5: the deadline is more than ninety days away */
 export const BROT_MARKETS_ERROR__DURATION_TOO_LONG = 0x17a4; // 6052
-/** OpeningUsdBelowFee: The opening pays less than opening_fee_usd */
+/** OpeningUsdBelowFee: Row 7: the opening pays less than `opening_fee_usd` (a non-team signer always pays) */
 export const BROT_MARKETS_ERROR__OPENING_USD_BELOW_FEE = 0x17a5; // 6053
-/** OpeningAboveMaxLamports: The opening would cost more lamports than the signed max_lamports */
+/** OpeningAboveMaxLamports: Row 7: the opening would cost more lamports than the signed `max_lamports` */
 export const BROT_MARKETS_ERROR__OPENING_ABOVE_MAX_LAMPORTS = 0x17a6; // 6054
-/** SolUsdAccountMismatch: The SOL/USD slot is not the sponsored account of sol_usd_feed_id */
+/** SolUsdAccountMismatch: Row 7: the SOL/USD slot is not the sponsored account of `sol_usd_feed_id` */
 export const BROT_MARKETS_ERROR__SOL_USD_ACCOUNT_MISMATCH = 0x17a7; // 6055
-/** SolUsdStale: The SOL/USD price is older than max_price_age */
+/** SolUsdStale: Row 7: the SOL/USD price is older than `max_price_age` */
 export const BROT_MARKETS_ERROR__SOL_USD_STALE = 0x17a8; // 6056
-/** SolUsdConfidenceTooWide: The SOL/USD confidence is wider than max_price_conf_bps */
+/** SolUsdConfidenceTooWide: Row 7: the SOL/USD confidence is wider than `max_price_conf_bps` */
 export const BROT_MARKETS_ERROR__SOL_USD_CONFIDENCE_TOO_WIDE = 0x17a9; // 6057
-/** SolUsdPriceNonPositive: The SOL/USD price is zero or negative */
+/** SolUsdPriceNonPositive: Row 7: the SOL/USD price is zero or negative */
 export const BROT_MARKETS_ERROR__SOL_USD_PRICE_NON_POSITIVE = 0x17aa; // 6058
-/** PriceExponentOutOfRange: The SOL/USD exponent is outside the range the conversion supports */
+/** PriceExponentOutOfRange: Row 7: the SOL/USD exponent is outside the range the conversion supports */
 export const BROT_MARKETS_ERROR__PRICE_EXPONENT_OUT_OF_RANGE = 0x17ab; // 6059
-/** OpenWhilePaused: Entries are paused, which also stops openings */
+/** OpenWhilePaused: Row 8: entries are paused, which also stops openings */
 export const BROT_MARKETS_ERROR__OPEN_WHILE_PAUSED = 0x17ac; // 6060
-/** TooManyOpenCampaigns: open_campaigns has reached max_open_campaigns */
+/** TooManyOpenCampaigns: Row 8: `open_campaigns` has reached `max_open_campaigns` */
 export const BROT_MARKETS_ERROR__TOO_MANY_OPEN_CAMPAIGNS = 0x17ad; // 6061
-/** CampaignNotOpen: The campaign is not Open */
+/** CampaignNotOpen: The campaign is not `Open` */
 export const BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN = 0x17ae; // 6062
-/** EntriesClosed: Entries closed at entries_close_at */
+/** EntriesClosed: Entries closed at `entries_close_at` */
 export const BROT_MARKETS_ERROR__ENTRIES_CLOSED = 0x17af; // 6063
 /** JoinWhilePaused: Entries are paused */
 export const BROT_MARKETS_ERROR__JOIN_WHILE_PAUSED = 0x17b0; // 6064
-/** EntryBelowMinimum: The entry is below min_entry_lamports */
+/** EntryBelowMinimum: The entry is below `min_entry_lamports` */
 export const BROT_MARKETS_ERROR__ENTRY_BELOW_MINIMUM = 0x17b1; // 6065
-/** EntryTotalMismatch: The baker's entry total is not the expected_entry_total the client signed */
+/** EntryTotalMismatch: The baker's entry total is not the `expected_entry_total` the client signed */
 export const BROT_MARKETS_ERROR__ENTRY_TOTAL_MISMATCH = 0x17b2; // 6066
-/** ReturnBelowMinimum: The estimated return is below the signed min_return_bps */
+/** ReturnBelowMinimum: The estimated return is below the signed `min_return_bps` */
 export const BROT_MARKETS_ERROR__RETURN_BELOW_MINIMUM = 0x17b3; // 6067
-/** InvalidSide: The side byte is neither Yes nor No */
+/** InvalidSide: The side byte is neither `Yes` nor `No` */
 export const BROT_MARKETS_ERROR__INVALID_SIDE = 0x17b4; // 6068
-/** EntryMismatch: The Entry account belongs to another campaign or another baker */
+/** EntryMismatch: The `Entry` account belongs to another campaign or another baker */
 export const BROT_MARKETS_ERROR__ENTRY_MISMATCH = 0x17b5; // 6069
-/** ReaderNotReady: This reader method arrives in a later sprint */
+/** ReaderNotReady: This reader method arrives in Sprint 03 (`outcome_knowable`, `try_resolve`) */
 export const BROT_MARKETS_ERROR__READER_NOT_READY = 0x17b6; // 6070
 
 export type BrotMarketsError =
@@ -237,27 +237,27 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__ALREADY_PAUSED]: `Entries are already paused`,
     [BROT_MARKETS_ERROR__BAD_ACCOUNT_DATA]: `A stored field holds a value no variant of its enum has`,
     [BROT_MARKETS_ERROR__BAD_INSTRUCTION_DATA]: `The instruction data is not exactly the size of the instruction's arguments`,
-    [BROT_MARKETS_ERROR__CAMPAIGN_MAX_AGE_OUT_OF_RANGE]: `campaign_max_age is below 30 seconds or above its ceiling`,
-    [BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN]: `The campaign is not Open`,
-    [BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING]: `creator_share_bps is above MAX_CREATOR_SHARE_BPS`,
+    [BROT_MARKETS_ERROR__CAMPAIGN_MAX_AGE_OUT_OF_RANGE]: `\`campaign_max_age\` is below 30 seconds or above its ceiling`,
+    [BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN]: `The campaign is not \`Open\``,
+    [BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING]: `\`creator_share_bps\` is above \`MAX_CREATOR_SHARE_BPS\``,
     [BROT_MARKETS_ERROR__DUPLICATE_ACCOUNT]: `The same account was passed in two slots that must differ`,
     [BROT_MARKETS_ERROR__DUPLICATE_TEAM_KEY]: `The same team key appears twice`,
-    [BROT_MARKETS_ERROR__DURATION_TOO_LONG]: `The deadline is more than ninety days away`,
-    [BROT_MARKETS_ERROR__DURATION_TOO_SHORT]: `The deadline is less than three days away`,
-    [BROT_MARKETS_ERROR__ENTRIES_CLOSED]: `Entries closed at entries_close_at`,
-    [BROT_MARKETS_ERROR__ENTRY_BELOW_MINIMUM]: `The entry is below min_entry_lamports`,
-    [BROT_MARKETS_ERROR__ENTRY_MISMATCH]: `The Entry account belongs to another campaign or another baker`,
-    [BROT_MARKETS_ERROR__ENTRY_TOTAL_MISMATCH]: `The baker's entry total is not the expected_entry_total the client signed`,
-    [BROT_MARKETS_ERROR__FEE_BPS_ABOVE_CEILING]: `fee_bps is above MAX_FEE_BPS`,
-    [BROT_MARKETS_ERROR__INVALID_DIRECTION]: `The direction byte is neither Above nor Below`,
-    [BROT_MARKETS_ERROR__INVALID_SIDE]: `The side byte is neither Yes nor No`,
+    [BROT_MARKETS_ERROR__DURATION_TOO_LONG]: `Row 5: the deadline is more than ninety days away`,
+    [BROT_MARKETS_ERROR__DURATION_TOO_SHORT]: `Row 5: the deadline is less than three days away`,
+    [BROT_MARKETS_ERROR__ENTRIES_CLOSED]: `Entries closed at \`entries_close_at\``,
+    [BROT_MARKETS_ERROR__ENTRY_BELOW_MINIMUM]: `The entry is below \`min_entry_lamports\``,
+    [BROT_MARKETS_ERROR__ENTRY_MISMATCH]: `The \`Entry\` account belongs to another campaign or another baker`,
+    [BROT_MARKETS_ERROR__ENTRY_TOTAL_MISMATCH]: `The baker's entry total is not the \`expected_entry_total\` the client signed`,
+    [BROT_MARKETS_ERROR__FEE_BPS_ABOVE_CEILING]: `\`fee_bps\` is above \`MAX_FEE_BPS\``,
+    [BROT_MARKETS_ERROR__INVALID_DIRECTION]: `Row 4: the direction byte is neither \`Above\` nor \`Below\``,
+    [BROT_MARKETS_ERROR__INVALID_SIDE]: `The side byte is neither \`Yes\` nor \`No\``,
     [BROT_MARKETS_ERROR__JOIN_WHILE_PAUSED]: `Entries are paused`,
     [BROT_MARKETS_ERROR__MATH_OVERFLOW]: `Arithmetic overflow`,
-    [BROT_MARKETS_ERROR__MAX_OPEN_CAMPAIGNS_OUT_OF_RANGE]: `max_open_campaigns is outside its floor and ceiling`,
-    [BROT_MARKETS_ERROR__MAX_PRICE_AGE_OUT_OF_RANGE]: `max_price_age is outside its floor and ceiling`,
-    [BROT_MARKETS_ERROR__MAX_PRICE_CONF_OUT_OF_RANGE]: `max_price_conf_bps is outside its floor and ceiling`,
-    [BROT_MARKETS_ERROR__METRIC_ACCOUNT_MISMATCH]: `The metric account is not the one the campaign's parameters name`,
-    [BROT_MARKETS_ERROR__MIN_ENTRY_OUT_OF_RANGE]: `min_entry_lamports is outside its floor and ceiling`,
+    [BROT_MARKETS_ERROR__MAX_OPEN_CAMPAIGNS_OUT_OF_RANGE]: `\`max_open_campaigns\` is outside its floor and ceiling`,
+    [BROT_MARKETS_ERROR__MAX_PRICE_AGE_OUT_OF_RANGE]: `\`max_price_age\` is outside its floor and ceiling`,
+    [BROT_MARKETS_ERROR__MAX_PRICE_CONF_OUT_OF_RANGE]: `\`max_price_conf_bps\` is outside its floor and ceiling`,
+    [BROT_MARKETS_ERROR__METRIC_ACCOUNT_MISMATCH]: `Row 2: the metric account is not the one the campaign's parameters name`,
+    [BROT_MARKETS_ERROR__MIN_ENTRY_OUT_OF_RANGE]: `\`min_entry_lamports\` is outside its floor and ceiling`,
     [BROT_MARKETS_ERROR__MISSING_SIGNATURE]: `A slot that must sign did not`,
     [BROT_MARKETS_ERROR__NO_PENDING_ADMIN]: `No admin transfer is pending`,
     [BROT_MARKETS_ERROR__NOT_ADMIN]: `The signer is not the config's admin`,
@@ -265,35 +265,35 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__NOT_PENDING_ADMIN]: `The signer is not the admin named by the pending transfer`,
     [BROT_MARKETS_ERROR__NOT_TEAM_MEMBER]: `The signer is not one of the config's team keys`,
     [BROT_MARKETS_ERROR__NOT_WRITABLE]: `A slot that must be writable was passed read-only`,
-    [BROT_MARKETS_ERROR__ONE_SIDED_FEE_BPS_ABOVE_CEILING]: `one_sided_fee_bps is above its ceiling`,
-    [BROT_MARKETS_ERROR__OPENING_ABOVE_MAX_LAMPORTS]: `The opening would cost more lamports than the signed max_lamports`,
-    [BROT_MARKETS_ERROR__OPENING_FEE_USD_OUT_OF_RANGE]: `opening_fee_usd is outside its floor and ceiling`,
-    [BROT_MARKETS_ERROR__OPENING_PRIZE_BPS_OUT_OF_RANGE]: `opening_prize_bps is outside its floor and ceiling`,
-    [BROT_MARKETS_ERROR__OPENING_USD_BELOW_FEE]: `The opening pays less than opening_fee_usd`,
-    [BROT_MARKETS_ERROR__OPEN_WHILE_PAUSED]: `Entries are paused, which also stops openings`,
+    [BROT_MARKETS_ERROR__ONE_SIDED_FEE_BPS_ABOVE_CEILING]: `\`one_sided_fee_bps\` is above its ceiling`,
+    [BROT_MARKETS_ERROR__OPENING_ABOVE_MAX_LAMPORTS]: `Row 7: the opening would cost more lamports than the signed \`max_lamports\``,
+    [BROT_MARKETS_ERROR__OPENING_FEE_USD_OUT_OF_RANGE]: `\`opening_fee_usd\` is outside its floor and ceiling`,
+    [BROT_MARKETS_ERROR__OPENING_PRIZE_BPS_OUT_OF_RANGE]: `\`opening_prize_bps\` is outside its floor and ceiling`,
+    [BROT_MARKETS_ERROR__OPENING_USD_BELOW_FEE]: `Row 7: the opening pays less than \`opening_fee_usd\` (a non-team signer always pays)`,
+    [BROT_MARKETS_ERROR__OPEN_WHILE_PAUSED]: `Row 8: entries are paused, which also stops openings`,
     [BROT_MARKETS_ERROR__PDA_MISMATCH]: `The address is not the program-derived address its seeds and bump give`,
-    [BROT_MARKETS_ERROR__PRICE_CONFIDENCE_TOO_WIDE]: `The confidence interval is wider than 0.5% of the price`,
-    [BROT_MARKETS_ERROR__PRICE_EXPONENT_OUT_OF_RANGE]: `The SOL/USD exponent is outside the range the conversion supports`,
-    [BROT_MARKETS_ERROR__PRICE_NON_POSITIVE]: `The price is zero or negative`,
+    [BROT_MARKETS_ERROR__PRICE_CONFIDENCE_TOO_WIDE]: `Row 4: the confidence interval is wider than 0.5% of the price`,
+    [BROT_MARKETS_ERROR__PRICE_EXPONENT_OUT_OF_RANGE]: `Row 7: the SOL/USD exponent is outside the range the conversion supports`,
+    [BROT_MARKETS_ERROR__PRICE_NON_POSITIVE]: `Row 4: the price is zero or negative`,
     [BROT_MARKETS_ERROR__PRICE_NOT_FULLY_VERIFIED]: `Price update was not fully verified by the Pyth receiver`,
-    [BROT_MARKETS_ERROR__PRICE_STALE]: `The price is older than the campaign's maximum age`,
+    [BROT_MARKETS_ERROR__PRICE_STALE]: `Row 4: the price is older than the campaign's maximum age`,
     [BROT_MARKETS_ERROR__PRICE_WRONG_FEED]: `Price update is for another feed than the one expected`,
     [BROT_MARKETS_ERROR__READER_BAD_LAYOUT]: `Account data does not match the layout this reader expects`,
-    [BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN]: `This kind of campaign does not open yet`,
-    [BROT_MARKETS_ERROR__READER_NOT_READY]: `This reader method arrives in a later sprint`,
+    [BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN]: `Row 1: this kind does not open yet (the four non-price kinds until Sprint 03)`,
+    [BROT_MARKETS_ERROR__READER_NOT_READY]: `This reader method arrives in Sprint 03 (\`outcome_knowable\`, \`try_resolve\`)`,
     [BROT_MARKETS_ERROR__READER_WRONG_OWNER]: `Account is not owned by the program this reader trusts`,
-    [BROT_MARKETS_ERROR__RETURN_BELOW_MINIMUM]: `The estimated return is below the signed min_return_bps`,
-    [BROT_MARKETS_ERROR__SOL_USD_ACCOUNT_MISMATCH]: `The SOL/USD slot is not the sponsored account of sol_usd_feed_id`,
-    [BROT_MARKETS_ERROR__SOL_USD_CONFIDENCE_TOO_WIDE]: `The SOL/USD confidence is wider than max_price_conf_bps`,
-    [BROT_MARKETS_ERROR__SOL_USD_FEED_ID_ZERO]: `sol_usd_feed_id is all zeros`,
-    [BROT_MARKETS_ERROR__SOL_USD_PRICE_NON_POSITIVE]: `The SOL/USD price is zero or negative`,
-    [BROT_MARKETS_ERROR__SOL_USD_STALE]: `The SOL/USD price is older than max_price_age`,
-    [BROT_MARKETS_ERROR__TARGET_ALREADY_TOUCHED]: `The target is already touched or met; the campaign would be decided at birth`,
-    [BROT_MARKETS_ERROR__TEAM_SLOT_NOT_EMPTY]: `A team slot past team_len is not zero`,
+    [BROT_MARKETS_ERROR__RETURN_BELOW_MINIMUM]: `The estimated return is below the signed \`min_return_bps\``,
+    [BROT_MARKETS_ERROR__SOL_USD_ACCOUNT_MISMATCH]: `Row 7: the SOL/USD slot is not the sponsored account of \`sol_usd_feed_id\``,
+    [BROT_MARKETS_ERROR__SOL_USD_CONFIDENCE_TOO_WIDE]: `Row 7: the SOL/USD confidence is wider than \`max_price_conf_bps\``,
+    [BROT_MARKETS_ERROR__SOL_USD_FEED_ID_ZERO]: `\`sol_usd_feed_id\` is all zeros`,
+    [BROT_MARKETS_ERROR__SOL_USD_PRICE_NON_POSITIVE]: `Row 7: the SOL/USD price is zero or negative`,
+    [BROT_MARKETS_ERROR__SOL_USD_STALE]: `Row 7: the SOL/USD price is older than \`max_price_age\``,
+    [BROT_MARKETS_ERROR__TARGET_ALREADY_TOUCHED]: `Row 3: the target is already touched or met; the campaign would be decided at birth`,
+    [BROT_MARKETS_ERROR__TEAM_SLOT_NOT_EMPTY]: `A team slot past \`team_len\` is not zero`,
     [BROT_MARKETS_ERROR__TEAM_TOO_LARGE]: `More than five team keys`,
-    [BROT_MARKETS_ERROR__TOO_MANY_OPEN_CAMPAIGNS]: `open_campaigns has reached max_open_campaigns`,
+    [BROT_MARKETS_ERROR__TOO_MANY_OPEN_CAMPAIGNS]: `Row 8: \`open_campaigns\` has reached \`max_open_campaigns\``,
     [BROT_MARKETS_ERROR__UNKNOWN_INSTRUCTION]: `The first byte of the instruction data names no instruction`,
-    [BROT_MARKETS_ERROR__UNKNOWN_READER_KIND]: `The kind byte names no reader`,
+    [BROT_MARKETS_ERROR__UNKNOWN_READER_KIND]: `Row 1: the kind byte names no reader`,
     [BROT_MARKETS_ERROR__UPGRADE_AUTHORITY_MISMATCH]: `The signer is not the program's upgrade authority`,
     [BROT_MARKETS_ERROR__WRONG_EVENT_AUTHORITY]: `The event-authority slot is not this program's event authority`,
     [BROT_MARKETS_ERROR__WRONG_LAYOUT_VERSION]: `The account's layout version is not the one this program reads`,
@@ -302,7 +302,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__WRONG_PROGRAM_ACCOUNT]: `The program slot is not this program`,
     [BROT_MARKETS_ERROR__WRONG_PROGRAM_DATA]: `The ProgramData account is not this program's, or records no upgrade authority`,
     [BROT_MARKETS_ERROR__WRONG_SYSTEM_PROGRAM]: `The System Program slot holds another account`,
-    [BROT_MARKETS_ERROR__WRONG_TAG]: `The account's type tag is not the one this slot expects`,
+    [BROT_MARKETS_ERROR__WRONG_TAG]: `The account's type tag is not the one this slot expects (a zeroed account included)`,
     [BROT_MARKETS_ERROR__ZERO_ADDRESS]: `An address that must name a key is all zeros`,
   };
 }
