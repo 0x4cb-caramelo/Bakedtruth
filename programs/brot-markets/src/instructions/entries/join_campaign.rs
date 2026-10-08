@@ -5,11 +5,12 @@
 //! Sprint: 02 (pot core on Pinocchio); accounts and arguments frozen at the sprint's opening,
 //!         body by lane E
 //!
-//! Order (the contract of `checks.rs`): the arguments, the slots, the loads, the campaign's
-//! rules, the baker's `Entry` (created on the first join, `entry_account.rs`), the first baker,
-//! the return estimate, and only then the effects: the deposit, the bookkeeping and the event.
-//! Every refusal has its own error. There is no cap of any kind (D-h), and no instruction moves
-//! an entry out (A-1).
+//! Order: the arguments, the slots, the loads and the campaign's rules, as `checks.rs` orders
+//! them; then the baker's `Entry` (`entry_account.rs`), created on the first join with its rent,
+//! the only lamports that move before the estimate; the first baker; the return estimate; and
+//! only then the deposit, the bookkeeping and the event. A refusal after the creation reverts it
+//! with the rest of the transaction. Every refusal has its own error. There is no cap of any
+//! kind (D-h), and no instruction moves an entry out (A-1).
 
 use pinocchio::{
     error::ProgramError,

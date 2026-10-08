@@ -7,8 +7,10 @@
  */
 import {
   AccountRole,
+  generateKeyPairSigner,
   getAddressEncoder,
   getProgramDerivedAddress,
+  lamports,
   type Address,
   type Instruction,
   type KeyPairSigner,
@@ -85,6 +87,24 @@ export async function entryBump(campaign: Address, baker: Address) {
   const seeds = [new TextEncoder().encode("entry"), key.encode(campaign), key.encode(baker)];
   const [, bump] = await getProgramDerivedAddress({ programAddress: P.PROGRAM_ID, seeds });
   return bump;
+}
+
+/**
+ * A wallet holding 100 SOL whose address satisfies `wanted`, drawn until one does. A foreign
+ * Entry's stored bump, re-derived on another wallet's seeds, either gives a valid address (when
+ * the two canonical bumps are equal, that wallet's own Entry address) or none at all (when it is
+ * above that wallet's canonical bump, the point is on the curve). Choosing the wallets makes each
+ * test take one of the two paths on every run, instead of one at random.
+ */
+export async function walletWhere(w: World, wanted: (address: Address) => Promise<boolean>) {
+  for (let tries = 0; tries < 64; tries++) {
+    const signer = await generateKeyPairSigner();
+    if (await wanted(signer.address)) {
+      w.client.svm.airdrop(signer.address, lamports(100n * P.SOL));
+      return signer;
+    }
+  }
+  throw new Error("no wallet with the wanted Entry bumps in 64 draws");
 }
 
 // --- TP section 3.4.16, mirrored to compute what the program must answer --------------------------

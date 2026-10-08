@@ -6,7 +6,7 @@
  * Sprint:  02 (pot core on Pinocchio), lane E. Needs the SBF build: runs from the integration on.
  */
 import { describe, expect, test } from "bun:test";
-import { getAddressEncoder } from "@solana/kit";
+import { getAddressEncoder, type Address, type KeyPairSigner } from "@solana/kit";
 
 import { join, openedCampaign, readCampaign, readEntry } from "./flows";
 import * as I from "./instructions";
@@ -14,7 +14,7 @@ import { offsetOf } from "./layouts";
 import * as P from "./program";
 import { accountData, expectError, expectOk, fundedWallet, send, setTime } from "./setup";
 import { CAMPAIGN, ENTRY } from "./structs";
-import { expectedEstimate, joinWorld, MIN_ENTRY, rewrite } from "./join-campaign-support";
+import { entryBump, expectedEstimate, joinWorld, MIN_ENTRY, rewrite, walletWhere } from "./join-campaign-support";
 
 const SOL = P.SOL;
 const yes = (amount: bigint, more: Partial<I.JoinArgs> = {}): I.JoinArgs => ({ side: P.Side.Yes, amount, ...more });
@@ -114,15 +114,19 @@ describe("join refuses", () => {
   test("an Entry of another campaign or another baker (PdaMismatch), or one naming them (EntryMismatch)", async () => {
     const { w, creator, campaign, metric } = await joinWorld();
     const other = (await openedCampaign(w, creator)).campaign;
-    const [a, b] = [await fundedWallet(w), await fundedWallet(w)];
-    expectOk(await join(w, a, other, yes(SOL)));
+    // The program re-derives the Entry from this campaign, the signer and the bump stored in the
+    // account passed. c's canonical bumps in both campaigns are equal, so its other Entry's bump
+    // gives c's own address here, a different one; b's bump is 255 and a's is lower, so on a's
+    // seeds it gives no address at all. Both are `PdaMismatch` (`checks::pda`), on every run.
+    const c = await walletWhere(w, async (x) => (await entryBump(other, x)) === (await entryBump(campaign, x)));
+    const a = await walletWhere(w, async (x) => (await entryBump(campaign, x)) < 255);
+    const b = await walletWhere(w, async (x) => (await entryBump(campaign, x)) === 255);
+    expectOk(await join(w, c, other, yes(SOL)));
     expectOk(await join(w, b, campaign, yes(SOL)));
-    // The program re-derives the Entry from this campaign and the signer, so anyone else's real
-    // Entry fails on its address, whatever total is signed.
-    const base = await I.joinCampaignIx(a, campaign, metric, yes(SOL));
-    for (const wrong of [await P.entryPda(other, a.address), await P.entryPda(campaign, b.address)]) {
-      expectError(await send(w, [I.withSlot(base, 4, { address: wrong })]), "PdaMismatch");
-    }
+    const passing = async (signer: KeyPairSigner, entry: Address) =>
+      I.withSlot(await I.joinCampaignIx(signer, campaign, metric, yes(SOL)), 4, { address: entry });
+    expectError(await send(w, [await passing(c, await P.entryPda(other, c.address))]), "PdaMismatch");
+    expectError(await send(w, [await passing(a, await P.entryPda(campaign, b.address))]), "PdaMismatch");
     // An Entry at a's own address that names someone else exists only through setAccount; the
     // stored keys are compared as well (the explicit `has_one` of TP section 3.4.17).
     expectOk(await join(w, a, campaign, yes(SOL)));

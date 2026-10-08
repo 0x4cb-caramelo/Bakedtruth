@@ -5,20 +5,24 @@
  * Sprint:  02 (pot core on Pinocchio), lane E. Needs the SBF build: runs from the integration on.
  */
 import { describe, expect, test } from "bun:test";
-import { AccountRole } from "@solana/kit";
+import { AccountRole, type Address } from "@solana/kit";
 
 import { join, readCampaign, readEntry } from "./flows";
 import * as I from "./instructions";
 import * as P from "./program";
-import { expectError, expectOk, fundedWallet, send } from "./setup";
-import { joinWorld, snapshot } from "./join-campaign-support";
+import { expectError, expectOk, send } from "./setup";
+import { entryBump, joinWorld, snapshot, walletWhere } from "./join-campaign-support";
 
 const SOL = P.SOL;
 
 describe("two wallets", () => {
   test("A cannot change, close or redirect B's Entry", async () => {
     const { w, campaign, metric } = await joinWorld();
-    const [a, b] = [await fundedWallet(w), await fundedWallet(w)];
+    // Equal canonical bumps: B's bump on A's seeds gives A's own Entry address, which the load
+    // compares with the account passed, on every run ("join refuses" has the other path, a bump
+    // that gives no address at all).
+    const bumpIs255 = async (x: Address) => (await entryBump(campaign, x)) === 255;
+    const [a, b] = [await walletWhere(w, bumpIs255), await walletWhere(w, bumpIs255)];
     expectOk(await join(w, b, campaign, { side: P.Side.Yes, amount: SOL }));
     const entryB = await P.entryPda(campaign, b.address);
     const keptB = snapshot(w, entryB);
