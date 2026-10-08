@@ -1,0 +1,8 @@
+# Purpose: pins the npm registry this workspace installs from, whatever a developer's ~/.npmrc says.
+# Sprint: 02 (T15). bun.lock resolved through registry.npmmirror.com until Sprint 02; a mirror is a
+# third party in every build, and its hashes were never compared with the official registry
+# (docs/technical/TECHNICAL-PLAN.md, section 7.1). Packages from this registry are recorded in
+# bun.lock with an empty URL, so `bun install --frozen-lockfile` fetches each tarball from here and
+# checks it against the sha512 the lockfile already holds.
+[install]
+registry = "https://registry.npmjs.org"
