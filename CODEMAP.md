@@ -8,8 +8,8 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **170** |
-| Acima de 200 linhas | **30** ⚠️ |
+| Arquivos mapeados | **171** |
+| Acima de 200 linhas | **31** ⚠️ |
 | Sem cabeçalho `Purpose:` | **102** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -43,6 +43,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `scripts/sync-selfhosted.js` — 349 linhas
 - `scripts/test/hooks.test.js` — 278 linhas
 - `scripts/tokenomics-model.ts` — 584 linhas
+- `services/landing/scripts/build-legal.mjs` — 201 linhas
 - `target/types/pred_provable.ts` — 3189 linhas
 - `tests/helpers.ts` — 424 linhas
 - `tests/pred-provable.test.ts` — 2799 linhas
@@ -441,13 +442,19 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`sprites.js`](services/landing/public/pitch/sprites.js) | the mascot images of /pitch4: which file is which pose, loading them ahead of time, and putting a pose on a slide at a place given in the slide's own 1920 x 108 | 78 |
 | [`team.js`](services/landing/public/pitch/team.js) | the Team slide of the v4 deck: the mascot runs in and pulls the rope of each curtain in turn, showing each person drawn as a bread roll; a few seconds later eac | 67 |
 
+## `services/landing/scripts/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`build-legal.mjs`](services/landing/scripts/build-legal.mjs) | builds public/terms.html and public/privacy.html from docs/legal/TERMS-OF-SERVICE.md and PRIVACY-POLICY.md, the reviewed texts. Edit those files, then run `node | 201 |
+
 ## `services/landing/tests/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`leads.test.mjs`](services/landing/tests/leads.test.mjs) | tests the waitlist store and the request limiter of the "coming soon" site (node --test) | 113 |
-| [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 159 |
-| [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 192 |
+| [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 199 |
+| [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 193 |
 
 ## `target/types/`
 
