@@ -12,6 +12,13 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Added
 
+- **Termos de serviço e política de privacidade, primeiro rascunho** (`docs/legal/`), pedidos pelo fundador em
+  8/10/2026: curtos, sem juridiquês e no tom do pãozinho. Cada seção abre com "the crumb", uma linha do Baked que
+  resume a regra; a piada fica no resumo, nunca dentro da regra. Os termos descrevem o produto do BP v0.0.3 e do deck
+  v4, mostram numa tabela o que a equipe pode e não pode fazer, e prometem que um mercado aberto mantém as regras com
+  que abriu. A política diz o que o site guarda e o que não guarda, item por item. Um terceiro arquivo, em português,
+  traz as notas para a revisão. Junto entram, para consulta interna, os 13 documentos da Polymarket, Kalshi, World e
+  Robinhood em que o rascunho se apoiou (`knowledge-base/legal/concorrentes/`), cada um com fonte e data.
 - **Um deck só no ar: o v4 passa para `/pitch`,** em 8/10/2026, a pedido do fundador. Os decks anteriores (o de oito
   slides que estava em `/pitch`, o `/pitch2` e o `/pitch3`) saem do ar e ficam em `services/landing/history/`, com os
   roteiros de fala, só como história. Os endereços `/pitch2`, `/pitch3` e `/pitch4` redirecionam para `/pitch/`, para
@@ -158,10 +165,11 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 - **Da revisão dos mentores ficam com o fundador:** R3 (que métricas entram no lançamento; o slide de proteção contra
   manipulação não entrou), R4 (o valor da taxa reduzida dos três primeiros meses) e R6 (o prazo de entrega). Detalhe
   em `docs/business/_review/revisao-do-pitch-2026-10-08.md`, seção 6.
-- **Termos de uso e documentos do site, pela metade.** Pedido de 8/10/2026: lista dos documentos necessários, os
-  termos dos concorrentes importados e um rascunho nosso, curto e no tom do pãozinho. Um agente baixou 13 documentos
-  da Polymarket, Kalshi, World e Robinhood para `knowledge-base/legal/concorrentes/` e parou no limite de uso. Ainda
-  fora do Git; faltam o resumo, a lista e o rascunho.
+- **Termos de serviço e política de privacidade, em rascunho à espera de revisão jurídica** (`docs/legal/`). Nada
+  foi publicado; `/privacy` continua valendo. Estão em branco a empresa, os países bloqueados, o teto de
+  responsabilidade, a lei, o foro e um email de contato. Seis regras dos termos dependem de decisões do plano ainda
+  abertas, e o texto não resolve o risco da MP 1.394 para sócios no Brasil sem bloqueio de país. A lista está em
+  `docs/legal/NOTAS-DA-REVISAO.md`. Faltam o resumo comparativo dos concorrentes e a lista completa de documentos.
 - **Índice do `docs.brot.markets`** (documentação estilo wiki, pedida em 8/10/2026): não começado.
 - **`docs/business/BP-v0.0.3-completo.md`,** o plano num arquivo só, pedido pelo fundador, fica fora do Git: é uma
   cópia das partes e envelhece na primeira edição.
