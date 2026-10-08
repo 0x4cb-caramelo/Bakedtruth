@@ -1,7 +1,8 @@
 //! Purpose: the frozen loaders of `state` running the `checks` module on the host: owner,
 //!          exact length, tag and version, then the PDA from the stored bump, each failure with its
-//!          own error, and the campaign address re-derived from the id the account carries (T24).
-//! Version: 0.0.1
+//!          own error, and the campaign address re-derived from the id the account carries (T24);
+//!          and `init`, which never writes over an account that carries a tag or a version.
+//! Version: 0.0.2
 //! Sprint: 02 (pot core on Pinocchio), lane A
 
 #[path = "checks_support/host.rs"]
@@ -11,7 +12,9 @@ use brot_markets::{
     constants::CAMPAIGN_SEED,
     error::BrotError,
     layout::ZeroCopy,
-    state::{campaign::Campaign, config::GlobalConfig, AccountTag, LAYOUT_VERSION},
+    state::{
+        self, campaign::Campaign, config::GlobalConfig, entry::Entry, AccountTag, LAYOUT_VERSION,
+    },
     ID,
 };
 use host::{config_data, config_pda, key, HostAccount, SYSTEM};
@@ -78,4 +81,29 @@ fn the_campaign_loader_rederives_the_address_from_the_stored_id() {
     let mut wrong_type = HostAccount::new(config_address, ID, &config).writable();
     let result = Campaign::load_mut(&mut wrong_type.view(), &ID).err();
     assert_eq!(result, code(BrotError::WrongLength));
+}
+
+#[test]
+fn init_writes_the_tag_once_and_refuses_an_account_that_carries_one() {
+    let already = code(BrotError::AlreadyInitialized);
+    let mut fresh = HostAccount::new(key(9), ID, &[0; Entry::LEN]).writable();
+    let entry = state::init::<Entry>(&mut fresh.view()).map(|entry| (entry.tag, entry.version));
+    assert_eq!(entry.ok(), Some((AccountTag::Entry as u8, LAYOUT_VERSION)));
+    assert_eq!(state::init::<Entry>(&mut fresh.view()).err(), already);
+    // A tag of any type, or a version alone, is enough to refuse.
+    let (_, bump) = config_pda();
+    let mut config = HostAccount::new(key(9), ID, &config_data(bump, key(1))).writable();
+    assert_eq!(
+        state::init::<GlobalConfig>(&mut config.view()).err(),
+        already
+    );
+    let mut version_only = vec![0u8; Entry::LEN];
+    version_only[1] = LAYOUT_VERSION;
+    let mut stale = HostAccount::new(key(9), ID, &version_only).writable();
+    assert_eq!(state::init::<Entry>(&mut stale.view()).err(), already);
+    let mut short = HostAccount::new(key(9), ID, &[0; 99]).writable();
+    assert_eq!(
+        state::init::<Entry>(&mut short.view()).err(),
+        code(BrotError::WrongLength)
+    );
 }

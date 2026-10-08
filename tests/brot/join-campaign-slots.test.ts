@@ -1,13 +1,14 @@
 /**
  * Purpose: the slot checks of `user_join_campaign` in the order of checks.rs, each with its own
  *          error: signer and writable flags, the three pairs that must differ, the System Program,
- *          the event slots, the config, the vault's address and the size of the arguments.
- * Version: 0.0.1
+ *          the event slots, the config, the vault's owner and address and the size of the arguments.
+ * Version: 0.0.2
  * Sprint:  02 (pot core on Pinocchio), lane E. Needs the SBF build: runs from the integration on.
  */
 import { describe, expect, test } from "bun:test";
 import { AccountRole, type Address } from "@solana/kit";
 
+import { place } from "./checks-support";
 import type { BrotErrorName } from "./errors";
 import { openedCampaign, readCampaign } from "./flows";
 import * as I from "./instructions";
@@ -53,5 +54,15 @@ describe("join refuses", () => {
       kept,
     );
     expectOk(await send(w, [ix]));
+  });
+
+  test("a vault at its own address that the program does not own: WrongOwner, and nothing moves", async () => {
+    const { w, campaign, vault, metric } = await joinWorld();
+    const baker = await fundedWallet(w);
+    place(w, vault, { owner: P.SYSTEM_PROGRAM_ID, lamports: balance(w, vault) });
+    const before = { baker: balance(w, baker.address), vault: balance(w, vault) };
+    const ix = await I.joinCampaignIx(baker, campaign, metric, { side: P.Side.Yes, amount: P.SOL });
+    expectError(await send(w, [ix]), "WrongOwner");
+    expect({ baker: balance(w, baker.address), vault: balance(w, vault) }).toEqual(before);
   });
 });

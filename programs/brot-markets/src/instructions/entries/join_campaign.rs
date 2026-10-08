@@ -91,6 +91,7 @@ pub fn user_join_campaign(
     let baker_key = *baker.address();
     let mut campaign = Campaign::load_mut(campaign, program_id)?;
     let vault_seeds: [&[u8]; 2] = [VAULT_SEED, campaign_key.as_ref()];
+    checks::owned_by(vault, program_id)?;
     checks::pda(vault, &vault_seeds, campaign.vault_bump, program_id)?;
     // The join lock of Sprint 03 reads this account; until then it is only compared.
     if metric_account.address() != &campaign.metric_account {

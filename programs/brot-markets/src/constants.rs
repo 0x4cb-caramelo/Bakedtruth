@@ -74,6 +74,10 @@ pub const PRICE_CAMPAIGN_MAX_CONF_BPS: u16 = 50;
 pub const MAX_PRICE_AGE_CEILING: u32 = 300;
 /// [AC] Ceiling of `max_price_conf_bps` for the SOL/USD read at opening (1%).
 pub const MAX_PRICE_CONF_BPS_CEILING: u16 = 100;
+/// [AC] A price published more than this many seconds ahead of the cluster clock is refused as
+/// stale (Sprint 02 review): a fault upstream could otherwise stamp a price that never ages. The
+/// measured leads are 1 to 2 s (knowledge-base/tecnologia/pyth-leitor-de-preco.md, 1.4 and 1.7).
+pub const MAX_PRICE_CLOCK_LEAD_SECONDS: i64 = 60;
 /// The join-time price age copied into each price campaign is never below 30 s (Q4 answer).
 pub const CAMPAIGN_MAX_AGE_FLOOR: u32 = 30;
 /// [AC] Ceiling of `campaign_max_age`, in seconds.

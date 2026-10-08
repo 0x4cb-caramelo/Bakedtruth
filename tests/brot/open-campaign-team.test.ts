@@ -1,13 +1,15 @@
 /**
  * Purpose: a team key opens free (P-3, I12, I14): no lamports move but the two rents, the campaign
  *          stores a zero creator share and no opening price, the SOL/USD slot is neither checked
- *          nor read (so a stale feed does not stop the team), and there is no `partner` argument.
- * Version: 0.0.1
+ *          nor read (so a stale feed does not stop the team), there is no `partner` argument, and
+ *          the team key must sign even when someone funded both accounts in advance.
+ * Version: 0.0.2
  * Sprint:  02 (pot core on Pinocchio), lane D. Runs after the SBF build (Wave 2).
  */
 import { describe, expect, test } from "bun:test";
-import { getAddressEncoder, type Instruction } from "@solana/kit";
+import { AccountRole, getAddressEncoder, type Instruction } from "@solana/kit";
 
+import { place } from "./checks-support";
 import { readCampaign, readConfig } from "./flows";
 import * as I from "./instructions";
 import { openingWorld, rents, tryOpen } from "./opening";
@@ -62,6 +64,23 @@ describe("team opening pays nothing", () => {
     expectOk((await tryOpen(w, w.team, onSol)).sent);
     setPriceAccount(w.client, P.SOL_USD_ACCOUNT, "pyth-sol-usd-devnet", { publishTime: START_TIME - 121n });
     expectError((await tryOpen(w, w.team, onSol)).sent, "PriceStale");
+  });
+
+  test("an unsigned team key is refused, even with the campaign and vault funded in advance", async () => {
+    // A free opening whose two rents are already there takes no lamport from the creator: the
+    // signature is all that stops anyone from opening in a team key's name.
+    const w = await openingWorld();
+    const tamper = async (ix: Instruction, args: I.OpenArgs) => {
+      const campaign = await P.campaignPda(args.id);
+      place(w, campaign, { owner: P.SYSTEM_PROGRAM_ID, lamports: rents(w).campaign });
+      place(w, await P.vaultPda(campaign), { owner: P.SYSTEM_PROGRAM_ID, lamports: rents(w).vault });
+      return I.withSlot(ix, 0, { role: AccountRole.WRITABLE });
+    };
+    const { sent, campaign } = await tryOpen(w, w.team, { openingUsd: 0n, maxLamports: 0n }, { tamper });
+    expectError(sent, "MissingSignature");
+    const account = w.client.svm.getAccount(campaign);
+    expect(account.exists && [account.programAddress, account.data.length]).toEqual([P.SYSTEM_PROGRAM_ID, 0]);
+    expect((await readConfig(w)).open_campaigns).toBe(0);
   });
 
   test("takes no partner argument: a key appended to the arguments is refused", async () => {

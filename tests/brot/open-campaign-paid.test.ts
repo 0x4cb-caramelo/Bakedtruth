@@ -2,8 +2,9 @@
  * Purpose: the paid opening (TP section 3.4.16, I14): US$500 in lamports at the captured Pyth
  *          SOL/USD price, all of it into the vault, 90% bookkept as the prize and 10% held as the
  *          opening fee, the creator charged exactly that plus both rents; more US$ make a larger
- *          prize at the same 90/10; and a team key that adds a prize pays like any wallet [AC].
- * Version: 0.0.1
+ *          prize at the same 90/10, also for a campaign on SOL/USD itself; and a team key that adds
+ *          a prize pays like any wallet [AC].
+ * Version: 0.0.2
  * Sprint:  02 (pot core on Pinocchio), lane D. Runs after the SBF build (Wave 2).
  */
 import { describe, expect, test } from "bun:test";
@@ -86,6 +87,19 @@ describe("opening charges 500 dollars at the pyth price", () => {
     expect(readCampaign(w, campaign)).toMatchObject(expected);
     expect(balance(w, vault)).toBe(rents(w).vault + expected.opening_paid_lamports);
     expect(expected.prize_lamports).toBeGreaterThan(base.prize_lamports);
+  });
+
+  test("a campaign on SOL/USD itself: one account in both price slots, charged like any other", async () => {
+    const w = await openingWorld();
+    const onSol = { feedId: P.SOL_USD_FEED_ID, direction: P.Direction.Below, target: (SOL_PRICE * 9n) / 10n };
+    const { sent, campaign, vault } = await tryOpen(w, w.creator, onSol);
+    const ok = expectOk(sent);
+    const { paid, prize, fee } = split(openingLamports(500n, SOL_PRICE));
+    const stored = { metric_account: P.SOL_USD_ACCOUNT, feed_id: P.SOL_USD_FEED_ID, opening_price: SOL_PRICE };
+    const money = { opening_paid_lamports: paid, prize_lamports: prize, opening_fee_lamports: fee };
+    expect(readCampaign(w, campaign)).toMatchObject({ ...stored, ...money, direction: P.Direction.Below });
+    expect(balance(w, vault)).toBe(rents(w).vault + paid);
+    expect(opened(ok.events)[0].data).toMatchObject({ ...stored, ...money });
   });
 
   test("max_lamports at the price opens, one lamport below is refused (T25)", async () => {

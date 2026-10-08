@@ -73,11 +73,17 @@ fn one_second_past_max_age_is_stale() {
 }
 
 #[test]
-fn a_publish_time_ahead_of_the_clock_is_fresh() {
-    // Seen on mainnet: the publish time 2 s ahead of the reader's clock.
+fn a_publish_time_up_to_a_minute_ahead_of_the_clock_is_fresh() {
+    // Seen on mainnet: the publish time 2 s ahead of the reader's clock. Up to 60 s ahead passes;
+    // a price stamped further ahead, by a fault upstream, would otherwise never age.
     let reading = sol();
     assert_eq!(check(&reading, shift(reading.publish_time, -5)), Ok(()));
-    assert_eq!(check(&reading, i64::MIN), Ok(()));
+    assert_eq!(check(&reading, shift(reading.publish_time, -60)), Ok(()));
+    assert_eq!(
+        check(&reading, shift(reading.publish_time, -61)),
+        Err(PriceRefusal::Stale)
+    );
+    assert_eq!(check(&reading, i64::MIN), Err(PriceRefusal::Stale));
 }
 
 #[test]
@@ -86,7 +92,8 @@ fn extreme_times_give_an_answer_never_a_panic() {
     reading.publish_time = i64::MIN;
     assert_eq!(check(&reading, i64::MAX), Err(PriceRefusal::Stale));
     reading.publish_time = i64::MAX;
-    assert_eq!(check(&reading, i64::MIN), Ok(()));
+    assert_eq!(check(&reading, i64::MIN), Err(PriceRefusal::Stale));
+    assert_eq!(check(&reading, i64::MAX), Ok(()));
 }
 
 #[test]

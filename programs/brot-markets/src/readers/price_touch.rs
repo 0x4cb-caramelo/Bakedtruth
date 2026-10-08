@@ -14,7 +14,7 @@ use pinocchio::{AccountView, Address};
 
 use super::cursor::Cursor;
 use crate::{
-    constants::{BPS_DENOMINATOR, PYTH_PUSH_ORACLE_ID, PYTH_SHARD},
+    constants::{BPS_DENOMINATOR, MAX_PRICE_CLOCK_LEAD_SECONDS, PYTH_PUSH_ORACLE_ID, PYTH_SHARD},
     error::BrotError,
     state::enums::Direction,
 };
@@ -127,11 +127,11 @@ pub fn sponsored_account(feed_id: &[u8; 32]) -> Result<Address, BrotError> {
     .ok_or(BrotError::MetricAccountMismatch)
 }
 
-/// Checks a reading for an opening: published at most `max_age` seconds before `now` (a publish
-/// time a few seconds ahead of the clock counts as fresh), a positive price, and a confidence of
-/// at most `max_conf_bps` of the price. The caller maps the refusals to its own row's errors
-/// (row 4 for the campaign's feed, row 7 for SOL/USD), so the three outcomes are distinct.
-/// Checked in that order: a stale price is `Stale` whatever its value.
+/// Checks a reading for an opening: published at most `max_age` seconds before `now` and at most
+/// `MAX_PRICE_CLOCK_LEAD_SECONDS` after it (the clock may lag Pyth's), a positive price, and a
+/// confidence of at most `max_conf_bps` of the price. The caller maps the refusals to its own
+/// row's errors (row 4 for the campaign's feed, row 7 for SOL/USD), so the three outcomes are
+/// distinct. Checked in that order: a stale price is `Stale` whatever its value.
 pub fn check_fresh_and_tight(
     reading: &PriceReading,
     now: i64,
@@ -139,12 +139,16 @@ pub fn check_fresh_and_tight(
     max_conf_bps: u16,
 ) -> Result<(), PriceRefusal> {
     // In i128 neither a publish time far in the past nor one ahead of the clock can overflow. A
-    // publish time ahead of the clock gives a negative age: fresh, with no upper bound, because
-    // Pyth signs the time and the cluster clock may lag it (pyth-leitor-de-preco.md, 1.4 and 1.7).
+    // publish time ahead of the clock gives a negative age: fresh, because Pyth signs the time and
+    // the cluster clock may lag it, but only up to `MAX_PRICE_CLOCK_LEAD_SECONDS`, so a price
+    // stamped far ahead by a fault upstream cannot stay fresh for hours.
     let age = i128::from(now)
         .checked_sub(i128::from(reading.publish_time))
         .ok_or(PriceRefusal::Stale)?;
-    if age > i128::from(max_age) {
+    let lead = i128::from(reading.publish_time)
+        .checked_sub(i128::from(now))
+        .ok_or(PriceRefusal::Stale)?;
+    if age > i128::from(max_age) || lead > i128::from(MAX_PRICE_CLOCK_LEAD_SECONDS) {
         return Err(PriceRefusal::Stale);
     }
     let price = u128::try_from(reading.price)

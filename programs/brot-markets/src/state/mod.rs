@@ -80,14 +80,19 @@ pub fn load_mut<'a, T: AccountState, const N: usize>(
 }
 
 /// Writes the tag and layout version of a freshly created account and returns its view. The
-/// account must have just been created by `checks::create_pda_account` with `T::LEN` bytes.
+/// account must have just been created by `checks::create_pda_account` with `T::LEN` bytes. An
+/// account that already carries a tag or a version is refused (`AlreadyInitialized`), whatever
+/// the caller checked before: no account is ever initialised twice.
 pub fn init<'a, T: AccountState>(
     account: &'a mut AccountView,
 ) -> Result<RefMut<'a, T>, ProgramError> {
     let mut data = account.try_borrow_mut()?;
     checks::len(&data, T::LEN)?;
-    if let Some(head) = data.get_mut(..2) {
-        head.copy_from_slice(&[T::TAG as u8, LAYOUT_VERSION]);
+    match data.get_mut(..2) {
+        Some(head) if head.iter().all(|byte| *byte == 0) => {
+            head.copy_from_slice(&[T::TAG as u8, LAYOUT_VERSION]);
+        }
+        _ => return Err(BrotError::AlreadyInitialized.into()),
     }
     RefMut::try_map(data, |bytes| {
         T::from_bytes_mut(bytes).ok_or(BrotError::WrongLength)

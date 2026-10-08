@@ -1,12 +1,14 @@
 /**
  * Purpose: the checks negatives in LiteSVM through `admin_initialize_config`: non-canonical bumps,
  *          a look-alike System Program, the upgrade authority, a second initialisation, an address
- *          another program owns and one account in two slots (T24; `-t "checks refuse"`); and the
- *          config and fee vault still created when their addresses were funded in advance.
- * Version: 0.0.1
+ *          another program owns, one account in two slots and an unsigned authority whose accounts
+ *          were funded in advance (T24; `-t "checks refuse"`); and the config and fee vault still
+ *          created when their addresses were funded in advance.
+ * Version: 0.0.2
  * Sprint:  02 (pot core on Pinocchio), lane A
  */
 import { describe, expect, test } from "bun:test";
+import { AccountRole } from "@solana/kit";
 
 import { anyAddress, nonCanonicalPda, place, programDataOf, rewrite, text, uninitialised } from "./checks-support";
 import { DEFAULT_PARAMS, initConfig } from "./flows";
@@ -69,6 +71,20 @@ describe("checks refuse", () => {
     const { w, init } = await uninitialised();
     place(w, await P.configPda(), { owner: await anyAddress(), lamports: rentFor(w, 0) });
     expectError(await send(w, [init]), "WrongOwner");
+  });
+
+  test("signer: an unsigned upgrade authority, with the config and fee vault funded in advance", async () => {
+    // Funded in advance, neither account needs a lamport from the authority: the signature is all
+    // that stops anyone from naming the upgrade authority's address and choosing the admin.
+    const { w, init } = await uninitialised();
+    const [config, feeVault] = [await P.configPda(), await P.feeVaultPda()];
+    place(w, config, { owner: P.SYSTEM_PROGRAM_ID, lamports: rentFor(w, 400) });
+    place(w, feeVault, { owner: P.SYSTEM_PROGRAM_ID, lamports: rentFor(w, 0) });
+    expectError(await send(w, [I.withSlot(init, 0, { role: AccountRole.WRITABLE })]), "MissingSignature");
+    for (const address of [config, feeVault]) {
+      const account = w.client.svm.getAccount(address);
+      expect(account.exists && [account.programAddress, account.data.length]).toEqual([P.SYSTEM_PROGRAM_ID, 0]);
+    }
   });
 
   test("distinct: the config as the fee vault", async () => {

@@ -1,14 +1,15 @@
 //! Purpose: every account check Anchor used to make, written by hand in one place (TP section
 //!          3.4.17). Each check returns its own error and has a negative test that fails when
 //!          the check is removed (T24, X0.9).
-//! Version: 0.0.3
+//! Version: 0.0.4
 //! Sprint: 02 (pot core on Pinocchio); signatures frozen at the sprint's opening, bodies by lane A
 //!
 //! Order inside an instruction (contract for every handler): arguments (exact length), then the
 //! per-slot flags (`signer`, `writable`), then `distinct` for the pairs that must differ, then
 //! `system_program` and `event_accounts`, then the account loads (`owned_by`, `len`, `tag`,
 //! `pda`), then roles and business rules, then the effects (creation, transfers, writes), then
-//! the event. Pinocchio checks none of this by itself.
+//! the event. One exception: the join creates a baker's first `Entry` before its last rule, the
+//! return estimate; a refusal reverts both. Pinocchio checks none of this by itself.
 //!
 //! Each refusal follows an `// X0.9 <name>` line: `scripts/checks-mutation.mjs` puts an early
 //! return right after it, rebuilds the program and shows that the check's tests then fail.
