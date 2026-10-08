@@ -29,6 +29,10 @@ pinocchio-system = "=0.6.1"
 # Attributes only: ShankAccount and ShankInstruction generate no runtime code; shank-cli reads
 # them from the source to write the IDL (T9).
 shank = "=0.4.9"
+# shank-cli reads error codes and messages only from a thiserror-derived enum (T9, lane F). The
+# derive's Display and Error impls are never called on-chain. 2.0.21 is the version Cargo.lock
+# already held; it declares rust-version 1.77.
+thiserror = { version = "=2.0.21", default-features = false }
 
 # Host builds only: deriving a PDA off-chain needs the curve check. The SBF binary uses the
 # runtime's syscalls instead, so this never reaches the program.

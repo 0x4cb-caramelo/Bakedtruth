@@ -1,12 +1,1947 @@
 {
-  "address": "6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN",
-  "metadata": {
-    "name": "brot_markets",
-    "version": "0.0.1",
-    "spec": "0.1.0",
-    "description": "Brot Markets: pot-based prediction markets resolved by on-chain account reads"
-  },
-  "instructions": [],
+  "version": "0.0.2",
+  "name": "brot_markets",
+  "instructions": [
+    {
+      "name": "AdminInitializeConfig",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The program's upgrade authority; pays both rents"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig, PDA [\"config\"], created"
+          ]
+        },
+        {
+          "name": "feeVault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Fee vault, PDA [\"fee_vault\"], created with no data"
+          ]
+        },
+        {
+          "name": "programData",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program's ProgramData account"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System Program"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "initializeConfigArgs",
+          "type": {
+            "defined": "InitializeConfigArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 0
+      }
+    },
+    {
+      "name": "AdminSetTeam",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "GlobalConfig.admin"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "setTeamArgs",
+          "type": {
+            "defined": "SetTeamArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 1
+      }
+    },
+    {
+      "name": "AdminSetCreationParams",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "GlobalConfig.admin"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "creationParams",
+          "type": {
+            "defined": "CreationParams"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 2
+      }
+    },
+    {
+      "name": "AdminSetFeeRecipient",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "GlobalConfig.admin"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "setFeeRecipientArgs",
+          "type": {
+            "defined": "SetFeeRecipientArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 3
+      }
+    },
+    {
+      "name": "AdminTransferAdmin",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "GlobalConfig.admin"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "transferAdminArgs",
+          "type": {
+            "defined": "TransferAdminArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 4
+      }
+    },
+    {
+      "name": "AdminAcceptAdmin",
+      "accounts": [
+        {
+          "name": "newAdmin",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "GlobalConfig.pending_admin"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 5
+      }
+    },
+    {
+      "name": "TeamPauseEntries",
+      "accounts": [
+        {
+          "name": "teamMember",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "A key in GlobalConfig.team"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 6
+      }
+    },
+    {
+      "name": "AdminResumeEntries",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "GlobalConfig.admin"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 7
+      }
+    },
+    {
+      "name": "UserOpenCampaign",
+      "accounts": [
+        {
+          "name": "creator",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "Any wallet, or a team key; pays the opening and both rents"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig"
+          ]
+        },
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign, PDA [\"campaign\", id], created"
+          ]
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Vault, PDA [\"vault\", campaign], created with no data"
+          ]
+        },
+        {
+          "name": "metricAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The account the reader reads (price: the sponsored account of feed_id)"
+          ]
+        },
+        {
+          "name": "solUsdPrice",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The sponsored SOL/USD account; read only when the opening pays"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System Program"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "openCampaignArgs",
+          "type": {
+            "defined": "OpenCampaignArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 8
+      }
+    },
+    {
+      "name": "UserJoinCampaign",
+      "accounts": [
+        {
+          "name": "baker",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The joining wallet; pays the entry and the Entry rent"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig: the pause and the minimum"
+          ]
+        },
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign"
+          ]
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The campaign's vault"
+          ]
+        },
+        {
+          "name": "entry",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Entry, PDA [\"entry\", campaign, baker], created on the first join"
+          ]
+        },
+        {
+          "name": "metricAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Campaign.metric_account (the join lock reads it from Sprint 03)"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System Program"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "joinCampaignArgs",
+          "type": {
+            "defined": "JoinCampaignArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 9
+      }
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Campaign",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tag",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "vaultBump",
+            "type": "u8"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": "ReaderKind"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "direction",
+            "type": {
+              "defined": "Direction"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": "Status"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "outcome",
+            "type": {
+              "defined": "Outcome"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "settleMode",
+            "type": {
+              "defined": "SettleMode"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "voidReason",
+            "type": {
+              "defined": "VoidReason"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "contestStage",
+            "type": {
+              "defined": "ContestStage"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "creatorIsTeam",
+            "type": "bool",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "metLate",
+            "type": "bool",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "creatorShareSettled",
+            "type": "bool",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "feeCollected",
+            "type": "bool",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "prizeSettled",
+            "type": "bool",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "id",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "creator",
+            "type": "publicKey"
+          },
+          {
+            "name": "rentPayer",
+            "type": "publicKey"
+          },
+          {
+            "name": "templateVersion",
+            "type": "u16",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "creatorShareBps",
+            "type": "u16",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "feeBps",
+            "type": "u16",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "oneSidedFeeBps",
+            "type": "u16",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "feedId",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "metricAccount",
+            "type": "publicKey"
+          },
+          {
+            "name": "target",
+            "type": "i128",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "priceExponent",
+            "type": "i32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "maxAge",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "opensAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "entriesCloseAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "deadlineAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingUsd",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingPaidLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingPrice",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingPriceExponent",
+            "type": "i32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingPricePublishTime",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "prizeLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingFeeLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "poolYes",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "poolNo",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "firstBaker",
+            "type": "publicKey"
+          },
+          {
+            "name": "entriesOpen",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "eventSeq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "observedValue",
+            "type": "i128",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "resolvedAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "reviewEndsAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "contestEndsAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "voidNoteHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "winningTotal",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "losingTotal",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "distributable",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "feeTotal",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "creatorShare",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "creatorShareFromFee",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "paidOutTotal",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "GlobalConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tag",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "feeVaultBump",
+            "type": "u8"
+          },
+          {
+            "name": "operatingLevel",
+            "type": {
+              "defined": "OperatingLevel"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "teamLen",
+            "type": "u8"
+          },
+          {
+            "name": "admin",
+            "type": "publicKey"
+          },
+          {
+            "name": "pendingAdmin",
+            "type": "publicKey"
+          },
+          {
+            "name": "team",
+            "type": {
+              "array": [
+                "publicKey",
+                5
+              ]
+            }
+          },
+          {
+            "name": "feeRecipient",
+            "type": "publicKey"
+          },
+          {
+            "name": "params",
+            "type": {
+              "defined": "CreationParams"
+            }
+          },
+          {
+            "name": "openCampaigns",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Entry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tag",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "isFirst",
+            "type": "bool",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "baker",
+            "type": "publicKey"
+          },
+          {
+            "name": "amountYes",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "amountNo",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                16
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "ConfigInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "signer",
+            "type": "publicKey"
+          },
+          {
+            "name": "admin",
+            "type": "publicKey"
+          },
+          {
+            "name": "feeRecipient",
+            "type": "publicKey"
+          },
+          {
+            "name": "params",
+            "type": {
+              "defined": "CreationParams"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConfigChanged",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "change",
+            "type": {
+              "defined": "ConfigChange"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "signer",
+            "type": "publicKey"
+          },
+          {
+            "name": "admin",
+            "type": "publicKey"
+          },
+          {
+            "name": "pendingAdmin",
+            "type": "publicKey"
+          },
+          {
+            "name": "feeRecipient",
+            "type": "publicKey"
+          },
+          {
+            "name": "teamLen",
+            "type": "u8"
+          },
+          {
+            "name": "team",
+            "type": {
+              "array": [
+                "publicKey",
+                5
+              ]
+            }
+          },
+          {
+            "name": "params",
+            "type": {
+              "defined": "CreationParams"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "EntriesPaused",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "signer",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EntriesResumed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "signer",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignOpened",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "id",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "creator",
+            "type": "publicKey"
+          },
+          {
+            "name": "creatorIsTeam",
+            "type": "bool",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": "ReaderKind"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "direction",
+            "type": {
+              "defined": "Direction"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "feedId",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "metricAccount",
+            "type": "publicKey"
+          },
+          {
+            "name": "target",
+            "type": "i128",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "priceExponent",
+            "type": "i32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "maxAge",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "templateVersion",
+            "type": "u16",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "opensAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "entriesCloseAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "deadlineAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "feeBps",
+            "type": "u16",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "oneSidedFeeBps",
+            "type": "u16",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "creatorShareBps",
+            "type": "u16",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingUsd",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingPaidLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingPrice",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingPriceExponent",
+            "type": "i32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingPricePublishTime",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "prizeLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingFeeLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "EntryAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "baker",
+            "type": "publicKey"
+          },
+          {
+            "name": "side",
+            "type": {
+              "defined": "Side"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "isFirst",
+            "type": "bool",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "amount",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "poolYes",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "poolNo",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "entryYes",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "entryNo",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "InitializeConfigArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "publicKey"
+          },
+          {
+            "name": "feeRecipient",
+            "type": "publicKey"
+          },
+          {
+            "name": "params",
+            "type": {
+              "defined": "CreationParams"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "SetFeeRecipientArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "feeRecipient",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SetTeamArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "teamLen",
+            "type": "u8"
+          },
+          {
+            "name": "team",
+            "type": {
+              "array": [
+                "publicKey",
+                5
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "TransferAdminArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "newAdmin",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OpenCampaignArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": "ReaderKind"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "direction",
+            "type": {
+              "defined": "Direction"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "feedId",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "target",
+            "type": "i128",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "deadlineAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingUsd",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "maxLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "JoinCampaignArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "side",
+            "type": {
+              "defined": "Side"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "amount",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "minReturnBps",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "expectedEntryTotal",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreationParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "openingFeeUsd",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingPrizeBps",
+            "type": "u16",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "feeBps",
+            "type": "u16",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "oneSidedFeeBps",
+            "type": "u16",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "creatorShareBps",
+            "type": "u16",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "maxOpenCampaigns",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "minEntryLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "solUsdFeedId",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "maxPriceAge",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "maxPriceConfBps",
+            "type": "u16",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "campaignMaxAge",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReaderKind",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "PriceTouch"
+          },
+          {
+            "name": "SupplyAtMost"
+          },
+          {
+            "name": "DammV2LockedAtLeast"
+          },
+          {
+            "name": "StakePoolTvlAtLeast"
+          },
+          {
+            "name": "StakeAtLeast"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Status",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Open"
+          },
+          {
+            "name": "InReview"
+          },
+          {
+            "name": "Contested"
+          },
+          {
+            "name": "Settling"
+          },
+          {
+            "name": "Settled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Outcome",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Unresolved"
+          },
+          {
+            "name": "Yes"
+          },
+          {
+            "name": "No"
+          },
+          {
+            "name": "Void"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SettleMode",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Unset"
+          },
+          {
+            "name": "Split"
+          },
+          {
+            "name": "OneSided"
+          },
+          {
+            "name": "Refund"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VoidReason",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "MissedWindow"
+          },
+          {
+            "name": "UnreadableAccount"
+          },
+          {
+            "name": "StaleFeed"
+          },
+          {
+            "name": "TeamHouseFailure"
+          },
+          {
+            "name": "TeamOutsideCause"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ContestStage",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "Stage1"
+          },
+          {
+            "name": "Stage2"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OperatingLevel",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Normal"
+          },
+          {
+            "name": "EntriesHalted"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Side",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Yes"
+          },
+          {
+            "name": "No"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Direction",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Above"
+          },
+          {
+            "name": "Below"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConfigChange",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Team"
+          },
+          {
+            "name": "CreationParams"
+          },
+          {
+            "name": "FeeRecipient"
+          },
+          {
+            "name": "PendingAdmin"
+          },
+          {
+            "name": "Admin"
+          }
+        ]
+      }
+    }
+  ],
   "errors": [
     {
       "code": 6000,
@@ -32,97 +1967,340 @@
       "code": 6004,
       "name": "PriceWrongFeed",
       "msg": "Price update is for another feed than the one expected"
+    },
+    {
+      "code": 6005,
+      "name": "WrongOwner",
+      "msg": "An account the program treats as its own belongs to another program"
+    },
+    {
+      "code": 6006,
+      "name": "MissingSignature",
+      "msg": "A slot that must sign did not"
+    },
+    {
+      "code": 6007,
+      "name": "NotWritable",
+      "msg": "A slot that must be writable was passed read-only"
+    },
+    {
+      "code": 6008,
+      "name": "WrongTag",
+      "msg": "The account's type tag is not the one this slot expects"
+    },
+    {
+      "code": 6009,
+      "name": "WrongLength",
+      "msg": "The account's data is not exactly the size of its type"
+    },
+    {
+      "code": 6010,
+      "name": "PdaMismatch",
+      "msg": "The address is not the program-derived address its seeds and bump give"
+    },
+    {
+      "code": 6011,
+      "name": "WrongSystemProgram",
+      "msg": "The System Program slot holds another account"
+    },
+    {
+      "code": 6012,
+      "name": "UpgradeAuthorityMismatch",
+      "msg": "The signer is not the program's upgrade authority"
+    },
+    {
+      "code": 6013,
+      "name": "WrongProgramData",
+      "msg": "The ProgramData account is not this program's, or records no upgrade authority"
+    },
+    {
+      "code": 6014,
+      "name": "AlreadyInitialized",
+      "msg": "The account already exists; the program never re-initialises one"
+    },
+    {
+      "code": 6015,
+      "name": "DuplicateAccount",
+      "msg": "The same account was passed in two slots that must differ"
+    },
+    {
+      "code": 6016,
+      "name": "WrongEventAuthority",
+      "msg": "The event-authority slot is not this program's event authority"
+    },
+    {
+      "code": 6017,
+      "name": "WrongProgramAccount",
+      "msg": "The program slot is not this program"
+    },
+    {
+      "code": 6018,
+      "name": "WrongLayoutVersion",
+      "msg": "The account's layout version is not the one this program reads"
+    },
+    {
+      "code": 6019,
+      "name": "BadAccountData",
+      "msg": "A stored field holds a value no variant of its enum has"
+    },
+    {
+      "code": 6020,
+      "name": "UnknownInstruction",
+      "msg": "The first byte of the instruction data names no instruction"
+    },
+    {
+      "code": 6021,
+      "name": "BadInstructionData",
+      "msg": "The instruction data is not exactly the size of the instruction's arguments"
+    },
+    {
+      "code": 6022,
+      "name": "NotAdmin",
+      "msg": "The signer is not the config's admin"
+    },
+    {
+      "code": 6023,
+      "name": "NotTeamMember",
+      "msg": "The signer is not one of the config's team keys"
+    },
+    {
+      "code": 6024,
+      "name": "NotPendingAdmin",
+      "msg": "The signer is not the admin named by the pending transfer"
+    },
+    {
+      "code": 6025,
+      "name": "NoPendingAdmin",
+      "msg": "No admin transfer is pending"
+    },
+    {
+      "code": 6026,
+      "name": "ZeroAddress",
+      "msg": "An address that must name a key is all zeros"
+    },
+    {
+      "code": 6027,
+      "name": "TeamTooLarge",
+      "msg": "More than five team keys"
+    },
+    {
+      "code": 6028,
+      "name": "TeamSlotNotEmpty",
+      "msg": "A team slot past team_len is not zero"
+    },
+    {
+      "code": 6029,
+      "name": "DuplicateTeamKey",
+      "msg": "The same team key appears twice"
+    },
+    {
+      "code": 6030,
+      "name": "OpeningFeeUsdOutOfRange",
+      "msg": "opening_fee_usd is outside its floor and ceiling"
+    },
+    {
+      "code": 6031,
+      "name": "OpeningPrizeBpsOutOfRange",
+      "msg": "opening_prize_bps is outside its floor and ceiling"
+    },
+    {
+      "code": 6032,
+      "name": "FeeBpsAboveCeiling",
+      "msg": "fee_bps is above MAX_FEE_BPS"
+    },
+    {
+      "code": 6033,
+      "name": "OneSidedFeeBpsAboveCeiling",
+      "msg": "one_sided_fee_bps is above its ceiling"
+    },
+    {
+      "code": 6034,
+      "name": "CreatorShareBpsAboveCeiling",
+      "msg": "creator_share_bps is above MAX_CREATOR_SHARE_BPS"
+    },
+    {
+      "code": 6035,
+      "name": "MaxOpenCampaignsOutOfRange",
+      "msg": "max_open_campaigns is outside its floor and ceiling"
+    },
+    {
+      "code": 6036,
+      "name": "MinEntryOutOfRange",
+      "msg": "min_entry_lamports is outside its floor and ceiling"
+    },
+    {
+      "code": 6037,
+      "name": "SolUsdFeedIdZero",
+      "msg": "sol_usd_feed_id is all zeros"
+    },
+    {
+      "code": 6038,
+      "name": "MaxPriceAgeOutOfRange",
+      "msg": "max_price_age is outside its floor and ceiling"
+    },
+    {
+      "code": 6039,
+      "name": "MaxPriceConfOutOfRange",
+      "msg": "max_price_conf_bps is outside its floor and ceiling"
+    },
+    {
+      "code": 6040,
+      "name": "CampaignMaxAgeOutOfRange",
+      "msg": "campaign_max_age is below 30 seconds or above its ceiling"
+    },
+    {
+      "code": 6041,
+      "name": "AlreadyPaused",
+      "msg": "Entries are already paused"
+    },
+    {
+      "code": 6042,
+      "name": "NotPaused",
+      "msg": "Entries are not paused"
+    },
+    {
+      "code": 6043,
+      "name": "UnknownReaderKind",
+      "msg": "The kind byte names no reader"
+    },
+    {
+      "code": 6044,
+      "name": "ReaderKindNotOpen",
+      "msg": "This kind of campaign does not open yet"
+    },
+    {
+      "code": 6045,
+      "name": "MetricAccountMismatch",
+      "msg": "The metric account is not the one the campaign's parameters name"
+    },
+    {
+      "code": 6046,
+      "name": "TargetAlreadyTouched",
+      "msg": "The target is already touched or met; the campaign would be decided at birth"
+    },
+    {
+      "code": 6047,
+      "name": "PriceStale",
+      "msg": "The price is older than the campaign's maximum age"
+    },
+    {
+      "code": 6048,
+      "name": "PriceConfidenceTooWide",
+      "msg": "The confidence interval is wider than 0.5% of the price"
+    },
+    {
+      "code": 6049,
+      "name": "PriceNonPositive",
+      "msg": "The price is zero or negative"
+    },
+    {
+      "code": 6050,
+      "name": "InvalidDirection",
+      "msg": "The direction byte is neither Above nor Below"
+    },
+    {
+      "code": 6051,
+      "name": "DurationTooShort",
+      "msg": "The deadline is less than three days away"
+    },
+    {
+      "code": 6052,
+      "name": "DurationTooLong",
+      "msg": "The deadline is more than ninety days away"
+    },
+    {
+      "code": 6053,
+      "name": "OpeningUsdBelowFee",
+      "msg": "The opening pays less than opening_fee_usd"
+    },
+    {
+      "code": 6054,
+      "name": "OpeningAboveMaxLamports",
+      "msg": "The opening would cost more lamports than the signed max_lamports"
+    },
+    {
+      "code": 6055,
+      "name": "SolUsdAccountMismatch",
+      "msg": "The SOL/USD slot is not the sponsored account of sol_usd_feed_id"
+    },
+    {
+      "code": 6056,
+      "name": "SolUsdStale",
+      "msg": "The SOL/USD price is older than max_price_age"
+    },
+    {
+      "code": 6057,
+      "name": "SolUsdConfidenceTooWide",
+      "msg": "The SOL/USD confidence is wider than max_price_conf_bps"
+    },
+    {
+      "code": 6058,
+      "name": "SolUsdPriceNonPositive",
+      "msg": "The SOL/USD price is zero or negative"
+    },
+    {
+      "code": 6059,
+      "name": "PriceExponentOutOfRange",
+      "msg": "The SOL/USD exponent is outside the range the conversion supports"
+    },
+    {
+      "code": 6060,
+      "name": "OpenWhilePaused",
+      "msg": "Entries are paused, which also stops openings"
+    },
+    {
+      "code": 6061,
+      "name": "TooManyOpenCampaigns",
+      "msg": "open_campaigns has reached max_open_campaigns"
+    },
+    {
+      "code": 6062,
+      "name": "CampaignNotOpen",
+      "msg": "The campaign is not Open"
+    },
+    {
+      "code": 6063,
+      "name": "EntriesClosed",
+      "msg": "Entries closed at entries_close_at"
+    },
+    {
+      "code": 6064,
+      "name": "JoinWhilePaused",
+      "msg": "Entries are paused"
+    },
+    {
+      "code": 6065,
+      "name": "EntryBelowMinimum",
+      "msg": "The entry is below min_entry_lamports"
+    },
+    {
+      "code": 6066,
+      "name": "EntryTotalMismatch",
+      "msg": "The baker's entry total is not the expected_entry_total the client signed"
+    },
+    {
+      "code": 6067,
+      "name": "ReturnBelowMinimum",
+      "msg": "The estimated return is below the signed min_return_bps"
+    },
+    {
+      "code": 6068,
+      "name": "InvalidSide",
+      "msg": "The side byte is neither Yes nor No"
+    },
+    {
+      "code": 6069,
+      "name": "EntryMismatch",
+      "msg": "The Entry account belongs to another campaign or another baker"
+    },
+    {
+      "code": 6070,
+      "name": "ReaderNotReady",
+      "msg": "This reader method arrives in a later sprint"
     }
   ],
-  "constants": [
-    {
-      "name": "BPS_DENOMINATOR",
-      "docs": [
-        "Basis points in 100%."
-      ],
-      "type": "u64",
-      "value": "10000"
-    },
-    {
-      "name": "CAP_SEED",
-      "docs": [
-        "Global cap on the total held in open questions: `[\"cap\"]`."
-      ],
-      "type": "bytes",
-      "value": "[99, 97, 112]"
-    },
-    {
-      "name": "CONFIG_SEED",
-      "docs": [
-        "Global configuration, one per program: `[\"config\"]`."
-      ],
-      "type": "bytes",
-      "value": "[99, 111, 110, 102, 105, 103]"
-    },
-    {
-      "name": "FEE_VAULT_SEED",
-      "docs": [
-        "Where collected fees wait for the sweep: `[\"fee_vault\"]`."
-      ],
-      "type": "bytes",
-      "value": "[102, 101, 101, 95, 118, 97, 117, 108, 116]"
-    },
-    {
-      "name": "MAX_FEE_BPS",
-      "docs": [
-        "Ceiling for the fee on the losing side. The admin can lower the fee of future questions,",
-        "never raise it above this (product rule R-32)."
-      ],
-      "type": "u16",
-      "value": "1000"
-    },
-    {
-      "name": "MIN_BET",
-      "docs": [
-        "Smallest bet, in USDC base units (1 USDC). Working default for founder question 3 of the",
-        "technical plan, section 14.2."
-      ],
-      "type": "u64",
-      "value": "1000000"
-    },
-    {
-      "name": "POSITION_SEED",
-      "docs": [
-        "One account per wallet and question, holding both sides: `[\"position\", question, bettor]`."
-      ],
-      "type": "bytes",
-      "value": "[112, 111, 115, 105, 116, 105, 111, 110]"
-    },
-    {
-      "name": "QUESTION_SEED",
-      "docs": [
-        "One account per question: `[\"question\", id]`."
-      ],
-      "type": "bytes",
-      "value": "[113, 117, 101, 115, 116, 105, 111, 110]"
-    },
-    {
-      "name": "USDC_DECIMALS",
-      "type": "u8",
-      "value": "6"
-    },
-    {
-      "name": "USDC_MINT",
-      "docs": [
-        "Collateral for every question. Circle devnet USDC by default; build with",
-        "`--features mainnet` for mainnet USDC."
-      ],
-      "type": "pubkey",
-      "value": "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
-    },
-    {
-      "name": "VAULT_SEED",
-      "docs": [
-        "The USDC vault of a question, a token account at a program-derived address so nobody can",
-        "create it first: `[\"vault\", question]`."
-      ],
-      "type": "bytes",
-      "value": "[118, 97, 117, 108, 116]"
-    }
-  ]
+  "metadata": {
+    "origin": "shank",
+    "address": "6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN"
+  }
 }
