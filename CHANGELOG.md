@@ -12,6 +12,12 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Added
 
+- **Revisão do `/pitch3` com dois mentores, em 8/10/2026,** organizada por slide em
+  `docs/business/_review/revisao-do-pitch-2026-10-08.md`, com as transcrições brutas em `knowledge-base/pitch/`.
+  Quem é quem por dedução, o que foi dito com a marca de tempo, a avaliação de cada ponto e seis decisões do
+  fundador (R1 a R6). As maiores: juntar patrocínio e criadores num slide só, com uma semente mínima de 500 dólares
+  no lugar dos 0,02 SOL, e usar o slide que sobra para a proteção contra manipulação. Nada foi mudado no deck nem
+  no plano.
 - **Business Plan v0.0.3, refeito a partir do pitch** por ordem do fundador em 7/10/2026 ("tomar o pitch como
   verdade, e transformar o Business plan conforme o pitch"), com três agentes em sequência: mapa de impacto
   (`docs/business/_review/bp-impact-review-v0.0.3.md`), redação e revisão (`_review/revisao-bp-v0.0.3.md`). Quatro
