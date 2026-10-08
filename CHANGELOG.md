@@ -129,6 +129,10 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Fixed
 
+- **Conferência automática vermelha no `main` desde a troca do deck para `/pitch`** (8/10/2026). O índice do plano
+  apontava para o roteiro do `/pitch3`, que foi para o histórico, e o `os-self-test` barra link quebrado. O pull
+  request foi juntado mesmo assim, por erro meu no comando que juntava. O link agora leva ao histórico, e o `LEIA-ME`
+  das poses aponta para as imagens do deck no ar. O site não foi afetado.
 - **Redirecionamento de pasta** do site provisório montado a partir do caminho validado, e não do texto enviado pelo
   visitante. Apontado pela revisão de segurança do commit; nenhum caso testado saía do domínio.
 
@@ -144,15 +148,29 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   Também não há aviso quando entra um email novo.
 - **Portão de redação do deck:** o fundador mandou publicar, e falta aprovar linha por linha o que vai a público e
   dizer quem mantém o deck. Até lá ele fica só por link. A recomendação está no `PITCH.md`.
-- **O `/pitch3` mostra "7 of 30 launch spots taken" com sete logos de exemplo.** Não há sete parceiros: foi pedido
-  do fundador para ver a animação, e o cartão diz "example". Antes de qualquer apresentação de verdade, trocar a
-  lista (`services/landing/public/pitch3/partners.js`) pelos parceiros fechados ou esvaziá-la.
+- **O deck no ar (`/pitch`, v4) mostra "7 of 30 launch spots taken" com sete logos de exemplo.** Não há sete
+  parceiros: foi pedido do fundador para ver a animação, e o cartão diz "example". Antes de qualquer apresentação de
+  verdade, trocar a lista (`services/landing/public/pitch/partners.js`) pelos parceiros fechados ou esvaziá-la.
+- **O v4 mudou duas regras que o BP v0.0.3 acabou de registrar,** por resposta do fundador à revisão dos mentores em
+  8/10/2026: abrir mercado pede uma semente de 500 dólares ou mais (90% prêmio, 10% taxa), no lugar dos 0,02 SOL
+  (decisões 2 e 15 do plano); e quem abre leva "1% of the market's volume", e não 1% do pote, que não são o mesmo
+  número. O plano não foi tocado; as duas pedem a revisão de impacto.
+- **Da revisão dos mentores ficam com o fundador:** R3 (que métricas entram no lançamento; o slide de proteção contra
+  manipulação não entrou), R4 (o valor da taxa reduzida dos três primeiros meses) e R6 (o prazo de entrega). Detalhe
+  em `docs/business/_review/revisao-do-pitch-2026-10-08.md`, seção 6.
+- **Termos de uso e documentos do site, pela metade.** Pedido de 8/10/2026: lista dos documentos necessários, os
+  termos dos concorrentes importados e um rascunho nosso, curto e no tom do pãozinho. Um agente baixou 13 documentos
+  da Polymarket, Kalshi, World e Robinhood para `knowledge-base/legal/concorrentes/` e parou no limite de uso. Ainda
+  fora do Git; faltam o resumo, a lista e o rascunho.
+- **Índice do `docs.brot.markets`** (documentação estilo wiki, pedida em 8/10/2026): não começado.
+- **`docs/business/BP-v0.0.3-completo.md`,** o plano num arquivo só, pedido pelo fundador, fica fora do Git: é uma
+  cópia das partes e envelhece na primeira edição.
 - **19 decisões abertas no BP v0.0.3** (quadro no `docs/business/BUSINESS-PLAN.md`), oito delas antes da Sprint 02:
   1 (de onde sai o 1% de quem abriu), 2 (os 0,02 SOL), 6 (a equipe abre mercados), 7 (tipos em que dá para empurrar o
   resultado), 10, 13, 15 e 16. O resumo de produto, o plano técnico e a Sprint 02 ainda descrevem a criação só pela
   equipe e precisam ser revistos depois dessas respostas. O plano traz os nomes completos da equipe antes do de acordo
-  escrito do Bernardo e do Ronaldo. O slide de receita mostra 960 para quem acertou; com o 1% do slide de criadores,
-  são 950.
+  escrito do Bernardo e do Ronaldo. O slide de receita do `/pitch3` mostrava 960 para quem acertou; o v4 já mostra
+  950, com o 1% de quem abriu.
 - **O `/pitch3` diz três regras que o plano de negócio não tinha,** a pedido do fundador em 7/10/2026. Desde 8/10/2026
   estão na v0.0.3 como "Decisão do pitch"; o registro abaixo fica como histórico. O plano não
   foi alterado; cada uma pede a decisão dele e a revisão de impacto. (1) **Patrocínio 90/10:** o plano diz 70% para
@@ -163,20 +181,9 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   pote para quem abriu:** se sair do pote inteiro, quem acerta paga parte dele, e com mais de 98,9% do pote de um
   lado só o vencedor recebe menos do que pôs. As duas saídas (tirar do lado perdedor, ou da taxa do Brot) estão em
   `docs/business/_review/plano-do-pitch3.md`, "A rodada das regras".
-- **A taxa no `/pitch2` diverge do plano.** O `/pitch3` voltou aos 10% do lado perdedor em 7/10/2026, e o `/pitch2`
-  ficou como estava. O fundador pediu para o deck dizer 3,5% do pote ("voltar ao projeto
-  anterior que era simplesmente 3%, e aumente para 3.5%"). O plano (Parte 1, §3.3) decidiu 10% do lado perdedor,
-  justamente porque a taxa sobre o pote todo faz quem acerta num favorito muito forte receber menos do que pôs (com
-  99% do pote no lado vencedor, volta 0,975 por dólar). Falta ele dizer se a regra do produto muda, o que pede a
-  revisão de impacto no plano, ou se é só a forma de contar no deck. A volta aos 10% no `/pitch3` indica que a
-  regra do produto não mudou; falta ele confirmar, ou pedir a mesma troca no `/pitch2`.
-- **Terceira versão do deck, depois da banca:** a análise recomenda montá-la como prévia, fora do ar. Esperam o
-  fundador seis decisões (a palavra "bet", o slide de equipe, o patrocínio em faixas ou com piso, o cartão do
-  token, os nomes de concorrentes no slide 2 e o título do slide 5) e a confirmação de que os avaliadores sabiam da
-  gravação. Cinco fatos citados pela banca não foram conferidos; a lista está na seção 9 da análise.
-- **O título do slide 5 do `/pitch` exagera** ("so being right never costs you"): em pote de um lado só, quem
-  entra depois do primeiro paga 1%. A frase proposta diz só a regra: "the fee comes out of the losing side". O plano
-  usa "ninguém perde por acertar" na Parte 1, §3.3, e entra na passada de coerência.
+- **"Ninguém perde por acertar" exagera** (Parte 1, §3.3 do plano; era também o título do slide 5 do deck de oito
+  slides, hoje fora do ar): em pote de um lado só, quem entra depois do primeiro paga 1%. Entra na passada de
+  coerência.
 - **Site provisório, pendências:** idioma (está em inglês, por escolha provisória; L-01 segue aberta); um email de
   contato do domínio para a página de privacidade; revisão jurídica do texto de privacidade; a conta do X não foi
   conferida; o Ronaldo ser avisado do serviço novo no servidor.

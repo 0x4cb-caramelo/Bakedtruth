@@ -154,9 +154,9 @@ O registro das perguntas e respostas do fundador, na ordem em que aconteceram, e
 
 ## Histórico e bastidores
 
-- O pitch que originou esta versão: os slides em `services/landing/public/pitch3/`, o roteiro e as respostas prontas
-  em [`../../services/landing/pitch3-notes.md`](../../services/landing/pitch3-notes.md), e a frase de elevador em
-  [`PITCH.md`](PITCH.md).
+- O pitch que originou esta versão, o `/pitch3`, hoje fora do ar e guardado com o roteiro e as respostas prontas em
+  [`../../services/landing/history/pitch-3/`](../../services/landing/history/pitch-3/roteiro.md); o deck no ar,
+  em `/pitch`, é o v4, que nasceu dele. A frase de elevador está em [`PITCH.md`](PITCH.md).
 - [`_review/bp-impact-review-v0.0.3.md`](_review/bp-impact-review-v0.0.3.md): o que o pitch muda no plano, as contas
   refeitas, os riscos novos e as catorze primeiras decisões.
 - [`_review/revisao-bp-v0.0.3.md`](_review/revisao-bp-v0.0.3.md): a revisão final desta versão, com os defeitos

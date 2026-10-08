@@ -42,8 +42,9 @@ As oito poses anteriores e as duas peças prontas foram trazidas para as mesmas 
   um poder trocar pelo outro sem a imagem pular. É o par usado na capa do deck.
 
 **O que o deck usa.** As 17 novas, o `e01-neutro`, o `e07-aprovando` (no slide de criadores) e o
-`e09-adesivo-cheio`, convertidos para WebP em `services/landing/public/pitch3/img/`. O nome de cada pose no código
-está em `public/pitch3/sprites.js`; a de joinha é citada direto na página.
+`e09-adesivo-cheio`, convertidos para WebP. Desde 8/10/2026 o deck no ar é o v4, em `services/landing/public/pitch/img/`
+(o `/pitch3` foi para `services/landing/history/pitch-3/`). O nome de cada pose no código está em
+`public/pitch/sprites.js`; a de joinha é citada direto na página.
 
 **O que não está aqui.** O `manifest.json`, o `prompts.json` e a prévia em GIF citados acima não vieram com as
 imagens. Os pontos de encaixe usados pelas cenas (o punho na pose pendurada, o punho na corda da cortina) foram
