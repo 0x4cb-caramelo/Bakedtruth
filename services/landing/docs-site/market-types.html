@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Market types — Brot Markets docs</title>
+    <meta name="description" content="The five kinds of market Brot Markets opens, what each one reads on Solana, who could push its result, and what stays out on purpose." />
+    <link rel="canonical" href="https://docs.brot.markets/market-types" />
+    <link rel="icon" type="image/png" href="/img/favicon.png" />
+    <script src="/app.js?v=2"></script>
+    <link rel="stylesheet" href="/styles.css?v=3" />
+    <link rel="stylesheet" href="/docs.css?v=1" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="wrap">
+        <a class="brand" href="/" aria-label="Brot Markets docs, home">
+          <img src="/img/baked-deadpan.webp" alt="" width="58" height="37" />
+          <span>brot<b>.markets</b></span>
+          <em class="docs-tag">docs</em>
+        </a>
+        <a class="top-link" href="https://brot.markets" rel="noopener">brot.markets</a>
+        <button class="theme" type="button" data-theme-toggle aria-label="Switch to the dark theme">
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke-linejoin="round" />
+          </svg>
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="wrap docs-grid">
+      <!-- Generated from docs/wiki/market-types.md. Edit the text there and run services/landing/scripts/build-docs.mjs. -->
+      <nav class="docs-nav" aria-label="Documentation">
+<p class="docs-nav-h">Start here</p><ul><li><a href="/start-here/what-is-brot">What Brot Markets is</a></li><li><a href="/start-here/why-the-chain-decides">Why the chain decides</a></li><li><a href="/start-here/where-we-are">Where we are today</a></li></ul>
+<p class="docs-nav-h">How it works</p><ul><li><a href="/how-it-works/the-pot">The pot</a></li><li><a href="/how-it-works/life-of-a-market">Life of a market</a></li><li><a href="/how-it-works/how-a-market-is-decided">How a market is decided</a></li></ul>
+<p class="docs-nav-h">Markets</p><ul><li><a href="/market-types" aria-current="page">Market types</a></li></ul>
+<p class="docs-nav-h">Legal</p><ul><li><a href="https://brot.markets/terms" rel="noopener">Terms of Service</a></li><li><a href="https://brot.markets/privacy" rel="noopener">Privacy Policy</a></li></ul>
+      </nav>
+      <details class="docs-menu">
+        <summary>Contents</summary>
+<p class="docs-nav-h">Start here</p><ul><li><a href="/start-here/what-is-brot">What Brot Markets is</a></li><li><a href="/start-here/why-the-chain-decides">Why the chain decides</a></li><li><a href="/start-here/where-we-are">Where we are today</a></li></ul>
+<p class="docs-nav-h">How it works</p><ul><li><a href="/how-it-works/the-pot">The pot</a></li><li><a href="/how-it-works/life-of-a-market">Life of a market</a></li><li><a href="/how-it-works/how-a-market-is-decided">How a market is decided</a></li></ul>
+<p class="docs-nav-h">Markets</p><ul><li><a href="/market-types" aria-current="page">Market types</a></li></ul>
+<p class="docs-nav-h">Legal</p><ul><li><a href="https://brot.markets/terms" rel="noopener">Terms of Service</a></li><li><a href="https://brot.markets/privacy" rel="noopener">Privacy Policy</a></li></ul>
+      </details>
+      <article class="doc legal docs-page">
+<h1>Market types</h1>
+<p class="crumb"><strong>In one bite:</strong> five kinds of question, each with its answer already written on-chain. If we can't read it, we don't list it.</p>
+<p>Each market type has a reader: a piece of the program that opens one kind of Solana account, reads one number and answers YES or NO. No reader, no market type.</p>
+<h2 id="the-five-types">The five types</h2>
+<div class="table"><table><thead><tr><th>Type</th><th>What it asks</th><th>Example</th><th>Who could push the result</th></tr></thead><tbody><tr><td><strong>Price</strong></td><td>Does a large asset's price touch a target before the end date?</td><td>"Does SOL touch $300 by Dec 31?"</td><td>Nobody. It's the whole market for that asset</td></tr><tr><td><strong>Burn</strong></td><td>Does a token's total supply fall to a number?</td><td>"Does the supply of token T fall to 900M by the 30th?"</td><td>Whoever holds the token and burns it. It costs them the tokens</td></tr><tr><td><strong>Locked liquidity</strong></td><td>Does a Meteora pool have at least X locked forever?</td><td>"Does the T/SOL pool reach X locked liquidity by the 30th?"</td><td>Whoever adds liquidity and locks it. The money stays locked</td></tr><tr><td><strong>Stake pool size</strong></td><td>Does a stake pool hold at least X SOL at the start of an epoch?</td><td>"Does JitoSOL start epoch E with X SOL or more?"</td><td>Whoever deposits. The money has to stay through the epoch change</td></tr><tr><td><strong>Validator stake</strong></td><td>Does a validator have at least X SOL staked with it in an epoch?</td><td>"Does validator V enter epoch E with X SOL or more?"</td><td>Whoever stakes with it before the epoch changes</td></tr></tbody></table></div>
+<p>A few words, if you're new to Solana:</p>
+<ul><li><strong>Supply</strong> is the total amount of a token. A <strong>burn</strong> destroys tokens forever.</li><li><strong>Locked liquidity</strong> is money put into a trading pool and locked there for good. Meteora is one of Solana's pool platforms.</li><li>A <strong>validator</strong> is a computer that confirms the network's transactions. <strong>Stake</strong> is the SOL people entrust to it. A <strong>stake pool</strong> gathers many people's SOL and spreads it across validators.</li><li>An <strong>epoch</strong> is Solana's "day" for stake. It lasts about two days.</li></ul>
+<h2 id="notes-on-each-type">Notes on each type</h2>
+<p><strong>Price markets</strong> read Pyth, an oracle where exchanges and market makers publish signed prices that the program checks on-chain. They're "touch" markets: YES if the price reaches the target at any moment before the end. Every entry needs a fresh price, so nobody can enter after the price has already touched. On 4 October 2026, Pyth had 1,881 price feeds, 423 of them crypto.</p>
+<p><strong>Epoch markets</strong> (stake pool size and validator stake) are read when an epoch begins, and the window to read them lasts about two days.</p>
+<p><strong>Projects can push their own results, and that's the point.</strong> A project that promises a burn controls whether it happens. That's what it's putting money behind. Markets where the opener may control the result carry a warning: "The person who opened this market may control the result and may have picked a side."</p>
+<h2 id="what-stays-out-and-why">What stays out, and why</h2>
+<p><strong>Anything a single key decides for free.</strong> A key is the permission that gives someone power over a token or a program: to mint new tokens, freeze wallets or change code. Giving that power up forever is called renouncing. A market on a renunciation would let the key holder enter early from another wallet, flip the switch and collect, at no risk. So renunciations of minting or freezing, immutable programs and immutable metadata are all out.</p>
+<p><strong>Small tokens' prices, for now.</strong> In a small pool, the price is just the ratio of two reserves, and someone can move it for an instant with money borrowed and repaid in the same transaction. It has happened on Solana: in the Mango case, in October 2022, between $114 and $116 million was taken (SEC and CFTC complaints). Price markets start with assets that have an oracle price. Tokens with a pool on Raydium or Meteora come later, through the average price over a period of time.</p>
+<p><strong>Token-2022 and locked tokens, at first.</strong> Solana has two token programs, the classic one and the newer Token-2022. Burn markets start with classic tokens only. Newer tokens, which include recent pump.fun launches, come later, with a reader reviewed on its own.</p>
+<p><strong>Opinion, by design.</strong> Politics, geopolitics and anything that needs someone to say what happened. There are no opinion markets on Brot.</p>
+<p><strong>Sports, in phase 2.</strong> A match result isn't born on-chain: someone has to publish it. We'd rather build an oracle for it than borrow someone's word.</p>
+<nav class="docs-steps" aria-label="Previous and next"><a class="docs-step" href="/how-it-works/how-a-market-is-decided"><small>Previous</small>How a market is decided</a><span></span></nav>
+      </article>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <p>Brot Markets is in a test phase on Solana devnet, with test tokens. The program is not audited.</p>
+        <nav aria-label="Footer">
+          <a href="https://brot.markets" rel="noopener">brot.markets</a>
+          <a href="https://brot.markets/terms" rel="noopener">Terms</a>
+          <a href="https://brot.markets/privacy" rel="noopener">Privacy</a>
+          <a href="https://x.com/brotmarkets" rel="noopener">X</a>
+          <span>© 2026 Brot Markets</span>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -122,8 +122,8 @@ permissão sim, pode fazer"). O que foi feito, nesta ordem:
 | Programa do túnel | `cloudflared` 2026.9.3, arquivo único em `/srv/brot-markets/bin` (root, 0755), sem pacote do sistema. O SHA-256 conferiu com o publicado na página da versão. A 2026.10.0 tinha saído horas antes e foi preterida |
 | Token do túnel | `/etc/brot-markets/tunnel.env`, root, 0600. Foi do Cloudflare ao servidor sem passar pela tela nem pelo repositório |
 | Unidade `brot-tunnel.service` | Ativa e habilitada, como o usuário `brot`, sem docker e sem root. Só disca para fora. Métricas em `127.0.0.1:4290`. 17 MB de memória |
-| Rotas do túnel | `brot.markets` e `www.brot.markets` para `http://127.0.0.1:4200`; o resto responde 404 |
-| DNS | `brot.markets` e `www.brot.markets` apontam para o túnel, passando pelo Cloudflare. O curinga `*.brot.markets`, que levava qualquer subdomínio ao estacionamento do registrador, foi apagado |
+| Rotas do túnel | `brot.markets`, `www.brot.markets` e, desde 8/10/2026, `docs.brot.markets` para `http://127.0.0.1:4200`; o resto responde 404. O serviço separa o site e a documentação pelo nome pedido |
+| DNS | `brot.markets`, `www.brot.markets` e `docs.brot.markets` apontam para o túnel, passando pelo Cloudflare. O curinga `*.brot.markets`, que levava qualquer subdomínio ao estacionamento do registrador, foi apagado |
 | Zona | "Sempre HTTPS" ligado; TLS mínimo 1.2 |
 
 **Conferido de fora, pelo endereço público:** a página responde 200 em HTTPS; HTTP vai para HTTPS; `www` vai para o

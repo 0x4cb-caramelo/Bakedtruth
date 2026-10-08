@@ -2,95 +2,15 @@
  * Purpose: builds public/terms.html and public/privacy.html from docs/legal/TERMS-OF-SERVICE.md and PRIVACY-POLICY.md,
  *          the reviewed texts. Edit those files, then run `node services/landing/scripts/build-legal.mjs`; the page
  *          tests fail when a page and its text disagree. Reads only the small Markdown those two files use.
- * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-08
+ * Version: 0.2.0 · Sprint: out of band (landing page), 2026-10-08 (the converter moved to markdown.mjs)
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-const LINKS = { "PRIVACY-POLICY.md": "/privacy", "TERMS-OF-SERVICE.md": "/terms" };
-const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-const inline = (s) =>
-  esc(s)
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/`(.+?)`/g, "<code>$1</code>")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, href) => {
-      const url = LINKS[href] ?? href;
-      return /^https?:/.test(url) ? `<a href="${url}" rel="noopener">${text}</a>` : `<a href="${url}">${text}</a>`;
-    });
+import { convert } from "./markdown.mjs";
 
-function convert(md) {
-  const lines = md.replace(/\r/g, "").split("\n");
-  const out = [];
-  let i = 0;
-  const block = (test) => {
-    const taken = [];
-    while (i < lines.length && test(lines[i])) taken.push(lines[i++]);
-    return taken;
-  };
-  while (i < lines.length) {
-    const line = lines[i];
-    const heading = line.match(/^(#{1,3}) (.+)$/);
-    const simple = !line.trim()
-      ? ""
-      : heading
-        ? `<h${heading[1].length}>${inline(heading[2])}</h${heading[1].length}>`
-        : line === "---"
-          ? "<hr />"
-          : null;
-    if (simple !== null) {
-      if (simple) out.push(simple);
-      i++;
-      continue;
-    }
-    if (line.startsWith(">")) {
-      const text = block((l) => l.startsWith(">"))
-        .map((l) => l.replace(/^>\s?/, ""))
-        .join(" ");
-      out.push(`<p class="crumb">${inline(text)}</p>`);
-      continue;
-    }
-    if (line.startsWith("|")) {
-      const rows = block((l) => l.startsWith("|")).filter((l) => !/^\|[\s|:-]+\|$/.test(l));
-      const cells = (l) =>
-        l
-          .slice(1, -1)
-          .split("|")
-          .map((c) => inline(c.trim()));
-      const [head, ...body] = rows;
-      out.push(
-        `<div class="table"><table><thead><tr>${cells(head)
-          .map((c) => `<th>${c}</th>`)
-          .join("")}</tr></thead><tbody>` +
-          body
-            .map(
-              (r) =>
-                `<tr>${cells(r)
-                  .map((c) => `<td>${c}</td>`)
-                  .join("")}</tr>`,
-            )
-            .join("") +
-          "</tbody></table></div>",
-      );
-      continue;
-    }
-    const listItem = /^(- |\d+\. )/;
-    if (listItem.test(line)) {
-      const ordered = /^\d/.test(line);
-      const items = [];
-      while (i < lines.length && (listItem.test(lines[i]) || /^\s{2,}\S/.test(lines[i]))) {
-        if (listItem.test(lines[i])) items.push(lines[i].replace(listItem, ""));
-        else items[items.length - 1] += " " + lines[i].trim();
-        i++;
-      }
-      const tag = ordered ? "ol" : "ul";
-      out.push(`<${tag}>${items.map((it) => `<li>${inline(it)}</li>`).join("")}</${tag}>`);
-      continue;
-    }
-    const para = block((l) => l.trim() && !/^(#|>|\||- |\d+\. |---$)/.test(l));
-    out.push(`<p>${inline(para.join(" "))}</p>`);
-  }
-  return out.join("\n");
-}
+const LINKS = { "PRIVACY-POLICY.md": "/privacy", "TERMS-OF-SERVICE.md": "/terms" };
+const link = (href) => LINKS[href] ?? href;
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const pages = [
@@ -125,7 +45,7 @@ const LEAVE = `<h3 id="leave">Leave the waitlist</h3>
 </form>`;
 
 for (const p of pages) {
-  let body = convert(readFileSync(`${repo}/${p.md}`, "utf8"));
+  let body = convert(readFileSync(`${repo}/${p.md}`, "utf8"), { link });
   const updated = body.match(/<p><strong>Brot Markets<\/strong> · (Last updated: [^<]+)<\/p>/);
   if (!updated) throw new Error(`no date line in ${p.md}`);
   body = body.replace(`<h1>${p.title}</h1>\n`, "").replace(updated[0], "");

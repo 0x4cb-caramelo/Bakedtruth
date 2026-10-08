@@ -152,3 +152,23 @@ Depois do registro acima, o item dos termos foi retomado e terminou no ar.
   só com a taxa, o 300/700 que vira 1,63, o 5.000 a 5.000 que cai para 1,30, o pote de um lado só (0, 2, 3) e o
   oportunista do último minuto (409 de lucro, 1,08 para quem estava antes).
 - **Notas da revisão:** saiu da lista de pendências a troca da página `/privacy`, feita na seção 8.
+
+## 10. O docs no ar (mesmo dia, à noite)
+
+- **O pedido:** "pode liberar o endereço e colocar online, pois vou ler online. os terms e privacy ficaram excelentes."
+  É a liberação por escrito para o endereço novo no Cloudflare e para publicar.
+- **A ferramenta, decisão minha:** ele liberou sem escolher entre as três formas. Eu tinha recomendado um framework de
+  documentação, mas montei no próprio serviço do site, com um gerador como o dos termos. Motivos: nenhuma dependência
+  nova num serviço que hoje não tem nenhuma; nada a construir no servidor dividido; e o texto é Markdown simples, que
+  um framework lê depois sem reescrever. O que fica faltando em relação a um framework é a busca, que com sete páginas
+  não faz falta. Contei isso a ele.
+- **Fora dos buscadores:** o servidor manda `noindex` em todo o `docs.`. Ele quer ler; abrir para buscadores é
+  publicidade indexada, que traz a dúvida da MP 1.394, art. 16, e fica para depois da aprovação dele.
+- **Como o servidor separa:** pelo nome pedido. No `docs.` ele serve `docs-site/` e empresta do site só imagens,
+  fontes, estilo e o script do tema. A lista de espera não responde lá, e as páginas do site não aparecem lá, nem as
+  do docs no site. Os testes conferem os dois lados.
+- **O conversor de Markdown** saiu do gerador dos termos para um arquivo comum aos dois. As páginas dos termos e da
+  privacidade saíram idênticas, byte a byte, conferido com `cmp`.
+- **Conferido antes de publicar:** 33 testes do site; uma mudança de título feita só no texto fez o teste falhar (e
+  foi desfeita pela cópia, não pelo `git checkout`, como aprendido na seção 8); um navegador sem tela abriu as páginas
+  em tela larga e de celular, nos dois temas, sem estouro de largura, imagem quebrada nem erro.
