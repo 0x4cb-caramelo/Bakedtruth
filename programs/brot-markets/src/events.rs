@@ -9,7 +9,6 @@
 //! PDA, so a top-level call of the event instruction fails (decoder rule 2, TP section 3.4.14).
 //! Every campaign-scoped event carries the campaign and a contiguous `seq` (X0.4).
 
-use pinocchio::{AccountView, Address, ProgramResult};
 use shank::ShankType;
 
 use crate::{
@@ -172,23 +171,7 @@ impl Event for EntryAdded {
     const DISCRIMINATOR: u8 = 5;
 }
 
-/// Emits `event` by self-CPI: an instruction to this program with data
-/// `[EVENT_IX_TAG, E::DISCRIMINATOR, event bytes]`, signed by the event authority
-/// (`EVENT_AUTHORITY_SEED`, `EVENT_AUTHORITY_BUMP`). The caller passes its two trailing slots;
-/// `checks::event_accounts` verifies them.
-pub fn emit<E: Event>(
-    event: &E,
-    event_authority: &AccountView,
-    program: &AccountView,
-    program_id: &Address,
-) -> ProgramResult {
-    let _ = (event, event_authority, program, program_id);
-    todo!("Sprint 02 lane F")
-}
-
-/// The handler of `EVENT_IX_TAG`: succeeds only when the event authority signed, which only this
-/// program can do through `emit`; anything else is `WrongEventAuthority`.
-pub fn process_event_instruction(accounts: &[AccountView]) -> ProgramResult {
-    let _ = accounts;
-    todo!("Sprint 02 lane F")
-}
+// `emit` (the self-CPI, signed by the event authority) and the handler of `EVENT_IX_TAG` live in
+// `events/self_cpi.rs`, to keep this file to the event layouts.
+mod self_cpi;
+pub use self_cpi::{emit, event_data, process_event_instruction, EVENT_BUFFER_LEN};
