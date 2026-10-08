@@ -55,11 +55,21 @@ the close that returns rent. Then prove with the randomized test that the fiftee
       accounts to the System Program. `checks::close_account` gets its negative test: a revival in the same
       transaction fails the tag check.
 - [ ] **`sweep_fees`** moves the fee vault's lamports above its rent-exempt minimum to `GlobalConfig.fee_recipient`,
-      and nowhere else.
+      and nowhere else, and refuses a `fee_recipient` equal to the fee vault (`admin_set_fee_recipient` accepts any
+      non-zero key, Sprint 02).
+- [ ] **Every instruction that pays** (`settle_entry`, `settle_creator_share`, `collect_fee`, `settle_prize`,
+      `close_campaign`, `sweep_fees`) checks `owned_by` on its vault and `distinct` between each recipient and the
+      vault. Before the first of them merges, a slot matrix generated from the Shank account lists (each signer
+      unsigned, each writable read-only, a stranger, an account of each program type, every writable pair aliased)
+      runs in CI with a specific error and unchanged balances for each case, or every `checks::` call line is removed
+      once with its test failing (Sprint 02 review: X0.9 proved the 15 checks and 21 call sites, not all ~70).
 - [ ] **Randomized test with a fixed seed:** hundreds of random operations (paid and team openings, entries on both
       sides, pause and resume, lamports sent by hand, clock advances, resolve, confirm, void with each reason,
       contest, finalize, settlements out of order and twice, a credit to an empty wallet, close), with **I1 to I15**
       (TP §3.4.13) checked after each one (gate 1, X0.1).
+- [ ] **The in-program assertions** of TP §3.4.13 (`math/invariant.rs`) also run at the end of `user_open_campaign`
+      and `user_join_campaign`: the vault's lamport change across the instruction equals the bookkept change (the
+      change, not "lamports ≥ rent + books", so hand-sent SOL never refuses a join; Sprint 02 review).
 - [ ] **One-sided cases, one row each:** only winners, only losers, a single baker, with and without the prize, and a
       campaign with no entry at all, under a switchable default (see the founder questions below).
 - [ ] Two wallets: A cannot receive, close or redirect B's `Entry`, and cannot take the creator share.
@@ -70,7 +80,8 @@ the close that returns rent. Then prove with the randomized test that the fiftee
       creator share, one-sided, void, the opening conversion), committed for Sprint 05's replay (X0.3, Rust half).
 - [ ] **The settle batch is measured** in LiteSVM with self-CPI events (T3): entries per transaction and compute
       used; the per-account write limit under late entries (TP C7) is measured too. Both recorded.
-- [ ] If Sprint 02 started with `sol_log_data`, events move to self-CPI here (T4).
+- [x] ~~If Sprint 02 started with `sol_log_data`, events move to self-CPI here (T4).~~ Moot: Sprint 02 shipped
+      self-CPI events.
 - [ ] **How a campaign leaves `Contested` before Sprint 14** is decided by the team and recorded: the instruction
       stays disabled until then, or a path out is written [AC].
 - [ ] Common closure (`docs/SPRINTS.md`, section 4).
@@ -136,6 +147,26 @@ bun test tests/ -t "close returns rent and sweeps the surplus"
 bun test tests/ -t "pause never blocks a payout"                       # I10′
 bun test tests/ -t "randomized invariants"                             # I1 to I15, fixed seed
 ```
+
+## Carried over
+
+From Sprint 02 and its reviews (`docs/sprints/sprint-02-pot-core.md`, "Reviews"; 2026-10-08).
+
+- **Hand-sent lamports land on the `Campaign` and `Entry` accounts too,** not only on the vault (I15 names the
+  vault). Settling and closing account for them.
+- **After `close_campaign`, the same `id` can be opened again,** with the same `Entry` addresses. The indexer keys a
+  campaign by address and opening signature, or the program keeps a tombstone [AC].
+- **The valve has one writer until finalize.** The randomized test asserts I7, and the runbook says how to raise
+  `max_open_campaigns` when the counter is stuck. A leaked team key can fill it for up to 90 days; the founder decides
+  in PR #30 between a separate budget for free openings and letting the team void an `Open` campaign with no entries
+  (which §3.4.7's "nobody voids outside the window" forbids today). Until then the risk is written in TP §7.
+- **Layout versions are exact-match.** No `LAYOUT_VERSION` bump while version 1 accounts exist (or a dual read), v1
+  byte fixtures with a test that the new binary loads them, and `Entry._reserved` (16 bytes) re-checked before the
+  devnet deploy fixes the layout.
+- **Stored bumps** are safe because every writer takes `canonical_pda`'s value; a `CanonicalBump` type built only
+  there, or a test over every stored bump, keeps it so.
+- **The first-baker exemption is per wallet, later joins included** (Q3 as written): TP §3.4.16's one-sided table says
+  so, so nobody reads it as "the first entry only".
 
 ## Risks
 

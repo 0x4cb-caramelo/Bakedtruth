@@ -67,8 +67,10 @@ Then the frozen program leaves, and Anchor with it.
 - [ ] **Alpenglow on devnet** is checked and recorded: confirmed against finalized, the leader-set Clock timestamp, the
       slot time, and the drift of `unix_timestamp` against wall time (TP §14.4 C12, C23). Deadlines and the 60 s proof
       window are retested, and proof and SOL/USD freshness are bounded by slot as well as by time.
-- [ ] The `StakeAtLeast` YES path is tested in Rust LiteSVM 0.17 with `set_epoch_stake`, if it works there [AC];
-      otherwise it stays devnet-only (Sprint 05).
+- [ ] The `StakeAtLeast` YES path is tested in the Rust `litesvm` crate with `set_epoch_stake`, if it works there
+      [AC]; otherwise it stays devnet-only (Sprint 05). Sprint 02 found that `litesvm` 0.17.0, which itself declares
+      Rust 1.89, needs `solana-program-runtime` 4.3.0 (Agave 4.3), which declares Rust 1.97.1, above the pinned 1.89:
+      use the newest version that builds under 1.89 (0.16 [AC]), or record a Rust bump first.
 - [ ] The Lighthouse program id is recorded for the relay's allowlist of Sprint 08 [AC].
 - [ ] **`pred-provable` leaves, in one commit:** `programs/pred-provable`, `tests/pred-provable.test.ts`, the Anchor
       parts of `tests/helpers.ts`, `target/idl/pred_provable.json`, `target/types/pred_provable.ts` and `Anchor.toml`.
@@ -160,6 +162,34 @@ From the price-reader proof of Sprint 01 (`docs/sprints/sprint-01-foundation.md`
   account updates every 62–64 s [F], so devnet price campaigns use at least 90 s (proposal §2.5).
 - **The list of sponsored feeds** limits which assets a price campaign can name. Above.
 - **Only the upgraded receiver (`rec2HH…`) is accepted.** Unchanged.
+
+From Sprint 02 and its reviews (`docs/sprints/sprint-02-pot-core.md`, "Reviews"; 2026-10-08).
+
+- **`outcome_knowable` and `try_resolve` replace `ReaderNotReady`** (6070), the code every kind returns today.
+- **Codes of its own for the SOL/USD read:** an owner, layout, verification or feed refusal on the SOL/USD account
+  surfaces the reader's codes (6001 to 6004), not row 7's. Decide whether row 7 gets four codes; new codes are
+  appended from the first free number.
+- **Which feeds a price campaign may name, before row 2 is extended** (all three reviewers; a founder decision). The
+  price kind accepts any feed whose shard-0 sponsored account is Full, fresh and within 0.5%; TP §3.4.8 ("price of a
+  large asset") and §3.4.10 ("only the price kind is out of any creator's reach") are not enforced by that. First
+  check on devnet whether the push oracle lets any payer create the shard-0 account of an unsponsored feed. Then
+  either a compiled, append-only list of feed ids with its own error and a test that a fresh, valid, unlisted feed is
+  refused, or the TP and BP claims narrowed to what the code enforces.
+- **Row 3, both ends:** refuse a target the price can never reach (`Below` with `target ≤ 0`, an `Above` far past any
+  price) and set the minimum distance per kind (C45), with negative tests one tick past the band and at the far side.
+  Today a `Below` target of 1 opens.
+- **The future-publish bound is shared:** an opening refuses a price published more than 60 s ahead of the clock
+  (`MAX_PRICE_CLOCK_LEAD_SECONDS`, Sprint 02 review); the join lock and the YES proof reuse the rule, with the slot
+  bound above.
+- **A reading whose exponent differs from the stored `price_exponent`** is refused, at the join lock and as proof.
+- **The terms the creator saw:** `max_lamports` bounds the lamports, not the prize share or the creator share, which
+  an admin change between preview and signature can move. While the argument layout is unreleased (before Sprint 05's
+  SDK), decide whether `OpenCampaignArgs` carries an expected `params_version` (or the two values) and refuses on a
+  mismatch, or record it as an accepted risk.
+- **Founder decisions asked in PR #30, built here if he says yes:** charge the opening at `p − conf` instead of `p`
+  (it removes the creator's choice of the highest recent update, worth up to about 1% at the 300 s age ceiling); the
+  SOL/USD feed id as a compiled constant instead of a config value only checked non-zero; and a separate budget for
+  free team openings, so that one leaked team key cannot fill `max_open_campaigns` for up to 90 days.
 
 ## Risks
 

@@ -158,7 +158,8 @@ nesta onda.
 - O fundador confirmar o D6 (que aprovar a proposta aprovou também a troca de nomes), a leitura do Q12 (Lucas e
   Ronaldo com chaves da equipe) e a leitura de trabalho do C44. O R4 (abertura mais barata nos primeiros meses) não
   foi construído.
-- A prova no CI da compilação do primeiro dia: o primeiro run do PR.
+- A prova no CI da compilação do primeiro dia: o primeiro run do PR. Feita: run 37849347333, no PR #30 (commit
+  `21470da`), job Program, verde.
 - Sprint 03: o crate `litesvm` 0.17 esbarra na Agave 4.3 como o Mollusk 0.16.
 
 ## Fontes
@@ -166,3 +167,10 @@ nesta onda.
 - `docs/sprints/sprint-02-pot-core.md`; `docs/technical/TECHNICAL-PLAN.md` v0.1.0; `docs/technical/SYSTEM-ARCHITECTURE-PROPOSAL.md` §2.1, §2.4, §5.2, §5.3.
 - crates.io: `pinocchio` 0.11.2, `pinocchio-system` 0.6.1, `shank` 0.4.9, `mollusk-svm` 0.12 a 0.16, `solana-program-runtime` 3.1.14 a 4.3.0, lidos em 8/10/2026.
 - `litesvm` (npm) 1.5.0, `node_modules/.bun/litesvm@1.5.0+44ee86a28eb4b548/node_modules/litesvm/dist/internal.d.ts`.
+- O crate `litesvm`, lido em 8/10/2026 com `cargo info`: a 0.16.0 e a 0.17.0 declaram, as duas, `rust-version`
+  1.89.0. Um lockfile de prova com `litesvm = "=0.17.0"` resolve `solana-program-runtime` 4.3.0, que declara 1.97.1:
+  o limite vem da dependência, não do crate.
+- O shank-cli só lê erros de um enum com `thiserror::Error`: `shank_idl-0.4.9/src/file.rs:196-197` chama
+  `extract_this_errors` (`shank_macro_impl-0.4.9/src/error/this_error.rs`).
+- O `Rent` do Pinocchio 0.11 lê só o primeiro campo da variável de sistema, como lamports por byte:
+  `pinocchio-0.11.2/src/sysvars/rent.rs` (`lamports_per_byte`, `from_bytes`; o padrão é 6.960).

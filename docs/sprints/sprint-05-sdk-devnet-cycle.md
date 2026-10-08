@@ -27,7 +27,8 @@ read, the window passes, the winners and the creator are paid.
 - [ ] The SDK imports no React, Next.js, Node built-in or DOM API; `Buffer` comes from `buffer`. A lint rule fails if
       it does.
 - [ ] **T9 is decided and recorded:** the Codama client generated from the Shank IDL, or hand-written codecs with a
-      byte-for-byte test against the Rust serializer.
+      byte-for-byte test against the Rust serializer. Sprint 02's spike: Codama 1.11 renders Shank's IDL and
+      round-trips in LiteSVM, but that IDL carries no events and no PDA seeds, which stay hand-written either way.
 - [ ] **The decoder rules** (proposal §2.3) have tests: a failed transaction is skipped; only this program's events
       are accepted (signed by its event-authority PDA, or inside its own frame with `sol_log_data`); inner account
       indexes resolve through `loadedAddresses`; each event is keyed by signature, top-level index and inner index.
@@ -49,8 +50,12 @@ read, the window passes, the winners and the creator are paid.
       Sprint 09 [INF].
 - [ ] **Deploy from CI's artifact** (TP §10, §12): downloaded by run id
       (`gh run download <run id> --repo 0x4cb-caramelo/Bakedtruth`), its `SHA256SUMS` checked; the program keypair
-      taken from its backup outside `target/deploy/`; the deploy and `admin_initialize_config` in the same session.
-      The procedure is written in `deploy/`.
+      taken from its backup outside `target/deploy/`; the deploy and `admin_initialize_config` in the same session,
+      followed by `admin_set_team` (initialization leaves the team empty, so nobody can pause until then). The deploy
+      refuses a keypair whose address is not the declared id (`crate::ID`: the event authority is derived from it,
+      and every instruction fails at the event otherwise), and uses the upgradeable loader (v3), whose ProgramData
+      `admin_initialize_config` reads: a loader-v4 or `--final` deploy can never initialize. The procedure is written
+      in `deploy/`.
 - [ ] `scripts/team/` opens (team key, free), confirms, voids, contests, pauses and sets the creation params; each
       person uses their own key. A void saves its public text under `content/void-log/` and passes that text's hash
       with the `VoidReason` (TP §3.4.7); Sprint 12 gives the record its public format.
@@ -58,6 +63,11 @@ read, the window passes, the winners and the creator are paid.
       outside the team opens a campaign and pays at the Pyth price; two wallets join YES and NO; the result is read;
       the window ends (drill constants or a team confirmation); the winners and the creator share are paid.
 - [ ] On devnet, a retried entry fails on `expected_entry_total` and a retried opening fails on its `id` (X0.5).
+- [ ] The opening preview shows the whole debit: `max_lamports` covers only what moves into the vault, and the two
+      rents (3,901,440 lamports on devnet, Sprint 02) come on top.
+- [ ] The negative tests, the slot tests and one paid opening run once on a real validator (Surfpool or
+      `solana-test-validator`), since Mollusk 0.14 and npm LiteSVM 1.5 are not the cluster's runtime (Sprint 02
+      review).
 - [ ] `bun run seed:devnet`, rewritten, opens example campaigns with a team key, of the kinds that passed.
 - [ ] **Checked on devnet and recorded:** a `StakeAtLeast` YES (or the kind stays closed); the SOL/USD account's age
       against `max_price_age`; an epoch turn; the real settle batch with self-CPI events and its compute cost (T3,
@@ -122,9 +132,16 @@ build.
   `cargo build-sbf` artifact. Above.
 - **Back up the program-address keypair outside `target/deploy/`** before the first deploy, and point the deploy
   command at the backup. Still applies; it is a founder action (above).
-- **The SDK takes the program address from the IDL (`idl.address`).** Re-read for Shank: if the Shank IDL carries the
-  address [AC], keep it as the single source; otherwise one SDK constant, checked in CI against the program's declared
-  id.
+- **The SDK takes the program address from the IDL (`idl.address`).** Answered in Sprint 02: the Shank IDL carries it
+  in `metadata.address`, and `tests/brot/idl.test.ts` checks it against the program id; keep it as the single source.
+
+From Sprint 02's reviews (`docs/sprints/sprint-02-pot-core.md`, "Reviews"; 2026-10-08).
+
+- **Measure before setting mainnet values:** a week of devnet SOL/USD age, confidence and cadence, and of
+  `unix_timestamp` against wall time, recorded in `knowledge-base/`. The [AC] ceilings (price age 300 s, confidence
+  100 bps) and devnet's 120 s are set from what it shows.
+- **A runbook line for a Pyth migration:** the receiver, the push oracle and the shard are compiled constants, so a
+  move by Pyth stops every price opening until an upgrade.
 
 ## Risks
 

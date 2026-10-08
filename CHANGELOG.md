@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-A Sprint 02, o núcleo do pote em Pinocchio, está em revisão no pull request da branch `sprint-02-pot-core`, sem
+A Sprint 02, o núcleo do pote em Pinocchio, está em revisão no pull request #30 (branch `sprint-02-pot-core`), sem
 mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-02-pot-core.md`).
 
 ### Added
@@ -16,14 +16,18 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
 - **Sprint 02: o núcleo do pote, o programa novo em Pinocchio** (`programs/brot-markets`, 8/10/2026). Sai o
   esqueleto Anchor; entra o programa que guarda SOL de verdade, ainda sem leitura de resultado nem pagamento:
   - **A configuração e a equipe:** `admin_initialize_config` (só a autoridade de upgrade, lida da conta ProgramData),
-    até cinco chaves da equipe, os parâmetros de criação dentro dos tetos do código e só para as próximas campanhas,
-    o destino das taxas, a troca de admin em dois passos, a pausa por uma chave da equipe e a volta pelo admin.
+    até cinco chaves da equipe, os parâmetros de criação dentro dos tetos do código, o destino das taxas, a troca de
+    admin em dois passos, a pausa por uma chave da equipe e a volta pelo admin. Os parâmetros valem só para as
+    próximas campanhas, menos a entrada mínima, que cada entrada lê da configuração na hora (a confirmar com o
+    fundador: o plano técnico diz as duas coisas, e os termos publicados prometem que a campanha aberta mantém as
+    regras com que abriu).
   - **A abertura paga:** `user_open_campaign` do tipo preço cobra US$ 500 em SOL ao preço da Pyth SOL/USD, lido na
     hora da conta patrocinada que o programa deriva da configuração; tudo vai para o cofre da campanha, 90% como
-    prêmio e 10% guardados para a Brot até o resultado. Ao preço capturado da devnet, US$ 119,22, são 4,1940 SOL. As
-    dez regras de abertura do plano técnico têm cada uma o seu erro. Uma chave da equipe abre de graça, sem o 1% do
-    criador; se quiser pôr prêmio, paga como qualquer carteira (a leitura de trabalho, a confirmar). Repetir a
-    abertura com o mesmo número falha sem cobrar duas vezes.
+    prêmio e 10% guardados para a Brot até o resultado. Ao preço capturado da devnet, US$ 119,22, são 4,1940 SOL. Das
+    dez regras de abertura do plano técnico, oito têm o seu erro; as outras duas (o criador não passa taxa nem texto
+    livre) valem pela forma dos argumentos, e um argumento a mais cai no erro de dados. Uma chave da equipe abre de
+    graça, sem o 1% do criador; se quiser pôr prêmio, paga como qualquer carteira (a leitura de trabalho, a
+    confirmar). Repetir a abertura com o mesmo número falha sem cobrar duas vezes.
   - **A entrada:** `user_join_campaign` leva o SOL da carteira do baker para o cofre, a partir de 0,01 SOL, com a
     trava contra a transação repetida e o retorno mínimo assinado. O pote é escriturado: SOL mandado à mão para o
     cofre não vira entrada.
@@ -32,8 +36,9 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
   - **Eventos por chamada do programa a si mesmo**, um por instrução, com sequência contínua por campanha.
   - **O IDL do Shank** em `packages/sdk/src/idl` e um cliente gerado pelo Codama no ensaio do T9; a decisão sobre o
     Codama é da Sprint 05.
-  - **Testes do programa novo:** 145 em Rust (a matemática com casos aleatórios, as checagens no Mollusk, o leitor de
-    preço) e 126 em LiteSVM; os nove filtros da sprint passam, e tirar qualquer checagem derruba o teste dela.
+  - **Testes do programa novo:** 146 em Rust (a matemática com casos aleatórios, as checagens no Mollusk, o leitor de
+    preço) e 130 em TypeScript, quase todos no LiteSVM sobre o binário; os nove filtros da sprint passam, e tirar
+    qualquer checagem, ou qualquer assinatura e papel conferido dentro das instruções, derruba o teste dela.
 - **O `bun.lock` baixa do `registry.npmjs.org`** (T15), e os dois `trustedDependencies` saíram depois da revisão.
 - **Build e CI:** `bun run build:program` compila o programa novo com `cargo build-sbf` e escreve o IDL do Shank; o
   `anchor build` fica só para o `pred-provable`, até a Sprint 03. O CI instala o shank-cli 0.4.9 fixo, confere o IDL
@@ -251,6 +256,18 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
 
 ### Fixed
 
+- **Sprint 02, o que as revisões acharam e foi corrigido antes da mescla** (8/10/2026; três revisores e o
+  coordenador, nenhum achou como tirar SOL de ninguém):
+  - um preço da Pyth com horário mais de 60 segundos à frente do relógio da rede passa a ser recusado como velho;
+    antes, um horário adiantado por falha na origem nunca envelhecia;
+  - a entrada confere que o cofre pertence ao programa, além do endereço;
+  - a escrita da marca de tipo numa conta nova recusa uma conta que já tenha marca, qualquer que seja a instrução;
+  - testes novos: a assinatura que falta quando alguém já pagou o aluguel das contas (a inicialização e a abertura
+    gratuita da equipe, onde a assinatura é a única defesa), o cofre de outro dono na entrada, e a abertura paga de
+    uma campanha sobre o próprio SOL/USD, que usa a mesma conta nas duas posições de preço;
+  - a prova de que cada assinatura e cada papel conferido dentro das instruções tem um teste que cai sem ele: 21
+    remoções, uma de cada vez, todas derrubaram o seu teste.
+
 - **Conferência automática vermelha no `main` desde a troca do deck para `/pitch`** (8/10/2026). O índice do plano
   apontava para o roteiro do `/pitch3`, que foi para o histórico, e o `os-self-test` barra link quebrado. O pull
   request foi juntado mesmo assim, por erro meu no comando que juntava. O link agora leva ao histórico, e o `LEIA-ME`
@@ -262,7 +279,15 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
 
 - **Sprint 02, para o fundador confirmar:** que aprovar a proposta de arquitetura aprovou também a troca de nomes
   do D6; que o Lucas e o Ronaldo têm, os dois, chaves da equipe (Q12); a leitura de trabalho de "a equipe põe
-  prêmio" (paga como qualquer carteira). O R4, abertura mais barata nos primeiros meses, não foi construído.
+  prêmio" (paga como qualquer carteira); se a entrada mínima de uma campanha aberta muda quando a configuração
+  muda (hoje muda); e se o PR #27, o plano v0.1.0 que a branch da sprint carrega, é revisto e mesclado antes. O R4,
+  abertura mais barata nos primeiros meses, não foi construído.
+- **Sprint 02, decisões que as revisões pedem antes da Sprint 03:** a campanha de preço aceita qualquer feed da Pyth,
+  e o plano diz "preço de um ativo grande" (uma lista fechada de feeds pediria a decisão dele, porque o D-i tirou a
+  lista de contas); uma chave da equipe vazada pode ocupar todas as vagas de campanhas abertas por até 90 dias (uma
+  cota própria para as aberturas gratuitas resolveria); cobrar a abertura na borda de baixo do preço, `p − conf`,
+  tira de quem abre a vantagem de escolher a atualização mais alta; e o feed do SOL/USD pode virar uma constante do
+  programa, em vez de um parâmetro que um erro de digitação do admin muda.
 
 - **Autoria no Colosseum, prazo 12/10/2026:** o plano diz que a equipe se apresenta como uma pessoa, mas o git mostra
   quatro autores desde 14/9/2026, e o regulamento pede todos os membros e verifica quem fez o trabalho. O código vindo
@@ -321,8 +346,8 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
   conferida; o Ronaldo ser avisado do serviço novo no servidor.
 - **Arquivos originais do deck** (as duas versões, 10 MB e 13 MB) em `docs/technical/`, fora do Git. Não foram
   commitados nem apagados.
-- **Sprints:** a 00 e a 01 estão concluídas. A 02 está destravada: as chaves ficam com o Lucas e o Ronaldo. Falta
-  confirmar a leitura de que os dois têm chave de equipe.
+- **Sprints:** a 00 e a 01 estão concluídas; a 02 está em revisão no pull request #30, sem mesclar. Falta
+  confirmar a leitura de que o Lucas e o Ronaldo têm, os dois, chave de equipe.
 - **Leitura no Surfpool:** era critério de pronto da Sprint 01 e não foi feita. Está na Sprint 03, com o de acordo
   do fundador.
 - **Desenho da pergunta de preço:** a revisão da Sprint 01 propõe aceitar, na aposta, só a conta patrocinada do
@@ -341,14 +366,15 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
 - **Nome:** Brot Markets. O app, os protótipos e o `package.json` da raiz ainda dizem "baked" ou `pred-provable`.
 - **Servidor:** o projeto tem espaço próprio no servidor compartilhado, com o código e o site provisório rodando.
   Falta o lugar do segundo serviço agendado.
-- **Ferramentas locais:** a máquina de desenvolvimento tem Anchor 1.0.0 e Solana 2.2.16, e o projeto fixa 1.1.2 e
-  3.1.x. O programa só compila na conferência automática.
+- **Ferramentas locais:** a máquina de desenvolvimento da Sprint 02 (não o servidor compartilhado) tem Solana CLI
+  3.1.10 e Anchor 1.1.2, e compila os dois programas para os testes. O que for para uma rede sai só dos artefatos da
+  conferência automática.
 - **Chave do endereço do programa:** só na máquina do fundador, em `target/deploy/`. Precisa de cópia de segurança.
 - **Proteção da `main`:** indisponível em repositório privado da conta gratuita do GitHub.
-- **`bun.lock`** aponta para `registry.npmmirror.com`, herdado do upstream. Falta decidir se volta ao registro
-  oficial do npm.
-- **Achados de segurança adiados:** os da Sprint 00, na seção 7.1 do plano técnico e nas Sprints 02, 05, 09 e 16;
-  os da Sprint 01, nas Sprints 03, 07 e 16.
+- **Achados de segurança adiados:** os da Sprint 00 que cabiam na 02 foram tratados nela (com o SOL não há mais
+  casa da moeda a conferir, e uma conta com marca de tipo nunca é reiniciada); os outros seguem nas Sprints 05, 09 e
+  16. Os da Sprint 01, nas Sprints 03, 07 e 16; os da Sprint 02, nas Sprints 03, 04 e 05
+  (`docs/sprints/sprint-02-pot-core.md`, "Reviews").
 - **Regulação:** falta conferir a tramitação da MP 1.394 no Congresso e ler o Decreto 13.128, de 2026.
 - **BP v0.0.2:** fechado, sem proposta em aberto. Faltam o primeiro valor do teto global e os nomes de quem assina a
   carteira com várias assinaturas.

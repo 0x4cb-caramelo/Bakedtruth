@@ -23,7 +23,7 @@ v0.0.1 or the approved proposal. **[Q]** founder question. **[AC]** to verify. *
 
 ## Summary for the founder
 
-There are 24 sprints in seven groups: 00 and 01 are done, and 22 remain. The order is the one you asked for: the
+There are 24 sprints in seven groups: 00 and 01 are done, 02 is in review, and 21 remain. The order is the one you asked for: the
 program and the services on devnet, then the site, then mainnet. The Android app is a separate track.
 
 | Group | Sprints | What comes to exist |
@@ -74,16 +74,15 @@ demonstrable on devnet.
 ## 2. The sprints
 
 **Status.** Sprints 00 and 01 are closed, with tags `sprint-00` and `sprint-01`. Sprint 01 concluded that Pyth serves
-on devnet; the Surfpool read it asked for was not done and moved to Sprint 03. The next is 02. It starts after the
-founder reviews this plan, and its first identifier waits for the D6 rename (section 5).
+on devnet; the Surfpool read it asked for was not done and moved to Sprint 03. Sprint 02 ran on 2026-10-08 with the D6
+names and is in review (PR #30, not merged); its branch carries this plan's PR #27. The next is 03.
 
 **Outside the roadmap: the provisional site.** At the founder's request, `brot.markets` serves `services/landing`: a
 "coming soon" page with a waitlist, a privacy page and the decks at `/pitch` and `/pitch2`. It is not a sprint and
 does not change the order. It took two Sprint 06 items early (Brot's own tunnel and the domain) and leaves when Sprint
-09 puts the real site at the same address. It stores emails (TP §8.1). Three edits wait there, outside the sprints:
-the D6 copy pass (title, meta tags, H1, lead, form label, privacy text); the `/pitch2` fee line, which still shows
-3.5% of the pot (proposal §5.2, D1); and the deck's mainnet line, which still says "and a cap" and whose new wording
-waits for the founder (BP index, "Slide").
+09 puts the real site at the same address. It stores emails (TP §8.1). The D6 copy pass was done at the opening of
+Sprint 02 (`c82be03`), and `/pitch2` now redirects to `/pitch/`. One edit waits there, outside the sprints: the deck's
+mainnet line, which still says "and a cap" and whose new wording waits for the founder (BP index, "Slide").
 
 | # | Sprint | TP block | Depends on |
 |---|---|---|---|

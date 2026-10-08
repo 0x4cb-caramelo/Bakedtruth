@@ -142,6 +142,9 @@ removes this route and `OPENROUTER_API_KEY`.
 
 - `@solana/kit` is pinned `~8.3.0` (8.4.0 shipped with unpublished sub-packages); re-check before bumping.
 - `solana-epoch-stake` must stay `=3.0.0` (3.0.1 pulls solana-pubkey 4, mismatching anchor-lang 1.1.x).
+- `mollusk-svm` 0.15 and later and the `litesvm` crate 0.17 need Agave 4.3 crates, which declare Rust 1.97.1, above
+  the pinned 1.89; `.cargo/config.toml` keeps `cargo update` on versions Rust 1.89 builds (`brot-markets` uses Mollusk
+  0.14.0).
 - Rust tests need `--features no-entrypoint` (spl-token's `entrypoint` symbol collides at link).
 - Keep `anchor-spl` default features: Anchor's `mint::`/`associated_token::` codegen needs `token_interface` even for
   classic SPL Token.
@@ -172,7 +175,7 @@ This repository also carries the AI Dev Operating System (`.claude/rules`, `.cla
 are applied where they still add value rather than from zero. Phases 1 to 4 are done: BP v0.0.2 in `docs/business/`,
 the prototype lab with fourteen directions and the approved one in `docs/product/DESIGN-DIRECTION.md`, the Product
 Brief, the Technical Plan and the sprint roadmap. Phase 5 is under way: Sprints 00 and 01 are closed (tags `sprint-00`,
-`sprint-01`) and Sprint 02 is next. On 2026-10-08 BP v0.0.4 changed the product, and the Technical Plan and the
+`sprint-01`) and Sprint 02 is in review (PR #30, not merged). On 2026-10-08 BP v0.0.4 changed the product, and the Technical Plan and the
 roadmap were rewritten in English from the approved architecture proposal 0.4; the Product Brief and the design
 direction are still to be aligned. The pitch (wizard stage 2.9) is written in `docs/business/PITCH.md`; the founder's
 own deck is served at `/pitch` by link only, and stays out of search engines until he approves the redaction table there.
