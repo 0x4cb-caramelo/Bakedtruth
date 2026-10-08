@@ -19,6 +19,8 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
   que abriu. A política diz o que o site guarda e o que não guarda, item por item. Um terceiro arquivo, em português,
   traz as notas para a revisão. Junto entram, para consulta interna, os 13 documentos da Polymarket, Kalshi, World e
   Robinhood em que o rascunho se apoiou (`knowledge-base/legal/concorrentes/`), cada um com fonte e data.
+  No mesmo dia o fundador achou os termos longos ("ficaram muito longos, podemos e conseguimos reduzir?"): a versão
+  0.2 cai de 2.962 para 1.520 palavras, com as mesmas 13 seções e as mesmas regras, perto do tamanho da política.
 - **Um deck só no ar: o v4 passa para `/pitch`,** em 8/10/2026, a pedido do fundador. Os decks anteriores (o de oito
   slides que estava em `/pitch`, o `/pitch2` e o `/pitch3`) saem do ar e ficam em `services/landing/history/`, com os
   roteiros de fala, só como história. Os endereços `/pitch2`, `/pitch3` e `/pitch4` redirecionam para `/pitch/`, para
