@@ -1,8 +1,9 @@
 /**
  * Purpose: tests what the pages of the "coming soon" site promise without a browser: every file they point at exists,
- *          the suggestion draft keeps its mention and hashtag, the mascot has its poses, and the deck at /pitch keeps
- *          what the founder decided. The earlier decks live in history/ and are not served, so they are not tested.
- * Version: 0.2.0 · Sprint: out of band (landing page), 2026-10-08
+ *          the suggestion draft keeps its mention and hashtag, the mascot has its poses, the terms and privacy pages
+ *          say what the reviewed texts in docs/legal say, and the deck at /pitch keeps what the founder decided. The
+ *          earlier decks live in history/ and are not served, so they are not tested.
+ * Version: 0.3.0 · Sprint: out of band (landing page), 2026-10-08
  */
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
@@ -13,18 +14,22 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const read = (path) => readFileSync(join(ROOT, path), "utf8");
 const home = read("index.html");
+const terms = read("terms.html");
+const privacy = read("privacy.html");
 const deck = read("pitch/index.html");
+const LEGAL = join(ROOT, "..", "..", "..", "docs", "legal");
 
 /** Local files a page asks for through src="" and href="", resolved from the page's own folder. */
 function localFiles(html, folder) {
   const found = [...html.matchAll(/\s(?:src|href)="([^"#?]+)(?:\?v=\d+)?"/g)].map((match) => match[1]);
   return found
-    .filter((ref) => !/^[a-z]+:/.test(ref) && ref !== "/" && ref !== "/privacy")
+    .filter((ref) => !/^[a-z]+:/.test(ref) && !["/", "/privacy", "/terms"].includes(ref))
     .map((ref) => (ref.startsWith("/") ? ref.slice(1) : join(folder, ref)));
 }
 
 test("every file the landing page and the deck point at exists", () => {
-  const files = [...localFiles(home, ""), ...localFiles(deck, "pitch")];
+  const pages = [home, terms, privacy, read("404.html")].flatMap((page) => localFiles(page, ""));
+  const files = [...pages, ...localFiles(deck, "pitch")];
   assert.ok(files.length > 15, "the pages reference their scripts, styles, fonts and images");
   for (const file of files) assert.ok(existsSync(join(ROOT, file)), `${file} is missing`);
 });
@@ -62,7 +67,8 @@ test("every script and style is asked for with a version, and files that are sha
   };
   const pages = [
     ["", home],
-    ["", read("privacy.html")],
+    ["", privacy],
+    ["", terms],
     ["", read("404.html")],
     ["pitch", deck],
   ];
@@ -91,12 +97,46 @@ test("every script and style is asked for with a version, and files that are sha
 });
 
 test("the landing page keeps to its content policy: no inline style and no inline script", () => {
-  for (const page of [home, read("privacy.html"), read("404.html")]) {
+  for (const page of [home, privacy, terms, read("404.html")]) {
     assert.ok(!/\sstyle="/.test(page), "no style attribute");
     assert.ok(!/<style[\s>]/.test(page), "no style tag");
     assert.ok(!/<script(?![^>]*\ssrc=)[^>]*>/.test(page), "no inline script");
   }
 });
+test("the terms and privacy pages say what the reviewed texts in docs/legal say, each with its Baked", () => {
+  const plain = (text) =>
+    text
+      .replace(/<[^>]+>/g, "")
+      .replace(/&amp;/g, "&")
+      .replace(/\*\*/g, "")
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .replace(/\s+/g, " ");
+  for (const [page, file, image] of [
+    [terms, "TERMS-OF-SERVICE.md", "baked-terms.webp"],
+    [privacy, "PRIVACY-POLICY.md", "baked-privacy.webp"],
+  ]) {
+    const md = readFileSync(join(LEGAL, file), "utf8").replace(/\r/g, "");
+    const shown = plain(page);
+    const headings = [...md.matchAll(/^#{2,3} (.+)$/gm)].map((match) => plain(match[1]));
+    assert.ok(headings.length >= 8, `${file} has its sections`);
+    for (const heading of headings) assert.ok(shown.includes(heading), `${file}: "${heading}" is not on the page`);
+    const crumbs = md
+      .split("\n\n")
+      .filter((part) => part.startsWith("> "))
+      .map((part) => plain(part.replace(/^> ?/gm, "").replace("**The crumb:** ", "")));
+    assert.ok(crumbs.length >= 6, `${file} has its crumbs`);
+    for (const crumb of crumbs) assert.ok(shown.includes(crumb), `${file}: a crumb is not on the page: ${crumb}`);
+    assert.ok(!/\[[A-Z][A-Z ,]+[\]:]/.test(md + page), `${file} still has a blank to fill`);
+    assert.ok(page.includes(`src="img/${image}"`), `${file}: the page shows its Baked`);
+  }
+  for (const page of [home, terms, privacy]) {
+    const footer = page.slice(page.indexOf("<footer"));
+    assert.match(footer, /href="\/terms"/);
+    assert.match(footer, /href="\/privacy"/);
+  }
+  assert.match(privacy, /data-leave/, "the privacy page keeps the form to leave the waitlist");
+});
+
 test("the deck at /pitch keeps what the founder decided on 2026-10-08, after the mentors' review", async () => {
   const slides = [...deck.matchAll(/<section class="slide" data-label="([^"]+)"/g)].map((match) => match[1]);
   const labels = "Title, Problem, Solution, Market, How we earn, Open a market, Growth, Team, Close";

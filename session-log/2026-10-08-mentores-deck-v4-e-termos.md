@@ -108,3 +108,47 @@ nossa empresa ... comece me mostrar um roteiro/índice". Nada foi feito.
 - `docs/business/BP-v0.0.3-completo.md`, pelo motivo da seção 1.
 - `docs/technical/Brot Markets Pitch.html` e `Brot Markets Pitch v2.html`, os originais do fundador (10 e 13 MB),
   já listados no `CHANGELOG.md` desde 5/10.
+
+## 8. Os termos e a privacidade, do rascunho ao ar (mesmo dia, à tarde)
+
+Depois do registro acima, o item dos termos foi retomado e terminou no ar.
+
+- **Rascunho (PR 25).** O fundador estreitou o pedido: "termos de serviço e privacidade, me monte estes dois
+  arquivos". Os dois saíram em inglês, em `docs/legal/`, com "the crumb", uma linha do Baked, no topo de cada seção.
+  A piada fica no resumo e nunca dentro da regra, para o humor não mudar o que a regra diz. Os 13 documentos dos
+  concorrentes entraram no Git junto.
+- **Enxuto (PR 26).** "os termos de serviço ficaram muito longos, podemos e conseguimos reduzir?" De 2.962 para
+  1.520 palavras, com as mesmas 13 seções e as mesmas regras. O que saiu foi detalhe repetido. Cortar mais tiraria
+  regra, e eu disse isso a ele.
+- **No ar (PR 28).** "revisado e pode inserir no site, no rodapé", com dois desenhos novos do Baked, um para cada
+  página. Ele aprovou sem preencher as lacunas (empresa, países, teto, lei, foro, email). **Decisão minha, contada a
+  ele:** colchete não vai ao ar, então cada lacuna virou uma frase verdadeira de "será definido antes de dinheiro
+  real". A tabela está em `docs/legal/NOTAS-DA-REVISAO.md`, seção 2.
+- **Uma fonte só.** As páginas são geradas dos arquivos de `docs/legal/` por `services/landing/scripts/build-legal.mjs`,
+  e um teste falha se um título ou uma frase do Baked divergir entre texto e página. Foi conferido de propósito,
+  mudando uma frase só no arquivo: o teste acusou.
+- **O que deu errado.** Para desfazer essa mudança de teste usei `git checkout` no arquivo, o que o voltou à versão
+  comitada e apagou também a troca das lacunas feita minutos antes. Eu tinha guardado uma cópia antes do teste e a
+  restaurei; nada se perdeu. Para não repetir: desfazer uma mudança de teste pela cópia, nunca pelo `git checkout`
+  de um arquivo com edição não comitada.
+- **Conferido no ar,** depois da troca no servidor (commit `e1a54d8`): `/terms`, `/privacy`, as duas imagens, o
+  estilo novo e o `/pitch` respondem 200; o rodapé da página inicial tem "Terms"; o formulário de sair da lista
+  funciona (testado localmente, contra um arquivo temporário, e não contra a lista real).
+
+## 9. O docs começou: sete páginas, fora do ar (mesmo dia, à noite)
+
+- **O índice foi apresentado** ao fundador, com onze seções e três formas de montar o site (framework de
+  documentação, gerador próprio como o dos termos, serviço pronto). A recomendação foi o framework, pela busca e pelo
+  menu. Ele respondeu "continue de onde parou", sem escolher a ferramenta.
+- **Leitura minha:** escrever o texto não depende da ferramenta, porque Markdown com `title` e `description` no topo
+  serve às três. Escrevi as sete páginas das seções 1 a 3 (`docs/wiki/`), que são as marcadas "pronta" e as que
+  explicam o produto. Não criei o endereço, não escolhi a ferramenta e não publiquei nada.
+- **Por que as seções 4, 5 e 9 ficaram de fora:** abrir mercado, taxas e equipe dependem das decisões 1, 2, 9, 12, 15
+  e 16 do plano. As páginas escritas apontam para os termos, §7, onde precisam falar do custo de abrir e da parte de
+  quem abriu, para a regra não existir em dois lugares.
+- **Tom:** o pedido era "estilo um whitepaper, porém soft" e "a parte séria da nossa empresa". Cada página abre com
+  "In one bite", no tom do Baked, e o corpo é sério. O que nenhuma página diz: projeções, caixa, tokens e "bet".
+- **Contas conferidas** contra o BP v0.0.3, Parte 1, §3.2 a §3.6: o exemplo 600/400 (950, 1,583), a tabela de retorno
+  só com a taxa, o 300/700 que vira 1,63, o 5.000 a 5.000 que cai para 1,30, o pote de um lado só (0, 2, 3) e o
+  oportunista do último minuto (409 de lucro, 1,08 para quem estava antes).
+- **Notas da revisão:** saiu da lista de pendências a troca da página `/privacy`, feita na seção 8.
