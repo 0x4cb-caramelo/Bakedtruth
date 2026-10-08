@@ -165,8 +165,7 @@ impl AccountState for Campaign {
 }
 
 impl Campaign {
-    /// Loads a campaign for reading. `id` comes from the instruction or from the stored account;
-    /// either way the address is re-derived and compared.
+    /// Loads a campaign for reading; the address is re-derived from `id` and compared.
     pub fn load<'a>(
         account: &'a AccountView,
         id: u64,
@@ -175,19 +174,20 @@ impl Campaign {
         crate::state::load(account, &[CAMPAIGN_SEED, &id.to_le_bytes()], program_id)
     }
 
-    /// Loads a campaign for writing. The id is read from the account itself, then the address
-    /// is re-derived from it, so a look-alike account with another id fails the PDA check.
+    /// Loads a campaign for writing; the address is re-derived from its stored id and compared.
     pub fn load_mut<'a>(
         account: &'a mut AccountView,
         program_id: &Address,
     ) -> Result<RefMut<'a, Self>, ProgramError> {
+        // Slot and owner first: no byte is read from an account the program does not own.
+        crate::checks::writable(account)?;
+        crate::checks::owned_by(account, program_id)?;
         let id = stored_id(account)?;
         crate::state::load_mut(account, &[CAMPAIGN_SEED, &id.to_le_bytes()], program_id)
     }
 }
 
-/// The `id` field of a campaign account, read before the full checks so the PDA can be derived.
-/// The bytes are only trusted after `load_mut` re-derives the address from them.
+/// The stored `id` of a campaign the program owns; trusted once `load_mut` re-derives the address.
 fn stored_id(account: &AccountView) -> Result<u64, ProgramError> {
     let data = account.try_borrow()?;
     crate::checks::len(&data, <Campaign as crate::layout::ZeroCopy>::LEN)?;

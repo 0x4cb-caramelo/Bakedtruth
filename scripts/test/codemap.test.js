@@ -120,6 +120,7 @@ suite('descoberta de arquivos', () => {
       '.next/c.js',
       'src/vendor/d.js',
       'coverage/e.js',
+      'packages/sdk/src/idl/generated/index.ts',
     ]) {
       assert.ok(SKIP_DIR.test(p), `${p} deveria ser pulado`);
     }
@@ -161,7 +162,7 @@ suite('descoberta de arquivos', () => {
 
   test('caminhos legítimos não são confundidos com gerados', () => {
     // "distribuidor" contém "dist", "outbox" contém "out" — o regex exige limite de path.
-    for (const p of ['src/app.ts', 'src/distribuidor/calc.ts', 'src/outbox/queue.ts', 'lib/build-helper.ts']) {
+    for (const p of ['src/app.ts', 'src/distribuidor/calc.ts', 'src/outbox/queue.ts', 'lib/build-helper.ts', 'src/generated-ids.ts']) {
       assert.ok(!SKIP_DIR.test(p), `${p} não deveria ser pulado`);
     }
   });
