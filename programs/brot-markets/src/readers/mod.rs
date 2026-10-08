@@ -14,10 +14,15 @@ pub mod price_touch;
 
 use pinocchio::{error::ProgramError, AccountView};
 
-use crate::state::{
-    campaign::Campaign,
-    enums::{Direction, ReaderKind, VoidReason},
+use crate::{
+    constants::PRICE_CAMPAIGN_MAX_CONF_BPS,
+    error::BrotError,
+    state::{
+        campaign::Campaign,
+        enums::{Direction, ReaderKind, VoidReason},
+    },
 };
+use price_touch::PriceRefusal;
 
 /// What `user_open_campaign` hands a reader: the metric account and the campaign's parameters.
 pub struct CreationContext<'a> {
@@ -85,11 +90,24 @@ pub fn try_resolve(kind: ReaderKind, ctx: &ReadContext) -> Result<Resolution, Pr
 /// (`MetricAccountMismatch`), reads as a Full update of that feed (the reader's errors), is fresh
 /// within `max_age` (`PriceStale`), positive (`PriceNonPositive`), within 0.5% confidence
 /// (`PriceConfidenceTooWide`), and price ± confidence has not reached the target in the
-/// campaign's direction (`TargetAlreadyTouched`). Lane D implements it in `price_touch.rs` or
-/// here.
+/// campaign's direction (`TargetAlreadyTouched`). The address is compared before a byte is read.
 fn price_touch_validate_at_creation(
     ctx: &CreationContext,
 ) -> Result<CreationReading, ProgramError> {
-    let _ = ctx;
-    todo!("Sprint 02 lane D")
+    if *ctx.metric.address() != price_touch::sponsored_account(ctx.feed_id)? {
+        return Err(BrotError::MetricAccountMismatch.into());
+    }
+    let reading = price_touch::read_price_account(ctx.metric, ctx.feed_id)?;
+    price_touch::check_fresh_and_tight(&reading, ctx.now, ctx.max_age, PRICE_CAMPAIGN_MAX_CONF_BPS)
+        .map_err(|refusal| match refusal {
+            PriceRefusal::Stale => BrotError::PriceStale,
+            PriceRefusal::NonPositive => BrotError::PriceNonPositive,
+            PriceRefusal::ConfidenceTooWide => BrotError::PriceConfidenceTooWide,
+        })?;
+    if price_touch::band_reaches_target(&reading, ctx.direction, ctx.target)? {
+        return Err(BrotError::TargetAlreadyTouched.into());
+    }
+    Ok(CreationReading {
+        price_exponent: reading.exponent,
+    })
 }
