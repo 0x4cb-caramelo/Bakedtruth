@@ -5,7 +5,7 @@
  */
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, posix } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
@@ -15,6 +15,7 @@ const home = read("index.html");
 const deck = read("pitch/index.html");
 const deck2 = read("pitch2/index.html");
 const deck3 = read("pitch3/index.html");
+const deck4 = read("pitch4/index.html");
 
 /** Local files a page asks for through src="" and href="", resolved from the page's own folder. */
 function localFiles(html, folder) {
@@ -25,7 +26,12 @@ function localFiles(html, folder) {
 }
 
 test("every file the landing page and the deck point at exists", () => {
-  const decks = [...localFiles(deck, "pitch"), ...localFiles(deck2, "pitch2"), ...localFiles(deck3, "pitch3")];
+  const decks = [
+    ...localFiles(deck, "pitch"),
+    ...localFiles(deck2, "pitch2"),
+    ...localFiles(deck3, "pitch3"),
+    ...localFiles(deck4, "pitch4"),
+  ];
   const files = [...localFiles(home, ""), ...decks];
   assert.ok(files.length > 15, "the pages reference their scripts, styles, fonts and images");
   for (const file of files) assert.ok(existsSync(join(ROOT, file)), `${file} is missing`);
@@ -56,25 +62,38 @@ test("the mascot has an image for every pose the page and the scripts ask for", 
 test("every script and style is asked for with a version, and files that are shared agree on it", () => {
   // Cloudflare tells browsers to keep these files for hours. Without the version, a returning visitor gets the new
   // page with the old script and style, which is how the mascot went missing on the day it shipped.
-  const versions = new Map(); // file name -> the versions it is asked for with
-  const note = (file, version) => {
-    assert.ok(version, `${file} has no version`);
-    const name = file.split("/").pop();
-    versions.set(name, (versions.get(name) ?? new Set()).add(version));
+  // Keyed by the file's path in public/: /pitch3/team.js and /pitch4/team.js are different files.
+  const versions = new Map(); // path -> the versions it is asked for with
+  const note = (path, version) => {
+    assert.ok(version, `${path} has no version`);
+    versions.set(path, (versions.get(path) ?? new Set()).add(version));
   };
-  for (const page of [home, read("privacy.html"), read("404.html"), deck, deck2, deck3]) {
+  const pages = [
+    ["", home],
+    ["", read("privacy.html")],
+    ["", read("404.html")],
+    ["pitch", deck],
+    ["pitch2", deck2],
+  ];
+  for (const [folder, page] of [...pages, ["pitch3", deck3], ["pitch4", deck4]]) {
     const refs = [...page.matchAll(/\s(?:src|href)="([^"]+\.(?:js|css))(\?v=(\d+))?"/g)];
     assert.ok(refs.length >= 2, "the page loads its script and its style");
-    for (const [, file, , version] of refs) note(file, version);
+    for (const [, file, , version] of refs) note(posix.join(folder, file.replace(/^\//, "")), version);
   }
-  const modules = readdirSync(join(ROOT, "pitch3")).filter((name) => name.endsWith(".js"));
-  assert.ok(modules.length >= 8, "the deck's motion is split in modules");
   let imported = 0;
-  for (const script of ["mascot.js", ...modules.map((name) => `pitch3/${name}`)]) {
-    for (const [, file, , version] of read(script).matchAll(/from "\.\/([a-z-]+\.js)(\?v=(\d+))?"/g)) {
-      note(file, version);
-      imported += 1;
+  for (const folder of ["pitch3", "pitch4"]) {
+    const modules = readdirSync(join(ROOT, folder)).filter((name) => name.endsWith(".js"));
+    assert.ok(modules.length >= 8, "the deck's motion is split in modules");
+    for (const script of modules.map((name) => `${folder}/${name}`)) {
+      for (const [, file, , version] of read(script).matchAll(/from "\.\/([a-z-]+\.js)(\?v=(\d+))?"/g)) {
+        note(`${folder}/${file}`, version);
+        imported += 1;
+      }
     }
+  }
+  for (const [, file, , version] of read("mascot.js").matchAll(/from "\.\/([a-z-]+\.js)(\?v=(\d+))?"/g)) {
+    note(file, version);
+    imported += 1;
   }
   assert.ok(imported >= 10, "the modules import one another");
   for (const [name, asked] of versions) assert.equal(asked.size, 1, `${name} is asked for with ${[...asked]}`);
@@ -178,4 +197,38 @@ test("the fourth version of the deck has its demo, its own motion and what the f
   assert.ok(!/3\.5%/.test(text), "the flat fee the founder tried is gone from this deck");
   assert.match(read("pitch3/demo.js"), /const FEE = \{ of: "losers", rate: 0\.1 \};/);
   assert.match(text, /90% becomes the prize pool\. 10% is a marketing fee\./);
+});
+
+test("v4 of the deck keeps what the founder decided on 2026-10-08, after the mentors' review", () => {
+  const slides = [...deck4.matchAll(/<section class="slide" data-label="([^"]+)"/g)].map((match) => match[1]);
+  const labels = "Title, Problem, Solution, Market, How we earn, Open a market, Growth, Team, Close";
+  assert.equal(slides.join(", "), labels);
+  assert.match(deck4, new RegExp(`<span data-count aria-live="polite">1 / ${slides.length}</span>`));
+  assert.ok(deck4.indexOf('src="motion.js?') > 0 && deck4.indexOf('src="motion.js?') < deck4.indexOf("deck.js?"));
+  const text = deck4
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/<style[\s\S]*?<\/style>/g, "")
+    .replace(/<[^>]+>/g, " ");
+  assert.match(text, /Permissionless prediction markets, settled by on-chain data\./);
+  assert.equal([...text.matchAll(/PROOF &gt; PROMISES/g)].length, 1, "the motto is only on the last slide");
+  assert.match(text, /one market settled on an event that never happened/);
+  // The creator's 1% comes out of the same pot as the fee: the picture and the demo say 950 and count it.
+  assert.match(text, /950\s+USDC to the winners/);
+  assert.match(text, /10\s+USDC to the creator/);
+  assert.match(read("pitch4/demo.js"), /const CREATOR = 0\.01;/);
+  assert.match(text, /initial seed/i);
+  assert.ok(!/pump\.fun/i.test(text) && !/Share to take a side/.test(text) && !deck4.includes("data-arrow"));
+  assert.match(text, /Launch fees, first 3 months/);
+  for (const part of ["data-lever", "data-lever-knob", "data-lever-amount", "data-card"])
+    assert.ok(deck4.includes(part));
+  // The team: three LinkedIn pages, opened outside the deck, and a photo behind each drawing.
+  const links = [
+    ...deck4.matchAll(
+      /<a class="member-name" href="(https:\/\/www\.linkedin\.com\/in\/[a-z-]+\/)" target="_blank" rel="noopener">/g,
+    ),
+  ];
+  assert.equal(links.length, 3);
+  for (const id of ["bernardo", "lucas", "ronaldo"])
+    assert.ok(existsSync(join(ROOT, `pitch4/img/team/${id}-real.webp`)));
+  for (const word of [/\bbet(s|ting)?\b/i, /parimutuel/i, /break-even/i]) assert.ok(!word.test(text), `${word}`);
 });

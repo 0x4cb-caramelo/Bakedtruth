@@ -12,6 +12,19 @@ A próxima sprint é a 02, o núcleo do pote (`docs/sprints/sprint-02-pot-core.m
 
 ### Added
 
+- **Deck v4 em `/pitch4`,** em 8/10/2026, com as respostas do fundador à revisão dos mentores. O `/pitch3` fica como
+  estava. Nove slides:
+  - **Capa:** "Permissionless prediction markets, settled by on-chain data."; o "Proof > Promises" sai da capa.
+  - **Problema:** "$7M · one market settled on an event that never happened."
+  - **Receita:** a barra do pote mostra também o 1% de quem abriu o mercado; quem acertou recebe 950, e não 960. A
+    demo do slide de solução conta o mesmo 1%.
+  - **Patrocínio e criadores num slide só, "Open a market":** qualquer um abre um mercado com uma semente inicial de
+    500 dólares ou mais; 90% da semente vira prêmio, 10% é a taxa, 1% do volume vai para quem abriu. Cena nova: o
+    pãozinho puxa uma alavanca, e a semente sobe de 500 a 10 mil dólares e o mercado sobe no site. Sai o 0,02 SOL.
+  - **Crescimento:** "Launch fees, first 3 months" no lugar de "Share to take a side".
+  - **Equipe:** cada retrato de pãozinho vira a foto real uns três segundos depois de a cortina abrir; o nome de cada
+    um leva ao LinkedIn; as linhas trazem duas atuações de cada um, ditadas pelo fundador.
+  - **Fechamento:** sem a seta.
 - **Revisão do `/pitch3` com dois mentores, em 8/10/2026,** organizada por slide em
   `docs/business/_review/revisao-do-pitch-2026-10-08.md`, com as transcrições brutas em `knowledge-base/pitch/`.
   Quem é quem por dedução, o que foi dito com a marca de tempo, a avaliação de cada ponto e seis decisões do

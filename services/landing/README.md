@@ -19,6 +19,7 @@ Não tem dependências. Roda com o Node que já existe no servidor (22 ou mais n
 | `public/pitch/` | O deck: 8 slides do fundador (segunda versão), um palco leve (`deck.js`, `deck.css`) e a animação (`deck-motion.js`) |
 | `public/pitch2/` | A terceira versão do deck, de 6/10/2026, com as respostas à banca: nove slides, só a página. Usa o palco, as fontes e as imagens de `public/pitch/`. Proposta, a aprovar pelo fundador |
 | `public/pitch3/` | O deck de 7/10/2026: dez slides, a demo animada e uma cena do mascote por troca. Tem movimento próprio, em módulos curtos (`motion.js` decide, `scenes.js` e `exits.js` têm as cenas, `sprites.js` as imagens de `img/`). Usa o palco e as fontes de `public/pitch/`. Proposta, a aprovar pelo fundador |
+| `public/pitch4/` | O v4 do deck, de 8/10/2026, com as respostas do fundador à revisão dos mentores: nove slides; patrocínio e criadores num slide só, com a semente inicial e a alavanca (`lever.js`); a equipe vira foto e tem os links do LinkedIn (`team.js`). Cópia do `pitch3` com essas mudanças; o `pitch3` fica como estava |
 | `pitch-notes.md`, `pitch2-notes.md`, `pitch3-notes.md` | O roteiro de fala de cada deck. Não são publicados |
 | `deploy/` | As duas unidades do systemd: o site e o túnel do Cloudflare |
 | `tests/` | Testes do armazenamento, do limitador, do servidor por HTTP e do que as páginas prometem (`pages.test.mjs`) |
