@@ -164,6 +164,28 @@ conta de dados do receptor atualizado é `3UV7w2yTaqVcUAbWm1KUXdcE1Ziw8CfyyCpZvh
 - **Os códigos de rede**, usados pelo script de captura para não confundir as duas: rede principal
   `5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d`, devnet `EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG`.
 
+### 1.9 Sprint 03: a conta patrocinada só anda para a frente (medido em 9/10/2026)
+
+O `StaleFeed` da Sprint 03 (D7) depende de a conta patrocinada nunca voltar atrás: um `publish_time` até o prazo
+tem de significar que nenhuma atualização chegou depois dele. A frente R mediu com `scripts/push-oracle-probe.ts`
+(`watch`, 12 minutos, uma leitura a cada 3 s; `scan`, as transações recentes), pelos RPCs públicos:
+
+| Medida | Devnet | Rede principal |
+|---|---|---|
+| Contas SOL/USD e BTC/USD, 240 leituras cada: regressões de `publish_time` ou de `posted_slot` | 0 e 0 | 0 e 0 |
+| Atualizações vistas por conta, e o intervalo entre elas | 14; 8 a 65 s, mediana 62 a 63 | 143; 5 a 6 s, mediana 5 |
+| Idade do preço no momento da leitura | 5 a 72 s, mediana 38 | 2 a 7 s, mediana 4 |
+| Transações recentes do push oracle que falharam | 0 de 1.000 (das 00:19 às 03:59 UTC) | 0 de 5.000 (das 03:35 às 04:32 UTC) |
+| De 60 transações recentes na conta SOL/USD | 40 escreveram; 19 não chamavam o oráculo (leituras); **1 foi pulada por não ser mais nova**, e a transação teve sucesso | 29 escreveram (um pagador); 30 leituras, delas 30 pelo Lighthouse `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95` |
+| Pagadores que escreveram a conta SOL/USD na janela | três (45, 11 e 4 de 60) | um (`9F6ApE…6saC`) |
+
+O que isso diz **[F]**: dentro dos 12 minutos observados nenhuma das quatro contas voltou atrás; uma atualização
+mais velha que a gravada não é recusada com erro, é pulada sem escrita, e a transação passa. O que não diz: o
+comportamento ao longo de dias, nem a leitura do código do push oracle no commit fixado (a frente parou antes). A
+cadência da devnet (um minuto; 65 s no pior intervalo visto) é o número por trás do piso de 600 s do `StaleFeed`
+que a revisão da sprint acrescentou (`STALE_FEED_MIN_SECONDS`). Quem cria contas de fatia 0 para feeds que a Pyth
+não patrocina, e quem as mantém: `pyth-feeds-patrocinados.md`.
+
 ## 2. Decisões desta sprint
 
 | Decisão | Escolha | Alternativa descartada | Por quê |

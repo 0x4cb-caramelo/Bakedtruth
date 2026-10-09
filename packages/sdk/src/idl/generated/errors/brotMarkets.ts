@@ -102,7 +102,7 @@ export const BROT_MARKETS_ERROR__ALREADY_PAUSED = 0x1799; // 6041
 export const BROT_MARKETS_ERROR__NOT_PAUSED = 0x179a; // 6042
 /** UnknownReaderKind: Row 1: the kind byte names no reader */
 export const BROT_MARKETS_ERROR__UNKNOWN_READER_KIND = 0x179b; // 6043
-/** ReaderKindNotOpen: Row 1: this kind does not open yet (the four non-price kinds until Sprint 03) */
+/** ReaderKindNotOpen: Row 1: this kind does not open yet (`StakeAtLeast` until a devnet YES is recorded) */
 export const BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN = 0x179c; // 6044
 /** MetricAccountMismatch: Row 2: the metric account is not the one the campaign's parameters name */
 export const BROT_MARKETS_ERROR__METRIC_ACCOUNT_MISMATCH = 0x179d; // 6045
@@ -154,8 +154,48 @@ export const BROT_MARKETS_ERROR__RETURN_BELOW_MINIMUM = 0x17b3; // 6067
 export const BROT_MARKETS_ERROR__INVALID_SIDE = 0x17b4; // 6068
 /** EntryMismatch: The `Entry` account belongs to another campaign or another baker */
 export const BROT_MARKETS_ERROR__ENTRY_MISMATCH = 0x17b5; // 6069
-/** ReaderNotReady: This reader method arrives in Sprint 03 (`outcome_knowable`, `try_resolve`) */
+/** ReaderNotReady: Unused since Sprint 03: the reader methods returned it before they were ported */
 export const BROT_MARKETS_ERROR__READER_NOT_READY = 0x17b6; // 6070
+/** ResolveNotTopLevel: `resolve_campaign` must be a top-level instruction, never called through a CPI */
+export const BROT_MARKETS_ERROR__RESOLVE_NOT_TOP_LEVEL = 0x17b7; // 6071
+/** NotResolvableYet: Nothing can be recorded yet: no YES is proven and the deadline's window is open */
+export const BROT_MARKETS_ERROR__NOT_RESOLVABLE_YET = 0x17b8; // 6072
+/** OutcomeKnowable: Entries are locked: the outcome is already knowable (met, touched, or epoch started) */
+export const BROT_MARKETS_ERROR__OUTCOME_KNOWABLE = 0x17b9; // 6073
+/** MintAuthorityLive: Row 2: the mint's authority can still mint, so its supply can grow */
+export const BROT_MARKETS_ERROR__MINT_AUTHORITY_LIVE = 0x17ba; // 6074
+/** TargetTooClose: Row 3: the target is within the minimum distance of the current value */
+export const BROT_MARKETS_ERROR__TARGET_TOO_CLOSE = 0x17bb; // 6075
+/** TargetUnreachable: Row 3: the target is out of reach (a price at or below zero, or past the far bound) */
+export const BROT_MARKETS_ERROR__TARGET_UNREACHABLE = 0x17bc; // 6076
+/** UnusedArgumentNotZero: An argument this kind does not use is not zero (feed, direction or epoch) */
+export const BROT_MARKETS_ERROR__UNUSED_ARGUMENT_NOT_ZERO = 0x17bd; // 6077
+/** EpochAlreadyStarted: Row 5: the measured epoch has already started */
+export const BROT_MARKETS_ERROR__EPOCH_ALREADY_STARTED = 0x17be; // 6078
+/** EpochAfterDeadline: Row 5: the measured epoch may start after the deadline */
+export const BROT_MARKETS_ERROR__EPOCH_AFTER_DEADLINE = 0x17bf; // 6079
+/** StakePoolNotUpdating: Row 2: the stake pool stopped updating and cannot write the epoch's snapshot */
+export const BROT_MARKETS_ERROR__STAKE_POOL_NOT_UPDATING = 0x17c0; // 6080
+/** PriceExponentChanged: The price's exponent is not the one stored at opening */
+export const BROT_MARKETS_ERROR__PRICE_EXPONENT_CHANGED = 0x17c1; // 6081
+/** JoinPriceStale: Join: the sponsored price is older than `max_age`, too far ahead, or too many slots old */
+export const BROT_MARKETS_ERROR__JOIN_PRICE_STALE = 0x17c2; // 6082
+/** ProofOutsideWindow: Proof: the publish time is outside the campaign's window */
+export const BROT_MARKETS_ERROR__PROOF_OUTSIDE_WINDOW = 0x17c3; // 6083
+/** ProofStale: Proof: more than 60 s old, too far ahead of the clock, or too many slots old */
+export const BROT_MARKETS_ERROR__PROOF_STALE = 0x17c4; // 6084
+/** ProofDoesNotTouch: Proof: price minus confidence does not cross the target in the campaign's direction */
+export const BROT_MARKETS_ERROR__PROOF_DOES_NOT_TOUCH = 0x17c5; // 6085
+/** SolUsdWrongOwner: Row 7: the SOL/USD account is not owned by the Pyth receiver */
+export const BROT_MARKETS_ERROR__SOL_USD_WRONG_OWNER = 0x17c6; // 6086
+/** SolUsdBadLayout: Row 7: the SOL/USD account does not have the `PriceUpdateV2` layout */
+export const BROT_MARKETS_ERROR__SOL_USD_BAD_LAYOUT = 0x17c7; // 6087
+/** SolUsdNotFullyVerified: Row 7: the SOL/USD price was not fully verified */
+export const BROT_MARKETS_ERROR__SOL_USD_NOT_FULLY_VERIFIED = 0x17c8; // 6088
+/** SolUsdWrongFeed: Row 7: the SOL/USD account holds another feed */
+export const BROT_MARKETS_ERROR__SOL_USD_WRONG_FEED = 0x17c9; // 6089
+/** CreationParamsChanged: The creation parameters changed since the client read them (`expected_params_version`) */
+export const BROT_MARKETS_ERROR__CREATION_PARAMS_CHANGED = 0x17ca; // 6090
 
 export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ALREADY_INITIALIZED
@@ -164,6 +204,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__BAD_INSTRUCTION_DATA
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_MAX_AGE_OUT_OF_RANGE
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN
+  | typeof BROT_MARKETS_ERROR__CREATION_PARAMS_CHANGED
   | typeof BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING
   | typeof BROT_MARKETS_ERROR__DUPLICATE_ACCOUNT
   | typeof BROT_MARKETS_ERROR__DUPLICATE_TEAM_KEY
@@ -173,9 +214,12 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ENTRY_BELOW_MINIMUM
   | typeof BROT_MARKETS_ERROR__ENTRY_MISMATCH
   | typeof BROT_MARKETS_ERROR__ENTRY_TOTAL_MISMATCH
+  | typeof BROT_MARKETS_ERROR__EPOCH_AFTER_DEADLINE
+  | typeof BROT_MARKETS_ERROR__EPOCH_ALREADY_STARTED
   | typeof BROT_MARKETS_ERROR__FEE_BPS_ABOVE_CEILING
   | typeof BROT_MARKETS_ERROR__INVALID_DIRECTION
   | typeof BROT_MARKETS_ERROR__INVALID_SIDE
+  | typeof BROT_MARKETS_ERROR__JOIN_PRICE_STALE
   | typeof BROT_MARKETS_ERROR__JOIN_WHILE_PAUSED
   | typeof BROT_MARKETS_ERROR__MATH_OVERFLOW
   | typeof BROT_MARKETS_ERROR__MAX_OPEN_CAMPAIGNS_OUT_OF_RANGE
@@ -183,11 +227,13 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__MAX_PRICE_CONF_OUT_OF_RANGE
   | typeof BROT_MARKETS_ERROR__METRIC_ACCOUNT_MISMATCH
   | typeof BROT_MARKETS_ERROR__MIN_ENTRY_OUT_OF_RANGE
+  | typeof BROT_MARKETS_ERROR__MINT_AUTHORITY_LIVE
   | typeof BROT_MARKETS_ERROR__MISSING_SIGNATURE
   | typeof BROT_MARKETS_ERROR__NO_PENDING_ADMIN
   | typeof BROT_MARKETS_ERROR__NOT_ADMIN
   | typeof BROT_MARKETS_ERROR__NOT_PAUSED
   | typeof BROT_MARKETS_ERROR__NOT_PENDING_ADMIN
+  | typeof BROT_MARKETS_ERROR__NOT_RESOLVABLE_YET
   | typeof BROT_MARKETS_ERROR__NOT_TEAM_MEMBER
   | typeof BROT_MARKETS_ERROR__NOT_WRITABLE
   | typeof BROT_MARKETS_ERROR__ONE_SIDED_FEE_BPS_ABOVE_CEILING
@@ -196,29 +242,43 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__OPENING_PRIZE_BPS_OUT_OF_RANGE
   | typeof BROT_MARKETS_ERROR__OPENING_USD_BELOW_FEE
   | typeof BROT_MARKETS_ERROR__OPEN_WHILE_PAUSED
+  | typeof BROT_MARKETS_ERROR__OUTCOME_KNOWABLE
   | typeof BROT_MARKETS_ERROR__PDA_MISMATCH
   | typeof BROT_MARKETS_ERROR__PRICE_CONFIDENCE_TOO_WIDE
+  | typeof BROT_MARKETS_ERROR__PRICE_EXPONENT_CHANGED
   | typeof BROT_MARKETS_ERROR__PRICE_EXPONENT_OUT_OF_RANGE
   | typeof BROT_MARKETS_ERROR__PRICE_NON_POSITIVE
   | typeof BROT_MARKETS_ERROR__PRICE_NOT_FULLY_VERIFIED
   | typeof BROT_MARKETS_ERROR__PRICE_STALE
   | typeof BROT_MARKETS_ERROR__PRICE_WRONG_FEED
+  | typeof BROT_MARKETS_ERROR__PROOF_DOES_NOT_TOUCH
+  | typeof BROT_MARKETS_ERROR__PROOF_OUTSIDE_WINDOW
+  | typeof BROT_MARKETS_ERROR__PROOF_STALE
   | typeof BROT_MARKETS_ERROR__READER_BAD_LAYOUT
   | typeof BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN
   | typeof BROT_MARKETS_ERROR__READER_NOT_READY
   | typeof BROT_MARKETS_ERROR__READER_WRONG_OWNER
+  | typeof BROT_MARKETS_ERROR__RESOLVE_NOT_TOP_LEVEL
   | typeof BROT_MARKETS_ERROR__RETURN_BELOW_MINIMUM
   | typeof BROT_MARKETS_ERROR__SOL_USD_ACCOUNT_MISMATCH
+  | typeof BROT_MARKETS_ERROR__SOL_USD_BAD_LAYOUT
   | typeof BROT_MARKETS_ERROR__SOL_USD_CONFIDENCE_TOO_WIDE
   | typeof BROT_MARKETS_ERROR__SOL_USD_FEED_ID_ZERO
+  | typeof BROT_MARKETS_ERROR__SOL_USD_NOT_FULLY_VERIFIED
   | typeof BROT_MARKETS_ERROR__SOL_USD_PRICE_NON_POSITIVE
   | typeof BROT_MARKETS_ERROR__SOL_USD_STALE
+  | typeof BROT_MARKETS_ERROR__SOL_USD_WRONG_FEED
+  | typeof BROT_MARKETS_ERROR__SOL_USD_WRONG_OWNER
+  | typeof BROT_MARKETS_ERROR__STAKE_POOL_NOT_UPDATING
   | typeof BROT_MARKETS_ERROR__TARGET_ALREADY_TOUCHED
+  | typeof BROT_MARKETS_ERROR__TARGET_TOO_CLOSE
+  | typeof BROT_MARKETS_ERROR__TARGET_UNREACHABLE
   | typeof BROT_MARKETS_ERROR__TEAM_SLOT_NOT_EMPTY
   | typeof BROT_MARKETS_ERROR__TEAM_TOO_LARGE
   | typeof BROT_MARKETS_ERROR__TOO_MANY_OPEN_CAMPAIGNS
   | typeof BROT_MARKETS_ERROR__UNKNOWN_INSTRUCTION
   | typeof BROT_MARKETS_ERROR__UNKNOWN_READER_KIND
+  | typeof BROT_MARKETS_ERROR__UNUSED_ARGUMENT_NOT_ZERO
   | typeof BROT_MARKETS_ERROR__UPGRADE_AUTHORITY_MISMATCH
   | typeof BROT_MARKETS_ERROR__WRONG_EVENT_AUTHORITY
   | typeof BROT_MARKETS_ERROR__WRONG_LAYOUT_VERSION
@@ -239,6 +299,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__BAD_INSTRUCTION_DATA]: `The instruction data is not exactly the size of the instruction's arguments`,
     [BROT_MARKETS_ERROR__CAMPAIGN_MAX_AGE_OUT_OF_RANGE]: `\`campaign_max_age\` is below 30 seconds or above its ceiling`,
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN]: `The campaign is not \`Open\``,
+    [BROT_MARKETS_ERROR__CREATION_PARAMS_CHANGED]: `The creation parameters changed since the client read them (\`expected_params_version\`)`,
     [BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING]: `\`creator_share_bps\` is above \`MAX_CREATOR_SHARE_BPS\``,
     [BROT_MARKETS_ERROR__DUPLICATE_ACCOUNT]: `The same account was passed in two slots that must differ`,
     [BROT_MARKETS_ERROR__DUPLICATE_TEAM_KEY]: `The same team key appears twice`,
@@ -248,9 +309,12 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__ENTRY_BELOW_MINIMUM]: `The entry is below \`min_entry_lamports\``,
     [BROT_MARKETS_ERROR__ENTRY_MISMATCH]: `The \`Entry\` account belongs to another campaign or another baker`,
     [BROT_MARKETS_ERROR__ENTRY_TOTAL_MISMATCH]: `The baker's entry total is not the \`expected_entry_total\` the client signed`,
+    [BROT_MARKETS_ERROR__EPOCH_AFTER_DEADLINE]: `Row 5: the measured epoch may start after the deadline`,
+    [BROT_MARKETS_ERROR__EPOCH_ALREADY_STARTED]: `Row 5: the measured epoch has already started`,
     [BROT_MARKETS_ERROR__FEE_BPS_ABOVE_CEILING]: `\`fee_bps\` is above \`MAX_FEE_BPS\``,
     [BROT_MARKETS_ERROR__INVALID_DIRECTION]: `Row 4: the direction byte is neither \`Above\` nor \`Below\``,
     [BROT_MARKETS_ERROR__INVALID_SIDE]: `The side byte is neither \`Yes\` nor \`No\``,
+    [BROT_MARKETS_ERROR__JOIN_PRICE_STALE]: `Join: the sponsored price is older than \`max_age\`, too far ahead, or too many slots old`,
     [BROT_MARKETS_ERROR__JOIN_WHILE_PAUSED]: `Entries are paused`,
     [BROT_MARKETS_ERROR__MATH_OVERFLOW]: `Arithmetic overflow`,
     [BROT_MARKETS_ERROR__MAX_OPEN_CAMPAIGNS_OUT_OF_RANGE]: `\`max_open_campaigns\` is outside its floor and ceiling`,
@@ -258,11 +322,13 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__MAX_PRICE_CONF_OUT_OF_RANGE]: `\`max_price_conf_bps\` is outside its floor and ceiling`,
     [BROT_MARKETS_ERROR__METRIC_ACCOUNT_MISMATCH]: `Row 2: the metric account is not the one the campaign's parameters name`,
     [BROT_MARKETS_ERROR__MIN_ENTRY_OUT_OF_RANGE]: `\`min_entry_lamports\` is outside its floor and ceiling`,
+    [BROT_MARKETS_ERROR__MINT_AUTHORITY_LIVE]: `Row 2: the mint's authority can still mint, so its supply can grow`,
     [BROT_MARKETS_ERROR__MISSING_SIGNATURE]: `A slot that must sign did not`,
     [BROT_MARKETS_ERROR__NO_PENDING_ADMIN]: `No admin transfer is pending`,
     [BROT_MARKETS_ERROR__NOT_ADMIN]: `The signer is not the config's admin`,
     [BROT_MARKETS_ERROR__NOT_PAUSED]: `Entries are not paused`,
     [BROT_MARKETS_ERROR__NOT_PENDING_ADMIN]: `The signer is not the admin named by the pending transfer`,
+    [BROT_MARKETS_ERROR__NOT_RESOLVABLE_YET]: `Nothing can be recorded yet: no YES is proven and the deadline's window is open`,
     [BROT_MARKETS_ERROR__NOT_TEAM_MEMBER]: `The signer is not one of the config's team keys`,
     [BROT_MARKETS_ERROR__NOT_WRITABLE]: `A slot that must be writable was passed read-only`,
     [BROT_MARKETS_ERROR__ONE_SIDED_FEE_BPS_ABOVE_CEILING]: `\`one_sided_fee_bps\` is above its ceiling`,
@@ -271,29 +337,43 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__OPENING_PRIZE_BPS_OUT_OF_RANGE]: `\`opening_prize_bps\` is outside its floor and ceiling`,
     [BROT_MARKETS_ERROR__OPENING_USD_BELOW_FEE]: `Row 7: the opening pays less than \`opening_fee_usd\` (a non-team signer always pays)`,
     [BROT_MARKETS_ERROR__OPEN_WHILE_PAUSED]: `Row 8: entries are paused, which also stops openings`,
+    [BROT_MARKETS_ERROR__OUTCOME_KNOWABLE]: `Entries are locked: the outcome is already knowable (met, touched, or epoch started)`,
     [BROT_MARKETS_ERROR__PDA_MISMATCH]: `The address is not the program-derived address its seeds and bump give`,
     [BROT_MARKETS_ERROR__PRICE_CONFIDENCE_TOO_WIDE]: `Row 4: the confidence interval is wider than 0.5% of the price`,
+    [BROT_MARKETS_ERROR__PRICE_EXPONENT_CHANGED]: `The price's exponent is not the one stored at opening`,
     [BROT_MARKETS_ERROR__PRICE_EXPONENT_OUT_OF_RANGE]: `Row 7: the SOL/USD exponent is outside the range the conversion supports`,
     [BROT_MARKETS_ERROR__PRICE_NON_POSITIVE]: `Row 4: the price is zero or negative`,
     [BROT_MARKETS_ERROR__PRICE_NOT_FULLY_VERIFIED]: `Price update was not fully verified by the Pyth receiver`,
     [BROT_MARKETS_ERROR__PRICE_STALE]: `Row 4: the price is older than the campaign's maximum age`,
     [BROT_MARKETS_ERROR__PRICE_WRONG_FEED]: `Price update is for another feed than the one expected`,
+    [BROT_MARKETS_ERROR__PROOF_DOES_NOT_TOUCH]: `Proof: price minus confidence does not cross the target in the campaign's direction`,
+    [BROT_MARKETS_ERROR__PROOF_OUTSIDE_WINDOW]: `Proof: the publish time is outside the campaign's window`,
+    [BROT_MARKETS_ERROR__PROOF_STALE]: `Proof: more than 60 s old, too far ahead of the clock, or too many slots old`,
     [BROT_MARKETS_ERROR__READER_BAD_LAYOUT]: `Account data does not match the layout this reader expects`,
-    [BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN]: `Row 1: this kind does not open yet (the four non-price kinds until Sprint 03)`,
-    [BROT_MARKETS_ERROR__READER_NOT_READY]: `This reader method arrives in Sprint 03 (\`outcome_knowable\`, \`try_resolve\`)`,
+    [BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN]: `Row 1: this kind does not open yet (\`StakeAtLeast\` until a devnet YES is recorded)`,
+    [BROT_MARKETS_ERROR__READER_NOT_READY]: `Unused since Sprint 03: the reader methods returned it before they were ported`,
     [BROT_MARKETS_ERROR__READER_WRONG_OWNER]: `Account is not owned by the program this reader trusts`,
+    [BROT_MARKETS_ERROR__RESOLVE_NOT_TOP_LEVEL]: `\`resolve_campaign\` must be a top-level instruction, never called through a CPI`,
     [BROT_MARKETS_ERROR__RETURN_BELOW_MINIMUM]: `The estimated return is below the signed \`min_return_bps\``,
     [BROT_MARKETS_ERROR__SOL_USD_ACCOUNT_MISMATCH]: `Row 7: the SOL/USD slot is not the sponsored account of \`sol_usd_feed_id\``,
+    [BROT_MARKETS_ERROR__SOL_USD_BAD_LAYOUT]: `Row 7: the SOL/USD account does not have the \`PriceUpdateV2\` layout`,
     [BROT_MARKETS_ERROR__SOL_USD_CONFIDENCE_TOO_WIDE]: `Row 7: the SOL/USD confidence is wider than \`max_price_conf_bps\``,
     [BROT_MARKETS_ERROR__SOL_USD_FEED_ID_ZERO]: `\`sol_usd_feed_id\` is all zeros`,
+    [BROT_MARKETS_ERROR__SOL_USD_NOT_FULLY_VERIFIED]: `Row 7: the SOL/USD price was not fully verified`,
     [BROT_MARKETS_ERROR__SOL_USD_PRICE_NON_POSITIVE]: `Row 7: the SOL/USD price is zero or negative`,
     [BROT_MARKETS_ERROR__SOL_USD_STALE]: `Row 7: the SOL/USD price is older than \`max_price_age\``,
+    [BROT_MARKETS_ERROR__SOL_USD_WRONG_FEED]: `Row 7: the SOL/USD account holds another feed`,
+    [BROT_MARKETS_ERROR__SOL_USD_WRONG_OWNER]: `Row 7: the SOL/USD account is not owned by the Pyth receiver`,
+    [BROT_MARKETS_ERROR__STAKE_POOL_NOT_UPDATING]: `Row 2: the stake pool stopped updating and cannot write the epoch's snapshot`,
     [BROT_MARKETS_ERROR__TARGET_ALREADY_TOUCHED]: `Row 3: the target is already touched or met; the campaign would be decided at birth`,
+    [BROT_MARKETS_ERROR__TARGET_TOO_CLOSE]: `Row 3: the target is within the minimum distance of the current value`,
+    [BROT_MARKETS_ERROR__TARGET_UNREACHABLE]: `Row 3: the target is out of reach (a price at or below zero, or past the far bound)`,
     [BROT_MARKETS_ERROR__TEAM_SLOT_NOT_EMPTY]: `A team slot past \`team_len\` is not zero`,
     [BROT_MARKETS_ERROR__TEAM_TOO_LARGE]: `More than five team keys`,
     [BROT_MARKETS_ERROR__TOO_MANY_OPEN_CAMPAIGNS]: `Row 8: \`open_campaigns\` has reached \`max_open_campaigns\``,
     [BROT_MARKETS_ERROR__UNKNOWN_INSTRUCTION]: `The first byte of the instruction data names no instruction`,
     [BROT_MARKETS_ERROR__UNKNOWN_READER_KIND]: `Row 1: the kind byte names no reader`,
+    [BROT_MARKETS_ERROR__UNUSED_ARGUMENT_NOT_ZERO]: `An argument this kind does not use is not zero (feed, direction or epoch)`,
     [BROT_MARKETS_ERROR__UPGRADE_AUTHORITY_MISMATCH]: `The signer is not the program's upgrade authority`,
     [BROT_MARKETS_ERROR__WRONG_EVENT_AUTHORITY]: `The event-authority slot is not this program's event authority`,
     [BROT_MARKETS_ERROR__WRONG_LAYOUT_VERSION]: `The account's layout version is not the one this program reads`,

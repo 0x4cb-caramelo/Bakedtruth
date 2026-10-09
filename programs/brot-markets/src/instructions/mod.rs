@@ -1,7 +1,8 @@
 //! Purpose: the program's interface: every instruction with its discriminator, its accounts in
 //!          order and its arguments, for the dispatcher and for the Shank IDL (T9).
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio); frozen at the sprint's opening
+//! Version: 0.0.3
+//! Sprint: 02 (pot core on Pinocchio); frozen at the sprint's opening; 03 appends
+//!         `resolve_campaign`
 //!
 //! Instruction data is `[discriminator, arguments]`; the arguments are a fixed little-endian
 //! layout of exactly their size (no string, no optional field: D-j). Shank numbers the variants
@@ -12,6 +13,7 @@
 pub mod admin;
 pub mod campaigns;
 pub mod entries;
+pub mod resolution;
 
 use pinocchio::{error::ProgramError, ProgramResult};
 use shank::ShankInstruction;
@@ -36,6 +38,7 @@ pub mod ix {
     pub const ADMIN_RESUME_ENTRIES: u8 = 7;
     pub const USER_OPEN_CAMPAIGN: u8 = 8;
     pub const USER_JOIN_CAMPAIGN: u8 = 9;
+    pub const RESOLVE_CAMPAIGN: u8 = 10;
     /// Not an instruction: the self-CPI that carries an event (`events::EVENT_IX_TAG`).
     pub const EMIT_EVENT: u8 = crate::events::EVENT_IX_TAG;
 }
@@ -121,11 +124,20 @@ pub enum BrotInstruction {
     #[account(2, writable, name = "campaign", desc = "Campaign")]
     #[account(3, writable, name = "vault", desc = "The campaign's vault")]
     #[account(4, writable, name = "entry", desc = "Entry, PDA [\"entry\", campaign, baker], created on the first join")]
-    #[account(5, name = "metric_account", desc = "Campaign.metric_account (the join lock reads it from Sprint 03)")]
+    #[account(5, name = "metric_account", desc = "Campaign.metric_account, read by the join lock")]
     #[account(6, name = "system_program", desc = "System Program")]
     #[account(7, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
     #[account(8, name = "program", desc = "This program")]
     UserJoinCampaign(JoinCampaignArgs),
+
+    /// Records the outcome the reader reads and opens the review window. Any wallet, top level
+    /// only; it chooses nothing (Q1). For a price campaign the proof slot offers a YES proof.
+    #[account(0, writable, name = "campaign", desc = "Campaign, Open")]
+    #[account(1, name = "metric_account", desc = "Campaign.metric_account")]
+    #[account(2, name = "proof_account", desc = "Price kind: the YES proof, any Full account of the feed; other kinds: not read")]
+    #[account(3, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
+    #[account(4, name = "program", desc = "This program")]
+    ResolveCampaign,
 }
 
 /// The arguments of an instruction, refused unless the data is exactly their size.

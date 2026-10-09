@@ -1,11 +1,10 @@
 //! Purpose: `Campaign` (`["campaign", id]`): everything about one campaign, and the loaders that
 //!          check it. Its vault (`["vault", campaign]`) is data-less and its bump lives here.
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio)
+//! Version: 0.0.3
+//! Sprint: 02 (pot core on Pinocchio); `epoch` taken from the reserve in 03
 //!
-//! Balances are bookkept in fields and never read from the vault (I15): anyone can send lamports
-//! to a vault, and those never become an entry or move the chance. The result and settlement
-//! groups are written from Sprint 03 on; in Sprint 02 they stay zero.
+//! Balances are bookkept in fields, never read from the vault, where anyone can send lamports
+//! (I15). `resolve_campaign` writes the result group (03); the settlement group is Sprint 04's.
 
 use pinocchio::{
     account::{Ref, RefMut},
@@ -24,7 +23,6 @@ use crate::{
 #[derive(ShankAccount)]
 #[repr(C)]
 pub struct Campaign {
-    // --- Identity and one-byte fields -----------------------------------------------------
     pub tag: u8,
     pub version: u8,
     pub bump: u8,
@@ -148,8 +146,11 @@ pub struct Campaign {
     pub creator_share_from_fee: LeU64,
     #[idl_type("u64")]
     pub paid_out_total: LeU64,
+    /// Epoch kinds only (Sprint 03): the epoch whose stake or pool snapshot is read; else zero.
+    #[idl_type("u64")]
+    pub epoch: LeU64,
     #[padding]
-    pub _reserved: [u8; 64],
+    pub _reserved: [u8; 56],
 }
 
 zero_copy!(Campaign = 512);

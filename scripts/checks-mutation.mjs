@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 /**
  * Purpose: the X0.9 evidence for the checks module: removes each check of
- *          programs/brot-markets/src/checks.rs in turn, rebuilds the program with cargo build-sbf,
- *          and shows that the check's own negative tests (Mollusk and LiteSVM) fail without it.
- *          checks.rs is restored byte for byte after each mutant, on error and on Ctrl-C.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio), lane A. Run by hand, never by CI: it builds the program.
+ *          programs/brot-markets/src/checks.rs and its submodules (checks/top_level.rs) in turn,
+ *          rebuilds the program with cargo build-sbf, and shows that the check's own negative tests
+ *          (Mollusk and LiteSVM) fail without it. Each source is restored byte for byte after each
+ *          mutant, on error and on Ctrl-C.
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio), lane A; `top_level` in 03, lane D. Run by hand, never by CI.
  *
  * Usage:  node scripts/checks-mutation.mjs [--plan] [--only id,id] [--jobs N]
  *   --plan  checks the `// X0.9 <id>` markers and prints the plan; builds and runs nothing.
@@ -21,13 +22,14 @@ import { fileURLToPath } from "node:url";
 import { junitCases, unxml } from "./bun-junit.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const CHECKS = join(ROOT, "programs/brot-markets/src/checks.rs");
+// checks.rs and its submodules: each `// X0.9 <id>` marker is in exactly one of them.
+const SOURCES = ["checks.rs", "checks/top_level.rs"].map((file) => join(ROOT, "programs/brot-markets/src", file));
 const DEPLOY = join(ROOT, "target/deploy");
 const SO = join(DEPLOY, "brot_markets.so");
 const SAVED = join(ROOT, "target/checks-mutation/brot_markets.so");
 const JUNIT = join(ROOT, "target/checks-mutation/junit.xml");
 const RUST_TARGETS = ["checks_mollusk", "checks_mollusk_init"];
-const TS_FILES = ["tests/brot/checks.test.ts", "tests/brot/checks-init.test.ts"];
+const TS_FILES = ["tests/brot/checks.test.ts", "tests/brot/checks-init.test.ts", "tests/brot/resolve-refuses.test.ts"];
 const PATH = `${process.env.HOME}/.bun/bin:${process.env.PATH}`;
 // Mollusk and LiteSVM both run the binary this script builds; logs off and no colours to parse.
 const ENV = { ...process.env, PATH, BROT_MARKETS_SO: SO, RUST_LOG: "off", NO_COLOR: "1" };
@@ -63,6 +65,7 @@ event_accounts        fail  event_accounts_refuse_a_wrong_event_authority | even
 event_accounts        fail  event_program_refuses_a_wrong_program_slot | event_program: a wrong program slot
 event_program         fail  event_program_refuses_a_wrong_program_slot | event_program: a wrong program slot
 event_program         keeps event_accounts_refuse_a_wrong_event_authority | event_accounts: a wrong event authority
+top_level             fail  - | top_level: a resolve forwarded by another program
 `;
 
 const args = process.argv.slice(2);
@@ -70,7 +73,7 @@ const option = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : u
 const jobs = option("--jobs") ?? "2";
 const only = option("--only")?.split(",");
 const log = (line) => process.stderr.write(`${line}\n`);
-const original = readFileSync(CHECKS);
+const originals = new Map(SOURCES.map((file) => [file, readFileSync(file)]));
 
 const tests = PLAN.trim()
   .split("\n")
@@ -86,20 +89,21 @@ const tests = PLAN.trim()
 const ids = [...new Set(tests.map((t) => t.id))].filter((id) => !only || only.includes(id));
 const statement = (id) => (id === "canonical_pda" ? "return Ok(bump)" : "return Ok(())");
 
-/** checks.rs with the early return after the marker of `id`; throws unless the marker is there once. */
+/** The source holding `id`'s marker, with the early return after it; throws unless it is there once. */
 function mutate(id) {
-  const lines = original.toString("utf8").split("\n");
-  const at = lines.flatMap((line, i) => (line.trim() === `// X0.9 ${id}` ? [i] : []));
-  if (at.length !== 1) throw new Error(`marker "// X0.9 ${id}" is in checks.rs ${at.length} times`);
-  const indent = lines[at[0]].match(/^\s*/)[0];
-  lines.splice(at[0] + 1, 0, `${indent}if true { ${statement(id)}; } // X0.9 mutant`);
-  return lines.join("\n");
+  const marked = (file, lines) =>
+    lines.flatMap((line, i) => (line.trim() === `// X0.9 ${id}` ? [{ file, lines, i }] : []));
+  const found = SOURCES.flatMap((file) => marked(file, originals.get(file).toString("utf8").split("\n")));
+  if (found.length !== 1) throw new Error(`marker "// X0.9 ${id}" is in the checks ${found.length} times`);
+  const { file, lines, i } = found[0];
+  lines.splice(i + 1, 0, `${lines[i].match(/^\s*/)[0]}if true { ${statement(id)}; } // X0.9 mutant`);
+  return { file, text: lines.join("\n") };
 }
 const mutants = new Map(ids.map((id) => [id, mutate(id)]));
 
 let savedSo = false; // the unmutated binary, saved by this run, goes back to target/deploy at the end
 function restore() {
-  if (!readFileSync(CHECKS).equals(original)) writeFileSync(CHECKS, original);
+  for (const [file, bytes] of originals) if (!readFileSync(file).equals(bytes)) writeFileSync(file, bytes);
   if (savedSo && existsSync(SAVED)) copyFileSync(SAVED, SO);
 }
 process.on("exit", restore);
@@ -136,14 +140,8 @@ function runTests(list) {
     // Bun names each test only on a terminal; the JUnit file lists every test wherever it runs.
     mkdirSync(dirname(JUNIT), { recursive: true });
     writeFileSync(JUNIT, "");
-    run("bun", [
-      "test",
-      ...TS_FILES,
-      "-t",
-      ts.map(escape).join("|"),
-      "--reporter=junit",
-      `--reporter-outfile=${JUNIT}`,
-    ]);
+    const filter = ts.map(escape).join("|");
+    run("bun", ["test", ...TS_FILES, "-t", filter, "--reporter=junit", `--reporter-outfile=${JUNIT}`]);
     const cases = junitCases(readFileSync(JUNIT, "utf8"));
     for (const name of ts) {
       const body = cases.get(name);
@@ -181,10 +179,11 @@ const rows = [];
 let proven = true;
 for (const id of ids) {
   log(`mutant ${id}: building and running its tests`);
-  writeFileSync(CHECKS, mutants.get(id));
+  const { file, text } = mutants.get(id);
+  writeFileSync(file, text);
   const mine = selected.filter((t) => t.id === id);
   const outcome = build().status === 0 ? runTests(mine) : {};
-  writeFileSync(CHECKS, original);
+  writeFileSync(file, originals.get(file));
   for (const t of mine) {
     const { result, got } = outcome[t.name] ?? { result: "build failed" };
     proven &&= result === t.must;

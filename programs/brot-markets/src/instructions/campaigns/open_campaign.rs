@@ -1,40 +1,36 @@
-//! Purpose: `user_open_campaign`: any wallet opens a price campaign paying US$500 in SOL at the
-//!          Pyth SOL/USD price, 90% bookkept as the prize and 10% held as the opening fee; a team
-//!          key opens free with no creator share (TP section 3.4.10).
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio); accounts and arguments frozen at the sprint's opening,
-//!         body by lane D
+//! Purpose: `user_open_campaign`: any wallet opens a campaign of any open kind paying US$500 in
+//!          SOL at the Pyth SOL/USD price, 90% bookkept as the prize and 10% held as the opening
+//!          fee; a team key opens free with no creator share (TP section 3.4.10).
+//! Version: 0.0.4
+//! Sprint: 02 (pot core on Pinocchio), lane D; 03 (the other four kinds, the canonical arguments,
+//!         the terms the creator saw and row 7's own codes), lane F
 //!
-//! The handler runs the ten rows of TP section 3.4.10 in the order of `checks.rs`, each refusal
-//! with its own error (X0.7): the arguments (rows 1 and 9), the slots, the config (row 8), the
-//! duration (row 5), the reader (rows 2 to 4), the payment (row 7, in `payment`), the two new
-//! accounts (row 10), the deposit, the fields (row 6, in `record`) and the event.
+//! The checks run in this order, each refusal with its own error (X0.7): (1) row 9, the arguments
+//! are exactly their size and none is text; (2) row 1, the kind names a reader and opens in this
+//! build (`rules`); (3) the canonical arguments, the direction byte and no feed, direction or
+//! epoch the kind does not use (`rules`); (4) the slots (TP section 3.4.17); (5) row 8, the
+//! pause and the valve; (6) the terms the creator saw, `params_version` (`rules`); (7) row 5,
+//! 3 to 90 days for every kind, with the clock read once; (8) rows 2 to 4, and the epoch kinds'
+//! part of row 5, in the kind's reader; (9) row 7, the payment (`payment`); (10) row 10, the
+//! campaign and its vault (`create`). Then the deposit, row 6 and every other field (`record`),
+//! the count of open campaigns and the event.
 
 mod create;
 pub mod payment;
-mod record;
+pub mod record;
+pub mod rules;
 
-use pinocchio::{
-    error::ProgramError,
-    sysvars::{clock::Clock, Sysvar},
-    AccountView, Address, ProgramResult,
-};
+use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 use shank::ShankType;
 
 use crate::{
     checks,
     error::BrotError,
-    events,
     instructions::args,
-    layout::{LeI128, LeI64, LeU64},
+    layout::{LeI128, LeI64, LeU32, LeU64},
     math::schedule,
-    readers::{self, CreationContext},
-    state::{
-        self,
-        campaign::Campaign,
-        config::GlobalConfig,
-        enums::{Direction, OperatingLevel, ReaderKind},
-    },
+    readers::{self, ChainTime, CreationContext},
+    state::{self, campaign::Campaign, config::GlobalConfig, enums::OperatingLevel},
     zero_copy,
 };
 
@@ -67,9 +63,16 @@ pub struct OpenCampaignArgs {
     /// The most lamports the signer accepts to pay (T25). Ignored when `opening_usd` is 0.
     #[idl_type("u64")]
     pub max_lamports: LeU64,
+    /// Epoch kinds: the measured epoch; zero for the other kinds (Sprint 03).
+    #[idl_type("u64")]
+    pub epoch: LeU64,
+    /// `GlobalConfig.params_version` as the client read it for the preview: the fees, the share
+    /// and the prize split the creator saw (Sprint 03).
+    #[idl_type("u32")]
+    pub expected_params_version: LeU32,
 }
 
-zero_copy!(OpenCampaignArgs = 82);
+zero_copy!(OpenCampaignArgs = 94);
 
 pub fn user_open_campaign(
     program_id: &Address,
@@ -82,13 +85,10 @@ pub fn user_open_campaign(
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    // Row 1: a byte that names no reader, then a kind that does not open yet (the four other
-    // kinds until Sprint 03; `StakeAtLeast` until a devnet YES). Then the direction byte.
-    let kind = ReaderKind::try_from(args.kind)?;
-    if kind != ReaderKind::PriceTouch {
-        return Err(BrotError::ReaderKindNotOpen.into());
-    }
-    let direction = Direction::try_from(args.direction)?;
+    // Row 1, then the canonical arguments (D-j), before any account is looked at.
+    let kind = rules::opening_kind(args.kind)?;
+    let epoch = args.epoch.get();
+    let direction = rules::canonical_direction(kind, args.direction, &args.feed_id, epoch)?;
 
     // The slots. The metric and SOL/USD slots are only read, and may hold the same account: a
     // campaign on SOL/USD itself passes it twice.
@@ -110,22 +110,30 @@ pub fn user_open_campaign(
     if open_campaigns >= config.params.max_open_campaigns.get() {
         return Err(BrotError::TooManyOpenCampaigns.into());
     }
+    // The terms the creator saw: no parameter changed since the client's preview.
+    let expected = args.expected_params_version.get();
+    rules::terms_unchanged(expected, config.params_version.get())?;
     let params = config.params;
 
-    // Row 5: 3 to 90 days from now, and when entries close.
-    let now = Clock::get()?.unix_timestamp;
+    // Row 5: 3 to 90 days from now for every kind, and when entries close. The clock is read
+    // once, here; the reader and the payment take the same reading.
+    let time = ChainTime::now()?;
+    let now = time.unix_timestamp;
     let deadline_at = args.deadline_at.get();
     schedule::check_duration(now, deadline_at)?;
     let entries_close_at = schedule::entries_close_at(now, deadline_at)?;
 
-    // Rows 2 to 4: the reader accepts the account, and the target is not touched yet.
+    // Rows 2 to 4, and the epoch kinds' part of row 5: the reader accepts the account, the
+    // target is neither met nor too close, and the measured epoch starts before the deadline.
     let context = CreationContext {
         metric: metric_account,
         feed_id: &args.feed_id,
         direction,
         target: args.target.get(),
         max_age: params.campaign_max_age.get(),
-        now,
+        epoch,
+        deadline_at,
+        time,
     };
     let reading = readers::validate_at_creation(kind, &context)?;
 
@@ -139,7 +147,7 @@ pub fn user_open_campaign(
         opening_usd,
         max_lamports,
         sol_usd_price,
-        now,
+        &time,
     )?;
 
     // Row 10: the campaign and its vault at their canonical PDAs, rent paid by the creator.
@@ -175,17 +183,11 @@ pub fn user_open_campaign(
     config.open_campaigns.set(open_campaigns);
 
     // The event with `seq` 0, then the campaign's next sequence number (X0.4).
-    events::emit(
-        &record::opened_event(&campaign_key, &opened),
+    record::announce(
+        &campaign_key,
+        &mut opened,
         event_authority,
         program,
         program_id,
-    )?;
-    let next_seq = opened
-        .event_seq
-        .get()
-        .checked_add(1)
-        .ok_or(BrotError::MathOverflow)?;
-    opened.event_seq.set(next_seq);
-    Ok(())
+    )
 }

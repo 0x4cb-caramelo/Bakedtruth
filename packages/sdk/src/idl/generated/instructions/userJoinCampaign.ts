@@ -147,7 +147,7 @@ export type UserJoinCampaignInput<
   vault: TAccountVault;
   /** Entry, PDA ["entry", campaign, baker], created on the first join */
   entry: TAccountEntry;
-  /** Campaign.metric_account (the join lock reads it from Sprint 03) */
+  /** Campaign.metric_account, read by the join lock */
   metricAccount: TAccountMetricAccount;
   /** System Program */
   systemProgram?: TAccountSystemProgram;
@@ -277,7 +277,7 @@ export type ParsedUserJoinCampaignInstruction<
     vault: TAccountMetas[3];
     /** Entry, PDA ["entry", campaign, baker], created on the first join */
     entry: TAccountMetas[4];
-    /** Campaign.metric_account (the join lock reads it from Sprint 03) */
+    /** Campaign.metric_account, read by the join lock */
     metricAccount: TAccountMetas[5];
     /** System Program */
     systemProgram: TAccountMetas[6];

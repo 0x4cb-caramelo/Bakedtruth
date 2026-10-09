@@ -1,8 +1,8 @@
 /**
  * Purpose: the program's custom error codes by name, so tests assert the exact refusal (X0.7).
  *          Mirrors programs/brot-markets/src/error.rs; a code appended there is appended here.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio)
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio); 6071 to 6090 in 03
  */
 export const BrotError = {
   MathOverflow: 6000,
@@ -84,8 +84,28 @@ export const BrotError = {
   EntryMismatch: 6069,
   // Readers
   ReaderNotReady: 6070,
-
-  // New codes are appended here, numbered from 6071, as in error.rs.
+  // Sprint 03: resolution, the join lock and the other four kinds
+  ResolveNotTopLevel: 6071,
+  NotResolvableYet: 6072,
+  OutcomeKnowable: 6073,
+  MintAuthorityLive: 6074,
+  TargetTooClose: 6075,
+  TargetUnreachable: 6076,
+  UnusedArgumentNotZero: 6077,
+  EpochAlreadyStarted: 6078,
+  EpochAfterDeadline: 6079,
+  StakePoolNotUpdating: 6080,
+  PriceExponentChanged: 6081,
+  JoinPriceStale: 6082,
+  ProofOutsideWindow: 6083,
+  ProofStale: 6084,
+  ProofDoesNotTouch: 6085,
+  SolUsdWrongOwner: 6086,
+  SolUsdBadLayout: 6087,
+  SolUsdNotFullyVerified: 6088,
+  SolUsdWrongFeed: 6089,
+  CreationParamsChanged: 6090,
+  // New codes are appended here, numbered from 6091, as in error.rs.
 } as const;
 
 export type BrotErrorName = keyof typeof BrotError;

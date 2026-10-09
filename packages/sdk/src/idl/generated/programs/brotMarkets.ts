@@ -50,6 +50,7 @@ import {
   getAdminSetFeeRecipientInstruction,
   getAdminSetTeamInstruction,
   getAdminTransferAdminInstruction,
+  getResolveCampaignInstruction,
   getTeamPauseEntriesInstruction,
   getUserJoinCampaignInstruction,
   getUserOpenCampaignInstruction,
@@ -60,6 +61,7 @@ import {
   parseAdminSetFeeRecipientInstruction,
   parseAdminSetTeamInstruction,
   parseAdminTransferAdminInstruction,
+  parseResolveCampaignInstruction,
   parseTeamPauseEntriesInstruction,
   parseUserJoinCampaignInstruction,
   parseUserOpenCampaignInstruction,
@@ -77,9 +79,11 @@ import {
   type ParsedAdminSetFeeRecipientInstruction,
   type ParsedAdminSetTeamInstruction,
   type ParsedAdminTransferAdminInstruction,
+  type ParsedResolveCampaignInstruction,
   type ParsedTeamPauseEntriesInstruction,
   type ParsedUserJoinCampaignInstruction,
   type ParsedUserOpenCampaignInstruction,
+  type ResolveCampaignInput,
   type TeamPauseEntriesInput,
   type UserJoinCampaignInput,
   type UserOpenCampaignInput,
@@ -105,6 +109,7 @@ export enum BrotMarketsInstruction {
   AdminResumeEntries,
   UserOpenCampaign,
   UserJoinCampaign,
+  ResolveCampaign,
 }
 
 export function identifyBrotMarketsInstruction(
@@ -141,6 +146,9 @@ export function identifyBrotMarketsInstruction(
   if (containsBytes(data, getU8Encoder().encode(9), 0)) {
     return BrotMarketsInstruction.UserJoinCampaign;
   }
+  if (containsBytes(data, getU8Encoder().encode(10), 0)) {
+    return BrotMarketsInstruction.ResolveCampaign;
+  }
   throw new SolanaError(SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION, {
     instructionData: data,
     programName: "brotMarkets",
@@ -161,7 +169,8 @@ export type ParsedBrotMarketsInstruction<TProgram extends string = "6G2d7Cv66MR1
   | ({ instructionType: BrotMarketsInstruction.TeamPauseEntries } & ParsedTeamPauseEntriesInstruction<TProgram>)
   | ({ instructionType: BrotMarketsInstruction.AdminResumeEntries } & ParsedAdminResumeEntriesInstruction<TProgram>)
   | ({ instructionType: BrotMarketsInstruction.UserOpenCampaign } & ParsedUserOpenCampaignInstruction<TProgram>)
-  | ({ instructionType: BrotMarketsInstruction.UserJoinCampaign } & ParsedUserJoinCampaignInstruction<TProgram>);
+  | ({ instructionType: BrotMarketsInstruction.UserJoinCampaign } & ParsedUserJoinCampaignInstruction<TProgram>)
+  | ({ instructionType: BrotMarketsInstruction.ResolveCampaign } & ParsedResolveCampaignInstruction<TProgram>);
 
 export function parseBrotMarketsInstruction<TProgram extends string>(
   instruction: Instruction<TProgram> & InstructionWithData<ReadonlyUint8Array>,
@@ -235,6 +244,13 @@ export function parseBrotMarketsInstruction<TProgram extends string>(
         ...parseUserJoinCampaignInstruction(instruction),
       };
     }
+    case BrotMarketsInstruction.ResolveCampaign: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BrotMarketsInstruction.ResolveCampaign,
+        ...parseResolveCampaignInstruction(instruction),
+      };
+    }
     default:
       throw new SolanaError(SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE, {
         instructionType: instructionType as string,
@@ -285,6 +301,9 @@ export type BrotMarketsPluginInstructions = {
   userJoinCampaign: (
     input: UserJoinCampaignInput,
   ) => ReturnType<typeof getUserJoinCampaignInstruction> & SelfPlanAndSendFunctions;
+  resolveCampaign: (
+    input: ResolveCampaignInput,
+  ) => ReturnType<typeof getResolveCampaignInstruction> & SelfPlanAndSendFunctions;
 };
 
 export type BrotMarketsPluginRequirements = ClientWithRpc<GetAccountInfoApi & GetMultipleAccountsApi> &
@@ -316,6 +335,7 @@ export function brotMarketsProgram() {
           adminResumeEntries: (input) => addSelfPlanAndSendFunctions(client, getAdminResumeEntriesInstruction(input)),
           userOpenCampaign: (input) => addSelfPlanAndSendFunctions(client, getUserOpenCampaignInstruction(input)),
           userJoinCampaign: (input) => addSelfPlanAndSendFunctions(client, getUserJoinCampaignInstruction(input)),
+          resolveCampaign: (input) => addSelfPlanAndSendFunctions(client, getResolveCampaignInstruction(input)),
         },
         identifyInstruction: identifyBrotMarketsInstruction,
         parseInstruction: parseBrotMarketsInstruction,

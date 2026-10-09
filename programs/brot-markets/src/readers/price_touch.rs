@@ -1,195 +1,100 @@
-//! Purpose: read a Pyth `PriceUpdateV2` account into the price of one named feed, checking who
-//!          wrote it and how well it was verified; the price kind's reader, and the SOL/USD read
-//!          that prices an opening.
-//! Version: 0.0.4
-//! Sprint: 01 (price reader proof); ported to Pinocchio in 02, which adds the opening checks
+//! Purpose: the price kind (`PriceTouch`) at the three moments a campaign reads its feed: the
+//!          opening (rows 2 to 4, and row 3 at both ends), the join lock on the sponsored account,
+//!          and resolution (the YES proof, then NO or the stale-feed void; TP section 3.4.8; D7).
+//! Version: 0.0.6
+//! Sprint: 01 (price reader proof); 02 (the opening checks); 03 (row 3 at both ends, the slot
+//!         bound, the join lock, the YES proof and the stale-feed void), lane C
 //!
-//! The layout below was checked against real accounts on devnet and mainnet and against the IDL
-//! the receiver publishes on-chain (knowledge-base/tecnologia/pyth-leitor-de-preco.md). Sprint 02
-//! adds what an opening checks: the sponsored account a feed derives, the freshness and confidence
-//! bounds, and the touch rule (TP section 3.4.10, rows 2 to 4 and 7). The join lock and the YES
-//! proof arrive in Sprint 03.
+//! The account is read by `price_update.rs`. The rules the three moments share are in
+//! `price_touch/rules.rs`, row 3 in `price_touch/target.rs`, resolution in `price_touch/proof.rs`.
+//! Joining accepts only the sponsored account, which only moves forward (the push oracle refuses
+//! an older update), so a baker cannot choose an older price; a YES proof accepts any fully
+//! verified account of the feed, so a newer update pushed into the sponsored account cannot erase
+//! a touch (proposal section 2.5). A reading's `prev_publish_time` is Pythnet's previous
+//! aggregate, not the account's previous write, and no rule reads it.
 
-use pinocchio::{AccountView, Address};
+mod proof;
+mod rules;
+mod target;
 
-use super::cursor::Cursor;
+use pinocchio::error::ProgramError;
+
+use super::{CreationContext, CreationReading, ReadContext};
 use crate::{
-    constants::{BPS_DENOMINATOR, MAX_PRICE_CLOCK_LEAD_SECONDS, PYTH_PUSH_ORACLE_ID, PYTH_SHARD},
+    constants::PRICE_CAMPAIGN_MAX_CONF_BPS,
     error::BrotError,
-    state::enums::Direction,
+    state::{campaign::Campaign, enums::Direction},
 };
 
-pub use crate::constants::PYTH_RECEIVER_ID;
+pub use super::price_update::{
+    read_price_account, read_price_update, sponsored_account, PriceReading,
+    PRICE_UPDATE_V2_DISCRIMINATOR, PRICE_UPDATE_V2_LEN, PYTH_RECEIVER_ID,
+};
+pub use proof::try_resolve;
+pub use rules::{
+    band_crosses_target, band_reaches_target, check_fresh_and_tight, posted_within,
+    published_within, PriceRefusal,
+};
+pub use target::check_target;
 
-/// Anchor discriminator of `PriceUpdateV2`.
-pub const PRICE_UPDATE_V2_DISCRIMINATOR: [u8; 8] = [34, 241, 35, 99, 157, 126, 244, 205];
-
-/// The receiver allocates every `PriceUpdateV2` at this size.
-pub const PRICE_UPDATE_V2_LEN: usize = 134;
-
-/// Borsh tag of `VerificationLevel::Full`. `Partial` (tag 0) means the receiver checked fewer
-/// guardian signatures than a full verification needs, and it also shifts every later field by
-/// one byte, so it is refused before anything else is read.
-const VERIFICATION_FULL: u8 = 1;
-
-/// What the reader takes from a price update. `price` and `conf` are integers scaled by
-/// `10^exponent`: 11921844516 with exponent -8 is 119.21844516. Nothing here is sanitised:
-/// `price` can be negative and `conf` can be any `u64`, so a rule that combines them has to widen
-/// first.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct PriceReading {
-    pub feed_id: [u8; 32],
-    pub price: i64,
-    /// Confidence interval around `price`, in the same scale.
-    pub conf: u64,
-    pub exponent: i32,
-    /// Unix time the price was published by Pyth. It can be a few seconds ahead of the cluster
-    /// clock.
-    pub publish_time: i64,
-    /// Slot in which the update was written to this account.
-    pub posted_slot: u64,
-}
-
-/// Reads a fully verified `PriceUpdateV2` of the feed the caller expects.
-///
-/// Anyone can post an update of any feed, of any age, through the receiver. An account that
-/// passes the owner and layout checks therefore proves only "Pyth signed this, for some asset,
-/// at some time". Naming the feed is part of the read so that a BTC price can never answer a SOL
-/// question by omission. The age is not checked here: the caller compares `publish_time` with its
-/// own rule.
-pub fn read_price_update(
-    owner: &Address,
-    data: &[u8],
-    expected_feed_id: &[u8; 32],
-) -> Result<PriceReading, BrotError> {
-    if *owner != PYTH_RECEIVER_ID {
-        return Err(BrotError::ReaderWrongOwner);
+/// Rows 2 to 4 for the price kind, and row 3 at both ends. The metric account is the sponsored
+/// account of `feed_id` (`MetricAccountMismatch`), compared before a byte is read; it reads as a
+/// Full update of that feed (the reader's errors); it was posted within the slot bound of
+/// `max_age` and published within `max_age` (`PriceStale`), with a positive price
+/// (`PriceNonPositive`) and a confidence of at most 0.5% (`PriceConfidenceTooWide`); and the
+/// target passes `check_target`. The slot bound runs first, so a stale price is `PriceStale`
+/// whatever its value. The exponent is returned for the campaign to store.
+pub fn validate_at_creation(ctx: &CreationContext) -> Result<CreationReading, ProgramError> {
+    if *ctx.metric.address() != sponsored_account(ctx.feed_id)? {
+        return Err(BrotError::MetricAccountMismatch.into());
     }
-    if data.len() != PRICE_UPDATE_V2_LEN {
-        return Err(BrotError::ReaderBadLayout);
+    let reading = read_price_account(ctx.metric, ctx.feed_id)?;
+    if !posted_within(&reading, ctx.time.slot, ctx.max_age) {
+        return Err(BrotError::PriceStale.into());
     }
-
-    let mut cursor = Cursor::new(data);
-    if cursor.take::<8>()? != PRICE_UPDATE_V2_DISCRIMINATOR {
-        return Err(BrotError::ReaderBadLayout);
-    }
-    // write_authority: who may overwrite this account. Not part of the trust decision.
-    cursor.skip(32)?;
-    if cursor.u8()? != VERIFICATION_FULL {
-        return Err(BrotError::PriceNotFullyVerified);
-    }
-
-    let feed_id = cursor.take::<32>()?;
-    if feed_id != *expected_feed_id {
-        return Err(BrotError::PriceWrongFeed);
-    }
-    let price = cursor.i64()?;
-    let conf = cursor.u64()?;
-    let exponent = cursor.i32()?;
-    let publish_time = cursor.i64()?;
-    // prev_publish_time, ema_price and ema_conf: 24 bytes this reader does not use.
-    cursor.skip(24)?;
-    let posted_slot = cursor.u64()?;
-
-    Ok(PriceReading {
-        feed_id,
-        price,
-        conf,
-        exponent,
-        publish_time,
-        posted_slot,
+    let now = ctx.time.unix_timestamp;
+    check_fresh_and_tight(&reading, now, ctx.max_age, PRICE_CAMPAIGN_MAX_CONF_BPS).map_err(
+        |refusal| match refusal {
+            PriceRefusal::Stale => BrotError::PriceStale,
+            PriceRefusal::NonPositive => BrotError::PriceNonPositive,
+            PriceRefusal::ConfidenceTooWide => BrotError::PriceConfidenceTooWide,
+        },
+    )?;
+    check_target(&reading, ctx.direction, ctx.target)?;
+    Ok(CreationReading {
+        price_exponent: reading.exponent,
     })
 }
 
-/// The same read taken from the account itself, so the owner and the bytes cannot come from two
-/// different accounts. Instructions use this one.
-pub fn read_price_account(
-    account: &AccountView,
-    expected_feed_id: &[u8; 32],
-) -> Result<PriceReading, pinocchio::error::ProgramError> {
-    let data = account.try_borrow()?;
-    Ok(read_price_update(account.owner(), &data, expected_feed_id)?)
-}
-
-/// The sponsored push-oracle account of `feed_id` on shard 0: the PDA of
-/// `[PYTH_SHARD as u16 LE, feed_id]` under `PYTH_PUSH_ORACLE_ID`. The only account the program
-/// accepts for a price campaign's own feed and for the SOL/USD price at opening (TP section
-/// 3.4.8); derived here, never trusted as passed. `7AviUf…` for SOL/USD, `APgzQG…` for BTC/USD.
-/// Fails only when no bump gives an address off the curve, which no feed id is known to do; the
-/// error is then the campaign's `MetricAccountMismatch`, and the SOL/USD read maps it to its own.
-pub fn sponsored_account(feed_id: &[u8; 32]) -> Result<Address, BrotError> {
-    let shard = PYTH_SHARD.to_le_bytes();
-    Address::try_find_program_address(
-        &[shard.as_slice(), feed_id.as_slice()],
-        &PYTH_PUSH_ORACLE_ID,
-    )
-    .map(|(address, _bump)| address)
-    .ok_or(BrotError::MetricAccountMismatch)
-}
-
-/// Checks a reading for an opening: published at most `max_age` seconds before `now` and at most
-/// `MAX_PRICE_CLOCK_LEAD_SECONDS` after it (the clock may lag Pyth's), a positive price, and a
-/// confidence of at most `max_conf_bps` of the price. The caller maps the refusals to its own
-/// row's errors (row 4 for the campaign's feed, row 7 for SOL/USD), so the three outcomes are
-/// distinct. Checked in that order: a stale price is `Stale` whatever its value.
-pub fn check_fresh_and_tight(
-    reading: &PriceReading,
-    now: i64,
-    max_age: u32,
-    max_conf_bps: u16,
-) -> Result<(), PriceRefusal> {
-    // In i128 neither a publish time far in the past nor one ahead of the clock can overflow. A
-    // publish time ahead of the clock gives a negative age: fresh, because Pyth signs the time and
-    // the cluster clock may lag it, but only up to `MAX_PRICE_CLOCK_LEAD_SECONDS`, so a price
-    // stamped far ahead by a fault upstream cannot stay fresh for hours.
-    let age = i128::from(now)
-        .checked_sub(i128::from(reading.publish_time))
-        .ok_or(PriceRefusal::Stale)?;
-    let lead = i128::from(reading.publish_time)
-        .checked_sub(i128::from(now))
-        .ok_or(PriceRefusal::Stale)?;
-    if age > i128::from(max_age) || lead > i128::from(MAX_PRICE_CLOCK_LEAD_SECONDS) {
-        return Err(PriceRefusal::Stale);
+/// The join lock (BR-06). The caller has compared `ctx.metric` with `metric_account`, the
+/// sponsored account the opening checked. It reads as a Full update of the campaign's feed (the
+/// reader's errors), in the exponent stored at opening (`PriceExponentChanged`), published at most
+/// the campaign's `max_age` before the clock and `MAX_PRICE_CLOCK_LEAD_SECONDS` after it, and
+/// posted within the slot bound of `max_age` (`JoinPriceStale`). True when price ± confidence
+/// reaches the target in the campaign's direction: the touch may have happened, so entries lock.
+/// Confidence and sign are not checked here: a wide band locks sooner, never later.
+pub fn outcome_knowable(ctx: &ReadContext) -> Result<bool, ProgramError> {
+    let campaign = ctx.campaign;
+    let reading = read_price_account(ctx.metric, &campaign.feed_id)?;
+    if reading.exponent != campaign.price_exponent.get() {
+        return Err(BrotError::PriceExponentChanged.into());
     }
-    let price = u128::try_from(reading.price)
-        .ok()
-        .filter(|price| *price > 0)
-        .ok_or(PriceRefusal::NonPositive)?;
-    // conf / price <= max_conf_bps / 10,000, cross-multiplied: no rounding at the bound.
-    let width = u128::from(reading.conf)
-        .checked_mul(u128::from(BPS_DENOMINATOR))
-        .ok_or(PriceRefusal::ConfidenceTooWide)?;
-    let bound = price
-        .checked_mul(u128::from(max_conf_bps))
-        .ok_or(PriceRefusal::ConfidenceTooWide)?;
-    if width > bound {
-        return Err(PriceRefusal::ConfidenceTooWide);
+    let max_age = campaign.max_age.get();
+    let fresh = published_within(&reading, ctx.time.unix_timestamp, max_age)
+        && posted_within(&reading, ctx.time.slot, max_age);
+    if !fresh {
+        return Err(BrotError::JoinPriceStale.into());
     }
-    Ok(())
+    let direction = stored_direction(campaign)?;
+    Ok(band_reaches_target(
+        &reading,
+        direction,
+        campaign.target.get(),
+    )?)
 }
 
-/// The touch rule: true when the reading's confidence band already reaches `target` in
-/// `direction`, that is `price + conf >= target` for `Above` and `price - conf <= target` for
-/// `Below`. Row 3 refuses an opening on it, so no campaign is decided at birth; the join lock of
-/// Sprint 03 can reuse it. `target` is in the feed's own units (the reading's exponent).
-pub fn band_reaches_target(
-    reading: &PriceReading,
-    direction: Direction,
-    target: i128,
-) -> Result<bool, BrotError> {
-    // Widened from i64 and u64, so neither edge of the band can overflow an i128.
-    let price = i128::from(reading.price);
-    let conf = i128::from(reading.conf);
-    Ok(match direction {
-        Direction::Above => price.checked_add(conf).ok_or(BrotError::MathOverflow)? >= target,
-        Direction::Below => price.checked_sub(conf).ok_or(BrotError::MathOverflow)? <= target,
-    })
-}
-
-/// Why `check_fresh_and_tight` refused a reading.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum PriceRefusal {
-    Stale,
-    NonPositive,
-    ConfidenceTooWide,
+/// The campaign's stored direction. A byte no variant has is `BadAccountData`: it was stored, not
+/// passed, so it is not the instruction's `InvalidDirection`.
+fn stored_direction(campaign: &Campaign) -> Result<Direction, BrotError> {
+    Direction::try_from(campaign.direction).map_err(|_| BrotError::BadAccountData)
 }

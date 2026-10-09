@@ -1,15 +1,16 @@
 //! Purpose: pins the program's frozen interface: account and argument sizes, event sizes, the
 //!          event authority, the discriminators and the enum bytes. A change here is a change of
 //!          contract and must be made on purpose (Sprint 02, Wave 0).
-//! Version: 0.0.1
-//! Sprint: 02 (pot core on Pinocchio)
+//! Version: 0.0.2
+//! Sprint: 02 (pot core on Pinocchio); the Sprint 03 contract (Wave 0) grows the opening's
+//!         arguments and adds `resolve_campaign` and `CampaignResolved`
 
 use brot_markets::{
     constants::{EVENT_AUTHORITY, EVENT_AUTHORITY_BUMP, EVENT_AUTHORITY_SEED},
     error::BrotError,
     events::{
-        CampaignOpened, ConfigChanged, ConfigInitialized, EntriesPaused, EntriesResumed,
-        EntryAdded, Event, EVENT_IX_TAG,
+        CampaignOpened, CampaignResolved, ConfigChanged, ConfigInitialized, EntriesPaused,
+        EntriesResumed, EntryAdded, Event, EVENT_IX_TAG,
     },
     instructions::{
         admin::{
@@ -45,7 +46,7 @@ fn argument_sizes_are_frozen() {
     assert_eq!(SetTeamArgs::LEN, 161);
     assert_eq!(SetFeeRecipientArgs::LEN, 32);
     assert_eq!(TransferAdminArgs::LEN, 32);
-    assert_eq!(OpenCampaignArgs::LEN, 82);
+    assert_eq!(OpenCampaignArgs::LEN, 94);
     assert_eq!(JoinCampaignArgs::LEN, 21);
 }
 
@@ -55,8 +56,9 @@ fn event_sizes_and_discriminators_are_frozen() {
     assert_eq!(ConfigChanged::LEN, 360);
     assert_eq!(EntriesPaused::LEN, 32);
     assert_eq!(EntriesResumed::LEN, 32);
-    assert_eq!(CampaignOpened::LEN, 255);
+    assert_eq!(CampaignOpened::LEN, 263);
     assert_eq!(EntryAdded::LEN, 114);
+    assert_eq!(CampaignResolved::LEN, 140);
     let discriminators = [
         ConfigInitialized::DISCRIMINATOR,
         ConfigChanged::DISCRIMINATOR,
@@ -64,8 +66,9 @@ fn event_sizes_and_discriminators_are_frozen() {
         EntriesResumed::DISCRIMINATOR,
         CampaignOpened::DISCRIMINATOR,
         EntryAdded::DISCRIMINATOR,
+        CampaignResolved::DISCRIMINATOR,
     ];
-    assert_eq!(discriminators, [0, 1, 2, 3, 4, 5]);
+    assert_eq!(discriminators, [0, 1, 2, 3, 4, 5, 6]);
 }
 
 #[test]
@@ -88,8 +91,9 @@ fn instruction_discriminators_follow_the_shank_enum_order() {
         ix::ADMIN_RESUME_ENTRIES,
         ix::USER_OPEN_CAMPAIGN,
         ix::USER_JOIN_CAMPAIGN,
+        ix::RESOLVE_CAMPAIGN,
     ];
-    assert_eq!(all, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    assert_eq!(all, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     assert_eq!(ix::EMIT_EVENT, EVENT_IX_TAG);
     assert_eq!(EVENT_IX_TAG, 0xFF);
 }

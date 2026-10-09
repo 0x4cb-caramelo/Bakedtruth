@@ -1,6 +1,6 @@
 # Sprint 02 — Pot core on Pinocchio: config, paid opening, vault, entries
 
-**Status:** done, merged into `main` with PR #35 on 2026-10-08 (PR #30 carried the branch); the tag `sprint-02` waits for the founder · **Branch:** `sprint-02-pot-core` · **Dates:** none, by the founder's decision
+**Status:** done, merged into `main` with PR #35 on 2026-10-08 (PR #30 carried the branch); tagged `sprint-02` on 2026-10-09 · **Branch:** `sprint-02-pot-core` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -166,11 +166,11 @@ retrospective", at the end of this file, holds the tables (lanes, sizes and rent
 - [x] The committed IDL (and the generated client, if any) match CI's build (X0.6).
       Evidence: locally, `bun run build:program` regenerates both with no diff; in CI, run 37849347333, step "Check
       committed IDLs are up to date" (it covers `packages/sdk/src/idl`, the generated client included): success.
-- [ ] Common closure (`docs/SPRINTS.md`, section 4).
+- [x] Common closure (`docs/SPRINTS.md`, section 4).
       Evidence: items 1 to 5 done (the standard checks pass locally and in CI; `secrets-scan` clean; `CODEMAP.md`
       regenerated in the same commit; CHANGELOG and both session logs; the coordinator's review and the adversarial
-      reviews, in Reviews below). **Open, and not ours to close:** item 6, the merge into `main` and the `sprint-02`
-      tag, which wait for the founder.
+      reviews, in Reviews below). Item 6: merged into `main` with PR #35 on 2026-10-08, and tagged `sprint-02` on
+      2026-10-09.
 
 ## Deliverables
 

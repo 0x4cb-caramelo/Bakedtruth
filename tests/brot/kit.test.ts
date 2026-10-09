@@ -1,8 +1,8 @@
 /**
  * Purpose: checks the test kit itself, without the program binary: addresses, layout sizes against
  *          the Rust structs, the codec, and the instruction shapes of the frozen contract.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio)
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio); the Sprint 03 sizes and `resolve_campaign`
  */
 import { describe, expect, test } from "bun:test";
 import { generateKeyPairSigner } from "@solana/kit";
@@ -30,7 +30,7 @@ describe("test kit", () => {
     expect(layoutSize(S.CREATION_PARAMS)).toBe(70);
     expect(layoutSize(S.INITIALIZE_CONFIG_ARGS)).toBe(134);
     expect(layoutSize(S.SET_TEAM_ARGS)).toBe(161);
-    expect(layoutSize(S.OPEN_CAMPAIGN_ARGS)).toBe(82);
+    expect(layoutSize(S.OPEN_CAMPAIGN_ARGS)).toBe(94);
     expect(layoutSize(S.JOIN_CAMPAIGN_ARGS)).toBe(21);
     const events = Object.fromEntries(Object.entries(EVENTS).map(([n, e]) => [n, layoutSize(e.layout)]));
     expect(events).toEqual({
@@ -38,8 +38,9 @@ describe("test kit", () => {
       ConfigChanged: 360,
       EntriesPaused: 32,
       EntriesResumed: 32,
-      CampaignOpened: 255,
+      CampaignOpened: 263,
       EntryAdded: 114,
+      CampaignResolved: 140,
     });
     expect(offsetOf(S.CAMPAIGN, "id")).toBe(16);
   });
@@ -81,11 +82,14 @@ describe("test kit", () => {
       openingUsd: 500n,
       maxLamports: 1n,
     });
-    expect([open.accounts?.length, open.data?.length, open.data?.[0]]).toEqual([9, 83, P.IX.USER_OPEN_CAMPAIGN]);
+    expect([open.accounts?.length, open.data?.length, open.data?.[0]]).toEqual([9, 95, P.IX.USER_OPEN_CAMPAIGN]);
     expect(open.accounts?.[4].address).toBe(P.BTC_USD_ACCOUNT);
     const joinIx = await I.joinCampaignIx(who, P.SOL_USD_ACCOUNT, P.BTC_USD_ACCOUNT, { side: 0, amount: 1n });
     expect([joinIx.accounts?.length, joinIx.data?.length]).toEqual([9, 22]);
     expect(joinIx.accounts?.[7].address).toBe(P.EVENT_AUTHORITY);
     expect(joinIx.accounts?.[8].address).toBe(P.PROGRAM_ID);
+    const resolveIx = I.resolveCampaignIx(P.SOL_USD_ACCOUNT, P.BTC_USD_ACCOUNT);
+    expect([resolveIx.accounts?.length, resolveIx.data?.length, resolveIx.data?.[0]]).toEqual([5, 1, 10]);
+    expect(resolveIx.accounts?.[2].address).toBe(P.BTC_USD_ACCOUNT);
   });
 });

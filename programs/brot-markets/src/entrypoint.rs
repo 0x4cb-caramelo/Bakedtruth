@@ -1,14 +1,14 @@
 //! Purpose: the instruction dispatcher: the first byte of the instruction data picks the handler,
 //!          the rest is that handler's arguments.
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio)
+//! Version: 0.0.3
+//! Sprint: 02 (pot core on Pinocchio); `resolve_campaign` in 03
 
 use pinocchio::{AccountView, Address, ProgramResult};
 
 use crate::{
     error::BrotError,
     events,
-    instructions::{admin, campaigns, entries, ix},
+    instructions::{admin, campaigns, entries, ix, resolution},
 };
 
 pub fn process_instruction(
@@ -45,6 +45,9 @@ pub fn process_instruction(
         }
         ix::USER_JOIN_CAMPAIGN => {
             entries::join_campaign::user_join_campaign(program_id, accounts, args)
+        }
+        ix::RESOLVE_CAMPAIGN => {
+            resolution::resolve_campaign::resolve_campaign(program_id, accounts, args)
         }
         ix::EMIT_EVENT => events::process_event_instruction(accounts),
         _ => Err(BrotError::UnknownInstruction.into()),

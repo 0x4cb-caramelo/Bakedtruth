@@ -1,7 +1,7 @@
 //! Purpose: `GlobalConfig` (`["config"]`): roles, the pause, the creation parameters, the fee
 //!          recipient and the open-campaign counter; and the creation parameters' own layout.
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio)
+//! Version: 0.0.3
+//! Sprint: 02 (pot core on Pinocchio); `params_version` taken from the reserve in 03
 //!
 //! One per program, created by `admin_initialize_config` together with the data-less fee vault
 //! (`["fee_vault"]`), whose bump is kept here. Every creation parameter is copied into a campaign
@@ -88,8 +88,11 @@ pub struct GlobalConfig {
     /// Campaigns opened and not yet finalized (I7).
     #[idl_type("u32")]
     pub open_campaigns: LeU32,
+    /// Counts the changes of `params`; an opening signs the version it previewed (Sprint 03).
+    #[idl_type("u32")]
+    pub params_version: LeU32,
     #[padding]
-    pub _reserved: [u8; 64],
+    pub _reserved: [u8; 60],
 }
 
 zero_copy!(CreationParams = 70, GlobalConfig = 400);

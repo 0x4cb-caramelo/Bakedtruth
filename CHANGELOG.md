@@ -9,10 +9,51 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [Unreleased]
 
 A Sprint 02, o núcleo do pote em Pinocchio, foi mesclada na `main` pelo PR #35 em 8/10/2026 (o PR #30 trazia a branch
-`sprint-02-pot-core`); a tag `sprint-02` espera o fundador (`docs/sprints/sprint-02-pot-core.md`).
+`sprint-02-pot-core`) e ganhou a tag `sprint-02` em 9/10/2026. A Sprint 03, os leitores e a resolução, foi mesclada
+na `main` pelo PR #40 em 9/10/2026, com a tag `sprint-03` (`docs/sprints/sprint-03-readers-resolution.md`). Quem
+mesclou os PRs #37 e #40 foi o Ronaldo, com a liberdade que o Lucas lhe deu; ele também respondeu as perguntas ao
+fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`).
 
 ### Added
 
+- **Sprint 03: o programa lê o resultado sozinho, e o Anchor sai do repositório** (`programs/brot-markets`,
+  9/10/2026). Os cinco tipos de campanha abrem, travam a entrada e resolvem on-chain:
+  - **Os quatro leitores do `pred-provable` portados para o Pinocchio**, um arquivo cada, com o aviso MIT: a queima
+    de um token (`SupplyAtMost`), a liquidez travada num pool DAMM v2 da Meteora (`DammV2LockedAtLeast`), o tamanho
+    de um pool de stake numa época (`StakePoolTvlAtLeast`) e o stake de um validador numa época (`StakeAtLeast`).
+    Cada um confere o dono e o formato da conta antes de ler um byte; uma conta cortada, esticada ou zerada é um erro,
+    nunca um travamento. Testados nas contas reais capturadas da rede principal, e conferidos contra o programa
+    congelado nas mesmas contas antes de ele sair: 62 casos, com cada diferença justificada
+    (`docs/sprints/sprint-03-parity.md`).
+  - **A divisão do leitor de preço:** na entrada, só a conta patrocinada da Pyth; para provar o SIM, qualquer conta
+    totalmente verificada do mesmo feed, publicada dentro do prazo e com até 60 segundos; o NÃO só 60 segundos
+    depois do prazo, para ninguém gravar NÃO na frente de uma prova; e o feed parado anula a campanha (`StaleFeed`)
+    em vez de virar NÃO. O alvo precisa ficar a pelo menos 1% da faixa de confiança e, no lado distante, até 10 vezes
+    o preço (ou um décimo); um alvo de 1 lamport deixa de abrir.
+  - **`user_open_campaign` para os cinco tipos**, com as recusas das linhas 1 a 3 do plano técnico e um erro para
+    cada uma; os argumentos sem uso têm de ser zero; a abertura recusa quando os parâmetros de criação mudaram desde
+    a prévia que o criador viu (`expected_params_version`); quatro códigos próprios dizem qual conta da Pyth falhou
+    na cobrança em SOL/USD. O `StakeAtLeast` fica fechado por uma feature de build até um SIM na devnet.
+  - **Os tipos de época:** o criador passa a época e o prazo; a época precisa começar antes do prazo; a entrada fecha
+    quando a época começa; uma época perdida anula (`MissedWindow`) e devolve, em vez de dizer NÃO.
+  - **`resolve_campaign`:** qualquer carteira dispara e não escolhe nada; recusa ser chamada de dentro de outro
+    programa (provado com um programa de teste que repassa a instrução); grava SIM, NÃO ou anulação com a janela de
+    revisão de seis horas e emite `CampaignResolved` com o valor lido, a conta e, no preço, o horário e o slot da
+    prova.
+  - **A trava de entrada (BR-06):** a entrada é recusada assim que o resultado já é conhecível.
+  - **Surfpool:** o leitor de preço rodou dentro das instruções sobre um fork da rede principal, com o preço cruzando
+    o alvo e a campanha resolvendo SIM; o CI fixa o Surfpool 1.6.0 pelo SHA-256 do arquivo e do binário.
+  - **O SIM do `StakeAtLeast` testado pela primeira vez**, no Mollusk, que injeta stake de época.
+  - **Fatos da rede, em `knowledge-base/tecnologia/`** (frente R, com três scripts de medida em `scripts/`):
+    `pyth-feeds-patrocinados.md`, quais feeds têm conta de fatia 0 e quem as mantém (na rede principal, 120 das 183
+    são de feeds que a Pyth não patrocina, 78 criadas por um mesmo pagador e 102 paradas: a pergunta 1 ao fundador
+    ganha o fato); `alpenglow-devnet.md`, o Alpenglow ativo na devnet desde 25/9/2026 e não na rede principal, o
+    tempo de slot (231 a 245 ms e 260 a 282 ms) e a deriva do relógio (até 2,4 s), que confirmam os dois valores
+    [AC] da abertura; `lighthouse.md`, o endereço do Lighthouse para a lista da Sprint 08; e, na nota da Pyth, que a
+    conta patrocinada só anda para a frente (12 minutos, zero regressões; uma atualização velha é pulada, não
+    recusada).
+  - **Testes:** 255 em Rust e 259 em TypeScript depois das correções da revisão (252 e 258 antes delas), todos do
+    programa novo; os oito filtros da sprint passam; tirar a checagem de chamada de topo derruba o teste dela (X0.9).
 - **`brot.markets/2`, a página inicial com o visual do deck** (opção A, fundador, 9/10/2026): o mesmo conteúdo da
   página inicial, palavra por palavra, com o pãozinho e o formulário, e só o visual trocado: as cores do deck (carvão
   no tema escuro, creme no claro), IBM Plex e os cartões escuros dos slides. Um teste falha se o texto da `/2` e o da
@@ -245,6 +286,26 @@ A Sprint 02, o núcleo do pote em Pinocchio, foi mesclada na `main` pelo PR #35 
 
 ### Changed
 
+- **As respostas do fundador de 9/10/2026** às perguntas que as Sprints 02 e 03 deixaram e às duas abertas da Sprint
+  04, dadas pelo Ronaldo (`docs/business/ideacao-perguntas-e-respostas.md`, seção 1; comentário no PR #40). A Sprint
+  04 constrói: uma lista nossa de feeds da Pyth, fixa no programa, que começa pela lista oficial de feeds
+  patrocinados (62 na rede principal e 17 na devnet), o que estreita o D-i só para o tipo preço; a abertura cobrada
+  em `p − conf`; o feed do SOL/USD como constante; as aberturas da equipe fora do `max_open_campaigns` e sem limite;
+  a entrada mínima copiada na abertura (hoje 0,01 SOL); a margem na trava de entrada e a devolução das entradas
+  feitas a partir do `publish_time` da prova do SIM; o prêmio de volta a quem abriu numa campanha sem entradas, com
+  os US$ 50 para a Brot; e o `StaleFeed` como causa externa, também com os US$ 50 para a Brot. As chaves da equipe
+  ficam com o Lucas, o Ronaldo e o Bernardo.
+- **O `pred-provable` e o Anchor saem do repositório** (Sprint 03, 9/10/2026), num commit só: o programa congelado,
+  os seus testes, `tests/helpers.ts`, o IDL em `target/` e o `Anchor.toml`. O `Cargo.lock` perde 175 pacotes e não
+  sobe versão nenhuma; o `brot-markets` chama as syscalls de stake de época, altura da pilha e sysvar pelo próprio
+  Pinocchio, sem o crate `solana-epoch-stake` nem o seu pino. O CI deixa de instalar o Anchor CLI, e a checagem de
+  IDL cobre só o IDL do Shank e o cliente gerado. O pacote raiz passa a se chamar `brot-markets`. O site atual
+  continua com a cópia do IDL antigo em `app/lib` até a Sprint 09, e `smoke:devnet` e `seed:devnet` ainda falam com
+  a instalação antiga na devnet por ela. O `CLAUDE.md` foi reescrito sem o Anchor.
+- **Duas regras do plano técnico mudaram diante dos fatos** (Sprint 03): o `prev_publish_time` da Pyth é o agregado
+  anterior da Pythnet, não a escrita anterior da conta (em todas as contas capturadas vale `publish_time − 1`), então
+  o teste do feed parado passou a ser "nada foi gravado depois do prazo e a última escrita é mais velha que
+  `prazo − max_age`"; e o NÃO do tipo preço espera 60 segundos depois do prazo.
 - **Plano técnico v0.1.1** (8/10/2026): alinhado ao que a Sprint 02 construiu e mediu, linha por linha da tabela "TP
   to align" do arquivo da sprint. Entram as versões fixadas (`pinocchio-system` 0.6.1, Shank 0.4.9, Mollusk 0.14.0, que
   substitui o 0.16 por causa do Rust 1.89), os eventos por chamada do programa a si mesmo desde a Sprint 02, as dez
@@ -277,6 +338,22 @@ A Sprint 02, o núcleo do pote em Pinocchio, foi mesclada na `main` pelo PR #35 
 
 ### Fixed
 
+- **Sprint 03, o que as revisões acharam e foi corrigido antes do pull request** (9/10/2026; quatro revisores:
+  segurança, advogado do diabo, independente e produto; nenhum achou como tirar SOL de ninguém):
+  - **a anulação por feed parado ganha um piso de 600 segundos** (`STALE_FEED_MIN_SECONDS` [AC]): a conta
+    patrocinada da devnet atualiza a cada 62 a 64 segundos, e uma campanha com `max_age` perto disso podia ser anulada
+    ou virar NÃO conforme o segundo em que alguém a resolvesse; agora a última atualização antes do prazo precisa ser
+    mais velha que o maior entre o `max_age` e dez minutos;
+  - **o expoente do feed mudou desde a abertura, e a janela de prova fechou: anula**, em vez de registrar NÃO; toda
+    prova do SIM durante a janela era recusada pelo mesmo motivo, então o NÃO seria um veredito que ninguém pôde
+    contestar;
+  - **preço zero ou negativo não prova o SIM**, em nenhuma direção, com o mesmo erro da abertura (`PriceNonPositive`);
+    antes, um preço negativo assinado pela Pyth provaria o SIM de uma campanha "abaixo de" (era a pergunta 7 ao
+    fundador; as revisões a fecharam);
+  - **o endereço do próprio programa na vaga da prova vale como "sem prova"**: enquanto a janela está aberta a
+    resposta é `NotResolvableYet`, e não `ProofDoesNotTouch` para qualquer conta que preenchesse a vaga; sem isso a
+    recusa "ainda não dá" nunca era alcançável para uma campanha de preço;
+  - testes novos para cada item (255 em Rust, 259 em TypeScript); a IDL não muda.
 - **Sprint 02, o que as revisões acharam e foi corrigido antes da mescla** (8/10/2026; três revisores e o
   coordenador, nenhum achou como tirar SOL de ninguém):
   - um preço da Pyth com horário mais de 60 segundos à frente do relógio da rede passa a ser recusado como velho;
@@ -298,17 +375,7 @@ A Sprint 02, o núcleo do pote em Pinocchio, foi mesclada na `main` pelo PR #35 
 
 ### Em aberto
 
-- **Sprint 02, para o fundador confirmar:** que o Lucas e o Ronaldo têm, os dois, chaves da equipe (Q12); e se a
-  entrada mínima de uma campanha aberta muda quando a configuração muda (hoje muda). O D6 e a leitura de "a equipe
-  põe prêmio" (paga como qualquer carteira) ficaram decididos no PR #35, que mesclou também o #27 ("O que foi feito
-  lá no código dele a gente traz como nova realidade"). O R4, abertura mais barata nos primeiros meses, não foi
-  construído.
-- **Sprint 02, decisões que as revisões pedem antes da Sprint 03:** a campanha de preço aceita qualquer feed da Pyth,
-  e o plano diz "preço de um ativo grande" (uma lista fechada de feeds pediria a decisão dele, porque o D-i tirou a
-  lista de contas); uma chave da equipe vazada pode ocupar todas as vagas de campanhas abertas por até 90 dias (uma
-  cota própria para as aberturas gratuitas resolveria); cobrar a abertura na borda de baixo do preço, `p − conf`,
-  tira de quem abre a vantagem de escolher a atualização mais alta; e o feed do SOL/USD pode virar uma constante do
-  programa, em vez de um parâmetro que um erro de digitação do admin muda.
+- **O R4, abertura mais barata nos primeiros meses,** não foi construído (Sprint 02).
 
 - **Autoria no Colosseum, prazo 12/10/2026:** o plano diz que a equipe se apresenta como uma pessoa, mas o git mostra
   quatro autores desde 14/9/2026, e o regulamento pede todos os membros e verifica quem fez o trabalho. O código vindo
@@ -369,13 +436,6 @@ A Sprint 02, o núcleo do pote em Pinocchio, foi mesclada na `main` pelo PR #35 
   conferida; o Ronaldo ser avisado do serviço novo no servidor.
 - **Arquivos originais do deck** (as duas versões, 10 MB e 13 MB) em `docs/technical/`, fora do Git. Não foram
   commitados nem apagados.
-- **Sprints:** a 00 e a 01 estão concluídas; a 02 foi mesclada na `main` pelo PR #35, e a tag `sprint-02` espera o
-  fundador. Falta confirmar a leitura de que o Lucas e o Ronaldo têm, os dois, chave de equipe.
-- **Leitura no Surfpool:** era critério de pronto da Sprint 01 e não foi feita. Está na Sprint 03, com o de acordo
-  do fundador.
-- **Desenho da pergunta de preço:** a revisão da Sprint 01 propõe aceitar, na aposta, só a conta patrocinada do
-  ativo, e na prova qualquer conta completa. O plano técnico hoje aceita qualquer conta válida. Decide-se na
-  Sprint 03.
 - **Quem controla a Pyth:** na rede principal, a autoridade que atualiza os programas é um endereço derivado cujo
   controle não foi conferido. Risco na seção 13 do plano técnico; conferir antes da rede principal (Sprint 16).
 - **Perguntas do fundador:** as doze da seção 14.2 do plano técnico valem com a resposta recomendada, porque os
@@ -386,7 +446,8 @@ A Sprint 02, o núcleo do pote em Pinocchio, foi mesclada na `main` pelo PR #35 
   quando sai o token A, cabeçalhos que ainda dizem "rascunho"). A Parte 4 ainda dá a Pyth na devnet como não verificada, e a Parte 2 não traz o número do mercado $LAPTOP que o deck usa. Falta uma passada para resolvê-los.
 - **Direção de design:** Ledger² escura e clara, aprovada e documentada. O app ainda mostra a direção C; a troca
   é a Sprint -1 e as Sprints 09 a 13. Várias telas do protótipo mostram o modelo antigo e precisam de conteúdo novo.
-- **Nome:** Brot Markets. O app, os protótipos e o `package.json` da raiz ainda dizem "baked" ou `pred-provable`.
+- **Nome:** Brot Markets. O app e os protótipos ainda dizem "baked" ou `pred-provable`; o `package.json` da raiz diz
+  `brot-markets` desde a Sprint 03.
 - **Servidor:** o projeto tem espaço próprio no servidor compartilhado, com o código e o site provisório rodando.
   Falta o lugar do segundo serviço agendado.
 - **Ferramentas locais:** a máquina de desenvolvimento da Sprint 02 (não o servidor compartilhado) tem Solana CLI

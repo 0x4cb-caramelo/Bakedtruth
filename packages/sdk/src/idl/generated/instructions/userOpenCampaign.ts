@@ -18,6 +18,8 @@ import {
   getI64Encoder,
   getStructDecoder,
   getStructEncoder,
+  getU32Decoder,
+  getU32Encoder,
   getU64Decoder,
   getU64Encoder,
   getU8Decoder,
@@ -106,6 +108,8 @@ export type UserOpenCampaignInstructionData = {
   deadlineAt: bigint;
   openingUsd: bigint;
   maxLamports: bigint;
+  epoch: bigint;
+  expectedParamsVersion: number;
 };
 
 export type UserOpenCampaignInstructionDataArgs = {
@@ -117,6 +121,8 @@ export type UserOpenCampaignInstructionDataArgs = {
   deadlineAt: number | bigint;
   openingUsd: number | bigint;
   maxLamports: number | bigint;
+  epoch: number | bigint;
+  expectedParamsVersion: number;
 };
 
 export function getUserOpenCampaignInstructionDataEncoder(): FixedSizeEncoder<UserOpenCampaignInstructionDataArgs> {
@@ -131,6 +137,8 @@ export function getUserOpenCampaignInstructionDataEncoder(): FixedSizeEncoder<Us
       ["deadlineAt", getI64Encoder()],
       ["openingUsd", getU64Encoder()],
       ["maxLamports", getU64Encoder()],
+      ["epoch", getU64Encoder()],
+      ["expectedParamsVersion", getU32Encoder()],
     ]),
     (value) => ({ ...value, discriminator: USER_OPEN_CAMPAIGN_DISCRIMINATOR }),
   );
@@ -147,6 +155,8 @@ export function getUserOpenCampaignInstructionDataDecoder(): FixedSizeDecoder<Us
     ["deadlineAt", getI64Decoder()],
     ["openingUsd", getU64Decoder()],
     ["maxLamports", getU64Decoder()],
+    ["epoch", getU64Decoder()],
+    ["expectedParamsVersion", getU32Decoder()],
   ]);
 }
 
@@ -194,6 +204,8 @@ export type UserOpenCampaignInput<
   deadlineAt: UserOpenCampaignInstructionDataArgs["deadlineAt"];
   openingUsd: UserOpenCampaignInstructionDataArgs["openingUsd"];
   maxLamports: UserOpenCampaignInstructionDataArgs["maxLamports"];
+  epoch: UserOpenCampaignInstructionDataArgs["epoch"];
+  expectedParamsVersion: UserOpenCampaignInstructionDataArgs["expectedParamsVersion"];
 };
 
 export function getUserOpenCampaignInstruction<

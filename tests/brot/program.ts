@@ -2,8 +2,9 @@
  * Purpose: the program's addresses for the LiteSVM tests: ids, seeds, discriminators, PDAs and
  *          the known outside accounts (Pyth, the loader). Mirrors programs/brot-markets/src
  *          (constants.rs, instructions/mod.rs).
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio); frozen at the sprint's opening with the program's contract
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio); Sprint 03 adds `resolve_campaign`, the outcome enums, the
+ *          readers' programs and constants, frozen at its opening
  */
 import { address, getAddressEncoder, getProgramDerivedAddress, type Address } from "@solana/kit";
 
@@ -14,6 +15,15 @@ export const LOADER_V3_ID = address("BPFLoaderUpgradeab1e11111111111111111111111
 export const PYTH_RECEIVER_ID = address("rec2HHDDnjLfj4kE7VyEtFA1HPGQLK33259532cRyHp");
 export const PYTH_LEGACY_RECEIVER_ID = address("rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ");
 export const PYTH_PUSH_ORACLE_ID = address("pyt2F414BA6dPttK6RddPZUdHfapoBN24GL5wbrPCou");
+/** The readers' programs (Sprint 03): owners the readers check, and the sysvar the epoch rule reads. */
+export const SPL_TOKEN_PROGRAM_ID = address("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+export const TOKEN_2022_PROGRAM_ID = address("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
+export const DAMM_V2_PROGRAM_ID = address("cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG");
+export const STAKE_POOL_PROGRAM_ID = address("SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy");
+export const VOTE_PROGRAM_ID = address("Vote111111111111111111111111111111111111111");
+export const EPOCH_SCHEDULE_SYSVAR_ID = address("SysvarEpochSchedu1e111111111111111111111111");
+/** The test-only CPI proxy (tests/programs/cpi-proxy), loaded at any address a test picks. */
+export const CPI_PROXY_SO = "target/deploy/cpi_proxy.so";
 /** PDA `["__event_authority"]` of the program (bump 254), checked in tests/brot/kit.test.ts. */
 export const EVENT_AUTHORITY = address("E5CgcK5xs4YfPdBLnCWTAA9ruStbTqLjEzTxtVaRuB5o");
 
@@ -25,6 +35,15 @@ export const SOL_USD_ACCOUNT = address("7AviUf9nL62mcxNbQGKm4nKDQnPjswo6c5MX4D57
 export const BTC_USD_ACCOUNT = address("APgzQGGdv2qCgBkX6aHVkrGePtBVDDg68GiqaM7rmtf5");
 
 export const SOL = 1_000_000_000n;
+/** constants.rs, Sprint 03: the proof window, the review window and the readers' [AC] values. */
+export const PROOF_DELAY_SECONDS = 60n;
+export const STALE_FEED_MIN_SECONDS = 600n;
+export const REVIEW_WINDOW_SECONDS = 6n * 3_600n;
+export const MAX_PRICE_CLOCK_LEAD_SECONDS = 60n;
+export const MIN_SLOT_MS = 100n;
+export const PRICE_TARGET_MAX_RATIO = 10n;
+export const EPOCH_START_SLOW_SLOT_MS = 500n;
+export const MIN_DISTANCE_BPS = { price: 100n, supply: 100n, damm: 100n, stakePool: 100n, stake: 100n } as const;
 export const DAY = 86_400n;
 export const HOUR = 3_600n;
 
@@ -40,6 +59,7 @@ export const IX = {
   ADMIN_RESUME_ENTRIES: 7,
   USER_OPEN_CAMPAIGN: 8,
   USER_JOIN_CAMPAIGN: 9,
+  RESOLVE_CAMPAIGN: 10,
   EMIT_EVENT: 0xff,
 } as const;
 
@@ -51,6 +71,15 @@ export const ReaderKind = {
   StakeAtLeast: 4,
 } as const;
 export const Status = { Open: 0, InReview: 1, Contested: 2, Settling: 3, Settled: 4 } as const;
+export const Outcome = { Unresolved: 0, Yes: 1, No: 2, Void: 3 } as const;
+export const VoidReason = {
+  None: 0,
+  MissedWindow: 1,
+  UnreadableAccount: 2,
+  StaleFeed: 3,
+  TeamHouseFailure: 4,
+  TeamOutsideCause: 5,
+} as const;
 export const Side = { Yes: 0, No: 1 } as const;
 export const Direction = { Above: 0, Below: 1 } as const;
 export const OperatingLevel = { Normal: 0, EntriesHalted: 1 } as const;
