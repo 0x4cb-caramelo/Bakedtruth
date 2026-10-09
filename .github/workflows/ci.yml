@@ -127,6 +127,9 @@ jobs:
             exit 1
           fi
 
+      - name: Slot matrix is current (generated from the IDL)
+        run: bun scripts/slot-matrix-check.ts
+
       # Runs after the build because the Rust tests use the program binaries in target/deploy.
       # The last line compiles the mainnet branch of the code, which the build above never does.
       - name: Clippy

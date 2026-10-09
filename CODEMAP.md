@@ -288,7 +288,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`bookkeeping.rs`](programs/brot-markets/src/instructions/settlement/bookkeeping.rs) | the moves and counters every settlement instruction shares: the event sequence number, the lamport move out of the vault (checked against I1 by `math::invariant | 64 |
-| [`close_campaign.rs`](programs/brot-markets/src/instructions/settlement/close_campaign.rs) | `close_campaign`: once the fee, the prize and the creator share are settled, moves the vault's dust and hand-sent surplus to the fee vault, returns the rent of  | 100 |
+| [`close_campaign.rs`](programs/brot-markets/src/instructions/settlement/close_campaign.rs) | `close_campaign`: once the fee, the prize and the creator share are settled, moves the vault's dust and hand-sent surplus to the fee vault, returns the rent of  | 128 |
 | [`collect_fee.rs`](programs/brot-markets/src/instructions/settlement/collect_fee.rs) | `collect_fee`: moves what Brot keeps to the fee vault, once, after the entries are settled: the house fee net of the creator's share from it, the opening fee un | 81 |
 | [`finalize_campaign.rs`](programs/brot-markets/src/instructions/settlement/finalize_campaign.rs) | `finalize_campaign`: the snapshot of a reviewed campaign once its window has ended. Any wallet, permissionless; it chooses nothing. It runs `finalize_snapshot`, | 77 |
 | [`mod.rs`](programs/brot-markets/src/instructions/settlement/mod.rs) | the instructions that settle a campaign after its outcome: the snapshot, the payouts to people and Brot's fee, the prize, the close and the sweep (TP section 3. | 17 |
@@ -319,7 +319,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`refund.rs`](programs/brot-markets/src/math/refund.rs) | the late-entry refund (TP section 3.4.16; founder answer 7, 2026-10-09): the part of a baker's joins made at or after the YES proof's `publish_time` comes back  | 86 |
 | [`rounding.rs`](programs/brot-markets/src/math/rounding.rs) | the multiply-divide and basis-point shares every money formula uses, rounded down or up in u128 with checked math: the one place a rounding direction is written | 75 |
 | [`schedule.rs`](programs/brot-markets/src/math/schedule.rs) | when entries close and which durations a campaign may have (D-k; P1 section 3.6) | 73 |
-| [`snapshot.rs`](programs/brot-markets/src/math/snapshot.rs) | the settlement snapshot, the one pure function finalize calls to turn a campaign's totals and its verdict into what it stores: the mode, the house fee, the crea | 183 |
+| [`snapshot.rs`](programs/brot-markets/src/math/snapshot.rs) | the settlement snapshot, the one pure function finalize calls to turn a campaign's totals and its verdict into what it stores: the mode, the house fee, the crea | 184 |
 | [`void.rs`](programs/brot-markets/src/math/void.rs) | what a void, and a pot with no entry, returns to whoever opened and what Brot keeps (TP section 3.4.7, P-4, founder answer 8). The 10% opening fee follows the c | 70 |
 
 ## `programs/brot-markets/src/readers/`

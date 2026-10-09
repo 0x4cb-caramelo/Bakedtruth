@@ -13,7 +13,10 @@
 //! comes from the Rent sysvar, read only after every refusal above. Then the moves, `checks::close_account`
 //! on both accounts (their lamports must be gone), and `CampaignClosed`.
 
-use pinocchio::{AccountView, Address, ProgramResult};
+use pinocchio::{
+    sysvars::{rent::Rent, Sysvar},
+    AccountView, Address, ProgramResult,
+};
 
 use super::collect_fee::moves;
 use crate::{
@@ -21,7 +24,7 @@ use crate::{
     error::BrotError,
     events::{self, CampaignClosed},
     instructions::no_args,
-    layout::LeU64,
+    layout::{LeU64, ZeroCopy},
     state::{campaign::Campaign, enums::Status},
 };
 
@@ -54,23 +57,42 @@ pub fn close_campaign(
     checks::vault_of(vault, &key, stored.vault_bump, program_id)?;
     moves::fee_vault_is_canonical(fee_vault, program_id)?;
     let seq = stored.event_seq.get();
+    let reserved = stored.creator_share_reserved.get();
     drop(stored);
 
     checks::paying_vault(vault, program_id, &[&*fee_vault, &*rent_payer])?;
     checks::distinct(campaign, rent_payer)?;
     let rent = moves::empty_rent()?;
     let vault_rent = vault.lamports().min(rent);
-    let surplus = vault
+    let after_rent = vault
         .lamports()
         .checked_sub(vault_rent)
         .ok_or(BrotError::MathOverflow)?;
-    let campaign_rent = campaign.lamports();
+    // A reserved creator share (only when the creator is the rent payer; `require_closable`) goes to that
+    // payer with the rent. The rest of the vault is surplus.
+    let vault_surplus = after_rent
+        .checked_sub(reserved)
+        .ok_or(BrotError::InvariantViolated)?;
+    let to_payer = vault_rent
+        .checked_add(reserved)
+        .ok_or(BrotError::MathOverflow)?;
+    // The campaign returns its own rent; lamports sent to it by hand above that are surplus.
+    let campaign_min = Rent::get()?.try_minimum_balance(Campaign::LEN)?;
+    let campaign_rent = campaign.lamports().min(campaign_min);
+    let campaign_surplus = campaign
+        .lamports()
+        .checked_sub(campaign_rent)
+        .ok_or(BrotError::MathOverflow)?;
+    let surplus = vault_surplus
+        .checked_add(campaign_surplus)
+        .ok_or(BrotError::MathOverflow)?;
     let rent_returned = campaign_rent
         .checked_add(vault_rent)
         .ok_or(BrotError::MathOverflow)?;
 
-    moves::move_lamports(vault, fee_vault, surplus)?;
-    moves::move_lamports(vault, rent_payer, vault_rent)?;
+    moves::move_lamports(vault, fee_vault, vault_surplus)?;
+    moves::move_lamports(campaign, fee_vault, campaign_surplus)?;
+    moves::move_lamports(vault, rent_payer, to_payer)?;
     moves::move_lamports(campaign, rent_payer, campaign_rent)?;
     checks::close_account(vault, program_id)?;
     checks::close_account(campaign, program_id)?;
@@ -89,6 +111,12 @@ pub fn close_campaign(
 /// is still open for any of them is `CampaignNotSettled`; a reserved creator share unpaid is the same
 /// refusal, since its flag stays unset until it is paid (lane C's rule).
 fn require_closable(stored: &Campaign) -> ProgramResult {
+    // A reserved creator share is paid by close only to a creator who is the rent payer (decision of 2026-10-09);
+    // any other reserve blocks close until the creator claims it.
+    checks::require(
+        stored.creator_share_reserved.get() == 0 || stored.creator == stored.rent_payer,
+        BrotError::ReserveNotClaimable,
+    )?;
     let settled = Status::try_from(stored.status)? == Status::Settled;
     let flags =
         stored.fee_collected != 0 && stored.prize_settled != 0 && stored.creator_share_settled != 0;

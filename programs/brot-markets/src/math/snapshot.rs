@@ -146,7 +146,8 @@ pub fn snapshot(input: SnapshotInput) -> Result<Snapshot, BrotError> {
         .yes_total
         .checked_add(input.no_total)
         .ok_or(BrotError::MathOverflow)?;
-    if entries == 0 {
+    // The no-entry rule (answer 8) is for a campaign with no entry at all; a late-only pot follows its verdict.
+    if entries == 0 && late == 0 {
         return Ok(refund_with(
             SettleMode::Refund,
             late,
