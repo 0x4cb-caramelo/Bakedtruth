@@ -2,12 +2,13 @@
 //!          in index order, adds the late amounts (joined at or after the YES proof's publish time) to the entry
 //!          and the campaign, closes each Join with its rent back to the baker, and marks the entry tallied when
 //!          its last join is closed. Lets the snapshot know the late totals before finalize.
-//! Version: 0.0.2
+//! Version: 0.0.3
 //! Sprint: 04 (contract amendment; the body is lane G's)
 //!
 //! Accounts: 0 campaign (writable), 1 entry (writable), 2 baker (writable), 3 event authority, 4 program,
-//! then the Join accounts to close, in index order, at least one. Refused unless the campaign is InReview with
-//! its publish time recorded (`TallyNotReady`); each join must be the next index (`JoinAccountsMismatch`).
+//! then the Join accounts to close, in index order, at least one. Refused unless the campaign is InReview
+//! (`TallyNotReady`), for every outcome. A join is late only on a YES price campaign, at or after the proof's
+//! publish time (`LateRule`); each join must be the next index (`JoinAccountsMismatch`).
 
 use pinocchio::{AccountView, Address, ProgramResult};
 
@@ -15,7 +16,10 @@ use crate::{
     checks,
     error::BrotError,
     events::{self, LateTallied},
-    instructions::entries::{entry_account::load_entry_for_tally, join_tally::tally_join},
+    instructions::entries::{
+        entry_account::load_entry_for_tally,
+        join_tally::{tally_join, LateRule},
+    },
     layout::{LeU32, LeU64},
     state::{campaign::Campaign, enums::Status},
 };
@@ -42,8 +46,12 @@ pub fn tally_late_joins(
     let campaign_key = *campaign.address();
     let baker_key = *baker.address();
     let mut campaign_state = Campaign::load_mut(campaign, program_id)?;
-    let publish_time = campaign_state.publish_time.get();
-    if campaign_state.status != Status::InReview as u8 || publish_time == 0 {
+    let rule = LateRule::of(
+        campaign_state.outcome,
+        campaign_state.kind,
+        campaign_state.publish_time.get(),
+    );
+    if campaign_state.status != Status::InReview as u8 {
         return Err(BrotError::TallyNotReady.into());
     }
     let mut entry_state = load_entry_for_tally(entry, &campaign_key, &baker_key, program_id)?;
@@ -64,7 +72,7 @@ pub fn tally_late_joins(
             &campaign_key,
             &baker_key,
             next,
-            publish_time,
+            rule,
             program_id,
         )?;
         if tallied.late {
