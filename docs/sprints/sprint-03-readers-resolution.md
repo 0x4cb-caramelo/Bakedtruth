@@ -157,6 +157,14 @@ retrospective", at the end of this file, holds the tables (lanes, measurements, 
       Evidence: "Carried over, item by item" in the record below.
 - [ ] Common closure (`docs/SPRINTS.md`, section 4): checks, secrets scan, codemap, changelog and session log, the
       reviews, the pull request. Merge into `main` and the tag are the founder's.
+      Evidence: items 1 to 5 done. The standard checks pass locally on `edc230c` (2026-10-09): `bun run
+      build:program` with no IDL drift, `bun run test` 262 pass, `bun run test:rust` 255, the `mainnet` test 256,
+      `cargo fmt --check`, clippy with `no-entrypoint` and `no-entrypoint,mainnet`, `bunx tsc --noEmit`, `bun run
+      lint`, the app's lint and build, the landing's tests, `codemap.js --check`, `os-self-test` (the three warnings it
+      gives predate this sprint), `npm run test:os`; and in CI, run 37893268607, green. `ci-secret-scan.js
+      origin/main` is clean; `Cargo.lock` holds no `anchor-lang` or `anchor-spl`. CHANGELOG, both session logs, the
+      reviews and PR #40 are below. **Open, and not ours to close:** item 6, the merge into `main` and the `sprint-03`
+      tag.
 
 ## Deliverables
 
@@ -321,7 +329,9 @@ From Sprint 02 and its reviews (`docs/sprints/sprint-02-pot-core.md`, "Reviews";
 **Totals.** Before the Anchor removal (`2cbadb5`): `bun run test:rust` 252 pass; `bun run test` 458 pass (62 of them
 the parity suite, 138 the frozen program's). After it: `bun run test:rust` 252 pass; `bun run test` 258 pass, all for
 the new program; clippy clean with `no-entrypoint`, `no-entrypoint,mainnet` and `no-entrypoint,stake-at-least`; the
-eight filters of this file match passing tests (11, 62 before the removal, 12, 1, 15, 2, 4 and 10).
+eight filters of this file match passing tests (11, 62 before the removal, 12, 1, 15, 2, 4 and 10). After the review
+fixes (`17dcb1c`) and the merge of `main` (`edc230c`): `bun run test` 262 pass, `bun run test:rust` 255, the `mainnet`
+test 256.
 
 ### Measurements
 
