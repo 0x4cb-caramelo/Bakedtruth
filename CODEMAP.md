@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **482** |
+| Arquivos mapeados | **494** |
 | Acima de 200 linhas | **44** ⚠️ |
 | Sem cabeçalho `Purpose:` | **77** ⚠️ |
 
@@ -901,6 +901,28 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`lib.rs`](tests/programs/cpi-proxy/src/lib.rs) | a test-only program that forwards one instruction by CPI, so a test can show that `resolve_campaign` refuses to run below the top level (`checks::top_level`). N | 49 |
+
+## `tests/react-native/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`bundle.mjs`](tests/react-native/bundle.mjs) | one entry bundled as a React Native 0.87.1 Android release build makes it: Metro with `platform android`, `dev false`, `minify false` and the `default` transfor | 78 |
+| [`hermes.mjs`](tests/react-native/hermes.mjs) | the Hermes VM the React Native check runs JavaScript on: Hermes v0.13.0's Linux CLI, the newest Hermes release that publishes a runnable VM, downloaded once, ch | 73 |
+| [`metro.config.cjs`](tests/react-native/metro.config.cjs) | the Metro configuration of the React Native check: React Native 0.87.1's own defaults (`@react-native/metro-config`), so the SDK resolves and transforms as it w | 48 |
+| [`run.mjs`](tests/react-native/run.mjs) | the React Native check, end to end (Sprint 05, proposal section 3.2): bundles `@brot/sdk/read`, `@brot/sdk/tx` and the math-vector replay with Metro for Android | 143 |
+
+## `tests/react-native/entries/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`digest-shim.js`](tests/react-native/entries/digest-shim.js) | a minimal `crypto.subtle.digest("SHA-256")` for the Hermes CLI, which has no `crypto` at all, so the check can show that PDA derivation is the one thing the SDK | 25 |
+| [`outcome.js`](tests/react-native/entries/outcome.js) | an SDK call's result written the way the Rust vector generators print a `Result`: the value through a formatter, or `ERR:<Name>` for a `BrotRefusal`. Anything e | 22 |
+| [`read.js`](tests/react-native/entries/read.js) | the read half under Hermes: every export of `@brot/sdk/read` loaded as an app loads it on first use, the runtime's globals reported, and the config PDA derived  | 37 |
+| [`rows-math.js`](tests/react-native/entries/rows-math.js) | the four kinds of tests/vectors/math-vectors.csv (programs/brot-markets/tests/math_vectors.rs), each row's inputs passed to `@brot/sdk/read`'s math and its resu | 46 |
+| [`rows-snapshot.js`](tests/react-native/entries/rows-snapshot.js) | the four kinds of tests/vectors/snapshot-vectors.csv (programs/brot-markets/tests/ math_vectors_snapshot.rs and vectors_support/): the finalize `snapshot`, one  | 97 |
+| [`tx.js`](tests/react-native/entries/tx.js) | the transaction half under Hermes: every export of `@brot/sdk/tx` loaded as an app loads it on first use; the random campaign id refused with no `crypto.getRand | 33 |
+| [`vector-rows.js`](tests/react-native/entries/vector-rows.js) | replays one line of either Rust vector file through `@brot/sdk/read`'s math: splits it into kind, inputs and expected output, and hands the inputs to the kind's | 31 |
+| [`vectors.js`](tests/react-native/entries/vectors.js) | the entry the Hermes VM runs: every row of the Rust math vectors replayed through the SDK's math (X0.3, the React Native half), with a count per file and per ki | 42 |
 
 ## `tests/sdk/`
 

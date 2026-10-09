@@ -278,3 +278,40 @@ jobs:
 
       - name: Build
         run: bun run build
+
+  # Sprint 05 (proposal section 3.2): the SDK must run inside the Android app. Both halves are bundled
+  # with Metro the way a React Native 0.87.1 release build bundles them, compiled with the hermesc that
+  # version pins, and the Rust math vectors are replayed on a Hermes VM (tests/react-native/run.mjs).
+  # The VM is Hermes v0.13.0's CLI, the newest release with a runnable VM, checked by SHA-256 before it
+  # is extracted (tests/react-native/hermes.mjs); the tools come from that folder's own lockfile.
+  mobile:
+    name: Mobile bundle
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+
+      # Metro 0.87 and React Native 0.87.1's Babel packages need Node ^22.13, ^24.3 or 26+.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24.21.0"
+          cache: npm
+          cache-dependency-path: tests/react-native/package-lock.json
+
+      # The SDK resolves from the root: its workspace link (node_modules/@brot/sdk) and @solana/kit.
+      - name: Install JS dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install the check's tools (Metro, the React Native 0.87.1 Babel preset, hermesc)
+        working-directory: tests/react-native
+        run: npm ci --no-audit --no-fund
+
+      - name: Bundle both SDK halves for Android, compile with hermesc, replay the vectors on Hermes
+        working-directory: tests/react-native
+        run: node run.mjs

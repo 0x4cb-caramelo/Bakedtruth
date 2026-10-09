@@ -1,0 +1,28 @@
+{
+  "name": "brot-sdk-react-native-check",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Bundles @brot/sdk's read and tx halves with Metro for Android, compiles them with the hermesc React Native 0.87.1 ships, and replays the Rust math vectors under a Hermes VM (Sprint 05, proposal section 3.2). Not a workspace member: npm, its own lockfile.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": "^22.13.0 || ^24.3.0 || >= 26.0.0"
+  },
+  "scripts": {
+    "check": "node run.mjs"
+  },
+  "devDependencies": {
+    "@babel/core": "7.29.7",
+    "@react-native/babel-preset": "0.87.1",
+    "@react-native/js-polyfills": "0.87.1",
+    "@react-native/metro-babel-transformer": "0.87.1",
+    "@react-native/metro-config": "0.87.1",
+    "hermes-compiler": "250829098.0.17",
+    "metro": "0.87.1",
+    "metro-config": "0.87.1",
+    "metro-runtime": "0.87.1"
+  },
+  "dependencies": {
+    "@noble/hashes": "2.4.0"
+  }
+}
