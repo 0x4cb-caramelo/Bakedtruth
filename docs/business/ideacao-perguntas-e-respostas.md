@@ -9,6 +9,25 @@ Quando uma resposta posterior muda uma anterior, vale a posterior. A seção 1 t
 
 ## 1. Estado consolidado (vale este)
 
+### Decisões de 9 de outubro de 2026, sobre o Sprint 03 — prevalecem sobre tudo abaixo
+
+Respondidas por Ronaldo, que decide junto com o fundador (as perguntas são as da revisão do Sprint 03; a numeração segue
+essa lista, em que a pergunta 7 aparece como "pergunta 8" nos arquivos do Sprint 03). Registro escrito a partir do
+resumo das respostas, não das palavras exatas dele.
+
+1. **Lista de feeds de preço: fechada, opção C — lista própria da Brot, que começa com a lista oficial da Pyth no primeiro
+   dia (62 feeds na rede principal, 17 na devnet).** Antes, ele perguntou quantos tipos e feeds sobrariam com cada opção
+   (só a Pyth deixaria 1 tipo; hoje há 4 tipos abertos e 5 construídos).
+2. **Abertura cobrada em `p − conf`:** sim.
+3. **Id do feed SOL/USD como constante compilada:** sim.
+4. **Abertura pelo time:** orçamento próprio, **sem limite**, fora de `max_open_campaigns`.
+5. **A campanha guarda a entrada mínima com que foi aberta:** sim (0,01 SOL; faixa do administrador de 0,001 a 1 SOL).
+6. **Chaves do time:** Lucas, Ronaldo e Bernardo (Bernardo Nery, CEO; não programa; vai usar e administrar a plataforma).
+7. **Entrar depois do toque:** sim à recomendação (folga na trava de entrada, mais reembolso das entradas feitas a
+   partir do `publish_time` da prova).
+8. **Campanha sem entradas:** o prêmio volta para quem abriu; a Brot fica com os US$ 50 da abertura.
+9. **Void por `StaleFeed`:** a Brot fica com os US$ 50 (causa externa).
+
 ### Decisões de 8 de outubro de 2026, sobre o BP v0.0.3 — prevalecem sobre tudo abaixo
 
 Dadas em sessão de trabalho com o assistente, em resposta às perguntas sobre o BP v0.0.3 e a proposta de arquitetura.

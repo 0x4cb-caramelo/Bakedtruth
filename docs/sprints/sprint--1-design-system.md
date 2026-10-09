@@ -1,6 +1,6 @@
 # Sprint -1 — Design system, the opening screen and phone layouts
 
-**Status:** in progress (opened 2026-10-08) · **Branch:** `sprint--1-design-system`, stacked on `sprint-02-pot-core` (PR #30, which carries the plan's PR #27) · **Dates:** none, by the founder's decision
+**Status:** in progress (opened 2026-10-08); design approved by Ronaldo on 2026-10-09, port to `app/` next · **Branch:** `sprint--1-design-system`, stacked on `sprint-02-pot-core` (PR #30, which carries the plan's PR #27) · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -193,10 +193,9 @@ between 860 and 1180 px), the mascot's bubble at the window's edge (a definition
 cuts it), a short wallet label on narrow phones, the mock sentences regenerated from the spec's templates, and the
 leaderboard's points as Q7 decided (1 per campaign entered on the right side).
 
-**Open for the founder** (the closure waits on the first three): approving the screens, the creation box and the
-phone layouts; the partner seal's placement (A, a chip, or B, a band; the screens index shows both); the lock notice
-(A, recommended and in the prototype; B and C in the spec); and the questions the lanes and the spec raised, listed in
-the session log of the opening.
+**Approved on 2026-10-09 by Ronaldo, as they stand now:** the redrawn screens, the creation box and the phone layouts;
+the notices P-9 (creator notice, as BP-14 recommends), L-03 (lock notice, option A, the one in the prototype) and L-24
+(partner seal, **chip**, not band). The questions the lanes and the spec raised stay in the session log of the opening.
 
 **Still to do after the approval:** port the tokens, the theme script, the fonts and the primitives into `app/`; record
 the result in `docs/product/DESIGN-DIRECTION.md`; `cd app && bun run lint && bun run build`; the common closure.
