@@ -124,16 +124,23 @@ pub fn fact_resolution(
 }
 
 /// Row 3's minimum distance from `value`: `|value| × bps / 10,000`, rounded up, and at least one
-/// unit, in i128 with checked math.
+/// unit, in i128 with checked math. It divides before it multiplies (`q × bps + ⌈r × bps /
+/// 10,000⌉`, with `|value| = q × 10,000 + r`), so no value an i128 holds overflows for any bps up
+/// to 10,000; only `i128::MIN`, whose size an i128 cannot hold, is `MathOverflow`.
 pub fn min_distance(value: i128, bps: u16) -> Result<i128, ProgramError> {
-    let scaled = value
-        .checked_abs()
-        .and_then(|v| v.checked_mul(i128::from(bps)))
-        .ok_or(BrotError::MathOverflow)?;
+    let size = value.checked_abs().ok_or(BrotError::MathOverflow)?;
     let denominator = i128::from(BPS_DENOMINATOR);
-    let rounded_up = scaled
-        .checked_add(denominator.checked_sub(1).ok_or(BrotError::MathOverflow)?)
+    let bps = i128::from(bps);
+    let whole = size
+        .checked_div(denominator)
+        .and_then(|q| q.checked_mul(bps))
+        .ok_or(BrotError::MathOverflow)?;
+    let part = size
+        .checked_rem(denominator)
+        .and_then(|r| r.checked_mul(bps))
+        .and_then(|v| v.checked_add(denominator.checked_sub(1)?))
         .and_then(|v| v.checked_div(denominator))
         .ok_or(BrotError::MathOverflow)?;
-    Ok(rounded_up.max(1))
+    let distance = whole.checked_add(part).ok_or(BrotError::MathOverflow)?;
+    Ok(distance.max(1))
 }

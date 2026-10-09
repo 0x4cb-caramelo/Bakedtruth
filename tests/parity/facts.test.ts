@@ -37,9 +37,6 @@ const C45: Expected = { original: "accepted", ported: "refused: too close", why:
  *  The port refuses it as `ReaderBadLayout` (spl_mint.rs); pred-provable's `read_mint` read any
  *  non-zero tag as set, and never looked at the freeze tag for this kind. */
 const SPL_TAGS = (original: string): Expected => ({ original, ported: "refused: account", why: "SPL Token tags" });
-/** The Sprint 03 contract refuses a pool target at or below zero as `TargetUnreachable` (error.rs
- *  6076, damm_v2.rs); pred-provable refused a zero threshold as `MetricAlreadyMet`. */
-const ZERO: Expected = { original: "refused: already met", ported: "refused: unreachable", why: "contract, 6076" };
 
 /** A captured account at its own address, under its own owner, its bytes a fresh copy. */
 function captured(name: string): Account {
@@ -114,7 +111,7 @@ const CASES: [Case, Expected][] = [
   [pool("damm-sol-usdc", "target twice the lock, met by a u128::MAX lock", SOL_T, solUsdc, SOL_MAX), BOTH],
   [pool(FT8, "target just above the lock", representable(L + 1n)), C45],
   [pool(FT8, "target under the lock", (L >> 64n) << 64n), refused("already met")],
-  [pool(FT8, "target zero", 0n), ZERO],
+  [pool(FT8, "target zero", 0n), refused("already met")],
   [pool(FT8, "lock 1,000,000, target exactly 1% above", 1_010_000n, withLock(ft8, 1_000_000n)), BOTH],
   [pool(FT8, "lock 1,000,000, target one unit short of 1% above", 1_009_999n, withLock(ft8, 1_000_000n)), C45],
   [pool(FT8, "lock u128::MAX", T, withLock(ft8, MAX_U128)), refused("already met")],

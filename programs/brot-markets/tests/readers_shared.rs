@@ -22,7 +22,7 @@ use readers_support::*;
 
 /// Any account: the table reads only its address, for the reading.
 const METRIC: Address = Address::new_from_array([7; 32]);
-/// `(i128::MAX − 9,999) / 100`: one more and `|value| × 100 + 9,999` passes `i128::MAX`.
+/// `(i128::MAX − 9,999) / 100`: where a multiply-first distance used to overflow.
 const EDGE: i128 = (i128::MAX - 9_999) / 100;
 
 /// `fact_resolution` with the reader's `read`, met when the value is at least 10, the clock at
@@ -119,7 +119,7 @@ fn the_deadline_is_past_only_after_its_own_second() {
 
 #[test]
 fn min_distance_is_the_bps_of_the_value_rounded_up_and_at_least_one_unit() {
-    let rows: [(i128, u16, i128); 15] = [
+    let rows: [(i128, u16, i128); 18] = [
         (0, 100, 1),
         (1, 100, 1),
         (100, 100, 1),
@@ -137,24 +137,32 @@ fn min_distance_is_the_bps_of_the_value_rounded_up_and_at_least_one_unit() {
         (12_345, 10_000, 12_345),
         (10_000, u16::MAX, 65_535),
         (i128::from(u64::MAX), 100, 184_467_440_737_095_517),
+        // Dividing first: the largest sizes compute, rounded up.
+        (
+            i128::MAX,
+            100,
+            1_701_411_834_604_692_317_316_873_037_158_841_058,
+        ),
+        (i128::MAX, 1, 17_014_118_346_046_923_173_168_730_371_588_411),
+        (
+            -i128::MAX,
+            100,
+            1_701_411_834_604_692_317_316_873_037_158_841_058,
+        ),
     ];
     for (value, bps, expected) in rows {
         assert_eq!(min_distance(value, bps), Ok(expected), "{value}, {bps}");
     }
-    // The largest value 100 bps measures.
+    // Where the multiply-first version used to stop, and one past it.
     let edge = Ok(17_014_118_346_046_923_173_168_730_371_588_410);
     assert_eq!(min_distance(EDGE, 100), edge);
+    assert_eq!(min_distance(add(EDGE, 1), 100), edge);
 }
 
 #[test]
 fn min_distance_overflows_into_an_error_never_a_panic() {
-    let rows: [(i128, u16); 5] = [
-        (i128::MIN, 0),
-        (i128::MIN, 100),
-        (i128::MAX, 1),
-        (add(EDGE, 1), 100),
-        (i128::MAX, u16::MAX),
-    ];
+    // Only a size an i128 cannot hold, or a bps far above 10,000 on a huge value, overflows.
+    let rows: [(i128, u16); 3] = [(i128::MIN, 0), (i128::MIN, 100), (i128::MAX, u16::MAX)];
     for (value, bps) in rows {
         assert_eq!(min_distance(value, bps), refused(MathOverflow), "{value}");
     }

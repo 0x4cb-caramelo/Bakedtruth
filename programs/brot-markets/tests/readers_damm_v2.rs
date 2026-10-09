@@ -37,8 +37,8 @@ const SOL_USDC_LOCKED: i128 = 24_632_261_441_830_973_163_426_669_659;
 const SOL_USDC_DISTANCE: i128 = 246_322_614_418_309_731_634_266_697;
 const FT8_LOCKED: i128 = 36_147_769_331_809_244_933_896_548_063;
 const FT8_DISTANCE: i128 = 361_477_693_318_092_449_338_965_481;
-/// The largest lock row 3 can measure: `(i128::MAX − 9,999) / 100`.
-const LARGEST_MEASURABLE: u128 = 1_701_411_834_604_692_317_316_873_037_158_840_957;
+/// `(i128::MAX − 9,999) / 100`, where a multiply-first distance used to overflow.
+const OLD_DISTANCE_EDGE: u128 = 1_701_411_834_604_692_317_316_873_037_158_840_957;
 const OPENED: Result<CreationReading, ProgramError> = Ok(CreationReading { price_exponent: 0 });
 
 fn damm(address: Address, data: &[u8]) -> HostAccount {
@@ -122,9 +122,10 @@ fn rows_2_and_3_in_their_order_on_the_real_pools() {
         assert_eq!(min_distance(locked, MIN_DISTANCE_BPS_DAMM), Ok(distance));
         let opening = |target| open(KIND, &mut damm(address, data), target);
         let rows = [
-            (i128::MIN, refused(TargetUnreachable)),
-            (-1, refused(TargetUnreachable)),
-            (0, refused(TargetUnreachable)),
+            // At or below zero, every pool has met the target.
+            (i128::MIN, refused(TargetAlreadyTouched)),
+            (-1, refused(TargetAlreadyTouched)),
+            (0, refused(TargetAlreadyTouched)),
             (1, refused(TargetAlreadyTouched)),
             (sub(locked, 1), refused(TargetAlreadyTouched)),
             (locked, refused(TargetAlreadyTouched)),
@@ -143,15 +144,17 @@ fn rows_2_and_3_in_their_order_on_the_real_pools() {
 
 #[test]
 fn row_3_at_the_smallest_and_largest_locks() {
-    let beyond = LARGEST_MEASURABLE.checked_add(1).unwrap();
-    let rows: [(u128, i128, Result<CreationReading, ProgramError>); 7] = [
-        (0, 0, refused(TargetUnreachable)),
+    let beyond = OLD_DISTANCE_EDGE.checked_add(1).unwrap();
+    let rows: [(u128, i128, Result<CreationReading, ProgramError>); 8] = [
+        // A target at or below zero is met by every pool.
+        (0, 0, refused(TargetAlreadyTouched)),
+        (0, -1, refused(TargetAlreadyTouched)),
         (0, 1, OPENED),
         (1_000_000, 1_009_999, refused(TargetTooClose)),
         (1_000_000, 1_010_000, OPENED),
-        (LARGEST_MEASURABLE, i128::MAX, OPENED),
-        // Past it the distance overflows: a refusal, never a panic, and never a wrong opening.
-        (beyond, i128::MAX, refused(MathOverflow)),
+        (OLD_DISTANCE_EDGE, i128::MAX, OPENED),
+        // Past it the distance still computes (it divides first): the opening is judged, not refused.
+        (beyond, i128::MAX, OPENED),
         (u128::MAX, i128::MAX, refused(TargetAlreadyTouched)),
     ];
     for (locked, target, expected) in rows {

@@ -16,8 +16,8 @@
 //! the kind as `DammV2LockedAtLeast { shift }`, and the zod sketch in TP Appendix B has no shift.
 //! The campaign names the pool alone (`pool` in that sketch), so the original's check that a
 //! target mint is one of the pool's two mints has nothing to compare. A target at or below zero
-//! is `TargetUnreachable` (the original refused a zero threshold as `MetricAlreadyMet`); row 3's
-//! minimum distance is new (C45); after the deadline the pool is read again, so a late lock sets
+//! is already met, as the original said (`MetricAlreadyMet`); row 3's minimum distance is new
+//! (C45); after the deadline the pool is read again, so a late lock sets
 //! `met_late` and an unreadable pool voids, where the original recorded NO (TP section 3.4.6).
 
 use pinocchio::{error::ProgramError, AccountView, Address};
@@ -70,17 +70,13 @@ pub fn locked_liquidity(account: &AccountView) -> Result<i128, ProgramError> {
 
 /// Rows 2 and 3 for this kind, checked in this order, each with its own error:
 /// 1. the account is a DAMM v2 pool (`ReaderWrongOwner`, then `ReaderBadLayout`);
-/// 2. the target is above zero (`TargetUnreachable`): every pool has locked at least nothing;
-/// 3. the locked liquidity is still below the target (`TargetAlreadyTouched`);
-/// 4. the target is at least `min_distance(locked, MIN_DISTANCE_BPS_DAMM)` above it
+/// 2. the locked liquidity is still below the target (`TargetAlreadyTouched`; a target at or
+///    below zero is met by every pool, which has locked at least nothing);
+/// 3. the target is at least `min_distance(locked, MIN_DISTANCE_BPS_DAMM)` above it
 ///    (`TargetTooClose`): with 1,000,000 locked, a target of 1,010,000 opens and 1,009,999 does
-///    not. Above about 1.7e36 locked (`(i128::MAX − 9,999) / 100`) that distance overflows and the
-///    opening is refused with `MathOverflow`; the largest captured pool locks 3.6e28.
+///    not. The distance never overflows (it divides first); the largest captured pool locks 3.6e28.
 pub fn validate_at_creation(ctx: &CreationContext) -> Result<CreationReading, ProgramError> {
     let locked = locked_liquidity(ctx.metric)?;
-    if ctx.target <= 0 {
-        return Err(BrotError::TargetUnreachable.into());
-    }
     if locked >= ctx.target {
         return Err(BrotError::TargetAlreadyTouched.into());
     }

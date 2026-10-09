@@ -176,7 +176,7 @@ describe("readers match fixtures: what rows 2 and 3 refuse on the captured accou
     const [damm, flipped] = [P.DAMM_V2_PROGRAM_ID, Uint8Array.from(bytes, (b, i) => (i === 0 ? b ^ 1 : b))];
     // The targets first, on the pool as captured; then the broken pools, each written over it.
     const rows: Row[] = [
-      ["a target of zero", pool, 0n, "TargetUnreachable"],
+      ["a target of zero, met by every pool", pool, 0n, "TargetAlreadyTouched"],
       ["a target at the lock", pool, lock, "TargetAlreadyTouched"],
       ["one unit short of 1% above", pool, target - 1n, "TargetTooClose"],
       ["exactly 1% above", pool, target, null],
