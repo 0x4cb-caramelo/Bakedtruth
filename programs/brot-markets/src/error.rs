@@ -259,6 +259,14 @@ pub enum BrotError {
     EntryNotOnCampaign = 6113,
     #[error("The entry's joins are not all tallied yet: the late totals are not known")]
     NotTallied = 6114,
+    #[error(
+        "The campaign has no YES proof publish time, so its late entries cannot be told apart"
+    )]
+    NoProofTime = 6115,
+    #[error("The campaign is not InReview, so it cannot be finalized")]
+    CampaignNotInReview = 6116,
+    #[error("The review window has not ended yet")]
+    ReviewNotEnded = 6117,
     // Lane D (numbers from 6121).
     #[error("The campaign's fee, prize and creator share are not all settled")]
     CampaignNotSettled = 6121,

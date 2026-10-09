@@ -3,9 +3,11 @@
 //! Version: 0.0.1
 //! Sprint: 04 (contract freeze: stubs; bodies by lanes C and D)
 
+pub mod bookkeeping;
 pub mod close_campaign;
 pub mod collect_fee;
 pub mod finalize_campaign;
+pub mod rules;
 pub mod settle_creator_share;
 pub mod settle_entry;
 pub mod settle_prize;
