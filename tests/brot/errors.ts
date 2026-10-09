@@ -2,7 +2,7 @@
  * Purpose: the program's custom error codes by name, so tests assert the exact refusal (X0.7).
  *          Mirrors programs/brot-markets/src/error.rs; a code appended there is appended here.
  * Version: 0.0.2
- * Sprint:  02 (pot core on Pinocchio); 6071 to 6090 in 03
+ * Sprint:  02 (pot core on Pinocchio); 6071 to 6090 in 03, 6091 to 6146 in 04 (contract freeze)
  */
 export const BrotError = {
   MathOverflow: 6000,
@@ -106,6 +106,33 @@ export const BrotError = {
   SolUsdWrongFeed: 6089,
   CreationParamsChanged: 6090,
   // New codes are appended here, numbered from 6091, as in error.rs.
+  // Sprint 04 contract freeze: lanes A to H, from 6091 (error.rs)
+  TeamKeyOutsideReview: 6091,
+  OutsideReviewWindow: 6092,
+  AutomaticVoidNotInvertible: 6093,
+  VoidReasonNotForTeam: 6094,
+  ContestOutsideReview: 6095,
+  ContestExitDisabled: 6096,
+  InvariantViolated: 6101,
+  SnapshotInconsistent: 6102,
+  NotFinalized: 6106,
+  AlreadySettled: 6107,
+  WrongBaker: 6108,
+  CreatorShareNotDue: 6109,
+  WrongCreator: 6110,
+  ReserveNotClaimable: 6111,
+  PayoutExceedsSnapshot: 6112,
+  EntryNotOnCampaign: 6113,
+  CampaignNotSettled: 6121,
+  FeeRecipientIsFeeVault: 6122,
+  NothingToSweep: 6123,
+  AlreadyClosed: 6124,
+  FeeAlreadyCollected: 6125,
+  PrizeAlreadySettled: 6126,
+  JoinBufferRefused: 6131,
+  BelowCampaignMinEntry: 6132,
+  FeedNotOnList: 6141,
+  IllegalTransition: 6146,
 } as const;
 
 export type BrotErrorName = keyof typeof BrotError;

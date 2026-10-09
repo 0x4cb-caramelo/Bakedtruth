@@ -1663,6 +1663,408 @@
       }
     },
     {
+      "name": "CampaignFinalized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "settleMode",
+            "type": {
+              "defined": "SettleMode"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "winningTotal",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "losingTotal",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "refundedLate",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "feeTotal",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "fromPot",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "fromFee",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "distributable",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignClosed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "rentPayer",
+            "type": "publicKey"
+          },
+          {
+            "name": "rentReturned",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "surplusSwept",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "EntrySettled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "baker",
+            "type": "publicKey"
+          },
+          {
+            "name": "amount",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "settleMode",
+            "type": {
+              "defined": "SettleMode"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreatorShareSettled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "creator",
+            "type": "publicKey"
+          },
+          {
+            "name": "amount",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "fromPot",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "fromFee",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "FeeCollected",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "amount",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingFeeKept",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "PrizeSettled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "recipient",
+            "type": "publicKey"
+          },
+          {
+            "name": "prizeReturned",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "openingFeeReturned",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "FeesSwept",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "signer",
+            "type": "publicKey"
+          },
+          {
+            "name": "feeRecipient",
+            "type": "publicKey"
+          },
+          {
+            "name": "amount",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "ResultConfirmed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "signer",
+            "type": "publicKey"
+          },
+          {
+            "name": "outcome",
+            "type": {
+              "defined": "Outcome"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignVoided",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "signer",
+            "type": "publicKey"
+          },
+          {
+            "name": "voidReason",
+            "type": {
+              "defined": "VoidReason"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "noteHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ContestOpened",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "signer",
+            "type": "publicKey"
+          },
+          {
+            "name": "contestStage",
+            "type": {
+              "defined": "ContestStage"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "contestEndsAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "InitializeConfigArgs",
       "type": {
         "kind": "struct",
@@ -2588,6 +2990,136 @@
       "code": 6090,
       "name": "CreationParamsChanged",
       "msg": "The creation parameters changed since the client read them (`expected_params_version`)"
+    },
+    {
+      "code": 6091,
+      "name": "TeamKeyOutsideReview",
+      "msg": "The team key acts only while the campaign is InReview"
+    },
+    {
+      "code": 6092,
+      "name": "OutsideReviewWindow",
+      "msg": "The review window is closed, or the act is outside it"
+    },
+    {
+      "code": 6093,
+      "name": "AutomaticVoidNotInvertible",
+      "msg": "A team key may confirm an automatic void, never turn it into YES or NO"
+    },
+    {
+      "code": 6094,
+      "name": "VoidReasonNotForTeam",
+      "msg": "A team key cannot void with this reason"
+    },
+    {
+      "code": 6095,
+      "name": "ContestOutsideReview",
+      "msg": "A contest opens only inside the review window"
+    },
+    {
+      "code": 6096,
+      "name": "ContestExitDisabled",
+      "msg": "Nothing leaves `Contested` before Sprint 14"
+    },
+    {
+      "code": 6101,
+      "name": "InvariantViolated",
+      "msg": "A money invariant (I1 to I15) does not hold"
+    },
+    {
+      "code": 6102,
+      "name": "SnapshotInconsistent",
+      "msg": "The snapshot's totals disagree with each other"
+    },
+    {
+      "code": 6106,
+      "name": "NotFinalized",
+      "msg": "The campaign is not finalized yet"
+    },
+    {
+      "code": 6107,
+      "name": "AlreadySettled",
+      "msg": "This payout was already made"
+    },
+    {
+      "code": 6108,
+      "name": "WrongBaker",
+      "msg": "The entry's stored baker is not the recipient"
+    },
+    {
+      "code": 6109,
+      "name": "CreatorShareNotDue",
+      "msg": "No creator share is due: team, one-sided, void or refund"
+    },
+    {
+      "code": 6110,
+      "name": "WrongCreator",
+      "msg": "The recipient is not the stored creator"
+    },
+    {
+      "code": 6111,
+      "name": "ReserveNotClaimable",
+      "msg": "The wallet is still below its rent-exempt minimum; the reserved credit cannot be claimed yet"
+    },
+    {
+      "code": 6112,
+      "name": "PayoutExceedsSnapshot",
+      "msg": "A payout would exceed the snapshot's distributable amount"
+    },
+    {
+      "code": 6113,
+      "name": "EntryNotOnCampaign",
+      "msg": "The entry belongs to another campaign"
+    },
+    {
+      "code": 6121,
+      "name": "CampaignNotSettled",
+      "msg": "The campaign's fee, prize and creator share are not all settled"
+    },
+    {
+      "code": 6122,
+      "name": "FeeRecipientIsFeeVault",
+      "msg": "The fee recipient is the fee vault itself"
+    },
+    {
+      "code": 6123,
+      "name": "NothingToSweep",
+      "msg": "The fee vault holds nothing above its rent-exempt minimum"
+    },
+    {
+      "code": 6124,
+      "name": "AlreadyClosed",
+      "msg": "The campaign is already closed"
+    },
+    {
+      "code": 6125,
+      "name": "FeeAlreadyCollected",
+      "msg": "The opening fee and the held 10% were already collected"
+    },
+    {
+      "code": 6126,
+      "name": "PrizeAlreadySettled",
+      "msg": "The prize was already returned to the opener"
+    },
+    {
+      "code": 6131,
+      "name": "JoinBufferRefused",
+      "msg": "The sponsored price is within the join margin of the target"
+    },
+    {
+      "code": 6132,
+      "name": "BelowCampaignMinEntry",
+      "msg": "The entry is below the minimum this campaign opened with"
+    },
+    {
+      "code": 6141,
+      "name": "FeedNotOnList",
+      "msg": "The price feed is not on the compiled feed list"
+    },
+    {
+      "code": 6146,
+      "name": "IllegalTransition",
+      "msg": "The transition is not in the table of TP 3.4.2"
     }
   ],
   "metadata": {

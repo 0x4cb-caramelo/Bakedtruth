@@ -90,5 +90,11 @@ impl Event for EntriesResumed {
 // signed by the event authority) and the handler of `EVENT_IX_TAG` in `events/self_cpi.rs`.
 mod campaign;
 pub use campaign::{CampaignOpened, CampaignResolved, EntryAdded};
+mod finalize;
+pub use finalize::{CampaignClosed, CampaignFinalized};
+mod payout;
+pub use payout::{CreatorShareSettled, EntrySettled, FeeCollected, FeesSwept, PrizeSettled};
+mod review;
+pub use review::{CampaignVoided, ContestOpened, ResultConfirmed};
 mod self_cpi;
 pub use self_cpi::{emit, event_data, process_event_instruction, EVENT_BUFFER_LEN};
