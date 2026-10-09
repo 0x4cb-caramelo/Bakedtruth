@@ -163,7 +163,7 @@ describe("readers match fixtures: a StakePoolTvlAtLeast opening on the JitoSOL b
     expect(readCampaign(opened.w, opened.campaign)).toMatchObject({ kind: 3, metric_account: pool, epoch: E });
     expectError((await open({ target: nearest - 1n })).sent, "TargetTooClose");
     expectError((await open({ target: HIGH })).sent, "TargetAlreadyTouched");
-    expectError((await open({ target: 0n })).sent, "TargetUnreachable");
+    expectError((await open({ target: 0n })).sent, "TargetAlreadyTouched");
   });
   test("refuses a started epoch, one that may start after the deadline, and a stopped pool", async () => {
     expectError((await open({ epoch: UPDATED })).sent, "EpochAlreadyStarted");

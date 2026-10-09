@@ -99,12 +99,13 @@ fn opens_one_minimum_distance_above_the_stake_now() {
     same(open(nearest), Ok(Default::default()));
     same(open(below), refused(TargetTooClose));
     same(open(current), refused(TargetAlreadyTouched));
-    same(open(0), refused(TargetUnreachable));
-    same(open(-1), refused(TargetUnreachable));
+    // At or below zero, any vote account has met the target.
+    same(open(0), refused(TargetAlreadyTouched));
+    same(open(-1), refused(TargetAlreadyTouched));
     // No stake at all: the nearest target is one lamport.
     set_host_epoch_stake(&VOTE_ACCOUNT, 0);
     same(open(1), Ok(Default::default()));
-    same(open(0), refused(TargetUnreachable));
+    same(open(0), refused(TargetAlreadyTouched));
 }
 
 #[test]

@@ -134,8 +134,9 @@ fn opens_one_minimum_distance_above_the_higher_total_of_both_pools() {
         // Between the two totals: met by the higher one.
         let between = i128::from(total.min(snapshot)).checked_add(1).unwrap();
         same(open(between), refused(TargetAlreadyTouched));
-        same(open(0), refused(TargetUnreachable));
-        same(open(-1), refused(TargetUnreachable));
+        // At or below zero, any pool has met the target.
+        same(open(0), refused(TargetAlreadyTouched));
+        same(open(-1), refused(TargetAlreadyTouched));
     }
 }
 

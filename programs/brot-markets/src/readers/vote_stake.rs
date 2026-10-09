@@ -126,9 +126,6 @@ pub fn validate_at_creation(ctx: &CreationContext) -> Result<CreationReading, Pr
     read_vote_account(ctx.metric)?;
     epoch::check_epoch_for_opening(ctx)?;
     let current = i128::from(epoch_stake(ctx.metric));
-    if ctx.target <= 0 {
-        return Err(BrotError::TargetUnreachable.into());
-    }
     if ctx.target <= current {
         return Err(BrotError::TargetAlreadyTouched.into());
     }

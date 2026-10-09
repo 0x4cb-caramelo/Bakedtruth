@@ -128,9 +128,6 @@ pub fn validate_at_creation(ctx: &CreationContext) -> Result<CreationReading, Pr
     if pool.last_update_epoch.saturating_add(1) < ctx.time.epoch {
         return Err(BrotError::StakePoolNotUpdating.into());
     }
-    if ctx.target <= 0 {
-        return Err(BrotError::TargetUnreachable.into());
-    }
     // A target between the two totals is met by the higher one, which is what the snapshot
     // holds if no deposit or withdrawal lands before the epoch.
     let current = i128::from(pool.total_lamports.max(pool.last_epoch_total_lamports));
