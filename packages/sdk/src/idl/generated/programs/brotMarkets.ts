@@ -61,6 +61,7 @@ import {
   getSettleEntryInstruction,
   getSettlePrizeInstruction,
   getSweepFeesInstruction,
+  getTallyLateJoinsInstruction,
   getTeamConfirmResultInstruction,
   getTeamOpenContestInstruction,
   getTeamPauseEntriesInstruction,
@@ -82,6 +83,7 @@ import {
   parseSettleEntryInstruction,
   parseSettlePrizeInstruction,
   parseSweepFeesInstruction,
+  parseTallyLateJoinsInstruction,
   parseTeamConfirmResultInstruction,
   parseTeamOpenContestInstruction,
   parseTeamPauseEntriesInstruction,
@@ -113,6 +115,7 @@ import {
   type ParsedSettleEntryInstruction,
   type ParsedSettlePrizeInstruction,
   type ParsedSweepFeesInstruction,
+  type ParsedTallyLateJoinsInstruction,
   type ParsedTeamConfirmResultInstruction,
   type ParsedTeamOpenContestInstruction,
   type ParsedTeamPauseEntriesInstruction,
@@ -124,6 +127,7 @@ import {
   type SettleEntryInput,
   type SettlePrizeInput,
   type SweepFeesInput,
+  type TallyLateJoinsInput,
   type TeamConfirmResultInput,
   type TeamOpenContestInput,
   type TeamPauseEntriesInput,
@@ -164,6 +168,7 @@ export enum BrotMarketsInstruction {
   SettlePrize,
   CloseCampaign,
   SweepFees,
+  TallyLateJoins,
 }
 
 export function identifyBrotMarketsInstruction(
@@ -233,6 +238,9 @@ export function identifyBrotMarketsInstruction(
   if (containsBytes(data, getU8Encoder().encode(20), 0)) {
     return BrotMarketsInstruction.SweepFees;
   }
+  if (containsBytes(data, getU8Encoder().encode(21), 0)) {
+    return BrotMarketsInstruction.TallyLateJoins;
+  }
   throw new SolanaError(SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION, {
     instructionData: data,
     programName: "brotMarkets",
@@ -264,7 +272,8 @@ export type ParsedBrotMarketsInstruction<TProgram extends string = "6G2d7Cv66MR1
   | ({ instructionType: BrotMarketsInstruction.CollectFee } & ParsedCollectFeeInstruction<TProgram>)
   | ({ instructionType: BrotMarketsInstruction.SettlePrize } & ParsedSettlePrizeInstruction<TProgram>)
   | ({ instructionType: BrotMarketsInstruction.CloseCampaign } & ParsedCloseCampaignInstruction<TProgram>)
-  | ({ instructionType: BrotMarketsInstruction.SweepFees } & ParsedSweepFeesInstruction<TProgram>);
+  | ({ instructionType: BrotMarketsInstruction.SweepFees } & ParsedSweepFeesInstruction<TProgram>)
+  | ({ instructionType: BrotMarketsInstruction.TallyLateJoins } & ParsedTallyLateJoinsInstruction<TProgram>);
 
 export function parseBrotMarketsInstruction<TProgram extends string>(
   instruction: Instruction<TProgram> & InstructionWithData<ReadonlyUint8Array>,
@@ -400,6 +409,10 @@ export function parseBrotMarketsInstruction<TProgram extends string>(
       assertIsInstructionWithAccounts(instruction);
       return { instructionType: BrotMarketsInstruction.SweepFees, ...parseSweepFeesInstruction(instruction) };
     }
+    case BrotMarketsInstruction.TallyLateJoins: {
+      assertIsInstructionWithAccounts(instruction);
+      return { instructionType: BrotMarketsInstruction.TallyLateJoins, ...parseTallyLateJoinsInstruction(instruction) };
+    }
     default:
       throw new SolanaError(SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE, {
         instructionType: instructionType as string,
@@ -476,6 +489,9 @@ export type BrotMarketsPluginInstructions = {
     input: CloseCampaignInput,
   ) => ReturnType<typeof getCloseCampaignInstruction> & SelfPlanAndSendFunctions;
   sweepFees: (input: SweepFeesInput) => ReturnType<typeof getSweepFeesInstruction> & SelfPlanAndSendFunctions;
+  tallyLateJoins: (
+    input: TallyLateJoinsInput,
+  ) => ReturnType<typeof getTallyLateJoinsInstruction> & SelfPlanAndSendFunctions;
 };
 
 export type BrotMarketsPluginRequirements = ClientWithRpc<GetAccountInfoApi & GetMultipleAccountsApi> &
@@ -519,6 +535,7 @@ export function brotMarketsProgram() {
           settlePrize: (input) => addSelfPlanAndSendFunctions(client, getSettlePrizeInstruction(input)),
           closeCampaign: (input) => addSelfPlanAndSendFunctions(client, getCloseCampaignInstruction(input)),
           sweepFees: (input) => addSelfPlanAndSendFunctions(client, getSweepFeesInstruction(input)),
+          tallyLateJoins: (input) => addSelfPlanAndSendFunctions(client, getTallyLateJoinsInstruction(input)),
         },
         identifyInstruction: identifyBrotMarketsInstruction,
         parseInstruction: parseBrotMarketsInstruction,

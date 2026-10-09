@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **344** |
+| Arquivos mapeados | **346** |
 | Acima de 200 linhas | **33** ⚠️ |
 | Sem cabeçalho `Purpose:` | **78** ⚠️ |
 
@@ -24,8 +24,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `app/lib/market.ts` — 211 linhas
 - `app/lib/mascot/engine.ts` — 302 linhas
 - `app/lib/metric.ts` — 691 linhas
-- `programs/brot-markets/src/error.rs` — 300 linhas
-- `programs/brot-markets/src/instructions/interface.rs` — 204 linhas
+- `programs/brot-markets/src/error.rs` — 302 linhas
+- `programs/brot-markets/src/instructions/interface.rs` — 216 linhas
 - `programs/brot-markets/tests/price_stale_feed.rs` — 201 linhas
 - `prototype-lab/prototype-b/view.js` — 265 linhas
 - `prototype-lab/prototype-e/view.js` — 258 linhas
@@ -46,8 +46,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `scripts/sync-selfhosted.js` — 349 linhas
 - `scripts/test/hooks.test.js` — 278 linhas
 - `scripts/tokenomics-model.ts` — 584 linhas
-- `tests/brot/codama-spike.test.ts` — 208 linhas
-- `tests/brot/idl.test.ts` — 223 linhas
+- `tests/brot/codama-spike.test.ts` — 219 linhas
+- `tests/brot/idl.test.ts` — 231 linhas
 - `tests/brot/setup.ts` — 201 linhas
 
 ---
@@ -173,9 +173,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`checks.rs`](programs/brot-markets/src/checks.rs) | every account check Anchor used to make, written by hand in one place (TP 3.4.17), each with its own error and a negative test that fails without it (T24, X0.9) | 172 |
 | [`constants.rs`](programs/brot-markets/src/constants.rs) | seeds, program ids, code ceilings and the duration and window constants compiled into the program, with the devnet-only drill values behind the `drill` feature | 177 |
-| [`entrypoint.rs`](programs/brot-markets/src/entrypoint.rs) | the instruction dispatcher: the first byte of the instruction data picks the handler, the rest is that handler's arguments | 78 |
-| [`error.rs`](programs/brot-markets/src/error.rs) | every refusal the program can return, one code per cause, as custom program errors | 300 |
+| [`entrypoint.rs`](programs/brot-markets/src/entrypoint.rs) | the instruction dispatcher: the first byte of the instruction data picks the handler, the rest is that handler's arguments | 81 |
+| [`error.rs`](programs/brot-markets/src/error.rs) | every refusal the program can return, one code per cause, as custom program errors | 302 |
 | [`events.rs`](programs/brot-markets/src/events.rs) | the events, one per instruction, and how they leave the program: a self-CPI signed by the event-authority PDA, so they survive log truncation (T4) | 101 |
+| [`feeds.rs`](programs/brot-markets/src/feeds.rs) | the compiled list of Pyth feeds a price campaign may name (founder answer 1, 2026-10-09; TP 3.4.1, 3.4.10). One list per cluster, chosen by the `mainnet` featur | 147 |
 | [`layout.rs`](programs/brot-markets/src/layout.rs) | zero-copy byte layouts shared by accounts, instruction arguments and events: the little-endian field types and the one place where bytes become a typed view | 126 |
 | [`lib.rs`](programs/brot-markets/src/lib.rs) | the Brot Markets program on Pinocchio: On-Chain Campaigns paid in SOL; declares the program id and wires the modules and the entrypoint | 27 |
 | [`vault.rs`](programs/brot-markets/src/vault.rs) | the lamport vault of a campaign: SOL arriving from a signer's wallet by System Program transfer, signed by that wallet (TP section 3.4.4) | 33 |
@@ -194,7 +195,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`campaign.rs`](programs/brot-markets/src/events/campaign.rs) | the events of a campaign's life, each carrying the campaign and its contiguous `seq` (X0.4): opened, an entry added, resolved | 148 |
-| [`finalize.rs`](programs/brot-markets/src/events/finalize.rs) | the events that fix the money and end the campaign: the snapshot (`CampaignFinalized`) and the close (`CampaignClosed`). Both carry the campaign and `seq` | 63 |
+| [`finalize.rs`](programs/brot-markets/src/events/finalize.rs) | the events that fix the money and end the campaign: the snapshot (`CampaignFinalized`) and the close (`CampaignClosed`). Both carry the campaign and `seq` | 88 |
 | [`payout.rs`](programs/brot-markets/src/events/payout.rs) | the events of the money leaving the program (TP section 3.4.14): an entry paid, the creator share, the fee collected, the prize returned, and the fee vault swep | 107 |
 | [`review.rs`](programs/brot-markets/src/events/review.rs) | the events of the review window and the team's acts (TP section 3.4.14): the result confirmed, the campaign voided, a contest opened. Each carries the campaign  | 68 |
 | [`self_cpi.rs`](programs/brot-markets/src/events/self_cpi.rs) | how an event leaves the program: `emit` sends it to this program by self-CPI, signed by the event-authority PDA, and the event handler accepts only that signatu | 92 |
@@ -203,8 +204,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`interface.rs`](programs/brot-markets/src/instructions/interface.rs) | the program's interface for the Shank IDL (T9): the `BrotInstruction` enum, with each instruction's accounts in order and its arguments | 204 |
-| [`mod.rs`](programs/brot-markets/src/instructions/mod.rs) | the program's interface: every instruction with its discriminator, its accounts in order and its arguments, for the dispatcher and for the Shank IDL (T9) | 66 |
+| [`interface.rs`](programs/brot-markets/src/instructions/interface.rs) | the program's interface for the Shank IDL (T9): the `BrotInstruction` enum, with each instruction's accounts in order and its arguments | 216 |
+| [`mod.rs`](programs/brot-markets/src/instructions/mod.rs) | the program's interface: every instruction with its discriminator, its accounts in order and its arguments, for the dispatcher and for the Shank IDL (T9) | 67 |
 
 ## `programs/brot-markets/src/instructions/admin/`
 
@@ -242,7 +243,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`entry_account.rs`](programs/brot-markets/src/instructions/entries/entry_account.rs) | the baker's `Entry` at a join: created at its canonical PDA on the first join, rent paid by the baker, and checked against the campaign, the baker and the total | 72 |
-| [`join_campaign.rs`](programs/brot-markets/src/instructions/entries/join_campaign.rs) | `user_join_campaign`: a baker joins YES or NO with at least `min_entry_lamports` while the outcome is not knowable; the entry moves from the baker's wallet into | 197 |
+| [`join_campaign.rs`](programs/brot-markets/src/instructions/entries/join_campaign.rs) | `user_join_campaign`: a baker joins YES or NO with at least `min_entry_lamports` while the outcome is not knowable; the entry moves from the baker's wallet into | 198 |
 | [`join_lock.rs`](programs/brot-markets/src/instructions/entries/join_lock.rs) | the join lock (BR-06): a join is refused once the campaign's reader says the outcome is knowable (`OutcomeKnowable`), and with the reader's own error when it ca | 43 |
 | [`mod.rs`](programs/brot-markets/src/instructions/entries/mod.rs) | entries: a baker joins a campaign with SOL (TP section 3.4.3) until the outcome is knowable (the join lock, BR-06) | 9 |
 
@@ -269,7 +270,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`close_campaign.rs`](programs/brot-markets/src/instructions/settlement/close_campaign.rs) | `close_campaign`: moves dust and surplus to the fee vault, returns the rent to rent_payer, zeroes the data and gives both accounts back to the System Program (T | 19 |
 | [`collect_fee.rs`](programs/brot-markets/src/instructions/settlement/collect_fee.rs) | `collect_fee`: moves what Brot keeps to the fee vault: the house fee net of from_fee, the one-sided fees, the opening fee unless refunded (TP 3.4.16) | 19 |
 | [`finalize_campaign.rs`](programs/brot-markets/src/instructions/settlement/finalize_campaign.rs) | `finalize_campaign`: the snapshot of a reviewed campaign: the totals, the mode, the creator share; open_campaigns down for a paid campaign (TP 3.4.3, I7) | 19 |
-| [`mod.rs`](programs/brot-markets/src/instructions/settlement/mod.rs) | the instructions that settle a campaign after its outcome: the snapshot, the payouts to people and Brot's fee, the prize, the close and the sweep (TP section 3. | 13 |
+| [`mod.rs`](programs/brot-markets/src/instructions/settlement/mod.rs) | the instructions that settle a campaign after its outcome: the snapshot, the payouts to people and Brot's fee, the prize, the close and the sweep (TP section 3. | 14 |
 | [`settle_creator_share.rs`](programs/brot-markets/src/instructions/settlement/settle_creator_share.rs) | `settle_creator_share`: pays the creator's share once, to the stored creator only (TP 3.4.16, I13) | 19 |
 | [`settle_entry.rs`](programs/brot-markets/src/instructions/settlement/settle_entry.rs) | `settle_entry`: pays one entry from the vault to its stored baker and closes the Entry, its rent back to the baker (TP 3.4.5) | 19 |
 | [`settle_prize.rs`](programs/brot-markets/src/instructions/settlement/settle_prize.rs) | `settle_prize`: returns the prize to whoever opened in OneSided and Refund, and the opening fee on a house-failure void (P-4) | 19 |
@@ -315,9 +316,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`campaign.rs`](programs/brot-markets/src/state/campaign.rs) | `Campaign` (`["campaign", id]`): everything about one campaign, and the loaders that check it. Its vault (`["vault", campaign]`) is data-less and its bump lives | 166 |
+| [`campaign.rs`](programs/brot-markets/src/state/campaign.rs) | `Campaign` (`["campaign", id]`): everything about one campaign, and the loaders that check it. Its vault (`["vault", campaign]`) is data-less and its bump lives | 178 |
 | [`config.rs`](programs/brot-markets/src/state/config.rs) | `GlobalConfig` (`["config"]`): roles, the pause, the creation parameters, the fee recipient and the open-campaign counter; and the creation parameters' own layo | 193 |
-| [`entry.rs`](programs/brot-markets/src/state/entry.rs) | `Entry` (`["entry", campaign, baker]`): one baker's entry in one campaign, both sides, created on the baker's first join and closed by `settle_entry` (Sprint 04 | 71 |
+| [`entry.rs`](programs/brot-markets/src/state/entry.rs) | `Entry` (`["entry", campaign, baker]`): one baker's entry in one campaign, both sides, created on the baker's first join and closed by `settle_entry` (Sprint 04 | 80 |
 | [`enums.rs`](programs/brot-markets/src/state/enums.rs) | the one-byte enums stored in accounts and passed in instruction data, with their checked conversion from a raw byte | 162 |
 | [`join.rs`](programs/brot-markets/src/state/join.rs) | `Join` (`["join", campaign, baker, index]`): one join of one baker in one campaign. One account per join, so the late-entry refund is exact with no cap on joins | 46 |
 | [`mod.rs`](programs/brot-markets/src/state/mod.rs) | the accounts the program owns: their type tags, layout version and the one loader that runs the owner, length, tag and PDA checks before any field is read | 106 |
@@ -342,7 +343,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`config_params.rs`](programs/brot-markets/tests/config_params.rs) | the floors and ceilings of the creation parameters (TP section 3.4.1, C43): the founder's values pass, every bound passes, and one step past a bound fails with  | 192 |
 | [`cursor.rs`](programs/brot-markets/tests/cursor.rs) | the bounds-checked cursor on its own. Readers of variable layouts lean on it, so "an error, never a panic" is proved here and not through one reader's fixed siz | 69 |
 | [`event_cpi.rs`](programs/brot-markets/tests/event_cpi.rs) | the self-CPI events on the host (T4): the instruction data `emit` sends for each of the six events, and the handler that accepts only the event authority, signi | 82 |
-| [`join_layout.rs`](programs/brot-markets/tests/join_layout.rs) | the layout of the per-join account and the fields the join and the refund read from `Entry` and `Campaign` (founder decision, 2026-10-09: one `Join` per join, n | 31 |
+| [`feeds_list.rs`](programs/brot-markets/tests/feeds_list.rs) | the compiled feed list (`feeds::require_listed`): the SOL/USD and BTC/USD feeds are listed on this cluster, the feed ids are the ones the captured mainnet and d | 41 |
+| [`join_layout.rs`](programs/brot-markets/tests/join_layout.rs) | the layout of the per-join account and the fields the join and the refund read from `Entry` and `Campaign` (founder decision, 2026-10-09: one `Join` per join, n | 34 |
 | [`layout.rs`](programs/brot-markets/tests/layout.rs) | pins the program's frozen interface: account and argument sizes, event sizes, the event authority, the discriminators and the enum bytes. A change here is a cha | 123 |
 | [`math_estimate_properties.rs`](programs/brot-markets/tests/math_estimate_properties.rs) | the join's return estimate over random pots: in `Split` it is the settlement's own payout in bps and never below 10,000; in a one-sided pot it is the refund, wi | 100 |
 | [`math_fees.rs`](programs/brot-markets/tests/math_fees.rs) | the fee functions and the rounding helpers under them on the host: the TP's worked examples, the 100% ceiling, and the tight round-up over random amounts and ra | 102 |
@@ -669,19 +671,19 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`admin-pause.test.ts`](tests/brot/admin-pause.test.ts) | I10′, first half (TP section 3.4.9): with the pause on, only `user_join_campaign` and `user_open_campaign` fail; every other instruction of Sprint 02 still runs | 52 |
 | [`admin-refusals.test.ts`](tests/brot/admin-refusals.test.ts) | every refusal of the admin and team instructions with its exact error (X0.7): a signer without the role, the team rules, the zero keys, each creation parameter  | 147 |
 | [`admin.test.ts`](tests/brot/admin.test.ts) | the admin and team instructions on their success paths, each with its event decoded from the transaction (TP sections 3.4.3 and 3.4.14), and the two-step admin  | 160 |
-| [`campaigns.ts`](tests/brot/campaigns.ts) | a `Campaign` of any kind and its vault written straight into the world, so the tests of resolution and of the join lock do not depend on the opening's rules for | 175 |
+| [`campaigns.ts`](tests/brot/campaigns.ts) | a `Campaign` of any kind and its vault written straight into the world, so the tests of resolution and of the join lock do not depend on the opening's rules for | 185 |
 | [`checks-init.test.ts`](tests/brot/checks-init.test.ts) | the checks negatives in LiteSVM through `admin_initialize_config`: non-canonical bumps, a look-alike System Program, the upgrade authority, a second initialisat | 121 |
 | [`checks-support.ts`](tests/brot/checks-support.ts) | helpers of the checks negatives in LiteSVM: rewrite or place one account (owner, bytes, lamports), a PDA at a bump below the canonical one, another program's Pr | 99 |
 | [`checks.test.ts`](tests/brot/checks.test.ts) | the checks negatives in LiteSVM through `admin_set_team` and `user_join_campaign`: the config under another owner, unsigned and read-only slots, a wrong tag or  | 113 |
-| [`codama-spike.test.ts`](tests/brot/codama-spike.test.ts) | the Codama spike (T9): the Kit client rendered from the Shank IDL (packages/sdk/src/idl/generated) against the hand-written kit. Without the program: every inst | 208 |
-| [`errors.ts`](tests/brot/errors.ts) | the program's custom error codes by name, so tests assert the exact refusal (X0.7). Mirrors programs/brot-markets/src/error.rs; a code appended there is appende | 140 |
+| [`codama-spike.test.ts`](tests/brot/codama-spike.test.ts) | the Codama spike (T9): the Kit client rendered from the Shank IDL (packages/sdk/src/idl/generated) against the hand-written kit. Without the program: every inst | 219 |
+| [`errors.ts`](tests/brot/errors.ts) | the program's custom error codes by name, so tests assert the exact refusal (X0.7). Mirrors programs/brot-markets/src/error.rs; a code appended there is appende | 141 |
 | [`events.test.ts`](tests/brot/events.test.ts) | the events round-trip (T4, X0.4): every instruction of Sprint 02 emits exactly one event by self-CPI, decoded from its inner instruction; campaign events carry  | 199 |
 | [`events.ts`](tests/brot/events.ts) | the program's events as layouts: an inner instruction to the program whose data is [0xFF, discriminator, payload], signed by the event authority (T4). Mirrors e | 102 |
 | [`flows.ts`](tests/brot/flows.ts) | the common paths every test file starts from: a config initialised with the founder's values, a team, a paid or free price campaign opened on BTC/USD, an entry | 110 |
-| [`idl.test.ts`](tests/brot/idl.test.ts) | the drift check (X0.6): the hand-written test kit (struct layouts, events, instruction builders, error codes) against the Shank IDL that `bun run idl` writes fr | 223 |
+| [`idl.test.ts`](tests/brot/idl.test.ts) | the drift check (X0.6): the hand-written test kit (struct layouts, events, instruction builders, error codes) against the Shank IDL that `bun run idl` writes fr | 231 |
 | [`idl.ts`](tests/brot/idl.ts) | the Shank IDL (packages/sdk/src/idl/brot_markets.json) in the test kit's terms: struct fields as layouts.ts types, enums as one byte, names as Shank writes them | 127 |
-| [`instructions-settlement.ts`](tests/brot/instructions-settlement.ts) | builders for the ten instructions of Sprint 04, with the accounts in the frozen order of programs/brot-markets/src/instructions/interface.rs. The bodies are lan | 70 |
-| [`instructions.ts`](tests/brot/instructions.ts) | builders for every instruction of the program, with the accounts in the frozen order of programs/brot-markets/src/instructions/mod.rs, and helpers that tamper w | 153 |
+| [`instructions-settlement.ts`](tests/brot/instructions-settlement.ts) | builders for the ten instructions of Sprint 04, with the accounts in the frozen order of programs/brot-markets/src/instructions/interface.rs. The bodies are lan | 81 |
+| [`instructions.ts`](tests/brot/instructions.ts) | builders for every instruction of the program, with the accounts in the frozen order of programs/brot-markets/src/instructions/mod.rs, and helpers that tamper w | 166 |
 | [`join-campaign-adds.test.ts`](tests/brot/join-campaign-adds.test.ts) | what a join writes: the Entry created on the first join with the baker's rent, the first baker, later joins of the same wallet on either side (Q3), the bookkept | 146 |
 | [`join-campaign-estimate.test.ts`](tests/brot/join-campaign-estimate.test.ts) | pins the join tests' copy of the money math to the worked examples of TP section 3.4.16, so a failing join test points at the program and not at its expectation | 41 |
 | [`join-campaign-lock.test.ts`](tests/brot/join-campaign-lock.test.ts) | the join lock (BR-06): once the reader of the campaign's kind knows the outcome, a join is refused with `OutcomeKnowable` and nothing moves; one step short of i | 165 |
@@ -691,7 +693,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`join-campaign-slots.test.ts`](tests/brot/join-campaign-slots.test.ts) | the slot checks of `user_join_campaign` in the order of checks.rs, each with its own error: signer and writable flags, the three pairs that must differ, the Sys | 69 |
 | [`join-campaign-support.ts`](tests/brot/join-campaign-support.ts) | what the join tests share: a world with a paid price campaign, its sponsored price kept fresh across clock moves, a refused join that moves nothing, SOL sent by | 200 |
 | [`join-campaign-wallets.test.ts`](tests/brot/join-campaign-wallets.test.ts) | two wallets: A cannot change, close or redirect B's Entry, whichever slot of a join it puts that Entry in, and cannot join as B without B's signature (A-1) | 58 |
-| [`kit.test.ts`](tests/brot/kit.test.ts) | checks the test kit itself, without the program binary: addresses, layout sizes against the Rust structs, the codec, and the instruction shapes of the frozen co | 96 |
+| [`kit.test.ts`](tests/brot/kit.test.ts) | checks the test kit itself, without the program binary: addresses, layout sizes against the Rust structs, the codec, and the instruction shapes of the frozen co | 97 |
 | [`layouts.ts`](tests/brot/layouts.ts) | the byte layouts of the program's accounts, instruction arguments and events, field by field in the order of the Rust structs, with one encoder and one decoder  | 133 |
 | [`money-model.ts`](tests/brot/money-model.ts) | a reference model of the money, written apart from the program's math (TP 3.4.16): the randomized test checks the program against it, so it must not reuse the R | 64 |
 | [`open-campaign-kinds.test.ts`](tests/brot/open-campaign-kinds.test.ts) | `user_open_campaign` for the four kinds other than the price kind (TP section 3.4.10): row 1 (`StakeAtLeast` closed in this build), the canonical arguments (D-j | 192 |
@@ -704,7 +706,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`opening.ts`](tests/brot/opening.ts) | what the opening's LiteSVM tests share: a world with the founder's config, one team key and a funded creator; the default opening's arguments, and the canonical | 92 |
 | [`price-proof.test.ts`](tests/brot/price-proof.test.ts) | the price kind's YES proof window in LiteSVM (TP sections 3.4.6 and 3.4.8; Q4; D7): a touch proven from any address resolves YES inside `[opens_at, deadline]` w | 143 |
 | [`price-support.ts`](tests/brot/price-support.ts) | what the price kind's LiteSVM tests share: a captured update's fields read from its bytes, a fresh address holding a price update (the YES proof slot accepts an | 53 |
-| [`program.ts`](tests/brot/program.ts) | the program's addresses for the LiteSVM tests: ids, seeds, discriminators, PDAs and the known outside accounts (Pyth, the loader). Mirrors programs/brot-markets | 121 |
+| [`program.ts`](tests/brot/program.ts) | the program's addresses for the LiteSVM tests: ids, seeds, discriminators, PDAs and the known outside accounts (Pyth, the loader). Mirrors programs/brot-markets | 128 |
 | [`readers-epoch.test.ts`](tests/brot/readers-epoch.test.ts) | the two epoch kinds through the program in LiteSVM, on the captured JitoSOL pool and mainnet vote account: the stake pool opening at its edges, resolution with  | 194 |
 | [`readers-facts.test.ts`](tests/brot/readers-facts.test.ts) | the two fact readers in the program, on the mainnet accounts of tests/fixtures: a team key opens `SupplyAtMost` and `DammV2LockedAtLeast` campaigns on the real  | 199 |
 | [`readers-price.test.ts`](tests/brot/readers-price.test.ts) | the price reader on the captured mainnet accounts in LiteSVM (TP section 3.4.8): an opening checked and priced on them as captured, a campaign left on them void | 93 |
@@ -713,7 +715,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`resolve-refuses.test.ts`](tests/brot/resolve-refuses.test.ts) | what `resolve_campaign` refuses, each with its exact error and nothing written: a call forwarded by another program (`checks::top_level`, `bun test tests/ -t "r | 143 |
 | [`resolve-support.ts`](tests/brot/resolve-support.ts) | what the resolution tests share: a world at a mainnet-like slot and epoch, a campaign of each kind written into it with its metric account (a synthetic mint, th | 195 |
 | [`setup.ts`](tests/brot/setup.ts) | a LiteSVM world for the program's tests: the binary loaded, the clock set next to the captured Pyth prices, the upgrade authority recorded, funded wallets, and  | 201 |
-| [`structs.ts`](tests/brot/structs.ts) | the program's structs as layouts: accounts (GlobalConfig, Campaign, Entry), instruction arguments and events, each in the field order of its Rust struct | 163 |
+| [`structs.ts`](tests/brot/structs.ts) | the program's structs as layouts: accounts (GlobalConfig, Campaign, Entry), instruction arguments and events, each in the field order of its Rust struct | 170 |
 
 ## `tests/programs/cpi-proxy/src/`
 

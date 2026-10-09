@@ -33,11 +33,20 @@ pub struct Entry {
     /// decision, 2026-10-09: one account per join, no cap).
     #[idl_type("u32")]
     pub join_count: LeU32,
+    /// How many of those joins `tally_late_joins` has read and closed; the entry is tallied when all are.
+    #[idl_type("u32")]
+    pub joins_tallied: LeU32,
+    /// This baker's late amounts on each side (joined at or after the proof's publish time), summed by
+    /// `tally_late_joins`. They come back whole, so the payout works from `amount − late`.
+    #[idl_type("u64")]
+    pub late_yes: LeU64,
+    #[idl_type("u64")]
+    pub late_no: LeU64,
     #[padding]
-    pub _reserved: [u8; 12],
+    pub _reserved: [u8; 8],
 }
 
-zero_copy!(Entry = 100);
+zero_copy!(Entry = 116);
 
 impl AccountState for Entry {
     const TAG: AccountTag = AccountTag::Entry;

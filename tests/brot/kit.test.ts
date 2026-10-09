@@ -5,7 +5,7 @@
  * Sprint:  02 (pot core on Pinocchio); the Sprint 03 sizes and `resolve_campaign`
  */
 import { describe, expect, test } from "bun:test";
-import { generateKeyPairSigner } from "@solana/kit";
+import { AccountRole, generateKeyPairSigner } from "@solana/kit";
 
 import { openingLamports, DEFAULT_PARAMS } from "./flows";
 import * as I from "./instructions";
@@ -26,7 +26,7 @@ describe("test kit", () => {
   test("layouts have the sizes of the Rust structs (programs/brot-markets/tests/layout.rs)", () => {
     expect(layoutSize(S.GLOBAL_CONFIG)).toBe(400);
     expect(layoutSize(S.CAMPAIGN)).toBe(512);
-    expect(layoutSize(S.ENTRY)).toBe(100);
+    expect(layoutSize(S.ENTRY)).toBe(116);
     expect(layoutSize(S.CREATION_PARAMS)).toBe(70);
     expect(layoutSize(S.INITIALIZE_CONFIG_ARGS)).toBe(134);
     expect(layoutSize(S.SET_TEAM_ARGS)).toBe(161);
@@ -85,9 +85,10 @@ describe("test kit", () => {
     expect([open.accounts?.length, open.data?.length, open.data?.[0]]).toEqual([9, 95, P.IX.USER_OPEN_CAMPAIGN]);
     expect(open.accounts?.[4].address).toBe(P.BTC_USD_ACCOUNT);
     const joinIx = await I.joinCampaignIx(who, P.SOL_USD_ACCOUNT, P.BTC_USD_ACCOUNT, { side: 0, amount: 1n });
-    expect([joinIx.accounts?.length, joinIx.data?.length]).toEqual([9, 22]);
-    expect(joinIx.accounts?.[7].address).toBe(P.EVENT_AUTHORITY);
-    expect(joinIx.accounts?.[8].address).toBe(P.PROGRAM_ID);
+    expect([joinIx.accounts?.length, joinIx.data?.length]).toEqual([10, 22]);
+    expect(joinIx.accounts?.[6].role).toBe(AccountRole.WRITABLE);
+    expect(joinIx.accounts?.[8].address).toBe(P.EVENT_AUTHORITY);
+    expect(joinIx.accounts?.[9].address).toBe(P.PROGRAM_ID);
     const resolveIx = I.resolveCampaignIx(P.SOL_USD_ACCOUNT, P.BTC_USD_ACCOUNT);
     expect([resolveIx.accounts?.length, resolveIx.data?.length, resolveIx.data?.[0]]).toEqual([5, 1, 10]);
     expect(resolveIx.accounts?.[2].address).toBe(P.BTC_USD_ACCOUNT);

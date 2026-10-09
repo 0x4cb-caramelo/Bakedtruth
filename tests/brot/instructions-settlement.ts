@@ -67,3 +67,14 @@ export function closeCampaignIx(campaign: Address, vault: Address, rentPayer: Ad
 export function sweepFeesIx(config: Address, feeVault: Address, feeRecipient: Address): Instruction {
   return ix([ro(config), rw(feeVault), rw(feeRecipient), ...eventSlots()], data(P.IX.SWEEP_FEES));
 }
+
+/**
+ * Lane G (amendment 2026-10-09): reads and closes a baker's Join accounts, in index order, after the five
+ * listed slots. At least one join per call.
+ */
+export function tallyLateJoinsIx(baker: Address, campaign: Address, entry: Address, joins: Address[]): Instruction {
+  return ix(
+    [rw(campaign), rw(entry), rw(baker), ...eventSlots(), ...joins.map((j) => rw(j))],
+    data(P.IX.TALLY_LATE_JOINS),
+  );
+}

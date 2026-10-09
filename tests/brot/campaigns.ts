@@ -77,6 +77,10 @@ export async function injectCampaign(client: Pick<Client, "svm">, c: InjectedCam
     pool_no: c.poolNo ?? 0n,
     epoch: c.epoch ?? 0n,
     min_entry_lamports: 0n,
+    publish_time: 0n,
+    late_yes: 0n,
+    late_no: 0n,
+    entries_untallied: 0,
     ...c.extra,
   });
   const write = (at: Address, bytes: Uint8Array, extraLamports = 0n) =>
@@ -144,6 +148,9 @@ export async function injectEntry(
     amountNo?: bigint;
     isFirst?: boolean;
     joinCount?: number;
+    joinsTallied?: number;
+    lateYes?: bigint;
+    lateNo?: bigint;
   },
 ) {
   const [entry, bump] = await getProgramDerivedAddress({
@@ -160,7 +167,10 @@ export async function injectEntry(
     amount_yes: e.amountYes ?? 0n,
     amount_no: e.amountNo ?? 0n,
     join_count: e.joinCount ?? 0,
-    _reserved: new Uint8Array(12),
+    joins_tallied: e.joinsTallied ?? 0,
+    late_yes: e.lateYes ?? 0n,
+    late_no: e.lateNo ?? 0n,
+    _reserved: new Uint8Array(8),
   });
   client.svm.setAccount({
     address: entry,

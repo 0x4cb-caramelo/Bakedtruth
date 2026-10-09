@@ -123,6 +123,7 @@ export const BrotError = {
   ReserveNotClaimable: 6111,
   PayoutExceedsSnapshot: 6112,
   EntryNotOnCampaign: 6113,
+  NotTallied: 6114,
   CampaignNotSettled: 6121,
   FeeRecipientIsFeeVault: 6122,
   NothingToSweep: 6123,

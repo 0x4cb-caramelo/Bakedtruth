@@ -35,9 +35,9 @@ describe("join refuses", () => {
       [3, { address: campaign }, "DuplicateAccount"],
       [4, { address: vault }, "DuplicateAccount"],
       [4, { address: campaign }, "DuplicateAccount"],
-      [6, { address: P.PROGRAM_ID }, "WrongSystemProgram"],
-      [7, { address: stranger.address }, "WrongEventAuthority"],
-      [8, { address: P.SYSTEM_PROGRAM_ID }, "WrongProgramAccount"],
+      [7, { address: P.PROGRAM_ID }, "WrongSystemProgram"],
+      [8, { address: stranger.address }, "WrongEventAuthority"],
+      [9, { address: P.SYSTEM_PROGRAM_ID }, "WrongProgramAccount"],
       [1, { address: stranger.address }, "WrongOwner"],
       [3, { address: otherVault }, "PdaMismatch"],
     ];

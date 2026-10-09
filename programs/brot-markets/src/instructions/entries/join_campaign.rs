@@ -67,7 +67,8 @@ pub fn user_join_campaign(
     data: &[u8],
 ) -> ProgramResult {
     let args = args::<JoinCampaignArgs>(data)?;
-    let [baker, config, campaign, vault, entry, metric_account, system_program, event_authority, program, ..] =
+    // The Join account sits at slot 6 (amendment 2026-10-09); lane G writes it. Until then it is only passed.
+    let [baker, config, campaign, vault, entry, metric_account, _join, system_program, event_authority, program, ..] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);

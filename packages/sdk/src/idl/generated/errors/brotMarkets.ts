@@ -228,6 +228,8 @@ export const BROT_MARKETS_ERROR__RESERVE_NOT_CLAIMABLE = 0x17df; // 6111
 export const BROT_MARKETS_ERROR__PAYOUT_EXCEEDS_SNAPSHOT = 0x17e0; // 6112
 /** EntryNotOnCampaign: The entry belongs to another campaign */
 export const BROT_MARKETS_ERROR__ENTRY_NOT_ON_CAMPAIGN = 0x17e1; // 6113
+/** NotTallied: The entry's joins are not all tallied yet: the late totals are not known */
+export const BROT_MARKETS_ERROR__NOT_TALLIED = 0x17e2; // 6114
 /** CampaignNotSettled: The campaign's fee, prize and creator share are not all settled */
 export const BROT_MARKETS_ERROR__CAMPAIGN_NOT_SETTLED = 0x17e9; // 6121
 /** FeeRecipientIsFeeVault: The fee recipient is the fee vault itself */
@@ -306,6 +308,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__NOT_PAUSED
   | typeof BROT_MARKETS_ERROR__NOT_PENDING_ADMIN
   | typeof BROT_MARKETS_ERROR__NOT_RESOLVABLE_YET
+  | typeof BROT_MARKETS_ERROR__NOT_TALLIED
   | typeof BROT_MARKETS_ERROR__NOT_TEAM_MEMBER
   | typeof BROT_MARKETS_ERROR__NOT_WRITABLE
   | typeof BROT_MARKETS_ERROR__ONE_SIDED_FEE_BPS_ABOVE_CEILING
@@ -428,6 +431,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__NOT_PAUSED]: `Entries are not paused`,
     [BROT_MARKETS_ERROR__NOT_PENDING_ADMIN]: `The signer is not the admin named by the pending transfer`,
     [BROT_MARKETS_ERROR__NOT_RESOLVABLE_YET]: `Nothing can be recorded yet: no YES is proven and the deadline's window is open`,
+    [BROT_MARKETS_ERROR__NOT_TALLIED]: `The entry's joins are not all tallied yet: the late totals are not known`,
     [BROT_MARKETS_ERROR__NOT_TEAM_MEMBER]: `The signer is not one of the config's team keys`,
     [BROT_MARKETS_ERROR__NOT_WRITABLE]: `A slot that must be writable was passed read-only`,
     [BROT_MARKETS_ERROR__ONE_SIDED_FEE_BPS_ABOVE_CEILING]: `\`one_sided_fee_bps\` is above its ceiling`,

@@ -19,12 +19,15 @@ fn the_join_account_is_96_bytes_and_tagged_five() {
 
 #[test]
 fn the_entry_keeps_its_size_and_counts_its_joins_in_the_reserve() {
-    assert_eq!(Entry::LEN, 100);
+    assert_eq!(Entry::LEN, 116);
     assert_eq!(core::mem::offset_of!(Entry, join_count), 84);
+    assert_eq!(core::mem::offset_of!(Entry, late_yes), 92);
 }
 
 #[test]
 fn the_campaign_keeps_its_size_and_carries_its_minimum_entry() {
     assert_eq!(Campaign::LEN, 512);
     assert_eq!(core::mem::offset_of!(Campaign, min_entry_lamports), 456);
+    assert_eq!(core::mem::offset_of!(Campaign, publish_time), 464);
+    assert_eq!(core::mem::offset_of!(Campaign, entries_untallied), 488);
 }

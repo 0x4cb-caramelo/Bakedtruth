@@ -91,7 +91,7 @@ impl Event for EntriesResumed {
 mod campaign;
 pub use campaign::{CampaignOpened, CampaignResolved, EntryAdded};
 mod finalize;
-pub use finalize::{CampaignClosed, CampaignFinalized};
+pub use finalize::{CampaignClosed, CampaignFinalized, LateTallied};
 mod payout;
 pub use payout::{CreatorShareSettled, EntrySettled, FeeCollected, FeesSwept, PrizeSettled};
 mod review;

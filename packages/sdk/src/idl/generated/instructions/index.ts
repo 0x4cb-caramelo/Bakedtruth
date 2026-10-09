@@ -21,6 +21,7 @@ export * from "./settleCreatorShare";
 export * from "./settleEntry";
 export * from "./settlePrize";
 export * from "./sweepFees";
+export * from "./tallyLateJoins";
 export * from "./teamConfirmResult";
 export * from "./teamOpenContest";
 export * from "./teamPauseEntries";

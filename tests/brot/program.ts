@@ -70,6 +70,7 @@ export const IX = {
   SETTLE_PRIZE: 18,
   CLOSE_CAMPAIGN: 19,
   SWEEP_FEES: 20,
+  TALLY_LATE_JOINS: 21,
   EMIT_EVENT: 0xff,
 } as const;
 
@@ -113,6 +114,12 @@ export const feeVaultPda = () => pda([text("fee_vault")]);
 export const campaignPda = (id: bigint) => pda([text("campaign"), u64le(id)]);
 export const vaultPda = (campaign: Address) => pda([text("vault"), key(campaign)]);
 export const entryPda = (campaign: Address, baker: Address) => pda([text("entry"), key(campaign), key(baker)]);
+/** `["join", campaign, baker, index]`, the index as a little-endian u32 (amendment 2026-10-09). */
+export const joinPda = (campaign: Address, baker: Address, index: number) => {
+  const b = new Uint8Array(4);
+  new DataView(b.buffer).setUint32(0, index, true);
+  return pda([text("join"), key(campaign), key(baker), b]);
+};
 export const eventAuthorityPda = () => pda([text("__event_authority")]);
 /** The program's ProgramData account under the upgradeable loader. */
 export const programDataPda = () => pda([key(PROGRAM_ID)], LOADER_V3_ID);
