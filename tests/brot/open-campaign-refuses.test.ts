@@ -1,28 +1,23 @@
 /**
- * Purpose: `user_open_campaign` refuses rows 1 to 6 and 9 of TP section 3.4.10, each with its own
- *          error (X0.7): the kind, the direction, the metric account, the price and its target, the
- *          duration, and arguments that could carry a fee, a share or text. Payment, pause and
- *          slots are in the sibling files with the same describe name.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio), lane D. Runs after the SBF build (Wave 2).
+ * Purpose: `user_open_campaign` refuses rows 1 to 6 and 9 of TP section 3.4.10 for the price kind,
+ *          each with its own error (X0.7): the kind, the direction, the metric account, the price
+ *          and its target, the duration, arguments that could carry a fee, a share or text, and
+ *          parameters changed since the creator's preview. Payment, pause, slots and the other four
+ *          kinds are in the sibling files with the same describe name.
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio), lane D; 03 (row 3's minimum distance, the terms the creator
+ *          saw), lane F. Runs after the SBF build.
  */
 import { describe, expect, test } from "bun:test";
 import { address, type Instruction } from "@solana/kit";
 
-import { BTC_PRICE, DEFAULT_PARAMS, openedCampaign, readCampaign, SOL_PRICE } from "./flows";
+import { BTC_PRICE, DEFAULT_PARAMS, openedCampaign, readCampaign, readConfig, SOL_PRICE } from "./flows";
 import * as I from "./instructions";
 import { BTC_CONF, FRESH, openingWorld, STALE, tryOpen } from "./opening";
 import * as P from "./program";
 import { expectError, expectOk, now, send, setPriceAccount } from "./setup";
 
 describe("open campaign refuses", () => {
-  test("row 1: the four other kinds, StakeAtLeast included, do not open yet", async () => {
-    const w = await openingWorld();
-    for (const kind of [1, 2, 3, 4]) {
-      expectError((await tryOpen(w, w.creator, { kind })).sent, "ReaderKindNotOpen");
-    }
-  });
-
   test("row 1: a kind byte that names no reader", async () => {
     const w = await openingWorld();
     for (const kind of [5, 255]) {
@@ -80,9 +75,11 @@ describe("open campaign refuses", () => {
     expectError(await open(Above, BTC_PRICE + BTC_CONF), "TargetAlreadyTouched");
     expectError(await open(Below, BTC_PRICE - BTC_CONF), "TargetAlreadyTouched");
     expectError(await open(Above, BTC_PRICE / 2n), "TargetAlreadyTouched");
-    // One unit past the confidence band opens, in either direction.
-    expectOk(await open(Above, BTC_PRICE + BTC_CONF + 1n));
-    expectOk(await open(Below, BTC_PRICE - BTC_CONF - 1n));
+    // One unit past the confidence band is too close (1%, Sprint 03); 2% of the price past it opens.
+    expectError(await open(Above, BTC_PRICE + BTC_CONF + 1n), "TargetTooClose");
+    expectError(await open(Below, BTC_PRICE - BTC_CONF - 1n), "TargetTooClose");
+    expectOk(await open(Above, BTC_PRICE + BTC_CONF + BTC_PRICE / 50n));
+    expectOk(await open(Below, BTC_PRICE - BTC_CONF - BTC_PRICE / 50n));
   });
 
   test("row 5: 3 days − 1 s, 90 days + 1 s and a deadline in the past", async () => {
@@ -98,10 +95,32 @@ describe("open campaign refuses", () => {
     const first = await openedCampaign(w, w.creator);
     const changed = { ...DEFAULT_PARAMS, fee_bps: 500, one_sided_fee_bps: 50, creator_share_bps: 40 };
     expectOk(await send(w, [await I.setCreationParamsIx(w.admin, changed)]));
-    const second = await openedCampaign(w, w.creator);
+    const second = await openedCampaign(w, w.creator, { expectedParamsVersion: 1 });
     const copies = (c: Record<string, unknown>) => [c.fee_bps, c.one_sided_fee_bps, c.creator_share_bps];
     expect(copies(readCampaign(w, first.campaign))).toEqual([1_000, 100, 100]);
     expect(copies(readCampaign(w, second.campaign))).toEqual([500, 50, 40]);
+  });
+
+  test("the terms the creator saw: parameters changed since the preview, after row 8 and before row 5", async () => {
+    const w = await openingWorld();
+    const changed = { ...DEFAULT_PARAMS, creator_share_bps: 40 };
+    expectOk(await send(w, [await I.setCreationParamsIx(w.admin, changed)]));
+    expect((await readConfig(w)).params_version).toBe(1);
+    // An older or a newer version, and a team key's free opening, signed against version 0.
+    for (const expectedParamsVersion of [0, 2]) {
+      expectError((await tryOpen(w, w.creator, { expectedParamsVersion })).sent, "CreationParamsChanged");
+    }
+    expectError((await tryOpen(w, w.team, { openingUsd: 0n })).sent, "CreationParamsChanged");
+    // Before row 5: a deadline one day away, under the old version, is refused for the version.
+    const short = { expectedParamsVersion: 0, deadlineAt: now(w.client) + P.DAY };
+    expectError((await tryOpen(w, w.creator, short)).sent, "CreationParamsChanged");
+    // After row 8: the pause is named first.
+    expectOk(await send(w, [await I.pauseEntriesIx(w.team)]));
+    expectError((await tryOpen(w, w.creator)).sent, "OpenWhilePaused");
+    expectOk(await send(w, [await I.resumeEntriesIx(w.admin)]));
+    const opened = await tryOpen(w, w.creator, { expectedParamsVersion: 1 });
+    expectOk(opened.sent);
+    expect(readCampaign(w, opened.campaign).creator_share_bps).toBe(40);
   });
 
   test("rows 6 and 9: an argument with an extra or a missing byte", async () => {

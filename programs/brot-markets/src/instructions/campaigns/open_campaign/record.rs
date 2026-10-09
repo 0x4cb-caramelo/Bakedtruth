@@ -1,16 +1,18 @@
-//! Purpose: steps 9 and 10 of `user_open_campaign`: every field an opening writes into the new
+//! Purpose: the end of `user_open_campaign`: every field an opening writes into the new
 //!          `Campaign`, and the `CampaignOpened` event built from what was stored, so the event
 //!          and the account can never disagree.
-//! Version: 0.0.3
-//! Sprint: 02 (pot core on Pinocchio), lane D; the epoch in 03
+//! Version: 0.0.4
+//! Sprint: 02 (pot core on Pinocchio), lane D; 03 (the epoch, the price-only fields zero for the
+//!         other kinds, and the event moved here from the handler), lane F
 
-use pinocchio::Address;
+use pinocchio::{AccountView, Address, ProgramResult};
 
 use super::{payment::Payment, OpenCampaignArgs};
 use crate::{
     constants::CAMPAIGN_TEMPLATE_VERSION,
-    events::CampaignOpened,
-    layout::{LeI32, LeI64, LeU16, LeU64},
+    error::BrotError,
+    events::{self, CampaignOpened},
+    layout::{LeI32, LeI64, LeU16, LeU32, LeU64},
     state::{
         campaign::Campaign,
         config::CreationParams,
@@ -58,12 +60,20 @@ pub fn write(c: &mut Campaign, o: &Opening) {
     };
     c.fee_bps = o.params.fee_bps;
     c.one_sided_fee_bps = o.params.one_sided_fee_bps;
+    // The feed and the direction are zero (`Above`) for the other kinds: `rules` refused any
+    // other value (D-j), so they are copied as passed.
     c.feed_id = o.args.feed_id;
     c.metric_account = *o.metric_account;
     c.target = o.args.target;
-    c.price_exponent = LeI32::new(o.price_exponent);
-    // The join-time price age: the config's, never the creator's (TP section 3.4.8).
-    c.max_age = o.params.campaign_max_age;
+    // Price kind only, zero for the other kinds: the exponent the reader saw, and the join-time
+    // price age, the config's and never the creator's (TP section 3.4.8).
+    let is_price = o.kind == ReaderKind::PriceTouch;
+    c.price_exponent = LeI32::new(if is_price { o.price_exponent } else { 0 });
+    c.max_age = if is_price {
+        o.params.campaign_max_age
+    } else {
+        LeU32::new(0)
+    };
     c.opens_at = LeI64::new(o.now);
     c.entries_close_at = LeI64::new(o.entries_close_at);
     c.deadline_at = o.args.deadline_at;
@@ -74,7 +84,31 @@ pub fn write(c: &mut Campaign, o: &Opening) {
     c.opening_price_publish_time = LeI64::new(o.payment.publish_time);
     c.prize_lamports = LeU64::new(o.payment.prize);
     c.opening_fee_lamports = LeU64::new(o.payment.fee);
+    // Epoch kinds only; zero for the others, as `rules` required.
     c.epoch = o.args.epoch;
+}
+
+/// Emits `CampaignOpened` with `seq` 0 (X0.4), then moves the campaign's sequence number on to 1.
+pub fn announce(
+    campaign: &Address,
+    opened: &mut Campaign,
+    event_authority: &AccountView,
+    program: &AccountView,
+    program_id: &Address,
+) -> ProgramResult {
+    events::emit(
+        &opened_event(campaign, opened),
+        event_authority,
+        program,
+        program_id,
+    )?;
+    let next_seq = opened
+        .event_seq
+        .get()
+        .checked_add(1)
+        .ok_or(BrotError::MathOverflow)?;
+    opened.event_seq.set(next_seq);
+    Ok(())
 }
 
 /// `CampaignOpened` for `campaign`, read back from the stored fields, with `seq` the campaign's
