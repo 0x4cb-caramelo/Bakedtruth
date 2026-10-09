@@ -7,7 +7,8 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { OpenCampaignInput, ReaderKind, toOpenArgs } from "@brot/sdk/read";
+import { ReaderKind } from "@brot/sdk/read";
+import { OpenCampaignInput, toOpenArgs } from "@brot/sdk/schemas";
 
 import * as P from "../brot/program";
 import { bytesToHex } from "@brot/sdk/read";

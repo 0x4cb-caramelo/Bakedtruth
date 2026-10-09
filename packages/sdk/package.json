@@ -10,6 +10,7 @@
     ".": "./src/read/index.ts",
     "./read": "./src/read/index.ts",
     "./tx": "./src/tx/index.ts",
+    "./schemas": "./src/schemas/index.ts",
     "./idl": "./src/idl/brot_markets.json",
     "./package.json": "./package.json"
   },

@@ -6,6 +6,10 @@
  * Version: 0.1.0
  * Sprint:  05 (SDK); the read API's schemas join in Sprint 08
  *
+ * Its own entry point, `@brot/sdk/schemas`, so `read` and `tx` stay free of zod: zod 4's ESM build uses
+ * `export * as`, which React Native 0.87.1's Babel preset does not transform (Expo's preset does, through
+ * `@babel/plugin-transform-export-namespace-from`; knowledge-base/tecnologia/sdk-react-native.md).
+ *
  * Departs from the sketch in one place, as the program does: every kind passes `deadlineAt`, the epoch
  * kinds too (row 5 holds for every kind; Sprint 03). Amounts and ids are decimal strings, so no JSON
  * number loses precision. Range checks beyond the types are the program's rules, mirrored by
@@ -14,10 +18,10 @@
 import { address } from "@solana/kit";
 import { z } from "zod";
 
-import { hexToBytes } from "./bytes";
-import { Direction, ReaderKind } from "./constants";
-import { I128_MAX, I128_MIN, I64_MAX, U64_MAX } from "./math/integers";
-import type { OpenArgs } from "./validate/open-rules";
+import { hexToBytes } from "../read/bytes";
+import { Direction, ReaderKind } from "../read/constants";
+import { I128_MAX, I128_MIN, I64_MAX, U64_MAX } from "../read/math/integers";
+import type { OpenArgs } from "../read/validate/open-rules";
 
 const integer = (min: bigint, max: bigint) =>
   z

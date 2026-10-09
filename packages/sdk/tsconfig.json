@@ -12,5 +12,5 @@
     "noEmit": true,
     "isolatedModules": true
   },
-  "include": ["src/read/**/*.ts", "src/tx/**/*.ts"]
+  "include": ["src/read/**/*.ts", "src/tx/**/*.ts", "src/schemas/**/*.ts"]
 }

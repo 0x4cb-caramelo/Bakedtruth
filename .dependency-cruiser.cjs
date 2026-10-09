@@ -13,8 +13,15 @@ module.exports = {
       name: "sdk-read-never-imports-tx",
       comment: "The read path (indexer, relay) must not be able to build a transaction (proposal 2.3).",
       severity: "error",
-      from: { path: "^packages/sdk/src/read/" },
+      from: { path: "^packages/sdk/src/(read|schemas)/" },
       to: { path: "^packages/sdk/src/tx/" },
+    },
+    {
+      name: "sdk-read-tx-without-zod",
+      comment: "read and tx bundle with React Native's default Babel preset; zod 4 needs export-namespace-from.",
+      severity: "error",
+      from: { path: "^packages/sdk/src/(read|tx)/" },
+      to: { path: "node_modules/zod/" },
     },
     {
       name: "sdk-no-node-builtins",
@@ -28,7 +35,7 @@ module.exports = {
       comment: "Framework-free (proposal 3.2): no React, React Native, Next.js, web3.js v1 or Anchor in the SDK.",
       severity: "error",
       from: { path: "^packages/sdk/src/" },
-      to: { path: "node_modules/(react|react-dom|react-native|next|@solana/web3\\.js|@anchor-lang|@coral-xyz)/" },
+      to: { path: "(^|/)(react|react-dom|react-native|next|@solana/web3\\.js|@anchor-lang|@coral-xyz)(/|$)" },
     },
     {
       name: "sdk-self-contained",
@@ -41,7 +48,7 @@ module.exports = {
       name: "sdk-not-codama-errors",
       comment: "The generated errors module reads process.env (a Node global); messages come from the IDL.",
       severity: "error",
-      from: { path: "^packages/sdk/src/(read|tx)/" },
+      from: { path: "^packages/sdk/src/(read|tx|schemas)/" },
       to: { path: "^packages/sdk/src/idl/generated/(errors/|index\\.ts$)" },
     },
     {
@@ -54,13 +61,13 @@ module.exports = {
     {
       name: "sdk-no-circular",
       severity: "error",
-      from: { path: "^packages/sdk/src/(read|tx)/" },
+      from: { path: "^packages/sdk/src/(read|tx|schemas)/" },
       to: { circular: true },
     },
   ],
   options: {
+    // Packages are recorded as dependencies but not walked into; excluding them would hide them from the rules.
     doNotFollow: { path: "node_modules" },
-    exclude: { path: "(^|/)node_modules/" },
     tsPreCompilationDeps: true,
     tsConfig: { fileName: "tsconfig.json" },
     enhancedResolveOptions: {

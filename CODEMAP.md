@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **494** |
+| Arquivos mapeados | **495** |
 | Acima de 200 linhas | **44** ⚠️ |
 | Sem cabeçalho `Purpose:` | **77** ⚠️ |
 
@@ -67,7 +67,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`.dependency-cruiser.cjs`](.dependency-cruiser.cjs) | the import rules of the SDK and its consumers (proposal 2.3 and 3.2; TP 3.2, 10): the read half never imports the transaction half; the SDK imports no Node buil | 73 |
+| [`.dependency-cruiser.cjs`](.dependency-cruiser.cjs) | the import rules of the SDK and its consumers (proposal 2.3 and 3.2; TP 3.2, 10): the read half never imports the transaction half; the SDK imports no Node buil | 80 |
 
 ## `.claude/hooks/`
 
@@ -189,13 +189,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`events.ts`](packages/sdk/src/read/events.ts) | the program's events: each name with its discriminator and the Codama decoder of its payload, and the decoding of one event's inner-instruction data `[0xFF, dis | 96 |
 | [`feeds.ts`](packages/sdk/src/read/feeds.ts) | the compiled lists of Pyth feeds a price campaign may name, one per cluster, as programs/brot-markets/src/feeds.rs compiles them (founder answer 1, 2026-10-09;  | 107 |
 | [`format.ts`](packages/sdk/src/read/format.ts) | exact, deterministic display of the program's units: lamports as SOL with all nine decimals (no floating point), Unix seconds as a UTC date, basis points as a p | 29 |
-| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 36 |
+| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 35 |
 | [`knowable.ts`](packages/sdk/src/read/knowable.ts) | the join lock (BR-06) as the program applies it, for a client that wants to know whether a join can still go in: `outcomeKnowable` per kind (the price band reac | 66 |
 | [`pdas.ts`](packages/sdk/src/read/pdas.ts) | every program-derived address a client needs: the config, the fee vault, a campaign and its vault, an entry, a join, the event authority, the program's ProgramD | 68 |
 | [`quote.ts`](packages/sdk/src/read/quote.ts) | what an opening pays (row 7 of TP 3.4.10): US$ at the sponsored Pyth SOL/USD price charged at `price − conf`, the 90/10 split, the `max_lamports` the creator si | 146 |
 | [`recheck.ts`](packages/sdk/src/read/recheck.ts) | `recheck(campaign, rpcUrl)` (BR-23, "Anyone can re-check. Same account, same answer"): through any RPC the caller chooses, read the campaign, then the very acco | 112 |
 | [`rpc.ts`](packages/sdk/src/read/rpc.ts) | the reads the SDK makes through any Solana RPC (Kit's `createSolanaRpc`, no paid key, A-5): an account's owner and bytes, several at once, the cluster's clock f | 72 |
-| [`schemas.ts`](packages/sdk/src/read/schemas.ts) | the zod schema of an opening's input (TP Appendix B, written here as Sprint 05 must), shared by the SDK, the site, the app and the preview: what a creator may c | 113 |
 | [`view.ts`](packages/sdk/src/read/view.ts) | a campaign's public state (BR-05; TP 3.4.2): Open, Closed, In review, Paid or Void, computed by one function from what the program recorded and the CHAIN's time | 82 |
 
 ## `packages/sdk/src/read/chain/`
@@ -239,6 +238,13 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`open-campaign.ts`](packages/sdk/src/read/validate/open-campaign.ts) | `validateOpenCampaign`, the SDK's mirror of `user_open_campaign`'s rules (TP 3.4.10) for the preview: from the arguments, the config, the chain's clock and the  | 122 |
 | [`open-rules.ts`](packages/sdk/src/read/validate/open-rules.ts) | the opening's rules that read no account, in the program's order: the argument sizes (row 9), row 1 (the kind names a reader and opens in this build), the canon | 85 |
 | [`rows.ts`](packages/sdk/src/read/validate/rows.ts) | which row of the opening's checks (TP 3.4.10) each refusal belongs to, so a preview can say "row 7: the price moved past your maximum" next to the program's own | 55 |
+
+## `packages/sdk/src/schemas/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`index.ts`](packages/sdk/src/schemas/index.ts) | `@brot/sdk/schemas`, the zod 4 schemas the site, the app and the services share: the opening's input today, the read API's from Sprint 08. A separate entry poin | 9 |
+| [`open-campaign.ts`](packages/sdk/src/schemas/open-campaign.ts) | the zod schema of an opening's input (TP Appendix B, written here as Sprint 05 must), shared by the SDK, the site, the app and the preview: what a creator may c | 117 |
 
 ## `packages/sdk/src/tx/`
 
@@ -939,7 +945,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`prepare.test.ts`](tests/sdk/prepare.test.ts) | A-3 end to end against the program's state (LiteSVM behind a local RPC endpoint): a join and a paid opening are re-read, checked, built, simulated and summarise | 128 |
 | [`recheck.test.ts`](tests/sdk/recheck.test.ts) | BR-23: `recheck(campaign, rpcUrl)` re-reads, through an RPC endpoint the caller chooses (here a local one backed by the LiteSVM world), the account and field th | 105 |
 | [`rpc-shape.ts`](tests/sdk/rpc-shape.ts) | a transaction sent in LiteSVM, returned in the shape the RPC's `getTransaction` (encoding `json`, `maxSupportedTransactionVersion: 0`) gives it, so the SDK's de | 107 |
-| [`schemas.test.ts`](tests/sdk/schemas.test.ts) | the opening's zod schema (TP Appendix B): one valid input per kind parses and converts to the SDK's `OpenArgs` the builders take; text, extra keys, numbers wher | 74 |
+| [`schemas.test.ts`](tests/sdk/schemas.test.ts) | the opening's zod schema (TP Appendix B): one valid input per kind parses and converts to the SDK's `OpenArgs` the builders take; text, extra keys, numbers wher | 75 |
 | [`snapshot-vectors.test.ts`](tests/sdk/snapshot-vectors.test.ts) | X0.3, the TypeScript half, second file: every vector of tests/vectors/snapshot-vectors.csv (programs/brot-markets/tests/math_vectors_snapshot.rs: the finalize s | 114 |
 | [`validate-open-kinds.test.ts`](tests/sdk/validate-open-kinds.test.ts) | A-10 / X0.7, SDK half, for the four kinds other than the price kind: each case tests/brot/open-campaign-kinds.test.ts feeds to the program (row 1's closed `Stak | 120 |
 | [`validate-open-payment.test.ts`](tests/sdk/validate-open-payment.test.ts) | A-10 / X0.7, SDK half, for rows 7, 8 and 10: each case tests/brot/open-campaign-refuses-payment.test.ts and open-campaign-retry.test.ts feed to the program is f | 100 |

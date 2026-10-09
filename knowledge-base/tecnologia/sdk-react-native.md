@@ -212,6 +212,22 @@ O `crypto.subtle` e o `crypto.getRandomValues` são lidos a cada chamada, mas a 
 **O erro sem polyfill é um número.** As versões nativas do Kit são de produção: o erro chega como "Solana error
 #3610001; Decode this error by running `npx @solana/errors decode -- 3610001`". O app deve mostrar uma mensagem própria.
 
+### 2.1 O zod fica fora do `read` e do `tx`
+
+Fato, visto nesta máquina em 9/10/2026: com o esquema zod da abertura dentro de `@brot/sdk/read`, a conferência falhou
+ao empacotar. O build ESM do zod 4.6.5 começa com `export * as core from "../core/index.js"`
+(`zod/v4/classic/external.js`), e o Babel do React Native 0.87.1, com os padrões, recusa: "Export namespace should be
+first transformed by `@babel/plugin-transform-export-namespace-from`". O `@react-native/babel-preset` 0.87.1 não traz
+esse plugin (`src/configs/main.js`, lido na pasta `tests/react-native/node_modules`).
+
+O que se fez: o esquema saiu do `read` para uma entrada própria, `@brot/sdk/schemas`, e uma regra do
+dependency-cruiser (`sdk-read-tx-without-zod`) impede o zod de voltar ao `read` ou ao `tx`. Depois da mudança a
+conferência voltou a passar.
+
+Para o app (Sprint 20), se quiser usar `@brot/sdk/schemas`: incluir `@babel/plugin-transform-export-namespace-from` no
+Babel. O `babel-preset-expo` deve trazer esse plugin [INF, de memória, não conferido nesta sessão: conferir no código do
+preset quando o app escolher a versão do Expo]. Os esquemas da API de leitura (Sprint 08) entram na mesma entrada, não no `read`.
+
 ## 3. Inferências
 
 - **A VM 0.12.0 do CI basta para pegar uma regressão da matemática.** As duas VMs deram o mesmo resultado nas 24.000
