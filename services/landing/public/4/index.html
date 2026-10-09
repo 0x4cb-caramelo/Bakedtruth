@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Brot Markets — On-Chain Campaigns the chain answers</title>
+    <meta
+      name="description"
+      content="Brot Markets runs On-Chain Campaigns on Solana. Join YES or NO with SOL, winners split the pot, and an on-chain account gives the answer. Coming soon, on devnet first."
+    />
+    <meta name="theme-color" content="#10151c" />
+    <!-- /4 is the home page as the founders asked on 2026-10-09, after /3: the copy of /3 (approved), the original
+         layout and fonts (it loads the home page own styles.css) and the colours used the way /2 used them (4/colors.css:
+         dark cards on the cream page, the dark strip, a flat button). tests/four.test.mjs checks the text is the one
+         of /3, word for word. Out of search engines until it replaces the home. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="canonical" href="https://brot.markets/" />
+    <link rel="icon" type="image/png" href="/img/favicon.png" />
+    <link rel="preload" href="/fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- The "v" of styles.css and app.js is the home page's; mascot.js is v=3, the one that finds its images from the
+         site root. Raise the "v" of colors.css whenever it changes: Cloudflare keeps styles for hours. -->
+    <script src="/app.js?v=2"></script>
+    <script type="module" src="/mascot.js?v=3"></script>
+    <link rel="stylesheet" href="/styles.css?v=3" />
+    <link rel="stylesheet" href="/4/colors.css?v=1" />
+  </head>
+  <body>
+    <div class="strip">
+      <div class="wrap"><b>● Solana Devnet</b> · Test tokens only, no real money</div>
+    </div>
+    <header class="top">
+      <div class="wrap">
+        <a class="brand" href="/4/" aria-label="Brot Markets, home">
+          <img src="/img/baked-deadpan.webp" alt="" width="58" height="37" />
+          <span>brot<b>.markets</b></span>
+        </a>
+        <a class="top-link" href="https://x.com/brotmarkets" rel="noopener">@brotmarkets on X</a>
+        <button class="theme" type="button" data-theme-toggle aria-label="Switch to the dark theme">
+          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" stroke-linejoin="round" />
+          </svg>
+          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" />
+            <path
+              d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+            />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <div class="wrap">
+        <p class="baking" role="note"><b>We are baking this website.</b> Some parts are still in the oven.</p>
+
+        <section class="hero">
+          <div>
+            <p class="eyebrow">Coming soon</p>
+            <h1 data-perch="hero" data-perch-x="0.9" data-perch-say="Prove it.">
+              On-Chain Campaigns the chain answers.
+            </h1>
+            <p class="lede">
+              Join YES or NO with SOL. Winners split the pot. A Solana account gives the answer: no vote, no judge.
+            </p>
+
+            <form class="join" data-join novalidate>
+              <label for="email">Get an email when campaigns open</label>
+              <div class="join-row">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  placeholder="you@example.com"
+                  required
+                />
+                <div class="trap" aria-hidden="true">
+                  <label for="company">Company</label>
+                  <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+                </div>
+                <button class="cta" type="submit" data-mood="tapping"><span>Notify me</span></button>
+              </div>
+              <p class="fine">
+                By sending, you agree that we keep your email to tell you when Brot Markets opens. Nothing else is
+                stored. <a href="/privacy">Privacy and how to leave</a>.
+              </p>
+              <p class="form-msg" data-join-msg role="alert" aria-live="polite"></p>
+              <noscript
+                ><p class="fine">This form needs JavaScript. You can also follow @brotmarkets on X.</p></noscript
+              >
+            </form>
+            <div class="joined" data-joined hidden tabindex="-1">
+              <b>You're on the list.</b>
+              We'll write when campaigns open.
+            </div>
+          </div>
+
+          <aside
+            class="read"
+            aria-label="Example campaign"
+            data-perch="read"
+            data-perch-x="0.84"
+            data-perch-pose="skeptical"
+            data-perch-say="It's a read. Not a vote."
+          >
+            <p class="kicker">Example · not a live campaign</p>
+            <h2>Does SOL touch $300 by Dec 31?</h2>
+            <div class="sides">
+              <div class="side yes" data-mood="approve">Yes <b>30%</b></div>
+              <div class="side no" data-mood="skeptical">No <b>70%</b></div>
+            </div>
+            <div class="bar"><i></i></div>
+            <dl class="facts">
+              <div>
+                <dt>Pot</dt>
+                <dd>3 SOL Yes · 7 SOL No</dd>
+              </div>
+              <div>
+                <dt>Resolved by</dt>
+                <dd>The Pyth price account</dd>
+              </div>
+            </dl>
+            <p class="fine">Each % is that side's share of the pot.</p>
+          </aside>
+        </section>
+
+        <section class="principles" aria-label="How it works">
+          <article
+            class="principle"
+            data-perch="chain"
+            data-perch-x="0.84"
+            data-perch-pose="point"
+            data-perch-say="I only believe accounts."
+          >
+            <div class="ic" aria-hidden="true">1</div>
+            <h3>The chain answers</h3>
+            <p>The program reads a Solana account and settles.</p>
+          </article>
+          <article class="principle" data-perch="pool" data-perch-x="0.84" data-perch-say="One pot. No order book.">
+            <div class="ic" aria-hidden="true">2</div>
+            <h3>One pot per campaign</h3>
+            <p>Winners split it by what each put in. No order book.</p>
+          </article>
+          <article
+            class="principle"
+            data-perch="wallet"
+            data-perch-x="0.84"
+            data-perch-pose="approve"
+            data-perch-say="Fine. It checks out."
+          >
+            <div class="ic" aria-hidden="true">3</div>
+            <h3>Paid to your wallet</h3>
+            <p>No sign-up. No claim button.</p>
+          </article>
+        </section>
+
+        <section class="suggest">
+          <p><b>Have a question the chain can answer?</b> Post it on X. We read every one.</p>
+          <!-- The draft is the home page's: Question for @brotmarkets: / "Does SOL touch $300 by Dec 31?" / The chain
+               can answer it. #BrotMarkets. A test checks the link is the same. -->
+          <a
+            class="ghost"
+            data-mood="point"
+            target="_blank"
+            rel="noopener"
+            href="https://x.com/intent/post?text=Question%20for%20%40brotmarkets%3A%0A%0A%22Does%20SOL%20touch%20%24300%20by%20Dec%2031%3F%22%0A%0AThe%20chain%20can%20answer%20it.%20%23BrotMarkets"
+            >Suggest a question on X</a
+          >
+        </section>
+      </div>
+    </main>
+
+    <footer
+      data-perch="footer"
+      data-perch-x="0.9"
+      data-perch-size="0.85"
+      data-perch-pose="tired"
+      data-perch-say="Not audited. Stay sharp."
+    >
+      <div class="wrap">
+        <p>
+          Test phase on Solana devnet, with test tokens. The program is not audited. Nothing here is an offer or an
+          invitation to put in real money, and availability by country has not been decided.
+        </p>
+        <nav aria-label="Footer">
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+          <a href="https://x.com/brotmarkets" rel="noopener">X</a>
+          <span>© 2026 Brot Markets</span>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>

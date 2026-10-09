@@ -54,6 +54,13 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
     recusada).
   - **Testes:** 255 em Rust e 259 em TypeScript depois das correções da revisão (252 e 258 antes delas), todos do
     programa novo; os oito filtros da sprint passam; tirar a checagem de chamada de topo derruba o teste dela (X0.9).
+- **`/4`, o texto da `/3` com as cores usadas como na `/2`** (fundadores, 9/10/2026; mesma branch da `/3`, ainda não
+  publicada). O texto curto da `/3` foi aprovado ("o copy no 3 acertou"); as cores dela, com tudo em creme e
+  laranja, passaram do ponto. A `/4` mantém o texto, a disposição e as fontes da original (Barlow Condensed e
+  Inter) e usa a paleta do deck como a `/2` usava: o exemplo e os três princípios em cartões escuros nos dois
+  temas, a faixa do topo escura, o botão liso, sem o anel giratório, e a caixa de sugestão com o destaque na borda
+  esquerda. O aviso laranja continua. Seis testes novos (`tests/four.test.mjs`): o texto é o da `/3`, palavra por
+  palavra, e o arquivo de cores só declara cor.
 - **`/3`, a página inicial original com as cores do deck e o texto mais curto** (fundadores, 9/10/2026; na branch
   `feat/site-3-original-com-cores-do-deck`, ainda não publicada). Depois de ver a `/2`, o Lucas e o Ronaldo
   preferiram a disposição e as fontes da página original, com as cores do deck. A `/3` carrega o `styles.css` da

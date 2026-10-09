@@ -1,0 +1,147 @@
+/* Purpose: the colours of /4. The page loads the home page's own styles.css (the original layout and fonts) and this
+   file after it. The palette is the pitch deck's, used the way /2 used it: the example campaign and the three
+   principles are dark cards in both themes, the strip is dark, the button is flat and the suggestion box has the
+   accent on its left edge. It sets colours only, plus the orange "we are baking this website" notice and the room it
+   takes above the hero. Sprint: out of band (landing page), 2026-10-09. */
+
+:root {
+  --bg: #10151c;
+  --panel: #171e29;
+  --raised: #171e29;
+  --line: #263041;
+  --line-strong: #3a4558;
+  --text: #f7eedb;
+  --muted: #d9d1c1;
+  --dim: #a3acba;
+  --accent: #eea546;
+  --accent-soft: #eea546;
+  --accent-hover: #f7cd8f;
+  --on-accent: #1b1611;
+  --crust: #eea546;
+  --yes-bg: #1c3a30;
+  --yes-fg: #a6ffcf;
+  --no-bg: #3d2422;
+  --no-fg: #ff9a7a;
+  --strip-bg: #0b0f15;
+  --notice-bg: #1c3a30;
+  --track: #263041;
+  --fill: linear-gradient(90deg, #a8481b, #eea546);
+  --ic-bg: #eea54626;
+  --dot-rgb: 163, 172, 186;
+  /* A flat button, as on /2: no spinning ring, and it turns to the text colour under the pointer. */
+  --cta-hover: #f7eedb;
+  --cta-ring: #eea546;
+  --say-bg: #f7eedb;
+  --say-fg: #1b1611;
+  --pet-shadow: rgba(0, 0, 0, 0.55);
+  --error: #ff9a7a;
+  --shadow: none;
+  --baking-bg: #eea546;
+  --baking-fg: #1b1611;
+}
+:root[data-theme="light"] {
+  --bg: #f6eddb;
+  --panel: #fffaf0;
+  --raised: #fffaf0;
+  --line: #e2d4ba;
+  --line-strong: #cdbb98;
+  --text: #1b1611;
+  --muted: #3d3328;
+  --dim: #6b5e4e;
+  --accent: #a8481b;
+  --accent-soft: #a8481b;
+  --accent-hover: #7a3212;
+  --on-accent: #f7eedb;
+  --crust: #a8481b;
+  --yes-bg: #1c3a30;
+  --yes-fg: #a6ffcf;
+  --no-bg: #3d2422;
+  --no-fg: #ff9a7a;
+  --strip-bg: #1b1611;
+  --notice-bg: #1c3a30;
+  --track: #263041;
+  --fill: linear-gradient(90deg, #a8481b, #eea546);
+  --ic-bg: #eea54626;
+  --dot-rgb: 107, 94, 78;
+  --cta-hover: #1b1611;
+  --cta-ring: #a8481b;
+  --say-bg: #1b1611;
+  --say-fg: #f7eedb;
+  --pet-shadow: rgba(27, 22, 17, 0.3);
+  --error: #a32e17;
+  --shadow: none;
+}
+
+/* The strip is dark in both themes, with the deck's orange dot. */
+.strip {
+  border-color: transparent;
+  color: #a3acba;
+}
+.strip b {
+  color: #eea546;
+}
+.joined {
+  border-color: transparent;
+  color: #a6ffcf;
+}
+
+/* The example campaign and the three principles are the deck's dark cards in both themes: inside them the tokens are
+   the dark ones, whatever the theme of the page. */
+.read,
+.principle {
+  --panel: #171e29;
+  --line: #263041;
+  --text: #f7eedb;
+  --muted: #d9d1c1;
+  --dim: #a3acba;
+  --accent-soft: #eea546;
+  color: #f7eedb;
+}
+:root[data-theme="light"] .principle {
+  --panel: #1b1611;
+  --line: #1b1611;
+}
+.suggest {
+  border-color: var(--line);
+  border-left: 4px solid var(--accent);
+}
+.ghost {
+  border-color: var(--accent);
+  background: transparent;
+  color: var(--accent);
+}
+.ghost:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.baking {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin-top: 28px;
+  padding: 12px 18px;
+  border-radius: var(--r);
+  background: var(--baking-bg);
+  color: var(--baking-fg);
+  font-size: 13px;
+  font-weight: 500;
+}
+.baking b {
+  font: 700 24px/1 var(--display);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.baking + .hero {
+  padding-top: 52px;
+}
+@media (max-width: 860px) {
+  .baking {
+    margin-top: 18px;
+  }
+  /* On phones the hero keeps the original 44px, so the mascot on the headline stays clear of the notice. */
+  .baking + .hero {
+    padding-top: 44px;
+  }
+}

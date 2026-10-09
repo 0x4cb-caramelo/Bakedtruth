@@ -32,9 +32,25 @@ branch nova.
   sem auditoria, nada ali é oferta, disponibilidade por país indefinida. Saiu a palavra "bet", que o plano de
   negócios não usa fora da marca.
 
+## A /4, no mesmo dia
+
+Depois de ver a `/3` rodando localmente, o Lucas respondeu: "o copy no 3 acertou, é isso. Mas as cores passaram no
+exagero, as cores do 2 eram boas, vamos fazer um /4 com estas correções, e a fonte do 3 é o mesmo do original, e a
+gente gosta dele tbm."
+
+- **O que ficou decidido:** o texto curto da `/3` e as fontes da original (Barlow Condensed e Inter) estão aprovados.
+- **O que "as cores do 2" quer dizer aqui.** A paleta da `/2` e a da `/3` são a mesma. O que mudou foi o uso: na
+  `/3` os cartões seguiam a original e ficavam creme sobre creme, com as etiquetas SIM e NÃO em tons pastel, a
+  faixa do topo bege e o botão com o anel giratório. Na `/2` o exemplo e os três princípios eram cartões escuros
+  sobre o creme, a faixa era escura e o botão era liso. A `/4` volta a esse uso. A leitura que fiz na `/3`,
+  "cartão escuro é disposição do deck, não cor", estava errada.
+- **Como:** `public/4/colors.css` redefine os tokens de cor e, dentro dos cartões, troca os tokens pelos escuros,
+  seja qual for o tema da página. Um teste confere que o arquivo só declara cor, fora o aviso.
+- **A `/3` continua na branch** para comparação; um teste garante que o texto das duas é o mesmo.
+
 ## Em aberto
 
-- A `/3` não foi publicada: mescla e servidor esperam a palavra do Lucas.
-- Qual das três vira a página inicial, e o que acontece com a `/2`.
+- A `/3` e a `/4` não foram publicadas: mescla e servidor esperam a palavra do Lucas.
+- Qual delas vira a página inicial, e o que acontece com a `/2` e a `/3`.
 - O texto curto é uma proposta; o Lucas e o Ronaldo revisam frase por frase.
 - O aviso laranja só está na `/3`. Falta decidir se vai também para os termos, a privacidade e o docs.
