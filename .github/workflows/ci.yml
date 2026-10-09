@@ -16,17 +16,13 @@ concurrency:
 env:
   # Keep in sync with README "Stack" and the local toolchain.
   SOLANA_VERSION: "3.1.10"
-  # The Anchor CLI builds only the frozen pred-provable, until Sprint 03 removes both.
-  ANCHOR_VERSION: "1.1.2"
   # Writes the brot-markets IDL from its source (T9); scripts/build-idl.ts refuses other versions.
   SHANK_VERSION: "0.4.9"
   CARGO_TERM_COLOR: always
-  NO_DNA: "1"
 
 jobs:
   program:
     name: Program
-    # Anchor 1.1.x prebuilt binaries need GLIBC >= 2.39 (Ubuntu 24.04).
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -59,14 +55,6 @@ jobs:
       - name: Add Solana CLI to PATH
         run: echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
 
-      - name: Install Anchor CLI (prebuilt release binary)
-        run: |
-          mkdir -p "$HOME/.local/bin"
-          curl -sSfL -o "$HOME/.local/bin/anchor" \
-            "https://github.com/solana-foundation/anchor/releases/download/v${ANCHOR_VERSION}/anchor-${ANCHOR_VERSION}-x86_64-unknown-linux-gnu"
-          chmod +x "$HOME/.local/bin/anchor"
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-
       # Cached by version outside target/: rust-cache prunes unknown folders under target/
       # before saving. cargo install --locked builds it from crates.io with its own lockfile.
       - name: Cache shank-cli
@@ -92,7 +80,6 @@ jobs:
           rustc --version
           solana --version
           cargo build-sbf --version
-          anchor --version
           shank --version
           bun --version
 
@@ -109,37 +96,34 @@ jobs:
       - name: Cargo.lock matches the manifests
         run: cargo metadata --locked --format-version 1 > /dev/null
 
-      # The same build developers run: anchor build for pred-provable, cargo build-sbf for
-      # brot-markets, its Shank IDL and the Codama client (bun run idl), then the app's IDL
-      # sync. Removing the committed outputs first means one the build did not regenerate shows
-      # up as deleted in the check below, instead of passing as "unchanged".
-      - name: Build programs and IDLs
+      # The same build developers run: cargo build-sbf for brot-markets and for the test-only CPI
+      # proxy, then the Shank IDL and the Codama client (bun run idl). Removing the committed
+      # outputs first means one the build did not regenerate shows up as deleted in the check
+      # below, instead of passing as "unchanged".
+      - name: Build programs and IDL
         run: |
-          rm -rf target/idl target/types packages/sdk/src/idl/brot_markets.json packages/sdk/src/idl/generated
+          rm -rf packages/sdk/src/idl/brot_markets.json packages/sdk/src/idl/generated
           bun run build:program
 
-      # Developers whose machine cannot run the pinned toolchain take the generated IDLs from
-      # here. It holds no program binary, so it is safe to publish from any branch. The
-      # brot-markets IDL needs no toolchain at all: `bun run idl` with shank-cli 0.4.9.
-      - name: Upload generated IDLs (preview, not deployable)
+      # Developers whose machine cannot run the pinned toolchain take the generated IDL from
+      # here. It holds no program binary, so it is safe to publish from any branch. The IDL
+      # itself needs no Solana toolchain: `bun run idl` with shank-cli 0.4.9.
+      - name: Upload generated IDL (preview, not deployable)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: idl-preview-${{ github.run_id }}
-          path: |
-            target/idl/
-            target/types/
-            packages/sdk/src/idl/
+          path: packages/sdk/src/idl/
           if-no-files-found: error
           retention-days: 7
 
       # `git status` rather than `git diff`: a generated file that was never committed is
       # untracked, and `git diff` does not see it. Covers the Codama client too (X0.6).
-      - name: Check committed IDLs are up to date
+      - name: Check committed IDL is up to date
         run: |
-          stale="$(git status --porcelain -- target/idl target/types app/lib/idl packages/sdk/src/idl)"
+          stale="$(git status --porcelain -- packages/sdk/src/idl)"
           if [ -n "$stale" ]; then
             echo "$stale"
-            echo "::error::IDL is stale. Run 'bun run build:program' (or 'bun run idl' for brot-markets) and commit the result."
+            echo "::error::IDL is stale. Run 'bun run idl' and commit the result."
             exit 1
           fi
 
@@ -147,7 +131,6 @@ jobs:
       # The last line compiles the mainnet branch of the code, which the build above never does.
       - name: Clippy
         run: |
-          cargo clippy --locked -p pred-provable --all-targets --features no-entrypoint -- -D warnings
           cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint -- -D warnings
           cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint,mainnet -- -D warnings
 
@@ -157,8 +140,8 @@ jobs:
       - name: TypeScript tests (bun test + LiteSVM)
         run: bun run test
 
-      # Both crates; the brot-markets checks run its binary in Mollusk (SBF_OUT_DIR, set by the
-      # script, points Mollusk at target/deploy).
+      # Host tests, plus the Mollusk checks on the program binary (SBF_OUT_DIR, set by the script,
+      # points Mollusk at target/deploy).
       - name: Rust tests
         run: bun run test:rust
 
@@ -217,7 +200,7 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p artifacts
-          cp target/deploy/*.so target/idl/*.json target/types/*.ts packages/sdk/src/idl/brot_markets.json artifacts/
+          cp target/deploy/brot_markets.so packages/sdk/src/idl/brot_markets.json artifacts/
           cd artifacts
           sha256sum -- * > SHA256SUMS
           cat SHA256SUMS
