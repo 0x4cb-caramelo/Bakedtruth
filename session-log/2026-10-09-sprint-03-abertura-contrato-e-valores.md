@@ -132,8 +132,10 @@ como estão:
 
 ## Follow-up
 
-- Os valores marcados "a confirmar" dependem das medidas da frente R.
-- O registro da integração e das revisões vem em `2026-10-09-sprint-03-integracao-e-revisoes.md`.
+- Os valores marcados "a confirmar" dependiam das medidas da frente R. Confirmados no mesmo dia: nenhum minuto
+  medido ficou abaixo de 231 ms por slot (devnet) ou 259 ms (rede principal), nem acima de 282 ms; a seção 4 de
+  `2026-10-09-sprint-03-integracao-e-revisoes.md` tem a tabela.
+- O registro da integração e das revisões está em `2026-10-09-sprint-03-integracao-e-revisoes.md`.
 
 ## Fontes
 

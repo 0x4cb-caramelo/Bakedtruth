@@ -279,7 +279,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`proof.rs`](programs/brot-markets/src/readers/price_touch/proof.rs) | resolution of a price campaign (TP section 3.4.6; D7): while the proof window is open only a YES proof records anything; after it, the sponsored account gives N | 135 |
+| [`proof.rs`](programs/brot-markets/src/readers/price_touch/proof.rs) | resolution of a price campaign (TP section 3.4.6; D7): while the proof window is open only a YES proof records anything; after it, the sponsored account gives N | 136 |
 | [`rules.rs`](programs/brot-markets/src/readers/price_touch/rules.rs) | the price rules the opening, the join lock and the YES proof share: freshness by time and by slot, the confidence bound, and the two touch tests (the confidence | 118 |
 | [`target.rs`](programs/brot-markets/src/readers/price_touch/target.rs) | row 3 of TP section 3.4.10 for a price campaign, at both ends: the target is not touched at opening, sits at least the minimum distance past the edge of the con | 89 |
 

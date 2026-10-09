@@ -12,9 +12,10 @@
 //! bound and the wait after the deadline are therefore the same constant, and must stay so.
 //!
 //! After the window (D7, the exact test [AC], C47). The proof slot is no longer read; the
-//! sponsored account is. The push oracle refuses an older update (it declares
-//! `UpdatesNotMonotonic`; Sprint 03 checks the behaviour on a live cluster), so that account only
-//! moves forward: a `publish_time <= D` now means no update landed after the deadline, and the
+//! sponsored account is. The push oracle never writes an older update (lane R of Sprint 03 watched
+//! both clusters: no `publish_time` or `posted_slot` ever decreased, and the one older update seen
+//! on devnet was skipped without a write), so that account only moves forward: a
+//! `publish_time <= D` now means no update landed after the deadline, and the
 //! last update before it is exactly `publish_time`. When that is older than `D - stale_age`,
 //! with `stale_age` the larger of the campaign's `max_age` and `STALE_FEED_MIN_SECONDS` [AC], the
 //! feed was stale at the deadline and the campaign is voided (`StaleFeed`), not turned to NO: if

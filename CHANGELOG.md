@@ -43,11 +43,16 @@ a tag `sprint-02`. A Sprint 03, os leitores e a resolução, está em revisão n
   - **Surfpool:** o leitor de preço rodou dentro das instruções sobre um fork da rede principal, com o preço cruzando
     o alvo e a campanha resolvendo SIM; o CI fixa o Surfpool 1.6.0 pelo SHA-256 do arquivo e do binário.
   - **O SIM do `StakeAtLeast` testado pela primeira vez**, no Mollusk, que injeta stake de época.
-  - **Fatos da rede, em `knowledge-base/tecnologia/`:** os feeds patrocinados da Pyth que ficam frescos na devnet e
-    na rede principal; o Alpenglow na devnet (tempo de slot, deriva do relógio, confirmado contra finalizado); o
-    endereço do Lighthouse; e que a conta patrocinada só anda para a frente.
-  - **Testes:** 252 em Rust e 258 em TypeScript, todos do programa novo; os oito filtros da sprint passam; tirar a
-    checagem de chamada de topo derruba o teste dela (X0.9).
+  - **Fatos da rede, em `knowledge-base/tecnologia/`** (frente R, com três scripts de medida em `scripts/`):
+    `pyth-feeds-patrocinados.md`, quais feeds têm conta de fatia 0 e quem as mantém (na rede principal, 120 das 183
+    são de feeds que a Pyth não patrocina, 78 criadas por um mesmo pagador e 102 paradas: a pergunta 1 ao fundador
+    ganha o fato); `alpenglow-devnet.md`, o Alpenglow ativo na devnet desde 25/9/2026 e não na rede principal, o
+    tempo de slot (231 a 245 ms e 260 a 282 ms) e a deriva do relógio (até 2,4 s), que confirmam os dois valores
+    [AC] da abertura; `lighthouse.md`, o endereço do Lighthouse para a lista da Sprint 08; e, na nota da Pyth, que a
+    conta patrocinada só anda para a frente (12 minutos, zero regressões; uma atualização velha é pulada, não
+    recusada).
+  - **Testes:** 255 em Rust e 259 em TypeScript depois das correções da revisão (252 e 258 antes delas), todos do
+    programa novo; os oito filtros da sprint passam; tirar a checagem de chamada de topo derruba o teste dela (X0.9).
 - **Sprint 02: o núcleo do pote, o programa novo em Pinocchio** (`programs/brot-markets`, 8/10/2026). Sai o
   esqueleto Anchor; entra o programa que guarda SOL de verdade, ainda sem leitura de resultado nem pagamento:
   - **A configuração e a equipe:** `admin_initialize_config` (só a autoridade de upgrade, lida da conta ProgramData),
@@ -309,6 +314,22 @@ a tag `sprint-02`. A Sprint 03, os leitores e a resolução, está em revisão n
 
 ### Fixed
 
+- **Sprint 03, o que as revisões acharam e foi corrigido antes do pull request** (9/10/2026; quatro revisores:
+  segurança, advogado do diabo, independente e produto; nenhum achou como tirar SOL de ninguém):
+  - **a anulação por feed parado ganha um piso de 600 segundos** (`STALE_FEED_MIN_SECONDS` [AC]): a conta
+    patrocinada da devnet atualiza a cada 62 a 64 segundos, e uma campanha com `max_age` perto disso podia ser anulada
+    ou virar NÃO conforme o segundo em que alguém a resolvesse; agora a última atualização antes do prazo precisa ser
+    mais velha que o maior entre o `max_age` e dez minutos;
+  - **o expoente do feed mudou desde a abertura, e a janela de prova fechou: anula**, em vez de registrar NÃO; toda
+    prova do SIM durante a janela era recusada pelo mesmo motivo, então o NÃO seria um veredito que ninguém pôde
+    contestar;
+  - **preço zero ou negativo não prova o SIM**, em nenhuma direção, com o mesmo erro da abertura (`PriceNonPositive`);
+    antes, um preço negativo assinado pela Pyth provaria o SIM de uma campanha "abaixo de" (era a pergunta 7 ao
+    fundador; as revisões a fecharam);
+  - **o endereço do próprio programa na vaga da prova vale como "sem prova"**: enquanto a janela está aberta a
+    resposta é `NotResolvableYet`, e não `ProofDoesNotTouch` para qualquer conta que preenchesse a vaga; sem isso a
+    recusa "ainda não dá" nunca era alcançável para uma campanha de preço;
+  - testes novos para cada item (255 em Rust, 259 em TypeScript); a IDL não muda.
 - **Sprint 02, o que as revisões acharam e foi corrigido antes da mescla** (8/10/2026; três revisores e o
   coordenador, nenhum achou como tirar SOL de ninguém):
   - um preço da Pyth com horário mais de 60 segundos à frente do relógio da rede passa a ser recusado como velho;
@@ -331,12 +352,18 @@ a tag `sprint-02`. A Sprint 03, os leitores e a resolução, está em revisão n
 ### Em aberto
 
 - **Sprint 03, as sete perguntas ao fundador**, nenhuma respondida, com o que o código faz enquanto isso
-  (`session-log/2026-10-09-sprint-03-abertura-contrato-e-valores.md`): (1) quais feeds da Pyth uma campanha de preço
+  (`session-log/2026-10-09-sprint-03-abertura-contrato-e-valores.md` e
+  `session-log/2026-10-09-sprint-03-integracao-e-revisoes.md`): (1) quais feeds da Pyth uma campanha de preço
   pode nomear — hoje qualquer um cujo endereço patrocinado passe nas checagens; (2) cobrar a abertura em `p − conf`
   — hoje o preço médio; (3) o feed do SOL/USD como constante do programa — hoje um campo da configuração; (4) uma
   cota própria para as aberturas gratuitas da equipe — hoje a mesma válvula; (5) copiar a entrada mínima na abertura
-  — hoje a leitura viva; (6) o Lucas e o Ronaldo com chaves da equipe (Q12); (7) recusar um preço zero ou negativo
-  como prova do SIM — hoje um preço negativo assinado pela Pyth provaria o SIM de uma campanha "abaixo de".
+  — hoje a leitura viva; (6) o Lucas e o Ronaldo com chaves da equipe (Q12); (8) **entrar no SIM depois do toque**:
+  a trava de entrada lê a conta patrocinada, que atualiza a cada minuto, e a prova do SIM aceita qualquer
+  atualização completa de até 60 segundos; entre as duas, um baker que viu o toque numa atualização recém-postada
+  entra no SIM e resolve na mesma transação. As revisões propõem uma margem na trava (recusar a entrada quando a
+  borda da banda está a menos de X% do alvo), um `last_entry_at` na campanha e, na Sprint 04, a devolução das
+  entradas feitas depois do `publish_time` da prova; cada caminho muda quem ganha, então é dele. A pergunta 7 (preço
+  zero ou negativo como prova) foi fechada pelas revisões: recusado.
 - **Sprint 02, para o fundador confirmar:** que aprovar a proposta de arquitetura aprovou também a troca de nomes
   do D6; que o Lucas e o Ronaldo têm, os dois, chaves da equipe (Q12); a leitura de trabalho de "a equipe põe
   prêmio" (paga como qualquer carteira); se a entrada mínima de uma campanha aberta muda quando a configuração
