@@ -14,17 +14,13 @@ type Handler = fn(&Address, &mut [AccountView], &[u8]) -> ProgramResult;
 #[test]
 fn every_stub_refuses_before_reading_an_account() {
     let program = Address::new_from_array([7; 32]);
-    let handlers: [Handler; 10] = [
+    let handlers: [Handler; 6] = [
         resolution::team_confirm_result::team_confirm_result,
         resolution::team_void_campaign::team_void_campaign,
         resolution::team_open_contest::team_open_contest,
         settlement::finalize_campaign::finalize_campaign,
         settlement::settle_entry::settle_entry,
         settlement::settle_creator_share::settle_creator_share,
-        settlement::collect_fee::collect_fee,
-        settlement::settle_prize::settle_prize,
-        settlement::close_campaign::close_campaign,
-        settlement::sweep_fees::sweep_fees,
     ];
     for handler in handlers {
         let result = handler(&program, &mut [], &[]);

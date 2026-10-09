@@ -58,6 +58,7 @@ fn resolved(seq: u64, d: &Decision) -> Vec<u8> {
     (c.status, c.outcome, c.void_reason) = (1, d.outcome as u8, d.void_reason as u8);
     (c.met_late, c.observed_value) = (u8::from(d.met_late), LeI128::new(d.reading.observed));
     (c.resolved_at, c.review_ends_at) = (LeI64::new(NOW), LeI64::new(LATER));
+    c.publish_time = LeI64::new(d.reading.publish_time);
     bytes
 }
 
