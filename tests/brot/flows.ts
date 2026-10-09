@@ -1,12 +1,18 @@
 /**
  * Purpose: the common paths every test file starts from: a config initialised with the founder's
  *          values, a team, a paid or free price campaign opened on BTC/USD, an entry.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio); frozen at the sprint's opening with the program's contract
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio); frozen at the sprint's opening with the program's contract.
+ *          Sprint 05: the instructions are built by `@brot/sdk/tx`, so every test on these paths runs the
+ *          SDK's builders against the program (tests/sdk/builders.test.ts checks them byte for byte).
  */
 import { type Address, type KeyPairSigner } from "@solana/kit";
 
-import * as I from "./instructions";
+import { buildInitializeConfig, buildJoinCampaign, buildOpenCampaign, buildSetTeam } from "@brot/sdk/tx";
+import type { CreationParamsArgs } from "@brot/sdk/tx";
+
+import { camel } from "./idl";
+import type * as I from "./instructions";
 import { decode } from "./layouts";
 import * as P from "./program";
 import { accountData, expectOk, fundedWallet, now, send, type World } from "./setup";
@@ -27,15 +33,19 @@ export const DEFAULT_PARAMS = {
   campaign_max_age: 120, // [AC] devnet: at least 90 s; never below 30 s
 };
 
+/** The kit's snake_case creation parameters as the SDK's builders take them. */
+export const sdkParams = (params: Record<string, unknown>) =>
+  Object.fromEntries(Object.entries(params).map(([k, v]) => [camel(k), v])) as unknown as CreationParamsArgs;
+
 /** Initialises the config with `DEFAULT_PARAMS` (or `params`), signed by the upgrade authority. */
 export async function initConfig(w: World, params: Record<string, unknown> = DEFAULT_PARAMS) {
   const admin = await fundedWallet(w);
   const feeRecipient = await fundedWallet(w, 1n);
-  const ix = await I.initializeConfigIx({
+  const ix = await buildInitializeConfig({
     authority: w.upgradeAuthority,
     admin: admin.address,
     feeRecipient: feeRecipient.address,
-    params,
+    params: sdkParams(params),
   });
   expectOk(await send(w, [ix]));
   return { admin, feeRecipient };
@@ -44,14 +54,7 @@ export async function initConfig(w: World, params: Record<string, unknown> = DEF
 /** Sets `count` fresh team keys and returns them. */
 export async function setTeam(w: World, admin: KeyPairSigner, count = 2) {
   const team = await Promise.all(Array.from({ length: count }, () => fundedWallet(w)));
-  expectOk(
-    await send(w, [
-      await I.setTeamIx(
-        admin,
-        team.map((t) => t.address),
-      ),
-    ]),
-  );
+  expectOk(await send(w, [await buildSetTeam({ admin, team: team.map((t) => t.address) })]));
   return team;
 }
 
@@ -83,7 +86,14 @@ export async function openPriceCampaign(w: World, creator: KeyPairSigner, over: 
     maxLamports: 10n * P.SOL,
     ...over,
   };
-  const sent = await send(w, [await I.openCampaignIx(creator, args)]);
+  const sdkArgs = {
+    ...args,
+    kind: args.kind ?? P.ReaderKind.PriceTouch,
+    direction: args.direction ?? P.Direction.Above,
+    epoch: args.epoch ?? 0n,
+    expectedParamsVersion: args.expectedParamsVersion ?? 0,
+  };
+  const sent = await send(w, [await buildOpenCampaign({ creator, args: sdkArgs })]);
   const campaign = await P.campaignPda(args.id);
   return { sent, args, campaign, vault: await P.vaultPda(campaign) };
 }
@@ -108,7 +118,17 @@ export async function nextJoinIndex(w: World, campaign: Address, baker: Address)
 export async function join(w: World, baker: KeyPairSigner, campaign: Address, a: I.JoinArgs) {
   const metric = readCampaign(w, campaign).metric_account as Address;
   const joinIndex = a.joinIndex ?? (await nextJoinIndex(w, campaign, baker.address));
-  return send(w, [await I.joinCampaignIx(baker, campaign, metric, { ...a, joinIndex })]);
+  const ix = await buildJoinCampaign({
+    baker,
+    campaign,
+    metricAccount: metric,
+    side: a.side,
+    amount: a.amount,
+    minReturnBps: a.minReturnBps ?? 0,
+    expectedEntryTotal: a.expectedEntryTotal ?? 0n,
+    joinIndex,
+  });
+  return send(w, [ix]);
 }
 
 export const readConfig = async (w: World) => decode(GLOBAL_CONFIG, accountData(w, await P.configPda()));

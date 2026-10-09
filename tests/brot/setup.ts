@@ -2,8 +2,9 @@
  * Purpose: a LiteSVM world for the program's tests: the binary loaded, the clock set next to the
  *          captured Pyth prices, the upgrade authority recorded, funded wallets, and one `send`
  *          that returns the custom error code and the decoded events.
- * Version: 0.0.2
- * Sprint:  02 (pot core on Pinocchio); Sprint 03 lets a test set a price's posted slot
+ * Version: 0.0.3
+ * Sprint:  02 (pot core on Pinocchio); Sprint 03 lets a test set a price's posted slot; Sprint 05
+ *          decodes the events through the SDK (tests/brot/sent-events.ts)
  */
 import { readFileSync } from "node:fs";
 
@@ -14,6 +15,7 @@ import {
   generateKeyPairSigner,
   getAddressEncoder,
   getCompiledTransactionMessageDecoder,
+  getSignatureFromTransaction,
   lamports,
   pipe,
   setTransactionMessageFeePayerSigner,
@@ -26,9 +28,8 @@ import { litesvm, isFailedTransaction } from "@solana/kit-plugin-litesvm";
 import { generatedSigner } from "@solana/kit-plugin-signer";
 
 import { BrotError, type BrotErrorName } from "./errors";
-import { decode } from "./layouts";
 import * as P from "./program";
-import { EVENTS } from "./events";
+import { sentEvents, type Event } from "./sent-events";
 
 /** Unix time the captured SOL/USD and BTC/USD devnet accounts were published (fixture index). */
 export const FIXTURE_PUBLISH_TIME = 1_791_216_173n;
@@ -129,7 +130,7 @@ export function setPriceAccount(
   return data;
 }
 
-export type Event = { name: string; data: Record<string, any> };
+export { decodeEvent, type Event } from "./sent-events";
 export type Sent =
   | { ok: true; logs: string[]; events: Event[]; computeUnits: bigint }
   | { ok: false; logs: string[]; code: number | null; error: string };
@@ -151,13 +152,8 @@ export async function send(w: { client: Client }, ixs: Instruction[]): Promise<S
     const logs = (result as unknown as { meta(): { logs(): string[] } }).meta().logs();
     return { ok: false, logs, code: customCode(result.err()), error };
   }
-  const events = result
-    .innerInstructions()
-    .flat()
-    .map((inner) => inner.instruction())
-    .filter((c) => keys[c.programIdIndex()] === P.PROGRAM_ID && keys[c.accounts()[0]] === P.EVENT_AUTHORITY)
-    .map((c) => decodeEvent(c.data()))
-    .filter((e): e is Event => e !== null);
+  // Sprint 05: the events are the SDK's, decoded as an indexer decodes them (tests/brot/sent-events.ts).
+  const events = sentEvents(getSignatureFromTransaction(tx), keys, result.innerInstructions());
   return { ok: true, logs: result.logs(), events, computeUnits: result.computeUnitsConsumed() };
 }
 
@@ -166,13 +162,6 @@ function customCode(err: unknown): number | null {
   if (inner && typeof (inner as { code?: unknown }).code === "number") return (inner as { code: number }).code;
   const match = /code: (\d+)/.exec(String(err));
   return match ? Number(match[1]) : null;
-}
-
-/** Decodes `[0xFF, discriminator, payload]`; null for anything else. */
-export function decodeEvent(data: Uint8Array): Event | null {
-  if (data[0] !== P.IX.EMIT_EVENT) return null;
-  const found = Object.entries(EVENTS).find(([, e]) => e.discriminator === data[1]);
-  return found ? { name: found[0], data: decode(found[1].layout, data, 2) } : null;
 }
 
 /** Throws with the logs unless the transaction succeeded. */

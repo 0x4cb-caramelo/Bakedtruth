@@ -24,12 +24,12 @@
     "smoke:devnet": "bun run scripts/devnet-smoke.ts",
     "seed:devnet": "bun run scripts/devnet-seed.ts",
     "dev": "bun --filter @pred-provable/app dev",
-    "lint": "prettier --check \"tests/**/*.ts\" \"scripts/**/*.ts\" \"packages/**/*.ts\"",
+    "lint": "prettier --check \"tests/**/*.ts\" \"scripts/**/*.ts\" \"packages/**/*.ts\" && bun run lint:sdk",
     "test:os": "node scripts/run-tests.js",
     "self-test": "node scripts/os-self-test.js",
     "codemap": "node scripts/codemap.js",
     "prepare": "git config core.hooksPath .husky || echo \"git hooks not installed (not a git repository?)\"",
-    "depcruise": "depcruise packages services --config .dependency-cruiser.cjs"
+    "lint:sdk": "bunx --bun depcruise packages/sdk/src services --config .dependency-cruiser.cjs && tsc -p packages/sdk --noEmit && bun scripts/sdk-portability.ts"
   },
   "devDependencies": {
     "@anchor-lang/core": "^1.2.0",

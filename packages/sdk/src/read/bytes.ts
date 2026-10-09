@@ -14,19 +14,25 @@ export function hexToBytes(hex: string): Uint8Array {
   return out;
 }
 
+/** Any read-only run of bytes: a `Uint8Array`, Kit's `ReadonlyUint8Array`, a number array. */
+export type Bytes = ArrayLike<number> & Iterable<number>;
+
 /** Lower-case hex of `bytes`, no prefix. */
-export function bytesToHex(bytes: Uint8Array | ReadonlyArray<number>): string {
+export function bytesToHex(bytes: Bytes): string {
   let out = "";
   for (const byte of bytes) out += byte.toString(16).padStart(2, "0");
   return out;
 }
 
 /** The two byte arrays hold the same bytes. */
-export function bytesEqual(a: Uint8Array | ReadonlyArray<number>, b: Uint8Array | ReadonlyArray<number>): boolean {
+export function bytesEqual(a: Bytes, b: Bytes): boolean {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
   return true;
 }
 
 /** True when every byte is zero (an unused feed id, an empty note hash). */
-export const allZero = (bytes: Uint8Array | ReadonlyArray<number>): boolean => bytes.every((byte) => byte === 0);
+export function allZero(bytes: Bytes): boolean {
+  for (const byte of bytes) if (byte !== 0) return false;
+  return true;
+}

@@ -23,6 +23,8 @@ import {
 import { ACCOUNT_LEN, ACCOUNT_TAG, LAYOUT_VERSION, PROGRAM_ID } from "./constants";
 
 export type { Campaign, Entry, GlobalConfig, Join } from "../idl/generated/accounts";
+/** The raw Codama decoders, without the loader's checks, for callers that already made them. */
+export { getCampaignDecoder, getEntryDecoder, getGlobalConfigDecoder, getJoinDecoder } from "../idl/generated/accounts";
 
 /** An account as read from the chain: its owner and its bytes. */
 export type RawAccount = { readonly owner: Address | string; readonly data: Uint8Array };

@@ -108,8 +108,12 @@ describe("join refuses", () => {
   test("a side byte that is neither YES nor NO", async () => {
     const { w, campaign } = await joinWorld();
     const baker = await fundedWallet(w);
-    expectError(await join(w, baker, campaign, { side: 2, amount: SOL }), "InvalidSide");
-    expectError(await join(w, baker, campaign, { side: 255, amount: SOL }), "InvalidSide");
+    // The SDK cannot encode such a byte (Sprint 05); the kit's raw builder still sends it to the program.
+    await expect(join(w, baker, campaign, { side: 2, amount: SOL })).rejects.toThrow("Invalid enum variant");
+    for (const side of [2, 255]) {
+      const ix = await I.joinCampaignIx(baker, campaign, P.BTC_USD_ACCOUNT, { side, amount: SOL });
+      expectError(await send(w, [ix]), "InvalidSide");
+    }
   });
 
   test("a metric account other than the campaign's", async () => {
