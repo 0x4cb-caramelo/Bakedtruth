@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Brot Markets — On-Chain Campaigns the chain answers</title>
+    <meta
+      name="description"
+      content="Projects put SOL behind their own promises. Bakers join YES or NO, and the answer is read from a Solana account. Coming soon, on devnet first."
+    />
+    <!-- Draft of the home page in the deck's look (option A, founder, 2026-10-09). Out of search engines until approved. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/png" href="/img/favicon.png" />
+    <script src="/app.js?v=2"></script>
+    <script src="/2/two.js?v=1" defer></script>
+    <link rel="stylesheet" href="/2/base.css?v=1" />
+    <link rel="stylesheet" href="/2/bands.css?v=1" />
+    <link rel="stylesheet" href="/2/more.css?v=1" />
+  </head>
+  <body>
+    <p class="strip"><b>Solana devnet</b> · Coming soon · Test SOL only, no real money</p>
+
+    <header class="top">
+      <div class="wrap">
+        <a class="brand" href="/2/" aria-label="Brot Markets, home">
+          <img src="/img/baked-deadpan.webp" alt="" width="58" height="37" />
+          <span>brot.markets</span>
+        </a>
+        <nav class="top-nav" aria-label="Sections">
+          <a href="#how">How it works</a>
+          <a href="#pot">The pot</a>
+          <a href="#open">Open a campaign</a>
+          <a href="https://docs.brot.markets" rel="noopener">Docs</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="band dark hero">
+        <div class="wrap hero-grid">
+          <div>
+            <p class="kicker">On-Chain Campaigns · Solana</p>
+            <h1>On-Chain Campaigns the chain answers.</h1>
+            <p class="lede">
+              Projects put SOL behind their own promises. Bakers join YES or NO. At the deadline, the program reads the
+              answer from a Solana account and pays the winning side. No vote, no judge, no opinion.
+            </p>
+
+            <form class="join" id="join" data-join novalidate>
+              <label for="email">Get an email when campaigns open on devnet</label>
+              <div class="join-row">
+                <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+                <div class="trap" aria-hidden="true">
+                  <label for="company">Company</label>
+                  <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+                </div>
+                <button class="cta" type="submit">Notify me</button>
+              </div>
+              <p class="fine">
+                By sending, you agree that we keep your email to tell you when Brot Markets opens. Nothing else is
+                stored. <a href="/privacy">Privacy and how to leave</a>.
+              </p>
+              <p class="form-msg" data-join-msg role="alert" aria-live="polite"></p>
+              <noscript><p class="fine">This form needs JavaScript. You can also follow @brotmarkets on X.</p></noscript>
+            </form>
+            <div class="joined" data-joined hidden tabindex="-1">
+              <b>You're on the list.</b> We'll write when campaigns open on devnet. Until then, nothing.
+            </div>
+          </div>
+          <img class="sticker" src="/pitch/img/e09-adesivo-cheio.webp" alt="Baked, the Brot Markets bread roll, arms crossed" width="1200" height="800" />
+        </div>
+      </section>
+
+      <section class="band cream" aria-labelledby="problem-h">
+        <div class="wrap">
+          <p class="kicker">01 · The problem</p>
+          <h2 id="problem-h">Someone always stands between the event and your payout.</h2>
+          <div class="problem-grid">
+            <div class="big-stat">
+              <b>$7M</b>
+              <p>in a single market, settled on an event that never happened. Polymarket, March 2025. No refunds.</p>
+            </div>
+            <ul class="who">
+              <li><span>Polymarket</span><b>Token vote</b>Disputes take 4–6 days.</li>
+              <li><span>World, inside Phantom</span><b>Admin key</b>One company key writes the result.</li>
+              <li><span>PNP</span><b>Two LLMs</b>Language models decide.</li>
+            </ul>
+          </div>
+          <p class="source">Sources: CoinDesk and Cointelegraph (Mar 2025) · Polymarket docs · Chainstack Labs · PNP docs</p>
+        </div>
+      </section>
+
+      <section class="band dark" id="how" aria-labelledby="how-h">
+        <div class="wrap answer-grid">
+          <div>
+            <p class="kicker">02 · The answer</p>
+            <h2 id="how-h">Brot only opens campaigns the chain can answer.</h2>
+            <p class="lede">If the answer isn't stored in a Solana account, the campaign doesn't open.</p>
+            <ul class="points">
+              <li><b>No one picks the winner.</b> The program reads the account.</li>
+              <li><b>Anyone can re-check.</b> Same account, same answer.</li>
+              <li><b>Paid on its own.</b> SOL lands in your wallet. No claim button.</li>
+            </ul>
+          </div>
+          <div class="demo" data-demo>
+            <p class="demo-kicker">Example · not a live campaign</p>
+            <p class="demo-q">Does SOL touch $300 by Dec 31?</p>
+            <div class="demo-sides">
+              <button class="demo-side yes" type="button" data-side="yes"><span>YES</span><b>30%</b></button>
+              <button class="demo-side no" type="button" data-side="no"><span>NO</span><b>70%</b></button>
+            </div>
+            <dl class="demo-facts">
+              <div><dt>Pot</dt><dd>3 SOL on YES · 7 SOL on NO</dd></div>
+              <div><dt>Read from</dt><dd>The Pyth SOL/USD price account</dd></div>
+            </dl>
+            <p class="demo-status" data-demo-status>Join a side to see how it ends.</p>
+            <div class="demo-result" data-demo-result hidden>
+              <img src="/img/baked-approve.webp" alt="" width="440" height="280" data-demo-face />
+              <div>
+                <p class="demo-stamp">Resolved by the chain · SOL touched $300</p>
+                <p class="demo-amount" data-demo-amount></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="band cream" id="pot" aria-labelledby="pot-h">
+        <div class="wrap">
+          <p class="kicker">03 · The pot</p>
+          <h2 id="pot-h">We only earn from the losing side.</h2>
+          <div class="pot-grid">
+            <div class="big-stat">
+              <b>10%</b>
+              <p><strong>of the losing side.</strong> Winners get their SOL back, plus the rest.</p>
+            </div>
+            <div>
+              <p class="demo-kicker">Example · a 10 SOL pot</p>
+              <div class="bar"><span class="win">Winning side <b>6</b></span><span class="lose">Losing side <b>4</b></span></div>
+              <p class="bar-note">creator: 1% of the pot · ours: 10% of the losing side</p>
+              <div class="tiles">
+                <p><b>0.4</b>SOL to Brot</p>
+                <p><b>0.1</b>SOL to the creator</p>
+                <p class="hot"><b>9.5</b>SOL to the winners</p>
+              </div>
+            </div>
+          </div>
+          <img class="pet" src="/pitch/img/12-mordendo.webp" alt="" width="1200" height="800" />
+        </div>
+      </section>
+
+      <section class="band dark" id="open" aria-labelledby="open-h">
+        <div class="wrap">
+          <p class="kicker">04 · Open a campaign · permissionless</p>
+          <h2 id="open-h">Anyone opens a campaign for $500 in SOL.</h2>
+          <ol class="steps">
+            <li>Pick a target the chain can read: <em>burn 100M tokens by Nov 30</em>.</li>
+            <li>Pay $500 in SOL, at the SOL/USD price the program reads from Pyth.</li>
+            <li>Bakers join YES or NO, from 0.01 SOL.</li>
+            <li class="hot">The chain answers. Payouts go out on their own.</li>
+          </ol>
+          <div class="splits">
+            <p><b>90%</b>of the opening becomes the prize.</p>
+            <p><b>10%</b>is our opening fee.</p>
+            <p><b>1%</b>of the pot goes to the creator.</p>
+          </div>
+          <p class="note">
+            Projects open campaigns on their own promises. Anyone else can too, inside the same on-chain rules. Launch
+            partners open theirs free.
+          </p>
+        </div>
+      </section>
+
+      <section class="band cream" aria-labelledby="road-h">
+        <div class="wrap">
+          <p class="kicker">05 · Where we are</p>
+          <h2 id="road-h">Test SOL first. Real SOL after an audit.</h2>
+          <ol class="road">
+            <li class="now"><span>Now</span>Devnet, test SOL.</li>
+            <li><span>Launch</span>Partner campaigns live.</li>
+            <li><span>Mainnet</span>After an audit and a multisig.</li>
+          </ol>
+          <p class="note">
+            The program is being written and is not audited yet. Every screen will say so until it is.
+            <a href="https://docs.brot.markets" rel="noopener">Read how it works in the docs</a>.
+          </p>
+        </div>
+      </section>
+
+      <section class="band dark closing" aria-labelledby="close-h">
+        <div class="wrap close-grid">
+          <img src="/pitch/img/badge-proof.webp" alt="Proof > Promises badge with Baked" width="1000" height="1000" />
+          <div>
+            <h2 id="close-h">Proof &gt; Promises.</h2>
+            <p class="lede">Got a project with a promise to prove? Launch partner spots are limited to 20–30 projects.</p>
+            <p class="actions">
+              <a class="cta" href="#join">Get the email</a>
+              <a class="ghost" href="https://x.com/brotmarkets" rel="noopener">DM @brotmarkets on X</a>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <p>
+          Brot Markets is in a test phase on Solana devnet, with test tokens. The program is not audited. Nothing on
+          this page is an offer or an invitation to put in real money, and availability by country has not been decided.
+        </p>
+        <nav aria-label="Footer">
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+          <a href="https://docs.brot.markets" rel="noopener">Docs</a>
+          <a href="https://x.com/brotmarkets" rel="noopener">X</a>
+          <span>© 2026 Brot Markets</span>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>
