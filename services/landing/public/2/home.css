@@ -1,0 +1,312 @@
+/* Purpose: the parts of /2 in the pitch deck's look: the hero, the example campaign (always the deck's dark card), the
+   three principles (the deck's dark tiles), the suggestion box, the "joined" notice, the mascot and the phone layout.
+   The content is the home page's; only these rules differ. Sprint: out of band (landing page), 2026-10-09. */
+
+main {
+  flex: 1;
+}
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 1fr);
+  gap: 56px;
+  align-items: center;
+  padding-top: 84px;
+}
+.eyebrow,
+.kicker {
+  color: var(--accent);
+  font: 400 13px/1.3 var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.hero h1 {
+  margin-top: 16px;
+  font: 600 clamp(42px, 6vw, 78px) / 1.04 var(--mono);
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.lede {
+  margin-top: 22px;
+  max-width: 580px;
+  color: var(--muted);
+  font-size: 18px;
+  text-wrap: pretty;
+}
+.joined {
+  margin-top: 32px;
+  max-width: 540px;
+  padding: 18px 20px;
+  border-radius: var(--r);
+  background: #1c3a30;
+  color: #a6ffcf;
+}
+.joined b {
+  display: block;
+  margin-bottom: 4px;
+  font: 600 20px/1.2 var(--mono);
+}
+
+/* The example campaign is the deck's dark card in both themes, as on the cream slides. */
+.read {
+  position: relative;
+  margin-top: 60px;
+  padding: 26px;
+  border: 2px solid #263041;
+  border-radius: 22px;
+  background: #171e29;
+  color: #f7eedb;
+}
+.read .kicker {
+  color: #a3acba;
+}
+.read h2 {
+  margin-top: 10px;
+  font: 600 28px/1.2 var(--mono);
+  letter-spacing: -0.02em;
+}
+.sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 18px;
+}
+.side {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: var(--r);
+  font: 400 14px/1 var(--mono);
+}
+.side b {
+  font: 600 34px/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.side.yes {
+  background: #1c3a30;
+  color: #a6ffcf;
+}
+.side.no {
+  background: #3d2422;
+  color: #ff9a7a;
+}
+.bar {
+  height: 8px;
+  margin-top: 14px;
+  border-radius: 4px;
+  background: #263041;
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(90deg, #a8481b, #eea546);
+}
+.facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 18px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid #263041;
+}
+.facts dt {
+  color: #a3acba;
+  font: 400 11px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.facts dd {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+.read .fine {
+  margin-top: 16px;
+  color: #a3acba;
+}
+
+/* The three principles are the deck's dark tiles, with the step number in the crust colour. */
+.principles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 96px;
+}
+.principle {
+  padding: 22px;
+  border: 2px solid #263041;
+  border-radius: var(--r);
+  background: #171e29;
+  color: #d9d1c1;
+}
+:root[data-theme="light"] .principle {
+  border-color: #1b1611;
+  background: #1b1611;
+}
+.ic {
+  color: #eea546;
+  font: 600 16px/1 var(--mono);
+}
+.principle h3 {
+  margin-top: 12px;
+  color: #f7eedb;
+  font: 600 21px/1.2 var(--mono);
+  letter-spacing: -0.01em;
+}
+.principle p {
+  margin-top: 8px;
+  font-size: 14px;
+}
+.suggest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+  padding: 20px 22px;
+  border-left: 4px solid var(--accent);
+  border-radius: var(--r);
+  background: var(--panel);
+}
+.suggest p {
+  max-width: 760px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.suggest b {
+  color: var(--text);
+}
+.ghost {
+  display: inline-block;
+  padding: 12px 18px;
+  border: 2px solid var(--accent);
+  border-radius: var(--r);
+  color: var(--accent);
+  font: 600 14px/1 var(--mono);
+}
+.ghost:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+  text-decoration: none;
+}
+
+/* Baked, the mascot (/mascot.js). Same behaviour as on the home page; only its speech bubble takes the deck's font. */
+.bk-pet {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 80;
+  pointer-events: none;
+  will-change: transform;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.bk-pet.is-on {
+  opacity: 1;
+}
+.bk-pet-flip,
+.bk-pet-squash,
+.bk-pet-body {
+  position: absolute;
+  inset: 0;
+}
+.bk-pet-flip {
+  transition: transform 0.16s;
+}
+.bk-pet-squash,
+.bk-pet-body {
+  transform-origin: 50% 100%;
+}
+.bk-pet-body {
+  animation: bk-pet-breathe 3.4s ease-in-out infinite;
+}
+.bk-pet-body img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  user-select: none;
+}
+.bk-pet-body img.is-on {
+  opacity: 1;
+}
+.bk-pet-shadow {
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  bottom: -2%;
+  height: 8%;
+  border-radius: 50%;
+  background: var(--pet-shadow);
+  filter: blur(3px);
+}
+.bk-pet-say {
+  position: absolute;
+  left: 50%;
+  bottom: 102%;
+  transform: translate(-50%, 6px);
+  padding: 8px 11px;
+  border-radius: 10px;
+  background: var(--say-bg);
+  color: var(--say-fg);
+  font: 600 12px/1.2 var(--mono);
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transition:
+    opacity 0.18s,
+    transform 0.18s;
+}
+.bk-pet-say.is-on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.bk-pet-say.is-below {
+  bottom: auto;
+  top: 104%;
+}
+@keyframes bk-pet-breathe {
+  50% {
+    transform: scaleY(1.03) scaleX(0.988);
+  }
+}
+
+@media (max-width: 860px) {
+  .wrap {
+    padding: 0 16px;
+  }
+  .hero,
+  .principles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hero {
+    gap: 26px;
+    padding-top: 44px;
+  }
+  .principles {
+    margin-top: 48px;
+  }
+  .join-row {
+    flex-direction: column;
+  }
+  .top-link {
+    display: none;
+  }
+  footer nav {
+    margin-left: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bk-pet-body {
+    animation: none;
+  }
+  .bk-pet-flip {
+    transition: none;
+  }
+  body {
+    transition: none;
+  }
+}
