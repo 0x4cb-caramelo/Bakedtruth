@@ -1,10 +1,11 @@
 /**
- * Purpose: what the join tests share: a world with the founder's config, a team and a paid BTC/USD
- *          campaign; SOL sent by hand with a plain System Program transfer; an account rewritten in
- *          place; and the return estimate of TP section 3.4.16 that `min_return_bps` is checked on.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio), lane E
+ * Purpose: what the join tests share: a world with a paid price campaign, its sponsored price kept
+ *          fresh across clock moves, a refused join that moves nothing, SOL sent by hand, an account
+ *          rewritten in place, and the return estimate of TP section 3.4.16 (`min_return_bps`).
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio), lane E; 03 (the join lock reads the sponsored price), lane E
  */
+import { expect } from "bun:test";
 import {
   AccountRole,
   generateKeyPairSigner,
@@ -16,10 +17,13 @@ import {
   type KeyPairSigner,
 } from "@solana/kit";
 
+import type { BrotErrorName } from "./errors";
 import { DEFAULT_PARAMS, initConfig, openedCampaign, readCampaign, setTeam } from "./flows";
+import * as I from "./instructions";
 import { layoutSize } from "./layouts";
 import * as P from "./program";
-import { createWorld, fundedWallet, type World } from "./setup";
+import { setClock } from "./readers";
+import { balance, createWorld, expectError, fundedWallet, now, PRICE_OFFSETS, send, type World } from "./setup";
 import { ENTRY } from "./structs";
 
 /** P-5: 0.01 SOL, the config's `min_entry_lamports`. */
@@ -27,16 +31,44 @@ export const MIN_ENTRY = DEFAULT_PARAMS.min_entry_lamports;
 /** `Entry::LEN` (T19). */
 export const ENTRY_LEN = layoutSize(ENTRY);
 
-/** A world with the founder's config, two team keys and one paid price campaign, still empty. */
-export async function joinWorld() {
+/** A world with the founder's config, two team keys and one paid price campaign (BTC/USD unless `over`), empty. */
+export async function joinWorld(over: Partial<I.OpenArgs> = {}) {
   const w = await createWorld();
   const { admin } = await initConfig(w);
-  const team = await setTeam(w, admin);
-  const creator = await fundedWallet(w);
-  const opened = await openedCampaign(w, creator);
+  const [team, creator] = [await setTeam(w, admin), await fundedWallet(w)];
+  const opened = await openedCampaign(w, creator, over);
   const metric = readCampaign(w, opened.campaign).metric_account as Address;
   return { w, admin, team, creator, opened, campaign: opened.campaign, vault: opened.vault, metric };
 }
+
+/**
+ * Moves the clock's Unix time to `at` (by default it stays) and sets the publish time of the price
+ * account `metric` 5 s before it, every other byte kept: from Sprint 03 the join lock reads it.
+ */
+export function freshPrice(w: World, metric: Address, at = now(w.client)) {
+  setClock(w.client, { unixTimestamp: at });
+  rewrite(w, metric, (d) => new DataView(d.buffer).setBigInt64(PRICE_OFFSETS.publishTime, at - 5n, true));
+}
+
+/**
+ * A join that must fail with `error` and move nothing: the baker's and the vault's lamports, the campaign's bytes and
+ * the baker's Entry (absent if it was) stay as they were; returns them. `a.metric` replaces the campaign's own account.
+ */
+export async function refusedJoin(w: World, baker: KeyPairSigner, campaign: Address, a: Refused, error: BrotErrorName) {
+  const [vault, entry] = [await P.vaultPda(campaign), await P.entryPda(campaign, baker.address)];
+  const metric = a.metric ?? (readCampaign(w, campaign).metric_account as Address);
+  const state = () => ({
+    baker: balance(w, baker.address),
+    vault: balance(w, vault),
+    campaign: snapshot(w, campaign),
+    entry: snapshot(w, entry),
+  });
+  const kept = state();
+  expectError(await send(w, [await I.joinCampaignIx(baker, campaign, metric, a)]), error);
+  expect(state()).toEqual(kept);
+  return kept;
+}
+type Refused = I.JoinArgs & { metric?: Address };
 
 /** A System Program transfer signed by `from`: SOL sent by hand, outside the program. */
 export function systemTransferIx(from: KeyPairSigner, to: Address, amount: bigint): Instruction {
@@ -90,11 +122,10 @@ export async function entryBump(campaign: Address, baker: Address) {
 }
 
 /**
- * A wallet holding 100 SOL whose address satisfies `wanted`, drawn until one does. A foreign
- * Entry's stored bump, re-derived on another wallet's seeds, either gives a valid address (when
- * the two canonical bumps are equal, that wallet's own Entry address) or none at all (when it is
- * above that wallet's canonical bump, the point is on the curve). Choosing the wallets makes each
- * test take one of the two paths on every run, instead of one at random.
+ * A wallet holding 100 SOL whose address satisfies `wanted`, drawn until one does. A foreign Entry's stored bump,
+ * re-derived on another wallet's seeds, either gives a valid address (when the two canonical bumps are equal, that
+ * wallet's own Entry address) or none at all (when it is above that wallet's canonical bump, the point is on the
+ * curve). Choosing the wallets makes each test take one of the two paths on every run, instead of one at random.
  */
 export async function walletWhere(w: World, wanted: (address: Address) => Promise<boolean>) {
   for (let tries = 0; tries < 64; tries++) {
@@ -149,9 +180,8 @@ export function estimateReturnBps(p: JoinedPot) {
 }
 
 /**
- * The estimate the program will compute for `amount` on `side`, from the campaign's books as they
- * stand. Tests use it only where the rounding is unambiguous: a one-sided pot with whole-percent
- * fees, or a joiner alone on its side (`amount` equal to V).
+ * The estimate the program will compute for `amount` on `side`, from the campaign's books as they stand. Tests use it
+ * only where the rounding is unambiguous: a one-sided pot with whole-percent fees, or a joiner alone on its side.
  */
 export function expectedEstimate(w: World, campaign: Address, side: number, amount: bigint, isFirst: boolean) {
   const c = readCampaign(w, campaign);

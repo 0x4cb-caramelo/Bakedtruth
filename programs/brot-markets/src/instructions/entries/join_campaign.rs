@@ -1,25 +1,26 @@
-//! Purpose: `user_join_campaign`: a baker joins YES or NO with at least `min_entry_lamports`; the
-//!          entry moves from the baker's wallet into the vault by System Program transfer, and
-//!          the pot is bookkept, never read from the vault.
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio); accounts and arguments frozen at the sprint's opening,
-//!         body by lane E
+//! Purpose: `user_join_campaign`: a baker joins YES or NO with at least `min_entry_lamports` while
+//!          the outcome is not knowable; the entry moves from the baker's wallet into the vault
+//!          by System Program transfer, and the pot is bookkept, never read from the vault.
+//! Version: 0.0.3
+//! Sprint: 02 (pot core on Pinocchio), accounts and arguments frozen at its opening, body by
+//!         lane E; 03 (readers and resolution) adds the join lock (BR-06), lane E
 //!
-//! Order: the arguments, the slots, the loads and the campaign's rules, as `checks.rs` orders
-//! them; then the baker's `Entry` (`entry_account.rs`), created on the first join with its rent,
-//! the only lamports that move before the estimate; the first baker; the return estimate; and
-//! only then the deposit, the bookkeeping and the event. A refusal after the creation reverts it
-//! with the rest of the transaction. Every refusal has its own error. There is no cap of any
-//! kind (D-h), and no instruction moves an entry out (A-1).
+//! Order: the arguments, the slots and the loads, as `checks.rs` orders them; then the
+//! campaign's rules: the metric account's address, `Open`, the entry close, the join lock (the
+//! reader's error, or `OutcomeKnowable`; `join_lock.rs`), the pause and the minimum. Then the
+//! baker's `Entry` (`entry_account.rs`), created on the first join with its rent, the only
+//! lamports that move before the estimate; the first baker; the return estimate; and only then
+//! the deposit, the bookkeeping and the event. A refusal after the creation reverts it with the
+//! rest of the transaction. Every refusal has its own error. There is no cap of any kind (D-h),
+//! and no instruction moves an entry out (A-1).
 
-use pinocchio::{
-    error::ProgramError,
-    sysvars::{clock::Clock, Sysvar},
-    AccountView, Address, ProgramResult,
-};
+use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 use shank::ShankType;
 
-use super::entry_account::{create_entry, load_entry};
+use super::{
+    entry_account::{create_entry, load_entry},
+    join_lock::require_outcome_open,
+};
 use crate::{
     checks,
     constants::VAULT_SEED,
@@ -28,6 +29,7 @@ use crate::{
     instructions::args,
     layout::{LeU32, LeU64},
     math::payout::{estimate_return_bps, JoinedPot},
+    readers::ChainTime,
     state::{
         campaign::Campaign,
         config::GlobalConfig,
@@ -93,7 +95,9 @@ pub fn user_join_campaign(
     let vault_seeds: [&[u8]; 2] = [VAULT_SEED, campaign_key.as_ref()];
     checks::owned_by(vault, program_id)?;
     checks::pda(vault, &vault_seeds, campaign.vault_bump, program_id)?;
-    // The join lock of Sprint 03 reads this account; until then it is only compared.
+    // Only the account locked at opening is read. For a price campaign that is the sponsored
+    // account, derived on-chain from the push oracle, shard 0 and the feed (Sprint 02): this
+    // comparison is what makes the price join accept only the sponsored account.
     if metric_account.address() != &campaign.metric_account {
         return Err(BrotError::MetricAccountMismatch.into());
     }
@@ -101,9 +105,13 @@ pub fn user_join_campaign(
     if campaign.status != Status::Open as u8 {
         return Err(BrotError::CampaignNotOpen.into());
     }
-    if Clock::get()?.unix_timestamp >= campaign.entries_close_at.get() {
+    // One clock read serves the entry close and the join lock.
+    let time = ChainTime::now()?;
+    if time.unix_timestamp >= campaign.entries_close_at.get() {
         return Err(BrotError::EntriesClosed.into());
     }
+    // The join lock (BR-06).
+    require_outcome_open(metric_account, &campaign, time)?;
     if paused {
         return Err(BrotError::JoinWhilePaused.into());
     }
