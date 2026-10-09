@@ -13,18 +13,15 @@
 pub mod admin;
 pub mod campaigns;
 pub mod entries;
+pub mod interface;
 pub mod resolution;
+pub mod settlement;
 
 use pinocchio::{error::ProgramError, ProgramResult};
-use shank::ShankInstruction;
 
-use crate::{error::BrotError, layout::ZeroCopy, state::config::CreationParams};
-use admin::{
-    initialize_config::InitializeConfigArgs, set_fee_recipient::SetFeeRecipientArgs,
-    set_team::SetTeamArgs, transfer_admin::TransferAdminArgs,
-};
-use campaigns::open_campaign::OpenCampaignArgs;
-use entries::join_campaign::JoinCampaignArgs;
+use crate::{error::BrotError, layout::ZeroCopy};
+
+pub use interface::BrotInstruction;
 
 /// Instruction discriminators, in the order of `BrotInstruction`.
 pub mod ix {
@@ -39,105 +36,18 @@ pub mod ix {
     pub const USER_OPEN_CAMPAIGN: u8 = 8;
     pub const USER_JOIN_CAMPAIGN: u8 = 9;
     pub const RESOLVE_CAMPAIGN: u8 = 10;
+    pub const TEAM_CONFIRM_RESULT: u8 = 11;
+    pub const TEAM_VOID_CAMPAIGN: u8 = 12;
+    pub const TEAM_OPEN_CONTEST: u8 = 13;
+    pub const FINALIZE_CAMPAIGN: u8 = 14;
+    pub const SETTLE_ENTRY: u8 = 15;
+    pub const SETTLE_CREATOR_SHARE: u8 = 16;
+    pub const COLLECT_FEE: u8 = 17;
+    pub const SETTLE_PRIZE: u8 = 18;
+    pub const CLOSE_CAMPAIGN: u8 = 19;
+    pub const SWEEP_FEES: u8 = 20;
     /// Not an instruction: the self-CPI that carries an event (`events::EVENT_IX_TAG`).
     pub const EMIT_EVENT: u8 = crate::events::EVENT_IX_TAG;
-}
-
-#[derive(ShankInstruction)]
-#[rustfmt::skip]
-pub enum BrotInstruction {
-    /// Creates `GlobalConfig` and the fee vault, once. Only the program's upgrade authority.
-    #[account(0, writable, signer, name = "authority", desc = "The program's upgrade authority; pays both rents")]
-    #[account(1, writable, name = "config", desc = "GlobalConfig, PDA [\"config\"], created")]
-    #[account(2, writable, name = "fee_vault", desc = "Fee vault, PDA [\"fee_vault\"], created with no data")]
-    #[account(3, name = "program_data", desc = "This program's ProgramData account")]
-    #[account(4, name = "system_program", desc = "System Program")]
-    #[account(5, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
-    #[account(6, name = "program", desc = "This program")]
-    AdminInitializeConfig(InitializeConfigArgs),
-
-    /// Sets up to five team keys.
-    #[account(0, signer, name = "admin", desc = "GlobalConfig.admin")]
-    #[account(1, writable, name = "config", desc = "GlobalConfig")]
-    #[account(2, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
-    #[account(3, name = "program", desc = "This program")]
-    AdminSetTeam(SetTeamArgs),
-
-    /// Changes the creation parameters, each under its ceiling, for future campaigns only.
-    #[account(0, signer, name = "admin", desc = "GlobalConfig.admin")]
-    #[account(1, writable, name = "config", desc = "GlobalConfig")]
-    #[account(2, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
-    #[account(3, name = "program", desc = "This program")]
-    AdminSetCreationParams(CreationParams),
-
-    /// Sets where `sweep_fees` sends the fee vault.
-    #[account(0, signer, name = "admin", desc = "GlobalConfig.admin")]
-    #[account(1, writable, name = "config", desc = "GlobalConfig")]
-    #[account(2, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
-    #[account(3, name = "program", desc = "This program")]
-    AdminSetFeeRecipient(SetFeeRecipientArgs),
-
-    /// First step of an admin change: names the pending admin (zero cancels).
-    #[account(0, signer, name = "admin", desc = "GlobalConfig.admin")]
-    #[account(1, writable, name = "config", desc = "GlobalConfig")]
-    #[account(2, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
-    #[account(3, name = "program", desc = "This program")]
-    AdminTransferAdmin(TransferAdminArgs),
-
-    /// Second step: the pending admin accepts.
-    #[account(0, signer, name = "new_admin", desc = "GlobalConfig.pending_admin")]
-    #[account(1, writable, name = "config", desc = "GlobalConfig")]
-    #[account(2, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
-    #[account(3, name = "program", desc = "This program")]
-    AdminAcceptAdmin,
-
-    /// Pauses entries and openings: `Normal` to `EntriesHalted` only. Never blocks payouts.
-    #[account(0, signer, name = "team_member", desc = "A key in GlobalConfig.team")]
-    #[account(1, writable, name = "config", desc = "GlobalConfig")]
-    #[account(2, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
-    #[account(3, name = "program", desc = "This program")]
-    TeamPauseEntries,
-
-    /// Resumes entries: `EntriesHalted` to `Normal`.
-    #[account(0, signer, name = "admin", desc = "GlobalConfig.admin")]
-    #[account(1, writable, name = "config", desc = "GlobalConfig")]
-    #[account(2, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
-    #[account(3, name = "program", desc = "This program")]
-    AdminResumeEntries,
-
-    /// Opens a campaign: the ten checks of TP section 3.4.10, then the campaign, its vault and
-    /// the opening payment into the vault.
-    #[account(0, writable, signer, name = "creator", desc = "Any wallet, or a team key; pays the opening and both rents")]
-    #[account(1, writable, name = "config", desc = "GlobalConfig")]
-    #[account(2, writable, name = "campaign", desc = "Campaign, PDA [\"campaign\", id], created")]
-    #[account(3, writable, name = "vault", desc = "Vault, PDA [\"vault\", campaign], created with no data")]
-    #[account(4, name = "metric_account", desc = "The account the reader reads (price: the sponsored account of feed_id)")]
-    #[account(5, name = "sol_usd_price", desc = "The sponsored SOL/USD account; read only when the opening pays")]
-    #[account(6, name = "system_program", desc = "System Program")]
-    #[account(7, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
-    #[account(8, name = "program", desc = "This program")]
-    UserOpenCampaign(OpenCampaignArgs),
-
-    /// Joins a campaign: the entry moves from the baker's wallet into the vault.
-    #[account(0, writable, signer, name = "baker", desc = "The joining wallet; pays the entry and the Entry rent")]
-    #[account(1, name = "config", desc = "GlobalConfig: the pause and the minimum")]
-    #[account(2, writable, name = "campaign", desc = "Campaign")]
-    #[account(3, writable, name = "vault", desc = "The campaign's vault")]
-    #[account(4, writable, name = "entry", desc = "Entry, PDA [\"entry\", campaign, baker], created on the first join")]
-    #[account(5, name = "metric_account", desc = "Campaign.metric_account, read by the join lock")]
-    #[account(6, name = "system_program", desc = "System Program")]
-    #[account(7, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
-    #[account(8, name = "program", desc = "This program")]
-    UserJoinCampaign(JoinCampaignArgs),
-
-    /// Records the outcome the reader reads and opens the review window. Any wallet, top level
-    /// only; it chooses nothing (Q1). For a price campaign the proof slot offers a YES proof.
-    #[account(0, writable, name = "campaign", desc = "Campaign, Open")]
-    #[account(1, name = "metric_account", desc = "Campaign.metric_account")]
-    #[account(2, name = "proof_account", desc = "Price kind: the YES proof, any Full account of the feed; other kinds: not read")]
-    #[account(3, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
-    #[account(4, name = "program", desc = "This program")]
-    ResolveCampaign,
 }
 
 /// The arguments of an instruction, refused unless the data is exactly their size.

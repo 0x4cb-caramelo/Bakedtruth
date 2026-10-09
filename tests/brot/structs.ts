@@ -121,6 +121,10 @@ export const SET_TEAM_ARGS: Layout = [
   ["team_len", "u8"],
   ["team", { pubkeys: 5 }],
 ];
+export const TEAM_VOID_CAMPAIGN_ARGS: Layout = [
+  ["reason", "u8"],
+  ["note_hash", { bytes: 32 }],
+];
 export const SET_FEE_RECIPIENT_ARGS: Layout = [["fee_recipient", "pubkey"]];
 export const TRANSFER_ADMIN_ARGS: Layout = [["new_admin", "pubkey"]];
 export const OPEN_CAMPAIGN_ARGS: Layout = [

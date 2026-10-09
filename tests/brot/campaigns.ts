@@ -1,15 +1,15 @@
 /**
  * Purpose: a `Campaign` of any kind and its vault written straight into the world, so the tests of
  *          resolution and of the join lock do not depend on the opening's rules for that kind.
- * Version: 0.0.3
- * Sprint:  03 (readers and resolution); frozen at the sprint's opening with the program's contract
+ * Version: 0.0.4
+ * Sprint:  03 (readers and resolution); 04 adds `injectEntry` and the reviewed and settling helpers
  */
 import { getAddressEncoder, getProgramDerivedAddress, lamports, type Address } from "@solana/kit";
 
 import { encode, layoutSize } from "./layouts";
 import * as P from "./program";
 import type { Client } from "./setup";
-import { CAMPAIGN } from "./structs";
+import { CAMPAIGN, ENTRY } from "./structs";
 
 const text = (s: string) => new TextEncoder().encode(s);
 
@@ -91,4 +91,75 @@ export async function injectCampaign(client: Pick<Client, "svm">, c: InjectedCam
   write(vault, new Uint8Array(0), (c.poolYes ?? 0n) + (c.poolNo ?? 0n));
   if (data.length !== layoutSize(CAMPAIGN)) throw new Error("campaign layout size");
   return { campaign, vault };
+}
+
+/** A campaign in `InReview` with its outcome, as `resolve_campaign` leaves it (the window still open). */
+export const injectReviewed = (
+  client: Pick<Client, "svm">,
+  c: InjectedCampaign,
+  outcome: number,
+  reviewEndsAt: bigint,
+) =>
+  injectCampaign(client, {
+    ...c,
+    status: P.Status.InReview,
+    extra: { outcome, review_ends_at: reviewEndsAt, ...c.extra },
+  });
+
+/** A campaign in `Settling` with its snapshot, as `finalize_campaign` leaves it (the fields the program sets). */
+export const injectSettling = (
+  client: Pick<Client, "svm">,
+  c: InjectedCampaign,
+  outcome: number,
+  snapshot: Partial<
+    Record<
+      | "winning_total"
+      | "losing_total"
+      | "distributable"
+      | "fee_total"
+      | "creator_share"
+      | "creator_share_from_fee"
+      | "prize_lamports",
+      bigint
+    >
+  >,
+) =>
+  injectCampaign(client, {
+    ...c,
+    status: P.Status.Settling,
+    extra: { outcome, ...snapshot, ...c.extra },
+  });
+
+/**
+ * A baker's `Entry` at its canonical PDA `["entry", campaign, baker]`, with its two side totals.
+ * Its `_reserved` bytes stay zero until the join's storage is decided (Sprint 04, question 7).
+ */
+export async function injectEntry(
+  client: Pick<Client, "svm">,
+  e: { campaign: Address; baker: Address; amountYes?: bigint; amountNo?: bigint; isFirst?: boolean },
+) {
+  const [entry, bump] = await getProgramDerivedAddress({
+    programAddress: P.PROGRAM_ID,
+    seeds: [text("entry"), getAddressEncoder().encode(e.campaign), getAddressEncoder().encode(e.baker)],
+  });
+  const data = encode(ENTRY, {
+    tag: P.AccountTag.Entry,
+    version: 1,
+    bump,
+    is_first: e.isFirst ?? false,
+    campaign: e.campaign,
+    baker: e.baker,
+    amount_yes: e.amountYes ?? 0n,
+    amount_no: e.amountNo ?? 0n,
+    _reserved: new Uint8Array(16),
+  });
+  client.svm.setAccount({
+    address: entry,
+    data,
+    executable: false,
+    lamports: lamports(client.svm.minimumBalanceForRentExemption(BigInt(data.length))),
+    programAddress: P.PROGRAM_ID,
+    space: BigInt(data.length),
+  });
+  return entry;
 }

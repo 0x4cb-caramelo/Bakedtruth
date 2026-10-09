@@ -15,6 +15,7 @@ import { EVENTS } from "./events";
 import { DEFAULT_PARAMS, initConfig } from "./flows";
 import { camel, IDL, normalized, sampleBytes } from "./idl";
 import * as I from "./instructions";
+import * as IS from "./instructions-settlement";
 import { decode, type Layout } from "./layouts";
 import * as P from "./program";
 import { accountData, createWorld, expectOk, fundedWallet, send } from "./setup";
@@ -111,6 +112,46 @@ describe("codama client matches the test kit", () => {
       [
         C.getResolveCampaignInstruction({ campaign, metricAccount, proofAccount: P.SOL_USD_ACCOUNT }),
         I.resolveCampaignIx(campaign, metricAccount, P.SOL_USD_ACCOUNT),
+      ],
+      [
+        C.getTeamConfirmResultInstruction({ teamMember: who, config, campaign }),
+        await IS.teamConfirmResultIx(who, config, campaign),
+      ],
+      [
+        C.getTeamVoidCampaignInstruction({
+          teamMember: who,
+          config,
+          campaign,
+          reason: 1,
+          noteHash: new Uint8Array(32),
+        }),
+        await IS.teamVoidCampaignIx(who, config, campaign, { reason: 1, noteHash: new Uint8Array(32) }),
+      ],
+      [
+        C.getTeamOpenContestInstruction({ teamMember: who, config, campaign }),
+        await IS.teamOpenContestIx(who, config, campaign),
+      ],
+      [C.getFinalizeCampaignInstruction({ campaign, config }), IS.finalizeCampaignIx(campaign, config)],
+      [
+        C.getSettleEntryInstruction({ entry, campaign, vault, baker: who.address }),
+        IS.settleEntryIx(entry, campaign, vault, who.address),
+      ],
+      [
+        C.getSettleCreatorShareInstruction({ campaign, vault, creator: who.address }),
+        IS.settleCreatorShareIx(campaign, vault, who.address),
+      ],
+      [C.getCollectFeeInstruction({ campaign, vault, feeVault }), IS.collectFeeIx(campaign, vault, feeVault)],
+      [
+        C.getSettlePrizeInstruction({ campaign, vault, recipient: who.address }),
+        IS.settlePrizeIx(campaign, vault, who.address),
+      ],
+      [
+        C.getCloseCampaignInstruction({ campaign, vault, rentPayer: who.address, feeVault }),
+        IS.closeCampaignIx(campaign, vault, who.address, feeVault),
+      ],
+      [
+        C.getSweepFeesInstruction({ config, feeVault, feeRecipient: who.address }),
+        IS.sweepFeesIx(config, feeVault, who.address),
       ],
     ];
     expect(pairs.length).toBe(IDL.instructions.length);

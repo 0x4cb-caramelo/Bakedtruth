@@ -11,6 +11,7 @@ pub mod campaign;
 pub mod config;
 pub mod entry;
 pub mod enums;
+pub mod transitions;
 
 use pinocchio::{
     account::{Ref, RefMut},

@@ -4,3 +4,6 @@
 //! Sprint: 03 (readers and resolution)
 
 pub mod resolve_campaign;
+pub mod team_confirm_result;
+pub mod team_open_contest;
+pub mod team_void_campaign;

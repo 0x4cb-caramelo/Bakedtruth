@@ -624,6 +624,521 @@
         "type": "u8",
         "value": 10
       }
+    },
+    {
+      "name": "TeamConfirmResult",
+      "accounts": [
+        {
+          "name": "teamMember",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "A key in GlobalConfig.team"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig: the open count, for a paid campaign"
+          ]
+        },
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign, InReview"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 11
+      }
+    },
+    {
+      "name": "TeamVoidCampaign",
+      "accounts": [
+        {
+          "name": "teamMember",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "A key in GlobalConfig.team"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig: the open count, for a paid campaign"
+          ]
+        },
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign, InReview"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "teamVoidCampaignArgs",
+          "type": {
+            "defined": "TeamVoidCampaignArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 12
+      }
+    },
+    {
+      "name": "TeamOpenContest",
+      "accounts": [
+        {
+          "name": "teamMember",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "A key in GlobalConfig.team"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig, read"
+          ]
+        },
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign, InReview"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 13
+      }
+    },
+    {
+      "name": "FinalizeCampaign",
+      "accounts": [
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign, InReview, window closed"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig: the open count"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 14
+      }
+    },
+    {
+      "name": "SettleEntry",
+      "accounts": [
+        {
+          "name": "entry",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Entry, closed"
+          ]
+        },
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign, Settling"
+          ]
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The campaign's vault"
+          ]
+        },
+        {
+          "name": "baker",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The Entry's stored baker"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 15
+      }
+    },
+    {
+      "name": "SettleCreatorShare",
+      "accounts": [
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign, Settling"
+          ]
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The campaign's vault"
+          ]
+        },
+        {
+          "name": "creator",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The stored creator"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 16
+      }
+    },
+    {
+      "name": "CollectFee",
+      "accounts": [
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign"
+          ]
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The campaign's vault"
+          ]
+        },
+        {
+          "name": "feeVault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The fee vault"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 17
+      }
+    },
+    {
+      "name": "SettlePrize",
+      "accounts": [
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign"
+          ]
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The campaign's vault"
+          ]
+        },
+        {
+          "name": "recipient",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The stored creator, who opened"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 18
+      }
+    },
+    {
+      "name": "CloseCampaign",
+      "accounts": [
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign, Settled"
+          ]
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The campaign's vault"
+          ]
+        },
+        {
+          "name": "rentPayer",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The stored rent_payer"
+          ]
+        },
+        {
+          "name": "feeVault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The fee vault"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 19
+      }
+    },
+    {
+      "name": "SweepFees",
+      "accounts": [
+        {
+          "name": "config",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig, read"
+          ]
+        },
+        {
+          "name": "feeVault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The fee vault"
+          ]
+        },
+        {
+          "name": "feeRecipient",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig.fee_recipient"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 20
+      }
     }
   ],
   "accounts": [
@@ -2249,6 +2764,32 @@
             "attrs": [
               "idl-type"
             ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "TeamVoidCampaignArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reason",
+            "type": {
+              "defined": "VoidReason"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "noteHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           }
         ]
       }
