@@ -13,6 +13,14 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
 
 ### Added
 
+- **Sprint -1: o protótipo das telas das campanhas** (`prototype-lab/campaigns/`, 8/10/2026), à espera da aprovação
+  do fundador. Todas as telas do produto do BP v0.0.4 na linguagem Ledger², escuro por padrão e em inglês: a home e a
+  lista, a página da campanha em 16 estados com a entrada inteira (do resumo antes de assinar ao recibo e às recusas),
+  a caixa de abrir campanha, minhas entradas, o ranking, as taxas, quem pode o quê, como funciona e o cartão de
+  compartilhar, cada uma no computador e no celular. Dados de exemplo, nada conecta nem assina. A matemática do pote
+  confere com os exemplos do plano técnico ao lamport, e o contraste dos tokens foi corrigido onde ficava abaixo do
+  mínimo. A página `#/screens` reúne todas as telas e estados para a revisão.
+
 - **Sprint 02: o núcleo do pote, o programa novo em Pinocchio** (`programs/brot-markets`, 8/10/2026). Sai o
   esqueleto Anchor; entra o programa que guarda SOL de verdade, ainda sem leitura de resultado nem pagamento:
   - **A configuração e a equipe:** `admin_initialize_config` (só a autoridade de upgrade, lida da conta ProgramData),
@@ -262,6 +270,9 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
 - **`PITCH.md`:** o portão de redação passa a dizer o que o deck mostra em cada linha e o que se recomenda.
 
 ### Fixed
+
+- **O CI passa a rodar todos os testes do site** (`node --test services/landing/tests/*.test.mjs`): o teste do
+  `docs.brot.markets` ficava de fora da lista escrita à mão.
 
 - **Sprint 02, o que as revisões acharam e foi corrigido antes da mescla** (8/10/2026; três revisores e o
   coordenador, nenhum achou como tirar SOL de ninguém):

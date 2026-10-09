@@ -19,6 +19,10 @@ Arquivos lidos: `prototype-d/{index.html,styles.css,view.js}`, `prototype-n/{ind
 `prototype-lab/shared/`, `ledger.css`, `ledger.js`, `app.js`, `mosaic.js`, `mascot.js`, `mock-data.js` e as oito poses
 em `mascot/`. Caminhos abaixo são relativos a `prototype-lab/`.
 
+**Sprint -1 (8/10/2026).** O redesenho para as campanhas on-chain está em `prototype-lab/campaigns/`, à espera da
+aprovação do fundador: escuro por padrão (o escuro oficial é o da N, que está no ar), inglês, contraste corrigido nos
+tokens, a caixa de abertura e os layouts de celular. Este documento registra o resultado depois da aprovação.
+
 **Aviso de leitura.** O protótipo foi feito antes de o produto ser redefinido. A linguagem visual vale. O conteúdo
 de várias telas não vale mais: ver [Conflitos com o produto decidido](#conflitos-com-o-produto-decidido). As
 referências "P1 §3.2" apontam para `docs/business/BP-v0.0.2-parte-1-produto.md`, seção 3.2 (P2 e P4 são as partes 2

@@ -1,6 +1,6 @@
 # Sprint -1 — Design system, the opening screen and phone layouts
 
-**Status:** planned · **Branch:** `sprint--1-design-system` · **Dates:** none, by the founder's decision
+**Status:** in progress (opened 2026-10-08) · **Branch:** `sprint--1-design-system`, stacked on `sprint-02-pot-core` (PR #30, which carries the plan's PR #27) · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -96,12 +96,21 @@ built from this sprint's tokens and phone layouts (proposal §6). Referral, seal
 
 ## Founder decisions that block the sprint
 
-- Which of the two dark themes is official, and which theme is the default (TP §3.6; the design direction's last
-  section).
-- The site's language: L-01 (Product Brief v0.0.1 gap). It sets the copy and the language of the sentence templates.
-- Whether the campaign page shows the chance history and recent activity: L-23 (Product Brief v0.0.1 gap).
-- The text of the lock notice, L-03, and the place of the partner's seal and highlight, L-24 (Product Brief v0.0.1
-  gaps).
+Answered by the founder on 2026-10-08, at the sprint's opening (session log of that day):
+
+- **The official dark theme is the one live on brot.markets**, which is the approved prototype's dark
+  (`prototype-lab/shared/ledger.css`), and **dark is the default** ("i only see one when i enter the site
+  brot.markets, the default is dark theme"). The other dark, lab direction D's, differed only in radii and a few tones.
+- **The site's language is English** by default (L-01: "site language is english default").
+- **No chance history on the campaign page** (L-23: "i dont know about this, but probably not").
+- **The lock notice (L-03):** "i accept a suggestion". The prototype carries the recommended text and the options go
+  to the founder with the screens.
+- **The partner's seal and highlight (L-24):** "i dont know too, after i decide". The prototype shows two placements
+  side by side for the choice.
+- **"Forget USDC and cap":** the redesign follows BP v0.0.4 alone; the Product Brief v0.0.1's USDC and cap are
+  ignored until the brief is revised.
+
+Still open:
 - The creator notice is drawn as BP-14's recommendation ("permitir, com aviso automático"), still open in P-9.
 - To close: the founder's approval of the redesigned screens, the creation box and the phone layouts.
 - **Taken as approved with the proposal:** D8, option (a) (`docs/SPRINTS.md`, section 5). **Answered:** D-j (no free
@@ -153,4 +162,41 @@ screen-reader pass over the creation box's typed slots.
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+### Where it stands (2026-10-08): the redesign is built and waits for the founder's approval
+
+The medium chosen at the opening is a static prototype, `prototype-lab/campaigns/` (69 files, every one under 200
+lines with a `Purpose:` header): HTML, CSS and ES modules over mock data, opened over HTTP (its `README.md`). The
+founder reviews it on any screen; what the founder approves is then ported into `app/` (tokens, theme script, fonts,
+primitives), which is the second half of this definition of done.
+
+**How it ran.** The base first, by the orchestrator: tokens in both themes (contrast fixed), the components, the site
+frame, the wallet in every state, the campaign card, the pot math of TP §3.4.16 in BigInt (checked against worked
+examples A, B and C to the lamport), 16 mock campaigns covering every kind and state, and the contract
+(`prototype-lab/campaigns/README.md`). A read-only agent compiled a screen-by-screen spec from the sources (15
+screens, 24 notices, the 19 conflicts and the gaps mapped, 15 founder questions); the shared files adopted its
+conventions (English routes, SOL to 4 decimals, "est. 2.47 per 1", chance pairs that add up to 100, kind colours that
+avoid YES/NO green and red and the interface blue). Then four agents built the screens in parallel, each in its own
+files:
+
+| Lane | Screens | Files | States |
+|---|---|---|---|
+| 1 | Home, all campaigns | `home*.js`, `list.js`, `cards.css` | Carousel with pause and slide groups; closing soon; answered recently; filters, sort, search, load more; empty, loading, error; seal A and B |
+| 2 | Campaign page, entry flow | `campaign*.js`, `ui/entry*.js`, `campaign.css`, `entry.css` | 16 campaign states; "You're in"; the summary before signing, signing steps, receipt and 15 refusals; re-check command checked against devnet SOL/USD |
+| 3 | Opening box `/abrir` | `open*.js`, `open.css` | Five kinds (price opens now; the other four show when they open); typed slots; nine account-check states; the money table; 33 refusal messages; signing, retried, team key |
+| 4 | My entries, leaderboard, fees, record, how it works, share card | `me*.js`, `ranking.js`, `fees.js`, `powers.js`, `how.js`, `share-card.js`, `error.js`, `pages.css` | Tabs, the held credit and how to receive it; points; worked examples A, C and D; who can do what and the void log; the 1200 × 630 card before and after resolution |
+
+**Checks.** 93 page states at 360 px (31 routes, each with three combinations of wallet, pause, stale price, blocked
+country and light theme): no console error, one `<h1>` each, no sideways scroll, none of the banned words. Each lane
+checked its screens at 1440, 412 and 360 px in both themes. The contrast of every new token pair is computed (all
+text at 4.5:1 or more, borders of fields and controls at 3:1 or more). The integration fixed the top bar (it wrapped
+between 860 and 1180 px), the mascot's bubble at the window's edge (a definition-of-done item; the live site still
+cuts it), a short wallet label on narrow phones, the mock sentences regenerated from the spec's templates, and the
+leaderboard's points as Q7 decided (1 per campaign entered on the right side).
+
+**Open for the founder** (the closure waits on the first three): approving the screens, the creation box and the
+phone layouts; the partner seal's placement (A, a chip, or B, a band; the screens index shows both); the lock notice
+(A, recommended and in the prototype; B and C in the spec); and the questions the lanes and the spec raised, listed in
+the session log of the opening.
+
+**Still to do after the approval:** port the tokens, the theme script, the fonts and the primitives into `app/`; record
+the result in `docs/product/DESIGN-DIRECTION.md`; `cd app && bun run lint && bun run build`; the common closure.

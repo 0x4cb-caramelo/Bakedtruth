@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **273** |
+| Arquivos mapeados | **318** |
 | Acima de 200 linhas | **30** ⚠️ |
 | Sem cabeçalho `Purpose:` | **100** ⚠️ |
 
@@ -339,6 +339,76 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`burn_goal.rs`](programs/pred-provable/tests/burn_goal.rs) | ! Rust-side smoke test with anchor-litesvm. Run `anchor build` first; the .so is embedded | 219 |
+
+## `prototype-lab/campaigns/js/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`effects.js`](prototype-lab/campaigns/js/effects.js) | the approved prototype's two effects, the dot field that brightens around the pointer and the spotlight that follows the pointer across the card grid, plus the  | 71 |
+| [`format.js`](prototype-lab/campaigns/js/format.js) | how the site writes numbers and times: SOL amounts from lamports, the US$ display value, percentages, short addresses, a moment in UTC and in the visitor's time | 88 |
+| [`main.js`](prototype-lab/campaigns/js/main.js) | starts the prototype: icons, the theme switch (saved as `brot-theme`), the wallet button, the phone menu, the search box, the site-wide notices, the effects, th | 97 |
+| [`model.js`](prototype-lab/campaigns/js/model.js) | what the screens compute from a campaign: the pot's parts, the chance (each side's share of the entries), the estimated return of an entry net of Brot's fee and | 87 |
+| [`router.js`](prototype-lab/campaigns/js/router.js) | the prototype's hash router: each route of TP §3.6 maps to a screen module loaded on first use. A screen is `export default (params) => ({ title, html, mount(ma | 84 |
+| [`state.js`](prototype-lab/campaigns/js/state.js) | the prototype's state: the wallet in each of its states, the switches that show the site-wide notices (entries paused, a stale SOL/USD price, the country switch | 69 |
+
+## `prototype-lab/campaigns/js/data/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`campaigns-done.js`](prototype-lab/campaigns/js/data/campaigns-done.js) | the campaigns past their entries in the prototype's mock data: one in its six-hour review, one contested, paid YES, paid NO, a one-sided pot refunded, two voids | 83 |
+| [`campaigns.js`](prototype-lab/campaigns/js/data/campaigns.js) | the open and closing campaigns of the prototype's mock data, in the program's own fields (Sprint 02's `Campaign`): every kind, a paid opening with its prize, a  | 78 |
+| [`index.js`](prototype-lab/campaigns/js/data/index.js) | one door to the mock data: every campaign by id, the listed ones in ranking order (TP §3.5: the partner highlight first), and the demo wallet's history and the  | 23 |
+| [`wallet.js`](prototype-lab/campaigns/js/data/wallet.js) | the demo wallet's history for "My entries" and the ranking: its entries on each side, what it received as a baker, as a creator (the 1%) and as whoever opened ( | 49 |
+
+## `prototype-lab/campaigns/js/mascot/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`body.js`](prototype-lab/campaigns/js/mascot/body.js) | draws Baked, the mascot, on the campaigns prototype: the sprite with its eight poses, the shadow and the speech bubble. It knows nothing about where to stand; m | 95 |
+| [`mascot.js`](prototype-lab/campaigns/js/mascot/mascot.js) | makes Baked, the mascot, live on the campaigns prototype: it stands on declared perches, hops to the one nearest to where the pointer rests, reacts to what is u | 188 |
+| [`senses.js`](prototype-lab/campaigns/js/mascot/senses.js) | what Baked, the mascot, notices on the campaigns prototype: where the pointer rests, scrolling, keyboard focus, how long the visitor has been still, and which e | 92 |
+
+## `prototype-lab/campaigns/js/screens/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`campaign-head.js`](prototype-lab/campaigns/js/screens/campaign-head.js) | the campaign page's header, split-and-pot block and timeline. The header: back link, the eyebrow (kind chip, display name, partner seal, state badge with its vi | 133 |
+| [`campaign-proof.js`](prototype-lab/campaigns/js/screens/campaign-proof.js) | the campaign page's proof block and re-check panel. The proof: the value read now against the target, the distance (price, burn) or a bar (targets that only gro | 128 |
+| [`campaign-state.js`](prototype-lab/campaigns/js/screens/campaign-state.js) | the campaign page's blocks that change with the state. The state card takes the entry panel's place once entries close (spec 3.5 table): closed with the deadlin | 149 |
+| [`campaign.js`](prototype-lab/campaigns/js/screens/campaign.js) | the campaign page, #/c/:id (spec 3.5; TP §3.6; S11–S12), in every state. Left: the header, the proof, the creator notice, the split and pot, the timeline, the r | 174 |
+| [`error.js`](prototype-lab/campaigns/js/screens/error.js) | the error pages of spec 3.14 besides the 404: something broke on our side (500), with Baked tired and a way to try again, and offline, which retries by itself w | 43 |
+| [`fees.js`](prototype-lab/campaigns/js/screens/fees.js) | the fee page (#/fees): what Brot keeps and what the creator gets; TP worked example A in SOL (a paid campaign, YES wins), every lamport through the program's ma | 114 |
+| [`home-mosaic.js`](prototype-lab/campaigns/js/screens/home-mosaic.js) | the left half of the home page's mosaic, the "Open now" carousel of the top-ranked campaigns that take entries: each slide has its chance, pot bar, YES/NO short | 171 |
+| [`home-parts.js`](prototype-lab/campaigns/js/screens/home-parts.js) | what the home page and the list of all campaigns share: the state and kind filters (the five public states and Saved, spec 3.2), the sorts, the view kept in the | 150 |
+| [`home.js`](prototype-lab/campaigns/js/screens/home.js) | the home page (#/): a top line with the opening action and its cost, the mosaic (the carousel of home-mosaic.js, then "Closing soon" and "Answered recently"), h | 161 |
+| [`how.js`](prototype-lab/campaigns/js/screens/how.js) | how a campaign works (#/how), as a path that reads the same on a phone: the six steps from opening to payout, what "chance" means, why there is no early exit, w | 60 |
+| [`list.js`](prototype-lab/campaigns/js/screens/list.js) | every campaign (#/campaigns), unlisted ones included (TP §3.6, spec 3.3), as a dense list: a search read from the hash (#/campaigns?q=sol matches the sentence,  | 175 |
+| [`me-creator.js`](prototype-lab/campaigns/js/screens/me-creator.js) | the wallet as creator and opener, in "My entries": one row per campaign it opened, saying where its 1% of the entries, the prize, the 10% opening fee and the ac | 118 |
+| [`me-rows.js`](prototype-lab/campaigns/js/screens/me-rows.js) | the rows of "My entries": one per campaign the wallet joined, with the sentence, the side or sides and the amount, the state, and what matters in that state: th | 114 |
+| [`me.js`](prototype-lab/campaigns/js/screens/me.js) | "My entries" (#/entries): a connect prompt with no wallet, a skeleton while it connects, then the summary (in open campaigns, waiting for a result, received in  | 126 |
+| [`not-found.js`](prototype-lab/campaigns/js/screens/not-found.js) | the 404 screen: a path that matches no route, or a campaign id that does not exist. Baked sulks, and there is one way back to the campaigns | 17 |
+| [`open-preview.js`](prototype-lab/campaigns/js/screens/open-preview.js) | sections 3 and 4 of the creation box (spec 3.12). 3 Preview, built only from what the transaction would carry: the sentence, the value now with "If read now", t | 170 |
+| [`open-signing.js`](prototype-lab/campaigns/js/screens/open-signing.js) | what the creation box refuses and how it signs. One plain message per refusal of user_open_campaign (spec 3.12; TP §3.4.10 rows 1–10: program codes 6043–6061, t | 199 |
+| [`open-slots.js`](prototype-lab/campaigns/js/screens/open-slots.js) | sections 1 and 2 of the creation box (spec 3.12). 1 What: the combobox "What should the chain answer?" over the templates and the known names, grouped by kind,  | 161 |
+| [`open-templates.js`](prototype-lab/campaigns/js/screens/open-templates.js) | what the creation box knows before it reads anything: the five sentence templates (spec 1.5, P1 §4.2), the pinned Pyth feeds and the reviewed account names (A-1 | 189 |
+| [`open.js`](prototype-lab/campaigns/js/screens/open.js) | the creation box at /abrir and /open (spec 3.12; TP §3.6; proposal §2.9, flow F0), where any wallet opens an On-Chain Campaign: 1 What and 2 Details build the s | 200 |
+| [`powers.js`](prototype-lab/campaigns/js/screens/powers.js) | the public record (#/record): the keys by role and address (never by person), every power with who holds it and its limit in code (TP §3.4.9), said plainly that | 99 |
+| [`ranking.js`](prototype-lab/campaigns/js/screens/ranking.js) | the devnet leaderboard (#/leaderboard): wallets by points (1 per campaign entered on the right side, Q7), with the campaigns each entered and its hit rate, the  | 93 |
+| [`review.js`](prototype-lab/campaigns/js/screens/review.js) | the screens index for review (#/screens): every route and every state in one place, with links that set the switches (wallet, pause, stale price, country, valve | 102 |
+| [`share-card.js`](prototype-lab/campaigns/js/screens/share-card.js) | the share card (#/card/:id), the 1200 × 630 image an X post shows for a campaign (/c/[id]/opengraph-image): before the result, the sentence, the live value agai | 109 |
+
+## `prototype-lab/campaigns/js/ui/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`card.js`](prototype-lab/campaigns/js/ui/card.js) | the campaign card, shared by the home grid, the full list, the opening preview and the screens index: kind and state, the generated sentence, the live value aga | 120 |
+| [`entry-flow.js`](prototype-lab/campaigns/js/ui/entry-flow.js) | the entry flow after "Review entry" (spec 3.6): the sheet "Check before you sign", built like the deterministic summary (A-3), with the return floor signed as m | 199 |
+| [`entry.js`](prototype-lab/campaigns/js/ui/entry.js) | the entry panel of the campaign page (spec 3.6; S11): YES or NO with each side's chance and estimated return, the amount in SOL (0.01 SOL minimum, the balance,  | 183 |
+| [`icons.js`](prototype-lab/campaigns/js/ui/icons.js) | the line icons of the site as inline SVG strings, drawn on a 24 px grid with a 2 px stroke, plus one helper that returns an icon ready to place in a template. I | 57 |
+| [`layer.js`](prototype-lab/campaigns/js/ui/layer.js) | what floats above a screen: the dialog (a bottom sheet on phones), the small menus anchored to a button, and toasts. The dialog traps focus, closes on Escape or | 109 |
+| [`notices.js`](prototype-lab/campaigns/js/ui/notices.js) | the notices that apply to the whole site, drawn above every screen: entries and openings paused by the team (I10′: everything else keeps running), and entries u | 30 |
+| [`parts.js`](prototype-lab/campaigns/js/ui/parts.js) | the small pieces every screen repeats, each one function returning HTML: the kind tile and label, the state chip, the partner seal, the YES/NO bar with the priz | 96 |
+| [`wallet.js`](prototype-lab/campaigns/js/ui/wallet.js) | the wallet button in the top bar and its flows: connect (a wallet list, or "Use Installed Wallet" on Android, proposal §3.4), connecting, connected with the sho | 81 |
 
 ## `prototype-lab/prototype-a/`
 
