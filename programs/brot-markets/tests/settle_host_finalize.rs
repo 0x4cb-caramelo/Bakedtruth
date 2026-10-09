@@ -32,6 +32,7 @@ fn campaign(buf: &mut Vec<u8>) -> &mut Campaign {
     c.one_sided_fee_bps = brot_markets::layout::LeU16::new(100);
     c.creator_share_bps = brot_markets::layout::LeU16::new(100);
     c.creator_is_team = 0;
+    c.opening_usd = LeU64::new(5);
     c
 }
 
@@ -118,15 +119,47 @@ fn settle_host_finalize_split_takes_the_late_totals_out_of_v_and_p() {
 }
 
 #[test]
-fn settle_host_finalize_team_campaign_does_not_touch_the_open_count() {
+fn settle_host_finalize_a_free_team_campaign_does_not_touch_the_open_count() {
     let (mut cb, mut gb) = (Vec::new(), Vec::new());
     let c = campaign(&mut cb);
     c.creator_is_team = 1;
+    c.opening_usd = LeU64::new(0);
     c.creator_share_bps = brot_markets::layout::LeU16::new(0);
     let g = config(&mut gb, 0);
     finalize_snapshot(c, g).unwrap();
     assert_eq!(g.open_campaigns.get(), 0);
     assert_eq!(c.creator_share.get(), 0);
+}
+
+#[test]
+fn settle_host_finalize_a_paid_team_campaign_decrements_the_open_count() {
+    let (mut cb, mut gb) = (Vec::new(), Vec::new());
+    let c = campaign(&mut cb);
+    c.creator_is_team = 1;
+    c.opening_usd = LeU64::new(5);
+    c.creator_share_bps = brot_markets::layout::LeU16::new(0);
+    let g = config(&mut gb, 1);
+    finalize_snapshot(c, g).unwrap();
+    assert_eq!(g.open_campaigns.get(), 0);
+}
+
+#[test]
+fn settle_host_finalize_a_paid_non_team_campaign_decrements_the_open_count() {
+    let (mut cb, mut gb) = (Vec::new(), Vec::new());
+    let c = campaign(&mut cb);
+    let g = config(&mut gb, 2);
+    finalize_snapshot(c, g).unwrap();
+    assert_eq!(g.open_campaigns.get(), 1);
+}
+
+#[test]
+fn settle_host_finalize_the_open_count_never_goes_below_zero() {
+    let (mut cb, mut gb) = (Vec::new(), Vec::new());
+    let c = campaign(&mut cb);
+    let g = config(&mut gb, 0);
+    assert_eq!(finalize_snapshot(c, g), Err(BrotError::InvariantViolated));
+    assert_eq!(g.open_campaigns.get(), 0);
+    assert_eq!(c.status, Status::InReview as u8);
 }
 
 #[test]

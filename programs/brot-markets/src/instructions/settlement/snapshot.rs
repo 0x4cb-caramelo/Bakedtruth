@@ -96,7 +96,8 @@ pub fn finalize_snapshot(
     let snap = snapshot(input)?;
     check_snapshot(&input, &snap)?;
 
-    if campaign.creator_is_team == 0 {
+    // The valve counts paid openings only (founder answer 4): a paid team opening counts, a free one does not.
+    if campaign.opening_usd.get() > 0 {
         let open = config.open_campaigns.get();
         let next = open.checked_sub(1).ok_or(BrotError::InvariantViolated)?;
         config.open_campaigns.set(next);
