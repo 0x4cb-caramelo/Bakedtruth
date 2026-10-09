@@ -1,6 +1,6 @@
 //! Purpose: `GlobalConfig` (`["config"]`): roles, the pause, the creation parameters, the fee
 //!          recipient and the open-campaign counter; and the creation parameters' own layout.
-//! Version: 0.0.3
+//! Version: 0.0.4
 //! Sprint: 02 (pot core on Pinocchio); `params_version` taken from the reserve in 03
 //!
 //! One per program, created by `admin_initialize_config` together with the data-less fee vault
@@ -52,7 +52,9 @@ pub struct CreationParams {
     /// Smallest entry (P-5: 10,000,000, 0.01 SOL). Read at every join, not copied.
     #[idl_type("u64")]
     pub min_entry_lamports: LeU64,
-    /// The Pyth SOL/USD feed id the opening is priced with (D-f).
+    /// The Pyth SOL/USD feed id (D-f). Since founder answer 3 the opening is priced with the compiled
+    /// `SOL_USD_FEED_ID`, so this field is unused by pricing; it stays in the frozen layout, checked
+    /// non-zero only, and is not read by any instruction at opening.
     pub sol_usd_feed_id: [u8; 32],
     /// Oldest SOL/USD price accepted at a paid opening, seconds (at least 90 on devnet).
     #[idl_type("u32")]

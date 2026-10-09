@@ -9,7 +9,7 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { DEFAULT_PARAMS, openingLamports, readConfig, SOL_PRICE } from "./flows";
+import { DEFAULT_PARAMS, openingLamports, readConfig, SOL_CHARGED, SOL_PRICE } from "./flows";
 import * as I from "./instructions";
 import { openingWorld, STALE, tryOpen, type OpeningWorld } from "./opening";
 import * as P from "./program";
@@ -35,7 +35,7 @@ describe("open campaign refuses", () => {
 
   test("row 7: a price above the signed max_lamports (T25)", async () => {
     const w = await openingWorld();
-    const price = openingLamports(500n, SOL_PRICE);
+    const price = openingLamports(500n, SOL_CHARGED);
     expectError((await tryOpen(w, w.creator, { maxLamports: price - 1n })).sent, "OpeningAboveMaxLamports");
     expectError((await tryOpen(w, w.creator, { maxLamports: 0n })).sent, "OpeningAboveMaxLamports");
   });
@@ -115,7 +115,11 @@ describe("open campaign refuses", () => {
     expectOk((await tryOpen(w, w.creator, { expectedParamsVersion: 1 })).sent);
     expect((await readConfig(w)).open_campaigns).toBe(1);
     expectError((await tryOpen(w, w.creator)).sent, "TooManyOpenCampaigns");
-    expectError((await tryOpen(w, w.team, { openingUsd: 0n })).sent, "TooManyOpenCampaigns");
+    // A team key that adds a prize is a paid opening, so the limit refuses it too.
+    expectError((await tryOpen(w, w.team)).sent, "TooManyOpenCampaigns");
+    expect((await readConfig(w)).open_campaigns).toBe(1);
+    // A team key's free opening is outside the limit (founder answer 4): it opens and does not count.
+    expectOk((await tryOpen(w, w.team, { openingUsd: 0n })).sent);
     expect((await readConfig(w)).open_campaigns).toBe(1);
   });
 });

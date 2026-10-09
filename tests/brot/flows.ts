@@ -59,6 +59,10 @@ export async function setTeam(w: World, admin: KeyPairSigner, count = 2) {
 export const BTC_PRICE = 8_521_233_806_870n;
 /** SOL/USD in the captured devnet account: 119.21844516 US$ (exponent −8). */
 export const SOL_PRICE = 11_921_844_516n;
+/** The captured SOL/USD confidence: 0.00655484 US$. */
+export const SOL_CONF = 655_484n;
+/** The price a paid opening is charged at, `price − conf` (founder answer 2, 2026-10-09). */
+export const SOL_CHARGED = SOL_PRICE - SOL_CONF;
 
 let nextId = 1n;
 /** A fresh campaign id; real clients draw it at random (T17). */

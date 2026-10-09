@@ -44,6 +44,12 @@ pub const PYTH_RECEIVER_ID: Address = address!("rec2HHDDnjLfj4kE7VyEtFA1HPGQLK33
 pub const PYTH_PUSH_ORACLE_ID: Address = address!("pyt2F414BA6dPttK6RddPZUdHfapoBN24GL5wbrPCou");
 /// The shard of the sponsored accounts the program accepts.
 pub const PYTH_SHARD: u16 = 0;
+/// The Pyth SOL/USD feed id a paid opening is priced with (founder answer 3, 2026-10-09). The
+/// same id on mainnet and devnet; a host test checks it against both captured accounts.
+pub const SOL_USD_FEED_ID: [u8; 32] = [
+    0xef, 0x0d, 0x8b, 0x6f, 0xda, 0x2c, 0xeb, 0xa4, 0x1d, 0xa1, 0x5d, 0x40, 0x95, 0xd1, 0xda, 0x39,
+    0x2a, 0x0d, 0x2f, 0x8e, 0xd0, 0xc6, 0xc7, 0xbc, 0x0f, 0x4c, 0xfa, 0xc8, 0xc2, 0x80, 0xb5, 0x6d,
+];
 
 // --- Money -------------------------------------------------------------------------------------
 
