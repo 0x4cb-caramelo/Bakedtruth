@@ -100,6 +100,30 @@ com duas linhas 'On-Chain Campaigns the chain answers.'"
   foram tocados: um é aviso legal e a outra tem a versão guardada com cada email.
 - **A `/3` e a `/4` continuam na branch** para comparação.
 
+## A /5 aprovada, o pão na barra e o documento de marca
+
+O Lucas escreveu: "o cinco ficou excelente, encontramos nosso copy e nossas cores, acho que temos que documentar isso
+como oficial, para termos como base e ser usado por todos, com todas as regras de cores, layout, wireframe, tamanhos,
+quantia de palavras e etc. Fazer um documento completo de marca e branding. Mas faltou só uma pequena correção, no
+menutopbar canto esquerdo tem que ser o pãozinho e não o mascote aparecendo ao lado do nome do site".
+
+- **O pão na barra:** li "o pãozinho" como o pão simples, sem rosto e sem pernas, e "o mascote" como o Baked. O único
+  desenho assim na biblioteca é o `14-pao-inteiro`, o pão do slide de ganhos do deck. Foi recortado no contorno e
+  reduzido para 174 × 104 pixels (`img/brot-loaf.webp`, 9 KB). A troca vale só na `/5`. Se ele queria outra imagem,
+  troca-se um arquivo.
+- **O documento:** `docs/product/BRAND.md`. Tudo nele foi lido da `/5` e do `styles.css`: nenhuma medida foi
+  estimada. As contagens de palavras e os contrastes foram calculados por script; as linhas por bloco são as medidas
+  no navegador a 1440px e a 390px.
+- **O que o documento generaliza:** os limites de palavras por tipo de bloco são os números da própria página, e
+  algumas regras de uso (o símbolo sozinho ao lado da assinatura, verde e vermelho só no YES e no NO) descrevem a
+  página. O documento diz isso e pede confirmação.
+- **O que saiu por falta de fonte:** uma primeira versão listava palavras proibidas que ninguém decidiu ("jackpot",
+  "odds", "player") e motivos que eram dedução minha. Ficou só o que o plano de negócio e a direção de design já
+  dizem: campaign e não market, entry e não bet, tudo em SOL, não somos um cassino.
+- **Conflito registrado, não resolvido:** o `DESIGN-DIRECTION.md` de 3/10 usa azul como destaque. Ganhou um aviso no
+  topo; reescrevê-lo e alinhar o aplicativo é decisão do Lucas, e o pedido aberto da sprint de design segue a
+  direção antiga.
+
 ## Em aberto
 
 - A `/3`, a `/4` e a `/5` não foram publicadas: mescla e servidor esperam a palavra do Lucas.

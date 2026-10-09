@@ -54,6 +54,16 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
     recusada).
   - **Testes:** 255 em Rust e 259 em TypeScript depois das correções da revisão (252 e 258 antes delas), todos do
     programa novo; os oito filtros da sprint passam; tirar a checagem de chamada de topo derruba o teste dela (X0.9).
+- **Documento oficial de marca, `docs/product/BRAND.md`** (fundadores, 9/10/2026). O Lucas aprovou a `/5` ("o cinco
+  ficou excelente, encontramos nosso copy e nossas cores") e pediu que virasse a base de todos. O documento descreve,
+  lido da página: nome, assinatura, símbolo e mascote; voz e palavras; o texto oficial bloco por bloco, com palavras
+  e linhas; as cores dos dois temas e o contraste de cada par; fontes e tamanhos; grade, medidas e o desenho da
+  página no computador e no celular; componentes, temas, movimento e regras de construção. Lista onde a marca ainda
+  não vale (página inicial no ar, termos, privacidade, docs, aplicativo) e o que falta decidir. O
+  `DESIGN-DIRECTION.md` ganhou um aviso: as cores dele são mais antigas e ainda não foram alinhadas.
+- **Na barra do topo da `/5`, o pão simples no lugar do mascote** (Lucas, 9/10/2026: "tem que ser o pãozinho e não
+  o mascote aparecendo ao lado do nome do site"). A imagem nova é `img/brot-loaf.webp`, recortada do desenho
+  `14-pao-inteiro` da biblioteca de poses. Vale só na `/5`; as outras páginas continuam com o mascote na barra.
 - **`/5`, o tema claro da `/3` com o tema escuro da `/4` e o título em duas linhas** (fundadores, 9/10/2026; mesma
   branch, ainda não publicada). Pedido do Lucas: "vamos pegar o sistema light do /3 e o dark do /4, e o texto ainda
   precisa diminuir um pouco, por exemplo o primeiro texto está com 3 linhas e queremos com duas linhas". No claro a

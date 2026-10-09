@@ -123,7 +123,9 @@ current app and `scripts/devnet-*.ts` until Sprint 09; no test uses it.
 **Frontend** (`app/`): Next.js App Router, Tailwind v4, wallet-adapter. The UI follows the approved design direction in
 `docs/product/DESIGN-DIRECTION.md` (Ledger²: lab direction D in dark and N in light, consolidated in `prototype-lab/prototype-n/`,
 with the Baked mascot). The app still renders the earlier direction C ("Tape") until the design-system sprint (-1)
-and the site sprints (09 to 13) replace it. A generic dashboard look was rejected. `app/AGENTS.md`
+and the site sprints (09 to 13) replace it. A generic dashboard look was rejected. The brand (name, mark, mascot, voice, official copy, colours, type and page grid) is
+`docs/product/BRAND.md`, approved 2026-10-09 from the `/5` landing draft; its colours are newer than the design
+direction's, which is still to be aligned. `app/AGENTS.md`
 (loaded via `app/CLAUDE.md`) says this Next.js version has breaking changes: read `app/node_modules/next/dist/docs/`
 before writing app code.
 

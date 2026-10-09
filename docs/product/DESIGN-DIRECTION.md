@@ -8,6 +8,10 @@
   foi trocada em 3 de outubro: o Lucas pediu "vamos usar o layout D, Ledger2, e dele queremos a sua versão light" e,
   depois de ver a N no lab, respondeu "N aprovado". Os motivos estão em
   [`session-log/2026-10-03-direcao-ledger2-claro-e-escuro.md`](../../session-log/2026-10-03-direcao-ledger2-claro-e-escuro.md).
+- **Marca, desde 2026-10-09:** o nome, o símbolo, o mascote, a voz, o texto oficial, as cores e as fontes estão em
+  [`BRAND.md`](BRAND.md), aprovado pelos fundadores a partir da página `/5`. As cores de lá (azul-marinho e laranja
+  no escuro, creme e ferrugem no claro) são mais novas que as deste documento, que ainda descreve o destaque azul.
+  Este documento continua valendo para a estrutura das telas do aplicativo, até ser alinhado.
 
 | Identificador | `ledger2-d-n` |
 |---|---|
