@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **315** |
+| Arquivos mapeados | **318** |
 | Acima de 200 linhas | **30** ⚠️ |
 | Sem cabeçalho `Purpose:` | **78** ⚠️ |
 
@@ -189,6 +189,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`campaign.rs`](programs/brot-markets/src/events/campaign.rs) | the events of a campaign's life, each carrying the campaign and its contiguous `seq` (X0.4): opened, an entry added, resolved | 148 |
+| [`finalize.rs`](programs/brot-markets/src/events/finalize.rs) | the events that fix the money and end the campaign: the snapshot (`CampaignFinalized`) and the close (`CampaignClosed`). Both carry the campaign and `seq` | 63 |
+| [`payout.rs`](programs/brot-markets/src/events/payout.rs) | the events of the money leaving the program (TP section 3.4.14): an entry paid, the creator share, the fee collected, the prize returned, and the fee vault swep | 107 |
+| [`review.rs`](programs/brot-markets/src/events/review.rs) | the events of the review window and the team's acts (TP section 3.4.14): the result confirmed, the campaign voided, a contest opened. Each carries the campaign  | 68 |
 | [`self_cpi.rs`](programs/brot-markets/src/events/self_cpi.rs) | how an event leaves the program: `emit` sends it to this program by self-CPI, signed by the event-authority PDA, and the event handler accepts only that signatu | 92 |
 
 ## `programs/brot-markets/src/instructions/`
@@ -255,7 +258,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`fees.rs`](programs/brot-markets/src/math/fees.rs) | Brot's fee on the losing side and the one-sided fee per entry (P1 sections 3.3 and 3.5; TP section 3.4.16). Both round up | 27 |
-| [`mod.rs`](programs/brot-markets/src/math/mod.rs) | the money and schedule math as pure functions: the opening conversion, the entry close, the fee and the creator share (TP section 3.4.16) | 17 |
+| [`mod.rs`](programs/brot-markets/src/math/mod.rs) | the money and schedule math as pure functions: the opening conversion, the entry close, the fee and the creator share (TP section 3.4.16) | 19 |
 | [`opening.rs`](programs/brot-markets/src/math/opening.rs) | the price of a paid opening in lamports at the Pyth SOL/USD price, and its split into the prize and Brot's opening fee (D-b, D-f; TP section 3.4.16; T25) | 79 |
 | [`payout.rs`](programs/brot-markets/src/math/payout.rs) | the creator share, what winners split, and the return estimate a join checks against `min_return_bps` (D-g read as P-2; TP section 3.4.16) | 145 |
 | [`rounding.rs`](programs/brot-markets/src/math/rounding.rs) | the multiply-divide and basis-point shares every money formula uses, rounded down or up in u128 with checked math: the one place a rounding direction is written | 75 |
