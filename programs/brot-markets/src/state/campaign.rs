@@ -1,7 +1,7 @@
 //! Purpose: `Campaign` (`["campaign", id]`): everything about one campaign, and the loaders that
 //!          check it. Its vault (`["vault", campaign]`) is data-less and its bump lives here.
 //! Version: 0.0.3
-//! Sprint: 02 (pot core on Pinocchio); `epoch` taken from the reserve in 03
+//! Sprint: 02 (pot core on Pinocchio); `epoch` taken from the reserve in 03; settlement fields in 04 (lane C)
 //!
 //! Balances are bookkept in fields, never read from the vault, where anyone can send lamports
 //! (I15). `resolve_campaign` writes the result group (03); the settlement group is Sprint 04's.
@@ -160,8 +160,15 @@ pub struct Campaign {
     pub late_no: LeU64,
     #[idl_type("u32")]
     pub entries_untallied: LeU32,
+    /// Lane C (settlement): the one-sided fees taken per entry at settlement, summed for `collect_fee`.
+    #[idl_type("u64")]
+    pub one_sided_fees: LeU64,
+    /// Lane C: the creator share credited to an empty wallet below rent, held in the vault until the
+    /// creator claims it (`settle_creator_share`); zero when nothing is reserved.
+    #[idl_type("u64")]
+    pub creator_share_reserved: LeU64,
     #[padding]
-    pub _reserved: [u8; 20],
+    pub _reserved: [u8; 4],
 }
 
 zero_copy!(Campaign = 512);
