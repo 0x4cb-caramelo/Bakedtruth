@@ -29,6 +29,12 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
   a leitura contra o alvo, o estado vazio, o aviso, o seletor segmentado e o esqueleto). O `Odds` com preço em centavos
   sai. `docs/product/DESIGN-DIRECTION.md` registra o que ficou de fora e por quê: campos, diálogo e menu entram com as
   telas que os usam; a caixa de abrir campanha e os layouts de celular são telas das Sprints 09 a 13 e 19.
+- **Sprint -1, o fechamento (9/10/2026, em revisão).** Teste de contraste permanente em `tests/app/` (36 pares por tema,
+  os dois temas); `--dim` sobe nos dois temas para passar 4,5:1 sobre a superfície elevada; a animação da borda do
+  botão primário passa a `orbit`, porque o `spin` do Tailwind girava o botão inteiro. O registro ganha as seções da caixa
+  de abrir e dos layouts de celular, o inventário sem primitivo e os quatro problemas de acessibilidade. A releitura de
+  conflitos e lacunas tem fonte para cada linha. Ficam abertos: a caixa e os layouts (telas, Sprints 09 a 13 e 19), três
+  lacunas adiadas, seis componentes que aguardam decisão do fundador, e o merge com a tag pelo Ronaldo.
 - **Sprint -1: o protótipo das telas das campanhas** (`prototype-lab/campaigns/`, 8/10/2026), à espera da aprovação
   do fundador. Todas as telas do produto do BP v0.0.4 na linguagem Ledger², escuro por padrão e em inglês: a home e a
   lista, a página da campanha em 16 estados com a entrada inteira (do resumo antes de assinar ao recibo e às recusas),

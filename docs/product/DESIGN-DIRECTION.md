@@ -464,7 +464,7 @@ A grade se ajusta sozinha (`minmax(290px, 1fr)`). Não há ponto de quebra abaix
 - [x] The flow section matches the clickable flow, not the intended one.
 - [x] The gaps table is filled in.
 - [x] `prototype-lab/prototype-n/`, `prototype-lab/prototype-d/` e `prototype-lab/shared/` estão no Git.
-- [ ] Conflitos e lacunas resolvidos na etapa de design system, antes do resumo de produto.
+- [ ] Conflitos e lacunas resolvidos na etapa de design system, antes do resumo de produto. Releitura feita em 9/10/2026, com fonte para cada linha; três lacunas seguem adiadas (Patrocinador, Indicação, Dados longos) e as fontes não foram recitadas contra o BP v0.0.4.
 
 ## Porte para o `app/` (Sprint -1, 9/10/2026)
 
@@ -480,8 +480,8 @@ Fonte de cada peça: o protótipo, salvo onde a linha diz o contrário.
 - **Fontes:** Barlow Condensed 700 e Inter (peso 100 a 900), em `app/fonts/`, por `next/font/local` em
   `app/app/layout.tsx`. Nenhuma fonte de terceiros é carregada. Os nomes `Space Grotesk`, `Jersey 15` e `Geist Mono`
   saíram.
-- **Tema:** o script de `app/lib/theme.ts` roda no `<head>`, antes do CSS, e lê `localStorage['brot-theme']` dentro de
-  `try/catch`. Padrão escuro; só o valor `light` troca. O botão (`app/components/ui/theme-toggle.tsx`) lê o atributo
+- **Tema:** o script de `app/lib/theme.ts` está no `<head>` e lê `localStorage['brot-theme']` dentro de
+  `try/catch`. Padrão escuro; só o valor `light` troca. A ordem no HTML gerado (`app/.next/server/app/index.html`) põe o `<link>` do CSS antes do script; o tema é aplicado antes do primeiro pintar, mas não "antes do CSS" como o código-fonte sugeria. O botão (`app/components/ui/theme-toggle.tsx`) lê o atributo
   `data-theme`, não o armazenamento, para o servidor e a primeira tela concordarem.
 - **Tailwind:** `app/app/globals.css` aponta o `@theme` para as variáveis. Os nomes da direção C (`page`, `surface`,
   `ink`, `crust`...) continuam como apelidos até as Sprints 09 a 13.
@@ -525,19 +525,153 @@ Nenhum primitivo tem cor literal; todos usam variáveis de `tokens.css`. Nenhuma
   quadro de telas e da moldura do site (Sprints 09 a 13). O `app/` atual ainda tem o cabeçalho e o rodapé da direção C.
 - **Campo de pontos (`#dots`) e as animações de fundo:** ficam para a moldura do site.
 
-### Ainda aberto nesta sprint
+### Ainda aberto nesta sprint (estado em 9/10/2026, depois da revisão do coordenador)
 
-- A **caixa de abrir campanha** e os **layouts de celular** estão aprovados no protótipo (9/10/2026), mas não estão
-  portados: são telas, e cabem às Sprints 09 a 13 e 19. Este registro os cita como portados só no protótipo.
-- A **re-leitura da tabela de conflitos (19 linhas)** e das lacunas contra o BP v0.0.4 não foi feita. A lista de
-  conflitos acima continua valendo como checklist.
-- Os **quatro problemas de acessibilidade** não foram conferidos no `app/`. Os três pares de texto abaixo de 4,5:1
-  já vêm corrigidos em `tokens.css` (mesmos valores do protótipo, conferidos lá).
-- O **teste automático de contraste** (`tests/`, "design tokens meet contrast") ainda não existe.
-- Nenhuma verificação visual em navegador foi feita: os primitivos não estão em página nenhuma.
+- **Telas, não componentes:** a caixa de abrir campanha e os layouts de celular estão aprovados no protótipo, com a
+  seção própria abaixo. Não estão portados para o `app/`: cabem às Sprints 09 a 13 e 19.
+- **Releitura** dos conflitos e lacunas feita, com fonte para cada linha. As fontes citam as partes do BP v0.0.2 (o
+  índice das partes está no cabeçalho desta página). **Não foram recitadas contra as seções do BP v0.0.4**, que mudaram
+  a numeração: essa conferência fica aberta.
+- **Três lacunas adiadas, não fechadas:** Patrocinador (aviso "não divulgado" e destaque de 72 horas, Sprint 15),
+  Indicação (Sprint 14) e Dados longos (medir títulos longos, Sprint 10).
+- **Componentes do inventário ainda sem primitivo:** ver "Inventário sem primitivo", abaixo. A decisão de cortar ou
+  diferir cada um é do fundador; até lá, cada um está marcado como diferido.
+- **Acessibilidade:** os quatro problemas estão registrados abaixo, com o que foi verificado e o que não foi. Nenhum
+  foi testado com leitor de tela.
+- **Visual:** verificado em navegador (página temporária, já removida) nos dois temas, em 1440, 412 e 360 px. Não
+  há leitor de tela nem teste de teclado automatizado; a passagem de teclado foi feita com o protocolo de depuração do
+  Chromium (todos os controles alcançam o foco, o contorno do navegador aparece, o botão desabilitado é pulado).
 
 ### Verificação desta etapa
 
 - `cd app && bun run lint`: passou.
 - `cd app && bun run build`: passou (compilação, TypeScript e as rotas).
 - `node scripts/codemap.js --check`: em dia.
+
+## Caixa de abrir campanha (aprovada em 9/10/2026, não portada)
+
+Aprovada pelo Ronaldo em 9/10, em largura de computador e de celular. Fonte: `prototype-lab/campaigns/js/screens/open*.js`
+e `css/open.css`. Não está no `app/`; cabe à Sprint 19 (e ao site de 09 a 13 para o que for comum).
+
+- **Cinco tipos** de campanha: o preço abre agora; os demais aparecem como "depois" ou "devnet", conforme
+  `open-templates.js` (o estado de cada tipo está ali).
+- **Caixa com campos tipados** (número, data, escolha de conta), não com lacunas no texto, para funcionar com leitor de
+  tela. Texto fora da gramática recebe "não dá para checar isso on-chain" e os modelos mais próximos.
+- **Estados da conta:** nove, em `open-slots.js` (verificando, aceita com nome revisado, aceita sem nome com endereço
+  abreviado e link, recusada por dono ou formato, entre outros).
+- **Prévia:** a frase gerada; a regra em palavras simples; o valor ao vivo com "se resolvida agora: SIM/NÃO"; o
+  dinheiro (taxa, parte do criador, a abertura em SOL com o valor em dólares e a divisão 90/10); o cartão de
+  compartilhar; e o aviso de controle para tipos de queima, trava e stake.
+- **Recusas:** 33 mensagens, uma por motivo do `user_open_campaign`, em `open-preview.js` e `open-signing.js`.
+- **Assinatura:** pendente, confirmada e a abertura repetida que encontra a campanha já aberta.
+- **Variante da equipe:** sem pagamento e sem parte do criador (`team`).
+
+## Layouts de celular (aprovados em 9/10/2026, não portados)
+
+Pontos de quebra do protótipo, lidos de `prototype-lab/campaigns/css` (são 1180, 1100, 860, 700 e 412 px):
+
+| Largura | Arquivos que mudam com ele |
+|---|---|
+| até 1180 px | `chrome.css`: o link "How it works" vai ao menu e ao rodapé (lido pela revisão) |
+| até 1100 px | `*.css` das telas (5 regras) |
+| até 860 px | `*.css` das telas (7 regras) |
+| até 700 px | `*.css` (10 regras): por exemplo, o diálogo vira folha de baixo para cima em `components.css` |
+| até 412 px | `*.css` (6 regras) |
+
+O que cada regra muda não foi descrito linha a linha nesta releitura: a conferência é a tarefa da Sprint 09.
+
+Verificado: o teste das telas no protótipo (93 estados a 360 px, registrado na Sprint -1) e a verificação dos
+primitivos do `app/` a 412 e 360 px nos dois temas (a captura não mostrou transbordo horizontal). A ordem dos
+pontos de quebra deste protótipo ainda não foi comparada com o que o `app/` vai usar: isso acontece na Sprint 09.
+
+## Inventário sem primitivo (seis itens da lista de componentes)
+
+Os itens da tabela "Component inventory" que ainda não têm primitivo e que a primeira versão do porte não citava:
+
+| Componente | Estado | Onde entra |
+|---|---|---|
+| Abas de categoria (`.cats`) | diferido | Lista de campanhas, Sprint 10 |
+| Passos e princípios (`.steps`, `.principles`) | diferido | Home e "como funciona", Sprints 09 e 12 |
+| Barra de filtros (`.toolbar`) | diferido | Lista de campanhas, Sprint 10 |
+| Nota e "voltar" (`.note`, `.back`) | diferido, pode ser cortado | Sem equivalente no produto novo: a nota era de mercado de exemplo |
+| Painel de compra (`.order`) | substituído | A entrada e a caixa de abrir (Sprints 11 e 19) |
+| Ícones (`shared/app.js`) | diferido | Vêm com a primeira tela que os usa |
+
+Os itens "diferido" dependem de decisão do fundador para virar corte; a recomendação é não cortar o que o produto
+ainda usa.
+
+## Acessibilidade: os quatro problemas
+
+Verificado por leitura do código e, quando dito, no navegador. Nenhum foi testado com leitor de tela.
+
+| Problema | Estado no protótipo | Estado no `app/` |
+|---|---|---|
+| Busca sem anel de foco | Resolvido: `.search:focus-within` com contorno (`chrome.css`) | A busca não existe ainda (Sprint 10) |
+| Carrossel anunciado a cada troca | Resolvido: `aria-live="off"` enquanto o carrossel roda (`home-mosaic.js`) | Não há carrossel no `app/` |
+| Gráficos com `aria-label` sem `role="img"` | Sem gráficos (conflito 2); a barra do pote tem `role="img"` e nome | A barra do pote tem `role="img"` (verificado no navegador) |
+| "Como funciona" some abaixo de 860 px | Resolvido no protótipo: o link vai ao menu e ao rodapé (lido pela revisão) | Não existe ainda |
+
+## Releitura de conflitos e lacunas (Sprint -1, 9/10/2026)
+
+Cada linha das duas tabelas acima foi conferida contra o protótipo aprovado (`prototype-lab/campaigns/`). Os estados são:
+**redesenhado** (o protótipo mostra o desenho novo), **sumiu** (o produto decidido não tem o item, com a fonte),
+**parcial** e **não conferido**. Nenhuma linha ficou em aberto sem fonte.
+
+### Conflitos (19)
+
+| # | Estado | Onde no protótipo | Fonte da decisão |
+|---|---|---|---|
+| 1 | redesenhado | Botões Sim/Não mostram a chance (`ui/parts.js` `chancePair`) | P1 §1.2, §3.2 |
+| 2 | sumiu | Sem gráfico de histórico (`#/c/…` sem gráfico) | L-23, fundador, 8/10: "probably not" |
+| 3 | redesenhado | Entrada com resumo antes de assinar e retorno estimado (`ui/entry*.js`) | P1 §2.1, §3.2, §4.7 |
+| 4 | redesenhado | Divisão do pote em `model.js` (`settleSplit`), sem 1 USDC por cota | P1 §3.2, §3.3 |
+| 5 | sumiu | Sem botão de resgate; "Paid" paga sem pedido (passo 6 de `how.js`) | P1 §3.9 |
+| 6 | redesenhado | "Anyone … can trigger resolution, payouts…, choosing no amount" (`powers.js`) | P1 §4.4 |
+| 7 | redesenhado | Leitura da conta na prova; "If the account can't be read, the campaign is voided" (`campaign-head.js`) | P1 §4.5 a §4.7 |
+| 8 | sumiu | Sem token de SIM; nenhum "1:1" no protótipo | P1 §2.1 |
+| 9 | redesenhado | Dois momentos (entradas fecham, prazo); a palavra "guarded" sai | P1 §3.5 |
+| 10 | redesenhado | Seis passos: abrir, entrar, fechar, ler a conta, revisão de 6 horas, pagamento (`how.js`) | P1 §1.2, §4.1 |
+| 11 | sumiu | Sem formulário de patrocínio; abrir com a caixa (`open*.js`) e o selo de parceiro | BP v0.0.4; D-t |
+| 12 | sumiu | Sem "Upcoming" nem "Notify"; a home tem "Closing soon" e "Answered recently" | P1 §2.3 |
+| 13 | redesenhado | Cinco tipos (`ui/parts.js` `KINDS`); Renounce e Immutable saem | P1 §4.2 |
+| 14 | redesenhado | Cinco estados públicos (`STATES`); "Saved" é o marcador do cartão (`state.saved`), não um estado | P1 §3.1 |
+| 15 | sumiu | Nenhuma ordenação por "YES price" (`home.js`) | P1 §3.2 |
+| 16 | redesenhado | O pote tem dois totais e o prêmio (`potLine`, `splitBar`) | P1 §3.2 |
+| 17 | redesenhado | Dois momentos, fechamento e prazo, com UTC (`moments`) | P1 §3.5 |
+| 18 | redesenhado | Aviso de devnet em inglês: "Test SOL only, no real money" (`ui/notices.js`); o texto em português do P1 §4.7 é a referência | P1 §4.7; L-01 |
+| 19 | redesenhado | Marca "Brot Markets" no protótipo (`index.html`); Baked fica como mascote | P1 §1.1 |
+
+### Lacunas (22)
+
+| Lacuna | Estado | Onde no protótipo |
+|---|---|---|
+| Carteira desconectada e conectada | redesenhado | Estados de carteira (`?wallet=off`, `connecting`, `on`, `nosol`, `wrongnet`; `ui/wallet.js`) |
+| Minhas apostas | redesenhado | `#/entries` (`me.js`) |
+| Confirmação antes de assinar | redesenhado | Resumo antes de assinar e etapas de assinatura (`ui/entry-flow.js`) |
+| Carregamento | redesenhado | Estado de carregamento na grade e no carrossel (`home-parts.js`, `home-mosaic.js`) |
+| Erro | redesenhado | Tela de erro (`error.js`) |
+| Estados vazios | redesenhado | `EmptyState`; "Nothing is open right now." (`home.js`) |
+| Estados Fechada, Em revisão, Paga | redesenhado | Cinco estados em `STATES` |
+| Janela de 6 horas | redesenhado | Passo 5 de `how.js`; estado "Contested" |
+| Pergunta anulada | redesenhado | Estado "Voided" com motivo (`voidReason`) |
+| Resultado NÃO | redesenhado | Textos de prova e de resolução (`campaign-head.js`) |
+| Pote de um lado só | redesenhado | Passo 6 de `how.js`: devolução das entradas |
+| Pagamento recebido | redesenhado | Crédito retido e como receber (`me.js`) |
+| Patrocinador | parcial | Selo de parceiro e abertura pela equipe; o aviso "não divulgado" e o destaque de 72 horas não foram conferidos nesta releitura |
+| Indicação | não desenhada | Fora da Sprint -1: Sprint 14 |
+| Sugestões pelo X | sumiu | Sem página de sugestões; abrir é o caminho (P1 §4.1) |
+| Pontuação da devnet | redesenhado | `#/leaderboard` (`ranking.js`) |
+| Pergunta de preço | redesenhado | Campanha de preço com alvo e leitura (`open-templates.js`, `campaign-head.js`) |
+| Teto global atingido | sumiu | Sem teto: o pote não tem limite (`fees.js`: "No cap") |
+| Dados longos | não conferido | Títulos longos não foram medidos nesta releitura |
+| Idioma | redesenhado | Inglês, por L-01 (8/10) |
+| Tema padrão | redesenhado | Escuro, por decisão do fundador (8/10) |
+| Celular | redesenhado | Layouts de celular aprovados em 9/10; o balão do mascote não corta na borda |
+
+### Pendências que a releitura não fecha
+
+- O aviso "não divulgado" e o destaque de 72 horas do patrocinador (lacuna "Patrocinador") ficam para a conferência
+  com as telas de patrocínio da Sprint 15.
+- Títulos longos (lacuna "Dados longos") não foram medidos. Ficam para a verificação da Sprint 10.
+- A linha 18 usa o texto em inglês do protótipo. Se o fundador quiser o texto do P1 §4.7 em português, é uma
+  decisão de idioma (L-01), não de design.

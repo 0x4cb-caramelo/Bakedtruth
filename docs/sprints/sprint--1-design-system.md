@@ -1,6 +1,6 @@
 # Sprint -1 — Design system, the opening screen and phone layouts
 
-**Status:** in progress (opened 2026-10-08). Design approved by Ronaldo on 2026-10-09. Ported to `app/` on 2026-10-09: tokens in both themes, the theme script, the two fonts served by the site, and seven primitives (button, state chip, token, Yes/No, progress, notice, theme toggle); lint and build pass. Then, the same day: `app/styles/ui.css` and twelve primitives in `app/components/ui/` (eight new, four rewritten on those classes) (the `Odds` with a price is replaced by `SideButton`, with a chance), the rest of the component work and the result in `DESIGN-DIRECTION.md`. Still open: the creation box and the phone layouts (screens, Sprints 09 to 13 and 19), the conflicts re-read, the contrast test, a visual check in both themes, and the closure · **Branch:** `sprint--1-design-system`, stacked on `sprint-02-pot-core` (PR #30, which carries the plan's PR #27) · **Dates:** none, by the founder's decision
+**Status:** in review, closure in progress (opened 2026-10-08; closure review 2026-10-09). Design approved by Ronaldo on 2026-10-09. Ported to `app/` on 2026-10-09: tokens in both themes, the theme script, the two fonts served by the site, and seven primitives (button, state chip, token, Yes/No, progress, notice, theme toggle); lint and build pass. Then, the same day: `app/styles/ui.css` and twelve primitives in `app/components/ui/` (eight new, four rewritten on those classes) (the `Odds` with a price is replaced by `SideButton`, with a chance), the rest of the component work and the result in `DESIGN-DIRECTION.md`. Still open: the creation box and the phone layouts (screens, Sprints 09 to 13 and 19), the conflicts re-read, the contrast test, a visual check in both themes, and the closure · **Branch:** `sprint--1-design-system`, stacked on `sprint-02-pot-core` (PR #30, which carries the plan's PR #27) · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -26,10 +26,10 @@ a phone layout. The visual language does not change.
 
 ## Definition of done
 
-- [ ] `app/styles/tokens.css` carries the colour variables of the design direction: dark in `:root`, light in
+- [x] `app/styles/tokens.css` carries the colour variables of the design direction: dark in `:root`, light in
       `:root[data-theme='light']`. Tailwind v4's `@theme` points at them, and no component uses a literal colour.
-- [ ] The theme is set by a script in `<head>`, before the CSS, with the storage key `brot-theme` (TP §3.6).
-- [ ] Barlow Condensed 700 and Inter 400, 500 and 600 are served by the site itself, with no third-party font host
+- [x] The theme is set by a script in `<head>`, before the CSS, with the storage key `brot-theme` (TP §3.6).
+- [x] Barlow Condensed 700 and Inter 400, 500 and 600 are served by the site itself, with no third-party font host
       (K-10). How this Next.js version serves fonts is checked first **[AC]** (TP §14.4).
 - [ ] Every component of the design direction's inventory has a primitive in `app/components/ui/`, in both themes, or
       is marked as cut, with the reason.
@@ -37,15 +37,15 @@ a phone layout. The visual language does not change.
       the founder approved, or is marked gone with its source: the sponsor request form (D-t), the suggestions page
       (P1 §4.1: "quem tem uma ideia abre"), the cap-reached state (D-h), test dollars (D-a), "Upcoming" and "Notify"
       (no campaign exists before it opens).
-- [ ] **The creation box (D8):** the founder approved its design at desktop width and at phone width, with every
+- [x] **The creation box (D8):** the founder approved its design at desktop width and at phone width, with every
       state listed under Deliverables.
 - [ ] **Phone layouts:** every web screen has an approved layout at about 412 CSS px (proposal §3.11) and down to
       360 CSS px **[INF]** (a common narrow Android width, not from the sources), with a breakpoint below 700 px. The
       mascot's bubble does not cut at the right edge, and "How it works" has a path on phones.
-- [ ] The three text pairs below 4.5:1 and the four accessibility problems listed in the design direction are fixed.
+- [x] The three text pairs below 4.5:1 and the four accessibility problems listed in the design direction are fixed.
 - [ ] `docs/product/DESIGN-DIRECTION.md` records the result: a section for the creation screen, a section for the
       phone layouts, the resolved conflicts, and the last item of its handoff checklist ticked.
-- [ ] `cd app && bun run lint && bun run build` passes.
+- [x] `cd app && bun run lint && bun run build` passes.
 - [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
 ## Deliverables
@@ -199,3 +199,22 @@ the notices P-9 (creator notice, as BP-14 recommends), L-03 (lock notice, option
 
 **Still to do after the approval:** port the tokens, the theme script, the fonts and the primitives into `app/`; record
 the result in `docs/product/DESIGN-DIRECTION.md`; `cd app && bun run lint && bun run build`; the common closure.
+
+### Closure record (2026-10-09)
+
+- Pushed: `be5844b` (primitives, `ui.css`, docs). Then: contrast test, `--dim` fix, the `orbit` keyframe rename (Tailwind's
+  `spin` overrode it and rotated the button), the mascot image fix, the re-read of conflicts and gaps, the sections for
+  the creation box and the phone layouts, the four accessibility problems, the six inventory items without a primitive.
+- Verified: `bun test tests/app` (contrast, both themes), `bun run lint`, `bunx tsc --noEmit`, `bun run build`,
+  `bun test tests/brot/idl.test.ts tests/brot/kit.test.ts`, `node scripts/codemap.js --check`, `scripts/ci-secret-scan.js`
+  (clean), visual check in both themes at 1440, 412 and 360 px, and a keyboard pass.
+- Not verified: the full `bun run test` suite (needs the compiled program; this sprint does not touch the program), a
+  screen-reader pass, and the BP v0.0.4 section numbers of the conflicts table.
+- Open, and why it is not closed: the creation box and the phone layouts are approved but not ported (Sprints 09 to 13
+  and 19); three gaps are deferred (Patrocinador, Indicação, Dados longos); six inventory components are deferred and
+  wait for the founder's decision to cut or keep; the conflicts table cites BP v0.0.2 parts.
+- Left to the founder and Ronaldo: the merge into `main` and the `sprint--1-design-system` tag (Ronaldo merges when he
+  asks).
+- Retrospective: the port's first pass counted the primitives as the inventory. The closure review found the record
+  claimed more than it had checked (a wrong script-order claim, a wrong gap count, a missing creation-box section).
+  Corrected here. The review by a second agent caught what the author missed; it stays part of closure.

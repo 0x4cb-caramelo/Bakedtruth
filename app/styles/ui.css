@@ -1,18 +1,20 @@
 /* Purpose: the primitives every screen shares, ported from the approved campaigns prototype (css/components.css):
    buttons, the kind tile, state chips, fields, the segmented control, notices, the YES/NO split bar with the prize,
    skeletons, the dialog and bottom sheet, menus and toasts. Colours come from tokens.css only. Each React wrapper in
-   app/components/ui/ names the class it uses. Version: 0.1.0 · Sprint -1 (design system), ported 2026-10-09. */
+   app/components/ui/ names the class it uses. Version: 0.1.0 · Sprint -1 (design system), ported 2026-10-09.
+   The orbit keyframe is named `orbit`, not `spin`: Tailwind v4 emits its own `spin` (a rotate of the whole
+   element) and it would replace this one. */
 
 /* Buttons. The primary keeps the approved orbiting edge; secondary and quiet ones are flat. */
 .cta { position: relative; display: inline-block; padding: 1.5px; border-radius: var(--r-sm); background: var(--cta-ring);
-  animation: spin 3.2s linear infinite; }
+  animation: orbit 3.2s linear infinite; }
 .cta > span { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 15px;
   border-radius: calc(var(--r-sm) - 1.5px); background: var(--cta-bg); color: var(--on-accent); font-weight: 600;
   font-size: 13px; white-space: nowrap; }
 .cta:hover > span { background: var(--cta-hover); }
 .cta.wide { display: block; width: 100%; } .cta.wide > span { min-height: var(--tap); font-size: 14px; }
 .cta:disabled { animation: none; background: var(--line); } .cta:disabled > span { background: var(--raised); color: var(--dim); }
-@keyframes spin { to { --spin: 360deg; } }
+@keyframes orbit { to { --spin: 360deg; } }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 8px 14px;
   border: var(--bw) solid var(--line-strong); border-radius: var(--r-sm); color: var(--text); font-size: 13px; font-weight: 600; }
 .btn:hover { border-color: var(--muted); background: var(--row-hover); }

@@ -4,7 +4,8 @@
    2026-10-08. Version: 0.1.0 · Sprint -1 (design system).
    Changed from the approved values only where a text pair was below WCAG 4.5:1 (DESIGN-DIRECTION.md, contrast
    table): --dim in dark (3.64 → 4.92 on panels), the primary button in dark (3.68 → 5.29) and small amber text in
-   light (3.47 → 5.23), and --dim in light on the page floor (4.05 → 4.82). Sprint -1 ports this file to
+   light (3.47 → 5.23), and --dim in light on the page floor (4.05 → 4.82). Sprint -1 (test "design tokens meet contrast"): --dim in dark
+   #808ba0 → #8590a4 (4.29 → 4.58 on the raised surface) and in light #5f6a7d → #5e697c (4.44 → 4.51 there). Sprint -1 ports this file to
    app/styles/tokens.css. */
 @font-face { font-family: "Barlow Condensed"; font-weight: 700; font-display: swap; src: url("../fonts/barlow-condensed-700.woff2") format("woff2"); }
 @font-face { font-family: Inter; font-weight: 400 600; font-display: swap; src: url("../fonts/inter-var.woff2") format("woff2"); }
@@ -13,7 +14,7 @@
 :root {
   /* Surfaces and text. */
   --bg: #10141b; --panel: #181d27; --raised: #212838; --line: #2a3243; --line-strong: #36466a;
-  --text: #edf0f5; --muted: #9aa4b6; --dim: #808ba0;
+  --text: #edf0f5; --muted: #9aa4b6; --dim: #8590a4;
   /* One blue for the interface; amber for the brand; green and red only for YES and NO. */
   --accent: #4f7dff; --accent-soft: #a8beff; --accent-hover: #bdccff; --on-accent: #fff;
   --cta-bg: #3560e6; --cta-hover: #2b52cc;
@@ -58,7 +59,7 @@
 
 :root[data-theme="light"] {
   --bg: #eef1f6; --panel: #fff; --raised: #e3e8f0; --line: #d5dbe6; --line-strong: #b4bfd2;
-  --text: #131a26; --muted: #556074; --dim: #5f6a7d;
+  --text: #131a26; --muted: #556074; --dim: #5e697c;
   --accent: #2f5fe6; --accent-soft: #2a52c9; --accent-hover: #1b3a9c; --on-accent: #fff;
   --cta-bg: #2f5fe6; --cta-hover: #2450cf;
   --cta-ring: conic-gradient(from var(--spin), #1f43b0 0 62%, #c9d8ff 80%, #1f43b0 100%);

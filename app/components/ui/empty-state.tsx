@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 export function EmptyState({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
     <div className="empty">
-      <Image src="/mascot/sulking.png" alt="Baked, sulking" width={150} height={95} />
+      <Image src="/mascot/sulking.png" alt="Baked, sulking" width={150} height={95} style={{ height: "auto" }} />
       <p>{children}</p>
       {action}
     </div>

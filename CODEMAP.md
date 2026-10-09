@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **365** |
+| Arquivos mapeados | **373** |
 | Acima de 200 linhas | **32** ⚠️ |
 | Sem cabeçalho `Purpose:` | **78** ⚠️ |
 
@@ -135,8 +135,16 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`button.tsx`](app/components/ui/button.tsx) | the buttons of the design direction. "primary" is the blue CTA with the orbiting edge (.cta); "secondary" | 28 |
+| [`empty-state.tsx`](app/components/ui/empty-state.tsx) | the empty state: Baked sulking, one sentence and an optional way out (.empty). The mascot is the one served | 15 |
+| [`live-value.tsx`](app/components/ui/live-value.tsx) | the live reading against the target, the heart of the proof (P1 §4.7: the number read, the target and the | 29 |
+| [`moments.tsx`](app/components/ui/moments.tsx) | the two moments of a campaign, entries close and the deadline, as two rows, never one (BR-06). Each shows | 23 |
 | [`notice.tsx`](app/components/ui/notice.tsx) | the notice bar above the content (sign-in, a refusal, a pause, the lock notice). It always carries a text | 21 |
 | [`progress.tsx`](app/components/ui/progress.tsx) | the progress bar of the proof panel (role=progressbar), on the token track. Sprint -1 (DESIGN-DIRECTION.md) | 18 |
+| [`seal.tsx`](app/components/ui/seal.tsx) | the partner seal (BR-19) on a campaign opened free for a launch partner. It is a chip, not a band: the | 10 |
+| [`segmented.tsx`](app/components/ui/segmented.tsx) | the segmented control, a row of exclusive choices (the sort, a chance view). Each choice is a button with | 26 |
+| [`side-button.tsx`](app/components/ui/side-button.tsx) | the YES and NO buttons of a campaign: the side on the left and its chance on the right, never a price. The | 24 |
+| [`skeleton.tsx`](app/components/ui/skeleton.tsx) | a loading block that shimmers, and stops for reduced motion (.skel in styles/ui.css). It is hidden from | 6 |
+| [`split-bar.tsx`](app/components/ui/split-bar.tsx) | the pot as one bar, YES then NO then the prize as a hatched end cap that belongs to no side, with a legend | 33 |
 | [`state-chip.tsx`](app/components/ui/state-chip.tsx) | the chip that names a campaign's public state (P1 §3.1). Text on its own chip with a dot, never colour | 27 |
 | [`theme-toggle.tsx`](app/components/ui/theme-toggle.tsx) | the theme switch (dark by default). It flips data-theme, saves the choice in localStorage under brot-theme, | 46 |
 | [`token.tsx`](app/components/ui/token.tsx) | the one-letter tile of a campaign's kind (P1 §4.2), in the kind's own colour (.kind-tile). Five kinds, none | 14 |
