@@ -103,3 +103,18 @@ pub(super) fn create_entry<'a>(
     state.baker = *baker_key;
     Ok(state)
 }
+
+/// An existing entry for the tally: owner, tag and PDA, and its stored keys must be the campaign and baker
+/// passed (`EntryMismatch`). Its total is not checked here; the joins are checked one by one.
+pub fn load_entry_for_tally<'a>(
+    entry: &'a mut AccountView,
+    campaign: &Address,
+    baker: &Address,
+    program_id: &Address,
+) -> Result<RefMut<'a, Entry>, ProgramError> {
+    let state = Entry::load_mut(entry, campaign, baker, program_id)?;
+    if state.campaign != *campaign || state.baker != *baker {
+        return Err(BrotError::EntryMismatch.into());
+    }
+    Ok(state)
+}

@@ -134,6 +134,8 @@ export const BrotError = {
   JoinBufferRefused: 6131,
   BelowCampaignMinEntry: 6132,
   JoinAccountsMismatch: 6133,
+  TallyNotReady: 6134,
+  EntryAlreadyTallied: 6135,
   FeedNotOnList: 6141,
   IllegalTransition: 6146,
 } as const;

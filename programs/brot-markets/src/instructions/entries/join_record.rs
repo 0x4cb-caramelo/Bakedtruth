@@ -16,7 +16,7 @@ use crate::{
     constants::JOIN_SEED,
     error::BrotError,
     layout::ZeroCopy,
-    state::{join::Join, AccountTag, LAYOUT_VERSION},
+    state::{entry::Entry, join::Join, AccountTag, LAYOUT_VERSION},
 };
 
 /// The fields of one join the refund and the payout read.
@@ -120,5 +120,48 @@ pub fn create_join(
     state.index.set(new.index);
     state.joined_at.set(new.joined_at);
     state.amount.set(new.amount);
+    Ok(())
+}
+
+/// The Join slot's checks: writable, and distinct from every other slot of the instruction it is
+/// passed to (`DuplicateAccount`), so a Join cannot alias the vault, the Entry, the campaign or the baker.
+pub fn check_join_slot(join: &AccountView, others: &[&AccountView]) -> ProgramResult {
+    checks::writable(join)?;
+    for other in others {
+        checks::distinct(join, other)?;
+    }
+    Ok(())
+}
+
+/// What a join writes into its record.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct JoinFields {
+    /// `Side` as its byte: 0 for YES, 1 for NO.
+    pub side: u8,
+    pub joined_at: i64,
+    pub amount: u64,
+}
+
+/// The join's record and the entry's count: the index is the entry's join count before this join
+/// (no cap), the count goes up by one, and the account is created with the baker's rent. A refusal
+/// after this reverts with the transaction.
+pub fn open_join(
+    baker: &AccountView,
+    join: &mut AccountView,
+    campaign: &Address,
+    entry: &mut Entry,
+    fields: JoinFields,
+    program_id: &Address,
+) -> ProgramResult {
+    let index = entry.join_count.get();
+    let next = index.checked_add(1).ok_or(BrotError::MathOverflow)?;
+    let new = NewJoin {
+        index,
+        side: fields.side,
+        joined_at: fields.joined_at,
+        amount: fields.amount,
+    };
+    create_join(baker, join, campaign, new, program_id)?;
+    entry.join_count.set(next);
     Ok(())
 }

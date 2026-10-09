@@ -1,11 +1,11 @@
 //! Purpose: `user_join_campaign`: a baker joins YES or NO with at least `min_entry_lamports` while
 //!          the outcome is not knowable; the entry moves from the baker's wallet into the vault
 //!          by System Program transfer, and the pot is bookkept, never read from the vault.
-//! Version: 0.0.4
+//! Version: 0.0.5
 //! Sprint: 02 (pot core on Pinocchio), accounts and arguments frozen at its opening, body by
 //!         lane E; 03 (readers and resolution) adds the join lock (BR-06), lane E; 04 (lane G)
 //!         reads the campaign's own minimum (question 5) and the proximity buffer (question 7).
-//!         The `Join` record (`join_record.rs`) is not written here yet: the account list has no slot for it.
+//!         The `Join` record (`join_record.rs`) is created at slot 6 with the entry's join count as its index.
 //!
 //! Order: the arguments, the slots and the loads, as `checks.rs` orders them; then the
 //! campaign's rules: the metric account's address, `Open`, the entry close, the join lock (the
@@ -22,6 +22,7 @@ use shank::ShankType;
 use super::{
     entry_account::{create_entry, load_entry},
     join_lock::require_outcome_open,
+    join_record::{check_join_slot, open_join, JoinFields},
     join_rules,
 };
 use crate::{
@@ -67,8 +68,8 @@ pub fn user_join_campaign(
     data: &[u8],
 ) -> ProgramResult {
     let args = args::<JoinCampaignArgs>(data)?;
-    // The Join account sits at slot 6 (amendment 2026-10-09); lane G writes it. Until then it is only passed.
-    let [baker, config, campaign, vault, entry, metric_account, _join, system_program, event_authority, program, ..] =
+    // The Join account sits at slot 6 (amendment 2026-10-09): one record per join, created here.
+    let [baker, config, campaign, vault, entry, metric_account, join, system_program, event_authority, program, ..] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -84,6 +85,7 @@ pub fn user_join_campaign(
     checks::distinct(campaign, vault)?;
     checks::distinct(entry, vault)?;
     checks::distinct(entry, campaign)?;
+    check_join_slot(join, &[&*baker, &*vault, &*entry, &*campaign])?;
     checks::system_program(system_program)?;
     checks::event_accounts(event_authority, program, program_id)?;
 
@@ -127,6 +129,9 @@ pub fn user_join_campaign(
         let created = create_entry(baker, entry, &campaign_key, expected_total, program_id)?;
         let entries_open = add_u32(campaign.entries_open.get(), 1)?;
         campaign.entries_open.set(entries_open);
+        // A new entry is untallied until its joins are tallied after the proof (`tally_late_joins`).
+        let untallied = add_u32(campaign.entries_untallied.get(), 1)?;
+        campaign.entries_untallied.set(untallied);
         created
     };
 
@@ -165,6 +170,12 @@ pub fn user_join_campaign(
     };
     let seq = campaign.event_seq.get();
     let next_seq = add(seq, 1)?;
+    let fields = JoinFields {
+        side: args.side,
+        joined_at: time.unix_timestamp,
+        amount,
+    };
+    open_join(baker, join, &campaign_key, &mut entry, fields, program_id)?;
     vault::deposit(baker, vault, amount)?;
     entry.amount_yes.set(entry_yes);
     entry.amount_no.set(entry_no);

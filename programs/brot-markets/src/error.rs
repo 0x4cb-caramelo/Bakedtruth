@@ -281,6 +281,10 @@ pub enum BrotError {
     BelowCampaignMinEntry = 6132,
     #[error("The join accounts passed do not match the entry's joins, in order")]
     JoinAccountsMismatch = 6133,
+    #[error("The campaign is not InReview with its publish time recorded, so its joins cannot be tallied")]
+    TallyNotReady = 6134,
+    #[error("Every join of this entry is already tallied")]
+    EntryAlreadyTallied = 6135,
     // Lane H (numbers from 6141).
     #[error("The price feed is not on the compiled feed list")]
     FeedNotOnList = 6141,
