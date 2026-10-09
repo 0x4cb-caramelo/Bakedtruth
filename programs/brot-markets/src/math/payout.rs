@@ -142,3 +142,22 @@ pub fn estimate_return_bps(pot: &JoinedPot) -> Result<u64, BrotError> {
     };
     mul_div_floor(returned, BPS_DENOMINATOR, pot.amount)
 }
+
+/// What a `OneSided` entry gets back: `entry − its one-sided fee`, whatever the outcome (P1 section
+/// 3.5). The fee is the one `fees::one_sided_fee` charges; a payout that would be negative is
+/// `MathOverflow`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct OneSidedRefund {
+    pub payout: u64,
+    pub fee: u64,
+}
+
+pub fn one_sided_refund(
+    entry: u64,
+    one_sided_fee_bps: u16,
+    is_first: bool,
+) -> Result<OneSidedRefund, BrotError> {
+    let fee = one_sided_fee(entry, one_sided_fee_bps, is_first)?;
+    let payout = entry.checked_sub(fee).ok_or(BrotError::MathOverflow)?;
+    Ok(OneSidedRefund { payout, fee })
+}
