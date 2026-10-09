@@ -9,8 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [Unreleased]
 
 A Sprint 02, o núcleo do pote em Pinocchio, foi mesclada na `main` pelo fundador no pull request #35 (8/10/2026), sem
-a tag `sprint-02`. A Sprint 03, os leitores e a resolução, está em revisão no seu pull request (branch
-`sprint-03-readers-resolution`), sem mesclar: a mescla e a tag esperam o fundador
+a tag `sprint-02`. A Sprint 03, os leitores e a resolução, está em revisão no pull request #40 (branch
+`sprint-03-readers-resolution`, 9/10/2026), sem mesclar: a mescla e a tag esperam o fundador
 (`docs/sprints/sprint-03-readers-resolution.md`).
 
 ### Added

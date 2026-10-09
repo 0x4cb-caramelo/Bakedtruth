@@ -77,7 +77,7 @@ demonstrable on devnet.
 on devnet; the Surfpool read it asked for was done in Sprint 03. Sprint 02 ran on 2026-10-08 with the D6 names and was
 merged into `main` in PR #35 (not tagged). Sprint 03 ran on 2026-10-09: the five readers, the opening of every kind,
 the join lock, `resolve_campaign`, the Surfpool scenario, and the frozen program and Anchor gone from the workspace; it
-is in review (its pull request, not merged). The next is 04.
+is in review (PR #40, not merged). The next is 04.
 
 **Outside the roadmap: the provisional site.** At the founder's request, `brot.markets` serves `services/landing`: a
 "coming soon" page with a waitlist, a privacy page and the decks at `/pitch` and `/pitch2`. It is not a sprint and
@@ -92,7 +92,7 @@ mainnet line, which still says "and a cap" and whose new wording waits for the f
 | 00 | [Setup](sprints/sprint-00-setup.md) (closed) | B0 | — |
 | 01 | [Foundation: price reader proof](sprints/sprint-01-foundation.md) (closed) | B1 | 00 |
 | 02 | [Pot core on Pinocchio: config, paid opening, vault, entries](sprints/sprint-02-pot-core.md) (merged, PR #35) | B2 | 00 |
-| 03 | [Readers and resolution; Anchor leaves the workspace](sprints/sprint-03-readers-resolution.md) (in review) | B3 | 01, 02 |
+| 03 | [Readers and resolution; Anchor leaves the workspace](sprints/sprint-03-readers-resolution.md) (in review, PR #40) | B3 | 01, 02 |
 | 04 | [Window, settlement, payout, fees, creator share and invariants](sprints/sprint-04-settlement-invariants.md) | B4 | 03 |
 | 05 | [SDK and the devnet cycle](sprints/sprint-05-sdk-devnet-cycle.md) | B5 | 04 |
 | 06 | [Server and primary keeper (Bun check first)](sprints/sprint-06-keeper-server.md) | B6 | 05 |

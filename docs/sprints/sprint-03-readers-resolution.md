@@ -1,6 +1,6 @@
 # Sprint 03 — Readers and resolution; Anchor leaves the workspace
 
-**Status:** in review (pull request open, not merged) · **Branch:** `sprint-03-readers-resolution` · **Dates:** none, by the founder's decision
+**Status:** in review (PR #40, opened 2026-10-09, not merged) · **Branch:** `sprint-03-readers-resolution` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
