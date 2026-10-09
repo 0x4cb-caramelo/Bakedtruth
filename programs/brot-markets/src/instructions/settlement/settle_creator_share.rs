@@ -64,6 +64,14 @@ pub fn settle_creator_share(
     let from_pot = share
         .checked_sub(from_fee)
         .ok_or(BrotError::InvariantViolated)?;
+    // No share is due (a team opening, a mode other than Split, a zero share): checked before the flag, which
+    // finalize sets for such a campaign. A reserved claim always has a share due.
+    if stored.creator_is_team != 0
+        || SettleMode::try_from(stored.settle_mode)? != SettleMode::Split
+        || share == 0
+    {
+        return Err(BrotError::CreatorShareNotDue.into());
+    }
     let rent_min = Rent::get()?.try_minimum_balance(0)?;
     let reserved = stored.creator_share_reserved.get();
 
@@ -90,12 +98,6 @@ pub fn settle_creator_share(
         return events::emit(&event, event_authority, program, program_id);
     }
 
-    if stored.creator_is_team != 0
-        || SettleMode::try_from(stored.settle_mode)? != SettleMode::Split
-        || share == 0
-    {
-        return Err(BrotError::CreatorShareNotDue.into());
-    }
     stored.creator_share_settled = 1;
     checks::paying_vault(vault, program_id, &[&*creator])?;
     match plan_credit(creator.lamports(), share, rent_min)? {

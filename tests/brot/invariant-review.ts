@@ -9,6 +9,7 @@ import {
   isTeamReason,
   PROOF_DELAY,
   prizeSettledAtSnapshot,
+  shareDue,
   SIX_HOURS,
   snapshotOf,
   type ModelCampaign,
@@ -52,6 +53,8 @@ const BLANK = new Map<string, bigint>();
 /** The snapshot of a reviewed campaign: taken by `team_confirm_result`, `team_void_campaign` and `finalize`. */
 function takeSnapshot(c: ModelCampaign) {
   c.snapshot = snapshotOf(c);
+  // Finalize marks the creator share settled when none is due (closure fix): close never waits for it.
+  c.shareSettled = shareDue(c) === 0n;
   // A campaign with no entry has nothing to settle: finalize moves it straight to Settled (decision of 2026-10-09).
   c.phase = new Set(c.joins.map((j) => j.baker)).size === 0 ? "Settled" : "Settling";
   c.counted = false;

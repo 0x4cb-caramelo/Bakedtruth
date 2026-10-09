@@ -111,6 +111,11 @@ pub fn finalize_snapshot(
     campaign
         .creator_share_from_fee
         .set(snap.creator_share_from_fee);
+    // No creator share is due (team, one-sided, void, refund, a zero share): nothing to settle, so the share
+    // counts as settled now. Otherwise close_campaign would wait for a settlement that always refuses.
+    if snap.creator_share == 0 {
+        campaign.creator_share_settled = 1;
+    }
     campaign.status = target as u8;
     Ok(())
 }

@@ -215,3 +215,21 @@ fn settle_host_finalize_no_outcome_is_refused() {
     let g = config(&mut gb, 1);
     assert_eq!(finalize_snapshot(c, g), Err(BrotError::BadAccountData));
 }
+
+#[test]
+fn settle_host_finalize_a_campaign_with_no_creator_share_due_marks_it_settled() {
+    // Closure review: close_campaign needs the share settled; a void (no share due) must not leave it open.
+    let (mut cb, mut gb) = (Vec::new(), Vec::new());
+    let c = campaign(&mut cb);
+    c.entries_open = LeU32::new(0);
+    c.pool_yes = LeU64::new(0);
+    c.pool_no = LeU64::new(0);
+    c.late_yes = LeU64::new(0);
+    c.publish_time = LeI64::new(0);
+    c.kind = ReaderKind::SupplyAtMost as u8;
+    c.creator_share_settled = 0;
+    let g = config(&mut gb, 1);
+    finalize_snapshot(c, g).unwrap();
+    assert_eq!(c.creator_share.get(), 0);
+    assert_eq!(c.creator_share_settled, 1);
+}
