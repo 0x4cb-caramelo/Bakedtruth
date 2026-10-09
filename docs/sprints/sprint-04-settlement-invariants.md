@@ -215,3 +215,42 @@ The files of Deliverables, the randomized test in `tests/`, the math vectors, th
 ## Record and retrospective
 
 Filled in during the sprint and at closure.
+
+## Closure status (2026-10-09)
+
+Written at the end of the sprint's work on branch `sprint-04-settlement-invariants`, before the pull request. The
+Definition of done above is **not** all ticked: an item is ticked only when a test or a measurement in this record
+shows it. Everything not listed as verified below is open, and goes to the owner's review before the merge.
+
+**Verified in this session**
+
+- Host tests: `cargo test --locked -p brot-markets --features no-entrypoint` passes 436 tests; with `,mainnet` 437.
+  Clippy with `-D warnings` is clean for both feature sets. `cargo fmt --check` is clean.
+- TypeScript: `bun test tests/` passes 307 tests against the rebuilt `brot_markets.so`. `bunx tsc --noEmit`, `bun run lint`
+  and the codemap check pass. The slot matrix is current (373 cases, from the IDL).
+- Randomized invariants (X0.1): fixed seed `0x0badc0de` (195936478), 1,200 operations, checks I1 to I15 after each one
+  (35,288 campaign checks). Successful operations per kind: advance 147, close 40, collect 40, drain 23, finalize 40,
+  fund 25, hand 36, join 71, openPaid 92, openTeam 22, pause 17, prize 40, resolveNo 28, resolveYes 12, resume 16,
+  settle 53, share 4, sweep 11. Refusals are counted per error in the test output.
+- Measurements: see `docs/technical/TECHNICAL-PLAN.md` §3.4.18.
+- The re-proof and the viability rule have their own tests (`cutoff-reproof.test.ts`, `math_snapshot_split.rs`, the
+  boundary test at 12 and 13).
+
+**Known gaps in the evidence (open)**
+
+- **Coverage.** In the random run `confirm` and the team `void` path never succeed (they are refused as
+  `TeamKeyOutsideReview`, `TeamVoidNotAutomatic` or `OutsideReviewWindow`), and `contest` is refused by design until
+  Sprint 14. `share` succeeds only 4 times. The team paths need their own targeted draws.
+- **The viability rule's wording.** The founder's decision says the fees are "charged on the winning side's principal";
+  the code and the Technical Plan charge the house fee on the losing side, and the share on the whole pot. The two
+  readings give different results for some pots. Open for the founder before the merge.
+- **Worked examples changed.** V 990 / P 10 and V 98,900 / P 1,100, with or without the prize, now resolve one-sided,
+  not split. The sprint's worked-example list above describes the earlier split values; the tests carry the new ones.
+- **Reviewer items not closed.** The payout invariant in `bookkeeping.rs` is still a tautology and should be a real
+  check. The residual gap in the join buffer is accepted (decision 5). The policy for SOL sent by hand to an `Entry`
+  or a `Campaign` is written in the session log, not yet in the Technical Plan.
+- **Not re-checked at closure.** The two-wallet tests, the pause tests (I10′) and the feed-list items are open until the
+  owner confirms the rows of the Definition of done that they cover.
+- **Product notes for the founder.** 62 or 63 mainnet feeds (the compiled list has 63); whether the team-openings valve
+  is read as a product limit.
+- **Carried to later sprints:** the reserve's daily retry is Sprint 06's; the contest exit is Sprint 14's.

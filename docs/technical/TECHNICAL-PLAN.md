@@ -1,6 +1,6 @@
 # Brot Markets — Technical Plan
 
-**Version:** 0.1.2 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
+**Version:** 0.1.3 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
 todo em ingles") from the architecture proposal 0.4 the founder approved that day ("sim para todos") and from BP
 v0.0.4, merged into `main` with PR #35 on 2026-10-08; v0.1.1 aligns it with what Sprint 02 built and measured
 (`docs/sprints/sprint-02-pot-core.md`, "TP to align"); v0.1.2 aligns it with what Sprint 03 built and to the founder's
@@ -1564,6 +1564,49 @@ devnet cycle (connect, open a campaign, join, resolution, payout received) runs 
 Android phone; process death never yields a second entry or opening; the bundle holds no paid key and imports the SDK
 rather than a copy of its math; and, for Sprint 22, every C-item is checked, the company is the publisher and the
 team's lawyer has signed off in writing, country by country.
+
+### 3.4.18 Sprint 04 alignment (v0.1.3, 2026-10-09)
+
+What Sprint 04 built and the decisions it implements (`docs/sprints/sprint-04-settlement-invariants.md`, "Closure
+status"; session log `2026-10-09-sprint-04-*`). Where this section and the text above disagree, this section is what
+the code does.
+
+- **Late joins.** A join is late only on a YES price result, when its time is at or after the YES proof's
+  `publish_time`. Late amounts leave V and P, come back whole to their baker, and pay no fee. `tally_late_joins`
+  (discriminator 21) sums each entry's late totals and moves the rent of its `Join` accounts into the `Entry`.
+  `finalize_campaign` refuses `NotTallied` while `entries_untallied` is not zero, for every outcome.
+- **One account per join.** `Join` (`["join", campaign, baker, index as u32 LE]`, 96 bytes, tag 5) records each join;
+  `Entry` (116 bytes) keeps `join_count`, `joins_tallied`, `late_yes` and `late_no`. The join's rent sits in the
+  `Entry` and goes back to the baker when the entry settles (`LateTallied`, `EntrySettled`).
+- **Cut-off move.** A campaign in review moves its cut-off back, and only back, to an earlier YES price proof, before
+  any tally has started. The review window does not move. Any other second proof is refused with `CutoffNotMovable`
+  (6147), after the reader's own refusals (`NotResolvableYet`, `ProofStale`) for a NO or a void.
+- **Team voids and contests.** A team key voids only an automatic void (`TeamVoidNotAutomatic`, 6097 for a YES or
+  NO). `team_open_contest` is disabled (`ContestExitDisabled`, 6096) until Sprint 14, because a contest would freeze
+  the pot with no exit.
+- **Creator share.** It comes from the losing side less the house fee, then from the house fee, and never from the
+  prize: `C = floor((V + P) × creator_share_bps ÷ 10,000)`, `from_pot = min(C, P − fee)`,
+  `from_fee = min(C − from_pot, fee)`, and the winners split `V + P + R − fee − from_pot`, never below V. The house
+  fee is charged on the losing side. A team campaign has no creator share (I12).
+- **Economic Viability Rule (decision of 2026-10-09).** A pot splits only when the losing side is larger than the fees
+  that would come out of it (the house fee plus the creator share on V + P). Otherwise it resolves one-sided: entries
+  come back net of their one-sided fees and the prize returns to whoever opened. Worked examples: V 990 / P 10 and
+  V 98,900 / P 1,100 are one-sided, with or without the prize; V 990 / P 13 splits, and V 990 / P 12 does not. Open
+  point for the founder: the decision's words say "fees charged on the winning side's principal", while the code
+  charges the house fee on the losing side (see the sprint file).
+- **Prize flag.** `settle_prize` sets `prize_settled` on every settlement, Split included (it pays nothing for a
+  Split); `close_campaign` needs the fee, prize and creator-share flags, and finalize sets the share flag when no share
+  is due.
+- **Reserved creator share.** A reserved share blocks `close_campaign` unless the creator is the rent payer, in which
+  case close pays it with the rent (`ReserveNotClaimable`, 6111, otherwise).
+- **Rent.** Read from the `Rent` sysvar at the moment of use, never a constant. Devnet measured: 650,240 lamports for a
+  zero-byte account at 5,080 lamports per byte.
+- **Feed list.** `require_listed` refuses a feed outside the compiled list (`FeedNotOnList`, 6141): 63 feeds on
+  mainnet, 17 sponsored feeds on devnet, measured on 2026-10-09.
+- **Measured (LiteSVM, `scripts/measure-settle.ts`, `scripts/measure-cu.ts`).** `settle_entry` costs 2,926 to 3,180
+  compute units per entry; a transaction holds 12 entries (1,152 bytes of the 1,232 allowed); one campaign account
+  takes about 3,850 settlements per block under the 12,000,000 compute units of the account write limit (C7). The
+  opening costs 19,466 compute units when free and 25,022 when paid. `brot_markets.so` is 158,072 bytes.
 
 ## 4. Data model
 
