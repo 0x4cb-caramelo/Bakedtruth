@@ -21,6 +21,13 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
   confere com os exemplos do plano técnico ao lamport, e o contraste dos tokens foi corrigido onde ficava abaixo do
   mínimo. A página `#/screens` reúne todas as telas e estados para a revisão.
 
+- **`brot.markets/2`, a página inicial com o visual do deck** (opção A, fundador, 9/10/2026): o mesmo conteúdo da
+  página inicial, palavra por palavra, com o pãozinho e o formulário, e só o visual trocado: as cores do deck (carvão
+  no tema escuro, creme no claro), IBM Plex e os cartões escuros dos slides. Um teste falha se o texto da `/2` e o da
+  página inicial divergirem. Fica fora dos buscadores até virar a página inicial. Arquivos próprios em
+  `services/landing/public/2/`, sem tocar na página atual, que o Ronaldo também edita; o `mascot.js` passou a achar as
+  imagens a partir da raiz do site. **A primeira versão, publicada horas antes, estava errada:** trazia o conteúdo do
+  pitch (problema, pote, abertura, roteiro) no lugar do da página inicial, e foi substituída.
 - **Sprint 02: o núcleo do pote, o programa novo em Pinocchio** (`programs/brot-markets`, 8/10/2026). Sai o
   esqueleto Anchor; entra o programa que guarda SOL de verdade, ainda sem leitura de resultado nem pagamento:
   - **A configuração e a equipe:** `admin_initialize_config` (só a autoridade de upgrade, lida da conta ProgramData),
@@ -345,7 +352,9 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
   resultado), 10, 13, 15 e 16. O resumo de produto, o plano técnico e a Sprint 02 ainda descrevem a criação só pela
   equipe e precisam ser revistos depois dessas respostas. O plano traz os nomes completos da equipe antes do de acordo
   escrito do Bernardo e do Ronaldo. O slide de receita do `/pitch3` mostrava 960 para quem acertou; o v4 já mostra
-  950, com o 1% de quem abriu.
+  950, com o 1% de quem abriu. Em 8/10/2026, à noite, as oito foram apresentadas ao fundador num quadro, cada uma com
+  a recomendação do plano, para resposta numa sessão só ("ok em todas" ou ajustes); a 2 já pergunta se a semente de
+  500 do v4 substitui os 0,02 SOL e se o 1% é do volume ou do pote. Sem resposta até o fechamento do dia.
 - **O `/pitch3` diz três regras que o plano de negócio não tinha,** a pedido do fundador em 7/10/2026. Desde 8/10/2026
   estão na v0.0.3 como "Decisão do pitch"; o registro abaixo fica como histórico. O plano não
   foi alterado; cada uma pede a decisão dele e a revisão de impacto. (1) **Patrocínio 90/10:** o plano diz 70% para

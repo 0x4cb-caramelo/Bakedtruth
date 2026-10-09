@@ -1,0 +1,256 @@
+/* Purpose: base of /2, the home page in the pitch deck's look (option A, founder, 2026-10-09): the deck's fonts and
+   colours in both themes (dark is the deck's charcoal, light its cream), the strip, the header, the waitlist form,
+   buttons and the footer. The page's parts are in home.css. Sprint: out of band (landing page), 2026-10-09. */
+
+@font-face { font-family: "IBM Plex Mono"; font-weight: 400; font-display: swap; src: url("/pitch/fonts/ibm-plex-mono-400.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 600; font-display: swap; src: url("/pitch/fonts/ibm-plex-mono-600.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 700; font-display: swap; src: url("/pitch/fonts/ibm-plex-mono-700.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-weight: 400; font-display: swap; src: url("/pitch/fonts/ibm-plex-sans-400.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-weight: 600; font-display: swap; src: url("/pitch/fonts/ibm-plex-sans-600.woff2") format("woff2"); }
+
+:root {
+  color-scheme: dark;
+  --bg: #10151c;
+  --strip: #0b0f15;
+  --panel: #171e29;
+  --line: #263041;
+  --text: #f7eedb;
+  --muted: #d9d1c1;
+  --dim: #a3acba;
+  --accent: #eea546;
+  --on-accent: #1b1611;
+  --dot: rgba(163, 172, 186, 0.14);
+  --say-bg: #f7eedb;
+  --say-fg: #1b1611;
+  --pet-shadow: rgba(0, 0, 0, 0.55);
+  --error: #ff9a7a;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --sans: "IBM Plex Sans", system-ui, sans-serif;
+  --r: 14px;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f6eddb;
+  --strip: #1b1611;
+  --panel: #fffaf0;
+  --line: #e2d4ba;
+  --text: #1b1611;
+  --muted: #3d3328;
+  --dim: #6b5e4e;
+  --accent: #a8481b;
+  --on-accent: #f7eedb;
+  --dot: rgba(107, 94, 78, 0.18);
+  --say-bg: #1b1611;
+  --say-fg: #f7eedb;
+  --pet-shadow: rgba(27, 22, 17, 0.3);
+  --error: #a8481b;
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.4px);
+  background-size: 26px 26px;
+  color: var(--text);
+  font: 400 16px/1.5 var(--sans);
+  transition: background-color 0.2s;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+[hidden] {
+  display: none !important;
+}
+.wrap {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+.strip {
+  padding: 8px 0;
+  background: var(--strip);
+  color: #a3acba;
+  font: 400 12px/1.3 var(--mono);
+}
+.strip b {
+  color: #eea546;
+  font-weight: 600;
+}
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter: blur(10px);
+}
+.top .wrap {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 64px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+  color: var(--text);
+  font: 600 24px/1 var(--mono);
+  letter-spacing: -0.02em;
+}
+.brand:hover {
+  text-decoration: none;
+}
+.brand b {
+  color: var(--accent);
+  font-weight: inherit;
+}
+.top-link {
+  font: 400 13px/1 var(--mono);
+}
+.theme {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--dim);
+  cursor: pointer;
+}
+.theme:hover {
+  color: var(--text);
+}
+.theme svg {
+  width: 16px;
+  height: 16px;
+}
+.theme .sun,
+:root[data-theme="light"] .theme .moon {
+  display: block;
+}
+.theme .moon,
+:root[data-theme="light"] .theme .sun {
+  display: none;
+}
+
+.join {
+  margin-top: 32px;
+  max-width: 540px;
+}
+.join label {
+  display: block;
+  margin-bottom: 10px;
+  font: 600 13px/1.3 var(--mono);
+}
+.join-row {
+  display: flex;
+  gap: 10px;
+}
+.join input[type="email"] {
+  flex: 1;
+  min-width: 0;
+  padding: 13px 16px;
+  border: 2px solid var(--line);
+  border-radius: var(--r);
+  background: var(--panel);
+  color: var(--text);
+  font: 400 16px/1 var(--sans);
+}
+.join input[type="email"]::placeholder {
+  color: var(--dim);
+}
+.trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.cta {
+  padding: 0;
+  border: 0;
+  border-radius: var(--r);
+  background: none;
+  cursor: pointer;
+}
+.cta span {
+  display: block;
+  padding: 14px 22px;
+  border-radius: var(--r);
+  background: var(--accent);
+  color: var(--on-accent);
+  font: 600 15px/1 var(--mono);
+  white-space: nowrap;
+}
+.cta:hover span {
+  background: var(--text);
+  color: var(--bg);
+}
+.cta:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+.fine {
+  margin-top: 12px;
+  color: var(--dim);
+  font-size: 13px;
+}
+.form-msg {
+  min-height: 1.4em;
+  margin-top: 8px;
+  color: var(--error);
+  font: 600 13px/1.4 var(--mono);
+}
+
+footer {
+  margin-top: 80px;
+  padding: 24px 0 32px;
+  border-top: 1px solid var(--line);
+  color: var(--dim);
+  font-size: 12px;
+}
+footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: center;
+}
+footer p {
+  flex: 1 1 420px;
+  max-width: 720px;
+}
+footer nav {
+  display: flex;
+  gap: 18px;
+  margin-left: auto;
+  font: 400 12px/1 var(--mono);
+}
