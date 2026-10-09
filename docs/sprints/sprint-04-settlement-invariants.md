@@ -83,8 +83,11 @@ the close that returns rent. Then prove with the randomized test that the fiftee
       used; the per-account write limit under late entries (TP C7) is measured too. Both recorded.
 - [x] ~~If Sprint 02 started with `sol_log_data`, events move to self-CPI here (T4).~~ Moot: Sprint 02 shipped
       self-CPI events.
-- [ ] **How a campaign leaves `Contested` before Sprint 14** is decided by the team and recorded: the instruction
-      stays disabled until then, or a path out is written [AC].
+- [x] **How a campaign leaves `Contested` before Sprint 14** is decided by the team and recorded: the instruction
+      stays disabled until then, or a path out is written [AC]. Decided 2026-10-09 (founder, question 1 of the
+      Contested decision): `team_open_contest` and any path out of `Contested` stay disabled until Sprint 14; the
+      contract freezes the account lists without the exit. Evidence: TP §3.4.2 and C48 (v0.1.2), session log
+      `session-log/2026-10-09-sprint-04-decisao-contested.md`.
 - [ ] **The founder's answers of 2026-10-09** ("Founder decisions", below) are built, each with its test: the feed
       list, the opening at `p − conf`, the SOL/USD feed id as a constant, team openings outside
       `max_open_campaigns`, the minimum entry copied at opening, the join buffer and the late-entry refund.
@@ -175,6 +178,21 @@ From Sprint 02 and its reviews (`docs/sprints/sprint-02-pot-core.md`, "Reviews";
   there, or a test over every stored bump, keeps it so.
 - **The first-baker exemption is per wallet, later joins included** (Q3 as written): TP §3.4.16's one-sided table says
   so, so nobody reads it as "the first entry only".
+
+From Sprint 03 and its record, "Carried to Sprints 04 and 05" (`docs/sprints/sprint-03-readers-resolution.md`), item
+by item.
+
+- **The founder's seven questions of Sprint 03, answered on 2026-10-09** (`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`):
+  built here. Each has its test in the Definition of done above (the founder decisions section).
+- **Confirming, voiding by hand, contesting, settling and paying.** Voids by hand: `StaleFeed` after an update landed
+  past the deadline, and `MissedWindow`, with tests. Contesting: `team_open_contest` only, disabled until Sprint 14
+  (decision above). The review window (`review_ends_at`) is already written by `resolve_campaign`.
+- **Lane R's shard-0 scan** of unsponsored feeds was finished and recorded (183 mainnet accounts, 120 outside Pyth's
+  list, 78 from one non-Pyth payer, 102 stale; `knowledge-base/tecnologia/pyth-feeds-patrocinados.md`). The source read
+  of the push oracle at a pinned commit is Sprint 04's: "Sprint 04: the push oracle's update rule" in
+  `knowledge-base/tecnologia/pyth-leitor-de-preco.md`, with the commit and line of each claim.
+- **The join-after-touch fix (Sprint 03 finding F1)** is founder question 7, built here as the buffer at the join lock
+  and the refund of entries joined at or after the YES proof's `publish_time`.
 
 ## Risks
 

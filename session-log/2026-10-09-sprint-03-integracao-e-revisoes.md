@@ -63,7 +63,7 @@ Aqui, o porquê de cada decisão:
 | F5, `NotResolvableYet` nunca saía para o tipo preço (baixa; independente) | **Corrigido**: o endereço do programa na vaga da prova vale como "sem prova" | A instrução sempre passava uma prova ao leitor, então quem não tinha nada a oferecer recebia `ProofDoesNotTouch` da conta que preenchesse a vaga. Sem mudança de interface |
 | F6 a F13 e os quatro itens de produto | **Registrados**, cada um com a sprint que o atende | Nenhum muda uma regra desta sprint: o 1% comprável no pool de stake é risco escrito (TP §3.4.10, Sprint 16); o `params_version` sobe só com os termos, de propósito; o evento sem `conf` deixa a faixa para o indexador; o freio de slot espera a medida da frente R |
 
-As correções entraram em `17dcb1c`: três testes em Rust a mais (255) e um em TypeScript (259), a IDL igual, o binário
+As correções entraram em `17dcb1c`: três testes em Rust a mais (255) e um em TypeScript (a contagem era 259 nesse ponto; a medida ao fechar a sprint foi 262), a IDL igual, o binário
 em 93.480 bytes. O X0.9 não foi repetido: nenhuma checagem de `checks.rs` ou `checks/top_level.rs` foi tocada.
 
 ### 4. Os valores "a confirmar" e a frente R
@@ -84,9 +84,9 @@ confirmar" ficam confirmados [F]:
 | Quem escreve as contas patrocinadas | três pagadores na janela (45, 11 e 4 de 60) | um pagador (29 de 60), mais 30 leituras pelo Lighthouse `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95` | Qualquer um com uma atualização assinada pela Hermes empurra para a conta patrocinada; a pergunta 1 ao fundador é sobre quais feeds, não sobre quem escreve |
 
 O batimento da devnet (62 a 65 s) é também o número por trás do piso do `StaleFeed`: 600 s é nove vezes o maior
-intervalo visto. A leitura das fontes do push oracle e do receptor num commit fixado, e as contas de fatia 0 de feeds
-não patrocinados com quem pagou por elas, ficaram nas notas da frente em `knowledge-base/tecnologia/` até onde ela
-chegou, com os limites de cada corrida.
+intervalo visto. A varredura das contas de fatia 0 de feeds não patrocinados foi concluída (na rede principal: 183 contas, 120
+fora da lista, 78 de um mesmo pagador, 102 paradas; `knowledge-base/tecnologia/pyth-feeds-patrocinados.md`). A
+leitura das fontes do push oracle e do receptor num commit fixado não foi concluída na Sprint 03; a Sprint 04 a faz.
 
 ## Alternatives considered
 
