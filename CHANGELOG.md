@@ -53,6 +53,13 @@ a tag `sprint-02`. A Sprint 03, os leitores e a resolução, está em revisão n
     recusada).
   - **Testes:** 255 em Rust e 259 em TypeScript depois das correções da revisão (252 e 258 antes delas), todos do
     programa novo; os oito filtros da sprint passam; tirar a checagem de chamada de topo derruba o teste dela (X0.9).
+- **`brot.markets/2`, a página inicial com o visual do deck** (opção A, fundador, 9/10/2026): o mesmo conteúdo da
+  página inicial, palavra por palavra, com o pãozinho e o formulário, e só o visual trocado: as cores do deck (carvão
+  no tema escuro, creme no claro), IBM Plex e os cartões escuros dos slides. Um teste falha se o texto da `/2` e o da
+  página inicial divergirem. Fica fora dos buscadores até virar a página inicial. Arquivos próprios em
+  `services/landing/public/2/`, sem tocar na página atual, que o Ronaldo também edita; o `mascot.js` passou a achar as
+  imagens a partir da raiz do site. **A primeira versão, publicada horas antes, estava errada:** trazia o conteúdo do
+  pitch (problema, pote, abertura, roteiro) no lugar do da página inicial, e foi substituída.
 - **Sprint 02: o núcleo do pote, o programa novo em Pinocchio** (`programs/brot-markets`, 8/10/2026). Sai o
   esqueleto Anchor; entra o programa que guarda SOL de verdade, ainda sem leitura de resultado nem pagamento:
   - **A configuração e a equipe:** `admin_initialize_config` (só a autoridade de upgrade, lida da conta ProgramData),

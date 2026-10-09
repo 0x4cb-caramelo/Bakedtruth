@@ -8,8 +8,8 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **309** |
-| Acima de 200 linhas | **30** ⚠️ |
+| Arquivos mapeados | **313** |
+| Acima de 200 linhas | **32** ⚠️ |
 | Sem cabeçalho `Purpose:` | **78** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -38,10 +38,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `prototype-lab/shared/mascot.js` — 379 linhas
 - `prototype-lab/shared/mock-data.js` — 290 linhas
 - `scripts/codemap.js` — 223 linhas
+- `scripts/devnet-clock-probe.ts` — 201 linhas
 - `scripts/devnet-seed.ts` — 246 linhas
 - `scripts/devnet-smoke.ts` — 273 linhas
 - `scripts/devnet.ts` — 222 linhas
 - `scripts/os-self-test.js` — 406 linhas
+- `scripts/pyth-sponsored-feeds.ts` — 201 linhas
 - `scripts/sync-selfhosted.js` — 349 linhas
 - `scripts/test/hooks.test.js` — 278 linhas
 - `scripts/tokenomics-model.ts` — 584 linhas
@@ -486,6 +488,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`codemap.js`](scripts/codemap.js) | let an AI locate the right file without reading every file. Pairs with the 200-line limit in .claude/rules/code-style.md — small files plus a one-line index mea | 223 |
 | [`detach-os.ps1`](scripts/detach-os.ps1) | detach-os.ps1 — desconecta seu projeto do repositório AI Dev Operating System | 161 |
 | [`detach-os.sh`](scripts/detach-os.sh) | detach-os.sh — desconecta seu projeto do repositório AI Dev Operating System | 157 |
+| [`devnet-clock-probe.ts`](scripts/devnet-clock-probe.ts) | measure a cluster's clock against wall time (slot length, the confirmed-to-finalized gap, the drift of the Clock sysvar and, under Alpenglow, of the leader's na | 201 |
 | [`devnet-seed.ts`](scripts/devnet-seed.ts) | Seeds devnet with demo markets for the app, on named tokens (Metaplex metadata) so they read like | 246 |
 | [`devnet-smoke.ts`](scripts/devnet-smoke.ts) | Devnet smoke test: the full USDC lifecycle against the deployed program, with the client stack | 273 |
 | [`devnet.ts`](scripts/devnet.ts) | Shared setup for the devnet scripts: connection, deployer, Anchor client, sending, and the raw SPL | 222 |
@@ -495,6 +498,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`instruction-drift.js`](scripts/instruction-drift.js) | catch references in instruction files (CLAUDE.md, templates, skills, agents, WIZARD) to agents, commands and wizard stages that do not exist, and model generati | 160 |
 | [`os-self-test.js`](scripts/os-self-test.js) | the `os-self-test` skill did this, but only when a human or a model remembered to invoke it — and three session logs record it NOT being run when it would have  | 406 |
 | [`pre-commit.js`](scripts/pre-commit.js) | the PreToolUse gate only sees commits Claude makes. A commit from a terminal or an editor skipped it entirely. This runs the same scan from git itself | 76 |
+| [`push-oracle-probe.ts`](scripts/push-oracle-probe.ts) | probe Pyth's push oracle read-only: watch that the sponsored SOL/USD and BTC/USD accounts only move forward on devnet and mainnet, and scan its recent transacti | 200 |
+| [`pyth-sponsored-feeds.ts`](scripts/pyth-sponsored-feeds.ts) | list which Pyth feeds have a shard-0 push account on devnet and mainnet, which of those stay fresh, how often they update and who pays for the writes, read-only | 201 |
 | [`release-v0.2.0.ps1`](scripts/release-v0.2.0.ps1) | Release helper for AI Dev Operating System v0.2.0 | 11 |
 | [`release-v0.2.0.sh`](scripts/release-v0.2.0.sh) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 16 |
 | [`run-tests.js`](scripts/run-tests.js) | give `npm test` a file list that does not depend on the shell. npm runs scripts through cmd.exe on Windows, which does not expand globs, and Node only learned t | 33 |
@@ -570,7 +575,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`app.js`](services/landing/public/app.js) | browser script of the "coming soon" site: picks the theme before first paint and sends the waitlist forms. The mascot is a separate script, mascot.js | 111 |
 | [`mascot-body.js`](services/landing/public/mascot-body.js) | draws Baked, the mascot, on the landing page: the sprite with its eight poses, the shadow and the speech bubble. It knows nothing about where to stand; mascot.j | 90 |
 | [`mascot-senses.js`](services/landing/public/mascot-senses.js) | what Baked, the mascot, notices on the landing page: where the pointer rests, scrolling, keyboard focus, how long the visitor has been still, and which element  | 92 |
-| [`mascot.js`](services/landing/public/mascot.js) | makes Baked, the mascot, live on the landing page: it stands on declared perches, hops to the one nearest to where the pointer rests, reacts to what is under th | 188 |
+| [`mascot.js`](services/landing/public/mascot.js) | makes Baked, the mascot, live on the landing page: it stands on declared perches, hops to the one nearest to where the pointer rests, reacts to what is under th | 189 |
 
 ## `services/landing/public/pitch/`
 
@@ -606,6 +611,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`leads.test.mjs`](services/landing/tests/leads.test.mjs) | tests the waitlist store and the request limiter of the "coming soon" site (node --test) | 113 |
 | [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 199 |
 | [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 193 |
+| [`two.test.mjs`](services/landing/tests/two.test.mjs) | tests /2, the home page in the pitch deck's look: it says exactly what the home page says (only the look may differ), the mascot perches and moods are the same, | 53 |
 
 ## `tests/`
 
