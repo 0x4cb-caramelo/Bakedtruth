@@ -1,9 +1,22 @@
 {
-  "name": "@brot-markets/sdk",
-  "version": "0.0.1",
+  "name": "@brot/sdk",
+  "version": "0.1.0",
   "private": true,
-  "description": "Framework-free client library for the Brot Markets program: IDL, addresses, math and instruction builders",
+  "description": "Framework-free client library for the Brot Markets program: a read half (PDAs, codecs, money math, public state, event decoding, creation checks, recheck, errors) and a transaction half (builders, simulation, deterministic summary)",
+  "license": "MIT",
   "type": "module",
-  "main": "src/index.ts",
-  "types": "src/index.ts"
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/read/index.ts",
+    "./read": "./src/read/index.ts",
+    "./tx": "./src/tx/index.ts",
+    "./idl": "./src/idl/brot_markets.json",
+    "./package.json": "./package.json"
+  },
+  "main": "./src/read/index.ts",
+  "types": "./src/read/index.ts",
+  "dependencies": {
+    "@solana/kit": "~8.4.0",
+    "zod": "4.6.5"
+  }
 }

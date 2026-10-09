@@ -28,18 +28,21 @@
     "test:os": "node scripts/run-tests.js",
     "self-test": "node scripts/os-self-test.js",
     "codemap": "node scripts/codemap.js",
-    "prepare": "git config core.hooksPath .husky || echo \"git hooks not installed (not a git repository?)\""
+    "prepare": "git config core.hooksPath .husky || echo \"git hooks not installed (not a git repository?)\"",
+    "depcruise": "depcruise packages services --config .dependency-cruiser.cjs"
   },
   "devDependencies": {
     "@anchor-lang/core": "^1.2.0",
+    "@brot/sdk": "workspace:*",
     "@codama/nodes-from-anchor": "1.5.6",
     "@codama/renderers-js": "2.5.0",
-    "@solana/kit": "~8.3.0",
+    "@solana/kit": "~8.4.0",
     "@solana/kit-plugin-litesvm": "^0.19.0",
     "@solana/kit-plugin-signer": "^0.19.0",
     "@solana/web3.js": "^1.99.0",
     "@types/bun": "^1.4.2",
     "codama": "1.11.0",
+    "dependency-cruiser": "18.4.0",
     "litesvm": "^1.5.0",
     "prettier": "^3.9.9",
     "typescript": "^5"
