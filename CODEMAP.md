@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **495** |
+| Arquivos mapeados | **517** |
 | Acima de 200 linhas | **44** ⚠️ |
 | Sem cabeçalho `Purpose:` | **77** ⚠️ |
 
@@ -686,7 +686,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`detach-os.ps1`](scripts/detach-os.ps1) | detach-os.ps1 — desconecta seu projeto do repositório AI Dev Operating System | 161 |
 | [`detach-os.sh`](scripts/detach-os.sh) | detach-os.sh — desconecta seu projeto do repositório AI Dev Operating System | 157 |
 | [`devnet-clock-probe.ts`](scripts/devnet-clock-probe.ts) | measure a cluster's clock against wall time (slot length, the confirmed-to-finalized gap, the drift of the Clock sysvar and, under Alpenglow, of the leader's na | 201 |
-| [`devnet-seed.ts`](scripts/devnet-seed.ts) | seed a cluster with example campaigns opened free by a team key (Sprint 05 DoD), one per kind that can open there: a price campaign above and one below (targets | 129 |
+| [`devnet-seed.ts`](scripts/devnet-seed.ts) | seed a cluster with example campaigns opened free by a team key (Sprint 05 DoD), one per kind that can open there: a price campaign above and one below (targets | 137 |
 | [`devnet-smoke.ts`](scripts/devnet-smoke.ts) | the full cycle in SOL (Sprint 05 DoD, X0.2 and X0.5): a wallet outside the team opens a burn campaign and pays US$500 at the Pyth price after previewing the who | 76 |
 | [`devnet.ts`](scripts/devnet.ts) | the session the devnet scripts (smoke, seed) share: the cluster they write to, the payer, a team key, wallets, funding and fresh prices. `--cluster local` (the  | 127 |
 | [`extract-external-links.sh`](scripts/extract-external-links.sh) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 16 |
@@ -710,6 +710,16 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`sync-selfhosted.js`](scripts/sync-selfhosted.js) | keep a local, navigable mirror of the full self-hosted catalogue so the WIZARD (stage 4.2) can offer self-hosted alternatives without a network call | 349 |
 | [`tokenomics-model.ts`](scripts/tokenomics-model.ts) | Quantitative model behind ECONOMICS.md: protocol fees, revenue split, staker yield, the token unlock curve and the | 584 |
 
+## `scripts/deploy/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`artifact.ts`](scripts/deploy/artifact.ts) | fetch the program CI built, by run id and never by name (Sprint 00's carried item): the run must be a completed, successful run of the CI workflow on `main` (th | 76 |
+| [`checks.ts`](scripts/deploy/checks.ts) | the pure checks of the devnet deploy (TP §10, §12; Sprint 05 DoD "Deploy from CI's artifact"): the artifact's SHA256SUMS parsed and every file checked against i | 122 |
+| [`devnet-deploy.ts`](scripts/deploy/devnet-deploy.ts) | the first deploy of brot-markets to devnet from CI's artifact, and its initialization in the same session (TP §10, §12; deploy/devnet/README.md): the artifact b | 138 |
+| [`initialize.ts`](scripts/deploy/initialize.ts) | the two writes the deploy makes in the same session as the deploy itself (TP §3.4.3, §7; Sprint 05): `admin_initialize_config`, signed by the program's upgrade  | 115 |
+| [`rehearse.ts`](scripts/deploy/rehearse.ts) | rehearse every step of the devnet deploy on a local offline surfnet, inside a loopback-only network namespace: the artifact check (and its refusal of a changed  | 150 |
+
 ## `scripts/surfpool/`
 
 | Arquivo | Núcleo | Linhas |
@@ -732,6 +742,27 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`pre-commit.test.js`](scripts/test/pre-commit.test.js) | prove the hook stops a staged credential in a real git repository, and gets out of the way everywhere else | 95 |
 | [`sensor-wiring.test.js`](scripts/test/sensor-wiring.test.js) | pin the two severities — a missing sensor is an error in the OS repo and a warning in a derived project — and the "exists but never gates" class | 140 |
 | [`sync-selfhosted.test.js`](scripts/test/sync-selfhosted.test.js) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 146 |
+
+## `scripts/validator/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`clusters.ts`](scripts/validator/clusters.ts) | which cluster an RPC really is, by its genesis hash, so an ops script never writes to a cluster other than the one its operator named: mainnet is refused outrig | 51 |
+| [`isolate.ts`](scripts/validator/isolate.ts) | run a rehearsal script inside a network namespace that has only loopback (`unshare -rn`), so the local cluster and the script can talk on 127.0.0.1 and nothing  | 32 |
+| [`keys.ts`](scripts/validator/keys.ts) | keypairs for the ops scripts: read a Solana CLI keypair file (64-byte JSON array) into a Kit signer, write a throwaway one for a local rehearsal, and derive a s | 66 |
+| [`negative-baselines-settle.ts`](scripts/validator/negative-baselines-settle.ts) | the slot matrix's baselines of the review window and of settlement on the surfnet: the team's confirm, void and contest, finalize, the late-join tally, each pay | 157 |
+| [`negative-baselines.ts`](scripts/validator/negative-baselines.ts) | the slot matrix's baselines on one surfnet, in an order that keeps each one's state: one valid instruction per instruction of the config, the pause, the opening | 131 |
+| [`negative-extra.ts`](scripts/validator/negative-extra.ts) | the last three refusals of the negative run, each needing a state the others must not see: the valve (`TooManyOpenCampaigns`, the creation parameters changed th | 72 |
+| [`negative-join.ts`](scripts/validator/negative-join.ts) | the refusals of `user_join_campaign` on a local validator, one case per error, as the LiteSVM suites test them (tests/brot/join-campaign-refuses.test.ts, join-c | 90 |
+| [`negative-open.ts`](scripts/validator/negative-open.ts) | the refusals of `user_open_campaign` on a local validator, one case per error, as the LiteSVM suites test them (tests/brot/open-campaign-refuses*.test.ts, open- | 179 |
+| [`negative-price.ts`](scripts/validator/negative-price.ts) | rewrite a sponsored Pyth account on the surfnet with one field changed, from the captured devnet bytes (the .bin files are never edited): price, confidence, exp | 56 |
+| [`negative-run.ts`](scripts/validator/negative-run.ts) | the slot matrix and one paid opening on a local validator (Sprint 05 DoD: "the negative tests, the slot tests and one paid opening run once on a real validator" | 146 |
+| [`negative-world.ts`](scripts/validator/negative-world.ts) | run the test kit's account injectors and the slot matrix's mutations against a surfnet, unchanged: a recording stand-in for the three synchronous LiteSVM calls  | 107 |
+| [`rpc.ts`](scripts/validator/rpc.ts) | talk to a cluster over JSON-RPC for the ops scripts: the cluster guard (a non-local URL is refused unless the caller names the cluster on purpose; the genesis h | 179 |
+| [`simulate.ts`](scripts/validator/simulate.ts) | simulate a transaction before sending it, so an ops script shows what the program would answer (its custom error by name, the logs, the compute units) without w | 47 |
+| [`spl-token.ts`](scripts/validator/spl-token.ts) | the few System Program and classic SPL Token instructions the ops scripts need to make a burn campaign's mint (`SupplyAtMost`): create an account, transfer SOL, | 115 |
+| [`surfnet.ts`](scripts/validator/surfnet.ts) | start and stop a local OFFLINE Surfpool surfnet for the ops rehearsals: no datasource (`--offline`), bound to 127.0.0.1 on two free ports in 4200-4299, run from | 95 |
+| [`world.ts`](scripts/validator/world.ts) | a local cluster ready for the ops rehearsals: an offline surfnet, the brot-markets binary installed at the id the program declares with an upgrade authority hel | 114 |
 
 ## `services/landing/`
 
@@ -901,6 +932,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`structs.ts`](tests/brot/structs.ts) | the program's structs as layouts: accounts (GlobalConfig, Campaign, Entry), instruction arguments and events, each in the field order of its Rust struct | 172 |
 | [`team-window.test.ts`](tests/brot/team-window.test.ts) | the team's acts in the review window, on the binary: confirm, void (an automatic void only: a team key never voids a YES or NO, decision of 2026-10-09), and con | 184 |
 | [`void-refund.test.ts`](tests/brot/void-refund.test.ts) | a void on the binary: the prize goes back to the stored creator, the opening fee goes with it on a house failure and stays with Brot on an outside cause, and th | 82 |
+
+## `tests/ops/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`deploy-checks.test.ts`](tests/ops/deploy-checks.test.ts) | the pure checks of the devnet deploy (scripts/deploy/checks.ts), each refusal with its own case: SHA256SUMS parsing, the artifact folder against its sums, the p | 90 |
 
 ## `tests/programs/cpi-proxy/src/`
 
