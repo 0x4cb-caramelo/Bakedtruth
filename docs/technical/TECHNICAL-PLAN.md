@@ -1,9 +1,11 @@
 # Brot Markets — Technical Plan
 
-**Version:** 0.1.1 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
+**Version:** 0.1.2 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
 todo em ingles") from the architecture proposal 0.4 the founder approved that day ("sim para todos") and from BP
 v0.0.4, merged into `main` with PR #35 on 2026-10-08; v0.1.1 aligns it with what Sprint 02 built and measured
-(`docs/sprints/sprint-02-pot-core.md`, "TP to align") · **Date:** 2026-10-08 · **Supersedes:** v0.0.1 of 2026-10-05,
+(`docs/sprints/sprint-02-pot-core.md`, "TP to align"); v0.1.2 aligns it with what Sprint 03 built and to the founder's
+answers of 2026-10-09 (`docs/sprints/sprint-03-readers-resolution.md`, "Record and retrospective";
+`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`) · **Date:** 2026-10-09 · **Supersedes:** v0.0.1 of 2026-10-05,
 written in Portuguese, approved by the founder ("docs aprovados, podemos dar início"). Its last text, with §8.1, is in
 git history at commit `2089b81` (`git show 2089b81:docs/technical/TECHNICAL-PLAN.md`), the last commit that changed it;
 `0b40554`, the `main` before v0.1.0, holds the same text; tag `sprint-01` holds it before §8.1 was added
@@ -23,7 +25,8 @@ founder reads the summary below and section 14.2.
 - **[F]** fact read in a file (the path is given) or measured on-chain.
 - **[FD]** founder decision: D-a to D-t and P-1 to P-5 of 2026-10-08, earlier decisions the BP keeps, and the answers
   carried over from v0.0.1 §14.2 (Q1 to Q12, except Q8, which is open inside D4). Since v0.1.1 also D6 and C44 as
-  Sprint 02 built them, which the founder took as decided in PR #35 (§14.2). Not reopened here.
+  Sprint 02 built them, which the founder took as decided in PR #35 (§14.2). Since v0.1.2, the founder's answers of
+  2026-10-09 (§14.2). Not reopened here.
 - **[DP]** decision of this plan, kept from v0.0.1 or from the approved proposal.
 - **[NEW]** new in v0.1.0 and in neither source. Each one carries its reason.
 - **[Q]** needs the founder (§14.2). **[AC]** to verify (§14.4). **[INF]** inference.
@@ -76,7 +79,9 @@ charged at the Pyth price read on-chain, with CoinGecko only for display (D-e, D
 partners open free and keep no 1% (D-c, D-d, P-3). The creator's 1% comes from the pot, and from Brot's fee only so
 that winners never get back less than they put in (D-g, P-2); there is none on a void, in a one-sided pot or on the
 prize (P-1). On a void or a one-sided pot the prize returns to whoever opened, and the 10% follows the cause (P-4). A
-0.01 SOL minimum entry (P-5). No cap and no list of accepted accounts (D-h, D-i). No free text (D-j). The minimum
+0.01 SOL minimum entry (P-5). No cap (D-h). No list of accepted accounts (D-i), except that a price campaign may name
+only a feed on the program's own compiled list (founder answer 1, 2026-10-09; the narrowing applies to the price kind
+only, the other kinds are unchanged). No free text (D-j). The minimum
 opening rules (D-k). Pinocchio (D-o), Bun (D-p), no AI (D-q), no deadline (D-r), the Android app (D-n). The answers
 you approved with v0.0.1 still hold where SOL did not change them (§14.2).
 
@@ -366,7 +371,7 @@ lamports (v0.0.1 §3.4.1, D-a): the proposal keeps `collect_fee` and `sweep_fees
 | Field | Type | Meaning | Source |
 |---|---|---|---|
 | `admin`, `pending_admin` | Pubkey | The admin, changed in two steps (zero when no change is pending) | v0.0.1 |
-| `team`, `team_len` | [Pubkey; 5], u8 | Team keys, one per person | v0.0.1; Q12 |
+| `team`, `team_len` | [Pubkey; 5], u8 | Team keys, one per person, up to five: Lucas's, Ronaldo's and Bernardo's (Bernardo's is set when he starts, Sprint 05) | v0.0.1; Q12; founder answer 6, 2026-10-09 |
 | `operating_level` | enum: `Normal`, `EntriesHalted` | The pause (§3.4.9) | v0.0.1; D6 |
 | `fee_recipient` | Pubkey | Where `sweep_fees` sends the fee vault: the 2-of-3 multisig on mainnet, a team-held key on devnet | proposal §2.4.5; D6 |
 | `fee_bps` | u16 | Brot's fee on the losing side: 1,000 (10%); never above `MAX_FEE_BPS` = 1,000. The neutral name replaces `loser_fee_bps` (T11) | P1 §3.3 |
@@ -374,9 +379,10 @@ lamports (v0.0.1 §3.4.1, D-a): the proposal keeps `collect_fee` and `sweep_fees
 | `creator_share_bps` | u16 | 100 (1%); never above `MAX_CREATOR_SHARE_BPS` = 100 | D-g |
 | `opening_fee_usd` | u64 | 500, whole US$ | D-b |
 | `opening_prize_bps` | u16 | 9,000: the prize share of a paid opening | D-b |
-| `min_entry_lamports` | u64 | 10,000,000 (0.01 SOL) | P-5 |
+| `min_entry_lamports` | u64 | 10,000,000 (0.01 SOL); the admin sets it between 1,000,000 and 1,000,000,000 lamports (0.001 and 1 SOL) | P-5; founder answer 5, 2026-10-09; the bounds are `MIN_ENTRY_FLOOR_LAMPORTS` and `MIN_ENTRY_CEILING_LAMPORTS` |
 | `max_open_campaigns`, `open_campaigns` | u32, u32 | The valve on the services' work, and its counter (T18). 1,000 on devnet **[AC]**, code ceiling 10,000 (C43) | proposal §2.4.1 |
-| `sol_usd_feed_id` | [u8; 32] | `ef0d8b6f…c280b56d`, the SOL/USD feed [F] (`knowledge-base/tecnologia/pyth-leitor-de-preco.md` §1.2) | D-f |
+| `sol_usd_feed_id` | [u8; 32] | `ef0d8b6f…c280b56d`, the SOL/USD feed [F] (`knowledge-base/tecnologia/pyth-leitor-de-preco.md` §1.2). A compiled constant from Sprint 04, not a config field (founder answer 3, 2026-10-09); until then, the config field | D-f |
+| Feed list (not a field) | — | Compiled into the program, one list per cluster, chosen by the `mainnet` feature. A price campaign may name only a feed on it. Day one: Pyth's official list of sponsored feeds, 62 on mainnet and 17 on devnet (2026-10-09); feeds are added from Sprint 06 (founder answer 1, 2026-10-09). Built in Sprint 04 | founder answer 1; `knowledge-base/tecnologia/pyth-feeds-patrocinados.md` |
 | `max_price_age` | u32, seconds | SOL/USD freshness at opening. Code range 1 to 300 s; set to 120 s at initialization on devnet **[AC]** (C43), where the sponsored account updated every 62 to 64 s [F] (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`) | proposal §2.4.5 |
 | `max_price_conf_bps` | u16 | SOL/USD confidence bound at opening; 50 (0.5%) as for price campaigns **[INF]** | proposal §2.4.5 |
 | `campaign_max_age` | u32, seconds | The join-time price age copied into each new price campaign; never below 30 s (§3.4.8) **[INF]** | Q4 answer |
@@ -387,10 +393,9 @@ changed by `admin_set_creation_params`, under its code ceiling. What the code do
 (`instructions/campaigns/open_campaign/record.rs`, `instructions/entries/join_campaign.rs`,
 `tests/brot/admin-params.test.ts`): the fee, the one-sided fee, the creator share and the join-time price age are copied
 into each campaign at opening, and the opening fee, the prize share, the valve and the SOL/USD feed and bounds act only
-at opening, so a change to any of them reaches future campaigns only. `min_entry_lamports` is the exception: it is not
-copied, `user_join_campaign` reads it from `GlobalConfig` at every join, and a change reaches open campaigns too.
-Whether an open campaign keeps the minimum it opened with, as the published terms promise, is **[Q]** (§14.2); the code
-keeps the live read until the founder answers. Ceilings for the parameters without one in the sources
+at opening, so a change to any of them reaches future campaigns only. `min_entry_lamports` is copied into each campaign at
+opening (founder answer 5, 2026-10-09; as the published terms promise, "An open market keeps the rules it opened with").
+Sprint 03's code still reads it live from `GlobalConfig` at every join; Sprint 04 builds the copy. Ceilings for the parameters without one in the sources
 (`opening_prize_bps`, `one_sided_fee_bps`, `min_entry_lamports`, `max_open_campaigns`, the price bounds) were written in
 Sprint 02 **[AC]** (C43, §14.4). Changing the US$500 itself is a founder decision; the program only enforces the
 ceilings.
@@ -461,16 +466,19 @@ Open ─resolve─▶ InReview ─confirm, or 6 h elapsed─▶ Settling ─last
 | `InReview` | `Settling` | `team_confirm_result` | A team key | Inside the window | 04 |
 | `InReview` | `Settling` | `finalize_campaign` | Any wallet | `now ≥ review_ends_at` | 04 |
 | `InReview` | `Settling` (`Void`) | `team_void_campaign` | A team key | Inside the window, with a `VoidReason` | 04 |
-| `InReview` | `Contested` | `team_open_contest` | A team key | Inside the window | 04 |
+| `InReview` | `Contested` | `team_open_contest` | A team key | Inside the window. Entry only: nothing leaves `Contested` before Sprint 14 | 04 |
 | `Contested` | `Settling` | `reread_campaign` (same reading) | Any wallet | Stage 1, within one hour | 14 |
 | `Contested` | `Contested` (stage 2) | `reread_campaign` (different reading) | Any wallet | Opens 48 hours | 14 |
 | `Contested` | `Settling` | `admin_decide_contest` | `admin` | Confirm or void only | 14 |
 | `Settling` | `Settled` | `settle_entry` (the last one) | Any wallet | `entries_open` reaches 0 | 04 |
 | `Settled` | closed | `close_campaign` | Any wallet | Fee collected, prize settled, creator share settled | 04 |
 
-There is no arrow back. Any transition outside this table is refused with its own error. How a campaign leaves
-`Contested` between Sprints 04 and 14, before `reread_campaign` and `admin_decide_contest` exist, is still open from
-roadmap v0.0.1: the team decides in Sprint 04 whether `team_open_contest` stays disabled until Sprint 14 **[AC]**.
+There is no arrow back. Any transition outside this table is refused with its own error. Decided 2026-10-09 (founder):
+any path out of `Contested` stays disabled until Sprint 14. In Sprint 04 a team key can enter `Contested` through
+`team_open_contest`, and the campaign is not left there; `reread_campaign` and `admin_decide_contest` are Sprint 14's.
+Read literally, "`team_open_contest` disabled until Sprint 14" would leave `Contested` unreachable in Sprint 04. The
+founder's answer of 2026-10-09 says a campaign leaves `Contested` only by a disabled instruction, so entry stays allowed
+and the exits are disabled (§14.2).
 
 #### 3.4.3 Instructions
 
@@ -603,15 +611,19 @@ frozen program's guard, kept [F]). The two keepers on two providers are BR-24 (�
 |---|---|---|
 | Irreversible fact (`SupplyAtMost`, `DammV2LockedAtLeast`) | Target met: `Yes`. Otherwise: refused, not resolvable yet | `No`. If the late read shows the target met, `No` with `met_late` set; the watchdog alerts and the team may void within the window |
 | Epoch snapshot (`StakePoolTvlAtLeast`, `StakeAtLeast`) | In the measured epoch: `Yes` or `No` | Epoch missed: `Void` (`MissedWindow`). The frozen code records NO here [F] (`resolve_stake_pool`), which in a pot would pay out without a reading |
-| Price touch (`PriceTouch`) | A valid proof of a touch: `Yes` (§3.4.8) | `No`; but `Void` (`StaleFeed`) when the sponsored feed's last update before the deadline is older than `deadline − max_age` (D7, option b) |
+| Price touch (`PriceTouch`) | A valid proof of a touch: `Yes` (§3.4.8) | `No`, or `Void` (`StaleFeed`) by the test below (D7, option b) |
 | Any | Unreadable account: refused | Unreadable account: `Void` (`UnreadableAccount`) |
 
 **D7 (b).** If Pyth's sponsorship of a feed lapses, open price campaigns must not all
-turn to NO (proposal §5.2). The program sees only the sponsored account's current state, which carries `publish_time`
-and `prev_publish_time` **[F]** (the layout read in `price_touch.rs`). When the keeper resolves right after the
-deadline, the last update at or before it is `publish_time` (no update since) or `prev_publish_time` (one update
-since). If more updates have landed, the program cannot prove staleness and records `No`, and the indexer's feed
-history lets the team void within the window. The exact test is written in Sprint 03 **[AC]**.
+turn to NO (proposal §5.2). The window for NO opens `PROOF_DELAY_SECONDS` (60 s) after the deadline: until then only a
+YES proof resolves. After it, with no valid proof, the program reads only the sponsored account and records `Void`
+(`StaleFeed`) when `publish_time <= deadline` and `publish_time < deadline − max(max_age, STALE_FEED_MIN_SECONDS)`;
+otherwise `No` **[F]** (`readers/price_touch/proof.rs`). `STALE_FEED_MIN_SECONDS` is 600 s **[AC]**. The test relies on
+the push oracle never writing an older update, so `publish_time` is the last update before the deadline. The field
+`prev_publish_time` is not used: it is Pythnet's previous aggregate, `publish_time − 1` in every captured account **[F]**
+(Sprint 03). If an update landed after the deadline, the program cannot prove staleness and records `No`; the indexer's
+feed history lets the team void within the window. An exponent change after the window voids as `UnreadableAccount`,
+not as `StaleFeed` (Sprint 03 review, F3).
 
 **Evidence.** `CampaignResolved` carries the value read and, for price, `publish_time`, `posted_slot` and the proof
 account, so the standby's second read can re-fetch the transaction that wrote the proof through another provider
@@ -634,9 +646,9 @@ opens a contest.
 | Stage 2: two of three (B9) | `admin`, the 2-of-3 | `admin_decide_contest` |
 
 - **Stage 2 needs no voting code.** The "two of three members" of P1 §4.5 are the multisig's signatures (v0.0.1).
-- **Nobody voids outside the window.** After `Settling` the result is final. The automatic voids are written by
-  `resolve_campaign` and pass through the same window; the team can confirm an automatic void, never turn it into
-  `Yes` or `No`.
+- **Nobody voids outside the window.** After `Settling` the result is final. A team key voids only inside `InReview`.
+  The automatic voids are written by `resolve_campaign` and pass through the same window; the team can confirm an
+  automatic void, never turn it into `Yes` or `No`.
 - **Worst case:** payout 55 hours after resolution (6 + 1 + 48), as P1 §4.5 says.
 - **Review by exception** (T22): only the review queue of §3.5 puts a campaign in front of a person; everything else
   pays at the end of the window.
@@ -651,7 +663,7 @@ house, refunded to whoever opened on a house failure (P-4, P4 §4.6).
 |---|---|---|---|---|
 | `MissedWindow` | `resolve_campaign` | House failure | Refunded | P1 §3.5: "a janela de leitura foi perdida por falha do serviço" |
 | `UnreadableAccount` | `resolve_campaign` | Outside cause | Kept | P1 §3.5: the account can no longer be read |
-| `StaleFeed` | `resolve_campaign` | Outside cause **[INF]** | Kept **[INF]** | Pyth's sponsorship lapsing is a third party's act; whether a stale feed counts against the house once the keeper holds a Hermes key is **[Q]** |
+| `StaleFeed` | `resolve_campaign` | Outside cause (founder answer 9, 2026-10-09) | Kept | Answer recorded in `session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`: the house keeps the US$ 50 |
 | `TeamHouseFailure` | `team_void_campaign`, `admin_decide_contest` | House failure | Refunded | P1 §3.5: the review found the reading wrong through our fault |
 | `TeamOutsideCause` | `team_void_campaign`, `admin_decide_contest` | Outside cause | Kept | P4 §4.6 |
 
@@ -687,10 +699,10 @@ sponsored account, and older ones are skipped; only the push oracle writes it [E
 
 | Moment | Account accepted | Checks |
 |---|---|---|
-| Opening a price campaign | Only the sponsored account of `feed_id` | Owner `rec2HH…`, 134 bytes, Full verification, fresh (`campaign_max_age`), confidence at most 0.5% of the price, target not touched; the exponent is recorded |
-| Pricing a paid opening (any kind) | Only the sponsored account of `GlobalConfig.sol_usd_feed_id` | The same checks with `max_price_age` and `max_price_conf_bps` (§3.4.10) |
-| Joining | Only the sponsored account, derived on-chain from the push-oracle id, shard 0 and the campaign's `feed_id` | Owner, size, Full, the feed, and age ≤ the campaign's `max_age`, never below 30 s. Refused if price ± confidence reaches the target. A baker cannot choose an older price, because nobody can write one |
-| YES proof | Any Full `rec2HH…` account of the feed: the sponsored one, or a `post_update` account that only its own write authority can overwrite | `publish_time` inside the campaign's window; `now − publish_time ≤ 60 s` (Q4); a bound on `Clock::slot − posted_slot` **[AC]** value in Sprint 03; price minus confidence crosses the target in the campaign's direction |
+| Opening a price campaign | Only the sponsored account of `feed_id`, and `feed_id` on the program's compiled feed list (founder answer 1) | Owner `rec2HH…`, 134 bytes, Full verification, fresh (`campaign_max_age`), confidence at most 0.5% of the price, target not touched; the exponent is recorded |
+| Pricing a paid opening (any kind) | Only the sponsored account of the SOL/USD feed id, a compiled constant (founder answer 3; Sprint 04 moves it out of `GlobalConfig`) | The same checks with `max_price_age` and `max_price_conf_bps` (§3.4.10); the price charged is `price − conf` (founder answer 2) |
+| Joining | Only the sponsored account, derived on-chain from the push-oracle id, shard 0 and the campaign's `feed_id` | Owner, size, Full, the feed, and age ≤ the campaign's `max_age`, never below 30 s. Refused if price ± confidence reaches the target. A baker cannot choose an older price, because nobody can write one. The join lock's proximity buffer and the late-entry refund are in §3.4.16 |
+| YES proof | Any Full `rec2HH…` account of the feed inside the campaign's window, at most 60 s old: the sponsored one, or a `post_update` account that only its own write authority can overwrite | `publish_time` inside the campaign's window; `now − publish_time ≤ 60 s` (Q4); `Clock::slot − posted_slot ≤ ceil(age_seconds × 1,000 ÷ MIN_SLOT_MS)`, with `MIN_SLOT_MS` = 100 **[AC]** (Sprint 03; a posted slot ahead of the clock counts as now); price minus confidence crosses the target in the campaign's direction |
 | After the deadline with no proof | — | `No`, or `Void` (`StaleFeed`) per §3.4.6 |
 
 - **Q4 [FD].** (a): the price the service proves on-chain within 60 s counts, so a touch of a few seconds may not
@@ -705,7 +717,7 @@ sponsored account, and older ones are skipped; only the push oracle writes it [E
   mainnet price campaigns open only once the keeper can post its own proofs with a Hermes key (D4, §3.5).
 - **The SOL/USD account** is `7AviUf9nL62mcxNbQGKm4nKDQnPjswo6c5MX4D57HmyE`, the same on devnet and mainnet [F]
   (`knowledge-base/tecnologia/pyth-leitor-de-preco.md` §1.2). The program derives it rather than trusting a passed
-  address.
+  address. The feed id is a compiled constant from Sprint 04 (founder answer 3, 2026-10-09).
 - **Who controls the receiver** is a mainnet risk: on devnet an ordinary key controls its upgrades [F] (Sprint 01). The
   reader accepts one receiver and one exact size, so a format change breaks the read instead of misreading it; the
   watchdog watches the receiver's and the push oracle's upgrade slots (Sprint 07); who controls them is checked before
@@ -743,11 +755,13 @@ v0.0.1's global cap and its `CapState` are gone (D-h); this section takes its nu
 members" to "any wallet, inside the rules" (P1 §4.1; P4 §4.3): "regra fora da abertura não existe" (P4 §3.3).
 
 **Who and what it costs [FD].**
-- **Any wallet pays US$500 in SOL** at the Pyth SOL/USD price read in the same instruction (D-b, D-f). At the reference
+- **Any wallet pays US$500 in SOL** at the Pyth SOL/USD price minus its confidence, `p − conf`, read in the same
+  instruction (D-b, D-f; founder answer 2, 2026-10-09). At the reference
   price that is 4.5758 SOL: 4.1182 SOL becomes the prize, a neutral part of the pot on no side, and 0.4576 SOL is
   Brot's opening fee. `opening_usd` above 500 is allowed: the excess is a larger prize at the same 90/10 (D-b).
 - **A team key opens free**, for the team or for a launch partner, with `creator_share_bps = 0` and no prize unless the
-  team adds one (D-c, D-d, P-3, P1 §3.8). The team key stays the `creator`; `content/partners.json` links a partner's
+  team adds one (D-c, D-d, P-3, P1 §3.8). A team key's openings have their own unlimited budget, outside
+  `max_open_campaigns` (founder answer 4, 2026-10-09). The team key stays the `creator`; `content/partners.json` links a partner's
   campaign to the partner for its 72-hour highlight and report. There is no `partner` argument (P-3). How a team key
   adds a prize is not written in the sources. Sprint 02 built the reading that it passes `opening_usd` and pays like
   any wallet, at least `opening_fee_usd`, at the same 90/10, keeping a zero share, and the founder took it as decided
@@ -764,14 +778,14 @@ the program (X0.7); the SDK mirrors them for the preview and must refuse at leas
 
 | # | Check | Rule | Source | Sprint |
 |---|---|---|---|---|
-| 1 | The kind is one of five; `StakeAtLeast` opens only after a devnet YES | Closed `ReaderKind` | P1 §4.2; D-k | 02 (price), 03 |
-| 2 | The account fits the kind: owner, size, discriminator, through the reader's `validate_at_creation` | With no list, the only gate on the account (D-i) | P1 §4.2; D-i, D-k | 02, 03 |
-| 3 | The target is not met yet and sits a minimum distance from the current value | Otherwise the campaign is decided at birth. The distance per kind is set in Sprint 03 **[AC]** | proposal §2.4.3 (OCR) | 02, 03 |
-| 4 | Price kind: the sponsored account of `feed_id` exists, owner `rec2HH…`, Full, fresh, confidence ≤ 0.5% of the price | §3.4.8 | P1 §4.2; proposal §2.5 | 02 |
+| 1 | The kind is one of five; four open. `StakeAtLeast` opens only in a build with the feature `stake-at-least`, which no build enables until a devnet YES (Sprint 05) | Closed `ReaderKind`; `ReaderKindNotOpen` | P1 §4.2; D-k | 02 (price), 03 |
+| 2 | The account fits the kind: owner, size, discriminator, through the reader's `validate_at_creation` | With no list, the only gate on the account (D-i), except the price kind's feed list (row 4) | P1 §4.2; D-i, D-k | 02, 03 |
+| 3 | The target is not met yet and sits a minimum distance from the current value. Built (Sprint 03): a target already met, including zero or less on an "at least" kind, is `TargetAlreadyTouched`; a negative supply target and a `Below` price target at or below zero are `TargetUnreachable`; the minimum distance is 1% of the current value for each non-price kind (`MIN_DISTANCE_BPS_*`), and for the price kind it is measured from the edge of the confidence band **[AC]** | Otherwise the campaign is decided at birth | proposal §2.4.3 (OCR) | 02, 03 |
+| 4 | Price kind: `feed_id` is on the program's compiled feed list (founder answer 1, 2026-10-09; day one: Pyth's official sponsored list, 62 feeds on mainnet and 17 on devnet on that date, built in Sprint 04); the sponsored account of `feed_id` exists, owner `rec2HH…`, Full, fresh, confidence ≤ 0.5% of the price | §3.4.8, §3.4.1 | P1 §4.2; proposal §2.5 | 02; 04 (list) |
 | 5 | `deadline_at − now` is between 3 and 90 days; `entries_close_at` computed by `math/schedule.rs` | Duration chosen by the creator | P1 §3.6; D-k | 02 |
-| 6 | Fee, one-sided fee and creator share copied from `GlobalConfig`; the creator passes none of them; share 0 for a team key | Fixed fees | P1 §4.2; D-k, P-3 | 02 |
-| 7 | A non-team signer pays `opening_usd ≥ opening_fee_usd` at the Pyth price, at most `max_lamports`, all of it into the vault: 90% prize, 10% opening fee held (T23, T25) | §3.4.16 | D-b, D-f | 02 |
-| 8 | The pause is off, and `open_campaigns < max_open_campaigns` | A valve on the services' work (T18) | proposal §2.4.3 | 02 |
+| 6 | Fee, one-sided fee, creator share and `min_entry_lamports` copied from `GlobalConfig`; the creator passes none of them; share 0 for a team key | Fixed fees; the minimum entry is kept by the campaign (founder answer 5, 2026-10-09) | P1 §4.2; D-k, P-3, P-5 | 02; 04 (minimum entry) |
+| 7 | A non-team signer pays `opening_usd ≥ opening_fee_usd` at the SOL/USD price minus its confidence (`p − conf`, founder answer 2), at most `max_lamports`, all of it into the vault: 90% prize, 10% opening fee held (T23, T25). The SOL/USD feed id is a compiled constant (founder answer 3) | §3.4.16 | D-b, D-f | 02; 04 |
+| 8 | The pause is off. A non-team signer needs `open_campaigns < max_open_campaigns`; a team key's opening is outside that valve, with no limit (founder answer 4). The terms the creator read are checked by `expected_params_version` (in `OpenCampaignArgs`, Sprint 03), refused as `CreationParamsChanged` (6090) when the version has moved | A valve on the services' work (T18); the terms check covers the fee, the one-sided fee, the creator share, the prize split, the opening price and the join's price age | proposal §2.4.3; Sprint 03 decision | 02; 03; 04 |
 | 9 | No argument is a string; the sentence is rendered by template `template_version` from the stored fields | No free text | D-j | 02 |
 | 10 | The `Campaign` account for `id` does not exist yet; creation tolerates a pre-funded address | Retry guard (T17) | proposal §2.4.3 | 02 |
 
@@ -800,9 +814,10 @@ almost always. The defences left are the US$500 opening, the automatic notice on
 flag on the creator's own entry. Only the price kind is out of any creator's reach. The program cannot see who is
 behind a wallet; the creator may join their own campaign (BP-14).
 
-**A campaign with no entries [Q].** The BP has no written rule for it (P1 §3.5, §5.2; P4 §4.3). The program builds the
-one-sided treatment as the switchable default: the prize returns to whoever opened and the 10% is kept, so junk costs
-US$50 per campaign (P4 §4.3) **[INF]**.
+**A campaign with no entries [FD].** The BP has no written rule for it (P1 §3.5, §5.2; P4 §4.3). The founder's answer
+of 2026-10-09 (Sprint 04 question, recorded in `session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`):
+the prize returns to whoever opened and Brot keeps the 10% opening fee, so a campaign with no entry at all costs its
+opener US$50. This is a rule with no switch (§3.4.16).
 
 #### 3.4.11 Referral (B9)
 
@@ -964,7 +979,8 @@ truncating casts [F]). Fees round up, payouts and the share round down, and the 
 function is pure, lives in `math/`, and generates the vectors the SDK mirror must match (X0.3: at least 10,000,
 covering one-sided, void, both readings of the share and the opening conversion).
 
-**The opening (`math/opening.rs`) [DP]** (proposal §2.4.5; T25). With the Pyth SOL/USD price `p` and exponent `e`:
+**The opening (`math/opening.rs`) [DP]** (proposal §2.4.5; T25). With the Pyth SOL/USD price `p` taken as `price − conf`
+(founder answer 2, 2026-10-09; Sprint 03's code still charges the mid price) and exponent `e`:
 
 ```text
 opening_paid_lamports = ceil(opening_usd × 10^(9 − e) ÷ p)          refused if > max_lamports
@@ -998,7 +1014,8 @@ because only paid openings have a share and every paid opening has a prize; the 
 **[INF]**. When even `from_fee` cannot cover the gap, the creator receives less than C and winners get back exactly
 their entries: D-g's condition holds first.
 
-**Worked example A: a paid campaign, YES wins** (lamports exact; US$ at the reference price, display only).
+**Worked example A: a paid campaign, YES wins** (lamports exact; US$ at the reference price, display only). The
+examples take `p` with no band (conf = 0); a band lowers `p` and so raises the amount paid, to be recomputed in Sprint 04.
 
 | Step | Lamports | SOL | US$ |
 |---|---|---|---|
@@ -1036,13 +1053,27 @@ Brot keeps 50,000,000 (0.05 SOL, US$5.46) and the opening fee; the prize returns
 **Example D: a void.** Every entry gets back its amount; the prize returns to whoever opened; the 457,582,136-lamport
 opening fee is refunded on `MissedWindow` or `TeamHouseFailure` and kept otherwise (§3.4.7).
 
+**No entries (founder answer, 2026-10-09; Sprint 04).** A campaign that closes with no entry at all returns its prize to
+whoever opened and Brot keeps the 10% opening fee. This is a rule with no switch: the campaign costs its opener US$50
+and no more (§3.4.10).
+
+**Entries after the touch (founder answer, 2026-10-09; Sprint 04).** The join lock reads the sponsored account, which
+updates about once a minute, while the YES proof accepts any account at most 60 s old, so a baker could see a touch in a
+fresh update and join YES after it happened. Two rules close the gap, both built in Sprint 04:
+- **Refund.** An entry joined at or after the YES proof's `publish_time` is refunded whole to its baker, so it neither
+  wins nor loses.
+- **Proximity buffer at the join lock.** When the sponsored price's confidence band edge is within a margin of the
+  target, the join is refused. The margin is **[AC]**, derived from the sponsored account's update interval: about 60 s
+  on devnet (updates 62 to 64 s apart [F]) and about 5 s on mainnet (5 to 6 s apart [F]).
+
 **Other numbers [INF]** (P1 §3.4, P2): Brot's fee averages 3.70% of volume. A creator who puts 500 on each side of
 their own campaign with no prize gets back 940 + 10 = 950 of 1,000: wash activity does not pay unless something outside
 the pot rewards volume, which is why points and ranking stay off raw volume (proposal §2.4.4).
 
 #### 3.4.17 The `checks` module (what Anchor did, now by hand)
 
-Every check lives in `checks.rs` or in the instruction that needs it, and each has a negative test that feeds the wrong
+Every check lives in `checks.rs`, in its submodules under `checks/` (`top_level.rs`, `upgrade.rs`; Sprint 03), or in the
+instruction that needs it, and each has a negative test that feeds the wrong
 account and must be refused; the test is shown to fail when the check is removed (T24, X0.9). The checks module is
 tested with Mollusk; the instructions with LiteSVM [DP] (proposal §2.1, §2.2).
 
@@ -1058,8 +1089,8 @@ tested with Mollusk; the instructions with LiteSVM [DP] (proposal §2.1, §2.2).
 | `has_one` and constraints | Explicit comparisons with stored keys (`Entry.campaign`, `Entry.baker`, `Campaign.creator`, `GlobalConfig.fee_recipient`, `metric_account`) | An `Entry` of another campaign; a wrong recipient | 02, 04 |
 | `Program<System>` | `checks::system_program` on the System Program slot before any CPI | A look-alike program | 02 |
 | `emit_cpi!` | `checks::event_accounts` and the self-CPI event helper, signed by the event-authority PDA (T4) | A wrong event authority; a wrong program slot; the decoder tests (§3.4.14) | 02; decoder 05 |
-| The upgrade-authority constraint at initialisation | `checks::upgrade_authority`: read the program's ProgramData and compare its authority with the signer | Initialisation by any other key | 02 |
-| — | `checks::top_level`: stack height at transaction level, for `resolve_campaign` [F] (the frozen program's guard) | A call through CPI | 03 |
+| The upgrade-authority constraint at initialisation | `checks::upgrade_authority` (`checks/upgrade.rs`): read the program's ProgramData and compare its authority with the signer | Initialisation by any other key | 02 |
+| — | `checks::top_level` (`checks/top_level.rs`): stack height at transaction level, for `resolve_campaign` [F] (the frozen program's guard) | A call through CPI | 03 |
 | Duplicate-account protection **[NEW]** | `checks::distinct` wherever two slots must be different accounts (the vault and the fee vault; a recipient and the vault; two entries) | The same account in both slots | 02 |
 | The IDL | Shank attributes on accounts and instructions; Codama renders the client (T9) | The CI IDL check | 02, 05 |
 | Error codes | One enum mapped to custom program errors; each refusal has its own code. Codes start at 6000 and are contiguous to 6070 after Sprint 02; a new code is appended from 6071, never reusing a number [F] (`error.rs`) | X0.7: one test per refusal | 02 |
@@ -1883,14 +1914,14 @@ A `-t` filter that matches no test exits non-zero, so a forgotten test fails lou
 
 ## 10. CI/CD
 
-**Today** **[F]** (`.github/workflows/ci.yml`, after Sprint 02). Three jobs on Ubuntu 24.04, with actions pinned by
-hash. *Program:* Rust from `rust-toolchain.toml`, Solana CLI 3.1.10, the Anchor CLI 1.1.2 prebuilt binary (for
-`pred-provable` only), shank-cli 0.4.9 installed with `cargo install --locked` and cached by version, Bun from
+**Today** **[F]** (`.github/workflows/ci.yml`, after Sprint 03). Three jobs on Ubuntu 24.04, with actions pinned by
+hash. *Program:* Rust from `rust-toolchain.toml`, Solana CLI 3.1.10, shank-cli 0.4.9 installed with `cargo install --locked` and cached by version, Bun from
 `package.json`; `bun install --frozen-lockfile`; `cargo fmt --check` and Prettier; `cargo metadata --locked`;
-`bun run build:program` after deleting the committed outputs, which runs `anchor build` for `pred-provable`,
-`cargo build-sbf` for brot-markets, its Shank IDL and Codama client (`bun run idl`) and the app's IDL sync; an
-`idl-preview-<run id>` artifact; the stale-IDL check through `git status` over `target/idl`, `target/types`,
-`app/lib/idl` and `packages/sdk/src/idl`, the Codama client included; three clippy lines, the last one for brot-markets
+`bun run build:program` after deleting the committed outputs, which runs `cargo build-sbf` for brot-markets and for the
+test-only `cpi-proxy`, then `bun run idl` (the Shank IDL and the Codama client). CI has no Anchor: the Anchor CLI and
+`pred-provable` left the workspace in Sprint 03. The stale-IDL check through `git status` covers `packages/sdk/src/idl`
+only (the Shank output and the generated Codama client); an `idl-preview-<run id>` artifact is uploaded from the same
+directory; three clippy lines, the last one for brot-markets
 with the `mainnet` feature; `tsc --noEmit`; `bun run test`; `bun run test:rust`, whose Mollusk checks run the
 brot-markets binary; the step "Mainnet build carries the real values",
 `cargo test --locked -p brot-markets --features no-entrypoint,mainnet` (T12); and, on `main` only, a `programs-<sha>`
@@ -2112,19 +2143,20 @@ The business risks are in P4 §7. These are the plan's. Severities marked "(P4 �
 | Analytics | Turn off Cloudflare's analytics injection in the zone; today the CSP blocks it and each visitor's console shows an error (`CHANGELOG.md`, open items) | Turn it off: the plan has no visitor statistics (§8) | 09 |
 | Slide | The deck's mainnet line | "MAINNET After an audit and a multisig" (P4 §3.1) | The next showing of the deck |
 | Prize on another's campaign | May a third party add a prize to a campaign someone else opened (P1 §3.7)? The only reason to keep `sponsor_add_prize` (§3.4.3, §3.4.12) | No BP recommendation; without an answer, Sprint 15 builds only the sealed entry | 15 |
-| `StaleFeed` and the 10% | Is a `StaleFeed` void still an outside cause once the keeper holds a Hermes key, or a house failure that refunds the opening fee (§3.4.7)? | Working default: outside cause, fee kept **[INF]** | 04; before mainnet price campaigns (D4) |
-| Empty campaign | Where the prize and the held 10% go when a campaign gets no entry at all (P1 §3.5: "não tem regra escrita") | No BP recommendation. Working default: treated as one-sided, so the prize returns to whoever opened and the 10% is kept; switchable (§3.4.10) **[INF]** | 04 |
+| `StaleFeed` and the 10% | **Closed 2026-10-09 (Sprint 04 question).** Is a `StaleFeed` void still an outside cause once the keeper holds a Hermes key, or a house failure that refunds the opening fee (§3.4.7)? | An outside cause: the 10% is kept (§3.4.7). The rule itself was built in Sprint 03 (review F2 and F3); the 10% handling is Sprint 04's | 04 |
+| Empty campaign | **Closed 2026-10-09 (Sprint 04 question).** Where the prize and the held 10% go when a campaign gets no entry at all (P1 §3.5: "não tem regra escrita") | The prize returns to whoever opened and Brot keeps the 10% opening fee: a rule with no switch (§3.4.10, §3.4.16). Built in Sprint 04 | 04 |
+| Entry after the touch (PR #40, question 8; question 7 in the answers of 2026-10-09) | **Closed 2026-10-09.** A baker can join YES after a touch that shows in a fresh update, because the join lock reads the sponsored account and the proof accepts any account at most 60 s old (Sprint 03 review F1) | Answered: the recommended pair, a proximity buffer at the join lock, and a refund of entries at or after the YES proof's `publish_time`, both in Sprint 04 (§3.4.16). The margin is **[AC]** | 04 |
 | C-06 | Block Brazil in the app? | After L0 | 21; 22 |
 | Waitlist | What happens to the waitlist, its purge, its deletion form and `/pitch` when the landing leaves (§8.1) **[Q]** | Keep a deletion path and the purge until the last line expires, or use the list once and delete it | 09 |
 | Program key | A backup copy of the program-address keypair (Sprint 00) | Before Sprint 05 | 05 |
 | Weekly referral payout | Who signs the weekly referral payout, sent from the operations wallet (§3.4.11; roadmap v0.0.1 §5), and the treasury rule it pays from | Ties to P-7 and the multisig signers | 14 |
 | Demand-test thresholds | The thresholds of the three demand tests (P2 §2.5). Tests 1 and 2 have v0.0.2's; test 3 has none | Write them before the devnet beta | 13 |
-| Price feeds | Which Pyth feeds may a price campaign name, and does D-i (no accepted-account list) also cover feed ids? Today any Full feed of the upgraded receiver passes, so "price of a large asset" (§3.4.8) and "out of any creator's reach" (§3.4.10) are not enforced (Sprint 02 review, finding 1) | Built meanwhile: any feed. The security reviewer proposes an append-only compiled list of feeds and reads it as reopening D-i; the devil's advocate reads D-i as being about metric accounts only. Sprint 03 first checks whether any payer can create an unsponsored feed's shard-0 account | 03 |
-| Free-opening budget | A budget of its own for free team openings, or voiding an empty `Open` campaign, so that a leaked team key, or about US$50k of paid openings net of the returned prizes, cannot hold `max_open_campaigns` full for up to 90 days (§7; Sprint 02 review, finding 2) | Built meanwhile: one valve for all openings, 1,000 on devnet **[AC]**; every team-key opening alerts (§3.5) | 03 |
-| Opening price | Charge the opening at `p − conf`, the low edge of the Pyth price, instead of the mid price `p`? The creator posts the update the program reads, so with the mid price it can pick the highest of the last seconds, up to about 1% at the 300 s ceiling (Sprint 02 review, finding 14) | Built meanwhile: the mid price, rounded toward Brot, refused above `max_price_conf_bps`. The independent reviewer proposes `p − conf` | 03 |
-| SOL/USD feed id | Make the SOL/USD feed id a compiled constant instead of a `GlobalConfig` field? Today the program checks it only non-zero, so an admin's typo changes what every paid opening reads (Sprint 02 review, finding 5) | Built meanwhile: the config field, set at initialization and by `admin_set_creation_params` | 03 |
-| Minimum entry | Does an open campaign keep the `min_entry_lamports` it opened with? v0.1.0 said so in §3.4.1 and implied the live read in §3.4.3; the published terms promise "An open market keeps the rules it opened with" (`/terms`) | Built meanwhile: the join reads the minimum from `GlobalConfig` at every join, so a change reaches open campaigns (§3.4.1) | Any change of the minimum on devnet |
-| Q12 (confirmation) | Do both Lucas and Ronaldo hold team keys ("tem eu e o Ronaldo")? | The plan reads it so; `admin_set_team` takes up to five keys | 05 (deploy day) |
+| Price feeds | **Closed 2026-10-09 (answer 1).** Which Pyth feeds may a price campaign name, and does D-i (no accepted-account list) also cover feed ids? Today any Full feed of the upgraded receiver passes, so "price of a large asset" (§3.4.8) and "out of any creator's reach" (§3.4.10) are not enforced (Sprint 02 review, finding 1) | A list of our own, fixed in the program, per cluster. Day one: Pyth's official list of sponsored feeds (62 on mainnet, 17 on devnet, on 2026-10-09). Feeds are added from Sprint 06. D-i narrows to the price kind only. Built in Sprint 04 (§3.4.1, §3.4.10 row 4) | 04 |
+| Free-opening budget | **Closed 2026-10-09 (answer 4).** A budget of its own for free team openings, or voiding an empty `Open` campaign, so that a leaked team key, or about US$50k of paid openings net of the returned prizes, cannot hold `max_open_campaigns` full for up to 90 days (§7; Sprint 02 review, finding 2) | Yes, and without a limit: a team key's openings sit outside `max_open_campaigns` (§3.4.10). Built in Sprint 04. A leaked team key can open campaigns without limit, but takes no money from anyone: the admin removes the key at once, and the pause stops openings too | 04 |
+| Opening price | **Closed 2026-10-09 (answer 2).** Charge the opening at `p − conf`, the low edge of the Pyth price, instead of the mid price `p`? The creator posts the update the program reads, so with the mid price it can pick the highest of the last seconds, up to about 1% at the 300 s ceiling (Sprint 02 review, finding 14) | Yes: the opening is charged at `p − conf`. Built in Sprint 04 (§3.4.16) | 03 |
+| SOL/USD feed id | **Closed 2026-10-09 (answer 3).** Make the SOL/USD feed id a compiled constant instead of a `GlobalConfig` field? Today the program checks it only non-zero, so an admin's typo changes what every paid opening reads (Sprint 02 review, finding 5) | Yes: a compiled constant, not a `GlobalConfig` field. Built in Sprint 04 (§3.4.1) | 03 |
+| Minimum entry | **Closed 2026-10-09 (answer 5).** Does an open campaign keep the `min_entry_lamports` it opened with? v0.1.0 said so in §3.4.1 and implied the live read in §3.4.3; the published terms promise "An open market keeps the rules it opened with" (`/terms`) | Yes: each campaign copies `min_entry_lamports` at opening (0.01 SOL today; the admin sets 0.001 to 1 SOL). Built in Sprint 04 (§3.4.1, §3.4.10 row 6) | 04 |
+| Q12 (confirmation) | **Closed 2026-10-09 (answer 6).** Do both Lucas and Ronaldo hold team keys ("tem eu e o Ronaldo")? | Three team keys: Lucas's, Ronaldo's and Bernardo's; Bernardo's is set when he starts. The reading that both Lucas and Ronaldo hold team keys is confirmed. Set at the devnet deploy (Sprint 05) | 05 |
 
 **Design gaps still with the founder** (Product Brief v0.0.1 gaps, still the live handles).
 
@@ -2266,7 +2298,7 @@ Closed in Sprint 02 (`docs/sprints/sprint-02-pot-core.md`; the two session logs 
 | C45 | The minimum distance between the target and the current value, per kind (check 3, §3.4.10) | 03 |
 | C46 | How the epoch kinds meet the 3-to-90-day rule and the entry close, with no `deadline_at` in the proposal's sketch (§3.4.8) | 03 |
 | C47 | The exact `StaleFeed` test, and the slot bound on a YES proof (§3.4.6, §3.4.8) | 03 |
-| C48 | Whether `team_open_contest` stays disabled until Sprint 14 builds the way out of `Contested` (§3.4.2) | 04 |
+| C48 | Closed 2026-10-09: nothing leaves `Contested` until Sprint 14 (§3.4.2); entry through `team_open_contest` is allowed | 04 |
 | C49 | Whether `close_campaign` waits for a reserved creator share or pays it with the rent when the creator is the rent payer (§3.4.5) | 04 |
 | C50 | The sealed entry: a flag on the join or an instruction of its own, and its minimum (§3.4.12) | 15 |
 
