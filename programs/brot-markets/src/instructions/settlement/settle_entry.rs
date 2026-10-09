@@ -94,6 +94,8 @@ pub fn settle_entry(
         return Err(BrotError::AlreadySettled.into());
     }
     let (entry_campaign, entry_baker) = stored_keys(entry, program_id)?;
+    // The campaign is this program's before its key is compared with the entry's (house order: owner first).
+    checks::owned_by(campaign, program_id)?;
     let campaign_key = *campaign.address();
     if entry_campaign.as_slice() != campaign_key.as_ref() {
         return Err(BrotError::EntryNotOnCampaign.into());
@@ -102,6 +104,7 @@ pub fn settle_entry(
         return Err(BrotError::WrongBaker.into());
     }
     let mut stored = Campaign::load_mut(campaign, program_id)?;
+    checks::vault_of(vault, &campaign_key, stored.vault_bump, program_id)?;
     match Status::try_from(stored.status)? {
         Status::Settling => {}
         Status::Settled => return Err(BrotError::AlreadySettled.into()),

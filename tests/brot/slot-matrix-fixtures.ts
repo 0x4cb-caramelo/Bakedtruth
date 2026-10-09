@@ -6,13 +6,23 @@
  * Sprint:  04 (lane F). Lanes C and D's bodies decide whether the settlement baselines succeed; the
  *          integration run is where they are checked.
  */
-import { generateKeyPairSigner, lamports, type Address, type Instruction } from "@solana/kit";
+import {
+  generateKeyPairSigner,
+  getProgramDerivedAddress,
+  getAddressEncoder,
+  lamports,
+  type Address,
+  type Instruction,
+} from "@solana/kit";
 
 import * as I from "./instructions";
 import * as S from "./instructions-settlement";
 import { injectCampaign, injectEntry, injectReviewed, injectSettling, type InjectedCampaign } from "./campaigns";
 import { DEFAULT_PARAMS, initConfig, newId, setTeam } from "./flows";
 import { joinWorld } from "./join-campaign-support";
+import { encode, layoutSize } from "./layouts";
+import { settleSplit } from "./money-model";
+import { JOIN } from "./structs";
 import { openArgs, openingWorld } from "./opening";
 import * as P from "./program";
 import { resolveIx, resolveWorld, supplyCampaign } from "./resolve-support";
@@ -53,18 +63,64 @@ async function settling(w: World, snapshot: Parameters<typeof injectSettling>[3]
 }
 
 const SOL = P.SOL;
+// The snapshot of a Split pot of 2 SOL on YES and 1 SOL on NO, computed by the reference model with the
+// fee (10%) and the creator's share (1%) of the campaign, so the vault holds what the books owe.
+const SPLIT = settleSplit({ winning: 2n * SOL, losing: SOL, prize: 0n, feeBps: 1_000n, creatorBps: 100n });
 const SNAPSHOT = {
   settle_mode: 1, // Split
   winning_total: 2n * SOL,
   losing_total: SOL,
-  distributable: (9n * SOL) / 10n,
-  fee_total: SOL / 10n,
-  creator_share: SOL / 10n,
-  creator_share_from_fee: 0n,
-  prize_lamports: SOL / 2n,
+  distributable: SPLIT.distributable,
+  fee_total: SPLIT.fee,
+  creator_share: SPLIT.creatorFromPot + SPLIT.creatorFromFee,
+  creator_share_from_fee: SPLIT.creatorFromFee,
+  prize_lamports: 0n,
 };
 
 export const BASELINES: Record<string, () => Promise<Baseline>> = {
+  TallyLateJoins: async () => {
+    const { w } = await configWorld();
+    const baker = await fundedWallet(w);
+    const { campaign } = await injectReviewed(
+      w.client,
+      await base(w, { poolYes: SOL, poolNo: 0n, extra: { publish_time: now(w.client), entries_untallied: 1 } }),
+      P.Outcome.Yes,
+      now(w.client) + P.HOUR * 6n,
+    );
+    const entry = await injectEntry(w.client, { campaign, baker: baker.address, amountYes: SOL, joinCount: 1 });
+    // The baker's one Join, written at its PDA (tag 5, layout 1) as the join instruction creates it.
+    const join = await P.joinPda(campaign, baker.address, 0);
+    const [, bump] = await getProgramDerivedAddress({
+      programAddress: P.PROGRAM_ID,
+      seeds: [
+        new TextEncoder().encode("join"),
+        getAddressEncoder().encode(campaign),
+        getAddressEncoder().encode(baker.address),
+        new Uint8Array(4),
+      ],
+    });
+    const data = encode(JOIN, {
+      tag: 5, // AccountTag::Join (the kit's AccountTag predates the tag)
+      version: 1,
+      bump,
+      side: 0,
+      campaign,
+      baker: baker.address,
+      index: 0,
+      joined_at: now(w.client) - 60n,
+      amount: SOL,
+      _reserved: new Uint8Array(8),
+    });
+    w.client.svm.setAccount({
+      address: join,
+      data,
+      executable: false,
+      lamports: lamports(w.client.svm.minimumBalanceForRentExemption(BigInt(layoutSize(JOIN)))),
+      programAddress: P.PROGRAM_ID,
+      space: BigInt(data.length),
+    });
+    return { w, ix: S.tallyLateJoinsIx(baker.address, campaign, entry, [join]) };
+  },
   AdminInitializeConfig: async () => {
     const w = await createWorld();
     const admin = await fundedWallet(w);
@@ -157,7 +213,8 @@ export const BASELINES: Record<string, () => Promise<Baseline>> = {
   SettleEntry: async () => {
     const { w } = await configWorld();
     const baker = await fundedWallet(w);
-    const { campaign, vault } = await settling(w, SNAPSHOT);
+    // One open entry: the one being settled.
+    const { campaign, vault } = await settling(w, SNAPSHOT, { extra: { entries_open: 1 } });
     await injectEntry(w.client, { campaign, baker: baker.address, amountYes: 2n * SOL });
     return { w, ix: S.settleEntryIx(await P.entryPda(campaign, baker.address), campaign, vault, baker.address) };
   },

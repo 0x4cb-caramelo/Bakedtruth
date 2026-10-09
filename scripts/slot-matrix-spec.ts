@@ -11,7 +11,7 @@ import { layoutSize } from "../tests/brot/layouts";
 
 /** What a slot is. Only signers and writable slots are in the matrix; the rest need no kind. */
 export type Kind =
-  "admin" | "pending" | "team" | "payer" | "stored" | "config" | "campaign" | "entry" | "vault" | "feeVault";
+  "admin" | "pending" | "team" | "payer" | "stored" | "config" | "campaign" | "entry" | "join" | "vault" | "feeVault";
 
 export type Slot = {
   kind: Kind;
@@ -79,6 +79,7 @@ export const SPEC: Record<string, Record<string, Slot>> = {
     campaign: CAMP,
     vault: VAULT,
     entry: { kind: "entry", create: true },
+    join: { kind: "join", create: true },
   },
   ResolveCampaign: { campaign: CAMP },
   TeamConfirmResult: { teamMember: { kind: "team" }, config: C, campaign: CAMP },
@@ -94,8 +95,9 @@ export const SPEC: Record<string, Record<string, Slot>> = {
   SettleCreatorShare: { campaign: CAMP, vault: VAULT, creator: { kind: "stored", stored: "WrongCreator" } },
   CollectFee: { campaign: CAMP, vault: VAULT, feeVault: FEE },
   SettlePrize: { campaign: CAMP, vault: VAULT, recipient: { kind: "stored", stored: "WrongCreator" } },
-  CloseCampaign: { campaign: CAMP, vault: VAULT, rentPayer: { kind: "stored", stored: GAP }, feeVault: FEE },
-  SweepFees: { feeVault: FEE, feeRecipient: { kind: "stored", stored: GAP } },
+  CloseCampaign: { campaign: CAMP, vault: VAULT, rentPayer: { kind: "stored", stored: "RentPayerNotStored" }, feeVault: FEE },
+  SweepFees: { feeVault: FEE, feeRecipient: { kind: "stored", stored: "FeeRecipientMismatch" } },
+  TallyLateJoins: { campaign: CAMP, entry: { kind: "entry" }, baker: { kind: "stored", stored: "WrongBaker" } },
 };
 
 /**
@@ -122,12 +124,55 @@ export const DISTINCT: Record<string, [string, string][]> = {
   SweepFees: [["feeRecipient", "feeVault"]],
 };
 
+/**
+ * The program's own refusal where the generic rule guessed another. Each one is the program's check order
+ * (owner, length, tag, address; distinct before the loads; a system-owned empty account is closed), read from
+ * the instruction. Key: `instruction|category|slot|detail`, detail `Type` for a type case, `with<i>` for an alias.
+ */
+export const OVERRIDES: Record<string, { expect: string; why: string }> = {
+  "UserJoinCampaign|type|entry|Config": { expect: "WrongLength", why: "length is checked before the PDA (owner, length, tag, PDA)" },
+  "UserJoinCampaign|type|entry|Campaign": { expect: "WrongLength", why: "length is checked before the PDA" },
+  "UserJoinCampaign|type|entry|Join": { expect: "WrongLength", why: "a Join is 96 bytes, not an Entry's 116" },
+  "TeamConfirmResult|alias|campaign|with1": { expect: "DuplicateAccount", why: "distinct from the config runs before the load" },
+  "TeamVoidCampaign|alias|campaign|with1": { expect: "DuplicateAccount", why: "distinct from the config runs before the load" },
+  "FinalizeCampaign|alias|config|with0": { expect: "DuplicateAccount", why: "distinct before either account is borrowed (no runtime borrow error)" },
+  "SettleEntry|stranger|entry": { expect: "AlreadySettled", why: "a system-owned empty account is a closed Entry" },
+  "UserJoinCampaign|alias|join|with0": { expect: "DuplicateAccount", why: "checks::distinct against the slot the join must differ from, before any load" },
+  "UserJoinCampaign|alias|join|with2": { expect: "DuplicateAccount", why: "checks::distinct against the slot the join must differ from, before any load" },
+  "UserJoinCampaign|alias|join|with3": { expect: "DuplicateAccount", why: "checks::distinct against the slot the join must differ from, before any load" },
+  "UserJoinCampaign|alias|join|with4": { expect: "DuplicateAccount", why: "checks::distinct against the slot the join must differ from, before any load" },
+  "TallyLateJoins|stranger|baker": { expect: "PdaMismatch", why: "tally derives the Entry's address from the baker before comparing the stored key" },
+  "TallyLateJoins|type|baker|Token": { expect: "PdaMismatch", why: "as above" },
+  "TallyLateJoins|type|baker|Config": { expect: "PdaMismatch", why: "as above" },
+  "TallyLateJoins|type|baker|Campaign": { expect: "PdaMismatch", why: "as above" },
+  "TallyLateJoins|type|baker|Entry": { expect: "PdaMismatch", why: "as above" },
+  "TallyLateJoins|type|baker|Join": { expect: "PdaMismatch", why: "as above" },
+  "TallyLateJoins|alias|entry|with0": { expect: "DuplicateAccount", why: "distinct from the campaign precedes the loads" },
+  "TallyLateJoins|alias|baker|with0": { expect: "DuplicateAccount", why: "distinct from the campaign precedes the loads" },
+  "TallyLateJoins|alias|baker|with1": { expect: "DuplicateAccount", why: "distinct from the entry precedes the loads" },
+  "SettleEntry|type|campaign|Config": { expect: "EntryNotOnCampaign", why: "stored_keys compares the entry's campaign before the campaign's length (by design)" },
+  "SettleEntry|type|campaign|Entry": { expect: "EntryNotOnCampaign", why: "as above" },
+  "SettleEntry|type|campaign|Join": { expect: "EntryNotOnCampaign", why: "as above" },
+  "SettleEntry|alias|campaign|with0": { expect: "DuplicateAccount", why: "the entry is the earlier slot; distinct checks the pair" },
+  "SettleEntry|alias|vault|with0": { expect: "DuplicateAccount", why: "distinct from the entry precedes the vault's address" },
+  "SettleEntry|alias|vault|with1": { expect: "DuplicateAccount", why: "distinct from the campaign precedes the vault's address" },
+  "CollectFee|alias|feeVault|with1": { expect: "PdaMismatch", why: "the vault is the program's, the fee vault's address is not" },
+  "SettlePrize|alias|recipient|with1": { expect: "WrongCreator", why: "the recipient must be the stored creator before any distinct" },
+  "CloseCampaign|stranger|campaign": { expect: "AlreadyClosed", why: "a system-owned empty campaign is a closed one" },
+  "CloseCampaign|alias|rentPayer|with1": { expect: "RentPayerNotStored", why: "the stored rent payer is checked before distinct" },
+  "CloseCampaign|alias|feeVault|with1": { expect: "PdaMismatch", why: "the fee vault's address is checked before distinct" },
+  "SweepFees|alias|feeRecipient|with1": { expect: "FeeRecipientMismatch", why: "the stored fee recipient is checked before distinct" },
+};
+
+export const overrideOf = (key: string, generic: string) => OVERRIDES[key]?.expect ?? generic;
+
 /** The source type of a slot's current account, as a type case or an alias sees it. */
 export function typeOf(slot: Slot): Source {
   if (slot.kind === "vault" || slot.kind === "feeVault") return "Vault";
   if (slot.kind === "config") return "Config";
   if (slot.kind === "campaign") return "Campaign";
   if (slot.kind === "entry") return "Entry";
+  if (slot.kind === "join") return "Join";
   return "Wallet";
 }
 

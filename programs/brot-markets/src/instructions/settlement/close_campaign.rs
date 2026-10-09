@@ -18,7 +18,6 @@ use pinocchio::{AccountView, Address, ProgramResult};
 use super::collect_fee::moves;
 use crate::{
     checks,
-    constants::VAULT_SEED,
     error::BrotError,
     events::{self, CampaignClosed},
     instructions::no_args,
@@ -52,13 +51,7 @@ pub fn close_campaign(
         rent_payer.address() == &stored.rent_payer,
         BrotError::RentPayerNotStored,
     )?;
-    let key_bytes: &[u8] = key.as_ref();
-    checks::pda(
-        vault,
-        &[VAULT_SEED, key_bytes],
-        stored.vault_bump,
-        program_id,
-    )?;
+    checks::vault_of(vault, &key, stored.vault_bump, program_id)?;
     moves::fee_vault_is_canonical(fee_vault, program_id)?;
     let seq = stored.event_seq.get();
     drop(stored);

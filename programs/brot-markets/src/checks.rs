@@ -30,7 +30,7 @@ mod paying;
 mod top_level;
 mod upgrade;
 pub use close::close_account;
-pub use paying::paying_vault;
+pub use paying::{paying_vault, vault_of};
 pub use top_level::top_level;
 pub use upgrade::upgrade_authority;
 

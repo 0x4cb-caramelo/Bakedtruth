@@ -51,6 +51,7 @@ pub fn settle_creator_share(
 
     let campaign_key = *campaign.address();
     let mut stored = Campaign::load_mut(campaign, program_id)?;
+    checks::vault_of(vault, &campaign_key, stored.vault_bump, program_id)?;
     match Status::try_from(stored.status)? {
         Status::Settling | Status::Settled => {}
         _ => return Err(BrotError::NotFinalized.into()),

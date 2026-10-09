@@ -6,7 +6,8 @@
 
 use pinocchio::{AccountView, Address, ProgramResult};
 
-use super::{distinct, owned_by};
+use super::{distinct, owned_by, pda};
+use crate::constants::VAULT_SEED;
 
 /// The vault is owned by `program_id` (`WrongOwner`), and each recipient is a different account from
 /// it (`DuplicateAccount`). Called before the first transfer, by every instruction that pays.
@@ -21,4 +22,16 @@ pub fn paying_vault(
         distinct(recipient, vault)?;
     }
     Ok(())
+}
+
+/// A campaign's vault, checked before any amount is computed: owned by this program, then at the PDA
+/// `["vault", campaign]` with the bump the campaign stored (the house order: owner, then address).
+pub fn vault_of(
+    vault: &AccountView,
+    campaign: &Address,
+    bump: u8,
+    program_id: &Address,
+) -> ProgramResult {
+    owned_by(vault, program_id)?;
+    pda(vault, &[VAULT_SEED, campaign.as_ref()], bump, program_id)
 }

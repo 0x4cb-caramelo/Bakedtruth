@@ -38,6 +38,7 @@ pub fn settle_prize(
 
     let key = *campaign.address();
     let mut stored = Campaign::load_mut(campaign, program_id)?;
+    checks::vault_of(vault, &key, stored.vault_bump, program_id)?;
     let finalized = matches!(
         Status::try_from(stored.status)?,
         Status::Settling | Status::Settled

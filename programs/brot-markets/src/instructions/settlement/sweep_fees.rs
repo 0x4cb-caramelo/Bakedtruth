@@ -49,6 +49,7 @@ pub fn sweep_fees(
         fee_recipient.address() != fee_vault.address(),
         BrotError::FeeRecipientIsFeeVault,
     )?;
+    checks::owned_by(fee_vault, program_id)?;
     checks::pda(fee_vault, &[FEE_VAULT_SEED], fee_vault_bump, program_id)?;
     checks::paying_vault(fee_vault, program_id, &[&*fee_recipient])?;
 

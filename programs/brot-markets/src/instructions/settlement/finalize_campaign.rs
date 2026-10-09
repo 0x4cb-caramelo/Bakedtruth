@@ -33,6 +33,7 @@ pub fn finalize_campaign(
     checks::writable(config)?;
     checks::event_accounts(event_authority, program, program_id)?;
 
+    checks::distinct(campaign, config)?;
     let campaign_key = *campaign.address();
     let mut stored = Campaign::load_mut(campaign, program_id)?;
     let mut settings = GlobalConfig::load_mut(config, program_id)?;

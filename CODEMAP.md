@@ -9,7 +9,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 | | |
 |---|---|
 | Arquivos mapeados | **406** |
-| Acima de 200 linhas | **46** ⚠️ |
+| Acima de 200 linhas | **47** ⚠️ |
 | Sem cabeçalho `Purpose:` | **80** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -46,6 +46,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `scripts/devnet.ts` — 222 linhas
 - `scripts/os-self-test.js` — 406 linhas
 - `scripts/pyth-sponsored-feeds.ts` — 201 linhas
+- `scripts/slot-matrix-spec.ts` — 201 linhas
 - `scripts/sync-selfhosted.js` — 349 linhas
 - `scripts/test/hooks.test.js` — 278 linhas
 - `scripts/tokenomics-model.ts` — 584 linhas
@@ -60,8 +61,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `tests/brot/layout-v1.test.ts` — 245 linhas
 - `tests/brot/resolve-support.ts` — 205 linhas
 - `tests/brot/setup.ts` — 203 linhas
-- `tests/brot/slot-matrix-fixtures.ts` — 204 linhas
-- `tests/brot/slot-matrix.gen.ts` — 474 linhas
+- `tests/brot/slot-matrix-fixtures.ts` — 261 linhas
+- `tests/brot/slot-matrix.gen.ts` — 428 linhas
 
 ---
 
@@ -199,7 +200,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`close.rs`](programs/brot-markets/src/checks/close.rs) | `checks::close_account`: closes one account the program owns. Its data is zeroed, its lamports must already have left (`AccountNotEmpty`), and then the crate's  | 24 |
-| [`paying.rs`](programs/brot-markets/src/checks/paying.rs) | `checks::paying_vault`: the checks every paying instruction makes on its vault before any lamport moves (TP 3.4.17, Sprint 04): the vault belongs to this progra | 25 |
+| [`paying.rs`](programs/brot-markets/src/checks/paying.rs) | `checks::paying_vault`: the checks every paying instruction makes on its vault before any lamport moves (TP 3.4.17, Sprint 04): the vault belongs to this progra | 38 |
 | [`top_level.rs`](programs/brot-markets/src/checks/top_level.rs) | `checks::top_level`, the guard that keeps `resolve_campaign` out of other programs' CPIs (TP section 3.4.17): the instruction must run at the transaction's top  | 34 |
 | [`upgrade.rs`](programs/brot-markets/src/checks/upgrade.rs) | `checks::upgrade_authority`, the one check that binds the config's first write to this program's upgrade authority (TP 3.4.17), with its own refusals and negati | 45 |
 
@@ -287,16 +288,16 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`bookkeeping.rs`](programs/brot-markets/src/instructions/settlement/bookkeeping.rs) | the moves and counters every settlement instruction shares: the event sequence number, the lamport move out of the vault (checked against I1 by `math::invariant | 64 |
-| [`close_campaign.rs`](programs/brot-markets/src/instructions/settlement/close_campaign.rs) | `close_campaign`: once the fee, the prize and the creator share are settled, moves the vault's dust and hand-sent surplus to the fee vault, returns the rent of  | 107 |
-| [`collect_fee.rs`](programs/brot-markets/src/instructions/settlement/collect_fee.rs) | `collect_fee`: moves what Brot keeps to the fee vault, once, after the entries are settled: the house fee net of the creator's share from it, the opening fee un | 88 |
-| [`finalize_campaign.rs`](programs/brot-markets/src/instructions/settlement/finalize_campaign.rs) | `finalize_campaign`: the snapshot of a reviewed campaign once its window has ended. Any wallet, permissionless; it chooses nothing. It runs `finalize_snapshot`, | 76 |
+| [`close_campaign.rs`](programs/brot-markets/src/instructions/settlement/close_campaign.rs) | `close_campaign`: once the fee, the prize and the creator share are settled, moves the vault's dust and hand-sent surplus to the fee vault, returns the rent of  | 100 |
+| [`collect_fee.rs`](programs/brot-markets/src/instructions/settlement/collect_fee.rs) | `collect_fee`: moves what Brot keeps to the fee vault, once, after the entries are settled: the house fee net of the creator's share from it, the opening fee un | 81 |
+| [`finalize_campaign.rs`](programs/brot-markets/src/instructions/settlement/finalize_campaign.rs) | `finalize_campaign`: the snapshot of a reviewed campaign once its window has ended. Any wallet, permissionless; it chooses nothing. It runs `finalize_snapshot`, | 77 |
 | [`mod.rs`](programs/brot-markets/src/instructions/settlement/mod.rs) | the instructions that settle a campaign after its outcome: the snapshot, the payouts to people and Brot's fee, the prize, the close and the sweep (TP section 3. | 17 |
 | [`rules.rs`](programs/brot-markets/src/instructions/settlement/rules.rs) | the settlement rules as pure functions: what one entry is paid under the snapshot's mode, and the reserve path of a credit below rent (TP section 3.4.5; amendme | 131 |
-| [`settle_creator_share.rs`](programs/brot-markets/src/instructions/settlement/settle_creator_share.rs) | `settle_creator_share`: pays the creator's share once, to the stored creator only (TP 3.4.5, I13). A credit that would leave the creator's wallet below its rent | 123 |
-| [`settle_entry.rs`](programs/brot-markets/src/instructions/settlement/settle_entry.rs) | `settle_entry`: pays one entry from the vault to its stored baker and closes the Entry, its rent back to the baker (TP 3.4.5). A losing entry goes through the s | 158 |
-| [`settle_prize.rs`](programs/brot-markets/src/instructions/settlement/settle_prize.rs) | `settle_prize`: returns the prize to whoever opened in `OneSided` and `Refund`, and the opening fee too on a house-failure void (TP sections 3.4.7, 3.4.16; P-4) | 76 |
+| [`settle_creator_share.rs`](programs/brot-markets/src/instructions/settlement/settle_creator_share.rs) | `settle_creator_share`: pays the creator's share once, to the stored creator only (TP 3.4.5, I13). A credit that would leave the creator's wallet below its rent | 124 |
+| [`settle_entry.rs`](programs/brot-markets/src/instructions/settlement/settle_entry.rs) | `settle_entry`: pays one entry from the vault to its stored baker and closes the Entry, its rent back to the baker (TP 3.4.5). A losing entry goes through the s | 161 |
+| [`settle_prize.rs`](programs/brot-markets/src/instructions/settlement/settle_prize.rs) | `settle_prize`: returns the prize to whoever opened in `OneSided` and `Refund`, and the opening fee too on a house-failure void (TP sections 3.4.7, 3.4.16; P-4) | 77 |
 | [`snapshot.rs`](programs/brot-markets/src/instructions/settlement/snapshot.rs) | `finalize_snapshot`, the one snapshot path that `finalize_campaign` and `team_confirm_result` both call: it takes the campaign's totals and verdict through lane | 117 |
-| [`sweep_fees.rs`](programs/brot-markets/src/instructions/settlement/sweep_fees.rs) | `sweep_fees`: sends the fee vault's lamports above its rent-exempt minimum to `GlobalConfig.fee_recipient`, and nowhere else (TP sections 3.4.3, 3.4.4). Any wal | 70 |
+| [`sweep_fees.rs`](programs/brot-markets/src/instructions/settlement/sweep_fees.rs) | `sweep_fees`: sends the fee vault's lamports above its rent-exempt minimum to `GlobalConfig.fee_recipient`, and nowhere else (TP sections 3.4.3, 3.4.4). Any wal | 71 |
 | [`tally_late_joins.rs`](programs/brot-markets/src/instructions/settlement/tally_late_joins.rs) | `tally_late_joins` (amendment of 2026-10-09, founder decisions 1 and 2): reads a baker's Join accounts in index order, adds the late amounts (joined at or after | 124 |
 
 ## `programs/brot-markets/src/instructions/settlement/collect_fee/`
@@ -304,7 +305,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`amount.rs`](programs/brot-markets/src/instructions/settlement/collect_fee/amount.rs) | what Brot keeps and what the opener gets back, worked out from the stored campaign alone (TP section 3.4.16, P-4). The snapshot's `brot_keeps` and `to_opener` a | 146 |
-| [`moves.rs`](programs/brot-markets/src/instructions/settlement/collect_fee/moves.rs) | the lamport moves of the settlement instructions, and the two reads they share: the rent of an empty account, from the Rent sysvar (decision 6), and the fee vau | 46 |
+| [`moves.rs`](programs/brot-markets/src/instructions/settlement/collect_fee/moves.rs) | the lamport moves of the settlement instructions, and the two reads they share: the rent of an empty account, from the Rent sysvar (decision 6), and the fee vau | 47 |
 
 ## `programs/brot-markets/src/math/`
 
@@ -607,7 +608,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`run-tests.js`](scripts/run-tests.js) | give `npm test` a file list that does not depend on the shell. npm runs scripts through cmd.exe on Windows, which does not expand globs, and Node only learned t | 33 |
 | [`sensor-wiring.js`](scripts/sensor-wiring.js) | verify the repo has a standard test entry point, a linter with its config, a lockfile, a feedback hook, a git pre-commit, and a CI that actually runs them. The  | 121 |
 | [`slot-matrix-check.ts`](scripts/slot-matrix-check.ts) | the CI step of the slot matrix: regenerates the matrix in memory and fails when the committed tests/brot/slot-matrix.gen.ts is stale (or missing) | 18 |
-| [`slot-matrix-spec.ts`](scripts/slot-matrix-spec.ts) | the expectations of the slot matrix: what each account slot of each instruction is, and which BrotError a refused mutation gets, from the checks order of checks | 156 |
+| [`slot-matrix-spec.ts`](scripts/slot-matrix-spec.ts) | the expectations of the slot matrix: what each account slot of each instruction is, and which BrotError a refused mutation gets, from the checks order of checks | 201 |
 | [`slot-matrix.ts`](scripts/slot-matrix.ts) | generates tests/brot/slot-matrix.gen.ts, the slot matrix of Sprint 04 (T-lane F), from the frozen Shank IDL: every signer unsigned, every writable slot read-onl | 151 |
 | [`sync-selfhosted.js`](scripts/sync-selfhosted.js) | keep a local, navigable mirror of the full self-hosted catalogue so the WIZARD (stage 4.2) can offer self-hosted alternatives without a network call | 349 |
 | [`tokenomics-model.ts`](scripts/tokenomics-model.ts) | Quantitative model behind ECONOMICS.md: protocol fees, revenue split, staker yield, the token unlock curve and the | 584 |
@@ -792,9 +793,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`resolve-refuses.test.ts`](tests/brot/resolve-refuses.test.ts) | what `resolve_campaign` refuses, each with its exact error and nothing written: a call forwarded by another program (`checks::top_level`, `bun test tests/ -t "r | 143 |
 | [`resolve-support.ts`](tests/brot/resolve-support.ts) | what the resolution tests share: a world at a mainnet-like slot and epoch, a campaign of each kind written into it with its metric account (a synthetic mint, th | 205 |
 | [`setup.ts`](tests/brot/setup.ts) | a LiteSVM world for the program's tests: the binary loaded, the clock set next to the captured Pyth prices, the upgrade authority recorded, funded wallets, and  | 203 |
-| [`slot-matrix-fixtures.ts`](tests/brot/slot-matrix-fixtures.ts) | one valid instruction per Brot Markets instruction, in a world of its own, the baseline each slot case mutates. Every baseline must succeed before its cases mea | 204 |
+| [`slot-matrix-fixtures.ts`](tests/brot/slot-matrix-fixtures.ts) | one valid instruction per Brot Markets instruction, in a world of its own, the baseline each slot case mutates. Every baseline must succeed before its cases mea | 261 |
 | [`slot-matrix-mutate.ts`](tests/brot/slot-matrix-mutate.ts) | the mutations of the slot matrix: one slot of a valid instruction changed (unsigned, read-only, a stranger, an account of another type, or an alias of an earlie | 75 |
-| [`slot-matrix.gen.ts`](tests/brot/slot-matrix.gen.ts) | every slot case of the matrix: each signer unsigned (MissingSignature), each writable slot read-only (NotWritable), a stranger, an account of each other type, a | 474 |
+| [`slot-matrix.gen.ts`](tests/brot/slot-matrix.gen.ts) | every slot case of the matrix: each signer unsigned (MissingSignature), each writable slot read-only (NotWritable), a stranger, an account of each other type, a | 428 |
 | [`slot-matrix.test.ts`](tests/brot/slot-matrix.test.ts) | runs every case of the slot matrix (tests/brot/slot-matrix.gen.ts) against the binary: each refused with its own BrotError, and no lamport of the instruction's  | 51 |
 | [`structs.ts`](tests/brot/structs.ts) | the program's structs as layouts: accounts (GlobalConfig, Campaign, Entry), instruction arguments and events, each in the field order of its Rust struct | 172 |
 | [`team-window.test.ts`](tests/brot/team-window.test.ts) | the team's acts in the review window, on the binary: confirm, void with each reason, and contest. Each act is refused outside `InReview`, outside the window, to | 187 |

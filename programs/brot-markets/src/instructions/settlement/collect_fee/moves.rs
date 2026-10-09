@@ -41,5 +41,6 @@ pub fn empty_rent() -> Result<u64, ProgramError> {
 /// The fee vault is the program's `["fee_vault"]` PDA at its canonical bump (`PdaMismatch` otherwise).
 /// Used where no config is passed (`close_campaign`); the config's stored bump is checked elsewhere.
 pub fn fee_vault_is_canonical(fee_vault: &AccountView, program_id: &Address) -> ProgramResult {
+    checks::owned_by(fee_vault, program_id)?;
     checks::canonical_pda(fee_vault, &[FEE_VAULT_SEED], program_id).map(|_| ())
 }

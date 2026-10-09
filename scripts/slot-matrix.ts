@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as prettier from "prettier";
 
-import { DISTINCT, GAP, SPEC, strangerError, swapError, TYPES, typeOf, type Slot } from "./slot-matrix-spec";
+import { DISTINCT, GAP, overrideOf, SPEC, strangerError, swapError, TYPES, typeOf, type Slot } from "./slot-matrix-spec";
 
 const ROOT = join(fileURLToPath(import.meta.url), "..", "..");
 export const IDL_PATH = join(ROOT, "packages/sdk/src/idl/brot_markets.json");
@@ -57,10 +57,10 @@ export async function buildMatrix() {
     for (const i of writable) {
       const stranger = strangerError(slotOf(i));
       if (stranger === "accept") accepted++;
-      else push({ ...at(i), cat: "stranger", expect: stranger });
+      else push({ ...at(i), cat: "stranger", expect: overrideOf(`${ix.name}|stranger|${acc[i].name}`, stranger) });
       for (const src of TYPES) {
         if (typeOf(slotOf(i)) === src) continue;
-        push({ ...at(i), cat: "type", src, expect: swapError(slotOf(i), src) });
+        push({ ...at(i), cat: "type", src, expect: overrideOf(`${ix.name}|type|${acc[i].name}|${src}`, swapError(slotOf(i), src)) });
       }
     }
     // Every writable pair: the later slot (j) is given the earlier slot's (a) account.
@@ -73,7 +73,7 @@ export async function buildMatrix() {
           : named
             ? "DuplicateAccount"
             : swapError(slotOf(j), typeOf(slotOf(a)));
-        push({ ...at(j), cat: "alias", with: a, expect });
+        push({ ...at(j), cat: "alias", with: a, expect: overrideOf(`${ix.name}|alias|${acc[j].name}|with${a}`, expect) });
       }
     }
   }

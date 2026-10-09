@@ -18,7 +18,6 @@ use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 
 use crate::{
     checks,
-    constants::VAULT_SEED,
     error::BrotError,
     events::{self, FeeCollected},
     instructions::no_args,
@@ -46,13 +45,7 @@ pub fn collect_fee(
     if stored.fee_collected != 0 {
         return Err(BrotError::FeeAlreadyCollected.into());
     }
-    let key_bytes: &[u8] = key.as_ref();
-    checks::pda(
-        vault,
-        &[VAULT_SEED, key_bytes],
-        stored.vault_bump,
-        program_id,
-    )?;
+    checks::vault_of(vault, &key, stored.vault_bump, program_id)?;
     moves::fee_vault_is_canonical(fee_vault, program_id)?;
     checks::paying_vault(vault, program_id, &[&*fee_vault])?;
 
