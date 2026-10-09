@@ -1,10 +1,12 @@
 # Brot Markets — Technical Plan
 
-**Version:** 0.1.0 · **Status:** written on 2026-10-08 at the founder's request ("faca o plano de implementacao. todo em
-ingles"), from the architecture proposal 0.4 the founder approved that day ("sim para todos") and from BP v0.0.4;
-awaiting the founder's review · **Date:** 2026-10-08 · **Supersedes:** v0.0.1 of 2026-10-05, written in Portuguese,
-approved by the founder ("docs aprovados, podemos dar início"). Its last text, with §8.1, is in git history at commit
-`2089b81` (`git show 2089b81:docs/technical/TECHNICAL-PLAN.md`); tag `sprint-01` holds it before §8.1 was added
+**Version:** 0.1.1 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
+todo em ingles") from the architecture proposal 0.4 the founder approved that day ("sim para todos") and from BP
+v0.0.4, merged into `main` with PR #35 on 2026-10-08; v0.1.1 aligns it with what Sprint 02 built and measured
+(`docs/sprints/sprint-02-pot-core.md`, "TP to align") · **Date:** 2026-10-08 · **Supersedes:** v0.0.1 of 2026-10-05,
+written in Portuguese, approved by the founder ("docs aprovados, podemos dar início"). Its last text, with §8.1, is in
+git history at commit `2089b81` (`git show 2089b81:docs/technical/TECHNICAL-PLAN.md`), the last commit that changed it;
+`0b40554`, the `main` before v0.1.0, holds the same text; tag `sprint-01` holds it before §8.1 was added
 
 **Sources.** The architecture proposal 0.4 (`docs/technical/SYSTEM-ARCHITECTURE-PROPOSAL.md`), the primary source; TP
 v0.0.1, the base design the proposal builds on; BP v0.0.4 (`docs/business/BUSINESS-PLAN.md` and its four parts); the
@@ -20,7 +22,8 @@ founder reads the summary below and section 14.2.
 **Labels.**
 - **[F]** fact read in a file (the path is given) or measured on-chain.
 - **[FD]** founder decision: D-a to D-t and P-1 to P-5 of 2026-10-08, earlier decisions the BP keeps, and the answers
-  carried over from v0.0.1 §14.2 (Q1 to Q12, except Q8, which is open inside D4). Not reopened here.
+  carried over from v0.0.1 §14.2 (Q1 to Q12, except Q8, which is open inside D4). Since v0.1.1 also D6 and C44 as
+  Sprint 02 built them, which the founder took as decided in PR #35 (§14.2). Not reopened here.
 - **[DP]** decision of this plan, kept from v0.0.1 or from the approved proposal.
 - **[NEW]** new in v0.1.0 and in neither source. Each one carries its reason.
 - **[Q]** needs the founder (§14.2). **[AC]** to verify (§14.4). **[INF]** inference.
@@ -81,8 +84,9 @@ you approved with v0.0.1 still hold where SOL did not change them (§14.2).
 code and documents in one pull request, per its table), **D7** (option b: a price campaign whose Pyth feed went stale
 before the deadline is voided as `StaleFeed`, not resolved NO) and **D8** (option a: a design pass for the creation
 screen in Sprint -1, at web and phone widths, and a site slot after Sprint 11, which is Sprint 19) are read as approved
-with your "sim para todos" of 2026-10-08. This plan says so only here. If you meant otherwise for any of the three, say
-so: D6 changes the identifiers before Sprint 02 writes them, D7 the price reader in Sprint 03, and D8 Sprints -1 and 19.
+with your "sim para todos" of 2026-10-08. This plan says so only here. If you meant otherwise for D7 or D8, say so: D7
+changes the price reader in Sprint 03, and D8 Sprints -1 and 19. D6 is built, and you took it as decided in PR #35
+(§14.2).
 
 **What changed from v0.0.1.** USDC is gone: vaults hold SOL and pay wallets directly (§3.4.4, §3.4.5). Pinocchio
 replaces Anchor, so every account check the framework made is now written by hand, in one module, with a test per check
@@ -107,16 +111,16 @@ What the repository pins today stays, unless a decision of 2026-10-08 changes it
 
 | Layer | Choice and version | Status |
 |---|---|---|
-| Program framework | `pinocchio` 0.11.x (0.11.2, published 2026-06-09) [E72]; `pinocchio-system` for System Program CPIs, at the matching version **[AC]** | **[FD]** D-o |
-| Program toolchain | Rust 1.89.0 (`rust-toolchain.toml`); Solana CLI 3.1.10 with `cargo build-sbf` (`ci.yml:18`). Pinocchio 0.11 is built with both on the first day of Sprint 02 **[AC]** | **[F]**; build command **[DP]** |
+| Program framework | `pinocchio` 0.11.x (0.11.2, published 2026-06-09) [E72]; `pinocchio-system` 0.6.1 for System Program CPIs, pinned `=0.6.1` with `pinocchio` `=0.11.2`, the matching pair (0.6.1 asks for `pinocchio` 0.11) **[F]** (`programs/brot-markets/Cargo.toml`) | **[FD]** D-o |
+| Program toolchain | Rust 1.89.0 (`rust-toolchain.toml`); Solana CLI 3.1.10 with `cargo build-sbf` (`ci.yml:18`). Pinocchio 0.11 built with both on the first day of Sprint 02, locally and in CI (C14) **[F]** | **[F]**; build command **[DP]** |
 | Program lints | Clippy denies `arithmetic_side_effects`, `cast_possible_truncation` and `cast_sign_loss` in the crate; `overflow-checks = true` in release | **[F]** `programs/brot-markets/Cargo.toml`, root `Cargo.toml` |
 | Account checks | One `checks` module: owner, signer, writable, tag, PDA, length, account creation and closing; one negative test per check | **[DP]** proposal §2.1, T24 |
-| Events | Hand-written self-CPI, or `sol_log_data` first (T4) [E48] | **[DP]** |
-| IDL | Shank attributes and CLI, pinned after the Sprint 02 spike **[AC]** [E81] | **[DP]** T9 |
-| Client generation | `codama` 1.11.0; `@codama/nodes-from-anchor` 1.5.6 (reads Shank's IDL format **[AC]**); `@codama/renderers-js` 2.5.0 (needs Kit ≥ 8.3, renders events) [E50]. Fallback: hand-written codecs with a byte-for-byte test against the Rust serializer | **[DP]** T9 spike in 02, decision in 05 |
+| Events | Hand-written self-CPI from Sprint 02 (T4): one event round-tripped in npm `litesvm` 1.5.0 on day one **[F]**. Every instruction ends with the `event_authority` and `program` accounts (§3.4.14) [E48] | **[DP]** |
+| IDL | `shank` 0.4.9 attributes and `shank-cli` 0.4.9, exact pins; `bun run idl` refuses another CLI version **[F]** (`programs/brot-markets/Cargo.toml`, `ci.yml`) [E81]. shank-cli reads errors only from an enum that derives `thiserror::Error`, hence `thiserror` 2.0.21; the `shank` crate is not `no_std`, so the program links `std` **[F]** (Sprint 02) | **[DP]** T9 |
+| Client generation | `codama` 1.11.0; `@codama/nodes-from-anchor` 1.5.6 (reads Shank's IDL **[F]**, Sprint 02 spike; that IDL carries no events and no PDA seeds); `@codama/renderers-js` 2.5.0 (needs Kit ≥ 8.3, renders events) [E50]. Fallback: hand-written codecs with a byte-for-byte test against the Rust serializer | **[DP]** T9: spike done in 02 (the generated client is committed in `packages/sdk/src/idl/generated`, not exported); the decision stays Sprint 05's |
 | Price data | The hand-written `PriceUpdateV2` reader, upgraded receiver (`rec2HH…`) only, no Pyth crate; also used for SOL/USD at opening | **[F]** `readers/price_touch.rs`; SOL/USD **[DP]** |
 | Epoch stake | The `sol_get_epoch_stake` syscall, through `solana-epoch-stake =3.0.0` or a Pinocchio binding **[AC]** in Sprint 02 | **[F]** pin in `programs/pred-provable/Cargo.toml:31` |
-| Rust tests | `litesvm` crate 0.17.0 (`set_epoch_stake` since 0.15.0 **[AC]**); `mollusk-svm` 0.16.0 for the `checks` module [E49] | **[DP]** |
+| Rust tests | `mollusk-svm` 0.14.0 for the `checks` module **[F]** (`programs/brot-markets/Cargo.toml`): 0.15 and 0.16 build on Agave 4.3, whose crates declare Rust 1.97.1, above the pinned 1.89. The `litesvm` crate 0.17 resolves the same Agave 4.3, so Sprint 03 uses the newest version that builds under 1.89 (0.16 **[AC]**) or records a Rust bump first; `set_epoch_stake` since 0.15.0 **[AC]** [E49] | **[DP]**; Mollusk **[F]** |
 | Integration tests | Surfpool 1.6.0, binary checked by SHA-256 [E49] | **[DP]** Sprint 03 (carried from Sprint 01) |
 | TypeScript tests | `@solana/kit` ~8.3.0 today; 8.4.0 once a frozen install and the typecheck pass (8.4.0 first shipped with unpublished sub-packages); `litesvm` (npm) 1.5.0; `@solana/kit-plugin-litesvm` 0.19.0 | **[F]** `package.json`, `CLAUDE.md`; the bump **[DP]** Sprint 05 |
 | Off-chain runtime | Bun 1.4.2, exact version, binary checksum verified at deploy; services on `Bun.serve`, no web framework; `zod` 4.x the one schema library | **[FD]** D-p; zod **[DP]** |
@@ -129,7 +133,7 @@ What the repository pins today stays, unless a decision of 2026-10-08 changes it
 | Android app | Expo (custom development build); React Native; `@wallet-ui/react-native-kit` 4.3.0 or the MWA protocol packages 2.3.0 / 0.4.0; `dapp-store-cli` 1.0.1; `solana-mobile` CLI 0.5.0, all in `mobile/package.json` [E2][E23] | **[FD]** D-n; versions pinned in Sprint 20 |
 | Web end-to-end | Playwright, pinned in Sprint 11 | **[DP]** |
 | Ops | `cloudflared` 2026.9.3 | **[F]** `knowledge-base/tecnologia/servidor-e-dominio.md` |
-| Package registry | `bun.lock` moved from `registry.npmmirror.com` to npmjs.org at the opening of Sprint 02, before the Codama spike adds npm packages (T15) | **[DP]** Sprint 02 |
+| Package registry | `bun.lock` moved from `registry.npmmirror.com` to npmjs.org at the opening of Sprint 02, before the Codama spike adds npm packages (T15); a root `bunfig.toml` pins the registry | **[F]** commit `7d770ce` |
 | Verifiable build | `solana-verify`, pinned before mainnet | **[DP]** v0.0.1 §1; Sprint 16 |
 | Removed | `anchor-lang`, `anchor-spl` and their `event-cpi` feature; the Anchor CLI; `@anchor-lang/core`; SPL Token CPIs for the pot; the USDC mint constant; every AI package and the inherited chat route | **[FD]** D-o, D-a, D-q |
 | Not used | Quasar; gill (needs Kit ^5); Seeker Connect 0.1.x; Redis or Valkey; PostgreSQL | **[DP]** §2 |
@@ -152,7 +156,7 @@ enters only after its spike or check passes (§14.4).
 | Service framework | `Bun.serve` and zod 4 **[DP]** | NestJS, Express; gRPC between services | A handful of read-only routes and loopback calls (proposal §2.1) |
 | Store | SQLite, WAL, rebuildable **[DP]** | PostgreSQL; Redis or Valkey; no database | The neighbour's PostgreSQL is off-limits and Docker is not available to the `brot` user [F] (`knowledge-base/tecnologia/servidor-e-dominio.md`). Without a database there is no ranking, history or "my entries" after payout (v0.0.1 §3.5). Triggers to revisit: proposal §2.12 |
 | IDL and client | Shank attributes and a Codama-rendered Kit client **[DP]** (T9) | Anchor's IDL (gone with Anchor); hand-written codecs as the default | Pinocchio generates no IDL. A documented path exists [E81] but is untried here, hence a half-day spike in Sprint 02, the decision in Sprint 05, and hand-written codecs as the fallback |
-| Events | Self-CPI **[DP]** (T4) | `sol_log_data` only | Self-CPI events survive log truncation [E48]. Forgery is handled by the decoder (§3.4.14). If one event does not round-trip in LiteSVM on day one of Sprint 02, `sol_log_data` comes first and self-CPI by Sprint 04 |
+| Events | Self-CPI **[DP]** (T4) | `sol_log_data` only | Self-CPI events survive log truncation [E48]. Forgery is handled by the decoder (§3.4.14). T4 was settled on day one of Sprint 02: one event round-tripped in npm `litesvm` 1.5.0 **[F]**, so self-CPI is used from Sprint 02. The cost: two more accounts at the end of every instruction, `event_authority` and `program` |
 | Where the program is built | GitHub CI only **[DP]** (v0.0.1 §12) | A container on the shared server; a developer machine | The server is shared and has no compiler; CI already builds with the pinned versions and publishes the binary with its SHA-256 [F] (Sprint 00) |
 | **AI** | None **[FD]** (D-q) | An assistant, an MCP server, a model in creation or resolution | The founder's decision ("there is not ai in the scope"). Outcomes come from typed reads of on-chain accounts only (K-02). The chat route inherited in `app/app/api/chat/` leaves in Sprint 09 |
 | Mobile | A React Native and Expo app on the Solana dApp Store **[FD]** (D-n) | A web-shell APK; a Trusted Web Activity | D-n asks for a front of its own. Solana Mobile withdrew the TWA guide because Local Network Access breaks Mobile Wallet Adapter there [E6] (§3.7) |
@@ -239,10 +243,13 @@ check fails when they drift.
 
 ### 3.2 Repository layout
 
-**[DP] The program keeps its folder and address and is rewritten on Pinocchio.** `programs/brot-markets` has no
-instruction yet [F]; Sprint 02 replaces its Anchor skeleton. `programs/pred-provable` stays frozen until its readers
-are ported, and leaves the workspace at the latest in Sprint 03, taking `anchor build`, the Anchor CLI install and its
-clippy line with it (proposal §2.1). A ported file keeps the MIT authorship notice [F] (`LICENSE`).
+**[DP] The program keeps its folder and address and is rewritten on Pinocchio.** Sprint 02 replaced its Anchor skeleton
+with ten instructions [F] (`programs/brot-markets/src/instructions/`, `entrypoint.rs`): `admin_initialize_config`,
+`admin_set_team`, `admin_set_creation_params`, `admin_set_fee_recipient`, `admin_transfer_admin`, `admin_accept_admin`,
+`team_pause_entries`, `admin_resume_entries`, `user_open_campaign` (price kind only) and `user_join_campaign`; the
+entrypoint also dispatches the event instruction of the self-CPI (§3.4.14). `programs/pred-provable` stays frozen until
+its readers are ported, and leaves the workspace at the latest in Sprint 03, taking `anchor build`, the Anchor CLI
+install and its clippy line with it (proposal §2.1). A ported file keeps the MIT authorship notice [F] (`LICENSE`).
 
 ```
 programs/brot-markets/src/
@@ -337,8 +344,9 @@ Every rule below says where it is enforced and which sprint builds it.
 Every account the program owns starts with a one-byte **tag** (its type) and a layout version, has a fixed
 little-endian layout read in place by offset, and is checked for exact length before any field is read (§3.4.17).
 Enums are tagged by position: new variants are appended, never reordered [F] (`CLAUDE.md`). Every struct ends with a
-`_reserved` area for later sprints (referral, sealed entry). Real sizes and rent are measured and recorded in Sprint 02
-(T19); rent costs 5,080 lamports per byte including the 128-byte account overhead [F] [E55].
+`_reserved` area for later sprints (referral, sealed entry). Rent costs 5,080 lamports per byte including the 128-byte
+account overhead [F] [E55]. Sprint 02 measured the sizes (T19, C17) [F]: `GlobalConfig` 400 bytes (2,682,240 lamports
+of rent on devnet and mainnet), `Campaign` 512 (3,251,200), `Entry` 100 (1,158,240), each data-less vault 650,240.
 
 | Account | Seeds | Holds | Rent paid by | Sprint |
 |---|---|---|---|---|
@@ -367,18 +375,25 @@ lamports (v0.0.1 §3.4.1, D-a): the proposal keeps `collect_fee` and `sweep_fees
 | `opening_fee_usd` | u64 | 500, whole US$ | D-b |
 | `opening_prize_bps` | u16 | 9,000: the prize share of a paid opening | D-b |
 | `min_entry_lamports` | u64 | 10,000,000 (0.01 SOL) | P-5 |
-| `max_open_campaigns`, `open_campaigns` | u32, u32 | The valve on the services' work, and its counter (T18). The value is set in Sprint 02 **[AC]** | proposal §2.4.1 |
+| `max_open_campaigns`, `open_campaigns` | u32, u32 | The valve on the services' work, and its counter (T18). 1,000 on devnet **[AC]**, code ceiling 10,000 (C43) | proposal §2.4.1 |
 | `sol_usd_feed_id` | [u8; 32] | `ef0d8b6f…c280b56d`, the SOL/USD feed [F] (`knowledge-base/tecnologia/pyth-leitor-de-preco.md` §1.2) | D-f |
-| `max_price_age` | u32, seconds | SOL/USD freshness at opening; at least 90 on devnet, where the sponsored account updated every 62 to 64 s [F] (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`) | proposal §2.4.5 |
+| `max_price_age` | u32, seconds | SOL/USD freshness at opening. Code range 1 to 300 s; set to 120 s at initialization on devnet **[AC]** (C43), where the sponsored account updated every 62 to 64 s [F] (`knowledge-base/tecnologia/pyth-leitor-de-preco.md`) | proposal §2.4.5 |
 | `max_price_conf_bps` | u16 | SOL/USD confidence bound at opening; 50 (0.5%) as for price campaigns **[INF]** | proposal §2.4.5 |
 | `campaign_max_age` | u32, seconds | The join-time price age copied into each new price campaign; never below 30 s (§3.4.8) **[INF]** | Q4 answer |
 | `bump`, `_reserved` | | | |
 
-v0.0.1's question counter is dropped: campaign ids are chosen by the client (T17) **[INF]**. Every creation parameter
-is changed by `admin_set_creation_params`, under its code ceiling, for future campaigns only; an open campaign keeps the
-values it copied. Ceilings for the parameters without one in the sources (`opening_prize_bps`,
-`one_sided_fee_bps`, `min_entry_lamports`, `max_open_campaigns`, the price bounds) are written in Sprint 02 **[AC]**.
-Changing the US$500 itself is a founder decision; the program only enforces the ceilings.
+v0.0.1's question counter is dropped: campaign ids are chosen by the client (T17) **[INF]**. Every creation parameter is
+changed by `admin_set_creation_params`, under its code ceiling. What the code does today [F]
+(`instructions/campaigns/open_campaign/record.rs`, `instructions/entries/join_campaign.rs`,
+`tests/brot/admin-params.test.ts`): the fee, the one-sided fee, the creator share and the join-time price age are copied
+into each campaign at opening, and the opening fee, the prize share, the valve and the SOL/USD feed and bounds act only
+at opening, so a change to any of them reaches future campaigns only. `min_entry_lamports` is the exception: it is not
+copied, `user_join_campaign` reads it from `GlobalConfig` at every join, and a change reaches open campaigns too.
+Whether an open campaign keeps the minimum it opened with, as the published terms promise, is **[Q]** (§14.2); the code
+keeps the live read until the founder answers. Ceilings for the parameters without one in the sources
+(`opening_prize_bps`, `one_sided_fee_bps`, `min_entry_lamports`, `max_open_campaigns`, the price bounds) were written in
+Sprint 02 **[AC]** (C43, §14.4). Changing the US$500 itself is a founder decision; the program only enforces the
+ceilings.
 
 **`Campaign`.**
 
@@ -410,8 +425,11 @@ receiver `rec2HHDDnjLfj4kE7VyEtFA1HPGQLK33259532cRyHp` and push-oracle program
 `pyt2F414BA6dPttK6RddPZUdHfapoBN24GL5wbrPCou` [F]; `PRICE_UPDATE_V2_LEN` 134 [F]; minimum and maximum duration 3 and 90
 days (D-k); the review window, 6 hours (P1 §4.5); the entry close, 5% of the duration clamped to 24 hours and 7 days (P1
 §3.6); the proof delay, 60 s (Q4); the join-age floor, 30 s (Q4 answer); contest stage 1, one hour, and stage 2, 48
-hours (P1 §4.5). The window and the minimum duration have devnet-only drill values behind a `drill` cargo feature
-(T12); the `mainnet` feature refuses `drill`, and CI checks the mainnet artifact's values.
+hours (P1 §4.5). Three of them have devnet-only drill values behind a `drill` cargo feature (T12) **[AC]**: the
+minimum duration, 15 minutes; the review window, 10 minutes; and the entry close, at least 5 minutes before the
+deadline instead of 24 hours, without which a 15-minute campaign would close before it opens [F] (`constants.rs`). The
+`mainnet` feature refuses `drill` at compile time, and a CI step checks that the `mainnet` build carries the real
+values (§10).
 
 #### 3.4.2 States and transitions
 
@@ -466,7 +484,7 @@ the same effect whoever calls it: the second keeper to arrive gets an error and 
 |---|---|---|---|---|
 | `admin_initialize_config` | The program's upgrade authority, read from its ProgramData account | Creates `GlobalConfig` and the fee vault, once. Publishing and initialising happen in the same session (v0.0.1 §7) | `ConfigInitialized` | 02 |
 | `admin_set_team` | `admin` | Up to five team keys | `ConfigChanged` | 02 |
-| `admin_set_creation_params` | `admin` | `opening_fee_usd`, `opening_prize_bps`, `fee_bps`, `one_sided_fee_bps`, `creator_share_bps`, `max_open_campaigns`, `min_entry_lamports`, the SOL/USD feed and bounds, `campaign_max_age`: each under its ceiling, for future campaigns only | `ConfigChanged` | 02 |
+| `admin_set_creation_params` | `admin` | `opening_fee_usd`, `opening_prize_bps`, `fee_bps`, `one_sided_fee_bps`, `creator_share_bps`, `max_open_campaigns`, `min_entry_lamports`, the SOL/USD feed and bounds, `campaign_max_age`: each under its ceiling, for future campaigns only, except `min_entry_lamports`, which the join reads live (§3.4.1, **[Q]**) | `ConfigChanged` | 02 |
 | `admin_set_fee_recipient` | `admin` | The destination of `sweep_fees` (D6's `fee_recipient`; v0.0.1's fee-owner setter) | `ConfigChanged` | 02 |
 | `admin_transfer_admin`, `admin_accept_admin` | `admin`; then the new admin | Two-step change of `admin` | `ConfigChanged` | 02 |
 | `team_pause_entries` | A team key | `Normal` → `EntriesHalted` only | `EntriesPaused` | 02 |
@@ -502,14 +520,17 @@ pattern. `FeesSwept` is new: v0.0.1's event list had none for `sweep_fees`, and 
 
 **`user_open_campaign` accounts.** The signer (writable; it pays), `GlobalConfig`, the new `Campaign` and vault
 (writable), the metric account (read-only; for the price kind, the sponsored price account of `feed_id`), the SOL/USD
-sponsored account (read-only, when paying), the System Program. Arguments: `id` (u64); `params` (the kind with its own
-fields, `target`, `threshold`, `deadline_at`); `opening_usd` (absent for a team key that adds no prize); `max_lamports`
-(the most the signer accepts to pay, T25). No argument is a string (D-j). The zod shape is in Appendix B.
+sponsored account (read-only; the program reads it only on a paid opening), the System Program, then `event_authority`
+and the program, which end every instruction's accounts for the self-CPI event (§3.4.14) [F]. Arguments: `id` (u64);
+`params` (the kind with its own fields, `target`, `threshold`, `deadline_at`); `opening_usd` (0 for a team key that adds
+no prize: the argument layout is fixed [F]); `max_lamports` (the most the signer accepts to pay, T25). No argument is a
+string (D-j). The zod shape is in Appendix B.
 
 **`user_join_campaign` accounts.** The baker (signer, writable), `GlobalConfig` (read-only: pause and minimum),
 `Campaign` and vault (writable), the `Entry` (writable; created on the first join), the metric account the reader needs
-for `outcome_knowable` (for price, the sponsored account of the feed), the System Program. Joins write no account shared
-across campaigns: with no cap account, campaigns share no writable account on the join path (proposal §1.3)
+for `outcome_knowable` (for price, the sponsored account of the feed), the System Program, then `event_authority` and
+the program [F]. The minimum is read live at every join, not copied at opening (§3.4.1, **[Q]**). Joins write no account
+shared across campaigns: with no cap account, campaigns share no writable account on the join path (proposal §1.3)
 **[INF]**. Openings and finalizations write `GlobalConfig.open_campaigns`; they are rare next to joins **[INF]**.
 
 #### 3.4.4 The vault (native SOL, bookkept)
@@ -676,8 +697,8 @@ sponsored account, and older ones are skipped; only the push oracle writes it [E
   count, and the campaign's rule says so. The founder answered the Sprint 01 question: the join-time maximum age is a
   per-campaign parameter with a 30 s floor ("mesmo que ajustassemos por pergunta, mesmo assim 30s é um bom tmepo
   minimo"). The creator does not choose it: it is copied from `GlobalConfig.campaign_max_age`, so a creator cannot open
-  a campaign with a lax freshness rule **[INF]**. On devnet, where the sponsored account updated every 62 to 64 s, it
-  is at least 90 s [F].
+  a campaign with a lax freshness rule **[INF]**. On devnet, where the sponsored account updated every 62 to 64 s [F],
+  the initialization sets it to 120 s **[AC]** (C43; code range 30 to 300 s).
 - **Why the split.** If any valid account counted at join, a baker could pick the oldest admitted price; if proofs came
   only from the sponsored account, anyone with a key could push a newer update and erase a short touch before the
   keeper resolves (proposal §2.5). Open creation lets anyone open a short price campaign built around that race, so
@@ -704,7 +725,7 @@ sponsored account, and older ones are skipped; only the push oracle writes it [E
 | Resume; creation parameters; team keys; fee recipient; decide a contest | `admin` | Code ceilings; an open campaign's fee and share never change |
 | Move the fees | Anyone calls `sweep_fees` | Only to `GlobalConfig.fee_recipient` |
 | Resolve, settle, pay | Any wallet (Q1, B) | Destination and amount fixed by the program |
-| Move a baker's entry | Nobody | No instruction exists, and no emergency withdrawal |
+| Move a baker's entry | Nobody, by instruction | No instruction exists, and no emergency withdrawal. The upgrade key can still replace the program, and with it any rule (Sprint 02 review, finding 9); the powers page says so (BR-41) |
 
 - **The pause never blocks payout or refunds** [FD] (P4 §4.5). `operating_level` is read by `user_join_campaign`,
   `user_open_campaign` and, if kept, `sponsor_add_prize` (I10′). A test runs every other instruction with the pause on.
@@ -728,10 +749,11 @@ members" to "any wallet, inside the rules" (P1 §4.1; P4 §4.3): "regra fora da 
 - **A team key opens free**, for the team or for a launch partner, with `creator_share_bps = 0` and no prize unless the
   team adds one (D-c, D-d, P-3, P1 §3.8). The team key stays the `creator`; `content/partners.json` links a partner's
   campaign to the partner for its 72-hour highlight and report. There is no `partner` argument (P-3). How a team key
-  adds a prize is not written in the sources; the working reading is that it passes `opening_usd` and pays like any
-  wallet, at the same 90/10, keeping a zero share **[AC]** Sprint 02.
-- **Rent** of the two new accounts, about 0.0035 SOL at the measured rate **[INF]**, is paid by the signer and returns
-  to it at close (T19 measures it).
+  adds a prize is not written in the sources. Sprint 02 built the reading that it passes `opening_usd` and pays like
+  any wallet, at least `opening_fee_usd`, at the same 90/10, keeping a zero share, and the founder took it as decided
+  with PR #35 **[FD]** (C44, §14.2).
+- **Rent** of the two new accounts is paid by the signer and returns to it at close: 3,901,440 lamports on devnet
+  (`Campaign` 3,251,200 plus vault 650,240, at 5,080 lamports per byte, read on 2026-10-08) [F] (T19).
 - **The creator receives 1% of the entries** in a two-sided outcome (§3.4.16), never on a void, in a one-sided pot or
   on the prize (P-1).
 - **A stale SOL/USD feed** blocks paid openings until it updates; team keys still open, and an alert fires (proposal
@@ -860,10 +882,14 @@ I3′ and I10′ replace v0.0.1's I3 and I10, which named instructions that no l
 
 One event per instruction, plus `CampaignFinalized` on the three paths that finalize without `finalize_campaign`
 (`team_confirm_result`, `team_void_campaign`, `admin_decide_contest`). Events are defined in `events.rs` and emitted by
-a hand-written self-CPI signed by an event-authority PDA (T4: if one event does not round-trip in LiteSVM on day one of
-Sprint 02, `sol_log_data` first and self-CPI by Sprint 04). Every campaign-scoped event carries `campaign` and a
-contiguous `seq` (from `Campaign.event_seq`), so the indexer notices a gap; admin and config events carry none (X0.4).
-Amounts are lamports.
+a hand-written self-CPI signed by an event-authority PDA, from Sprint 02 (T4: one event round-tripped in npm `litesvm`
+1.5.0 on day one, whose `innerInstructions()` shows it at stack height 2) [F]. The authority is the PDA
+`["__event_authority"]`, `E5CgcK5xs4YfPdBLnCWTAA9ruStbTqLjEzTxtVaRuB5o`, bump 254, a constant checked by a test [F]
+(`constants.rs`). Every instruction ends its accounts with `event_authority` and the program: the runtime finds the
+callee of a CPI among the caller's accounts, and without the program the self-CPI fails with `MissingAccount` [F]. The
+inner instruction carries `[0xFF, event discriminator, event bytes]`; `0xFF` is reserved for it, and the program writes
+no log lines. Every campaign-scoped event carries `campaign` and a contiguous `seq` (from `Campaign.event_seq`), so the
+indexer notices a gap; admin and config events carry none (X0.4). Amounts are lamports.
 
 | Event | Emitted by | Carries | Sprint |
 |---|---|---|---|
@@ -887,9 +913,9 @@ v0.0.1's proposal, cancellation and four sponsorship events are gone; the old na
 
 **Decoder rules [DP]** (proposal §2.3; they hold for the SDK, the indexer and every other consumer):
 1. Skip any transaction whose `meta.err` is not null (`app/lib/history.ts` already does [F]).
-2. Accept an event only from an inner instruction of this program signed by its event-authority PDA (with
-   `sol_log_data`: only `Program data:` lines inside this program's own invocation frame). Today's decoder accepts
-   every `Program data:` line [F] (`app/lib/market.ts:202-209`), a bug in its own right.
+2. Accept an event only from an inner instruction of this program signed by its event-authority PDA; never from a
+   log line, which anyone's program can write. Today's decoder accepts every `Program data:` line [F]
+   (`app/lib/market.ts:202-209`), a bug in its own right.
 3. Resolve inner-instruction account indexes through `loadedAddresses`, so settle batches using lookup tables decode.
 4. Key each event by `(signature, top-level instruction index, inner instruction index)`: one top-level instruction,
    such as a multisig execute, can hold two of our CPIs.
@@ -951,7 +977,7 @@ opening_fee_lamports  = opening_paid_lamports − prize_lamports
 | Mode | When | Brot's fee | Creator share | Each entry receives |
 |---|---|---|---|---|
 | `Split` | `Yes` or `No`, both sides above zero | `fee = ceil(P × fee_bps ÷ 10,000)` | Below | Winners: `floor(winning_entry × distributable ÷ V)`; losers: zero |
-| `OneSided` | `Yes` or `No`, one side at zero | Per entry `ceil(entry × one_sided_fee_bps ÷ 10,000)`, zero for `first_baker` | 0 (P-1) | `entry − its fee`, whatever the outcome; the prize returns to whoever opened (P-4) |
+| `OneSided` | `Yes` or `No`, one side at zero | Per entry `ceil(entry × one_sided_fee_bps ÷ 10,000)`, zero for `first_baker`: the wallet whose first join landed in an empty pot, its later joins included, since the exemption sits on its one `Entry` (Q3; Sprint 02 review, finding 26) [F] (`join_campaign.rs`, `math/fees.rs`) | 0 (P-1) | `entry − its fee`, whatever the outcome; the prize returns to whoever opened (P-4) |
 | `Refund` | `Void` | 0 | 0 (P-1) | Its whole amount; the prize returns; the 10% follows `VoidReason` (P-4) |
 
 **The creator share (`creator_share(V, P, R, fee, bps) → (from_pot, from_fee)`) [FD]** (D-g, read as P-2; P1 §3.4):
@@ -1030,17 +1056,20 @@ tested with Mollusk; the instructions with LiteSVM [DP] (proposal §2.1, §2.2).
 | `init` | `checks::create_pda_account`: System Program `create_account` signed with the PDA's seeds; if the address was funded in advance, top it up, `allocate` and `assign` instead. Never re-initialise an account that carries a tag | A vault, `Campaign` or `Entry` address funded before creation; a second initialisation | 02 |
 | `close` | `checks::close_account`: move all lamports out, zero the data, reassign to the System Program | Revival in the same transaction | 04 |
 | `has_one` and constraints | Explicit comparisons with stored keys (`Entry.campaign`, `Entry.baker`, `Campaign.creator`, `GlobalConfig.fee_recipient`, `metric_account`) | An `Entry` of another campaign; a wrong recipient | 02, 04 |
-| `Program<System>` | `checks::program_id` on the System Program before any CPI | A look-alike program | 02 |
-| `emit_cpi!` | The self-CPI event helper, signed by the event-authority PDA | The decoder tests (§3.4.14) | 02 or 04 (T4) |
+| `Program<System>` | `checks::system_program` on the System Program slot before any CPI | A look-alike program | 02 |
+| `emit_cpi!` | `checks::event_accounts` and the self-CPI event helper, signed by the event-authority PDA (T4) | A wrong event authority; a wrong program slot; the decoder tests (§3.4.14) | 02; decoder 05 |
 | The upgrade-authority constraint at initialisation | `checks::upgrade_authority`: read the program's ProgramData and compare its authority with the signer | Initialisation by any other key | 02 |
 | — | `checks::top_level`: stack height at transaction level, for `resolve_campaign` [F] (the frozen program's guard) | A call through CPI | 03 |
 | Duplicate-account protection **[NEW]** | `checks::distinct` wherever two slots must be different accounts (the vault and the fee vault; a recipient and the vault; two entries) | The same account in both slots | 02 |
 | The IDL | Shank attributes on accounts and instructions; Codama renders the client (T9) | The CI IDL check | 02, 05 |
-| Error codes | One enum mapped to custom program errors; each refusal has its own code | X0.7: one test per refusal | 02 |
+| Error codes | One enum mapped to custom program errors; each refusal has its own code. Codes start at 6000 and are contiguous to 6070 after Sprint 02; a new code is appended from 6071, never reusing a number [F] (`error.rs`) | X0.7: one test per refusal | 02 |
 
 **[NEW] `checks::distinct`.** Neither source lists it. The reason: lamport moves between accounts the program owns are
 plain balance edits, so the same account passed in two slots (a recipient that is also the vault) can corrupt the
-bookkeeping silently. Pinocchio does not reject it by itself **[AC]**; the check costs one comparison per pair.
+bookkeeping silently. C42, answered in Sprint 02: neither Pinocchio nor the runtime refuses one account in two slots
+[F]. Today a PDA check also catches it: without `distinct`, the config passed as the fee vault of
+`admin_initialize_config` fails the fee vault's PDA check (X0.9). From Sprint 04, with payouts, `distinct` is the only
+guard. The check costs one comparison per pair.
 
 The checks module is the newest risk in the program, because each forgotten check is a vulnerability (P4 §1.4); the
 audit scope in Sprint 17 names it.
@@ -1608,8 +1637,8 @@ exposes only `GET /healthz` and `POST /restart` (TP v0.0.1 §5, §12) **[DP]**.
 **On-chain** **[DP]** (TP v0.0.1 §6; proposal §2.1).
 
 - One error code per point of failure, with a test; each refusal of `user_open_campaign` has its own code (X0.7).
-- One event per instruction, plus `CampaignFinalized` where an instruction also finalizes, emitted by self-CPI or
-  `sol_log_data` (T4); campaign-scoped events carry the campaign and its `seq` (§3.4.14).
+- One event per instruction, plus `CampaignFinalized` where an instruction also finalizes, emitted by self-CPI (T4);
+  campaign-scoped events carry the campaign and its `seq` (§3.4.14).
 - Amounts in lamports as `u64`; arithmetic in `u128` with checked math; fees rounded up and payouts down (§3.4.16).
 - Entries move from the baker's wallet to the vault by System Program CPI, signed by the baker; payouts debit the
   program-owned vault and credit the recipient's wallet directly, with no token account (§3.4.4–§3.4.5).
@@ -1681,8 +1710,8 @@ timestamp and body; the keeper checks the signature and the timestamp (TP v0.0.1
 | A forged or foreign event misleads the indexer | The four decoder rules of §3.4.14 |
 | Site taken over, asking for malicious signatures | Hardware second factor on the domain, Cloudflare, the server and GitHub; branch protection when available; pinned versions; the deterministic summary before every signature (A-3) |
 | A process reads another's secrets on the shared server | Per-unit identities, `LoadCredential=`, `ProtectProc=invisible`, `ProcSubset=pid` (§12; T13). Today the tunnel token sits in the environment of a unit running as `brot` **[F]** (`services/landing/deploy/brot-tunnel.service`) |
-| A leaked team key | Every team-key opening is an alert; the multisig removes the key; `max_open_campaigns` bounds the burst (proposal §2.10 item 8) |
-| Supply chain | `bun.lock` moved to npmjs.org at the opening of Sprint 02, before any new npm dependency (T15); exact versions for program crates and mobile tools; Bun's install-script block kept, with no `trustedDependencies` entry added without review. Two entries exist today, `sharp` and `unrs-resolver` **[F]** (`package.json`), and are reviewed (C30 **[AC]**). A compromised `@solana/web3.js` release already happened once [E66] |
+| A leaked team key | Every team-key opening is an alert; the multisig removes the key; `max_open_campaigns` bounds the burst (proposal §2.10 item 8). The valve is shared, though: a leaked team key, or about US$50k of paid openings (1,000 of them at US$50 each once the prizes return to the opener, §3.4.10) **[INF]**, can hold it full for up to 90 days, the longest duration, and so stop every other opening (Sprint 02 review, finding 2). A separate budget for free openings, or voiding an empty `Open` campaign, waits for the founder **[Q]** (§14.2) |
+| Supply chain | `bun.lock` resolves from `registry.npmjs.org` since the opening of Sprint 02, before any new npm dependency (T15): a root `bunfig.toml` pins the registry whatever a developer's `~/.npmrc` says, and `bun install --frozen-lockfile` checks every tarball against the lockfile's sha512 **[F]** (commit `7d770ce`). Exact versions for program crates and mobile tools; Bun's install-script block kept, with no `trustedDependencies` entry added without review. The two that existed, `sharp` and `unrs-resolver`, were reviewed and removed in the same commit (C30) **[F]**. A compromised `@solana/web3.js` release already happened once [E66] |
 | Android signing keys | Build locally without keys, sign on an offline machine, keep the publisher wallet on hardware or offline (C37 **[AC]**), `*.keystore` and `*.jks` in the secret scan (C-17) |
 
 **Before mainnet.** The founder's criteria **[FD]** (P4 §3.4, with the cap removed by D-h) and what makes them
@@ -1715,7 +1744,7 @@ for Pinocchio and SOL, with the sprint that inherits each.
 | Build and publish the `mainnet` variant under its own name and check the cluster at deploy. With D-a there is no USDC address to store any more; the `mainnet` feature now only keeps the real review window and minimum duration (T12), and CI checks that the mainnet artifact carries the real values | Deploying the devnet variant, with drill constants, to mainnet | 16; the CI check from 02–04 |
 | Secret-scan patterns: base58 keys, URLs with credentials, hex secrets, binaries; now also `*.keystore` and `*.jks` | One of these formats enters the repository unseen | 16 (gitleaks, per `docs/technical/registry-pick.md`); the Android patterns in 20 |
 | `CODEOWNERS` for `.github/`, the scan and the hooks; protection of `main` | A direct push to `main` skips review. Branch protection is not available on a private repository of the free plan **[F]** | 16 |
-| `bun.lock` resolved through `registry.npmmirror.com` | A third party's availability in every build; hashes never compared with the official registry | 02, at its opening, before the Codama spike adds npm packages (T15). This meets both of the proposal's wordings, "before 05" and "before any new dependency" |
+| `bun.lock` resolved through `registry.npmmirror.com` | A third party's availability in every build; hashes never compared with the official registry | Done at the opening of Sprint 02, before the Codama spike (T15, commit `7d770ce`): `bunfig.toml` pins `registry.npmjs.org`, and a fresh-cache frozen install fetched 705 tarballs from it, every sha512 matching **[F]** |
 | The upstream chat route, with a server key and a bypassable limit | With a key set, a free general-purpose model paid by the company | 09: removed (D-q); until then, no key anywhere |
 | Download the artifact by run id; keep the program-address keypair outside `target/` | Deploying the wrong artifact, or losing the program address | 05 |
 | A backup copy of the program-address keypair, today only in `target/deploy/` | Losing the address of the deployed program | The founder, before Sprint 05 |
@@ -1808,7 +1837,7 @@ stated purpose and then deleted. The founder chooses before Sprint 09 closes; th
 
 | Layer | What is tested | Tool | Sprint |
 |---|---|---|---|
-| `checks` module | One negative case per check of §3.4.17 (owner, signer, writable, tag, PDA, length, creation, closing, program id, upgrade authority, top level, `distinct`), each failing when its check is removed (T24, X0.9) | `cargo test` with `mollusk-svm` 0.16.0 | 02 |
+| `checks` module | One negative case per check of §3.4.17 (owner, signer, writable, tag, PDA, length, creation, closing, System Program id, upgrade authority, event accounts, top level, `distinct`), each failing when its check is removed (T24, X0.9) | `cargo test` with `mollusk-svm` 0.14.0 on the SBF binary (0.15 and later need a Rust above 1.89, §1); LiteSVM for each slot | 02 |
 | Readers | Each against real captured accounts; truncated or malformed accounts give an error, never a panic | `cargo test` with `tests/fixtures/*.bin` **[F]**, checked by SHA-256 in `tests/fixtures/index.json` | 01, 03 |
 | Money math | Fee, one-sided fee, creator share (both readings, the literal one as a test oracle), opening conversion, schedule and rounding as pure functions; the BP's examples as cases | `cargo test`; `bun test` in `packages/sdk` | 02–04 |
 | Math vectors | At least 10,000 vectors generated by the Rust pure functions, replayed against the TypeScript mirror, one-sided, void and opening conversion included (X0.3) | `bun test`; the app's test runner in 20 | 04–05 |
@@ -1829,10 +1858,10 @@ stated purpose and then deleted. The founder chooses before Sprint 09 closes; th
 | App end to end | Join, open, retry guards, report link | An Android UI test tool, chosen in 20 (C34 **[AC]**) | 21 |
 | Real devices | Seed Vault Wallet approval, App Links, process death while signing, payout arrival | A Seeker and one other Android phone, by checklist (devices under D4) | 20; 21 |
 
-**Only on a real cluster:** the `StakeAtLeast` YES path, unless LiteSVM 0.17's `set_epoch_stake` covers it (C20
-**[AC]**); Pyth freshness on devnet, SOL/USD included; an epoch boundary; the real settle batch size; the RPC
-providers' limits; Alpenglow's timing changes. They run by hand before each deploy. The program is built before
-testing, because the tests load the binary **[F]** (`CLAUDE.md`).
+**Only on a real cluster:** the `StakeAtLeast` YES path, unless the `litesvm` crate's `set_epoch_stake` covers it in a
+version that builds under Rust 1.89 (§1; C20 **[AC]**); Pyth freshness on devnet, SOL/USD included; an epoch boundary;
+the real settle batch size; the RPC providers' limits; Alpenglow's timing changes. They run by hand before each deploy.
+The program is built before testing, because the tests load the binary **[F]** (`CLAUDE.md`).
 
 ```bash
 export PATH="$HOME/.bun/bin:$PATH"
@@ -1854,25 +1883,32 @@ A `-t` filter that matches no test exits non-zero, so a forgotten test fails lou
 
 ## 10. CI/CD
 
-**Today** **[F]** (`.github/workflows/ci.yml`). Three jobs on Ubuntu 24.04, with actions pinned by hash. *Program:*
-Rust from `rust-toolchain.toml`, Solana CLI 3.1.10, the Anchor CLI 1.1.2 prebuilt binary, Bun from `package.json`;
-`cargo fmt --check` and Prettier; `cargo metadata --locked`; `anchor build`; an `idl-preview-<run id>` artifact; the
-stale-IDL check through `git status`; three clippy lines; `tsc --noEmit`; `bun run test`; `bun run test:rust`; and,
-on `main` only, a `programs-<sha>` artifact with `SHA256SUMS`. *Repo:* `codemap.js --check`, `os-self-test.js`, the
-landing's tests and the secret scan over the branch. *App:* lint and build.
+**Today** **[F]** (`.github/workflows/ci.yml`, after Sprint 02). Three jobs on Ubuntu 24.04, with actions pinned by
+hash. *Program:* Rust from `rust-toolchain.toml`, Solana CLI 3.1.10, the Anchor CLI 1.1.2 prebuilt binary (for
+`pred-provable` only), shank-cli 0.4.9 installed with `cargo install --locked` and cached by version, Bun from
+`package.json`; `bun install --frozen-lockfile`; `cargo fmt --check` and Prettier; `cargo metadata --locked`;
+`bun run build:program` after deleting the committed outputs, which runs `anchor build` for `pred-provable`,
+`cargo build-sbf` for brot-markets, its Shank IDL and Codama client (`bun run idl`) and the app's IDL sync; an
+`idl-preview-<run id>` artifact; the stale-IDL check through `git status` over `target/idl`, `target/types`,
+`app/lib/idl` and `packages/sdk/src/idl`, the Codama client included; three clippy lines, the last one for brot-markets
+with the `mainnet` feature; `tsc --noEmit`; `bun run test`; `bun run test:rust`, whose Mollusk checks run the
+brot-markets binary; the step "Mainnet build carries the real values",
+`cargo test --locked -p brot-markets --features no-entrypoint,mainnet` (T12); and, on `main` only, a `programs-<sha>`
+artifact with both binaries, the IDLs and `SHA256SUMS`. *Repo:* `codemap.js --check`, `os-self-test.js`, the landing's
+tests and the secret scan over the branch. *App:* lint and build.
 
 **What changes** **[DP]** (proposal §2.1, §2.3, §6).
 
 | Step | Change | Sprint |
 |---|---|---|
-| Build | `cargo build-sbf` replaces `anchor build`; then the Shank IDL and the Codama client (or the hand-written codecs, T9), synced into `packages/sdk` | 02 (spike), 03 (Anchor leaves), 05 (T9) |
+| Build | `cargo build-sbf` replaces `anchor build`; then the Shank IDL and the Codama client (or the hand-written codecs, T9), synced into `packages/sdk` | 02 (done for brot-markets, with the spike's client), 03 (Anchor leaves), 05 (T9) |
 | Toolchain | The Anchor CLI install and the `pred-provable` clippy line leave with the frozen program | 03 |
-| IDL check | Over the Shank output and the generated client, instead of `target/idl`, `target/types` and `app/lib/idl` | 02–05 |
-| New checks | `dependency-cruiser` read/tx rule; the Rust-generated math vectors; JSON Schema of `content/`; a check that the mainnet artifact carries the real window and duration (T12) | 02–05 |
+| IDL check | Over the Shank output and the generated client, instead of `target/idl`, `target/types` and `app/lib/idl` | 02 (added beside the old paths), 03–05 |
+| New checks | `dependency-cruiser` read/tx rule; the Rust-generated math vectors; JSON Schema of `content/`; a check that the mainnet build carries the real window and duration (T12, done in 02) | 02–05 |
 | Mobile bundle | A job that bundles both SDK halves for Android and runs the math vectors in the app's runner | 05 |
 | Services | `bun test services/` | 06–08 |
 | Web | The Playwright smoke at desktop and Android widths | 11 |
-| Lockfile | `bun install --frozen-lockfile` resolving from npmjs.org (T15) | 02, at its opening, before the Codama spike |
+| Lockfile | `bun install --frozen-lockfile` resolving from npmjs.org (T15) | 02, at its opening, before the Codama spike (done, `7d770ce`) |
 | Release integrity | `solana-verify build`, provenance attestation, pinned SHA-256 of downloaded tools, gitleaks or equivalent | 16 |
 | Landing | Its tests leave with it | 09 |
 
@@ -2017,7 +2053,7 @@ The business risks are in P4 §7. These are the plan's. Severities marked "(P4 �
 | Both keepers stop; a true YES turns NO at the deadline | Critical (P4 §7) | Different providers; the watchdog; any wallet may trigger (Q1); alerts; the window | Void in the window; everyone is refunded |
 | The Brazilian rule (MP 1.394) reaches the pot, the store or the partners | Critical (P4 §7) | L0 before real money; the country switch | Turn the switch on; payouts continue |
 | Whoever controls the Pyth receiver's upgrade and governance controls what the reader reads; on mainnet the controller was not checked (Sprint 01) | Low on devnet, high on mainnet | One receiver and an exact size, so a format change breaks the read instead of misreading; a watch on the receiver's upgrade slot and configuration (07); who controls it, before mainnet (16) | Pause price campaigns' entries; void in the window |
-| The sponsored feed lapses or goes stale (62–64 s cadence measured on devnet) | Medium | `max_age` per campaign with a 30 s floor, at least 90 s on devnet; `StaleFeed` voids instead of NO (D7); the keyed keeper | Entries in that price campaign are refused; paid openings fail until it updates (team keys still open); stale campaigns void |
+| The sponsored feed lapses or goes stale (62–64 s cadence measured on devnet) | Medium | `max_age` per campaign with a 30 s floor, 120 s on devnet **[AC]**; `StaleFeed` voids instead of NO (D7); the keyed keeper | Entries in that price campaign are refused; paid openings fail until it updates (team keys still open); stale campaigns void |
 | A short touch erased before the keeper resolves, without a Hermes key | Medium | The keyed keeper posts its own proofs; mainnet price campaigns wait for D4 | The team voids in the window if the service failed |
 | `StakeAtLeast` has never returned YES in a test | High | A YES verified on devnet before such campaigns open (check row 1, §3.4.10) | The kind stays closed; the other four continue |
 | The same code has the same bug in both keepers | High | The window; the second read through another provider | Void in the window |
@@ -2025,7 +2061,7 @@ The business risks are in P4 §7. These are the plan's. Severities marked "(P4 �
 | One CTO on call, with no backup | High (P4 §5.1) | Two inboxes before mainnet; the incident page names a substitute | Campaigns still resolve and pay without people |
 | A process reads another's secrets on the shared server | High **[INF]** | Per-unit identities and credentials (§12) | Rotate the tunnel token and the keeper keys |
 | Site taken over, asking for malicious signatures | High (P4 §7) | Hardware second factor on domain, hosting and repository; CSP; the deterministic summary | Take it down; the vaults are unaffected |
-| A leaked team key opens free campaigns | Medium | An alert per team opening; removal through the multisig; `max_open_campaigns` | Remove the key; unlist |
+| A leaked team key opens free campaigns, and can hold `max_open_campaigns` full for up to 90 days (§7) | Medium | An alert per team opening; removal through the multisig; `max_open_campaigns`; a separate free-opening budget if the founder chooses it **[Q]** | Remove the key; unlist |
 | `/rpc` abuse drains the paid quota | Medium | Its own account with a hard limit; the weighted bucket; Cloudflare rate rules | The relay degrades; the keeper is unaffected |
 | Bun 1.4 is the first release of its Rust port | Medium (P4 §7) | Exact version, checksum, soak test; SQLite behind an adapter; Node 22 for the site | Payouts are delayed; the money stays in the vault; D-p returns to the founder |
 | Next.js under Bun | Medium | The Sprint 09 staging test | Node 22 |
@@ -2049,7 +2085,7 @@ The business risks are in P4 §7. These are the plan's. Severities marked "(P4 �
 | `docs/product/DESIGN-DIRECTION.md` | The creation screen (D8); layouts below 700 px for the web and the app (D-n); which dark is official; the default theme; the site language (L-01) | Sprint -1; the app's pass in 20 |
 | `CLAUDE.md` | Product description (campaigns, the US$500 opening, the 1%, SOL only) and vocabulary; `build:program` with `cargo build-sbf`, Shank and Codama; the Anchor CLI line, the Anchor gotchas and the USDC notes leave with `pred-provable`; the `solana-epoch-stake` pin per §14.4; `init-if-needed` restated as "never re-initialise an account that carries a tag"; Bun 1.4.2; the in-app chat section leaves in Sprint 09 | 02; 03; 09 |
 | `.github/workflows/ci.yml` | §10 | 02–05; 16 |
-| `services/landing/public/` | Title, meta tags, H1, lead, form label and privacy text per D-m (`index.html:6-12, 59-66`, `privacy.html:50`); `/pitch2`'s 3.5% fee line, against the decided 10% of the losing side (`services/landing/pitch2-notes.md`); the deck's mainnet slide ("After an audit, a multisig and a cap") | Next, per the BP index ("O que vem depois", item 3) |
+| `services/landing/public/` | The D6 copy is done (commit `c82be03`, Sprint 02): title, meta tags, H1, lead, form label, example and principles, and the privacy line, per D-m; the footer's legal notice (L0's text) and the founder's deck at `/pitch` were left as they were. Still to do: `/pitch2`'s 3.5% fee line, against the decided 10% of the losing side (`services/landing/pitch2-notes.md`); the deck's mainnet slide ("After an audit, a multisig and a cap") | D6 copy: done in 02. The rest: next, per the BP index ("O que vem depois", item 3) |
 | `app/.env.example`, root `.env.example` | The OpenRouter variables leave (D-q). The root file is the operating system's generic template (AI, Supabase, Stripe keys) **[F]**; it does not describe this project | 09 |
 | `package.json` (root) | Name, description and `deploy:devnet` still describe the frozen program **[F]** | 03, when `pred-provable` leaves |
 
@@ -2083,6 +2119,12 @@ The business risks are in P4 §7. These are the plan's. Severities marked "(P4 �
 | Program key | A backup copy of the program-address keypair (Sprint 00) | Before Sprint 05 | 05 |
 | Weekly referral payout | Who signs the weekly referral payout, sent from the operations wallet (§3.4.11; roadmap v0.0.1 §5), and the treasury rule it pays from | Ties to P-7 and the multisig signers | 14 |
 | Demand-test thresholds | The thresholds of the three demand tests (P2 §2.5). Tests 1 and 2 have v0.0.2's; test 3 has none | Write them before the devnet beta | 13 |
+| Price feeds | Which Pyth feeds may a price campaign name, and does D-i (no accepted-account list) also cover feed ids? Today any Full feed of the upgraded receiver passes, so "price of a large asset" (§3.4.8) and "out of any creator's reach" (§3.4.10) are not enforced (Sprint 02 review, finding 1) | Built meanwhile: any feed. The security reviewer proposes an append-only compiled list of feeds and reads it as reopening D-i; the devil's advocate reads D-i as being about metric accounts only. Sprint 03 first checks whether any payer can create an unsponsored feed's shard-0 account | 03 |
+| Free-opening budget | A budget of its own for free team openings, or voiding an empty `Open` campaign, so that a leaked team key, or about US$50k of paid openings net of the returned prizes, cannot hold `max_open_campaigns` full for up to 90 days (§7; Sprint 02 review, finding 2) | Built meanwhile: one valve for all openings, 1,000 on devnet **[AC]**; every team-key opening alerts (§3.5) | 03 |
+| Opening price | Charge the opening at `p − conf`, the low edge of the Pyth price, instead of the mid price `p`? The creator posts the update the program reads, so with the mid price it can pick the highest of the last seconds, up to about 1% at the 300 s ceiling (Sprint 02 review, finding 14) | Built meanwhile: the mid price, rounded toward Brot, refused above `max_price_conf_bps`. The independent reviewer proposes `p − conf` | 03 |
+| SOL/USD feed id | Make the SOL/USD feed id a compiled constant instead of a `GlobalConfig` field? Today the program checks it only non-zero, so an admin's typo changes what every paid opening reads (Sprint 02 review, finding 5) | Built meanwhile: the config field, set at initialization and by `admin_set_creation_params` | 03 |
+| Minimum entry | Does an open campaign keep the `min_entry_lamports` it opened with? v0.1.0 said so in §3.4.1 and implied the live read in §3.4.3; the published terms promise "An open market keeps the rules it opened with" (`/terms`) | Built meanwhile: the join reads the minimum from `GlobalConfig` at every join, so a change reaches open campaigns (§3.4.1) | Any change of the minimum on devnet |
+| Q12 (confirmation) | Do both Lucas and Ronaldo hold team keys ("tem eu e o Ronaldo")? | The plan reads it so; `admin_set_team` takes up to five keys | 05 (deploy day) |
 
 **Design gaps still with the founder** (Product Brief v0.0.1 gaps, still the live handles).
 
@@ -2112,7 +2154,8 @@ L-08 (test USDC), L-17 (the suggestions page) and L-19 (the cap's value) fall aw
 | D-f | The price source for the US$500 | Pyth SOL/USD read on-chain; CoinGecko for display **[FD]** |
 | Bun for the site | The site on Bun too? (BP index, P4 §2.2) | Yes if the Sprint 09 staging test passes, Node 22 otherwise: decided with the approval of proposal 0.4 (D-p) **[FD]**, as BP v0.0.4 now records (P4 §2.2, §8; the index) |
 | D3 | The Android app's scope | Decided by D-n; timing per §3.7 **[FD]** |
-| D6 | Vocabulary in code and copy | (a): copy first, then code and docs in one PR, per the rename table, before Sprint 02 writes identifiers (see the Summary) |
+| D6 | Vocabulary in code and copy | (a): copy first, then code and docs in one PR, per the rename table, before Sprint 02 writes identifiers. Built that way in Sprint 02: the landing copy in `c82be03`, then the identifiers and documents in PR #30. The founder took what Sprint 02 built as decided, in PR #35 (2026-10-08): "as decisões ali são minhas e do Ronaldo, e escritas por ele. O que foi feito lá no código dele a gente traz como nova realidade [...] pode tocar ficha e continuar" **[FD]** |
+| C44 | How a team key adds a prize to its own campaign | As Sprint 02 built it: the team key passes `opening_usd` and pays like any wallet, at least `opening_fee_usd`, at 90/10, keeping `creator_share_bps = 0`; taken as decided in PR #35, with the words quoted for D6 **[FD]** |
 | D7 | A price campaign whose feed went stale | (b): `StaleFeed` voids it (see the Summary) |
 | D8 | The creation screen | (a): a design pass in Sprint -1 at web and phone widths, and a site slot after Sprint 11, which is Sprint 19 (see the Summary) |
 | D1, D2 | The fee base; the AI scope | Closed: 10% of the losing side (BP v0.0.3); no AI (D-q) |
@@ -2136,7 +2179,7 @@ L-08 (test USDC), L-17 (the suggestions page) and L-19 (the cap's value) fall aw
 | T1 | Bring `upstream/main` by merge or only the readers | Done: merged in Sprint 00 (`8e8b2ec`) **[F]** | 00 |
 | T2 + Q4 | Price-reader numbers and accounts | Reader hand-written (Sprint 01). The split of §3.4.8: sponsored PDA on entry, any Full account for the proof, 60 s proof window, per-campaign maximum age with a 30 s floor, slot bounds | 03 |
 | T3 | Settle batch size and per-instruction compute, with self-CPI events | Measure | 04 |
-| T4 | Events: hand-written self-CPI or `sol_log_data` | Self-CPI from Sprint 02 if one event round-trips in LiteSVM on day one; else `sol_log_data` first and self-CPI by Sprint 04 | 02 or 04 |
+| T4 | Events: hand-written self-CPI or `sol_log_data` | Decided: self-CPI from Sprint 02, because one event round-tripped in npm `litesvm` 1.5.0 on day one **[F]**; `event_authority` and the program end every instruction's accounts (§3.4.14) | 02 (done) |
 | T5 | RPC providers and the email service | §3.5's accounts table, within D4; the email provider still open | 06; 07 |
 | T6 | Running the tunnel without Docker or root | Done 2026-10-05: a single `cloudflared` binary in `/srv/brot-markets/bin`, as a systemd unit **[F]**. Whether the visitor's country reaches the server is C9 | 06 |
 | T7 | The multisig product, with a public wait for upgrades | Choose and test | 16 |
@@ -2165,6 +2208,27 @@ The plan depends on these statements, and none was verified when it was written.
 verification items; C-01 to C-17, with a hyphen, are the compliance items of §3.7. Closed since v0.0.1: C1, C2, C3
 and the Surfpool version (Sprint 01); C6 is replaced by T19.
 
+Closed in Sprint 02 (`docs/sprints/sprint-02-pot-core.md`; the two session logs of 2026-10-08):
+- **C14.** `pinocchio` 0.11.2 with `pinocchio-system` 0.6.1, the matching pair, builds with `cargo build-sbf` under Rust
+  1.89.0 and Solana CLI 3.1.10 (platform-tools v1.52), locally on day one and in CI (run 37849347333) [F].
+- **C15.** Codama works on Shank's IDL: `@codama/nodes-from-anchor` reads it, and the rendered client round-trips in
+  LiteSVM. The IDL carries no events and no PDA seeds; the client is committed but not exported, and the SDK decision
+  stays Sprint 05's (T9) [F].
+- **C16.** npm `litesvm` 1.5.0 exposes inner instructions: `innerInstructions()` shows the self-CPI event at stack
+  height 2 [F].
+- **C17.** `Campaign` is 512 bytes, 3,251,200 lamports of rent on devnet and mainnet; `GlobalConfig` 400 (2,682,240),
+  `Entry` 100 (1,158,240), each data-less vault 650,240, at the 5,080 lamports per byte of the Rent sysvar, read on
+  2026-10-08; LiteSVM and Mollusk use 6,960. An opening costs its creator 3,901,440 lamports of rent [F] (T19).
+- **C30.** `sharp` 0.35.5 has no install script, and `unrs-resolver` 1.12.2's postinstall only re-fetches a binary bun
+  already installs: both `trustedDependencies` entries were removed (`7d770ce`) [F].
+- **C42.** Neither Pinocchio nor the runtime refuses one account in two slots; `checks::distinct` stays, and from
+  Sprint 04 it is the only guard (§3.4.17) [F].
+- **C43.** Written as the team's choices **[AC]** (`session-log/2026-10-08-sprint-02-abertura-t-items-e-contrato.md`):
+  `max_open_campaigns` 1,000 on devnet, ceiling 10,000; `one_sided_fee_bps` up to 100; `opening_prize_bps` 9,000 to
+  10,000; `opening_fee_usd` 1 to 5,000; `min_entry_lamports` 1,000,000 to 1,000,000,000; `max_price_age` 1 to 300 s,
+  120 on devnet; `max_price_conf_bps` 1 to 100, 50 on devnet; `campaign_max_age` 30 to 300 s, 120 on devnet.
+- **C44.** Decided as Sprint 02 built it **[FD]** (§14.2).
+
 | # | What to verify | Sprint |
 |---|---|---|
 | C4 | Whether Surfpool simulates epoch stake | 03 |
@@ -2176,23 +2240,18 @@ and the Surfpool version (Sprint 01); C6 is replaced by T19.
 | C11 | A multisig with a public wait for program upgrades | 16 |
 | C12 | `unix_timestamp` drift on devnet over time (one sample in Sprint 01: 1 s ahead) | 03 |
 | C13 | What Cloudflare logs about visitors | 13; 17 |
-| C14 | Pinocchio 0.11 under `cargo build-sbf` with Rust 1.89 and Solana CLI 3.1.10; the matching `pinocchio-system` | 02, day one |
-| C15 | Shank and Codama on a Pinocchio program; whether `@codama/nodes-from-anchor` reads Shank's IDL | 02 |
-| C16 | npm `litesvm` exposing inner instructions, for event tests | 02, day one |
-| C17 | The real size of `Campaign` and its rent (with T19) | 02 |
 | C18 | How the program reaches `sol_get_epoch_stake`: through `solana-epoch-stake =3.0.0` or a Pinocchio binding, and whether the pin is still needed once Anchor leaves (§1) | 02–03 |
 | C19 | SOL/USD freshness on devnet, and which sponsored feeds stay fresh there | 02; 03 |
-| C20 | LiteSVM 0.17's `set_epoch_stake` for the `StakeAtLeast` YES path | 03 |
+| C20 | The `litesvm` crate's `set_epoch_stake` for the `StakeAtLeast` YES path, in a version that builds under Rust 1.89 (0.16 is the candidate; 0.17 resolves Agave 4.3, §1) | 03 |
 | C21 | The push oracle only moves forward on the live cluster | 03 |
 | C22 | The Lighthouse program id, for the relay's allowlist | 03 |
 | C23 | Alpenglow on devnet: dates, the Clock timestamp, slot length | Before 03 retests deadlines |
-| C24 | Self-CPI compute cost inside a settle batch | 04 |
+| C24 | Self-CPI compute cost inside a settle batch (one event alone, measured in LiteSVM in Sprint 02: 70 CU for the event frame plus 946 the runtime charges the caller per CPI) | 04 |
 | C25 | The SDK under React Native: polyfills, `bigint`, Metro (with C33) | 05 |
 | C26 | `@solana/kit` 8.4.0 with a frozen install and typecheck; `CLAUDE.md` pins `~8.3.0` because 8.4.0 shipped with unpublished sub-packages | 05 |
 | C27 | The Cloudflare notification for unknown tunnel connectors | 06 |
 | C28 | The Cloudflare Cache Rule needed to cache `/api/v1` JSON | 08 |
 | C29 | The `next/og` route convention in this Next.js version | 10 |
-| C30 | The two existing `trustedDependencies` entries (`sharp`, `unrs-resolver`) | Before 05 |
 | C31 | The waitlist record's fields named the same in code, README, privacy page and §8.1 | 09 |
 | C32 | Per-method RPC credit weights; CoinGecko's commercial terms | 08 |
 | C33 | Which Kit calls the app makes, and what the Hermes engine provides | 20 |
@@ -2204,9 +2263,6 @@ and the Surfpool version (Sprint 01); C6 is replaced by T19.
 | C39 | Helius and other plan limits, which are per plan [E40] | 06; 18 |
 | C40 | Who controls the Pyth receiver's upgrade authority on mainnet | 16 |
 | C41 | The SDK package name: `@brot/sdk` in this plan, `@brot-markets/sdk` in `packages/sdk/package.json` **[F]** (§3.2) | 05 |
-| C42 | Whether Pinocchio or the runtime refuses the same account in two slots; `checks::distinct` assumes not (§3.4.17) | 02 |
-| C43 | The value of `max_open_campaigns`, and code ceilings for the creation parameters that have none in the sources (§3.4.1) | 02 |
-| C44 | How a team key adds a prize to its own campaign: the working reading is that it pays `opening_usd` like any wallet and keeps a zero share (§3.4.10) | 02 |
 | C45 | The minimum distance between the target and the current value, per kind (check 3, §3.4.10) | 03 |
 | C46 | How the epoch kinds meet the 3-to-90-day rule and the entry close, with no `deadline_at` in the proposal's sketch (§3.4.8) | 03 |
 | C47 | The exact `StaleFeed` test, and the slot bound on a YES proof (§3.4.6, §3.4.8) | 03 |
@@ -2400,7 +2456,7 @@ without one. [E82] and [E83] are added by this plan, from sources TP v0.0.1 reli
 - [E46] Yellowstone gRPC v16 and the TypeScript client 8.0.0: github.com/rpcpool/yellowstone-grpc; npm `@triton-one/yellowstone-grpc`
 - [E47] Carbon 2.0 (Rust): github.com/sevenlabs-hq/carbon; Substreams for Solana: thegraph.com/docs/en/substreams/developing/solana/
 - [E48] Self-CPI events and log truncation, as documented for Anchor's `emit_cpi!`: anchor-lang.com/docs/features/events
-- [E49] Surfpool 1.6.0: solana.com/docs/tools/surfpool; LiteSVM 0.17.0 (`set_epoch_stake` since 0.15.0): crates.io/crates/litesvm; Mollusk 0.16.0: crates.io/crates/mollusk-svm
+- [E49] Surfpool 1.6.0: solana.com/docs/tools/surfpool; LiteSVM 0.17.0 (`set_epoch_stake` since 0.15.0): crates.io/crates/litesvm; Mollusk 0.16.0: crates.io/crates/mollusk-svm. Read again on 2026-10-08 in Sprint 02: `mollusk-svm` 0.15 and 0.16 and the `litesvm` crate 0.17.0 resolve Agave 4.3 (`solana-program-runtime` 4.3.0), which declares Rust 1.97.1; `mollusk-svm` 0.14.0 resolves Agave 4.1.2 and is the one used (`session-log/2026-10-08-sprint-02-abertura-t-items-e-contrato.md`)
 - [E50] `@solana/kit` 8.4.0 (2026-09-28): github.com/anza-xyz/kit/releases; `@solana/web3.js` 1.99.0 and 3.0.1; gill 0.14.0; Codama 1.11.0 and its packages (registry pages)
 - [E51] Pyth receiver and push oracle source: github.com/pyth-network/pyth-crosschain/tree/main/target_chains/solana; push feeds (55 s / 0.5%): docs.pyth.network/price-feeds/core/push-feeds/solana; Hermes key: docs.pyth.network/price-feeds/core/upgrade/preparing; plans (Free has no API; Starter US$500 a month): app.pyth.com/plans; verification status: verify.osec.io
 - [E52] Bun 1.4: bun.com/blog/bun-v1.4 (read 2026-10-08: 1.4.0 on 2026-08-19 or 20, the Rust port; 19 port regressions, all fixed); Bun in Rust: bun.com/blog/bun-in-rust; 1.4 breaking changes: github.com/oven-sh/bun/issues/28792; secondary: Appwrite, Wikipedia, alternativeto, The Pragmatic Engineer; Prisma's blog (Bun in production): prisma.io/blog/bun-rust-rewrite-prisma-compute; Node releases: nodejs.org/en/about/previous-releases
