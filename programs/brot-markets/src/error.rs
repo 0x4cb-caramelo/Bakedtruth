@@ -282,6 +282,14 @@ pub enum BrotError {
     PrizeAlreadySettled = 6126,
     #[error("The account still holds lamports, so it cannot be closed")]
     AccountNotEmpty = 6127,
+    #[error("The rent payer is not the one stored at opening")]
+    RentPayerNotStored = 6128,
+    #[error("The fee recipient is not the one GlobalConfig stores")]
+    FeeRecipientMismatch = 6129,
+    #[error(
+        "The running total of one-sided fees is not recorded, so the fee cannot be collected yet"
+    )]
+    OneSidedFeesNotRecorded = 6130,
     // Lane G (numbers from 6131).
     #[error("The sponsored price is within the join margin of the target")]
     JoinBufferRefused = 6131,
