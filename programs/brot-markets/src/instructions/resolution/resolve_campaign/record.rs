@@ -93,3 +93,19 @@ fn resolved_event(
         epoch: LeU64::new(time.epoch),
     }
 }
+
+/// Moves the cut-off back to an earlier valid YES proof (decision of 2026-10-09, closure review): only the publish
+/// time changes; the outcome and the review window stay as resolved. The caller checks that the proof is an earlier
+/// YES price result and that no tally has started. Returns the event the move leaves (the next `seq`).
+pub fn move_cutoff(
+    key: &Address,
+    campaign: &mut Campaign,
+    decision: &Decision,
+    time: &ChainTime,
+) -> Result<CampaignResolved, ProgramError> {
+    let seq = campaign.event_seq.get();
+    let next_seq = seq.checked_add(1).ok_or(BrotError::MathOverflow)?;
+    campaign.publish_time = LeI64::new(decision.reading.publish_time);
+    campaign.event_seq = LeU64::new(next_seq);
+    Ok(resolved_event(key, campaign, decision, time, seq))
+}

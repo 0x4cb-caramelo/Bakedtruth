@@ -145,6 +145,7 @@ export const BrotError = {
   EntryAlreadyTallied: 6135,
   FeedNotOnList: 6141,
   IllegalTransition: 6146,
+  CutoffNotMovable: 6147,
 } as const;
 
 export type BrotErrorName = keyof typeof BrotError;

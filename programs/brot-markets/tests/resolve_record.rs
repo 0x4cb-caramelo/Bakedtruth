@@ -140,7 +140,7 @@ type Slot = (Address, Address, Vec<u8>, bool);
 type Call = (Vec<u8>, Vec<Slot>);
 /// A change to a call, the campaign's bytes being `c.1[0].2`.
 type Tamper = fn(&mut Call);
-const NOT_OPEN: Tamper = |c| c.1[0].2[STATUS] = 1;
+const NOT_OPEN: Tamper = |c| c.1[0].2[STATUS] = Status::Settled as u8;
 const OTHER_METRIC: Tamper = |c| c.1[1].0 = key(9);
 const UNKNOWN_KIND: Tamper = |c| c.1[0].2[KIND] = 5;
 

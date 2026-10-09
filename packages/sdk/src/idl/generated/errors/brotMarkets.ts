@@ -272,6 +272,8 @@ export const BROT_MARKETS_ERROR__ENTRY_ALREADY_TALLIED = 0x17f7; // 6135
 export const BROT_MARKETS_ERROR__FEED_NOT_ON_LIST = 0x17fd; // 6141
 /** IllegalTransition: The transition is not in the table of TP 3.4.2 */
 export const BROT_MARKETS_ERROR__ILLEGAL_TRANSITION = 0x1802; // 6146
+/** CutoffNotMovable: The proof does not move the cut-off back: not earlier, not a YES price result, or a tally has started */
+export const BROT_MARKETS_ERROR__CUTOFF_NOT_MOVABLE = 0x1803; // 6147
 
 export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY
@@ -292,6 +294,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__CREATION_PARAMS_CHANGED
   | typeof BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING
   | typeof BROT_MARKETS_ERROR__CREATOR_SHARE_NOT_DUE
+  | typeof BROT_MARKETS_ERROR__CUTOFF_NOT_MOVABLE
   | typeof BROT_MARKETS_ERROR__DUPLICATE_ACCOUNT
   | typeof BROT_MARKETS_ERROR__DUPLICATE_TEAM_KEY
   | typeof BROT_MARKETS_ERROR__DURATION_TOO_LONG
@@ -425,6 +428,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__CREATION_PARAMS_CHANGED]: `The creation parameters changed since the client read them (\`expected_params_version\`)`,
     [BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING]: `\`creator_share_bps\` is above \`MAX_CREATOR_SHARE_BPS\``,
     [BROT_MARKETS_ERROR__CREATOR_SHARE_NOT_DUE]: `No creator share is due: team, one-sided, void or refund`,
+    [BROT_MARKETS_ERROR__CUTOFF_NOT_MOVABLE]: `The proof does not move the cut-off back: not earlier, not a YES price result, or a tally has started`,
     [BROT_MARKETS_ERROR__DUPLICATE_ACCOUNT]: `The same account was passed in two slots that must differ`,
     [BROT_MARKETS_ERROR__DUPLICATE_TEAM_KEY]: `The same team key appears twice`,
     [BROT_MARKETS_ERROR__DURATION_TOO_LONG]: `Row 5: the deadline is more than ninety days away`,

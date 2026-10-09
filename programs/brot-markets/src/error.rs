@@ -309,6 +309,8 @@ pub enum BrotError {
     // Lane shared (numbers from 6146).
     #[error("The transition is not in the table of TP 3.4.2")]
     IllegalTransition = 6146,
+    #[error("The proof does not move the cut-off back: not earlier, not a YES price result, or a tally has started")]
+    CutoffNotMovable = 6147,
     // New codes are appended here, from 6147, never reusing a number.
 }
 

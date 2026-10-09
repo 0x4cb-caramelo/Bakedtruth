@@ -29,7 +29,7 @@ use crate::{
     readers::{self, ChainTime, ReadContext, Resolution},
     state::{
         campaign::Campaign,
-        enums::{ReaderKind, Status},
+        enums::{Outcome, ReaderKind, Status},
     },
 };
 
@@ -50,13 +50,23 @@ pub fn resolve_campaign(
 
     let campaign_key = *campaign.address();
     let mut stored = Campaign::load_mut(campaign, program_id)?;
-    if stored.status != Status::Open as u8 {
+    let review = stored.status == Status::InReview as u8;
+    if !review && stored.status != Status::Open as u8 {
         return Err(BrotError::CampaignNotOpen.into());
     }
     if metric_account.address() != &stored.metric_account {
         return Err(BrotError::MetricAccountMismatch.into());
     }
     let kind = ReaderKind::try_from(stored.kind)?;
+    // A campaign already in review moves its cut-off only for an earlier YES price proof, before any tally starts
+    // (decision of 2026-10-09): every other re-proof is refused.
+    if review
+        && (kind != ReaderKind::PriceTouch
+            || stored.outcome != Outcome::Yes as u8
+            || stored.entries_untallied.get() != stored.entries_open.get())
+    {
+        return Err(BrotError::CutoffNotMovable.into());
+    }
 
     // The reader sees the campaign as stored; nothing is written until it has decided.
     let time = ChainTime::now()?;
@@ -72,7 +82,16 @@ pub fn resolve_campaign(
         Resolution::Decided(decision) => decision,
     };
 
-    let event = record::write(&campaign_key, &mut stored, &decision, &time)?;
+    let event = if review {
+        if decision.outcome != Outcome::Yes
+            || decision.reading.publish_time >= stored.publish_time.get()
+        {
+            return Err(BrotError::CutoffNotMovable.into());
+        }
+        record::move_cutoff(&campaign_key, &mut stored, &decision, &time)?
+    } else {
+        record::write(&campaign_key, &mut stored, &decision, &time)?
+    };
     drop(stored);
     events::emit(&event, event_authority, program, program_id)
 }
