@@ -97,5 +97,68 @@
     "slot": 507785675,
     "note": "Pyth PriceUpdateV2, SOL/USD, pre-upgrade receiver: same layout, an owner the reader rejects",
     "cluster": "devnet"
+  },
+  "pyth-sol-usd-mainnet": {
+    "address": "7AviUf9nL62mcxNbQGKm4nKDQnPjswo6c5MX4D57HmyE",
+    "owner": "rec2HHDDnjLfj4kE7VyEtFA1HPGQLK33259532cRyHp",
+    "length": 134,
+    "sha256": "59a0bcade556ba7b83bf858e4166d950a58ce30497fad3f4124731b4dc48736c",
+    "slot": 454743014,
+    "note": "Pyth PriceUpdateV2, SOL/USD, upgraded Core receiver, sponsored push feed",
+    "cluster": "mainnet"
+  },
+  "pyth-btc-usd-mainnet": {
+    "address": "APgzQGGdv2qCgBkX6aHVkrGePtBVDDg68GiqaM7rmtf5",
+    "owner": "rec2HHDDnjLfj4kE7VyEtFA1HPGQLK33259532cRyHp",
+    "length": 134,
+    "sha256": "5ad72a56f526960da37d4bae82325ab28aa310d9636a7a8a2613ccd0c9438771",
+    "slot": 454743018,
+    "note": "Pyth PriceUpdateV2, BTC/USD, upgraded Core receiver, sponsored push feed",
+    "cluster": "mainnet"
+  },
+  "mint-wif": {
+    "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+    "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "length": 82,
+    "sha256": "aade109e4cb32f505b725efff6068ba53ce0b35ab3a51661875c2db8460109ec",
+    "slot": 454743023,
+    "note": "SPL Token mint of WIF: both authorities revoked",
+    "cluster": "mainnet"
+  },
+  "mint-bonk": {
+    "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+    "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "length": 82,
+    "sha256": "a4faa530cc816a04a232f7fabbd2db0d773c4abce4a02729dc4ed5d3af889a7c",
+    "slot": 454743023,
+    "note": "SPL Token mint of BONK: both authorities revoked, supply near the u64 ceiling",
+    "cluster": "mainnet"
+  },
+  "mint-usdc": {
+    "address": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "length": 82,
+    "sha256": "c3d6afbb621f868498a874b498e7d1676f095a9774f812d01d96e0d274428754",
+    "slot": 454743023,
+    "note": "SPL Token mint of USDC: mint authority live, so the burn kind refuses it",
+    "cluster": "mainnet"
+  },
+  "mint-pyusd": {
+    "address": "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo",
+    "owner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+    "length": 866,
+    "sha256": "0c2e8478c890ffae1120a9369453cacac55d4497e424ece75472cda6a67fd617",
+    "slot": 454743023,
+    "note": "Token-2022 mint of PYUSD, with extensions: an owner the burn kind refuses",
+    "cluster": "mainnet"
+  },
+  "vote-mainnet-top": {
+    "address": "CcaHc2L43ZWjwCHART3oZoJvHLAe9hzT2DJNUpBzoTN1",
+    "owner": "Vote111111111111111111111111111111111111111",
+    "length": 3762,
+    "sha256": "a9bf48768105bf1dd2959d9026a082b540b8db66cccef5a8fdbbda986cc806a9",
+    "slot": 454743027,
+    "note": "Vote account with the most active stake on 2026-10-09, 3,762 bytes, version tag 3",
+    "cluster": "mainnet"
   }
 }

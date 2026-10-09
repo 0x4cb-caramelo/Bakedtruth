@@ -13,6 +13,7 @@ export * from "./adminSetCreationParams";
 export * from "./adminSetFeeRecipient";
 export * from "./adminSetTeam";
 export * from "./adminTransferAdmin";
+export * from "./resolveCampaign";
 export * from "./teamPauseEntries";
 export * from "./userJoinCampaign";
 export * from "./userOpenCampaign";

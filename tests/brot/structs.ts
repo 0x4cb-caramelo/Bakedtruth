@@ -1,8 +1,9 @@
 /**
  * Purpose: the program's structs as layouts: accounts (GlobalConfig, Campaign, Entry), instruction
  *          arguments and events, each in the field order of its Rust struct.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio); frozen at the sprint's opening with the program's contract
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio); Sprint 03 adds `epoch`, `params_version` and the opening's
+ *          `epoch` and `expected_params_version`, frozen at its opening
  */
 import type { Layout } from "./layouts";
 
@@ -33,7 +34,8 @@ export const GLOBAL_CONFIG: Layout = [
   ["fee_recipient", "pubkey"],
   ["params", { struct: CREATION_PARAMS }],
   ["open_campaigns", "u32"],
-  ["_reserved", { bytes: 64 }],
+  ["params_version", "u32"],
+  ["_reserved", { bytes: 60 }],
 ];
 
 export const CAMPAIGN: Layout = [
@@ -92,7 +94,8 @@ export const CAMPAIGN: Layout = [
   ["creator_share", "u64"],
   ["creator_share_from_fee", "u64"],
   ["paid_out_total", "u64"],
-  ["_reserved", { bytes: 64 }],
+  ["epoch", "u64"],
+  ["_reserved", { bytes: 56 }],
 ];
 
 export const ENTRY: Layout = [
@@ -129,6 +132,8 @@ export const OPEN_CAMPAIGN_ARGS: Layout = [
   ["deadline_at", "i64"],
   ["opening_usd", "u64"],
   ["max_lamports", "u64"],
+  ["epoch", "u64"],
+  ["expected_params_version", "u32"],
 ];
 export const JOIN_CAMPAIGN_ARGS: Layout = [
   ["side", "u8"],

@@ -1,8 +1,8 @@
 /**
  * Purpose: the program's events as layouts: an inner instruction to the program whose data is
  *          [0xFF, discriminator, payload], signed by the event authority (T4). Mirrors events.rs.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio); frozen at the sprint's opening with the program's contract
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio); Sprint 03 adds `CampaignResolved` and the opening's `epoch`
  */
 import type { Layout } from "./layouts";
 import { CREATION_PARAMS } from "./structs";
@@ -61,6 +61,7 @@ export const EVENTS: Record<string, { discriminator: number; layout: Layout }> =
       ["opening_price_publish_time", "i64"],
       ["prize_lamports", "u64"],
       ["opening_fee_lamports", "u64"],
+      ["epoch", "u64"],
     ],
   },
   EntryAdded: {
@@ -76,6 +77,25 @@ export const EVENTS: Record<string, { discriminator: number; layout: Layout }> =
       ["pool_no", "u64"],
       ["entry_yes", "u64"],
       ["entry_no", "u64"],
+    ],
+  },
+  CampaignResolved: {
+    discriminator: 6,
+    layout: [
+      ["campaign", "pubkey"],
+      ["seq", "u64"],
+      ["kind", "u8"],
+      ["outcome", "u8"],
+      ["void_reason", "u8"],
+      ["met_late", "bool"],
+      ["observed_value", "i128"],
+      ["read_account", "pubkey"],
+      ["publish_time", "i64"],
+      ["posted_slot", "u64"],
+      ["resolved_at", "i64"],
+      ["review_ends_at", "i64"],
+      ["slot", "u64"],
+      ["epoch", "u64"],
     ],
   },
 };

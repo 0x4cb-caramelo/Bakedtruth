@@ -1,8 +1,8 @@
 //! Purpose: steps 9 and 10 of `user_open_campaign`: every field an opening writes into the new
 //!          `Campaign`, and the `CampaignOpened` event built from what was stored, so the event
 //!          and the account can never disagree.
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio), lane D
+//! Version: 0.0.3
+//! Sprint: 02 (pot core on Pinocchio), lane D; the epoch in 03
 
 use pinocchio::Address;
 
@@ -74,6 +74,7 @@ pub fn write(c: &mut Campaign, o: &Opening) {
     c.opening_price_publish_time = LeI64::new(o.payment.publish_time);
     c.prize_lamports = LeU64::new(o.payment.prize);
     c.opening_fee_lamports = LeU64::new(o.payment.fee);
+    c.epoch = o.args.epoch;
 }
 
 /// `CampaignOpened` for `campaign`, read back from the stored fields, with `seq` the campaign's
@@ -106,5 +107,6 @@ pub fn opened_event(campaign: &Address, c: &Campaign) -> CampaignOpened {
         opening_price_publish_time: c.opening_price_publish_time,
         prize_lamports: c.prize_lamports,
         opening_fee_lamports: c.opening_fee_lamports,
+        epoch: c.epoch,
     }
 }

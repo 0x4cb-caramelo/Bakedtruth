@@ -2,8 +2,8 @@
  * Purpose: a LiteSVM world for the program's tests: the binary loaded, the clock set next to the
  *          captured Pyth prices, the upgrade authority recorded, funded wallets, and one `send`
  *          that returns the custom error code and the decoded events.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio); frozen at the sprint's opening with the program's contract
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio); Sprint 03 lets a test set a price's posted slot
  */
 import { readFileSync } from "node:fs";
 
@@ -111,6 +111,7 @@ export function setPriceAccount(
     publishTime?: bigint;
     verification?: number;
     owner?: Address;
+    postedSlot?: bigint;
   } = {},
 ) {
   const data = new Uint8Array(readFileSync(`tests/fixtures/${fixture}.bin`));
@@ -120,6 +121,7 @@ export function setPriceAccount(
   if (change.conf !== undefined) view.setBigUint64(PRICE_OFFSETS.conf, change.conf, true);
   if (change.exponent !== undefined) view.setInt32(PRICE_OFFSETS.exponent, change.exponent, true);
   if (change.verification !== undefined) data[PRICE_OFFSETS.verification] = change.verification;
+  if (change.postedSlot !== undefined) view.setBigUint64(PRICE_OFFSETS.postedSlot, change.postedSlot, true);
   const programAddress = change.owner ?? P.PYTH_RECEIVER_ID;
   client.svm.setAccount({ address, data, executable: false, lamports: lamports(P.SOL), programAddress, space: 134n });
   return data;

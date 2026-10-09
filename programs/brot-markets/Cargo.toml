@@ -1,6 +1,6 @@
 [package]
 name = "brot-markets"
-version = "0.0.2"
+version = "0.0.3"
 description = "Brot Markets: On-Chain Campaigns paid in SOL and answered by reading on-chain accounts"
 authors = ["Brot Markets"]
 edition.workspace = true
@@ -20,6 +20,9 @@ drill = []
 # The mainnet build. Since money is SOL (D-a) it no longer switches a mint; it only fixes the
 # real review window and minimum duration (T12, TP section 3.3).
 mainnet = []
+# Opens `StakeAtLeast` at `user_open_campaign` (Sprint 03 [AC]). Off in every build until a devnet
+# YES is recorded (Sprint 05); `mainnet` refuses it at compile time. Resolution never checks it.
+stake-at-least = []
 
 [dependencies]
 # Exact pins for program crates (TP section 7). Pinocchio 0.11.2 and its System Program CPIs

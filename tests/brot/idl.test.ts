@@ -2,8 +2,8 @@
  * Purpose: the drift check (X0.6): the hand-written test kit (struct layouts, events, instruction
  *          builders, error codes) against the Shank IDL that `bun run idl` writes from the program.
  *          Needs no program binary. When it fails, fix the kit or the program, never the IDL.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio), lane F
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio), lane F; `resolve_campaign` in 03
  */
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -54,6 +54,7 @@ const BUILDERS: Record<string, Builder> = {
     args: S.JOIN_CAMPAIGN_ARGS,
     build: async (who) => I.joinCampaignIx(who, await P.campaignPda(CAMPAIGN_ID), metric, { side: 0, amount: 1n }),
   },
+  ResolveCampaign: { args: null, build: async () => I.resolveCampaignIx(await P.campaignPda(CAMPAIGN_ID), metric) },
 };
 
 /** The address each named slot must hold; signing slots hold the signer. */
@@ -72,6 +73,7 @@ async function expectedAddresses(who: Address): Promise<Record<string, Address>>
     vault: await P.vaultPda(campaign),
     entry: await P.entryPda(campaign, who),
     metricAccount: metric,
+    proofAccount: metric,
     solUsdPrice: P.SOL_USD_ACCOUNT,
   };
 }

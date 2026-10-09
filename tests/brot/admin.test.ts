@@ -48,7 +48,8 @@ describe("admin instructions", () => {
       fee_recipient: feeRecipient.address,
       params: DEFAULT_PARAMS,
       open_campaigns: 0,
-      _reserved: new Uint8Array(64),
+      params_version: 0,
+      _reserved: new Uint8Array(60),
     });
 
     // Both accounts belong to the program, at their exact sizes and rent-exempt minimums (T19).

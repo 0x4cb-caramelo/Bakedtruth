@@ -44,7 +44,15 @@ describe("codama client matches the test kit", () => {
     const vault = await P.vaultPda(campaign);
     const entry = await P.entryPda(campaign, who.address);
     const metricAccount = P.BTC_USD_ACCOUNT;
-    const open = { id, feedId: P.BTC_USD_FEED_ID, target: -5n, deadlineAt: 1_800_000_000n, openingUsd: 750n };
+    const open = {
+      id,
+      feedId: P.BTC_USD_FEED_ID,
+      target: -5n,
+      deadlineAt: 1_800_000_000n,
+      openingUsd: 750n,
+      epoch: 3n,
+      expectedParamsVersion: 2,
+    };
     const join = { amount: 25_000_000n, minReturnBps: 12_345, expectedEntryTotal: 10_000_000n };
     const accounts = { config, campaign, vault, metricAccount };
     const pairs: [Instruction, Instruction][] = [
@@ -100,6 +108,10 @@ describe("codama client matches the test kit", () => {
         C.getUserJoinCampaignInstruction({ baker: who, ...accounts, entry, side: C.Side.No, ...join }),
         await I.joinCampaignIx(who, campaign, metricAccount, { side: P.Side.No, ...join }),
       ],
+      [
+        C.getResolveCampaignInstruction({ campaign, metricAccount, proofAccount: P.SOL_USD_ACCOUNT }),
+        I.resolveCampaignIx(campaign, metricAccount, P.SOL_USD_ACCOUNT),
+      ],
     ];
     expect(pairs.length).toBe(IDL.instructions.length);
     for (const [codama, kit] of pairs) {
@@ -121,6 +133,7 @@ describe("codama client matches the test kit", () => {
       ["EntriesResumed", EVENTS.EntriesResumed.layout, C.getEntriesResumedCodec()],
       ["CampaignOpened", EVENTS.CampaignOpened.layout, C.getCampaignOpenedCodec()],
       ["EntryAdded", EVENTS.EntryAdded.layout, C.getEntryAddedCodec()],
+      ["CampaignResolved", EVENTS.CampaignResolved.layout, C.getCampaignResolvedCodec()],
     ];
     for (const [name, layout, codec] of cases) {
       const bytes = sampleBytes(name);

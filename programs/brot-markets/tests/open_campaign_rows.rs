@@ -1,7 +1,7 @@
 //! Purpose: rows 1 to 4 of TP section 3.4.10 on the host, each refusal with its own error (X0.7):
 //!          `readers::validate_at_creation` over runtime-shaped accounts holding the captured Pyth
 //!          bytes, the account itself checked before the price and the price before the target.
-//! Version: 0.0.1
+//! Version: 0.0.2
 //! Sprint: 02 (pot core on Pinocchio), lane D. The handler runs these rows again in LiteSVM
 //!         (tests/brot/open-campaign-*.test.ts), after the SBF build.
 
@@ -9,7 +9,7 @@ mod opening_support;
 
 use brot_markets::{
     error::BrotError,
-    readers::{validate_at_creation, CreationContext, CreationReading},
+    readers::{validate_at_creation, ChainTime, CreationContext, CreationReading},
     state::enums::{Direction, ReaderKind},
 };
 use opening_support::*;
@@ -37,7 +37,13 @@ fn validate(
         direction,
         target,
         max_age: 120,
-        now: NOW,
+        epoch: 0,
+        deadline_at: NOW + 30 * 86_400,
+        time: ChainTime {
+            unix_timestamp: NOW,
+            slot: 0,
+            epoch: 0,
+        },
     };
     validate_at_creation(kind, &context)
 }

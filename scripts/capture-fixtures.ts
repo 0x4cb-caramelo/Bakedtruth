@@ -1,7 +1,8 @@
 // Purpose: capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party
 //          programs actually write instead of a layout someone typed from memory.
-// Version: 0.2.0
-// Sprint:  01 (price reader proof); the mainnet set came from upstream pred-provable
+// Version: 0.3.0
+// Sprint:  01 (price reader proof); the mainnet set came from upstream pred-provable; mints, a vote account and the
+//          mainnet price accounts added in Sprint 03
 //
 // Usage:   bun run scripts/capture-fixtures.ts            every fixture, all clusters
 //          bun run scripts/capture-fixtures.ts pyth       only the fixtures whose name starts with "pyth"
@@ -94,6 +95,42 @@ const FIXTURES: Record<string, [string, string, Cluster]> = {
     "7UVimffxr9ow1uXYxsr4LHAcV58mLzhmwaeKvJ1pjLiE",
     "Pyth PriceUpdateV2, SOL/USD, pre-upgrade receiver: same layout, an owner the reader rejects",
     "devnet",
+  ],
+  // Sprint 03: the mainnet price accounts, the burn kind's mints and a vote account.
+  "pyth-sol-usd-mainnet": [
+    "7AviUf9nL62mcxNbQGKm4nKDQnPjswo6c5MX4D57HmyE",
+    "Pyth PriceUpdateV2, SOL/USD, upgraded Core receiver, sponsored push feed",
+    "mainnet",
+  ],
+  "pyth-btc-usd-mainnet": [
+    "APgzQGGdv2qCgBkX6aHVkrGePtBVDDg68GiqaM7rmtf5",
+    "Pyth PriceUpdateV2, BTC/USD, upgraded Core receiver, sponsored push feed",
+    "mainnet",
+  ],
+  "mint-wif": [
+    "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+    "SPL Token mint of WIF: both authorities revoked",
+    "mainnet",
+  ],
+  "mint-bonk": [
+    "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+    "SPL Token mint of BONK: both authorities revoked, supply near the u64 ceiling",
+    "mainnet",
+  ],
+  "mint-usdc": [
+    "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "SPL Token mint of USDC: mint authority live, so the burn kind refuses it",
+    "mainnet",
+  ],
+  "mint-pyusd": [
+    "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo",
+    "Token-2022 mint of PYUSD, with extensions: an owner the burn kind refuses",
+    "mainnet",
+  ],
+  "vote-mainnet-top": [
+    "CcaHc2L43ZWjwCHART3oZoJvHLAe9hzT2DJNUpBzoTN1",
+    "Vote account with the most active stake on 2026-10-09, 3,762 bytes, version tag 3",
+    "mainnet",
   ],
 };
 

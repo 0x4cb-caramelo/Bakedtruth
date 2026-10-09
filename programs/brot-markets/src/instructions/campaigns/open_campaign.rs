@@ -1,9 +1,9 @@
 //! Purpose: `user_open_campaign`: any wallet opens a price campaign paying US$500 in SOL at the
 //!          Pyth SOL/USD price, 90% bookkept as the prize and 10% held as the opening fee; a team
 //!          key opens free with no creator share (TP section 3.4.10).
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio); accounts and arguments frozen at the sprint's opening,
-//!         body by lane D
+//! Version: 0.0.3
+//! Sprint: 02 (pot core on Pinocchio), lane D; Sprint 03 appends `epoch` and
+//!         `expected_params_version` to the arguments, and lane F opens the other four kinds
 //!
 //! The handler runs the ten rows of TP section 3.4.10 in the order of `checks.rs`, each refusal
 //! with its own error (X0.7): the arguments (rows 1 and 9), the slots, the config (row 8), the
@@ -14,11 +14,7 @@ mod create;
 pub mod payment;
 mod record;
 
-use pinocchio::{
-    error::ProgramError,
-    sysvars::{clock::Clock, Sysvar},
-    AccountView, Address, ProgramResult,
-};
+use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 use shank::ShankType;
 
 use crate::{
@@ -26,9 +22,9 @@ use crate::{
     error::BrotError,
     events,
     instructions::args,
-    layout::{LeI128, LeI64, LeU64},
+    layout::{LeI128, LeI64, LeU32, LeU64},
     math::schedule,
-    readers::{self, CreationContext},
+    readers::{self, ChainTime, CreationContext},
     state::{
         self,
         campaign::Campaign,
@@ -67,9 +63,16 @@ pub struct OpenCampaignArgs {
     /// The most lamports the signer accepts to pay (T25). Ignored when `opening_usd` is 0.
     #[idl_type("u64")]
     pub max_lamports: LeU64,
+    /// Epoch kinds: the measured epoch; zero for the other kinds (Sprint 03).
+    #[idl_type("u64")]
+    pub epoch: LeU64,
+    /// `GlobalConfig.params_version` as the client read it for the preview: the fees, the share
+    /// and the prize split the creator saw (Sprint 03).
+    #[idl_type("u32")]
+    pub expected_params_version: LeU32,
 }
 
-zero_copy!(OpenCampaignArgs = 82);
+zero_copy!(OpenCampaignArgs = 94);
 
 pub fn user_open_campaign(
     program_id: &Address,
@@ -113,7 +116,8 @@ pub fn user_open_campaign(
     let params = config.params;
 
     // Row 5: 3 to 90 days from now, and when entries close.
-    let now = Clock::get()?.unix_timestamp;
+    let time = ChainTime::now()?;
+    let now = time.unix_timestamp;
     let deadline_at = args.deadline_at.get();
     schedule::check_duration(now, deadline_at)?;
     let entries_close_at = schedule::entries_close_at(now, deadline_at)?;
@@ -125,7 +129,9 @@ pub fn user_open_campaign(
         direction,
         target: args.target.get(),
         max_age: params.campaign_max_age.get(),
-        now,
+        epoch: args.epoch.get(),
+        deadline_at,
+        time,
     };
     let reading = readers::validate_at_creation(kind, &context)?;
 

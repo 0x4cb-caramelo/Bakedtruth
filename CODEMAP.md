@@ -8,8 +8,8 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **273** |
-| Acima de 200 linhas | **30** ⚠️ |
+| Arquivos mapeados | **286** |
+| Acima de 200 linhas | **34** ⚠️ |
 | Sem cabeçalho `Purpose:` | **100** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -24,6 +24,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `app/lib/market.ts` — 211 linhas
 - `app/lib/mascot/engine.ts` — 302 linhas
 - `app/lib/metric.ts` — 691 linhas
+- `programs/brot-markets/src/checks.rs` — 201 linhas
+- `programs/brot-markets/src/error.rs` — 239 linhas
+- `programs/brot-markets/src/state/campaign.rs` — 201 linhas
 - `programs/pred-provable/src/resolver.rs` — 733 linhas
 - `programs/pred-provable/tests/burn_goal.rs` — 219 linhas
 - `prototype-lab/prototype-b/view.js` — 265 linhas
@@ -44,6 +47,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `scripts/test/hooks.test.js` — 278 linhas
 - `scripts/tokenomics-model.ts` — 584 linhas
 - `target/types/pred_provable.ts` — 3189 linhas
+- `tests/brot/setup.ts` — 201 linhas
 - `tests/helpers.ts` — 424 linhas
 - `tests/pred-provable.test.ts` — 2799 linhas
 
@@ -168,26 +172,33 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`checks.rs`](programs/brot-markets/src/checks.rs) | every account check Anchor used to make, written by hand in one place (TP section 3.4.17). Each check returns its own error and has a negative test that fails w | 200 |
-| [`constants.rs`](programs/brot-markets/src/constants.rs) | seeds, program ids, code ceilings and the duration and window constants compiled into the program, with the devnet-only drill values behind the `drill` feature | 125 |
-| [`entrypoint.rs`](programs/brot-markets/src/entrypoint.rs) | the instruction dispatcher: the first byte of the instruction data picks the handler, the rest is that handler's arguments | 53 |
-| [`error.rs`](programs/brot-markets/src/error.rs) | every refusal the program can return, one code per cause, as custom program errors | 190 |
-| [`events.rs`](programs/brot-markets/src/events.rs) | the events, one per instruction, and how they leave the program: a self-CPI signed by the event-authority PDA, so they survive log truncation (T4) | 178 |
+| [`checks.rs`](programs/brot-markets/src/checks.rs) | every account check Anchor used to make, written by hand in one place (TP 3.4.17), each with its own error and a negative test that fails without it (T24, X0.9) | 201 |
+| [`constants.rs`](programs/brot-markets/src/constants.rs) | seeds, program ids, code ceilings and the duration and window constants compiled into the program, with the devnet-only drill values behind the `drill` feature | 169 |
+| [`entrypoint.rs`](programs/brot-markets/src/entrypoint.rs) | the instruction dispatcher: the first byte of the instruction data picks the handler, the rest is that handler's arguments | 56 |
+| [`error.rs`](programs/brot-markets/src/error.rs) | every refusal the program can return, one code per cause, as custom program errors | 239 |
+| [`events.rs`](programs/brot-markets/src/events.rs) | the events, one per instruction, and how they leave the program: a self-CPI signed by the event-authority PDA, so they survive log truncation (T4) | 95 |
 | [`layout.rs`](programs/brot-markets/src/layout.rs) | zero-copy byte layouts shared by accounts, instruction arguments and events: the little-endian field types and the one place where bytes become a typed view | 126 |
 | [`lib.rs`](programs/brot-markets/src/lib.rs) | the Brot Markets program on Pinocchio: On-Chain Campaigns paid in SOL; declares the program id and wires the modules and the entrypoint | 26 |
 | [`vault.rs`](programs/brot-markets/src/vault.rs) | the lamport vault of a campaign: SOL arriving from a signer's wallet by System Program transfer, signed by that wallet (TP section 3.4.4) | 33 |
+
+## `programs/brot-markets/src/checks/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`top_level.rs`](programs/brot-markets/src/checks/top_level.rs) | `checks::top_level`, the guard that keeps `resolve_campaign` out of other programs' CPIs (TP section 3.4.17): the instruction must run at the transaction's top  | 34 |
 
 ## `programs/brot-markets/src/events/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
+| [`campaign.rs`](programs/brot-markets/src/events/campaign.rs) | the events of a campaign's life, each carrying the campaign and its contiguous `seq` (X0.4): opened, an entry added, resolved | 148 |
 | [`self_cpi.rs`](programs/brot-markets/src/events/self_cpi.rs) | how an event leaves the program: `emit` sends it to this program by self-CPI, signed by the event-authority PDA, and the event handler accepts only that signatu | 92 |
 
 ## `programs/brot-markets/src/instructions/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`mod.rs`](programs/brot-markets/src/instructions/mod.rs) | the program's interface: every instruction with its discriminator, its accounts in order and its arguments, for the dispatcher and for the Shank IDL (T9) | 144 |
+| [`mod.rs`](programs/brot-markets/src/instructions/mod.rs) | the program's interface: every instruction with its discriminator, its accounts in order and its arguments, for the dispatcher and for the Shank IDL (T9) | 156 |
 
 ## `programs/brot-markets/src/instructions/admin/`
 
@@ -209,7 +220,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`mod.rs`](programs/brot-markets/src/instructions/campaigns/mod.rs) | opening a campaign (TP section 3.4.10). Resolution joins this folder in Sprint 03 | 6 |
-| [`open_campaign.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign.rs) | `user_open_campaign`: any wallet opens a price campaign paying US$500 in SOL at the Pyth SOL/USD price, 90% bookkept as the prize and 10% held as the opening fe | 192 |
+| [`open_campaign.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign.rs) | `user_open_campaign`: any wallet opens a price campaign paying US$500 in SOL at the Pyth SOL/USD price, 90% bookkept as the prize and 10% held as the opening fe | 198 |
 
 ## `programs/brot-markets/src/instructions/campaigns/open_campaign/`
 
@@ -217,7 +228,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`create.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign/create.rs) | row 10 of TP section 3.4.10 for `user_open_campaign`: the `Campaign` and its vault, created at their canonical PDAs with the creator paying both rents. An exist | 59 |
 | [`payment.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign/payment.rs) | row 7 of TP section 3.4.10, what an opening pays: US$ at the sponsored Pyth SOL/USD price of the config's feed, fresh and tight, at most the signed `max_lamport | 93 |
-| [`record.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign/record.rs) | steps 9 and 10 of `user_open_campaign`: every field an opening writes into the new `Campaign`, and the `CampaignOpened` event built from what was stored, so the | 111 |
+| [`record.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign/record.rs) | steps 9 and 10 of `user_open_campaign`: every field an opening writes into the new `Campaign`, and the `CampaignOpened` event built from what was stored, so the | 113 |
 
 ## `programs/brot-markets/src/instructions/entries/`
 
@@ -226,6 +237,13 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`entry_account.rs`](programs/brot-markets/src/instructions/entries/entry_account.rs) | the baker's `Entry` at a join: created at its canonical PDA on the first join, rent paid by the baker, and checked against the campaign, the baker and the total | 72 |
 | [`join_campaign.rs`](programs/brot-markets/src/instructions/entries/join_campaign.rs) | `user_join_campaign`: a baker joins YES or NO with at least `min_entry_lamports`; the entry moves from the baker's wallet into the vault by System Program trans | 189 |
 | [`mod.rs`](programs/brot-markets/src/instructions/entries/mod.rs) | entries: a baker joins a campaign with SOL (TP section 3.4.3) | 7 |
+
+## `programs/brot-markets/src/instructions/resolution/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`mod.rs`](programs/brot-markets/src/instructions/resolution/mod.rs) | the instructions that decide a campaign's outcome: `resolve_campaign` (Sprint 03); confirming, voiding and contesting arrive in Sprint 04 | 7 |
+| [`resolve_campaign.rs`](programs/brot-markets/src/instructions/resolution/resolve_campaign.rs) | `resolve_campaign`: any wallet records the outcome the campaign's reader reads, at the top level only, and opens the six-hour review window (TP sections 3.4.2,  | 34 |
 
 ## `programs/brot-markets/src/math/`
 
@@ -242,18 +260,25 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`cursor.rs`](programs/brot-markets/src/readers/cursor.rs) | bounds-checked little-endian reads over raw account data, for the readers. An account shorter than its layout is an error, never a panic | 57 |
-| [`mod.rs`](programs/brot-markets/src/readers/mod.rs) | the closed set of readers that turn an on-chain account into a YES/NO answer, and the interface each one exposes: `validate_at_creation`, `outcome_knowable`, `t | 114 |
-| [`price_touch.rs`](programs/brot-markets/src/readers/price_touch.rs) | read a Pyth `PriceUpdateV2` account into the price of one named feed, checking who wrote it and how well it was verified; the price kind's reader, and the SOL/U | 196 |
+| [`cursor.rs`](programs/brot-markets/src/readers/cursor.rs) | bounds-checked little-endian reads over raw account data, for the readers. An account shorter than its layout is an error, never a panic | 100 |
+| [`damm_v2.rs`](programs/brot-markets/src/readers/damm_v2.rs) | `DammV2LockedAtLeast`: YES once a Meteora DAMM v2 pool's permanently locked liquidity reaches the target. Locking is one-way, so the fact is irreversible | 35 |
+| [`epoch.rs`](programs/brot-markets/src/readers/epoch.rs) | the epoch kinds' shared rules: when the measured epoch starts, against the deadline (row 5 for `StakePoolTvlAtLeast` and `StakeAtLeast`), from the EpochSchedule | 11 |
+| [`mod.rs`](programs/brot-markets/src/readers/mod.rs) | the closed set of readers that turn an on-chain account into a YES/NO answer, and the interface each one exposes: `validate_at_creation`, `outcome_knowable`, `t | 126 |
+| [`price_touch.rs`](programs/brot-markets/src/readers/price_touch.rs) | the price kind's rules: an opening's freshness, confidence and touch checks, the join lock on the sponsored account, the YES proof and the stale-feed void (TP s | 132 |
+| [`price_update.rs`](programs/brot-markets/src/readers/price_update.rs) | read a Pyth `PriceUpdateV2` account into the price of one named feed, checking who wrote it and how well it was verified, and derive a feed's sponsored account | 127 |
+| [`shared.rs`](programs/brot-markets/src/readers/shared.rs) | what the readers share: the outcome a reader decides and the reading behind it, the deadline test, the irreversible-fact table and row 3's minimum distance | 140 |
+| [`spl_mint.rs`](programs/brot-markets/src/readers/spl_mint.rs) | `SupplyAtMost`, the burn kind: YES once a classic SPL Token mint's supply is at or below the target. An irreversible fact while the mint authority stays revoked | 35 |
+| [`stake_pool.rs`](programs/brot-markets/src/readers/stake_pool.rs) | `StakePoolTvlAtLeast`: YES if an SPL stake pool's total at the start of the measured epoch, the snapshot its first balance update of that epoch writes, reaches  | 35 |
+| [`vote_stake.rs`](programs/brot-markets/src/readers/vote_stake.rs) | `StakeAtLeast`: YES if a vote account's stake in the measured epoch, read by `sol_get_epoch_stake`, reaches the target. Closed at opening until a devnet YES | 35 |
 
 ## `programs/brot-markets/src/state/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`campaign.rs`](programs/brot-markets/src/state/campaign.rs) | `Campaign` (`["campaign", id]`): everything about one campaign, and the loaders that check it. Its vault (`["vault", campaign]`) is data-less and its bump lives | 200 |
-| [`config.rs`](programs/brot-markets/src/state/config.rs) | `GlobalConfig` (`["config"]`): roles, the pause, the creation parameters, the fee recipient and the open-campaign counter; and the creation parameters' own layo | 190 |
+| [`campaign.rs`](programs/brot-markets/src/state/campaign.rs) | `Campaign` (`["campaign", id]`): everything about one campaign, and the loaders that check it. Its vault (`["vault", campaign]`) is data-less and its bump lives | 201 |
+| [`config.rs`](programs/brot-markets/src/state/config.rs) | `GlobalConfig` (`["config"]`): roles, the pause, the creation parameters, the fee recipient and the open-campaign counter; and the creation parameters' own layo | 193 |
 | [`entry.rs`](programs/brot-markets/src/state/entry.rs) | `Entry` (`["entry", campaign, baker]`): one baker's entry in one campaign, both sides, created on the baker's first join and closed by `settle_entry` (Sprint 04 | 67 |
-| [`enums.rs`](programs/brot-markets/src/state/enums.rs) | the one-byte enums stored in accounts and passed in instruction data, with their checked conversion from a raw byte | 151 |
+| [`enums.rs`](programs/brot-markets/src/state/enums.rs) | the one-byte enums stored in accounts and passed in instruction data, with their checked conversion from a raw byte | 162 |
 | [`mod.rs`](programs/brot-markets/src/state/mod.rs) | the accounts the program owns: their type tags, layout version and the one loader that runs the owner, length, tag and PDA checks before any field is read | 102 |
 
 ## `programs/brot-markets/tests/`
@@ -268,7 +293,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`config_params.rs`](programs/brot-markets/tests/config_params.rs) | the floors and ceilings of the creation parameters (TP section 3.4.1, C43): the founder's values pass, every bound passes, and one step past a bound fails with  | 192 |
 | [`cursor.rs`](programs/brot-markets/tests/cursor.rs) | the bounds-checked cursor on its own. Readers of variable layouts lean on it, so "an error, never a panic" is proved here and not through one reader's fixed siz | 69 |
 | [`event_cpi.rs`](programs/brot-markets/tests/event_cpi.rs) | the self-CPI events on the host (T4): the instruction data `emit` sends for each of the six events, and the handler that accepts only the event authority, signi | 82 |
-| [`layout.rs`](programs/brot-markets/tests/layout.rs) | pins the program's frozen interface: account and argument sizes, event sizes, the event authority, the discriminators and the enum bytes. A change here is a cha | 119 |
+| [`layout.rs`](programs/brot-markets/tests/layout.rs) | pins the program's frozen interface: account and argument sizes, event sizes, the event authority, the discriminators and the enum bytes. A change here is a cha | 123 |
 | [`math_estimate_properties.rs`](programs/brot-markets/tests/math_estimate_properties.rs) | the join's return estimate over random pots: in `Split` it is the settlement's own payout in bps and never below 10,000; in a one-sided pot it is the refund, wi | 100 |
 | [`math_fees.rs`](programs/brot-markets/tests/math_fees.rs) | the fee functions and the rounding helpers under them on the host: the TP's worked examples, the 100% ceiling, and the tight round-up over random amounts and ra | 102 |
 | [`math_opening_properties.rs`](programs/brot-markets/tests/math_opening_properties.rs) | the opening conversion and split over random dollars, prices and exponents: tight rounding toward Brot, an overflow exactly past u64, and a larger prize at 90/1 | 104 |
@@ -279,7 +304,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`math_schedule_properties.rs`](programs/brot-markets/tests/math_schedule_properties.rs) | the schedule math over random durations, under whichever build runs it (drill or not): where entries close, that it is monotonic, and that both functions refuse | 79 |
 | [`math_schedule.rs`](programs/brot-markets/tests/math_schedule.rs) | the schedule math on the host: the P1 section 3.6 table, the 3-to-90-day bounds, the past deadline, and the drill and mainnet values (T12) | 150 |
 | [`open_campaign_payment.rs`](programs/brot-markets/tests/open_campaign_payment.rs) | row 7 of TP section 3.4.10 on the host up to the conversion, each refusal with its own error (X0.7): who must pay, the US$ floor, the SOL/USD account derived fr | 106 |
-| [`open_campaign_rows.rs`](programs/brot-markets/tests/open_campaign_rows.rs) | rows 1 to 4 of TP section 3.4.10 on the host, each refusal with its own error (X0.7): `readers::validate_at_creation` over runtime-shaped accounts holding the c | 188 |
+| [`open_campaign_rows.rs`](programs/brot-markets/tests/open_campaign_rows.rs) | rows 1 to 4 of TP section 3.4.10 on the host, each refusal with its own error (X0.7): `readers::validate_at_creation` over runtime-shaped accounts holding the c | 194 |
 | [`price_opening.rs`](programs/brot-markets/tests/price_opening.rs) | what the price reader checks at an opening, on the captured Pyth accounts: the sponsored account each feed derives, the freshness and confidence bounds at their | 185 |
 | [`price_reader.rs`](programs/brot-markets/tests/price_reader.rs) | the price reader against real Pyth accounts captured from devnet, and against the malformed versions of them. A wrong account must be an error, never a panic | 157 |
 | [`team_keys.rs`](programs/brot-markets/tests/team_keys.rs) | the team rules of `admin_set_team` (Q12, TP section 3.4.9): at most five keys, none zero, none twice, every slot past `team_len` zero; each refusal with its own | 87 |
@@ -441,7 +466,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`build-idl.ts`](scripts/build-idl.ts) | writes the brot-markets IDL with the pinned shank-cli into packages/sdk/src/idl, then renders the Codama spike client from it (T9). `bun run idl`; also the last | 59 |
 | [`bun-junit.mjs`](scripts/bun-junit.mjs) | reads the JUnit file `bun test --reporter=junit` writes: each test by name, with its body (empty when it passed, `<skipped />` when filtered out, `<failure …>`  | 18 |
-| [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party programs actually write instead of a layout someone typed f | 145 |
+| [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party programs actually write instead of a layout someone typed f | 182 |
 | [`checks-mutation.mjs`](scripts/checks-mutation.mjs) | the X0.9 evidence for the checks module: removes each check of programs/brot-markets/src/checks.rs in turn, rebuilds the program with cargo build-sbf, and shows | 200 |
 | [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns | 74 |
 | [`codama-spike.ts`](scripts/codama-spike.ts) | the Codama spike (T9): renders a Kit client from the Shank IDL of brot-markets into packages/sdk/src/idl/generated. Sprint 05 decides whether the SDK adopts it; | 61 |
@@ -580,18 +605,18 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`admin-params.test.ts`](tests/brot/admin-params.test.ts) | creation parameters change future campaigns only (TP section 3.4.1): an open campaign keeps every byte it copied at opening and a new one takes the new values;  | 117 |
 | [`admin-pause.test.ts`](tests/brot/admin-pause.test.ts) | I10′, first half (TP section 3.4.9): with the pause on, only `user_join_campaign` and `user_open_campaign` fail; every other instruction of Sprint 02 still runs | 51 |
 | [`admin-refusals.test.ts`](tests/brot/admin-refusals.test.ts) | every refusal of the admin and team instructions with its exact error (X0.7): a signer without the role, the team rules, the zero keys, each creation parameter  | 147 |
-| [`admin.test.ts`](tests/brot/admin.test.ts) | the admin and team instructions on their success paths, each with its event decoded from the transaction (TP sections 3.4.3 and 3.4.14), and the two-step admin  | 159 |
+| [`admin.test.ts`](tests/brot/admin.test.ts) | the admin and team instructions on their success paths, each with its event decoded from the transaction (TP sections 3.4.3 and 3.4.14), and the two-step admin  | 160 |
 | [`checks-init.test.ts`](tests/brot/checks-init.test.ts) | the checks negatives in LiteSVM through `admin_initialize_config`: non-canonical bumps, a look-alike System Program, the upgrade authority, a second initialisat | 121 |
 | [`checks-support.ts`](tests/brot/checks-support.ts) | helpers of the checks negatives in LiteSVM: rewrite or place one account (owner, bytes, lamports), a PDA at a bump below the canonical one, another program's Pr | 99 |
 | [`checks.test.ts`](tests/brot/checks.test.ts) | the checks negatives in LiteSVM through `admin_set_team` and `user_join_campaign`: the config under another owner, unsigned and read-only slots, a wrong tag or  | 113 |
-| [`codama-spike.test.ts`](tests/brot/codama-spike.test.ts) | the Codama spike (T9): the Kit client rendered from the Shank IDL (packages/sdk/src/idl/generated) against the hand-written kit. Without the program: every inst | 154 |
-| [`errors.ts`](tests/brot/errors.ts) | the program's custom error codes by name, so tests assert the exact refusal (X0.7). Mirrors programs/brot-markets/src/error.rs; a code appended there is appende | 92 |
+| [`codama-spike.test.ts`](tests/brot/codama-spike.test.ts) | the Codama spike (T9): the Kit client rendered from the Shank IDL (packages/sdk/src/idl/generated) against the hand-written kit. Without the program: every inst | 167 |
+| [`errors.ts`](tests/brot/errors.ts) | the program's custom error codes by name, so tests assert the exact refusal (X0.7). Mirrors programs/brot-markets/src/error.rs; a code appended there is appende | 112 |
 | [`events.test.ts`](tests/brot/events.test.ts) | the events round-trip (T4, X0.4): every instruction of Sprint 02 emits exactly one event by self-CPI, decoded from its inner instruction; campaign events carry  | 198 |
-| [`events.ts`](tests/brot/events.ts) | the program's events as layouts: an inner instruction to the program whose data is [0xFF, discriminator, payload], signed by the event authority (T4). Mirrors e | 82 |
+| [`events.ts`](tests/brot/events.ts) | the program's events as layouts: an inner instruction to the program whose data is [0xFF, discriminator, payload], signed by the event authority (T4). Mirrors e | 102 |
 | [`flows.ts`](tests/brot/flows.ts) | the common paths every test file starts from: a config initialised with the founder's values, a team, a paid or free price campaign opened on BTC/USD, an entry | 110 |
-| [`idl.test.ts`](tests/brot/idl.test.ts) | the drift check (X0.6): the hand-written test kit (struct layouts, events, instruction builders, error codes) against the Shank IDL that `bun run idl` writes fr | 150 |
+| [`idl.test.ts`](tests/brot/idl.test.ts) | the drift check (X0.6): the hand-written test kit (struct layouts, events, instruction builders, error codes) against the Shank IDL that `bun run idl` writes fr | 152 |
 | [`idl.ts`](tests/brot/idl.ts) | the Shank IDL (packages/sdk/src/idl/brot_markets.json) in the test kit's terms: struct fields as layouts.ts types, enums as one byte, names as Shank writes them | 127 |
-| [`instructions.ts`](tests/brot/instructions.ts) | builders for every instruction of the program, with the accounts in the frozen order of programs/brot-markets/src/instructions/mod.rs, and helpers that tamper w | 137 |
+| [`instructions.ts`](tests/brot/instructions.ts) | builders for every instruction of the program, with the accounts in the frozen order of programs/brot-markets/src/instructions/mod.rs, and helpers that tamper w | 152 |
 | [`join-campaign-adds.test.ts`](tests/brot/join-campaign-adds.test.ts) | what a join writes: the Entry created on the first join with the baker's rent, the first baker, later joins of the same wallet on either side (Q3), the bookkept | 146 |
 | [`join-campaign-estimate.test.ts`](tests/brot/join-campaign-estimate.test.ts) | pins the join tests' copy of the money math to the worked examples of TP section 3.4.16, so a failing join test points at the program and not at its expectation | 41 |
 | [`join-campaign-pot.test.ts`](tests/brot/join-campaign-pot.test.ts) | the pot is the books, never the vault's balance: SOL sent by hand to a vault moves no pool, no prize, no first baker and no estimate (I15, first half); and the  | 88 |
@@ -599,7 +624,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`join-campaign-slots.test.ts`](tests/brot/join-campaign-slots.test.ts) | the slot checks of `user_join_campaign` in the order of checks.rs, each with its own error: signer and writable flags, the three pairs that must differ, the Sys | 69 |
 | [`join-campaign-support.ts`](tests/brot/join-campaign-support.ts) | what the join tests share: a world with the founder's config, a team and a paid BTC/USD campaign; SOL sent by hand with a plain System Program transfer; an acco | 170 |
 | [`join-campaign-wallets.test.ts`](tests/brot/join-campaign-wallets.test.ts) | two wallets: A cannot change, close or redirect B's Entry, whichever slot of a join it puts that Entry in, and cannot join as B without B's signature (A-1) | 58 |
-| [`kit.test.ts`](tests/brot/kit.test.ts) | checks the test kit itself, without the program binary: addresses, layout sizes against the Rust structs, the codec, and the instruction shapes of the frozen co | 92 |
+| [`kit.test.ts`](tests/brot/kit.test.ts) | checks the test kit itself, without the program binary: addresses, layout sizes against the Rust structs, the codec, and the instruction shapes of the frozen co | 96 |
 | [`layouts.ts`](tests/brot/layouts.ts) | the byte layouts of the program's accounts, instruction arguments and events, field by field in the order of the Rust structs, with one encoder and one decoder  | 133 |
 | [`open-campaign-paid.test.ts`](tests/brot/open-campaign-paid.test.ts) | the paid opening (TP section 3.4.16, I14): US$500 in lamports at the captured Pyth SOL/USD price, all of it into the vault, 90% bookkept as the prize and 10% he | 136 |
 | [`open-campaign-refuses-payment.test.ts`](tests/brot/open-campaign-refuses-payment.test.ts) | `user_open_campaign` refuses rows 7 and 8 of TP section 3.4.10, each with its own error (X0.7): who must pay and how much, the signed `max_lamports`, the SOL/US | 92 |
@@ -608,9 +633,16 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`open-campaign-retry.test.ts`](tests/brot/open-campaign-retry.test.ts) | row 10 of TP section 3.4.10 (T17; X0.5, opening half): a retried opening with the same id fails on the existing account and charges nothing twice, while an addr | 92 |
 | [`open-campaign-team.test.ts`](tests/brot/open-campaign-team.test.ts) | a team key opens free (P-3, I12, I14): no lamports move but the two rents, the campaign stores a zero creator share and no opening price, the SOL/USD slot is ne | 94 |
 | [`opening.ts`](tests/brot/opening.ts) | what the opening's LiteSVM tests share: a world with the founder's config, one team key and a funded creator; the default opening's arguments; an opening sent w | 75 |
-| [`program.ts`](tests/brot/program.ts) | the program's addresses for the LiteSVM tests: ids, seeds, discriminators, PDAs and the known outside accounts (Pyth, the loader). Mirrors programs/brot-markets | 82 |
-| [`setup.ts`](tests/brot/setup.ts) | a LiteSVM world for the program's tests: the binary loaded, the clock set next to the captured Pyth prices, the upgrade authority recorded, funded wallets, and  | 199 |
-| [`structs.ts`](tests/brot/structs.ts) | the program's structs as layouts: accounts (GlobalConfig, Campaign, Entry), instruction arguments and events, each in the field order of its Rust struct | 139 |
+| [`program.ts`](tests/brot/program.ts) | the program's addresses for the LiteSVM tests: ids, seeds, discriminators, PDAs and the known outside accounts (Pyth, the loader). Mirrors programs/brot-markets | 110 |
+| [`readers.ts`](tests/brot/readers.ts) | the third-party accounts the readers read, for the LiteSVM tests: the captured fixtures written into the world (moved, re-owned or edited in memory), a syntheti | 110 |
+| [`setup.ts`](tests/brot/setup.ts) | a LiteSVM world for the program's tests: the binary loaded, the clock set next to the captured Pyth prices, the upgrade authority recorded, funded wallets, and  | 201 |
+| [`structs.ts`](tests/brot/structs.ts) | the program's structs as layouts: accounts (GlobalConfig, Campaign, Entry), instruction arguments and events, each in the field order of its Rust struct | 144 |
+
+## `tests/programs/cpi-proxy/src/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`lib.rs`](tests/programs/cpi-proxy/src/lib.rs) | a test-only program that forwards one instruction by CPI, so a test can show that `resolve_campaign` refuses to run below the top level (`checks::top_level`). N | 49 |
 
 ---
 

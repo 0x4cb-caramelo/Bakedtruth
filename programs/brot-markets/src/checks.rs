@@ -1,8 +1,7 @@
-//! Purpose: every account check Anchor used to make, written by hand in one place (TP section
-//!          3.4.17). Each check returns its own error and has a negative test that fails when
-//!          the check is removed (T24, X0.9).
-//! Version: 0.0.4
-//! Sprint: 02 (pot core on Pinocchio); signatures frozen at the sprint's opening, bodies by lane A
+//! Purpose: every account check Anchor used to make, written by hand in one place (TP 3.4.17),
+//!          each with its own error and a negative test that fails without it (T24, X0.9).
+//! Version: 0.0.5
+//! Sprint: 02 (pot core on Pinocchio), lane A; `checks::top_level` in 03
 //!
 //! Order inside an instruction (contract for every handler): arguments (exact length), then the
 //! per-slot flags (`signer`, `writable`), then `distinct` for the pairs that must differ, then
@@ -10,9 +9,8 @@
 //! `pda`), then roles and business rules, then the effects (creation, transfers, writes), then
 //! the event. One exception: the join creates a baker's first `Entry` before its last rule, the
 //! return estimate; a refusal reverts both. Pinocchio checks none of this by itself.
-//!
-//! Each refusal follows an `// X0.9 <name>` line: `scripts/checks-mutation.mjs` puts an early
-//! return right after it, rebuilds the program and shows that the check's tests then fail.
+//! Each refusal follows an `// X0.9 <name>` line: `scripts/checks-mutation.mjs` returns early
+//! right after it, rebuilds, and shows the check's tests fail. `top_level` (03) is a submodule.
 
 use pinocchio::{
     cpi::{Seed, Signer},
@@ -27,11 +25,14 @@ use crate::{
     state::{AccountTag, LAYOUT_VERSION},
 };
 
+mod top_level;
+pub use top_level::top_level;
+
 /// `UpgradeableLoaderState::ProgramData`, the bincode enum tag a ProgramData account starts with.
 const PROGRAM_DATA_TAG: u32 = 3;
 
 /// `Ok` when `holds`, else `error`: the one shape every check below returns.
-fn require(holds: bool, error: BrotError) -> ProgramResult {
+pub(crate) fn require(holds: bool, error: BrotError) -> ProgramResult {
     if holds {
         Ok(())
     } else {

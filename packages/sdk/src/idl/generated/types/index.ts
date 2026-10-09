@@ -7,6 +7,7 @@
  */
 
 export * from "./campaignOpened";
+export * from "./campaignResolved";
 export * from "./configChange";
 export * from "./configChanged";
 export * from "./configInitialized";

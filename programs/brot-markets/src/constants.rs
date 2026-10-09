@@ -1,11 +1,12 @@
 //! Purpose: seeds, program ids, code ceilings and the duration and window constants compiled
 //!          into the program, with the devnet-only drill values behind the `drill` feature.
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio)
+//! Version: 0.0.3
+//! Sprint: 02 (pot core on Pinocchio); Sprint 03 adds the readers' programs and rules
 //!
-//! Values marked [AC] were chosen by the team in Sprint 02 where the sources give none (TP
-//! section 3.4.1, C43); the session log of 2026-10-08 records why. Money is SOL (D-a): there is
-//! no mint, no cap (D-h) and no accepted-account list (D-i), so none of them has a constant.
+//! Values marked [AC] were chosen by the team where the sources give none (TP section 3.4.1,
+//! C43); the session logs of 2026-10-08 (Sprint 02) and 2026-10-09 (Sprint 03) record why. Money
+//! is SOL (D-a): there is no mint, no cap (D-h) and no accepted-account list (D-i), so none of
+//! them has a constant.
 
 use pinocchio::{address::address, Address};
 
@@ -82,6 +83,49 @@ pub const MAX_PRICE_CLOCK_LEAD_SECONDS: i64 = 60;
 pub const CAMPAIGN_MAX_AGE_FLOOR: u32 = 30;
 /// [AC] Ceiling of `campaign_max_age`, in seconds.
 pub const CAMPAIGN_MAX_AGE_CEILING: u32 = 300;
+/// [AC] Row 3, far side of a price target (Sprint 03): `Above` at most this many times the price,
+/// `Below` at least the price divided by it, and never at or below zero. A tenfold move of a
+/// large asset inside 90 days would be a campaign decided at birth.
+pub const PRICE_TARGET_MAX_RATIO: i128 = 10;
+/// [AC] The shortest slot the freshness rules assume when a bound in seconds becomes a bound in
+/// slots: `Clock::slot − posted_slot` may be at most `ceil(seconds × 1,000 / MIN_SLOT_MS)`. A
+/// backstop against a cluster clock that lags, never the main rule (Sprint 03).
+pub const MIN_SLOT_MS: u64 = 100;
+
+// --- Readers (Sprint 03; TP section 3.4.8) --------------------------------------------------------
+
+/// Classic SPL Token: the burn kind's mint must belong to it, so a Token-2022 mint is refused.
+pub const SPL_TOKEN_PROGRAM_ID: Address = address!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+/// Token-2022, named so that its refusal can be tested.
+pub const TOKEN_2022_PROGRAM_ID: Address = address!("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
+/// Meteora DAMM v2, owner of the locked-liquidity kind's pool.
+pub const DAMM_V2_PROGRAM_ID: Address = address!("cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG");
+/// SPL Stake Pool, owner of the stake-pool kind's pool.
+pub const STAKE_POOL_PROGRAM_ID: Address = address!("SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy");
+/// The Vote program, owner of the stake kind's vote account.
+pub const VOTE_PROGRAM_ID: Address = address!("Vote111111111111111111111111111111111111111");
+/// The EpochSchedule sysvar, read to find the first slot of the measured epoch.
+pub const EPOCH_SCHEDULE_SYSVAR_ID: Address =
+    address!("SysvarEpochSchedu1e111111111111111111111111");
+/// `sol_get_stack_height` at the top level of a transaction; a CPI runs deeper.
+pub const TRANSACTION_LEVEL_STACK_HEIGHT: u64 = 1;
+
+/// [AC] Row 3, the minimum distance between the target and the current value, in bps of the
+/// current value (at least one unit), per kind. For the price kind it is measured from the edge
+/// of the confidence band. All are 1% today; the session log defends each.
+pub const MIN_DISTANCE_BPS_PRICE: u16 = 100;
+pub const MIN_DISTANCE_BPS_SUPPLY: u16 = 100;
+pub const MIN_DISTANCE_BPS_DAMM: u16 = 100;
+pub const MIN_DISTANCE_BPS_STAKE_POOL: u16 = 100;
+pub const MIN_DISTANCE_BPS_STAKE: u16 = 100;
+/// [AC] The slowest average slot the opening assumes when it checks that the measured epoch
+/// starts before the deadline: mainnet runs near 400 ms and devnet near 235 ms.
+pub const EPOCH_START_SLOW_SLOT_MS: u64 = 500;
+
+#[cfg(all(feature = "mainnet", feature = "stake-at-least"))]
+compile_error!(
+    "`StakeAtLeast` opens only after a devnet YES is recorded; never build it with `mainnet`"
+);
 
 // --- Time (TP section 3.4.1; P1 sections 3.6 and 4.5) ----------------------------------------------
 
