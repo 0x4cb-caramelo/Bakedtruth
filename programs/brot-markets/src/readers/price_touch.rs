@@ -12,7 +12,9 @@ use pinocchio::error::ProgramError;
 
 use super::{CreationContext, CreationReading, ReadContext, Resolution};
 use crate::{
-    constants::{BPS_DENOMINATOR, MAX_PRICE_CLOCK_LEAD_SECONDS, PRICE_CAMPAIGN_MAX_CONF_BPS},
+    constants::{
+        BPS_DENOMINATOR, MAX_PRICE_CLOCK_LEAD_SECONDS, MIN_SLOT_MS, PRICE_CAMPAIGN_MAX_CONF_BPS,
+    },
     error::BrotError,
     state::enums::Direction,
 };
@@ -120,6 +122,18 @@ pub fn band_reaches_target(
         Direction::Above => price.checked_add(conf).ok_or(BrotError::MathOverflow)? >= target,
         Direction::Below => price.checked_sub(conf).ok_or(BrotError::MathOverflow)? <= target,
     })
+}
+
+/// The slot bound (Sprint 03 [AC]): the reading was posted at most `ceil(age_seconds × 1,000 /
+/// MIN_SLOT_MS)` slots before `slot`, a backstop to the time rules against a lagging cluster
+/// clock. A posted slot ahead of `slot`, which no cluster writes, counts as posted now. Frozen at
+/// the sprint's opening: the opening (SOL/USD), the join and the proof all call it.
+pub fn posted_within(reading: &PriceReading, slot: u64, age_seconds: u32) -> bool {
+    let lag = slot.saturating_sub(reading.posted_slot);
+    let bound = u64::from(age_seconds)
+        .saturating_mul(1_000)
+        .div_ceil(MIN_SLOT_MS);
+    lag <= bound
 }
 
 /// Why `check_fresh_and_tight` refused a reading.
