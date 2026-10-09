@@ -13,6 +13,11 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
 
 ### Added
 
+- **`brot.markets/2`, a página inicial no visual do deck** (opção A, fundador, 9/10/2026): faixas escuras e creme,
+  IBM Plex, o pãozinho do deck, e o texto do BP v0.0.4 (SOL, On-Chain Campaigns, abertura de US$ 500, sem teto). Fica
+  fora dos buscadores até a aprovação. Arquivos próprios em `services/landing/public/2/`, sem tocar na página atual, que o
+  Ronaldo também edita. A lista de espera é a mesma, com a frase de consentimento idêntica (um teste confere). O site
+  passa a ter 37 testes.
 - **Sprint 02: o núcleo do pote, o programa novo em Pinocchio** (`programs/brot-markets`, 8/10/2026). Sai o
   esqueleto Anchor; entra o programa que guarda SOL de verdade, ainda sem leitura de resultado nem pagamento:
   - **A configuração e a equipe:** `admin_initialize_config` (só a autoridade de upgrade, lida da conta ProgramData),

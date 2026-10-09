@@ -1,0 +1,228 @@
+/* Purpose: the sections of the /2 draft, one band per slide of the deck: hero, problem, answer with the example
+   campaign, the pot, opening a campaign, where we are, and the closing. Dark and cream bands alternate. The parts
+   that only the lower sections use are in more.css. Sprint: out of band (landing page), 2026-10-09. */
+
+.band {
+  position: relative;
+  padding: 96px 0;
+  overflow: hidden;
+  background-image: radial-gradient(rgba(163, 172, 186, 0.14) 1px, transparent 1.4px);
+  background-size: 26px 26px;
+}
+.band.dark {
+  background-color: var(--night);
+}
+.band.cream {
+  background-color: var(--cream);
+  background-image: radial-gradient(rgba(107, 94, 78, 0.16) 1px, transparent 1.4px);
+  color: var(--ink);
+}
+.cream .kicker {
+  color: var(--rust);
+}
+.cream .lede,
+.cream .note,
+.cream .source {
+  color: var(--ink-soft);
+}
+.note,
+.source {
+  margin-top: 28px;
+  max-width: 760px;
+  color: var(--fog);
+  font-size: 15px;
+}
+.source {
+  font: 400 13px/1.4 var(--mono);
+}
+.cream a {
+  color: var(--rust);
+}
+
+.hero-grid,
+.answer-grid,
+.close-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: center;
+}
+.sticker {
+  width: 100%;
+  height: auto;
+}
+
+.problem-grid,
+.pot-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr);
+  gap: 48px;
+  align-items: start;
+  margin-top: 44px;
+}
+.big-stat b {
+  display: block;
+  color: var(--rust);
+  font: 700 clamp(96px, 12vw, 168px) / 0.9 var(--mono);
+  letter-spacing: -0.05em;
+}
+.big-stat p {
+  margin-top: 14px;
+  color: var(--ink-2);
+  font-size: 19px;
+}
+.who {
+  display: grid;
+  gap: 14px;
+  padding: 0;
+  list-style: none;
+}
+.who li {
+  display: grid;
+  gap: 4px;
+  padding: 18px 22px;
+  border-radius: var(--r);
+  background: var(--ink);
+  color: var(--flour-soft);
+}
+.who span {
+  color: var(--fog);
+  font: 400 13px/1.3 var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.who b {
+  color: var(--crust);
+  font: 600 24px/1.2 var(--mono);
+}
+
+.points {
+  display: grid;
+  gap: 14px;
+  margin-top: 30px;
+  padding: 0;
+  list-style: none;
+}
+.points li {
+  padding-left: 18px;
+  border-left: 3px solid var(--crust);
+  color: var(--fog);
+}
+.points b {
+  color: var(--flour);
+}
+
+.demo {
+  display: grid;
+  gap: 18px;
+  padding: 30px;
+  border: 2px solid var(--night-line);
+  border-radius: 22px;
+  background: var(--night-2);
+}
+.demo-kicker {
+  color: var(--fog);
+  font: 400 13px/1.3 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.cream .demo-kicker {
+  color: var(--ink-soft);
+}
+.demo-q {
+  font: 600 clamp(24px, 2.6vw, 32px) / 1.2 var(--mono);
+}
+.demo-sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.demo-side {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border: 3px solid transparent;
+  border-radius: var(--r);
+  font: 400 16px/1 var(--mono);
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    border-color 0.2s,
+    opacity 0.3s;
+}
+.demo-side b {
+  font: 600 36px/1 var(--mono);
+}
+.demo-side.yes {
+  background: var(--yes-bg);
+  color: var(--yes);
+}
+.demo-side.no {
+  background: var(--no-bg);
+  color: var(--no);
+}
+.demo-side:hover,
+.demo-side[aria-pressed="true"] {
+  border-color: currentColor;
+}
+.demo-side[aria-pressed="true"] {
+  transform: scale(1.03);
+}
+.demo.is-picked .demo-side[aria-pressed="false"] {
+  opacity: 0.5;
+}
+.demo-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--night-line);
+}
+.demo-facts dt {
+  color: var(--fog);
+  font: 400 12px/1.3 var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.demo-facts dd {
+  margin-top: 4px;
+  font-size: 15px;
+}
+.demo-status {
+  color: var(--flour-soft);
+}
+.demo-result {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-radius: var(--r);
+}
+.demo-result[hidden] {
+  display: none;
+}
+.demo-result.won {
+  background: var(--yes-bg);
+  color: var(--yes);
+}
+.demo-result.lost {
+  background: var(--no-bg);
+  color: var(--no);
+}
+.demo-result img {
+  flex: none;
+  width: 120px;
+  height: auto;
+  image-rendering: pixelated;
+}
+.demo-stamp {
+  font: 400 12px/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.demo-amount {
+  margin-top: 6px;
+  font: 600 20px/1.25 var(--mono);
+}
