@@ -1,8 +1,5 @@
-# Anchor / Rust
-.anchor
-target/*
-!target/idl
-!target/types
+# Rust
+target/
 **/*.rs.bk
 test-ledger
 .surfpool
