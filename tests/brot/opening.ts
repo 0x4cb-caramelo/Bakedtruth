@@ -1,9 +1,10 @@
 /**
  * Purpose: what the opening's LiteSVM tests share: a world with the founder's config, one team key
- *          and a funded creator; the default opening's arguments; an opening sent with a slot or a
- *          byte changed; the captured confidences and the two rents the money checks compare.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio), lane D
+ *          and a funded creator; the default opening's arguments, and the canonical ones of the
+ *          other four kinds; an opening sent with a slot or a byte changed; the captured
+ *          confidences and the two rents the money checks compare.
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio), lane D; 03 (the other kinds' arguments), lane F
  */
 import { type Address, type Instruction, type KeyPairSigner } from "@solana/kit";
 
@@ -46,6 +47,22 @@ export function openArgs(w: World, over: Partial<I.OpenArgs> = {}): I.OpenArgs {
     ...over,
   };
 }
+
+/** A team key's free opening: nothing paid, and the SOL/USD slot neither checked nor read. */
+export const FREE = { openingUsd: 0n, maxLamports: 0n } as const;
+
+/**
+ * The canonical arguments of `kind` on `target` for a kind other than the price kind (D-j): no
+ * feed, `Above`, and epoch 0 unless `over` names the epoch of an epoch kind.
+ */
+export const otherKind = (kind: number, target: bigint, over: Partial<I.OpenArgs> = {}): Partial<I.OpenArgs> => ({
+  kind,
+  target,
+  feedId: new Uint8Array(32),
+  direction: P.Direction.Above,
+  epoch: 0n,
+  ...over,
+});
 
 /** Changes a built opening before it is sent: a slot (`withSlot`) or the bytes (`withData`). */
 export type Tamper = (ix: Instruction, args: I.OpenArgs) => Instruction | Promise<Instruction>;
