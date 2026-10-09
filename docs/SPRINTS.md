@@ -23,7 +23,7 @@ v0.0.1 or the approved proposal. **[Q]** founder question. **[AC]** to verify. *
 
 ## Summary for the founder
 
-There are 24 sprints in seven groups: 00 and 01 are done, 02 is in review, and 21 remain. The order is the one you asked for: the
+There are 24 sprints in seven groups: 00 to 03 are done, and 20 remain. The order is the one you asked for: the
 program and the services on devnet, then the site, then mainnet. The Android app is a separate track.
 
 | Group | Sprints | What comes to exist |
@@ -75,10 +75,10 @@ demonstrable on devnet.
 
 **Status.** Sprints 00 and 01 are closed, with tags `sprint-00` and `sprint-01`. Sprint 01 concluded that Pyth serves
 on devnet; the Surfpool read it asked for was done in Sprint 03. Sprint 02 ran on 2026-10-08 with the D6 names and was
-merged into `main` with PR #35, together with this plan's PR #27; the tag `sprint-02` waits for the founder. Sprint 03
-ran on 2026-10-09: the five readers, the opening of every kind, the join lock, `resolve_campaign`, the Surfpool
-scenario, and the frozen program and Anchor gone from the workspace; it is in review (PR #40, not merged). The next is
-04.
+merged into `main` with PR #35, together with this plan's PR #27 (tag `sprint-02`). Sprint 03 ran on 2026-10-09: the
+five readers, the opening of every kind, the join lock, `resolve_campaign`, the Surfpool scenario, and the frozen
+program and Anchor gone from the workspace; it was merged with PR #40 (tag `sprint-03`). The next is 04, which also
+builds the founder's answers of 2026-10-09 (section 5).
 
 **Outside the roadmap: the provisional site.** At the founder's request, `brot.markets` serves `services/landing`: a
 "coming soon" page with a waitlist, a privacy page and the decks at `/pitch` and `/pitch2`. It is not a sprint and
@@ -92,8 +92,8 @@ mainnet line, which still says "and a cap" and whose new wording waits for the f
 | -1 | [Design system, the opening screen and phone layouts](sprints/sprint--1-design-system.md) | Prerequisite of B8 and M | 00 |
 | 00 | [Setup](sprints/sprint-00-setup.md) (closed) | B0 | — |
 | 01 | [Foundation: price reader proof](sprints/sprint-01-foundation.md) (closed) | B1 | 00 |
-| 02 | [Pot core on Pinocchio: config, paid opening, vault, entries](sprints/sprint-02-pot-core.md) (merged, PR #35) | B2 | 00 |
-| 03 | [Readers and resolution; Anchor leaves the workspace](sprints/sprint-03-readers-resolution.md) (in review, PR #40) | B3 | 01, 02 |
+| 02 | [Pot core on Pinocchio: config, paid opening, vault, entries](sprints/sprint-02-pot-core.md) (merged, PR #35, tag `sprint-02`) | B2 | 00 |
+| 03 | [Readers and resolution; Anchor leaves the workspace](sprints/sprint-03-readers-resolution.md) (merged, PR #40, tag `sprint-03`) | B3 | 01, 02 |
 | 04 | [Window, settlement, payout, fees, creator share and invariants](sprints/sprint-04-settlement-invariants.md) | B4 | 03 |
 | 05 | [SDK and the devnet cycle](sprints/sprint-05-sdk-devnet-cycle.md) | B5 | 04 |
 | 06 | [Server and primary keeper (Bun check first)](sprints/sprint-06-keeper-server.md) | B6 | 05 |
@@ -202,9 +202,9 @@ SOL.
 | 00 (closed) | **Answered 2026-10-05:** the Phase 4 documents approved; the go-ahead to bring in `upstream/main` |
 | 01 (closed) | **Answered by the sprint:** Pyth serves on devnet, so the five kinds stay (P1 §4.2) |
 | -1 | **Open:** which dark is official and which theme is the default (TP §3.6); the site language (L-01); whether a campaign shows the history of the YES/NO split and the activity (L-23); the text of the "money stays locked" notice (L-03); where the partner's seal and highlight go (L-24); the creator notice, drawn as BP-14 recommends (P-9); for closure, approval of the redrawn screens, the creation screen and the phone layouts included. **Taken as approved:** D8 |
-| 02 | **Answered:** D-a, D-b, D-c, D-d, D-f, D-h to D-l, D-o; P-3 (the team and launch partners pay nothing and keep no 1%); P-5 (minimum entry 0.01 SOL); Q3 (both sides allowed; the first-baker exemption covers the first wallet's whole entry); Q12 (keys with Lucas and Ronaldo). **Taken as approved:** D6, before the first identifier. **Open:** confirm the reading that both hold team keys (Q12) |
-| 03 | **Answered:** Q1 (B: any wallet may trigger resolution and payout; it chooses nothing); Q4 (a: the price proved on-chain within 60 s; maximum price age set per campaign, with a 30 s floor). **Taken as approved:** D7 |
-| 04 | **Answered:** P-1 (no creator share on a void, in a one-sided pot or on the prize); P-2 (the share from the pot while winners stay whole, the shortfall from Brot's fee); P-4 (the prize returns to whoever opened; the 10% follows the cause); Q2, re-read for SOL (a credit below rent to an empty wallet stays reserved, and its owner can claim it from their own wallet); Q6 (the 10% waits in the vault, T23). **Open [Q]:** a campaign with no entry at all has no written rule (P1 §3.5); the program builds the one-sided treatment as a switchable default (prize back to whoever opened, the 10% kept) [INF]. **Open [Q]:** whether a `StaleFeed` void counts as a house failure once the keeper holds a Hermes key, which decides whether the 10% is refunded; the working default is an outside cause, the 10% kept [INF] |
+| 02 | **Answered:** D-a, D-b, D-c, D-d, D-f, D-h to D-l, D-o; P-3 (the team and launch partners pay nothing and keep no 1%); P-5 (minimum entry 0.01 SOL); Q3 (both sides allowed; the first-baker exemption covers the first wallet's whole entry); Q12 (team keys with Lucas, Ronaldo and Bernardo, confirmed 2026-10-09). **Taken as approved:** D6, before the first identifier |
+| 03 | **Answered:** Q1 (B: any wallet may trigger resolution and payout; it chooses nothing); Q4 (a: the price proved on-chain within 60 s; maximum price age set per campaign, with a 30 s floor). **Taken as approved:** D7. **Answered 2026-10-09:** the seven questions it left (which Pyth feeds, `p − conf`, the SOL/USD constant, the team's opening budget, the minimum entry kept, Q12, join after the touch); Sprint 04 builds them |
+| 04 | **Answered:** P-1 (no creator share on a void, in a one-sided pot or on the prize); P-2 (the share from the pot while winners stay whole, the shortfall from Brot's fee); P-4 (the prize returns to whoever opened; the 10% follows the cause); Q2, re-read for SOL (a credit below rent to an empty wallet stays reserved, and its owner can claim it from their own wallet); Q6 (the 10% waits in the vault, T23). **Answered 2026-10-09:** a campaign with no entry at all returns the prize to whoever opened, and Brot keeps the 10%; a `StaleFeed` void is an outside cause, the 10% kept. Both are built as rules, with no switch |
 | 05 | **Open:** which of Lucas and Ronaldo holds the devnet upgrade key on deploy day (Q12); the program-address keypair backed up outside `target/deploy/` (Sprint 00 review, founder action). **Answered:** Q10 falls away (devnet SOL from the faucet; no test USDC) |
 | 06 | **Open:** D4 for the keeper's RPC account (Q8 is folded into D4); the server owner's agreement to per-unit identities (T13); P-7, for the monthly conversion half of the SOL runbook. If the Bun check on the server fails, D-p comes back to the founder before anything else. **Answered:** Q11 (domain bought, on Cloudflare); the Pyth Hermes key waits for measurement ("ok", 2026-10-05), and paid openings need no Pyth plan (D4) |
 | 07 | **Open:** D4 for the second provider's VM, the RPC account at another company and the email provider |

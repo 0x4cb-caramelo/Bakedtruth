@@ -1,6 +1,6 @@
 # Sprint 03 — Readers and resolution; Anchor leaves the workspace
 
-**Status:** in review (PR #40, opened 2026-10-09, not merged) · **Branch:** `sprint-03-readers-resolution` · **Dates:** none, by the founder's decision
+**Status:** done, merged into `main` with PR #40 on 2026-10-09; tagged `sprint-03` · **Branch:** `sprint-03-readers-resolution` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -155,16 +155,16 @@ retrospective", at the end of this file, holds the tables (lanes, measurements, 
       Evidence: commit `bf18ba2` (lane G) and the status line fixed at integration.
 - [x] Each item of "Carried over" below is done, or decided in writing with the reason.
       Evidence: "Carried over, item by item" in the record below.
-- [ ] Common closure (`docs/SPRINTS.md`, section 4): checks, secrets scan, codemap, changelog and session log, the
-      reviews, the pull request. Merge into `main` and the tag are the founder's.
+- [x] Common closure (`docs/SPRINTS.md`, section 4): checks, secrets scan, codemap, changelog and session log, the
+      reviews, the pull request, the merge into `main` and the tag.
       Evidence: items 1 to 5 done. The standard checks pass locally on `edc230c` (2026-10-09): `bun run
       build:program` with no IDL drift, `bun run test` 262 pass, `bun run test:rust` 255, the `mainnet` test 256,
       `cargo fmt --check`, clippy with `no-entrypoint` and `no-entrypoint,mainnet`, `bunx tsc --noEmit`, `bun run
       lint`, the app's lint and build, the landing's tests, `codemap.js --check`, `os-self-test` (the three warnings it
       gives predate this sprint), `npm run test:os`; and in CI, run 37893268607, green. `ci-secret-scan.js
       origin/main` is clean; `Cargo.lock` holds no `anchor-lang` or `anchor-spl`. CHANGELOG, both session logs, the
-      reviews and PR #40 are below. **Open, and not ours to close:** item 6, the merge into `main` and the `sprint-03`
-      tag.
+      reviews and PR #40 are below. Item 6: merged into `main` with PR #40 on 2026-10-09 by Ronaldo, with the freedom
+      the founder gave him, and tagged `sprint-03`.
 
 ## Deliverables
 
@@ -452,19 +452,20 @@ source read at a pinned commit; shard-0 accounts of unsponsored feeds and who pa
 | Only the upgraded receiver | Unchanged (`PYTH_RECEIVER_ID`) |
 | `outcome_knowable` and `try_resolve` replace `ReaderNotReady` | Done; 6070 is unused and not reused |
 | Codes of its own for the SOL/USD read | Four codes, 6086 to 6089 |
-| Which feeds a price campaign may name | Not decided here: a money rule the founder has not answered. Lane R's finding on who can create a shard-0 account is in `pyth-feeds-patrocinados.md`; the code accepts any feed whose sponsored account passes the checks |
+| Which feeds a price campaign may name | Not decided here: a money rule the founder has not answered. Lane R's finding on who can create a shard-0 account is in `pyth-feeds-patrocinados.md`; the code accepts any feed whose sponsored account passes the checks. Answered on 2026-10-09: our own compiled list, starting from Pyth's official sponsored list; built in Sprint 04 |
 | Row 3, both ends | Built (above) |
 | The future-publish bound is shared | Built (`price_touch::rules`) |
 | A reading whose exponent differs from the stored one | Refused at the join lock and as proof (`PriceExponentChanged`) |
 | The terms the creator saw | `expected_params_version` (above) |
-| `p − conf`, the SOL/USD constant, the free-opening budget | Not built: founder decisions, still open (the session log's table) |
+| `p − conf`, the SOL/USD constant, the free-opening budget | Not built: founder decisions, open during the sprint. Answered on 2026-10-09: all three yes, the team's openings outside `max_open_campaigns` and unlimited; built in Sprint 04 |
 
 ### Carried to Sprints 04 and 05
 
 - The founder's seven questions (the six of the opening plus the join-after-touch fix the reviews raised; the
   negative-price proof was decided by the reviews and built), with the code's working reading for each, in
   `session-log/2026-10-09-sprint-03-abertura-contrato-e-valores.md`,
-  `session-log/2026-10-09-sprint-03-integracao-e-revisoes.md` and the reviews below.
+  `session-log/2026-10-09-sprint-03-integracao-e-revisoes.md` and the reviews below. Answered on 2026-10-09
+  (`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`); Sprint 04 builds them.
 - Sprint 04: confirming, voiding by hand (`StaleFeed` after an update landed; `MissedWindow`), contesting, settling,
   paying; the review window (`review_ends_at`) is already written by `resolve_campaign`.
 - Sprint 05: the devnet YES of `StakeAtLeast` and the reviewed change that turns `stake-at-least` on; the SDK's

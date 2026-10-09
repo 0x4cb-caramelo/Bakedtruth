@@ -9,9 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [Unreleased]
 
 A Sprint 02, o núcleo do pote em Pinocchio, foi mesclada na `main` pelo PR #35 em 8/10/2026 (o PR #30 trazia a branch
-`sprint-02-pot-core`); a tag `sprint-02` espera o fundador (`docs/sprints/sprint-02-pot-core.md`). A Sprint 03, os
-leitores e a resolução, está em revisão no pull request #40 (branch `sprint-03-readers-resolution`, 9/10/2026), sem
-mesclar: a mescla e a tag esperam o fundador (`docs/sprints/sprint-03-readers-resolution.md`).
+`sprint-02-pot-core`) e ganhou a tag `sprint-02` em 9/10/2026. A Sprint 03, os leitores e a resolução, foi mesclada
+na `main` pelo PR #40 em 9/10/2026, com a tag `sprint-03` (`docs/sprints/sprint-03-readers-resolution.md`). Quem
+mesclou os PRs #37 e #40 foi o Ronaldo, com a liberdade que o Lucas lhe deu; ele também respondeu as perguntas ao
+fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`).
 
 ### Added
 
@@ -285,6 +286,15 @@ mesclar: a mescla e a tag esperam o fundador (`docs/sprints/sprint-03-readers-re
 
 ### Changed
 
+- **As respostas do fundador de 9/10/2026** às perguntas que as Sprints 02 e 03 deixaram e às duas abertas da Sprint
+  04, dadas pelo Ronaldo (`docs/business/ideacao-perguntas-e-respostas.md`, seção 1; comentário no PR #40). A Sprint
+  04 constrói: uma lista nossa de feeds da Pyth, fixa no programa, que começa pela lista oficial de feeds
+  patrocinados (62 na rede principal e 17 na devnet), o que estreita o D-i só para o tipo preço; a abertura cobrada
+  em `p − conf`; o feed do SOL/USD como constante; as aberturas da equipe fora do `max_open_campaigns` e sem limite;
+  a entrada mínima copiada na abertura (hoje 0,01 SOL); a margem na trava de entrada e a devolução das entradas
+  feitas a partir do `publish_time` da prova do SIM; o prêmio de volta a quem abriu numa campanha sem entradas, com
+  os US$ 50 para a Brot; e o `StaleFeed` como causa externa, também com os US$ 50 para a Brot. As chaves da equipe
+  ficam com o Lucas, o Ronaldo e o Bernardo.
 - **O `pred-provable` e o Anchor saem do repositório** (Sprint 03, 9/10/2026), num commit só: o programa congelado,
   os seus testes, `tests/helpers.ts`, o IDL em `target/` e o `Anchor.toml`. O `Cargo.lock` perde 175 pacotes e não
   sobe versão nenhuma; o `brot-markets` chama as syscalls de stake de época, altura da pilha e sysvar pelo próprio
@@ -365,30 +375,7 @@ mesclar: a mescla e a tag esperam o fundador (`docs/sprints/sprint-03-readers-re
 
 ### Em aberto
 
-- **Sprint 03, as sete perguntas ao fundador**, nenhuma respondida, com o que o código faz enquanto isso
-  (`session-log/2026-10-09-sprint-03-abertura-contrato-e-valores.md` e
-  `session-log/2026-10-09-sprint-03-integracao-e-revisoes.md`): (1) quais feeds da Pyth uma campanha de preço
-  pode nomear — hoje qualquer um cujo endereço patrocinado passe nas checagens; (2) cobrar a abertura em `p − conf`
-  — hoje o preço médio; (3) o feed do SOL/USD como constante do programa — hoje um campo da configuração; (4) uma
-  cota própria para as aberturas gratuitas da equipe — hoje a mesma válvula; (5) copiar a entrada mínima na abertura
-  — hoje a leitura viva; (6) o Lucas e o Ronaldo com chaves da equipe (Q12); (8) **entrar no SIM depois do toque**:
-  a trava de entrada lê a conta patrocinada, que atualiza a cada minuto, e a prova do SIM aceita qualquer
-  atualização completa de até 60 segundos; entre as duas, um baker que viu o toque numa atualização recém-postada
-  entra no SIM e resolve na mesma transação. As revisões propõem uma margem na trava (recusar a entrada quando a
-  borda da banda está a menos de X% do alvo), um `last_entry_at` na campanha e, na Sprint 04, a devolução das
-  entradas feitas depois do `publish_time` da prova; cada caminho muda quem ganha, então é dele. A pergunta 7 (preço
-  zero ou negativo como prova) foi fechada pelas revisões: recusado.
-- **Sprint 02, para o fundador confirmar:** que o Lucas e o Ronaldo têm, os dois, chaves da equipe (Q12); e se a
-  entrada mínima de uma campanha aberta muda quando a configuração muda (hoje muda). O D6 e a leitura de "a equipe
-  põe prêmio" (paga como qualquer carteira) ficaram decididos no PR #35, que mesclou também o #27 ("O que foi feito
-  lá no código dele a gente traz como nova realidade"). O R4, abertura mais barata nos primeiros meses, não foi
-  construído.
-- **Sprint 02, decisões que as revisões pedem antes da Sprint 03:** a campanha de preço aceita qualquer feed da Pyth,
-  e o plano diz "preço de um ativo grande" (uma lista fechada de feeds pediria a decisão dele, porque o D-i tirou a
-  lista de contas); uma chave da equipe vazada pode ocupar todas as vagas de campanhas abertas por até 90 dias (uma
-  cota própria para as aberturas gratuitas resolveria); cobrar a abertura na borda de baixo do preço, `p − conf`,
-  tira de quem abre a vantagem de escolher a atualização mais alta; e o feed do SOL/USD pode virar uma constante do
-  programa, em vez de um parâmetro que um erro de digitação do admin muda.
+- **O R4, abertura mais barata nos primeiros meses,** não foi construído (Sprint 02).
 
 - **Autoria no Colosseum, prazo 12/10/2026:** o plano diz que a equipe se apresenta como uma pessoa, mas o git mostra
   quatro autores desde 14/9/2026, e o regulamento pede todos os membros e verifica quem fez o trabalho. O código vindo
@@ -449,13 +436,6 @@ mesclar: a mescla e a tag esperam o fundador (`docs/sprints/sprint-03-readers-re
   conferida; o Ronaldo ser avisado do serviço novo no servidor.
 - **Arquivos originais do deck** (as duas versões, 10 MB e 13 MB) em `docs/technical/`, fora do Git. Não foram
   commitados nem apagados.
-- **Sprints:** a 00 e a 01 estão concluídas; a 02 foi mesclada na `main` pelo PR #35, e a tag `sprint-02` espera o
-  fundador. Falta confirmar a leitura de que o Lucas e o Ronaldo têm, os dois, chave de equipe.
-- **Leitura no Surfpool:** era critério de pronto da Sprint 01 e não foi feita. Está na Sprint 03, com o de acordo
-  do fundador.
-- **Desenho da pergunta de preço:** a revisão da Sprint 01 propõe aceitar, na aposta, só a conta patrocinada do
-  ativo, e na prova qualquer conta completa. O plano técnico hoje aceita qualquer conta válida. Decide-se na
-  Sprint 03.
 - **Quem controla a Pyth:** na rede principal, a autoridade que atualiza os programas é um endereço derivado cujo
   controle não foi conferido. Risco na seção 13 do plano técnico; conferir antes da rede principal (Sprint 16).
 - **Perguntas do fundador:** as doze da seção 14.2 do plano técnico valem com a resposta recomendada, porque os
@@ -466,7 +446,8 @@ mesclar: a mescla e a tag esperam o fundador (`docs/sprints/sprint-03-readers-re
   quando sai o token A, cabeçalhos que ainda dizem "rascunho"). A Parte 4 ainda dá a Pyth na devnet como não verificada, e a Parte 2 não traz o número do mercado $LAPTOP que o deck usa. Falta uma passada para resolvê-los.
 - **Direção de design:** Ledger² escura e clara, aprovada e documentada. O app ainda mostra a direção C; a troca
   é a Sprint -1 e as Sprints 09 a 13. Várias telas do protótipo mostram o modelo antigo e precisam de conteúdo novo.
-- **Nome:** Brot Markets. O app, os protótipos e o `package.json` da raiz ainda dizem "baked" ou `pred-provable`.
+- **Nome:** Brot Markets. O app e os protótipos ainda dizem "baked" ou `pred-provable`; o `package.json` da raiz diz
+  `brot-markets` desde a Sprint 03.
 - **Servidor:** o projeto tem espaço próprio no servidor compartilhado, com o código e o site provisório rodando.
   Falta o lugar do segundo serviço agendado.
 - **Ferramentas locais:** a máquina de desenvolvimento da Sprint 02 (não o servidor compartilhado) tem Solana CLI
