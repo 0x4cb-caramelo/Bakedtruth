@@ -1,9 +1,9 @@
 /**
  * Purpose: tests /4, the home page as the founders asked on 2026-10-09 after /3: it says exactly what /3 says (the copy
  *          they approved), keeps the original layout and fonts (the home page's own styles.css), and its colour file
- *          sets colours only, with the example and the principles as dark cards in both themes. It also stays out of
- *          search engines and has no inline style or script.
- * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-09
+ *          sets colours only: navy and orange, no cream and no brown, with the example and the principles as navy
+ *          cards in both themes. It also stays out of search engines and has no inline style or script.
+ * Version: 0.2.0 · Sprint: out of band (landing page), 2026-10-09
  */
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
@@ -52,7 +52,7 @@ test("/4 keeps the original layout and fonts: the home page's stylesheet, then i
 });
 
 test("the colour file of /4 sets colours only, apart from the notice", () => {
-  const colourProperties = /^(--[a-z-]+|color|background|border-color|border-left)$/;
+  const colourProperties = /^(--[a-z-]+|color|background|border-color|border-left|outline-color)$/;
   for (const [selector, properties] of rules) {
     if (selector.startsWith(".baking")) continue;
     for (const property of properties) assert.match(property, colourProperties, `${selector} sets ${property}`);
@@ -73,14 +73,24 @@ test("/4 replaces every colour of the original, in both themes", () => {
   assert.doesNotMatch(colors, /#(4f7dff|2f5fe6|a8beff|5d7fe0|6f93ff)/i, "none of the original's blues");
 });
 
-test("the example and the principles of /4 are dark cards in both themes, and the strip is dark", () => {
+test("the example and the principles of /4 are navy cards in both themes, and the strip is navy", () => {
   const cards = colors.match(/\.read,\s*\.principle \{([^}]*)\}/)[1];
   assert.match(cards, /--panel: #171e29;/);
   assert.match(cards, /--text: #f7eedb;/);
-  assert.match(colors, /:root\[data-theme="light"\] \.principle \{\s*--panel: #1b1611;/);
+  assert.doesNotMatch(colors, /\[data-theme="light"\] \.(read|principle)/, "the cards do not change with the theme");
   const light = colors.slice(colors.indexOf(':root[data-theme="light"] {'));
-  assert.match(light, /--strip-bg: #1b1611;/);
-  assert.match(light, /--yes-bg: #1c3a30;/, "the YES and NO chips sit on a dark card, so they keep the dark pair");
+  assert.match(light, /--strip-bg: #0b0f15;/);
+  assert.match(light, /--yes-bg: #1c3a30;/, "the YES and NO chips sit on a navy card, so they keep the dark pair");
+});
+
+test("/4 has no cream and no brown: navy and orange in dark, the original's cool page in light", () => {
+  // The cream page, the brown ink and the rust of the pitch deck's light slides, which /2 and /3 used in light.
+  const creamAndBrown = /#(f6eddb|fffaf0|efe2c8|e2d4ba|cdbb98|fbe3bd|1b1611|3d3328|6b5e4e|a8481b|7a3212|2b2416)/i;
+  assert.doesNotMatch(colors, creamAndBrown);
+  assert.match(colors, /:root \{\s*--bg: #10151c;/, "dark is the navy of /2");
+  const originalLight = styles.slice(styles.indexOf(':root[data-theme="light"] {'));
+  const bg = originalLight.match(/--bg: (#[0-9a-f]+);/)[1];
+  assert.match(colors.slice(colors.indexOf(':root[data-theme="light"] {')), new RegExp(`--bg: ${bg};`));
 });
 
 test("every file /4 points at exists, with no inline style or script, out of search engines", () => {

@@ -46,6 +46,16 @@ gente gosta dele tbm."
   "cartão escuro é disposição do deck, não cor", estava errada.
 - **Como:** `public/4/colors.css` redefine os tokens de cor e, dentro dos cartões, troca os tokens pelos escuros,
   seja qual for o tema da página. Um teste confere que o arquivo só declara cor, fora o aviso.
+- **A `/4` ainda saiu errada na primeira vez.** Resposta do Lucas: "vc tem o fundo marrom e não azul/nave como era
+  no original, ainda tem muito marrom, e eu disse especificamente que queremos as cores do /2, e ele não tinha esses
+  marrons". A `/2` tem dois temas: no escuro é azul-marinho com laranja; no claro é creme com blocos marrom-escuros.
+  A leitura mais provável é que ele viu a `/2` no escuro em `brot.markets`, onde o navegador lembra a escolha; no
+  `localhost` tudo abre no claro, e a `/4` tinha copiado justamente o tema claro da `/2`. Faltou conferir em qual
+  tema ele estava julgando.
+- **A correção:** nenhum creme e nenhum marrom. O escuro é o azul-marinho e laranja da `/2`. O claro fica com o
+  fundo azulado, os painéis brancos e a tinta da original, com os mesmos cartões azul-marinho e o mesmo laranja; o
+  laranja de texto no claro é um tom mais fundo (`#c2410c`), para dar leitura. Um teste proíbe as cores creme e
+  marrom no arquivo.
 - **A `/3` continua na branch** para comparação; um teste garante que o texto das duas é o mesmo.
 
 ## Em aberto

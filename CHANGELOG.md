@@ -59,8 +59,12 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
   laranja, passaram do ponto. A `/4` mantém o texto, a disposição e as fontes da original (Barlow Condensed e
   Inter) e usa a paleta do deck como a `/2` usava: o exemplo e os três princípios em cartões escuros nos dois
   temas, a faixa do topo escura, o botão liso, sem o anel giratório, e a caixa de sugestão com o destaque na borda
-  esquerda. O aviso laranja continua. Seis testes novos (`tests/four.test.mjs`): o texto é o da `/3`, palavra por
-  palavra, e o arquivo de cores só declara cor.
+  esquerda. O aviso laranja continua. **A primeira versão da `/4` ainda saiu com creme e marrom,** porque copiou o
+  tema claro da `/2`; o que os fundadores tinham aprovado era a `/2` no tema escuro, azul-marinho e laranja. Corrigida
+  no mesmo dia: o escuro é o azul-marinho da `/2`, o claro tem o fundo azulado da original com os mesmos cartões
+  azul-marinho e o mesmo laranja, e não há creme nem marrom em nenhum dos dois. Sete testes novos
+  (`tests/four.test.mjs`): o texto é o da `/3`, palavra por palavra, o arquivo de cores só declara cor, e nenhuma
+  cor creme ou marrom entra nele.
 - **`/3`, a página inicial original com as cores do deck e o texto mais curto** (fundadores, 9/10/2026; na branch
   `feat/site-3-original-com-cores-do-deck`, ainda não publicada). Depois de ver a `/2`, o Lucas e o Ronaldo
   preferiram a disposição e as fontes da página original, com as cores do deck. A `/3` carrega o `styles.css` da
