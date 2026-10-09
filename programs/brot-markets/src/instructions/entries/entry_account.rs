@@ -1,21 +1,55 @@
 //! Purpose: the baker's `Entry` at a join: created at its canonical PDA on the first join, rent
 //!          paid by the baker, and checked against the campaign, the baker and the total the
 //!          client signed on every later join (T10).
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio), lane E
+//! Version: 0.0.3
+//! Sprint: 02 (pot core on Pinocchio), lane E; 04 (lane G: `read_joins`, the refund's reads)
 //!
 //! One `Entry` per baker and campaign holds both sides (Q3). Nothing here moves lamports besides
 //! the rent of a new entry; the join deposits the entry itself and bookkeeps it.
 
 use pinocchio::{account::RefMut, cpi::Seed, error::ProgramError, AccountView, Address};
 
+use super::join_record::read_join;
 use crate::{
     checks,
     constants::ENTRY_SEED,
     error::BrotError,
     layout::ZeroCopy,
+    math::refund::Split,
     state::{self, entry::Entry},
 };
+
+/// The joins of one baker, read for the refund and the payout (lane G). `join_accounts` must be
+/// every one of the baker's joins in index order: the k-th account is join `k`, so a join passed
+/// twice or left out is `JoinAccountsMismatch`, and the sum of the joins must be the entry's
+/// `entry_total` (`EntryTotalMismatch`). Each join is split at `publish_time` by side.
+pub fn read_joins(
+    join_accounts: &[AccountView],
+    campaign: &Address,
+    baker: &Address,
+    join_count: u32,
+    entry_total: u64,
+    publish_time: i64,
+    program_id: &Address,
+) -> Result<Split, ProgramError> {
+    if join_accounts.len() != usize::try_from(join_count).map_err(|_| BrotError::MathOverflow)? {
+        return Err(BrotError::JoinAccountsMismatch.into());
+    }
+    let mut split = Split::default();
+    for (position, account) in join_accounts.iter().enumerate() {
+        let index = u32::try_from(position).map_err(|_| BrotError::MathOverflow)?;
+        let record = read_join(account, campaign, baker, index, program_id)?;
+        let join = crate::math::refund::Join {
+            joined_at: record.joined_at,
+            amount: record.amount,
+        };
+        split.add(record.yes, join, publish_time)?;
+    }
+    if split.total()? != entry_total {
+        return Err(BrotError::EntryTotalMismatch.into());
+    }
+    Ok(split)
+}
 
 /// A later join: the program's `Entry` at `["entry", campaign, baker]`. The load re-derives that
 /// address from this campaign and this baker, so another campaign's or another baker's entry
@@ -67,5 +101,20 @@ pub(super) fn create_entry<'a>(
     state.bump = bump;
     state.campaign = *campaign;
     state.baker = *baker_key;
+    Ok(state)
+}
+
+/// An existing entry for the tally: owner, tag and PDA, and its stored keys must be the campaign and baker
+/// passed (`EntryMismatch`). Its total is not checked here; the joins are checked one by one.
+pub fn load_entry_for_tally<'a>(
+    entry: &'a mut AccountView,
+    campaign: &Address,
+    baker: &Address,
+    program_id: &Address,
+) -> Result<RefMut<'a, Entry>, ProgramError> {
+    let state = Entry::load_mut(entry, campaign, baker, program_id)?;
+    if state.campaign != *campaign || state.baker != *baker {
+        return Err(BrotError::EntryMismatch.into());
+    }
     Ok(state)
 }

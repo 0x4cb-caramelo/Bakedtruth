@@ -65,8 +65,8 @@ describe("join refuses", () => {
   test("below min_entry_lamports, and takes exactly the minimum", async () => {
     const { w, campaign } = await joinWorld();
     const baker = await fundedWallet(w);
-    expectError(await join(w, baker, campaign, yes(MIN_ENTRY - 1n)), "EntryBelowMinimum");
-    expectError(await join(w, baker, campaign, no(0n)), "EntryBelowMinimum");
+    expectError(await join(w, baker, campaign, yes(MIN_ENTRY - 1n)), "BelowCampaignMinEntry");
+    expectError(await join(w, baker, campaign, no(0n)), "BelowCampaignMinEntry");
     expectOk(await join(w, baker, campaign, yes(MIN_ENTRY)));
   });
 

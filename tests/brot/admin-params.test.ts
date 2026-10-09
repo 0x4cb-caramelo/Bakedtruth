@@ -96,13 +96,14 @@ describe("creation params apply to future campaigns only", () => {
     expect(accountData(w, old.campaign)).toEqual(before);
   });
 
-  test("the minimum entry is read at every join, an open campaign's included", async () => {
+  test("an open campaign keeps the minimum it opened with: a later config change does not move it", async () => {
+    // Question 5 (lane G): the join reads the campaign's own `min_entry_lamports`, copied at opening.
     const { w, old, setParams } = await withOpenCampaign();
     const baker = await fundedWallet(w);
     await setParams({ min_entry_lamports: 50_000_000n });
-    const small = { side: P.Side.Yes, amount: 20_000_000n };
-    expectError(await join(w, baker, old.campaign, small), "EntryBelowMinimum");
-    expectOk(await join(w, baker, old.campaign, { side: P.Side.Yes, amount: 50_000_000n }));
+    const opened = 10_000_000n; // 0.01 SOL, the minimum the campaign was opened with
+    expectError(await join(w, baker, old.campaign, { side: P.Side.Yes, amount: opened - 1n }), "BelowCampaignMinEntry");
+    expectOk(await join(w, baker, old.campaign, { side: P.Side.Yes, amount: 20_000_000n }));
   });
 
   test("a lower max_open_campaigns stops new openings only", async () => {

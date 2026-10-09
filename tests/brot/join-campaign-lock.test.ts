@@ -1,11 +1,12 @@
 /**
  * Purpose: the join lock (BR-06): once the reader of the campaign's kind knows the outcome, a join is
- *          refused with `OutcomeKnowable` and nothing moves; one step short of it, the join passes.
+ *          refused with `OutcomeKnowable` and nothing moves; inside the proximity buffer (question 7) it is
+ *          refused with `JoinBufferRefused`, and at the margin or one unit outside it, the join passes.
  *          Price `Above` and `Below` (price ± confidence reaches the target), `SupplyAtMost`,
  *          `DammV2LockedAtLeast`, the two epoch kinds (the measured epoch has started), and where the
  *          lock sits among the join's checks.
- * Version: 0.0.1
- * Sprint:  03 (readers and resolution), lane E. Needs the SBF build with the readers of lanes A, B
+ * Version: 0.0.2
+ * Sprint:  03 (readers and resolution), lane E; 04 (the buffer), lane G. Needs the SBF build with the readers of lanes A, B
  *          and C: runs from the integration on.
  */
 import { describe, expect, test } from "bun:test";
@@ -74,8 +75,26 @@ describe("join refuses once the outcome is knowable", () => {
         btc(w, change);
         noEntry(await refusedJoin(w, a, campaign, yes(SOL), "OutcomeKnowable"));
       }
-      btc(w, { price: edge - sign });
-      expectOk(await join(w, a, campaign, yes(SOL)));
+      // The buffer (question 7): the band edge must sit at least the margin from the target, 1% of the
+      // price rounded up. One unit inside it the join is refused; exactly the margin, and one unit
+      // outside, it passes. `priceAtGap` solves for the price whose edge is that far from the target.
+      const margin = (p: bigint) => (p * 100n + 9999n) / 10000n;
+      const priceAtGap = (offset: bigint) => {
+        let p = target;
+        for (let i = 0; i < 4; i++) p = target - sign * (margin(p) + offset + BTC_CONF);
+        return p;
+      };
+      for (const [offset, passes] of [
+        [-1n, false],
+        [0n, true],
+        [1n, true],
+      ] as const) {
+        const p = priceAtGap(offset);
+        expect(sign * (target - p) - BTC_CONF).toBe(margin(p) + offset);
+        btc(w, { price: p });
+        if (passes) expectOk(await join(w, a, campaign, yes(SOL)));
+        else noEntry(await refusedJoin(w, a, campaign, yes(SOL), "JoinBufferRefused"));
+      }
       // A baker already in is locked out as well once the band reaches the target.
       btc(w, { price: edge });
       await refusedJoin(w, a, campaign, yes(SOL, SOL), "OutcomeKnowable");
