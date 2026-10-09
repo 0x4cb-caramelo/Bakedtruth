@@ -9,7 +9,7 @@
 import { describe, expect, test } from "bun:test";
 import { lamports } from "@solana/kit";
 
-import { newId, openingLamports, readCampaign, readConfig, SOL_PRICE } from "./flows";
+import { newId, openingLamports, readCampaign, readConfig, SOL_CHARGED } from "./flows";
 import { openingWorld, rents, split, tryOpen } from "./opening";
 import * as P from "./program";
 import { balance, expectError, expectOk, now } from "./setup";
@@ -42,7 +42,7 @@ describe("retried opening fails on its id", () => {
     const { sent, campaign, vault } = await tryOpen(w, w.creator, { id });
     expectOk(sent);
     const rent = rents(w);
-    const paid = openingLamports(500n, SOL_PRICE);
+    const paid = openingLamports(500n, SOL_CHARGED);
     expect(balance(w, campaign)).toBe(rent.campaign);
     expect(before - balance(w, w.creator.address)).toBe(rent.campaign - prefunded + rent.vault + paid);
     expect(balance(w, vault)).toBe(rent.vault + paid);
@@ -58,7 +58,7 @@ describe("retried opening fails on its id", () => {
     const { sent, campaign, vault } = await tryOpen(w, w.creator, { id });
     expectOk(sent);
     const rent = rents(w);
-    const { paid, prize, fee } = split(openingLamports(500n, SOL_PRICE));
+    const { paid, prize, fee } = split(openingLamports(500n, SOL_CHARGED));
     // Already above its rent, the vault needs no top-up: the creator pays the campaign's rent only.
     expect(before - balance(w, w.creator.address)).toBe(rent.campaign + paid);
     expect(balance(w, vault)).toBe(prefunded + paid);

@@ -47,6 +47,19 @@ describe("open campaign refuses", () => {
     expectError((await tryOpen(w, w.creator, onSol)).sent, "ReaderWrongOwner");
   });
 
+  test("question 1: a fresh, valid feed outside the compiled list is refused with FeedNotOnList", async () => {
+    const w = await openingWorld();
+    // The SOL/USD account with its feed id changed by one bit: fresh, fully verified, owned by the receiver,
+    // at the sponsored address of that id, so only the list refuses it.
+    const unlisted = Uint8Array.from(P.SOL_USD_FEED_ID);
+    unlisted[31] ^= 1;
+    const account = await P.sponsoredPriceAccount(unlisted);
+    setPriceAccount(w.client, account, "pyth-sol-usd-devnet", { feedId: unlisted });
+    const change = { feedId: unlisted, target: (SOL_PRICE * 11n) / 10n };
+    expectError((await tryOpen(w, w.creator, change, { slots: { metric: account } })).sent, "FeedNotOnList");
+    expect((await readConfig(w)).open_campaigns).toBe(0);
+  });
+
   test("row 4: a partial verification", async () => {
     const w = await openingWorld();
     setPriceAccount(w.client, P.BTC_USD_ACCOUNT, "pyth-btc-usd-devnet", { verification: 0 });
