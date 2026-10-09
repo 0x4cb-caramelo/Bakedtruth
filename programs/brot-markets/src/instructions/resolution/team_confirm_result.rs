@@ -60,7 +60,7 @@ pub fn team_confirm_result(
     let outcome = Outcome::try_from(stored.outcome)?;
     let seq = take_seq(&mut stored)?;
     finalize_snapshot(&mut stored, &mut config_state)?;
-    stored.status = Status::Settling as u8;
+    // `finalize_snapshot` has set the status (Settling, or Settled for a campaign with no entry).
     let event = ResultConfirmed {
         campaign: campaign_key,
         seq: LeU64::new(seq),

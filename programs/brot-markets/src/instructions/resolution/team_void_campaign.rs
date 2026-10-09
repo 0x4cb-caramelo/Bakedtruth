@@ -83,7 +83,7 @@ pub fn team_void_campaign(
     stored.void_reason = reason as u8;
     stored.void_note_hash = note_hash;
     finalize_snapshot(&mut stored, &mut config_state)?;
-    stored.status = Status::Settling as u8;
+    // `finalize_snapshot` has set the status (Settling, or Settled for a campaign with no entry).
     let event = CampaignVoided {
         campaign: campaign_key,
         seq: LeU64::new(seq),

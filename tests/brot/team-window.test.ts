@@ -54,7 +54,8 @@ describe("team window", () => {
       const c = await reviewed(w, Yes);
       expectOk(await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason, noteHash: NOTE })]));
       const after = readCampaign(w, c.campaign);
-      expect([after.status, after.outcome, after.void_reason]).toEqual([P.Status.Settling, Void, reason]);
+      // This campaign has no entry: finalize settles it at once (decision of 2026-10-09).
+      expect([after.status, after.outcome, after.void_reason]).toEqual([P.Status.Settled, Void, reason]);
     }
   });
 
@@ -123,7 +124,8 @@ describe("team window", () => {
     const c = await reviewed(w, Yes);
     expectOk(await send(w, [I.teamConfirmResultIx(member, config, c.campaign)]));
     const after = readCampaign(w, c.campaign);
-    expect([after.status, after.outcome]).toEqual([P.Status.Settling, Yes]);
+    // No entry: finalize settles the campaign at once, so the status is Settled.
+    expect([after.status, after.outcome]).toEqual([P.Status.Settled, Yes]);
   });
 
   test("team window: a team key acts only in review", async () => {
