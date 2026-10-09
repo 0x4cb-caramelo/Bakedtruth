@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **373** |
+| Arquivos mapeados | **374** |
 | Acima de 200 linhas | **32** ⚠️ |
 | Sem cabeçalho `Purpose:` | **78** ⚠️ |
 
@@ -708,6 +708,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`fixtures.test.ts`](tests/fixtures.test.ts) | the captured accounts in tests/fixtures are exactly the ones index.json describes. Git shows a changed .bin only as "binary files differ", so a swapped fixture  | 34 |
+
+## `tests/app/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`tokens-contrast.test.ts`](tests/app/tokens-contrast.test.ts) | the contrast of the design tokens (Sprint -1, DESIGN-DIRECTION.md). Reads app/styles/tokens.css, resolves every variable of the dark (:root) and the light (:roo | 102 |
 
 ## `tests/brot/`
 
