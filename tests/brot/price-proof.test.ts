@@ -2,8 +2,9 @@
  * Purpose: the price kind's YES proof window in LiteSVM (TP sections 3.4.6 and 3.4.8; Q4; D7): a
  *          touch proven from any address resolves YES inside `[opens_at, deadline]` while at most
  *          60 s old and posted within 600 slots, its whole band across the target; NO waits for
- *          the deadline plus 60 s; a sponsored feed stale at the deadline voids the campaign.
- * Version: 0.0.1
+ *          the deadline plus 60 s; a sponsored feed stale at the deadline, or rescaled since the
+ *          opening, voids the campaign.
+ * Version: 0.0.2
  * Sprint:  03 (readers and resolution), lane C. Runs after the SBF build (lanes C and D).
  */
 import { describe, expect, test } from "bun:test";
@@ -101,6 +102,8 @@ describe("yes proof window", () => {
     sponsoredAt(w, deadline + 30n);
     setClock(w.client, { unixTimestamp: deadline + 60n });
     expectError(await resolveWith(w, campaign), "ProofOutsideWindow");
+    // The same call with nothing to offer (the program's address in the proof slot) says why.
+    expectError(await resolveWith(w, campaign, P.PROGRAM_ID), "NotResolvableYet");
     setClock(w.client, { unixTimestamp: deadline + 61n });
     const { campaign: c, event } = recorded(w, campaign, await resolveWith(w, campaign));
     expect(c).toMatchObject({ outcome: P.Outcome.No, void_reason: P.VoidReason.None, met_late: false });
@@ -108,21 +111,32 @@ describe("yes proof window", () => {
     expect(event).toMatchObject({ read_account: P.BTC_USD_ACCOUNT, publish_time: deadline + 30n });
   });
 
-  test("a sponsored feed older than deadline − max_age at the deadline voids as StaleFeed", async () => {
+  test("a sponsored feed older than deadline − max(max_age, 600 s) at the deadline voids as StaleFeed", async () => {
     const w = await openingWorld();
     const stale = await openedCampaign(w, w.creator);
     const fresh = await openedCampaign(w, w.creator);
     const deadline = stale.args.deadlineAt;
     expect(fresh.args.deadlineAt).toBe(deadline);
     setClock(w.client, { unixTimestamp: deadline + 61n });
-    // max_age is 120 s: an update 121 s before the deadline, and none since, is a stale feed.
-    sponsoredAt(w, deadline - 121n);
+    // max_age is 120 s, under the 600 s floor: an update 601 s before the deadline, and none
+    // since, is a stale feed.
+    const edge = deadline - P.STALE_FEED_MIN_SECONDS;
+    sponsoredAt(w, edge - 1n);
     const voided = recorded(w, stale.campaign, await resolveWith(w, stale.campaign));
     expect(voided.campaign).toMatchObject({ outcome: P.Outcome.Void, void_reason: P.VoidReason.StaleFeed });
-    expect(voided.event).toMatchObject({ read_account: P.BTC_USD_ACCOUNT, publish_time: deadline - 121n });
-    // 120 s before it was still fresh: NO.
-    sponsoredAt(w, deadline - 120n);
+    expect(voided.event).toMatchObject({ read_account: P.BTC_USD_ACCOUNT, publish_time: edge - 1n });
+    // 600 s before it was still fresh: NO.
+    sponsoredAt(w, edge);
     const no = recorded(w, fresh.campaign, await resolveWith(w, fresh.campaign));
     expect(no.campaign).toMatchObject({ outcome: P.Outcome.No, void_reason: P.VoidReason.None });
+  });
+
+  test("a sponsored feed in another exponent after the window voids as UnreadableAccount", async () => {
+    const { w, campaign, deadline } = await campaignWorld();
+    setClock(w.client, { unixTimestamp: deadline + 61n });
+    setPriceAccount(w.client, P.BTC_USD_ACCOUNT, "pyth-btc-usd-devnet", { publishTime: deadline - 10n, exponent: -7 });
+    const { campaign: c, event } = recorded(w, campaign, await resolveWith(w, campaign));
+    expect(c).toMatchObject({ outcome: P.Outcome.Void, void_reason: P.VoidReason.UnreadableAccount });
+    expect(event).toMatchObject({ read_account: P.BTC_USD_ACCOUNT, publish_time: deadline - 10n });
   });
 });

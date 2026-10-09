@@ -1,7 +1,8 @@
 //! Purpose: a price campaign after its proof window on the host: NO from the sponsored account,
-//!          the stale-feed void (D7) at `deadline − max_age` ± 1 s, an update after the deadline,
-//!          and the unreadable-account void; past the window the proof slot is not read.
-//! Version: 0.0.1
+//!          the stale-feed void (D7) at `deadline − max(max_age, 600 s)` ± 1 s, an update after
+//!          the deadline, the unreadable-account void (a changed exponent included); past the
+//!          window the proof slot is not read.
+//! Version: 0.0.2
 //! Sprint: 03 (readers and resolution), lane C. The exact `StaleFeed` test [AC] is documented in
 //!         programs/brot-markets/src/readers/price_touch/proof.rs.
 
@@ -9,6 +10,7 @@ mod opening_support;
 mod price_support;
 
 use brot_markets::{
+    constants::STALE_FEED_MIN_SECONDS,
     readers::{Reading, Resolution},
     state::enums::{
         Direction::Above,
@@ -49,22 +51,38 @@ fn a_feed_fresh_at_the_deadline_resolves_no() {
 }
 
 #[test]
-fn a_feed_older_than_the_deadline_minus_max_age_voids_as_stale() {
-    let edge = after(DEADLINE, -120);
+fn a_feed_older_than_the_deadline_minus_the_stale_floor_voids_as_stale() {
+    // The devnet max_age (120 s) is under the floor: the floor decides.
+    let edge = after(DEADLINE, -i64::from(STALE_FEED_MIN_SECONDS));
     assert_eq!(closed(above(), Update::at(edge)), no(sponsored(edge)));
-    let older = after(DEADLINE, -121);
+    let older = after(edge, -1);
     let voided = void(StaleFeed, sponsored(older));
     assert_eq!(closed(above(), Update::at(older)), voided);
 }
 
 #[test]
-fn the_stale_test_follows_the_campaigns_own_max_age() {
+fn one_missed_heartbeat_near_max_age_is_not_a_stale_feed() {
+    // Devnet publishes every 62 to 64 s; a campaign at the 30 s max_age floor read in an update
+    // gap must still answer NO (Sprint 03 review).
     let floor = above().max_age(30);
-    let edge = after(DEADLINE, -30);
-    assert_eq!(closed(floor, Update::at(edge)), no(sponsored(edge)));
-    let older = after(DEADLINE, -31);
+    for gap in [31, 64, 128, 599] {
+        let published = after(DEADLINE, -gap);
+        assert_eq!(
+            closed(floor, Update::at(published)),
+            no(sponsored(published)),
+            "{gap}"
+        );
+    }
+}
+
+#[test]
+fn the_stale_test_follows_a_max_age_above_the_floor() {
+    let long = above().max_age(3_600);
+    let edge = after(DEADLINE, -3_600);
+    assert_eq!(closed(long, Update::at(edge)), no(sponsored(edge)));
+    let older = after(DEADLINE, -3_601);
     let voided = void(StaleFeed, sponsored(older));
-    assert_eq!(closed(floor, Update::at(older)), voided);
+    assert_eq!(closed(long, Update::at(older)), voided);
 }
 
 #[test]
@@ -117,14 +135,22 @@ fn past_the_window_the_proof_slot_is_not_read() {
 }
 
 #[test]
-fn past_the_window_neither_the_exponent_nor_the_posted_slot_is_compared() {
-    // NO and the void do not depend on the price: another exponent, an ancient posted slot.
+fn past_the_window_a_changed_exponent_voids_as_unreadable() {
+    // Every proof of the window was refused with `PriceExponentChanged`; the sponsored account
+    // in another scale cannot record the NO nobody could contest (Sprint 03 review).
     let published = after(DEADLINE, -10);
     let rescaled = closed(above(), Update::at(published).exponent(-7));
-    assert_eq!(rescaled, no(sponsored(published)));
-    let older = after(DEADLINE, -121);
+    assert_eq!(rescaled, void(UnreadableAccount, sponsored(published)));
+    // The exponent is checked before the stale test: the void reason is the exponent's.
+    let older = after(DEADLINE, -601);
     let rescaled = closed(above(), Update::at(older).exponent(5));
-    assert_eq!(rescaled, void(StaleFeed, sponsored(older)));
+    assert_eq!(rescaled, void(UnreadableAccount, sponsored(older)));
+}
+
+#[test]
+fn past_the_window_the_posted_slot_is_not_compared() {
+    // NO does not depend on the posted slot: an ancient one still answers.
+    let published = after(DEADLINE, -10);
     let mut metric = account(BTC_ACCOUNT, BTC, Update::at(published).slot(0));
     let resolved = resolve(
         &above(),

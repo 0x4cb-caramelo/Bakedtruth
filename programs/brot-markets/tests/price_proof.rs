@@ -1,8 +1,8 @@
 //! Purpose: a price campaign's YES proof on the host: `readers::try_resolve` up to the deadline
-//!          plus 60 s, the proof at any address, each refusal with its own error, the window, the
-//!          60 s age, the clock lead and the posted-slot bound at their edges, and the crossing of
-//!          the target at equality in both directions.
-//! Version: 0.0.1
+//!          plus 60 s, the proof at any address, each refusal with its own error (a non-positive
+//!          price among them), the window, the 60 s age, the clock lead and the posted-slot bound
+//!          at their edges, and the crossing of the target at equality in both directions.
+//! Version: 0.0.2
 //! Sprint: 03 (readers and resolution), lane C. `resolve_campaign` (lane D) runs the proof in
 //!         LiteSVM after the SBF build (tests/brot/price-proof.test.ts).
 
@@ -154,10 +154,26 @@ fn the_reader_refuses_a_proof_that_is_not_a_full_update_of_the_feed() {
 }
 
 #[test]
-fn the_refusals_come_in_order_scale_window_age_touch() {
+fn a_zero_or_negative_price_is_no_proof_in_either_direction() {
+    // A `Below` campaign is the one such a price would otherwise prove (Sprint 03 review).
+    let below = Terms::btc(Below, BELOW_TARGET);
+    for price in [0, -1, i128::from(i64::MIN)] {
+        let proof = account(PROOF_ACCOUNT, BTC, Update::at(DAY_ONE).price(price));
+        let proved = prove(below, proof, at(DAY_ONE, 0));
+        assert_eq!(proved, refused(PriceNonPositive), "{price}");
+        let proved = prove_above(Update::at(DAY_ONE).price(price), DAY_ONE);
+        assert_eq!(proved, refused(PriceNonPositive), "{price}");
+    }
+}
+
+#[test]
+fn the_refusals_come_in_order_scale_sign_window_age_touch() {
     // Another exponent, published long before the window: the scale is named first.
     let rescaled = prove_above(touch(0).exponent(-7), DAY_ONE);
     assert_eq!(rescaled, refused(PriceExponentChanged));
+    // A zero price outside the window: the sign before the window.
+    let zero = prove_above(Update::at(0).price(0), DAY_ONE);
+    assert_eq!(zero, refused(PriceNonPositive));
     // Outside the window and too old: the window. Too old and not touching: the age.
     let before = prove_above(touch(after(OPENS_AT, -1)), DAY_ONE);
     assert_eq!(before, refused(ProofOutsideWindow));

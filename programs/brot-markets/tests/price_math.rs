@@ -73,19 +73,20 @@ fn every_rule_answers_any_reading_without_a_panic() {
 }
 
 #[test]
-fn a_negative_price_is_refused_at_opening_and_answers_by_the_rule_elsewhere() {
+fn a_negative_price_is_refused_at_opening_and_as_a_proof() {
     let negative = reading(-1, 0);
     let checked = check_fresh_and_tight(&negative, PUBLISHED, 120, 50);
     assert_eq!(checked, Err(PriceRefusal::NonPositive));
     let mut metric = account(BTC_ACCOUNT, BTC, Update::captured().price(-1));
     let opened = open_btc(&mut metric, Below, 1_000);
     assert_eq!(opened, refused(PriceNonPositive));
-    // A signed negative price never reaches a positive `Above` target, and is across a `Below` one.
+    // A signed negative price would be across any `Below` target; it is refused as a proof in
+    // both directions instead, with the same error as the opening (Sprint 03 review).
     let proof = || account(PROOF_ACCOUNT, BTC, Update::at(NOW).price(-1));
     let below = prove(Terms::btc(Below, BELOW_TARGET), proof(), at(NOW, 0));
-    assert_eq!(below, yes(read(PROOF_ACCOUNT, NOW, -1, BTC_POSTED_SLOT)));
+    assert_eq!(below, refused(PriceNonPositive));
     let above = prove(Terms::btc(Above, ABOVE_TARGET), proof(), at(NOW, 0));
-    assert_eq!(above, refused(ProofDoesNotTouch));
+    assert_eq!(above, refused(PriceNonPositive));
 }
 
 #[test]

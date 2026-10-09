@@ -37,6 +37,7 @@ export const BTC_USD_ACCOUNT = address("APgzQGGdv2qCgBkX6aHVkrGePtBVDDg68GiqaM7r
 export const SOL = 1_000_000_000n;
 /** constants.rs, Sprint 03: the proof window, the review window and the readers' [AC] values. */
 export const PROOF_DELAY_SECONDS = 60n;
+export const STALE_FEED_MIN_SECONDS = 600n;
 export const REVIEW_WINDOW_SECONDS = 6n * 3_600n;
 export const MAX_PRICE_CLOCK_LEAD_SECONDS = 60n;
 export const MIN_SLOT_MS = 100n;

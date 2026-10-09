@@ -139,6 +139,11 @@ pub const ENTRY_CLOSE_BPS: i64 = 500;
 pub const ENTRY_CLOSE_MAX_SECONDS: i64 = 7 * SECONDS_PER_DAY;
 /// The proof delay for a price touch (Q4), Sprint 03.
 pub const PROOF_DELAY_SECONDS: i64 = 60;
+/// [AC] `StaleFeed` (D7): the sponsored account's last update before the deadline must be older
+/// than the larger of the campaign's `max_age` and this floor, ten times devnet's heartbeat
+/// (62 to 64 s): one missed heartbeat, or a resolution timed into an update gap, cannot turn a NO
+/// into a void (Sprint 03 review).
+pub const STALE_FEED_MIN_SECONDS: u32 = 600;
 /// Contest stage 1, one hour; stage 2, 48 hours (P1 section 4.5), Sprints 04 and 14.
 pub const CONTEST_STAGE1_SECONDS: i64 = SECONDS_PER_HOUR;
 pub const CONTEST_STAGE2_SECONDS: i64 = 48 * SECONDS_PER_HOUR;

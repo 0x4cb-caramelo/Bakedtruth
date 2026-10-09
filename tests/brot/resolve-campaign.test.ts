@@ -18,7 +18,6 @@ import { mintBytes, setRawAccount } from "./readers";
 import {
   DEADLINE,
   EPOCH,
-  PRICE_MAX_AGE,
   PRICE_TARGET,
   anyAddress,
   at,
@@ -137,11 +136,12 @@ describe("resolution table", () => {
     }
   });
 
-  test("Void(StaleFeed): no proof after the window, the sponsored feed last updated before deadline − max_age", async () => {
+  test("Void(StaleFeed): no proof after the window, the sponsored feed last updated before deadline − 600 s", async () => {
     const w = await resolveWorld();
     const c = await priceCampaign(w);
     at(w, AFTER_PROOFS);
-    const published = setBtcPrice(w, P.BTC_USD_ACCOUNT, BTC_PRICE, DEADLINE - PRICE_MAX_AGE - 10n);
+    // The campaign's max_age (120 s) is under the floor, so the floor decides.
+    const published = setBtcPrice(w, P.BTC_USD_ACCOUNT, BTC_PRICE, DEADLINE - P.STALE_FEED_MIN_SECONDS - 10n);
     await expectResolved(w, c, { outcome: Void, voidReason: StaleFeed, observed: BTC_PRICE, ...published });
   });
 

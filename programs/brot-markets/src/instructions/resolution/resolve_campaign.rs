@@ -1,6 +1,6 @@
 //! Purpose: `resolve_campaign`: any wallet records the outcome the campaign's reader reads, at
 //!          the top level only, and opens the six-hour review window (TP sections 3.4.2, 3.4.6).
-//! Version: 0.0.3
+//! Version: 0.0.4
 //! Sprint: 03 (readers and resolution); accounts frozen at the sprint's opening, body by lane D
 //!
 //! Order, each refusal with its own error: no arguments (`BadInstructionData`) and the five slots
@@ -12,7 +12,10 @@
 //! void reason, `observed_value`, `resolved_at` and `review_ends_at = now + REVIEW_WINDOW_SECONDS`,
 //! and `CampaignResolved` leaves with the next `seq`. No lamports move. A second call finds the
 //! campaign `InReview` (`CampaignNotOpen`). The caller chooses nothing (Q1): it offers a proof
-//! account, which only the price reader reads, and checks.
+//! account, which only the price reader reads, and checks. A caller with no proof to offer puts
+//! the program's own address in that slot, and the reader sees no proof (`NotResolvableYet` while
+//! the window is open): without it, every price campaign still open would answer
+//! `ProofDoesNotTouch` for whatever account filled the slot (Sprint 03 review).
 
 pub mod record;
 
@@ -57,11 +60,12 @@ pub fn resolve_campaign(
 
     // The reader sees the campaign as stored; nothing is written until it has decided.
     let time = ChainTime::now()?;
+    let no_proof = proof_account.address() == program_id;
     let context = ReadContext {
         metric: metric_account,
         campaign: &stored,
         time,
-        proof: Some(&*proof_account),
+        proof: (!no_proof).then_some(&*proof_account),
     };
     let decision = match readers::try_resolve(kind, &context)? {
         Resolution::NotYet => return Err(BrotError::NotResolvableYet.into()),
