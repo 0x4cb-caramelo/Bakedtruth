@@ -1,6 +1,8 @@
 [workspace]
 members = [
-    "programs/*"
+    "programs/*",
+    # Test-only programs, never deployed (Sprint 03: the CPI proxy).
+    "tests/programs/*",
 ]
 resolver = "2"
 

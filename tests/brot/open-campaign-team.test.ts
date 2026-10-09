@@ -3,14 +3,15 @@
  *          stores a zero creator share and no opening price, the SOL/USD slot is neither checked
  *          nor read (so a stale feed does not stop the team), there is no `partner` argument, and
  *          the team key must sign even when someone funded both accounts in advance.
- * Version: 0.0.2
- * Sprint:  02 (pot core on Pinocchio), lane D. Runs after the SBF build (Wave 2).
+ * Version: 0.0.3
+ * Sprint:  02 (pot core on Pinocchio), lane D; 03 (a reachable target, row 3's far side), lane F.
+ *          Runs after the SBF build.
  */
 import { describe, expect, test } from "bun:test";
 import { AccountRole, getAddressEncoder, type Instruction } from "@solana/kit";
 
 import { place } from "./checks-support";
-import { readCampaign, readConfig } from "./flows";
+import { readCampaign, readConfig, SOL_PRICE } from "./flows";
 import * as I from "./instructions";
 import { openingWorld, rents, tryOpen } from "./opening";
 import * as P from "./program";
@@ -60,7 +61,8 @@ describe("team opening pays nothing", () => {
     const slots = { solUsd: P.SYSTEM_PROGRAM_ID };
     expectOk((await tryOpen(w, w.team, { openingUsd: 0n }, { slots })).sent);
     // The campaign's own price is still checked when the campaign is on SOL/USD itself.
-    const onSol = { openingUsd: 0n, feedId: P.SOL_USD_FEED_ID, direction: P.Direction.Below, target: 1n };
+    const below = (SOL_PRICE * 9n) / 10n;
+    const onSol = { openingUsd: 0n, feedId: P.SOL_USD_FEED_ID, direction: P.Direction.Below, target: below };
     expectOk((await tryOpen(w, w.team, onSol)).sent);
     setPriceAccount(w.client, P.SOL_USD_ACCOUNT, "pyth-sol-usd-devnet", { publishTime: START_TIME - 121n });
     expectError((await tryOpen(w, w.team, onSol)).sent, "PriceStale");

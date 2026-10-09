@@ -1,7 +1,7 @@
 //! Purpose: the one-byte enums stored in accounts and passed in instruction data, with their
 //!          checked conversion from a raw byte.
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio)
+//! Version: 0.0.3
+//! Sprint: 02 (pot core on Pinocchio); `measured_by_epoch` in 03
 //!
 //! Stored as `u8` in the layouts and tagged by position, as Borsh would: a new variant is
 //! appended, never inserted or reordered (CLAUDE.md). Each enum is written out in full, not
@@ -21,6 +21,17 @@ pub enum ReaderKind {
     DammV2LockedAtLeast = 2,
     StakePoolTvlAtLeast = 3,
     StakeAtLeast = 4,
+}
+
+impl ReaderKind {
+    /// The two kinds read in a named epoch (TP section 3.4.8): they take an `epoch` argument, and
+    /// their entries lock when it starts.
+    pub fn measured_by_epoch(self) -> bool {
+        matches!(
+            self,
+            ReaderKind::StakePoolTvlAtLeast | ReaderKind::StakeAtLeast
+        )
+    }
 }
 
 /// Where a campaign is in its life (TP section 3.4.2). "Closed" is not stored: it comes from the

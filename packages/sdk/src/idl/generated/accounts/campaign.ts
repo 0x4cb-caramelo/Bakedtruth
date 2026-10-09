@@ -136,6 +136,7 @@ export type Campaign = {
   creatorShare: bigint;
   creatorShareFromFee: bigint;
   paidOutTotal: bigint;
+  epoch: bigint;
   reserved: ReadonlyUint8Array;
 };
 
@@ -195,6 +196,7 @@ export type CampaignArgs = {
   creatorShare: number | bigint;
   creatorShareFromFee: number | bigint;
   paidOutTotal: number | bigint;
+  epoch: number | bigint;
   reserved: ReadonlyUint8Array;
 };
 
@@ -256,7 +258,8 @@ export function getCampaignEncoder(): FixedSizeEncoder<CampaignArgs> {
     ["creatorShare", getU64Encoder()],
     ["creatorShareFromFee", getU64Encoder()],
     ["paidOutTotal", getU64Encoder()],
-    ["reserved", fixEncoderSize(getBytesEncoder(), 64)],
+    ["epoch", getU64Encoder()],
+    ["reserved", fixEncoderSize(getBytesEncoder(), 56)],
   ]);
 }
 
@@ -318,7 +321,8 @@ export function getCampaignDecoder(): FixedSizeDecoder<Campaign> {
     ["creatorShare", getU64Decoder()],
     ["creatorShareFromFee", getU64Decoder()],
     ["paidOutTotal", getU64Decoder()],
-    ["reserved", fixDecoderSize(getBytesDecoder(), 64)],
+    ["epoch", getU64Decoder()],
+    ["reserved", fixDecoderSize(getBytesDecoder(), 56)],
   ]);
 }
 

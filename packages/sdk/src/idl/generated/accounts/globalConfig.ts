@@ -63,6 +63,7 @@ export type GlobalConfig = {
   feeRecipient: Address;
   params: CreationParams;
   openCampaigns: number;
+  paramsVersion: number;
   reserved: ReadonlyUint8Array;
 };
 
@@ -79,6 +80,7 @@ export type GlobalConfigArgs = {
   feeRecipient: Address;
   params: CreationParamsArgs;
   openCampaigns: number;
+  paramsVersion: number;
   reserved: ReadonlyUint8Array;
 };
 
@@ -97,7 +99,8 @@ export function getGlobalConfigEncoder(): FixedSizeEncoder<GlobalConfigArgs> {
     ["feeRecipient", getAddressEncoder()],
     ["params", getCreationParamsEncoder()],
     ["openCampaigns", getU32Encoder()],
-    ["reserved", fixEncoderSize(getBytesEncoder(), 64)],
+    ["paramsVersion", getU32Encoder()],
+    ["reserved", fixEncoderSize(getBytesEncoder(), 60)],
   ]);
 }
 
@@ -116,7 +119,8 @@ export function getGlobalConfigDecoder(): FixedSizeDecoder<GlobalConfig> {
     ["feeRecipient", getAddressDecoder()],
     ["params", getCreationParamsDecoder()],
     ["openCampaigns", getU32Decoder()],
-    ["reserved", fixDecoderSize(getBytesDecoder(), 64)],
+    ["paramsVersion", getU32Decoder()],
+    ["reserved", fixDecoderSize(getBytesDecoder(), 60)],
   ]);
 }
 

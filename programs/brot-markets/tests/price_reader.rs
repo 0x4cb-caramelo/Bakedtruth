@@ -1,7 +1,8 @@
-//! Purpose: the price reader against real Pyth accounts captured from devnet, and against the
-//!          malformed versions of them. A wrong account must be an error, never a panic.
-//! Version: 0.0.3
-//! Sprint: 01 (price reader proof); ported to Pinocchio in 02
+//! Purpose: the price reader against real Pyth accounts captured from devnet and mainnet, and
+//!          against the malformed versions of them. A wrong account must be an error, never a
+//!          panic.
+//! Version: 0.0.4
+//! Sprint: 01 (price reader proof); ported to Pinocchio in 02; the mainnet accounts in 03, lane C
 
 use brot_markets::error::BrotError;
 use brot_markets::readers::price_touch::{read_price_update, PriceReading, PYTH_RECEIVER_ID};
@@ -12,6 +13,9 @@ const SOL: &[u8] = include_bytes!("../../../tests/fixtures/pyth-sol-usd-devnet.b
 const BTC: &[u8] = include_bytes!("../../../tests/fixtures/pyth-btc-usd-devnet.bin");
 // The same SOL feed under the pre-upgrade receiver.
 const SOL_LEGACY: &[u8] = include_bytes!("../../../tests/fixtures/pyth-sol-usd-devnet-legacy.bin");
+// Real mainnet accounts at the same sponsored addresses (Sprint 03).
+const SOL_MAINNET: &[u8] = include_bytes!("../../../tests/fixtures/pyth-sol-usd-mainnet.bin");
+const BTC_MAINNET: &[u8] = include_bytes!("../../../tests/fixtures/pyth-btc-usd-mainnet.bin");
 const LEGACY_RECEIVER: Address = address!("rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ");
 
 const SOL_FEED: [u8; 32] = [
@@ -64,6 +68,37 @@ fn reads_the_real_btc_account() {
 }
 
 #[test]
+fn reads_the_real_mainnet_accounts() {
+    let sol = PriceReading {
+        feed_id: SOL_FEED,
+        price: 11_000_079_114,
+        conf: 2_688_373,
+        exponent: -8,
+        publish_time: 1_791_515_877,
+        posted_slot: 454_743_011,
+    };
+    assert_eq!(read_sol(SOL_MAINNET).unwrap(), sol);
+    let btc = PriceReading {
+        feed_id: BTC_FEED,
+        price: 8_206_475_000_000,
+        conf: 2_805_000_000,
+        ..sol
+    };
+    let read = read_price_update(&PYTH_RECEIVER_ID, BTC_MAINNET, &BTC_FEED);
+    assert_eq!(read.unwrap(), btc);
+}
+
+#[test]
+fn prev_publish_time_is_pythnets_previous_second_not_this_accounts_previous_write() {
+    // Mainnet's sponsored accounts are rewritten every 5 to 11 s, devnet's every 62 to 64 s, yet
+    // every capture holds publish_time − 1 here: no rule may read it as the previous write (D7).
+    for fixture in [SOL, BTC, SOL_LEGACY, SOL_MAINNET, BTC_MAINNET] {
+        let field = |at: usize| i64::from_le_bytes(fixture[at..][..8].try_into().unwrap());
+        assert_eq!(field(93).checked_sub(field(101)), Some(1));
+    }
+}
+
+#[test]
 fn refuses_the_price_of_another_asset() {
     // A real, fully verified BTC price is still the wrong answer to a SOL question.
     assert_eq!(code(read_sol(BTC)), u32::from(BrotError::PriceWrongFeed));
@@ -86,28 +121,31 @@ fn refuses_the_pre_upgrade_receiver() {
 
 #[test]
 fn refuses_any_other_owner() {
-    assert_eq!(
-        code(read_price_update(&brot_markets::ID, SOL, &SOL_FEED)),
-        u32::from(BrotError::ReaderWrongOwner)
-    );
+    for fixture in [SOL, SOL_MAINNET] {
+        assert_eq!(
+            code(read_price_update(&brot_markets::ID, fixture, &SOL_FEED)),
+            u32::from(BrotError::ReaderWrongOwner)
+        );
+    }
 }
 
 #[test]
 fn a_cut_or_padded_account_is_an_error_never_a_panic() {
-    for len in 0..SOL.len() {
-        let cut = SOL.get(..len).unwrap();
-        assert_eq!(
-            code(read_sol(cut)),
-            u32::from(BrotError::ReaderBadLayout),
-            "length {len}"
-        );
+    let bad_layout = u32::from(BrotError::ReaderBadLayout);
+    let fixtures = [(SOL, SOL_FEED), (BTC, BTC_FEED)];
+    for (fixture, feed) in fixtures
+        .into_iter()
+        .chain([(SOL_MAINNET, SOL_FEED), (BTC_MAINNET, BTC_FEED)])
+    {
+        let read = |data: &[u8]| code(read_price_update(&PYTH_RECEIVER_ID, data, &feed));
+        for len in 0..fixture.len() {
+            let cut = fixture.get(..len).unwrap();
+            assert_eq!(read(cut), bad_layout, "length {len}");
+        }
+        let mut padded = fixture.to_vec();
+        padded.push(0);
+        assert_eq!(read(&padded), bad_layout);
     }
-    let mut padded = SOL.to_vec();
-    padded.push(0);
-    assert_eq!(
-        code(read_sol(&padded)),
-        u32::from(BrotError::ReaderBadLayout)
-    );
 }
 
 #[test]
@@ -133,14 +171,16 @@ fn refuses_a_zeroed_account_of_the_right_size() {
 fn refuses_every_verification_level_but_full() {
     // Byte 40 is the verification level, right after the discriminator and the authority.
     // Tag 0 is `Partial`; 2 to 255 are not levels at all.
-    for tag in (0..=u8::MAX).filter(|tag| *tag != 1) {
-        let mut update = SOL.to_vec();
-        update[40] = tag;
-        assert_eq!(
-            code(read_sol(&update)),
-            u32::from(BrotError::PriceNotFullyVerified),
-            "tag {tag}"
-        );
+    for fixture in [SOL, SOL_MAINNET] {
+        for tag in (0..=u8::MAX).filter(|tag| *tag != 1) {
+            let mut update = fixture.to_vec();
+            update[40] = tag;
+            assert_eq!(
+                code(read_sol(&update)),
+                u32::from(BrotError::PriceNotFullyVerified),
+                "tag {tag}"
+            );
+        }
     }
 }
 

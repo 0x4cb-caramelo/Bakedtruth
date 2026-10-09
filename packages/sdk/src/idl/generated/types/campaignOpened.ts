@@ -74,6 +74,7 @@ export type CampaignOpened = {
   openingPricePublishTime: bigint;
   prizeLamports: bigint;
   openingFeeLamports: bigint;
+  epoch: bigint;
 };
 
 export type CampaignOpenedArgs = {
@@ -103,6 +104,7 @@ export type CampaignOpenedArgs = {
   openingPricePublishTime: number | bigint;
   prizeLamports: number | bigint;
   openingFeeLamports: number | bigint;
+  epoch: number | bigint;
 };
 
 export function getCampaignOpenedEncoder(): FixedSizeEncoder<CampaignOpenedArgs> {
@@ -133,6 +135,7 @@ export function getCampaignOpenedEncoder(): FixedSizeEncoder<CampaignOpenedArgs>
     ["openingPricePublishTime", getI64Encoder()],
     ["prizeLamports", getU64Encoder()],
     ["openingFeeLamports", getU64Encoder()],
+    ["epoch", getU64Encoder()],
   ]);
 }
 
@@ -164,6 +167,7 @@ export function getCampaignOpenedDecoder(): FixedSizeDecoder<CampaignOpened> {
     ["openingPricePublishTime", getI64Decoder()],
     ["prizeLamports", getU64Decoder()],
     ["openingFeeLamports", getU64Decoder()],
+    ["epoch", getU64Decoder()],
   ]);
 }
 

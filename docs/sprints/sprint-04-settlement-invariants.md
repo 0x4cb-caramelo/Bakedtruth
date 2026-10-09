@@ -24,8 +24,8 @@ the close that returns rent. Then prove with the randomized test that the fiftee
 - [ ] Team instructions act only in `InReview` and never invert an outcome; outside the window nobody voids; an
       automatic void can be confirmed, never turned into YES or NO.
 - [ ] **`VoidReason`** (TP §3.4.7) records every void (BR-45), with its class: `MissedWindow` (house failure, the 10%
-      refunded); `UnreadableAccount` (outside cause, kept); `StaleFeed` (outside cause, kept: the working default,
-      see the founder question below); `TeamHouseFailure` (refunded); `TeamOutsideCause` (kept). One test per reason.
+      refunded); `UnreadableAccount` (outside cause, kept); `StaleFeed` (outside cause, kept: decided on 2026-10-09);
+      `TeamHouseFailure` (refunded); `TeamOutsideCause` (kept). One test per reason.
 - [ ] **`finalize_campaign`** snapshots the totals, records the mode (`Split`, `OneSided`, `Refund`), decrements
       `open_campaigns` (I7, TP §3.4.13), and computes the creator share with one pure function,
       `creator_share(V, P, R, fee, bps) → (from_pot, from_fee)`, per P-2: `fee = ceil(P × fee_bps ÷ 10,000)`;
@@ -71,7 +71,8 @@ the close that returns rent. Then prove with the randomized test that the fiftee
       and `user_join_campaign`: the vault's lamport change across the instruction equals the bookkept change (the
       change, not "lamports ≥ rent + books", so hand-sent SOL never refuses a join; Sprint 02 review).
 - [ ] **One-sided cases, one row each:** only winners, only losers, a single baker, with and without the prize, and a
-      campaign with no entry at all, under a switchable default (see the founder questions below).
+      campaign with no entry at all, under the rule decided on 2026-10-09 (the prize back to whoever opened, the 10%
+      kept).
 - [ ] Two wallets: A cannot receive, close or redirect B's `Entry`, and cannot take the creator share.
 - [ ] With the pause on, only `user_join_campaign` and `user_open_campaign` fail; every other instruction runs, and
       no payout or refund is ever blocked (I10′).
@@ -84,6 +85,9 @@ the close that returns rent. Then prove with the randomized test that the fiftee
       self-CPI events.
 - [ ] **How a campaign leaves `Contested` before Sprint 14** is decided by the team and recorded: the instruction
       stays disabled until then, or a path out is written [AC].
+- [ ] **The founder's answers of 2026-10-09** ("Founder decisions", below) are built, each with its test: the feed
+      list, the opening at `p − conf`, the SOL/USD feed id as a constant, team openings outside
+      `max_open_campaigns`, the minimum entry copied at opening, the join buffer and the late-entry refund.
 - [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
 ## Deliverables
@@ -110,12 +114,16 @@ the settlements (06). A contest opened by a baker with a deposit (phase 1.2).
 - **Q2, re-read for SOL:** with lamport credits, the closed or foreign USDC account case is gone. What remains is a
   credit below rent to an empty wallet: it takes the reserve path, and its owner can claim it from their own wallet
   (TP v0.0.1's recommendation b).
-- **Open [Q]: a campaign with no entry at all.** BP v0.0.4 has no written rule for it (P1 §3.5). The program builds
-  the one-sided treatment as a switchable default: the prize returns to whoever opened and the 10% stays with Brot,
-  so junk costs US$50 per campaign (TP §3.4.10) [INF].
-- **Open [Q]: does a `StaleFeed` void count as a house failure once the keeper holds a Hermes key?** The answer
-  decides whether the 10% is refunded. The working default is an outside cause, so the 10% is kept (TP §3.4.7) [INF];
-  a Pyth sponsorship that lapses is a third party's act.
+- **Answered on 2026-10-09: a campaign with no entry at all** returns the prize to whoever opened, and the 10% stays
+  with Brot, so junk costs US$50 per campaign (TP §3.4.10). Built as the rule, with no switch.
+- **Answered on 2026-10-09: a `StaleFeed` void is an outside cause,** so the 10% is kept (TP §3.4.7): a Pyth
+  sponsorship that lapses is a third party's act. Built as the rule, with no switch.
+- **From Sprint 03, answered on 2026-10-09 and built here** (`docs/business/ideacao-perguntas-e-respostas.md`,
+  section 1): our own compiled list of Pyth feeds, starting from Pyth's official sponsored list (62 on mainnet and
+  17 on devnet that day); the opening charged at `p − conf`; the SOL/USD feed id as a compiled constant; team
+  openings outside `max_open_campaigns`, with no limit; the minimum entry copied at opening; and, for the join after
+  the touch, a buffer at the join lock and the refund of entries joined at or after the YES proof's `publish_time`.
+  The team keys are Lucas's, Ronaldo's and Bernardo's (nothing to build here).
 - BP-5 (keep the window until the audit; say "no human picks the winner", P-9) changes only the copy of Sprint 13; the
   window is built here either way.
 

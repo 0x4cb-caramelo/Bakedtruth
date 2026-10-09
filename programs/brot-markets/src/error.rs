@@ -1,12 +1,13 @@
 //! Purpose: every refusal the program can return, one code per cause, as custom program errors.
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio); reader errors from 01 keep their codes
+//! Version: 0.0.3
+//! Sprint: 02 (pot core on Pinocchio); reader errors from 01 keep their codes; 03 appends 6071 on
 //!
 //! Codes start at 6000 so they never collide with the System Program's own custom errors, which
 //! a failed CPI passes through. A code, once assigned, never changes meaning. Each variant's
 //! `#[error("...")]` message is its documentation and what shank-cli writes into the IDL (T9); a
 //! variant without one is left out of the IDL and fails tests/brot/idl.test.ts. The derive's
-//! `Display` and `Error` impls are never called on-chain.
+//! `Display` and `Error` impls are never called on-chain. This file passes 200 lines on purpose:
+//! shank-cli reads the errors from one enum, and a Rust enum cannot be split across files.
 
 use pinocchio::error::ProgramError;
 
@@ -115,7 +116,7 @@ pub enum BrotError {
     // --- Opening a campaign: the rows of TP section 3.4.10 ---------------------------------
     #[error("Row 1: the kind byte names no reader")]
     UnknownReaderKind = 6043,
-    #[error("Row 1: this kind does not open yet (the four non-price kinds until Sprint 03)")]
+    #[error("Row 1: this kind does not open yet (`StakeAtLeast` until a devnet YES is recorded)")]
     ReaderKindNotOpen = 6044,
     #[error("Row 2: the metric account is not the one the campaign's parameters name")]
     MetricAccountMismatch = 6045,
@@ -171,9 +172,57 @@ pub enum BrotError {
     EntryMismatch = 6069,
 
     // --- Readers --------------------------------------------------------------------------------
-    #[error("This reader method arrives in Sprint 03 (`outcome_knowable`, `try_resolve`)")]
+    #[error("Unused since Sprint 03: the reader methods returned it before they were ported")]
     ReaderNotReady = 6070,
-    // New codes are appended here, numbered from 6071, never reusing a number.
+
+    // --- Sprint 03: resolution, the join lock and the other four kinds -------------------------
+    #[error("`resolve_campaign` must be a top-level instruction, never called through a CPI")]
+    ResolveNotTopLevel = 6071,
+    #[error("Nothing can be recorded yet: no YES is proven and the deadline's window is open")]
+    NotResolvableYet = 6072,
+    #[error(
+        "Entries are locked: the outcome is already knowable (met, touched, or epoch started)"
+    )]
+    OutcomeKnowable = 6073,
+    #[error("Row 2: the mint's authority can still mint, so its supply can grow")]
+    MintAuthorityLive = 6074,
+    #[error("Row 3: the target is within the minimum distance of the current value")]
+    TargetTooClose = 6075,
+    #[error("Row 3: the target is out of reach (a price at or below zero, or past the far bound)")]
+    TargetUnreachable = 6076,
+    #[error("An argument this kind does not use is not zero (feed, direction or epoch)")]
+    UnusedArgumentNotZero = 6077,
+    #[error("Row 5: the measured epoch has already started")]
+    EpochAlreadyStarted = 6078,
+    #[error("Row 5: the measured epoch may start after the deadline")]
+    EpochAfterDeadline = 6079,
+    #[error("Row 2: the stake pool stopped updating and cannot write the epoch's snapshot")]
+    StakePoolNotUpdating = 6080,
+    #[error("The price's exponent is not the one stored at opening")]
+    PriceExponentChanged = 6081,
+    #[error(
+        "Join: the sponsored price is older than `max_age`, too far ahead, or too many slots old"
+    )]
+    JoinPriceStale = 6082,
+    #[error("Proof: the publish time is outside the campaign's window")]
+    ProofOutsideWindow = 6083,
+    #[error("Proof: more than 60 s old, too far ahead of the clock, or too many slots old")]
+    ProofStale = 6084,
+    #[error("Proof: price minus confidence does not cross the target in the campaign's direction")]
+    ProofDoesNotTouch = 6085,
+    #[error("Row 7: the SOL/USD account is not owned by the Pyth receiver")]
+    SolUsdWrongOwner = 6086,
+    #[error("Row 7: the SOL/USD account does not have the `PriceUpdateV2` layout")]
+    SolUsdBadLayout = 6087,
+    #[error("Row 7: the SOL/USD price was not fully verified")]
+    SolUsdNotFullyVerified = 6088,
+    #[error("Row 7: the SOL/USD account holds another feed")]
+    SolUsdWrongFeed = 6089,
+    #[error(
+        "The creation parameters changed since the client read them (`expected_params_version`)"
+    )]
+    CreationParamsChanged = 6090,
+    // New codes are appended here, numbered from 6091, never reusing a number.
 }
 
 impl From<BrotError> for ProgramError {

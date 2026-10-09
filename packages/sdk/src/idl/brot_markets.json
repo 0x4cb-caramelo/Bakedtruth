@@ -1,5 +1,5 @@
 {
-  "version": "0.0.2",
+  "version": "0.0.3",
   "name": "brot_markets",
   "instructions": [
     {
@@ -534,7 +534,7 @@
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "Campaign.metric_account (the join lock reads it from Sprint 03)"
+            "Campaign.metric_account, read by the join lock"
           ]
         },
         {
@@ -573,6 +573,56 @@
       "discriminant": {
         "type": "u8",
         "value": 9
+      }
+    },
+    {
+      "name": "ResolveCampaign",
+      "accounts": [
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign, Open"
+          ]
+        },
+        {
+          "name": "metricAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Campaign.metric_account"
+          ]
+        },
+        {
+          "name": "proofAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Price kind: the YES proof, any Full account of the feed; other kinds: not read"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 10
       }
     }
   ],
@@ -962,11 +1012,18 @@
             ]
           },
           {
+            "name": "epoch",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
             "name": "reserved",
             "type": {
               "array": [
                 "u8",
-                64
+                56
               ]
             },
             "attrs": [
@@ -1045,11 +1102,18 @@
             ]
           },
           {
+            "name": "paramsVersion",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
             "name": "reserved",
             "type": {
               "array": [
                 "u8",
-                64
+                60
               ]
             },
             "attrs": [
@@ -1407,6 +1471,13 @@
             "attrs": [
               "idl-type"
             ]
+          },
+          {
+            "name": "epoch",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
           }
         ]
       }
@@ -1477,6 +1548,112 @@
           },
           {
             "name": "entryNo",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignResolved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": "ReaderKind"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "outcome",
+            "type": {
+              "defined": "Outcome"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "voidReason",
+            "type": {
+              "defined": "VoidReason"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "metLate",
+            "type": "bool",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "observedValue",
+            "type": "i128",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "readAccount",
+            "type": "publicKey"
+          },
+          {
+            "name": "publishTime",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "postedSlot",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "resolvedAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "reviewEndsAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "slot",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "epoch",
             "type": "u64",
             "attrs": [
               "idl-type"
@@ -1615,6 +1792,20 @@
           {
             "name": "maxLamports",
             "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "epoch",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "expectedParamsVersion",
+            "type": "u32",
             "attrs": [
               "idl-type"
             ]
@@ -2166,7 +2357,7 @@
     {
       "code": 6044,
       "name": "ReaderKindNotOpen",
-      "msg": "Row 1: this kind does not open yet (the four non-price kinds until Sprint 03)"
+      "msg": "Row 1: this kind does not open yet (`StakeAtLeast` until a devnet YES is recorded)"
     },
     {
       "code": 6045,
@@ -2296,7 +2487,107 @@
     {
       "code": 6070,
       "name": "ReaderNotReady",
-      "msg": "This reader method arrives in Sprint 03 (`outcome_knowable`, `try_resolve`)"
+      "msg": "Unused since Sprint 03: the reader methods returned it before they were ported"
+    },
+    {
+      "code": 6071,
+      "name": "ResolveNotTopLevel",
+      "msg": "`resolve_campaign` must be a top-level instruction, never called through a CPI"
+    },
+    {
+      "code": 6072,
+      "name": "NotResolvableYet",
+      "msg": "Nothing can be recorded yet: no YES is proven and the deadline's window is open"
+    },
+    {
+      "code": 6073,
+      "name": "OutcomeKnowable",
+      "msg": "Entries are locked: the outcome is already knowable (met, touched, or epoch started)"
+    },
+    {
+      "code": 6074,
+      "name": "MintAuthorityLive",
+      "msg": "Row 2: the mint's authority can still mint, so its supply can grow"
+    },
+    {
+      "code": 6075,
+      "name": "TargetTooClose",
+      "msg": "Row 3: the target is within the minimum distance of the current value"
+    },
+    {
+      "code": 6076,
+      "name": "TargetUnreachable",
+      "msg": "Row 3: the target is out of reach (a price at or below zero, or past the far bound)"
+    },
+    {
+      "code": 6077,
+      "name": "UnusedArgumentNotZero",
+      "msg": "An argument this kind does not use is not zero (feed, direction or epoch)"
+    },
+    {
+      "code": 6078,
+      "name": "EpochAlreadyStarted",
+      "msg": "Row 5: the measured epoch has already started"
+    },
+    {
+      "code": 6079,
+      "name": "EpochAfterDeadline",
+      "msg": "Row 5: the measured epoch may start after the deadline"
+    },
+    {
+      "code": 6080,
+      "name": "StakePoolNotUpdating",
+      "msg": "Row 2: the stake pool stopped updating and cannot write the epoch's snapshot"
+    },
+    {
+      "code": 6081,
+      "name": "PriceExponentChanged",
+      "msg": "The price's exponent is not the one stored at opening"
+    },
+    {
+      "code": 6082,
+      "name": "JoinPriceStale",
+      "msg": "Join: the sponsored price is older than `max_age`, too far ahead, or too many slots old"
+    },
+    {
+      "code": 6083,
+      "name": "ProofOutsideWindow",
+      "msg": "Proof: the publish time is outside the campaign's window"
+    },
+    {
+      "code": 6084,
+      "name": "ProofStale",
+      "msg": "Proof: more than 60 s old, too far ahead of the clock, or too many slots old"
+    },
+    {
+      "code": 6085,
+      "name": "ProofDoesNotTouch",
+      "msg": "Proof: price minus confidence does not cross the target in the campaign's direction"
+    },
+    {
+      "code": 6086,
+      "name": "SolUsdWrongOwner",
+      "msg": "Row 7: the SOL/USD account is not owned by the Pyth receiver"
+    },
+    {
+      "code": 6087,
+      "name": "SolUsdBadLayout",
+      "msg": "Row 7: the SOL/USD account does not have the `PriceUpdateV2` layout"
+    },
+    {
+      "code": 6088,
+      "name": "SolUsdNotFullyVerified",
+      "msg": "Row 7: the SOL/USD price was not fully verified"
+    },
+    {
+      "code": 6089,
+      "name": "SolUsdWrongFeed",
+      "msg": "Row 7: the SOL/USD account holds another feed"
+    },
+    {
+      "code": 6090,
+      "name": "CreationParamsChanged",
+      "msg": "The creation parameters changed since the client read them (`expected_params_version`)"
     }
   ],
   "metadata": {

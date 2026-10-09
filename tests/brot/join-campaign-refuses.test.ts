@@ -2,8 +2,9 @@
  * Purpose: every refusal of `user_join_campaign` on the campaign's rules, each with its own error
  *          (X0.7): not Open, entries closed, the pause, the minimum, the signed total (T10), the
  *          signed return, the side, the metric account, and an Entry that is not the baker's.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio), lane E. Needs the SBF build: runs from the integration on.
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio), lane E; 03 keeps the sponsored price fresh across a clock move,
+ *          which the join lock reads. Needs the SBF build: runs from the integration on.
  */
 import { describe, expect, test } from "bun:test";
 import { getAddressEncoder, type Address, type KeyPairSigner } from "@solana/kit";
@@ -12,9 +13,17 @@ import { join, openedCampaign, readCampaign, readEntry } from "./flows";
 import * as I from "./instructions";
 import { offsetOf } from "./layouts";
 import * as P from "./program";
-import { accountData, expectError, expectOk, fundedWallet, send, setTime } from "./setup";
+import { accountData, expectError, expectOk, fundedWallet, send } from "./setup";
 import { CAMPAIGN, ENTRY } from "./structs";
-import { entryBump, expectedEstimate, joinWorld, MIN_ENTRY, rewrite, walletWhere } from "./join-campaign-support";
+import {
+  entryBump,
+  expectedEstimate,
+  freshPrice,
+  joinWorld,
+  MIN_ENTRY,
+  rewrite,
+  walletWhere,
+} from "./join-campaign-support";
 
 const SOL = P.SOL;
 const yes = (amount: bigint, more: Partial<I.JoinArgs> = {}): I.JoinArgs => ({ side: P.Side.Yes, amount, ...more });
@@ -33,14 +42,16 @@ describe("join refuses", () => {
   });
 
   test("from entries_close_at on, and not one second before", async () => {
-    const { w, campaign } = await joinWorld();
+    const { w, campaign, metric } = await joinWorld();
     const baker = await fundedWallet(w);
     const closeAt = readCampaign(w, campaign).entries_close_at as bigint;
-    setTime(w.client, closeAt);
+    // Each clock move keeps the sponsored price 5 s old, so the join lock (Sprint 03) finds it fresh
+    // and only the entry close decides.
+    freshPrice(w, metric, closeAt);
     expectError(await join(w, baker, campaign, yes(SOL)), "EntriesClosed");
-    setTime(w.client, closeAt + P.DAY);
+    freshPrice(w, metric, closeAt + P.DAY);
     expectError(await join(w, baker, campaign, yes(SOL)), "EntriesClosed");
-    setTime(w.client, closeAt - 1n);
+    freshPrice(w, metric, closeAt - 1n);
     expectOk(await join(w, baker, campaign, yes(SOL)));
   });
 

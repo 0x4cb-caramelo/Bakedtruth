@@ -2,8 +2,9 @@
  * Purpose: builders for every instruction of the program, with the accounts in the frozen order of
  *          programs/brot-markets/src/instructions/mod.rs, and helpers that tamper with one slot or
  *          the data for the negative tests.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio); frozen at the sprint's opening with the program's contract
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio); Sprint 03 adds `resolve_campaign` and the opening's new
+ *          arguments, frozen at its opening
  */
 import { AccountRole, type Address, type Instruction, type TransactionSigner } from "@solana/kit";
 
@@ -68,6 +69,10 @@ export type OpenArgs = {
   deadlineAt: bigint;
   openingUsd: bigint;
   maxLamports: bigint;
+  /** Epoch kinds: the measured epoch; 0 for the others. */
+  epoch?: bigint;
+  /** `GlobalConfig.params_version` as read for the preview; 0 until the params change. */
+  expectedParamsVersion?: number;
 };
 
 /** `user_open_campaign`. The metric and SOL/USD slots default to the sponsored accounts. */
@@ -86,6 +91,8 @@ export async function openCampaignIx(
     deadline_at: a.deadlineAt,
     opening_usd: a.openingUsd,
     max_lamports: a.maxLamports,
+    epoch: a.epoch ?? 0n,
+    expected_params_version: a.expectedParamsVersion ?? 0,
   });
   const accounts = [signer(creator, true), rw(await P.configPda()), rw(campaign), rw(await P.vaultPda(campaign))];
   accounts.push(ro(slots.metric ?? (await P.sponsoredPriceAccount(a.feedId))), ro(slots.solUsd ?? P.SOL_USD_ACCOUNT));
@@ -106,6 +113,14 @@ export async function joinCampaignIx(baker: TransactionSigner, campaign: Address
   const accounts = [signer(baker, true), ro(await P.configPda()), rw(campaign), rw(await P.vaultPda(campaign))];
   accounts.push(rw(await P.entryPda(campaign, baker.address)), ro(metric), ro(P.SYSTEM_PROGRAM_ID), ...eventSlots());
   return ix(accounts, data(P.IX.USER_JOIN_CAMPAIGN, args));
+}
+
+/**
+ * `resolve_campaign`: no arguments. `proof` is the price kind's YES proof; the other kinds do not
+ * read it, and it defaults to the metric account.
+ */
+export function resolveCampaignIx(campaign: Address, metric: Address, proof: Address = metric) {
+  return ix([rw(campaign), ro(metric), ro(proof), ...eventSlots()], data(P.IX.RESOLVE_CAMPAIGN));
 }
 
 // --- Tampering, for the negative tests ------------------------------------------------------------

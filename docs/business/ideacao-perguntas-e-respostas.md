@@ -9,24 +9,33 @@ Quando uma resposta posterior muda uma anterior, vale a posterior. A seção 1 t
 
 ## 1. Estado consolidado (vale este)
 
-### Decisões de 9 de outubro de 2026, sobre o Sprint 03 — prevalecem sobre tudo abaixo
+### Decisões de 9 de outubro de 2026, sobre as perguntas das Sprints 02 a 04 — prevalecem sobre tudo abaixo
 
-Respondidas por Ronaldo, que decide junto com o fundador (as perguntas são as da revisão do Sprint 03; a numeração segue
-essa lista, em que a pergunta 7 aparece como "pergunta 8" nos arquivos do Sprint 03). Registro escrito a partir do
-resumo das respostas, não das palavras exatas dele.
+Dadas pelo Ronaldo em sessão de trabalho com o assistente, em resposta às perguntas que a Sprint 03 deixou ao fundador
+e às duas que a Sprint 04 tinha em aberto. O Lucas escreveu no PR #35 que as decisões de produto são dele e do Ronaldo.
+As respostas estão também no comentário do PR #40, e o porquê em
+`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`. A numeração é a da lista do PR #40.
 
-1. **Lista de feeds de preço: fechada, opção C — lista própria da Brot, que começa com a lista oficial da Pyth no primeiro
-   dia (62 feeds na rede principal, 17 na devnet).** Antes, ele perguntou quantos tipos e feeds sobrariam com cada opção
-   (só a Pyth deixaria 1 tipo; hoje há 4 tipos abertos e 5 construídos).
-2. **Abertura cobrada em `p − conf`:** sim.
-3. **Id do feed SOL/USD como constante compilada:** sim.
-4. **Abertura pelo time:** orçamento próprio, **sem limite**, fora de `max_open_campaigns`.
-5. **A campanha guarda a entrada mínima com que foi aberta:** sim (0,01 SOL; faixa do administrador de 0,001 a 1 SOL).
-6. **Chaves do time:** Lucas, Ronaldo e Bernardo (Bernardo Nery, CEO; não programa; vai usar e administrar a plataforma).
-7. **Entrar depois do toque:** sim à recomendação (folga na trava de entrada, mais reembolso das entradas feitas a
-   partir do `publish_time` da prova).
-8. **Campanha sem entradas:** o prêmio volta para quem abriu; a Brot fica com os US$ 50 da abertura.
-9. **Void por `StaleFeed`:** a Brot fica com os US$ 50 (causa externa).
+- **1. Quais feeds da Pyth uma campanha de preço pode nomear:** uma lista nossa, fixa no programa ("option c (Our own
+  list)"). No primeiro dia, a lista oficial de feeds patrocinados pela Pyth, "to ensure stability": 62 feeds na rede
+  principal e 17 na devnet em 9/10/2026. Feeds novos entram "later in Sprint 06 when we have our own infrastructure to
+  keep them updated safely". Sem a lista, eram 81 e 24 no mesmo dia, mas os que estão fora dela dependem de quem paga
+  as atualizações. Estreita, só para o tipo preço, o "nao tem lista de contas aprovadas" de 8/10.
+- **2. Cobrar a abertura em `p − conf`:** "ok you can do this".
+- **3. O feed do SOL/USD como constante do programa:** "ok this can be a constant".
+- **4. Cota própria para as aberturas gratuitas da equipe:** "ok lets do this, unlimited open campaings for team". As
+  aberturas da equipe deixam de contar no `max_open_campaigns` e não têm limite próprio.
+- **5. A campanha guarda a entrada mínima com que abriu:** "ok i accept this suggestion", depois de saber o valor
+  (0,01 SOL, P-5; o admin pode pô-la entre 0,001 e 1 SOL).
+- **6. Chaves da equipe (Q12):** "we are 3 in the team, Lucas, Ronaldo and Bernardo, bernardo is not coding with us
+  but he will use and admin the platform later".
+- **8. Entrar no SIM depois do toque:** "sim, aceito a recomendacao": a margem na trava de entrada e, na Sprint 04, a
+  devolução das entradas feitas a partir do `publish_time` da prova do SIM. A 7, preço zero ou negativo como prova,
+  foi fechada pelas revisões da Sprint 03: recusado.
+- **Campanha sem nenhuma entrada (Sprint 04):** "yes the platform keeps the campaign cost fee": o prêmio volta a quem
+  abriu, e a Brot fica com os US$ 50.
+- **Anulação por feed parado, `StaleFeed` (Sprint 04):** "keep the 50$ fee for platform": causa externa, e a Brot fica
+  com os US$ 50.
 
 ### Decisões de 8 de outubro de 2026, sobre o BP v0.0.3 — prevalecem sobre tudo abaixo
 

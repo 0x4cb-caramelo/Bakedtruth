@@ -1,0 +1,23 @@
+[package]
+name = "cpi-proxy"
+version = "0.0.3"
+description = "Test-only: forwards one instruction by CPI, so a test can show resolve_campaign refuses a CPI. Never deployed."
+authors = ["Brot Markets"]
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "cpi_proxy"
+
+[features]
+default = []
+no-entrypoint = []
+
+[dependencies]
+# The same pin as brot-markets, so the lockfile gains no new version.
+pinocchio = { version = "=0.11.2", features = ["cpi"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))'] }
