@@ -75,9 +75,10 @@ demonstrable on devnet.
 
 **Status.** Sprints 00 and 01 are closed, with tags `sprint-00` and `sprint-01`. Sprint 01 concluded that Pyth serves
 on devnet; the Surfpool read it asked for was done in Sprint 03. Sprint 02 ran on 2026-10-08 with the D6 names and was
-merged into `main` in PR #35 (not tagged). Sprint 03 ran on 2026-10-09: the five readers, the opening of every kind,
-the join lock, `resolve_campaign`, the Surfpool scenario, and the frozen program and Anchor gone from the workspace; it
-is in review (PR #40, not merged). The next is 04.
+merged into `main` with PR #35, together with this plan's PR #27; the tag `sprint-02` waits for the founder. Sprint 03
+ran on 2026-10-09: the five readers, the opening of every kind, the join lock, `resolve_campaign`, the Surfpool
+scenario, and the frozen program and Anchor gone from the workspace; it is in review (PR #40, not merged). The next is
+04.
 
 **Outside the roadmap: the provisional site.** At the founder's request, `brot.markets` serves `services/landing`: a
 "coming soon" page with a waitlist, a privacy page and the decks at `/pitch` and `/pitch2`. It is not a sprint and

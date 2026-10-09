@@ -8,10 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-A Sprint 02, o núcleo do pote em Pinocchio, foi mesclada na `main` pelo fundador no pull request #35 (8/10/2026), sem
-a tag `sprint-02`. A Sprint 03, os leitores e a resolução, está em revisão no pull request #40 (branch
-`sprint-03-readers-resolution`, 9/10/2026), sem mesclar: a mescla e a tag esperam o fundador
-(`docs/sprints/sprint-03-readers-resolution.md`).
+A Sprint 02, o núcleo do pote em Pinocchio, foi mesclada na `main` pelo PR #35 em 8/10/2026 (o PR #30 trazia a branch
+`sprint-02-pot-core`); a tag `sprint-02` espera o fundador (`docs/sprints/sprint-02-pot-core.md`). A Sprint 03, os
+leitores e a resolução, está em revisão no pull request #40 (branch `sprint-03-readers-resolution`, 9/10/2026), sem
+mesclar: a mescla e a tag esperam o fundador (`docs/sprints/sprint-03-readers-resolution.md`).
 
 ### Added
 
@@ -296,6 +296,13 @@ a tag `sprint-02`. A Sprint 03, os leitores e a resolução, está em revisão n
   anterior da Pythnet, não a escrita anterior da conta (em todas as contas capturadas vale `publish_time − 1`), então
   o teste do feed parado passou a ser "nada foi gravado depois do prazo e a última escrita é mais velha que
   `prazo − max_age`"; e o NÃO do tipo preço espera 60 segundos depois do prazo.
+- **Plano técnico v0.1.1** (8/10/2026): alinhado ao que a Sprint 02 construiu e mediu, linha por linha da tabela "TP
+  to align" do arquivo da sprint. Entram as versões fixadas (`pinocchio-system` 0.6.1, Shank 0.4.9, Mollusk 0.14.0, que
+  substitui o 0.16 por causa do Rust 1.89), os eventos por chamada do programa a si mesmo desde a Sprint 02, as dez
+  instruções, os tamanhos e o aluguel medidos (3.901.440 lamports por abertura na devnet), os três valores de treino,
+  o CI como está, e C14 a C17, C30, C42 e C43 fechados. O D6 e a leitura do prêmio posto pela equipe (C44) passam a
+  decisão do fundador, pelas palavras dele no PR #35; a entrada mínima lida a cada entrada e as quatro perguntas das
+  revisões ficam abertas na seção 14.2.
 - **A página em breve com o vocabulário do D6** (8/10/2026): título, meta tags, título principal, texto de abertura,
   formulário, exemplo e princípios passam de "prediction markets", "bet", "pool" e USDC para On-Chain Campaigns,
   entrar no YES ou NO, pote e SOL. O aviso legal do rodapé e o deck em `/pitch` não mudaram.
@@ -371,11 +378,11 @@ a tag `sprint-02`. A Sprint 03, os leitores e a resolução, está em revisão n
   borda da banda está a menos de X% do alvo), um `last_entry_at` na campanha e, na Sprint 04, a devolução das
   entradas feitas depois do `publish_time` da prova; cada caminho muda quem ganha, então é dele. A pergunta 7 (preço
   zero ou negativo como prova) foi fechada pelas revisões: recusado.
-- **Sprint 02, para o fundador confirmar:** que aprovar a proposta de arquitetura aprovou também a troca de nomes
-  do D6; que o Lucas e o Ronaldo têm, os dois, chaves da equipe (Q12); a leitura de trabalho de "a equipe põe
-  prêmio" (paga como qualquer carteira); se a entrada mínima de uma campanha aberta muda quando a configuração
-  muda (hoje muda); e se o PR #27, o plano v0.1.0 que a branch da sprint carrega, é revisto e mesclado antes. O R4,
-  abertura mais barata nos primeiros meses, não foi construído.
+- **Sprint 02, para o fundador confirmar:** que o Lucas e o Ronaldo têm, os dois, chaves da equipe (Q12); e se a
+  entrada mínima de uma campanha aberta muda quando a configuração muda (hoje muda). O D6 e a leitura de "a equipe
+  põe prêmio" (paga como qualquer carteira) ficaram decididos no PR #35, que mesclou também o #27 ("O que foi feito
+  lá no código dele a gente traz como nova realidade"). O R4, abertura mais barata nos primeiros meses, não foi
+  construído.
 - **Sprint 02, decisões que as revisões pedem antes da Sprint 03:** a campanha de preço aceita qualquer feed da Pyth,
   e o plano diz "preço de um ativo grande" (uma lista fechada de feeds pediria a decisão dele, porque o D-i tirou a
   lista de contas); uma chave da equipe vazada pode ocupar todas as vagas de campanhas abertas por até 90 dias (uma
@@ -442,8 +449,8 @@ a tag `sprint-02`. A Sprint 03, os leitores e a resolução, está em revisão n
   conferida; o Ronaldo ser avisado do serviço novo no servidor.
 - **Arquivos originais do deck** (as duas versões, 10 MB e 13 MB) em `docs/technical/`, fora do Git. Não foram
   commitados nem apagados.
-- **Sprints:** a 00 e a 01 estão concluídas; a 02 está em revisão no pull request #30, sem mesclar. Falta
-  confirmar a leitura de que o Lucas e o Ronaldo têm, os dois, chave de equipe.
+- **Sprints:** a 00 e a 01 estão concluídas; a 02 foi mesclada na `main` pelo PR #35, e a tag `sprint-02` espera o
+  fundador. Falta confirmar a leitura de que o Lucas e o Ronaldo têm, os dois, chave de equipe.
 - **Leitura no Surfpool:** era critério de pronto da Sprint 01 e não foi feita. Está na Sprint 03, com o de acordo
   do fundador.
 - **Desenho da pergunta de preço:** a revisão da Sprint 01 propõe aceitar, na aposta, só a conta patrocinada do
