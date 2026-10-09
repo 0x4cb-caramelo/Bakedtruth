@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../styles/tokens.css";
+@import "../styles/ui.css";
 
 /* Purpose: Tailwind's theme on top of the Ledger² tokens (styles/tokens.css). Every colour, radius and shadow
    points at a variable, so the dark theme (default) and the light theme come from one place. The names of the

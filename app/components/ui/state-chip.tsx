@@ -1,23 +1,26 @@
-// Purpose: the chip that names a campaign's state (P1 §3.1). Text on its own chip, never colour alone, so it reads
-// the same with a screen reader and in greyscale. Sprint -1.
+// Purpose: the chip that names a campaign's public state (P1 §3.1). Text on its own chip with a dot, never colour
+// alone. A contested campaign reads "In review" and says why in a note for screen readers, as the prototype does.
+// Classes come from styles/ui.css (.chip.state). Sprint -1.
 export type CampaignState = "open" | "closed" | "review" | "paid" | "void" | "contest";
 
-const labels: Record<CampaignState, string> = {
+const LABELS: Record<CampaignState, string> = {
   open: "Open",
   closed: "Closed",
   review: "In review",
   paid: "Paid",
-  void: "Void",
-  contest: "Contested",
+  void: "Voided",
+  contest: "In review",
 };
 
-export function StateChip({ state }: { state: CampaignState }) {
+const NOTES: Partial<Record<CampaignState, string>> = { contest: "Contested · payout paused" };
+
+export function StateChip({ state, result }: { state: CampaignState; result?: "YES" | "NO" }) {
+  const note = NOTES[state];
+  const text = state === "paid" && result ? `Paid · ${result}` : LABELS[state];
   return (
-    <span
-      className="inline-flex items-center rounded-(--r-pill) px-2.5 py-0.5 text-[11px] font-medium"
-      style={{ background: `var(--st-${state}-bg)`, color: `var(--st-${state}-fg)` }}
-    >
-      {labels[state]}
+    <span className={`chip state state-${state}`} title={note}>
+      {text}
+      {note ? <span className="sr-only">, {note}</span> : null}
     </span>
   );
 }

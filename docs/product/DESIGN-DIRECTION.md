@@ -468,23 +468,76 @@ A grade se ajusta sozinha (`minmax(290px, 1fr)`). Não há ponto de quebra abaix
 
 ## Porte para o `app/` (Sprint -1, 9/10/2026)
 
-O que o `app/` recebeu do protótipo aprovado, e o que ainda não:
+O que o `app/` recebeu do protótipo aprovado (`prototype-lab/campaigns/`), o que ficou de fora de propósito e por quê.
+Fonte de cada peça: o protótipo, salvo onde a linha diz o contrário.
 
-- **Tokens:** `app/styles/tokens.css`, cópia de `prototype-lab/campaigns/css/tokens.css`. Escuro em `:root` (o oficial,
-  o do ar em brot.markets), claro em `:root[data-theme='light']`. As variáveis `--display` e `--body` apontam para as
-  fontes do próprio site. O `@theme` do Tailwind (`app/app/globals.css`) aponta para essas variáveis; os nomes antigos
-  da direção C (`page`, `surface`, `ink`, `crust`...) continuam como apelidos até as Sprints 09 a 13.
-- **Fontes:** Barlow Condensed 700 e Inter (peso 100 a 900), em `app/fonts/`, por `next/font/local`. O build não
-  referencia nenhum host de fonte de terceiros na página. Os nomes `Space Grotesk`, `Jersey 15` e `Geist Mono` saíram.
+### Tokens, fontes e tema
+
+- **Tokens:** `app/styles/tokens.css`, cópia de `prototype-lab/campaigns/css/tokens.css` com três diferenças: as fontes
+  vêm das variáveis do `next/font` (`--font-barlow`, `--font-inter`), não de `@font-face` próprio; a variável `--shade`
+  é definida nos dois temas; e o cabeçalho diz que é o porte. Os valores de cor são os mesmos byte a byte. Escuro em
+  `:root` (o oficial, o do ar em brot.markets), claro em `:root[data-theme='light']`.
+- **Fontes:** Barlow Condensed 700 e Inter (peso 100 a 900), em `app/fonts/`, por `next/font/local` em
+  `app/app/layout.tsx`. Nenhuma fonte de terceiros é carregada. Os nomes `Space Grotesk`, `Jersey 15` e `Geist Mono`
+  saíram.
 - **Tema:** o script de `app/lib/theme.ts` roda no `<head>`, antes do CSS, e lê `localStorage['brot-theme']` dentro de
   `try/catch`. Padrão escuro; só o valor `light` troca. O botão (`app/components/ui/theme-toggle.tsx`) lê o atributo
   `data-theme`, não o armazenamento, para o servidor e a primeira tela concordarem.
-- **Primitivos em `app/components/ui/`:** botão (primário e secundário), chip de estado (P1 §3.1, com texto), token de
-  tipo (P1 §4.2), Sim/Não com o lado escolhido marcado por texto, barra de progresso (`role="progressbar"`), aviso e
-  o botão de tema. Todos usam as variáveis, nenhum cor literal.
+- **Tailwind:** `app/app/globals.css` aponta o `@theme` para as variáveis. Os nomes da direção C (`page`, `surface`,
+  `ink`, `crust`...) continuam como apelidos até as Sprints 09 a 13.
 
-**Ainda não portado:** o resto do inventário acima (cartão, carrossel, painel de prova, abas, campo de pontos, rodapé
-e os demais); a caixa de abrir campanha e as telas em celular, que são desenhadas no protótipo e portadas nas Sprints
-09 a 13 e 19; a re-leitura da tabela de conflitos (19 linhas) e de lacunas contra o BP v0.0.4. Os três pares de texto
-abaixo de 4,5:1 já vêm corrigidos nos valores de `tokens.css`, mas os quatro problemas de acessibilidade da lista não
-foram conferidos no `app/`: isso fica para a re-leitura das telas.
+### Estilos dos primitivos
+
+- **`app/styles/ui.css`**: cópia de `prototype-lab/campaigns/css/components.css`, o arquivo de primitivos aprovado:
+  botões (`.cta` com a borda que gira, `.btn`), o tile de tipo (`.kind-tile`), os chips de estado e o selo, os botões
+  Sim/Não (`.side-btn`), os campos (`.input`, `.seg`), os avisos, a barra do pote, o estado vazio, a prova, o diálogo,
+  o menu e os avisos rápidos. Só usa variáveis de `tokens.css`.
+- **Acréscimo ao protótipo:** uma regra de movimento reduzido (`prefers-reduced-motion`) para a borda que gira e o
+  brilho do esqueleto. O comentário do protótipo já prometia isso, mas o CSS não tinha a regra.
+
+### Componentes em `app/components/ui/`
+
+| Primitivo | Classe (ui.css) | Notas |
+|---|---|---|
+| `button.tsx` | `.cta` (primário), `.btn`, `.btn.quiet` | Primário com a borda que gira |
+| `side-button.tsx` | `.side-btn` | **Substitui `odds.tsx`.** O antigo mostrava preço em centavos, que o produto não tem (conflito 1). Agora mostra a chance em %; a escolha tem ✓ e contorno, não só cor |
+| `token.tsx` | `.kind-tile` | Cinco tipos, letra e cor próprias (P1 §4.2) |
+| `state-chip.tsx` | `.chip.state` | Rótulos do protótipo: "Voided" (não "Void"); contestada aparece como "In review" com a nota "Contested · payout paused" para leitor de tela |
+| `seal.tsx` | `.chip.seal` | Selo de parceiro como chip (L-24, decidido em 9/10) |
+| `split-bar.tsx` | `.split`, `.split-legend` | Pote em uma barra: SIM, NÃO, prêmio com faixa listrada. Recebe números e rótulos já formatados |
+| `moments.tsx` | `.moments-rows` | Duas datas, fechamento e prazo (BR-06), com UTC |
+| `live-value.tsx` | `.read-values` | Leitura atual contra o alvo (P1 §4.7) |
+| `empty-state.tsx` | `.empty` | Baked triste, `public/mascot/sulking.png` (o mesmo do site no ar) |
+| `notice.tsx` | `.notice`, `.warn`, `.danger` | Tom com texto; botão de fechar opcional |
+| `segmented.tsx` | `.seg` | Escolha exclusiva com `aria-pressed` |
+| `skeleton.tsx` | `.skel` | Carregamento, parado com movimento reduzido |
+| `progress.tsx` | (variáveis) | Sem mudança: barra da prova, `role="progressbar"` |
+| `theme-toggle.tsx` | (variáveis) | Sem mudança: troca o tema e grava `brot-theme` |
+
+Nenhum primitivo tem cor literal; todos usam variáveis de `tokens.css`. Nenhuma tela do `app/` usa os primitivos ainda
+(as telas chegam nas Sprints 09 a 13 e 19), então eles compilam mas ainda não foram vistos numa página.
+
+### Ficou de fora, com o motivo
+
+- **Campos, diálogo, menu e avisos rápidos** têm estilo em `ui.css`, mas ainda não têm componente. Entram com a caixa de
+  abrir campanha (Sprint 19) e com a entrada (Sprint 11), que são quem os usa.
+- **Cartão de campanha, carrossel, listas, cabeçalho, faixa de status, rodapé e o mascote em outras poses:** são do
+  quadro de telas e da moldura do site (Sprints 09 a 13). O `app/` atual ainda tem o cabeçalho e o rodapé da direção C.
+- **Campo de pontos (`#dots`) e as animações de fundo:** ficam para a moldura do site.
+
+### Ainda aberto nesta sprint
+
+- A **caixa de abrir campanha** e os **layouts de celular** estão aprovados no protótipo (9/10/2026), mas não estão
+  portados: são telas, e cabem às Sprints 09 a 13 e 19. Este registro os cita como portados só no protótipo.
+- A **re-leitura da tabela de conflitos (19 linhas)** e das lacunas contra o BP v0.0.4 não foi feita. A lista de
+  conflitos acima continua valendo como checklist.
+- Os **quatro problemas de acessibilidade** não foram conferidos no `app/`. Os três pares de texto abaixo de 4,5:1
+  já vêm corrigidos em `tokens.css` (mesmos valores do protótipo, conferidos lá).
+- O **teste automático de contraste** (`tests/`, "design tokens meet contrast") ainda não existe.
+- Nenhuma verificação visual em navegador foi feita: os primitivos não estão em página nenhuma.
+
+### Verificação desta etapa
+
+- `cd app && bun run lint`: passou.
+- `cd app && bun run build`: passou (compilação, TypeScript e as rotas).
+- `node scripts/codemap.js --check`: em dia.

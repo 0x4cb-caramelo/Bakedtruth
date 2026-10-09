@@ -23,6 +23,12 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
   `app/components/ui/` (botão, chip de estado, token, Sim/Não, barra de progresso, aviso e o botão de tema). O `app/`
   antigo muda de aparência: as classes da direção C continuam como apelidos. Ainda faltam os itens de fechamento da
   sprint (`docs/sprints/sprint--1-design-system.md`).
+- **Sprint -1, os primitivos e o registro do porte (9/10/2026, em andamento).** `app/styles/ui.css` é a cópia do
+  `components.css` aprovado do protótipo, com a regra de movimento reduzido que ele prometia. Doze primitivos em
+  `app/components/ui/`, oito novos e quatro reescritos sobre essas classes (o botão, o Sim/Não com chance, o tile, o chip de estado, o selo, a barra do pote, as duas datas,
+  a leitura contra o alvo, o estado vazio, o aviso, o seletor segmentado e o esqueleto). O `Odds` com preço em centavos
+  sai. `docs/product/DESIGN-DIRECTION.md` registra o que ficou de fora e por quê: campos, diálogo e menu entram com as
+  telas que os usam; a caixa de abrir campanha e os layouts de celular são telas das Sprints 09 a 13 e 19.
 - **Sprint -1: o protótipo das telas das campanhas** (`prototype-lab/campaigns/`, 8/10/2026), à espera da aprovação
   do fundador. Todas as telas do produto do BP v0.0.4 na linguagem Ledger², escuro por padrão e em inglês: a home e a
   lista, a página da campanha em 16 estados com a entrada inteira (do resumo antes de assinar ao recibo e às recusas),

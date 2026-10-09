@@ -1,21 +1,27 @@
-// Purpose: the primary and secondary buttons of the Ledger² direction, in both themes, from the tokens only.
-// Primary is the blue CTA; secondary is the quiet outline. Sprint -1 (DESIGN-DIRECTION.md, "Botão primário").
+// Purpose: the buttons of the design direction. "primary" is the blue CTA with the orbiting edge (.cta); "secondary"
+// is the outline (.btn); "quiet" is the flat link-like one (.btn.quiet). Classes and colours come from styles/ui.css
+// and tokens.css. Sprint -1 (DESIGN-DIRECTION.md, "Botão primário").
 import type { ButtonHTMLAttributes } from "react";
 
-type Variant = "primary" | "secondary";
-
-const base =
-  "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-(--r-sm) px-4 text-[12px] font-semibold transition-colors disabled:opacity-50";
-
-const variants: Record<Variant, string> = {
-  primary: "bg-(--cta-bg) text-(--on-accent) hover:bg-(--cta-hover)",
-  secondary: "border border-(--field-line) bg-(--panel) text-(--text) hover:bg-(--raised)",
-};
+type Variant = "primary" | "secondary" | "quiet";
 
 export function Button({
   variant = "primary",
   className = "",
+  children,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
-  return <button type="button" className={`${base} ${variants[variant]} ${className}`} {...props} />;
+  if (variant === "primary") {
+    return (
+      <button type="button" className={`cta ${className}`} {...props}>
+        <span>{children}</span>
+      </button>
+    );
+  }
+  const quiet = variant === "quiet" ? "quiet" : "";
+  return (
+    <button type="button" className={`btn ${quiet} ${className}`} {...props}>
+      {children}
+    </button>
+  );
 }

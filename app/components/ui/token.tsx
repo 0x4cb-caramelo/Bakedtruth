@@ -1,21 +1,13 @@
-// Purpose: the one-letter token tile of a campaign's kind (P1 §4.2). Five kinds, each with its own tile colour, none
-// of them YES/NO green or red. Sprint -1 (DESIGN-DIRECTION.md, "Token").
+// Purpose: the one-letter tile of a campaign's kind (P1 §4.2), in the kind's own colour (.kind-tile). Five kinds, none
+// of them YES/NO green or red; the kind's name always sits next to the tile. Sprint -1 (DESIGN-DIRECTION.md, "Token").
 export type TokenKind = "price" | "burn" | "lock" | "pool" | "stake";
 
-export function Token({ kind, letter, size = 40 }: { kind: TokenKind; letter: string; size?: number }) {
+const LETTERS: Record<TokenKind, string> = { price: "$", burn: "B", lock: "L", pool: "P", stake: "V" };
+
+export function Token({ kind, small = false }: { kind: TokenKind; small?: boolean }) {
   return (
-    <span
-      aria-hidden="true"
-      className="inline-flex items-center justify-center rounded-(--r-sm) font-display font-bold"
-      style={{
-        width: size,
-        height: size,
-        fontSize: size * 0.55,
-        background: `var(--k-${kind}-bg)`,
-        color: `var(--k-${kind}-fg)`,
-      }}
-    >
-      {letter}
+    <span aria-hidden="true" className={`kind-tile kind-${kind} ${small ? "sm" : ""}`}>
+      {LETTERS[kind]}
     </span>
   );
 }
