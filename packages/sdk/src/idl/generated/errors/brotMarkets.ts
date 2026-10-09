@@ -230,6 +230,12 @@ export const BROT_MARKETS_ERROR__PAYOUT_EXCEEDS_SNAPSHOT = 0x17e0; // 6112
 export const BROT_MARKETS_ERROR__ENTRY_NOT_ON_CAMPAIGN = 0x17e1; // 6113
 /** NotTallied: The entry's joins are not all tallied yet: the late totals are not known */
 export const BROT_MARKETS_ERROR__NOT_TALLIED = 0x17e2; // 6114
+/** NoProofTime: The campaign has no YES proof publish time, so its late entries cannot be told apart */
+export const BROT_MARKETS_ERROR__NO_PROOF_TIME = 0x17e3; // 6115
+/** CampaignNotInReview: The campaign is not InReview, so it cannot be finalized */
+export const BROT_MARKETS_ERROR__CAMPAIGN_NOT_IN_REVIEW = 0x17e4; // 6116
+/** ReviewNotEnded: The review window has not ended yet */
+export const BROT_MARKETS_ERROR__REVIEW_NOT_ENDED = 0x17e5; // 6117
 /** CampaignNotSettled: The campaign's fee, prize and creator share are not all settled */
 export const BROT_MARKETS_ERROR__CAMPAIGN_NOT_SETTLED = 0x17e9; // 6121
 /** FeeRecipientIsFeeVault: The fee recipient is the fee vault itself */
@@ -244,10 +250,22 @@ export const BROT_MARKETS_ERROR__FEE_ALREADY_COLLECTED = 0x17ed; // 6125
 export const BROT_MARKETS_ERROR__PRIZE_ALREADY_SETTLED = 0x17ee; // 6126
 /** AccountNotEmpty: The account still holds lamports, so it cannot be closed */
 export const BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY = 0x17ef; // 6127
+/** RentPayerNotStored: The rent payer is not the one stored at opening */
+export const BROT_MARKETS_ERROR__RENT_PAYER_NOT_STORED = 0x17f0; // 6128
+/** FeeRecipientMismatch: The fee recipient is not the one GlobalConfig stores */
+export const BROT_MARKETS_ERROR__FEE_RECIPIENT_MISMATCH = 0x17f1; // 6129
+/** OneSidedFeesNotRecorded: The running total of one-sided fees is not recorded, so the fee cannot be collected yet */
+export const BROT_MARKETS_ERROR__ONE_SIDED_FEES_NOT_RECORDED = 0x17f2; // 6130
 /** JoinBufferRefused: The sponsored price is within the join margin of the target */
 export const BROT_MARKETS_ERROR__JOIN_BUFFER_REFUSED = 0x17f3; // 6131
 /** BelowCampaignMinEntry: The entry is below the minimum this campaign opened with */
 export const BROT_MARKETS_ERROR__BELOW_CAMPAIGN_MIN_ENTRY = 0x17f4; // 6132
+/** JoinAccountsMismatch: The join accounts passed do not match the entry's joins, in order */
+export const BROT_MARKETS_ERROR__JOIN_ACCOUNTS_MISMATCH = 0x17f5; // 6133
+/** TallyNotReady: The campaign is not InReview with its publish time recorded, so its joins cannot be tallied */
+export const BROT_MARKETS_ERROR__TALLY_NOT_READY = 0x17f6; // 6134
+/** EntryAlreadyTallied: Every join of this entry is already tallied */
+export const BROT_MARKETS_ERROR__ENTRY_ALREADY_TALLIED = 0x17f7; // 6135
 /** FeedNotOnList: The price feed is not on the compiled feed list */
 export const BROT_MARKETS_ERROR__FEED_NOT_ON_LIST = 0x17fd; // 6141
 /** IllegalTransition: The transition is not in the table of TP 3.4.2 */
@@ -264,6 +282,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__BAD_INSTRUCTION_DATA
   | typeof BROT_MARKETS_ERROR__BELOW_CAMPAIGN_MIN_ENTRY
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_MAX_AGE_OUT_OF_RANGE
+  | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_IN_REVIEW
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_SETTLED
   | typeof BROT_MARKETS_ERROR__CONTEST_EXIT_DISABLED
@@ -276,6 +295,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__DURATION_TOO_LONG
   | typeof BROT_MARKETS_ERROR__DURATION_TOO_SHORT
   | typeof BROT_MARKETS_ERROR__ENTRIES_CLOSED
+  | typeof BROT_MARKETS_ERROR__ENTRY_ALREADY_TALLIED
   | typeof BROT_MARKETS_ERROR__ENTRY_BELOW_MINIMUM
   | typeof BROT_MARKETS_ERROR__ENTRY_MISMATCH
   | typeof BROT_MARKETS_ERROR__ENTRY_NOT_ON_CAMPAIGN
@@ -286,10 +306,12 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__FEE_BPS_ABOVE_CEILING
   | typeof BROT_MARKETS_ERROR__FEED_NOT_ON_LIST
   | typeof BROT_MARKETS_ERROR__FEE_RECIPIENT_IS_FEE_VAULT
+  | typeof BROT_MARKETS_ERROR__FEE_RECIPIENT_MISMATCH
   | typeof BROT_MARKETS_ERROR__ILLEGAL_TRANSITION
   | typeof BROT_MARKETS_ERROR__INVALID_DIRECTION
   | typeof BROT_MARKETS_ERROR__INVALID_SIDE
   | typeof BROT_MARKETS_ERROR__INVARIANT_VIOLATED
+  | typeof BROT_MARKETS_ERROR__JOIN_ACCOUNTS_MISMATCH
   | typeof BROT_MARKETS_ERROR__JOIN_BUFFER_REFUSED
   | typeof BROT_MARKETS_ERROR__JOIN_PRICE_STALE
   | typeof BROT_MARKETS_ERROR__JOIN_WHILE_PAUSED
@@ -302,6 +324,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__MINT_AUTHORITY_LIVE
   | typeof BROT_MARKETS_ERROR__MISSING_SIGNATURE
   | typeof BROT_MARKETS_ERROR__NO_PENDING_ADMIN
+  | typeof BROT_MARKETS_ERROR__NO_PROOF_TIME
   | typeof BROT_MARKETS_ERROR__NOT_ADMIN
   | typeof BROT_MARKETS_ERROR__NOT_FINALIZED
   | typeof BROT_MARKETS_ERROR__NOTHING_TO_SWEEP
@@ -312,6 +335,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__NOT_TEAM_MEMBER
   | typeof BROT_MARKETS_ERROR__NOT_WRITABLE
   | typeof BROT_MARKETS_ERROR__ONE_SIDED_FEE_BPS_ABOVE_CEILING
+  | typeof BROT_MARKETS_ERROR__ONE_SIDED_FEES_NOT_RECORDED
   | typeof BROT_MARKETS_ERROR__OPENING_ABOVE_MAX_LAMPORTS
   | typeof BROT_MARKETS_ERROR__OPENING_FEE_USD_OUT_OF_RANGE
   | typeof BROT_MARKETS_ERROR__OPENING_PRIZE_BPS_OUT_OF_RANGE
@@ -336,9 +360,11 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN
   | typeof BROT_MARKETS_ERROR__READER_NOT_READY
   | typeof BROT_MARKETS_ERROR__READER_WRONG_OWNER
+  | typeof BROT_MARKETS_ERROR__RENT_PAYER_NOT_STORED
   | typeof BROT_MARKETS_ERROR__RESERVE_NOT_CLAIMABLE
   | typeof BROT_MARKETS_ERROR__RESOLVE_NOT_TOP_LEVEL
   | typeof BROT_MARKETS_ERROR__RETURN_BELOW_MINIMUM
+  | typeof BROT_MARKETS_ERROR__REVIEW_NOT_ENDED
   | typeof BROT_MARKETS_ERROR__SNAPSHOT_INCONSISTENT
   | typeof BROT_MARKETS_ERROR__SOL_USD_ACCOUNT_MISMATCH
   | typeof BROT_MARKETS_ERROR__SOL_USD_BAD_LAYOUT
@@ -350,6 +376,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__SOL_USD_WRONG_FEED
   | typeof BROT_MARKETS_ERROR__SOL_USD_WRONG_OWNER
   | typeof BROT_MARKETS_ERROR__STAKE_POOL_NOT_UPDATING
+  | typeof BROT_MARKETS_ERROR__TALLY_NOT_READY
   | typeof BROT_MARKETS_ERROR__TARGET_ALREADY_TOUCHED
   | typeof BROT_MARKETS_ERROR__TARGET_TOO_CLOSE
   | typeof BROT_MARKETS_ERROR__TARGET_UNREACHABLE
@@ -387,6 +414,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__BAD_INSTRUCTION_DATA]: `The instruction data is not exactly the size of the instruction's arguments`,
     [BROT_MARKETS_ERROR__BELOW_CAMPAIGN_MIN_ENTRY]: `The entry is below the minimum this campaign opened with`,
     [BROT_MARKETS_ERROR__CAMPAIGN_MAX_AGE_OUT_OF_RANGE]: `\`campaign_max_age\` is below 30 seconds or above its ceiling`,
+    [BROT_MARKETS_ERROR__CAMPAIGN_NOT_IN_REVIEW]: `The campaign is not InReview, so it cannot be finalized`,
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN]: `The campaign is not \`Open\``,
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_SETTLED]: `The campaign's fee, prize and creator share are not all settled`,
     [BROT_MARKETS_ERROR__CONTEST_EXIT_DISABLED]: `Nothing leaves \`Contested\` before Sprint 14`,
@@ -399,6 +427,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__DURATION_TOO_LONG]: `Row 5: the deadline is more than ninety days away`,
     [BROT_MARKETS_ERROR__DURATION_TOO_SHORT]: `Row 5: the deadline is less than three days away`,
     [BROT_MARKETS_ERROR__ENTRIES_CLOSED]: `Entries closed at \`entries_close_at\``,
+    [BROT_MARKETS_ERROR__ENTRY_ALREADY_TALLIED]: `Every join of this entry is already tallied`,
     [BROT_MARKETS_ERROR__ENTRY_BELOW_MINIMUM]: `The entry is below \`min_entry_lamports\``,
     [BROT_MARKETS_ERROR__ENTRY_MISMATCH]: `The \`Entry\` account belongs to another campaign or another baker`,
     [BROT_MARKETS_ERROR__ENTRY_NOT_ON_CAMPAIGN]: `The entry belongs to another campaign`,
@@ -409,10 +438,12 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__FEE_BPS_ABOVE_CEILING]: `\`fee_bps\` is above \`MAX_FEE_BPS\``,
     [BROT_MARKETS_ERROR__FEED_NOT_ON_LIST]: `The price feed is not on the compiled feed list`,
     [BROT_MARKETS_ERROR__FEE_RECIPIENT_IS_FEE_VAULT]: `The fee recipient is the fee vault itself`,
+    [BROT_MARKETS_ERROR__FEE_RECIPIENT_MISMATCH]: `The fee recipient is not the one GlobalConfig stores`,
     [BROT_MARKETS_ERROR__ILLEGAL_TRANSITION]: `The transition is not in the table of TP 3.4.2`,
     [BROT_MARKETS_ERROR__INVALID_DIRECTION]: `Row 4: the direction byte is neither \`Above\` nor \`Below\``,
     [BROT_MARKETS_ERROR__INVALID_SIDE]: `The side byte is neither \`Yes\` nor \`No\``,
     [BROT_MARKETS_ERROR__INVARIANT_VIOLATED]: `A money invariant (I1 to I15) does not hold`,
+    [BROT_MARKETS_ERROR__JOIN_ACCOUNTS_MISMATCH]: `The join accounts passed do not match the entry's joins, in order`,
     [BROT_MARKETS_ERROR__JOIN_BUFFER_REFUSED]: `The sponsored price is within the join margin of the target`,
     [BROT_MARKETS_ERROR__JOIN_PRICE_STALE]: `Join: the sponsored price is older than \`max_age\`, too far ahead, or too many slots old`,
     [BROT_MARKETS_ERROR__JOIN_WHILE_PAUSED]: `Entries are paused`,
@@ -425,6 +456,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__MINT_AUTHORITY_LIVE]: `Row 2: the mint's authority can still mint, so its supply can grow`,
     [BROT_MARKETS_ERROR__MISSING_SIGNATURE]: `A slot that must sign did not`,
     [BROT_MARKETS_ERROR__NO_PENDING_ADMIN]: `No admin transfer is pending`,
+    [BROT_MARKETS_ERROR__NO_PROOF_TIME]: `The campaign has no YES proof publish time, so its late entries cannot be told apart`,
     [BROT_MARKETS_ERROR__NOT_ADMIN]: `The signer is not the config's admin`,
     [BROT_MARKETS_ERROR__NOT_FINALIZED]: `The campaign is not finalized yet`,
     [BROT_MARKETS_ERROR__NOTHING_TO_SWEEP]: `The fee vault holds nothing above its rent-exempt minimum`,
@@ -435,6 +467,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__NOT_TEAM_MEMBER]: `The signer is not one of the config's team keys`,
     [BROT_MARKETS_ERROR__NOT_WRITABLE]: `A slot that must be writable was passed read-only`,
     [BROT_MARKETS_ERROR__ONE_SIDED_FEE_BPS_ABOVE_CEILING]: `\`one_sided_fee_bps\` is above its ceiling`,
+    [BROT_MARKETS_ERROR__ONE_SIDED_FEES_NOT_RECORDED]: `The running total of one-sided fees is not recorded, so the fee cannot be collected yet`,
     [BROT_MARKETS_ERROR__OPENING_ABOVE_MAX_LAMPORTS]: `Row 7: the opening would cost more lamports than the signed \`max_lamports\``,
     [BROT_MARKETS_ERROR__OPENING_FEE_USD_OUT_OF_RANGE]: `\`opening_fee_usd\` is outside its floor and ceiling`,
     [BROT_MARKETS_ERROR__OPENING_PRIZE_BPS_OUT_OF_RANGE]: `\`opening_prize_bps\` is outside its floor and ceiling`,
@@ -459,9 +492,11 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN]: `Row 1: this kind does not open yet (\`StakeAtLeast\` until a devnet YES is recorded)`,
     [BROT_MARKETS_ERROR__READER_NOT_READY]: `Unused since Sprint 03: the reader methods returned it before they were ported`,
     [BROT_MARKETS_ERROR__READER_WRONG_OWNER]: `Account is not owned by the program this reader trusts`,
+    [BROT_MARKETS_ERROR__RENT_PAYER_NOT_STORED]: `The rent payer is not the one stored at opening`,
     [BROT_MARKETS_ERROR__RESERVE_NOT_CLAIMABLE]: `The wallet is still below its rent-exempt minimum; the reserved credit cannot be claimed yet`,
     [BROT_MARKETS_ERROR__RESOLVE_NOT_TOP_LEVEL]: `\`resolve_campaign\` must be a top-level instruction, never called through a CPI`,
     [BROT_MARKETS_ERROR__RETURN_BELOW_MINIMUM]: `The estimated return is below the signed \`min_return_bps\``,
+    [BROT_MARKETS_ERROR__REVIEW_NOT_ENDED]: `The review window has not ended yet`,
     [BROT_MARKETS_ERROR__SNAPSHOT_INCONSISTENT]: `The snapshot's totals disagree with each other`,
     [BROT_MARKETS_ERROR__SOL_USD_ACCOUNT_MISMATCH]: `Row 7: the SOL/USD slot is not the sponsored account of \`sol_usd_feed_id\``,
     [BROT_MARKETS_ERROR__SOL_USD_BAD_LAYOUT]: `Row 7: the SOL/USD account does not have the \`PriceUpdateV2\` layout`,
@@ -473,6 +508,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__SOL_USD_WRONG_FEED]: `Row 7: the SOL/USD account holds another feed`,
     [BROT_MARKETS_ERROR__SOL_USD_WRONG_OWNER]: `Row 7: the SOL/USD account is not owned by the Pyth receiver`,
     [BROT_MARKETS_ERROR__STAKE_POOL_NOT_UPDATING]: `Row 2: the stake pool stopped updating and cannot write the epoch's snapshot`,
+    [BROT_MARKETS_ERROR__TALLY_NOT_READY]: `The campaign is not InReview with its publish time recorded, so its joins cannot be tallied`,
     [BROT_MARKETS_ERROR__TARGET_ALREADY_TOUCHED]: `Row 3: the target is already touched or met; the campaign would be decided at birth`,
     [BROT_MARKETS_ERROR__TARGET_TOO_CLOSE]: `Row 3: the target is within the minimum distance of the current value`,
     [BROT_MARKETS_ERROR__TARGET_UNREACHABLE]: `Row 3: the target is out of reach (a price at or below zero, or past the far bound)`,

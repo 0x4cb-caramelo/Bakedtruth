@@ -1627,11 +1627,25 @@
             ]
           },
           {
+            "name": "oneSidedFees",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "creatorShareReserved",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
             "name": "reserved",
             "type": {
               "array": [
                 "u8",
-                20
+                4
               ]
             },
             "attrs": [
@@ -3853,6 +3867,21 @@
       "msg": "The entry's joins are not all tallied yet: the late totals are not known"
     },
     {
+      "code": 6115,
+      "name": "NoProofTime",
+      "msg": "The campaign has no YES proof publish time, so its late entries cannot be told apart"
+    },
+    {
+      "code": 6116,
+      "name": "CampaignNotInReview",
+      "msg": "The campaign is not InReview, so it cannot be finalized"
+    },
+    {
+      "code": 6117,
+      "name": "ReviewNotEnded",
+      "msg": "The review window has not ended yet"
+    },
+    {
       "code": 6121,
       "name": "CampaignNotSettled",
       "msg": "The campaign's fee, prize and creator share are not all settled"
@@ -3888,6 +3917,21 @@
       "msg": "The account still holds lamports, so it cannot be closed"
     },
     {
+      "code": 6128,
+      "name": "RentPayerNotStored",
+      "msg": "The rent payer is not the one stored at opening"
+    },
+    {
+      "code": 6129,
+      "name": "FeeRecipientMismatch",
+      "msg": "The fee recipient is not the one GlobalConfig stores"
+    },
+    {
+      "code": 6130,
+      "name": "OneSidedFeesNotRecorded",
+      "msg": "The running total of one-sided fees is not recorded, so the fee cannot be collected yet"
+    },
+    {
       "code": 6131,
       "name": "JoinBufferRefused",
       "msg": "The sponsored price is within the join margin of the target"
@@ -3896,6 +3940,21 @@
       "code": 6132,
       "name": "BelowCampaignMinEntry",
       "msg": "The entry is below the minimum this campaign opened with"
+    },
+    {
+      "code": 6133,
+      "name": "JoinAccountsMismatch",
+      "msg": "The join accounts passed do not match the entry's joins, in order"
+    },
+    {
+      "code": 6134,
+      "name": "TallyNotReady",
+      "msg": "The campaign is not InReview with its publish time recorded, so its joins cannot be tallied"
+    },
+    {
+      "code": 6135,
+      "name": "EntryAlreadyTallied",
+      "msg": "Every join of this entry is already tallied"
     },
     {
       "code": 6141,

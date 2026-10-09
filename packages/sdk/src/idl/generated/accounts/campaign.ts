@@ -142,6 +142,8 @@ export type Campaign = {
   lateYes: bigint;
   lateNo: bigint;
   entriesUntallied: number;
+  oneSidedFees: bigint;
+  creatorShareReserved: bigint;
   reserved: ReadonlyUint8Array;
 };
 
@@ -207,6 +209,8 @@ export type CampaignArgs = {
   lateYes: number | bigint;
   lateNo: number | bigint;
   entriesUntallied: number;
+  oneSidedFees: number | bigint;
+  creatorShareReserved: number | bigint;
   reserved: ReadonlyUint8Array;
 };
 
@@ -274,7 +278,9 @@ export function getCampaignEncoder(): FixedSizeEncoder<CampaignArgs> {
     ["lateYes", getU64Encoder()],
     ["lateNo", getU64Encoder()],
     ["entriesUntallied", getU32Encoder()],
-    ["reserved", fixEncoderSize(getBytesEncoder(), 20)],
+    ["oneSidedFees", getU64Encoder()],
+    ["creatorShareReserved", getU64Encoder()],
+    ["reserved", fixEncoderSize(getBytesEncoder(), 4)],
   ]);
 }
 
@@ -342,7 +348,9 @@ export function getCampaignDecoder(): FixedSizeDecoder<Campaign> {
     ["lateYes", getU64Decoder()],
     ["lateNo", getU64Decoder()],
     ["entriesUntallied", getU32Decoder()],
-    ["reserved", fixDecoderSize(getBytesDecoder(), 20)],
+    ["oneSidedFees", getU64Decoder()],
+    ["creatorShareReserved", getU64Decoder()],
+    ["reserved", fixDecoderSize(getBytesDecoder(), 4)],
   ]);
 }
 
