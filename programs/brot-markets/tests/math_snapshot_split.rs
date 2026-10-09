@@ -1,9 +1,8 @@
 //! Purpose: the `Split` snapshot on the sprint file's worked examples (V 600 / P 400 with and without
-//!          a 450 prize; V 990 / P 10 and V 98,900 / P 1,100 with and without the prize, under the P-2
-//!          reading of D-g), a team campaign, and the late refunds. The literal reading of D-g is an
-//!          oracle here only, never in production code.
-//! Version: 0.0.1
-//! Sprint: 04 (lane B)
+//!          a 450 prize), a team campaign, the late refunds, and the Economic Viability Rule (2026-10-09):
+//!          a losing side too small to pay the fees resolves one-sided, with or without a prize.
+//! Version: 0.0.2
+//! Sprint: 04 (lane B; viability rule added at the closure review)
 
 use brot_markets::math::{
     invariant::check_snapshot,
@@ -31,7 +30,7 @@ fn yes_wins(yes: u64, no: u64, prize: u64) -> SnapshotInput {
 }
 
 fn take(input: SnapshotInput) -> Snapshot {
-    let snap = snapshot(input).expect("a split pot snapshots");
+    let snap = snapshot(input).expect("a pot snapshots");
     assert_eq!(check_snapshot(&input, &snap), Ok(()));
     snap
 }
@@ -57,50 +56,58 @@ fn math_snapshot_split_example_with_prize_pays_the_winners_1400() {
     assert_eq!(snap.brot_keeps, 40);
 }
 
+/// V 990 / P 10: the fees on the losing side (1 + the share of 10) are 11, more than the 10 there is, so the
+/// pot is one-sided and nothing is taken from it.
 #[test]
-fn math_snapshot_split_small_lopsided_pot_without_prize() {
-    // V 990 / P 10: C = 10, the pot covers 9 of it and the fee covers the last one.
+fn math_snapshot_split_small_lopsided_pot_is_one_sided_without_prize() {
     let snap = take(yes_wins(990, 10, 0));
-    assert_eq!(snap.fee_total, 1);
-    assert_eq!(snap.creator_share, 10);
-    assert_eq!(snap.from_pot, 9);
-    assert_eq!(snap.creator_share_from_fee, 1);
-    assert_eq!(snap.distributable, 990);
+    assert_eq!(snap.mode, SettleMode::OneSided);
+    assert_eq!(snap.fee_total, 0);
+    assert_eq!(snap.creator_share, 0);
+    assert_eq!(snap.distributable, 0);
+    assert_eq!(snap.to_opener, 0);
     assert_eq!(snap.brot_keeps, 0);
 }
 
 #[test]
-fn math_snapshot_split_small_lopsided_pot_with_prize() {
-    // Decision of 2026-10-09: the share comes from the losing side less the fee (9), then Brot's fee; the prize is
-    // not a source. The creator takes the 1 left from the fee, so Brot keeps nothing.
+fn math_snapshot_split_small_lopsided_pot_is_one_sided_with_prize() {
     let snap = take(yes_wins(990, 10, 450));
-    assert_eq!(snap.creator_share, 10);
-    assert_eq!(snap.from_pot, 9);
-    assert_eq!(snap.creator_share_from_fee, 1);
-    assert_eq!(snap.distributable, 1_440);
+    assert_eq!(snap.mode, SettleMode::OneSided);
+    assert_eq!(snap.to_opener, 450);
+    assert_eq!(snap.creator_share, 0);
+    assert_eq!(snap.distributable, 0);
+}
+
+/// V 98,900 / P 1,100: the fees are 110 + 1,000 = 1,110, more than the 1,100 on the losing side: one-sided.
+#[test]
+fn math_snapshot_split_large_lopsided_pot_is_one_sided_without_prize() {
+    let snap = take(yes_wins(98_900, 1_100, 0));
+    assert_eq!(snap.mode, SettleMode::OneSided);
+    assert_eq!(snap.fee_total, 0);
+    assert_eq!(snap.creator_share, 0);
+    assert_eq!(snap.distributable, 0);
+    assert_eq!(snap.to_opener, 0);
     assert_eq!(snap.brot_keeps, 0);
 }
 
 #[test]
-fn math_snapshot_split_large_lopsided_pot_without_prize() {
-    // V 98,900 / P 1,100: C = 1,000; the pot gives 990 and the fee 10 (the fee is 110).
-    let snap = take(yes_wins(98_900, 1_100, 0));
-    assert_eq!(snap.fee_total, 110);
-    assert_eq!(snap.creator_share, 1_000);
-    assert_eq!(snap.from_pot, 990);
-    assert_eq!(snap.creator_share_from_fee, 10);
-    assert_eq!(snap.distributable, 98_900);
-    assert_eq!(snap.brot_keeps, 100);
+fn math_snapshot_split_large_lopsided_pot_is_one_sided_with_prize() {
+    let snap = take(yes_wins(98_900, 1_100, 4_500));
+    assert_eq!(snap.mode, SettleMode::OneSided);
+    assert_eq!(snap.to_opener, 4_500);
+    assert_eq!(snap.distributable, 0);
 }
 
+/// The boundary, with the winning side at 990: the losing side of 12 pays 2 (fee) + 10 (share) = 12, which is
+/// not more than 12, so one-sided. At 13 the fees are 12 and the split holds.
 #[test]
-fn math_snapshot_split_large_lopsided_pot_with_prize() {
-    // With a 4,500 prize the share still comes from the losing side (990) and the fee (10), never the prize.
-    let snap = take(yes_wins(98_900, 1_100, 4_500));
-    assert_eq!(snap.from_pot, 990);
-    assert_eq!(snap.creator_share_from_fee, 10);
-    assert_eq!(snap.distributable, 103_400);
-    assert_eq!(snap.brot_keeps, 100);
+fn math_snapshot_split_viability_boundary_is_strictly_more_than_the_fees() {
+    let at_fees = take(yes_wins(990, 12, 0));
+    assert_eq!(at_fees.mode, SettleMode::OneSided);
+    let above_fees = take(yes_wins(990, 13, 0));
+    assert_eq!(above_fees.mode, SettleMode::Split);
+    assert_eq!(above_fees.fee_total, 2);
+    assert_eq!(above_fees.creator_share, 10);
 }
 
 #[test]
@@ -144,19 +151,4 @@ fn math_snapshot_split_opening_fee_stays_with_brot_on_a_split() {
     let snap = take(input);
     assert_eq!(snap.brot_keeps, 40 + 50);
     assert_eq!(snap.to_opener, 0);
-}
-
-/// The literal reading of D-g, as an oracle: the whole 1% comes from the fee, capped at the fee.
-/// It leaves the winners more than their entries, which is why production uses the P-2 reading.
-#[test]
-fn math_snapshot_split_literal_oracle_overpays_winners_where_p2_does_not() {
-    let (v, p) = (98_900u64, 1_100u64);
-    let fee = 110u64;
-    let literal_creator = 1_000u64.min(fee);
-    let literal_winners = v + p - fee;
-    assert_eq!(literal_creator, 110);
-    assert_eq!(literal_winners, 99_890);
-    let p2 = take(yes_wins(v, p, 0));
-    assert!(p2.distributable >= v);
-    assert_eq!(p2.distributable, v);
 }

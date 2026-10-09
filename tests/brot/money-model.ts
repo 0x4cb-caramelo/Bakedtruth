@@ -30,6 +30,18 @@ export type SplitResult = {
 };
 
 /**
+ * The Economic Viability Rule (decision of 2026-10-09): a pot splits only when the losing side is more than the
+ * fees taken from it, Brot's fee plus the creator's share on the whole pot (`creatorBps` 0 for a team opening).
+ * Otherwise the pot resolves one-sided. Mirrors `math/snapshot.rs` `split_is_viable`.
+ */
+export function splitIsViable(input: SplitInput): boolean {
+  const { winning, losing, feeBps, creatorBps } = input;
+  const fee = feeCeil(losing, feeBps);
+  const share = shareFloor(winning + losing, creatorBps);
+  return losing > fee + share;
+}
+
+/**
  * The P-2 reading (TP 3.4.16), in the rule's own words: the creator's share comes from the pot first,
  * the rest from Brot's fee; the winners keep their entries whole, and never get less than they put in.
  */

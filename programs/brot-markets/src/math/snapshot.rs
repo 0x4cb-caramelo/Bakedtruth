@@ -16,7 +16,7 @@
 use super::{
     fees::house_fee,
     payout::{creator_share, distributable},
-    rounding::checked_bps,
+    rounding::{bps_floor_wide, checked_bps},
     void::{kept_opening_return, void_return, VoidClass},
 };
 use crate::{error::BrotError, state::enums::SettleMode};
@@ -162,8 +162,9 @@ pub fn snapshot(input: SnapshotInput) -> Result<Snapshot, BrotError> {
             return Ok(refund_with(SettleMode::Refund, late, ret));
         }
     };
-    if winning == 0 || losing == 0 {
-        // One side only: the entries come back net of their one-sided fees; no share (P-1).
+    if winning == 0 || losing == 0 || !split_is_viable(&input, winning, losing)? {
+        // One side only, or a losing side too small to pay the fees (decision of 2026-10-09, the Economic Viability
+        // Rule): the entries come back net of their one-sided fees; no share (P-1).
         let ret = kept_opening_return(input.prize, input.opening_fee);
         return Ok(Snapshot {
             winning_total: winning,
@@ -180,4 +181,27 @@ fn refund_with(mode: SettleMode, late: u64, ret: super::void::OpenerReturn) -> S
         brot_keeps: ret.brot_keeps,
         ..zero(mode, late)
     }
+}
+
+/// The Economic Viability Rule (decision of 2026-10-09): a pot is `Split` only when the losing side is larger than
+/// the fees that would come out of it, Brot's fee plus the creator's share (zero for a team campaign). A smaller
+/// losing side, such as a dust entry, resolves the pot as one-sided (refund mode), so a dust entry cannot flip a
+/// one-sided pot into a split. The fees are computed as the split computes them: the house fee on the losing side,
+/// the share on the whole pot.
+pub fn split_is_viable(
+    input: &SnapshotInput,
+    winning: u64,
+    losing: u64,
+) -> Result<bool, BrotError> {
+    let fee = u128::from(house_fee(losing, input.fee_bps)?);
+    let share = if input.creator_is_team {
+        0
+    } else {
+        let base = u128::from(winning)
+            .checked_add(u128::from(losing))
+            .ok_or(BrotError::MathOverflow)?;
+        bps_floor_wide(base, input.creator_share_bps)?
+    };
+    let fees = fee.checked_add(share).ok_or(BrotError::MathOverflow)?;
+    Ok(u128::from(losing) > fees)
 }
