@@ -206,8 +206,10 @@ export const BROT_MARKETS_ERROR__AUTOMATIC_VOID_NOT_INVERTIBLE = 0x17cd; // 6093
 export const BROT_MARKETS_ERROR__VOID_REASON_NOT_FOR_TEAM = 0x17ce; // 6094
 /** ContestOutsideReview: A contest opens only inside the review window */
 export const BROT_MARKETS_ERROR__CONTEST_OUTSIDE_REVIEW = 0x17cf; // 6095
-/** ContestExitDisabled: Nothing leaves `Contested` before Sprint 14 */
+/** ContestExitDisabled: Contests are disabled until Sprint 14: a contest would freeze the pot */
 export const BROT_MARKETS_ERROR__CONTEST_EXIT_DISABLED = 0x17d0; // 6096
+/** TeamVoidNotAutomatic: A team key voids only an automatic void; it never voids a YES or NO result */
+export const BROT_MARKETS_ERROR__TEAM_VOID_NOT_AUTOMATIC = 0x17d1; // 6097
 /** InvariantViolated: A money invariant (I1 to I15) does not hold */
 export const BROT_MARKETS_ERROR__INVARIANT_VIOLATED = 0x17d5; // 6101
 /** SnapshotInconsistent: The snapshot's totals disagree with each other */
@@ -383,6 +385,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__TEAM_KEY_OUTSIDE_REVIEW
   | typeof BROT_MARKETS_ERROR__TEAM_SLOT_NOT_EMPTY
   | typeof BROT_MARKETS_ERROR__TEAM_TOO_LARGE
+  | typeof BROT_MARKETS_ERROR__TEAM_VOID_NOT_AUTOMATIC
   | typeof BROT_MARKETS_ERROR__TOO_MANY_OPEN_CAMPAIGNS
   | typeof BROT_MARKETS_ERROR__UNKNOWN_INSTRUCTION
   | typeof BROT_MARKETS_ERROR__UNKNOWN_READER_KIND
@@ -417,7 +420,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_IN_REVIEW]: `The campaign is not InReview, so it cannot be finalized`,
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN]: `The campaign is not \`Open\``,
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_SETTLED]: `The campaign's fee, prize and creator share are not all settled`,
-    [BROT_MARKETS_ERROR__CONTEST_EXIT_DISABLED]: `Nothing leaves \`Contested\` before Sprint 14`,
+    [BROT_MARKETS_ERROR__CONTEST_EXIT_DISABLED]: `Contests are disabled until Sprint 14: a contest would freeze the pot`,
     [BROT_MARKETS_ERROR__CONTEST_OUTSIDE_REVIEW]: `A contest opens only inside the review window`,
     [BROT_MARKETS_ERROR__CREATION_PARAMS_CHANGED]: `The creation parameters changed since the client read them (\`expected_params_version\`)`,
     [BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING]: `\`creator_share_bps\` is above \`MAX_CREATOR_SHARE_BPS\``,
@@ -515,6 +518,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__TEAM_KEY_OUTSIDE_REVIEW]: `The team key acts only while the campaign is InReview`,
     [BROT_MARKETS_ERROR__TEAM_SLOT_NOT_EMPTY]: `A team slot past \`team_len\` is not zero`,
     [BROT_MARKETS_ERROR__TEAM_TOO_LARGE]: `More than five team keys`,
+    [BROT_MARKETS_ERROR__TEAM_VOID_NOT_AUTOMATIC]: `A team key voids only an automatic void; it never voids a YES or NO result`,
     [BROT_MARKETS_ERROR__TOO_MANY_OPEN_CAMPAIGNS]: `Row 8: \`open_campaigns\` has reached \`max_open_campaigns\``,
     [BROT_MARKETS_ERROR__UNKNOWN_INSTRUCTION]: `The first byte of the instruction data names no instruction`,
     [BROT_MARKETS_ERROR__UNKNOWN_READER_KIND]: `Row 1: the kind byte names no reader`,

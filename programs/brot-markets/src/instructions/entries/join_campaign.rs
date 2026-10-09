@@ -176,7 +176,10 @@ pub fn user_join_campaign(
         amount,
     };
     open_join(baker, join, &campaign_key, &mut entry, fields, program_id)?;
+    let vault_before = vault.lamports();
     vault::deposit(baker, vault, amount)?;
+    // The vault moves by exactly the entry this join books (TP 3.4.13; a lamport sent by hand is in vault_before).
+    crate::math::invariant::vault_change_matches(vault_before, vault.lamports(), amount, 0)?;
     entry.amount_yes.set(entry_yes);
     entry.amount_no.set(entry_no);
     campaign.pool_yes.set(pool_yes);

@@ -3809,7 +3809,12 @@
     {
       "code": 6096,
       "name": "ContestExitDisabled",
-      "msg": "Nothing leaves `Contested` before Sprint 14"
+      "msg": "Contests are disabled until Sprint 14: a contest would freeze the pot"
+    },
+    {
+      "code": 6097,
+      "name": "TeamVoidNotAutomatic",
+      "msg": "A team key voids only an automatic void; it never voids a YES or NO result"
     },
     {
       "code": 6101,

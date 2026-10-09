@@ -16,7 +16,7 @@ import { finalizeCampaignIx, settleEntryIx, tallyLateJoinsIx } from "./instructi
 import * as P from "./program";
 import { resolveWith } from "./price-support";
 import { balance, createWorld, expectOk, fundedWallet, now, rentFor, send, setTime } from "./setup";
-import { ENTRY } from "./structs";
+import { ENTRY, JOIN } from "./structs";
 
 const SOL = P.SOL;
 const SIX_HOURS = 6n * 3_600n;
@@ -50,7 +50,8 @@ describe("late-entry refund on the program", () => {
     setTime(w.client, now(w.client) + SIX_HOURS + 1n);
     expectOk(await send(w, [finalizeCampaignIx(campaign, await P.configPda())]));
 
-    const rent = rentFor(w, layoutSize(ENTRY));
+    // The Entry returns its own rent and the rent of its one Join (the tally moves it into the Entry).
+    const rent = rentFor(w, layoutSize(ENTRY)) + rentFor(w, layoutSize(JOIN));
     const anaBefore = balance(w, ana.address);
     expectOk(await send(w, [settleEntryIx(await P.entryPda(campaign, ana.address), campaign, vault, ana.address)]));
     expect(balance(w, ana.address) - anaBefore).toBe(2n * SOL + rent);

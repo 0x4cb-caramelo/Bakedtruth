@@ -15,7 +15,6 @@ use pinocchio::{error::ProgramError, AccountView, Address};
 use super::join_record::read_join;
 use crate::{
     checks,
-    error::BrotError,
     state::enums::{Outcome, ReaderKind},
 };
 
@@ -51,13 +50,15 @@ pub struct Tallied {
     pub yes: bool,
     pub late: bool,
     pub amount: u64,
+    /// The join account's lamports (its rent), taken out of it.
+    pub rent: u64,
 }
 
-/// Reads the join at `index` (owner, bytes, campaign, baker and PDA, all checked by `read_join`), moves its
-/// lamports to `baker`, and closes it.
+/// Reads the join at `index` (owner, bytes, campaign, baker and PDA, all checked by `read_join`), takes its
+/// lamports (its rent) out of it, and closes it. The rent is returned to the caller, which adds it to the Entry
+/// (decision of 2026-10-09): the Entry returns it to the baker at settlement, so the tally never pays a wallet.
 pub fn tally_join(
     join: &mut AccountView,
-    baker: &mut AccountView,
     campaign: &Address,
     baker_key: &Address,
     index: u32,
@@ -66,14 +67,10 @@ pub fn tally_join(
 ) -> Result<Tallied, ProgramError> {
     let record = read_join(join, campaign, baker_key, index, program_id)?;
     let rent = join.lamports();
-    let credited = baker
-        .lamports()
-        .checked_add(rent)
-        .ok_or(BrotError::MathOverflow)?;
-    baker.set_lamports(credited);
     join.set_lamports(0);
     checks::close_account(join, program_id)?;
     Ok(Tallied {
+        rent,
         yes: record.yes,
         late: rule.is_late(record.joined_at),
         amount: record.amount,

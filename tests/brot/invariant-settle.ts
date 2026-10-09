@@ -68,7 +68,7 @@ async function planPayout(
         error: notFinal ?? (c.settled.has(baker) ? "AlreadySettled" : undefined),
         deltas: new Map<string, bigint>([
           [vault, -payout],
-          [baker, payout + h.rent.entry],
+          [baker, payout + h.rent.entry + BigInt(c.joins.filter((j) => j.baker === baker).length) * h.rent.join],
         ]),
         apply: () => {
           c.ledger.push({ to: baker, amount: payout, kind: "entry" });

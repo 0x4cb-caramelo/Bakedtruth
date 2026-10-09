@@ -32,8 +32,8 @@ fn team_window_stale_feed_keeps_the_fee_and_a_team_may_void_it_after_a_late_upda
     // Founder answer 9 (2026-10-09): an outside cause, so the 10% is kept.
     assert!(!is_house_failure(VoidReason::StaleFeed));
     assert_eq!(team_may_choose(VoidReason::StaleFeed), Ok(()));
-    // The manual void: the team voids a YES that resolve_campaign read, when an update landed past the deadline.
-    assert_eq!(team_void_outcome(Outcome::Yes), Ok(Outcome::Void));
+    // Decision of 2026-10-09: a team key never voids a YES that resolve_campaign read, even with a late update.
+    assert_eq!(team_void_outcome(Outcome::Yes), Err(TeamVoidNotAutomatic));
 }
 
 #[test]
@@ -57,15 +57,13 @@ fn team_window_no_reason_is_not_a_void_for_the_team() {
 #[test]
 fn team_window_a_manual_missed_window_void_of_a_no_result() {
     assert_eq!(team_may_choose(VoidReason::MissedWindow), Ok(()));
-    assert_eq!(team_void_outcome(Outcome::No), Ok(Outcome::Void));
+    assert_eq!(team_void_outcome(Outcome::No), Err(TeamVoidNotAutomatic));
 }
 
 #[test]
 fn team_window_an_automatic_void_is_confirmed_never_inverted() {
-    assert_eq!(
-        team_void_outcome(Outcome::Void),
-        Err(AutomaticVoidNotInvertible)
-    );
+    // A team key may record its reason on an automatic void (Void stays Void); it never turns it into YES or NO.
+    assert_eq!(team_void_outcome(Outcome::Void), Ok(Outcome::Void));
 }
 
 #[test]
@@ -80,7 +78,7 @@ fn team_window_an_unresolved_campaign_is_not_in_review() {
 fn team_window_void_refusals_are_the_frozen_codes() {
     let as_code = |e: BrotError| u32::from(e);
     assert_eq!(as_code(VoidReasonNotForTeam), 6094);
-    assert_eq!(as_code(AutomaticVoidNotInvertible), 6093);
+    assert_eq!(as_code(TeamVoidNotAutomatic), 6097);
     assert_eq!(as_code(TeamKeyOutsideReview), 6091);
     assert_eq!(as_code(OutsideReviewWindow), 6092);
     assert_eq!(as_code(ContestOutsideReview), 6095);

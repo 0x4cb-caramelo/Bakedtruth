@@ -37,7 +37,8 @@ export function settleSplit(input: SplitInput): SplitResult {
   const { winning, losing, prize, feeBps, creatorBps } = input;
   const fee = feeCeil(losing, feeBps);
   const owed = shareFloor(winning + losing, creatorBps);
-  const spare = losing - fee + prize; // what the pot holds beyond the winners' own entries
+  // Decision of 2026-10-09: the share comes from the losing side less the fee, never the prize.
+  const spare = losing - fee;
   const creatorFromPot = owed < spare ? owed : spare;
   const feeLeft = fee;
   const shortfall = owed - creatorFromPot;

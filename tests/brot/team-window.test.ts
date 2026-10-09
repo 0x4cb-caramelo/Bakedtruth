@@ -1,10 +1,11 @@
 /**
- * Purpose: the team's acts in the review window, on the binary: confirm, void with each reason, and contest.
- *          Each act is refused outside `InReview`, outside the window, to a signer who is not a team key, and
- *          with a reason the team may not choose; an automatic void is confirmed and never inverted.
+ * Purpose: the team's acts in the review window, on the binary: confirm, void (an automatic void only: a team key
+ *          never voids a YES or NO, decision of 2026-10-09), and contest (disabled until Sprint 14). Each act is
+ *          refused outside `InReview`, outside the window, to a signer who is not a team key, and with a reason
+ *          the team may not choose.
  *          Run one with `bun test tests/ -t "void refunds and the opening fee follows the cause"`.
- * Version: 0.0.1
- * Sprint:  04 (lane A). Needs target/deploy/brot_markets.so, and lane C's `finalize_snapshot` for the
+ * Version: 0.0.2
+ * Sprint:  04 (lane A; team void and contest restricted at the closure review). Needs target/deploy/brot_markets.so, and lane C's `finalize_snapshot` for the
  *          successful paths (a stub refuses with UnknownInstruction). Written here, run at integration.
  */
 import { describe, expect, test } from "bun:test";
@@ -17,8 +18,6 @@ import { START_TIME, accountData, expectError, expectOk, fundedWallet, send, typ
 
 const { Yes, No, Void } = P.Outcome;
 const { MissedWindow, UnreadableAccount, StaleFeed, TeamHouseFailure, TeamOutsideCause, None } = P.VoidReason;
-/** Contest stage 1 lasts one hour (TP section 3.4.7). */
-const STAGE1_SECONDS = P.HOUR;
 const REVIEW_ENDS = START_TIME + P.REVIEW_WINDOW_SECONDS;
 const NOTE = new Uint8Array(32).fill(7);
 
@@ -26,7 +25,6 @@ const NOTE = new Uint8Array(32).fill(7);
 async function reviewed(w: World, outcome: number, status: number = P.Status.InReview) {
   return campaignOn(w, P.ReaderKind.SupplyAtMost, await anyAddress(), 1_000_000n, {
     status,
-    // A void always carries the reason `resolve_campaign` recorded; an automatic one is StaleFeed here.
     extra: {
       outcome,
       void_reason: outcome === Void ? StaleFeed : None,
@@ -34,6 +32,14 @@ async function reviewed(w: World, outcome: number, status: number = P.Status.InR
       resolved_at: START_TIME,
       event_seq: 2n,
     },
+  });
+}
+
+/** An automatic void: `resolve_campaign` recorded a void with `reason`; the team may confirm it or record its own reason. */
+async function automatic(w: World, reason: number = StaleFeed) {
+  return campaignOn(w, P.ReaderKind.SupplyAtMost, await anyAddress(), 1_000_000n, {
+    status: P.Status.InReview,
+    extra: { outcome: Void, void_reason: reason, review_ends_at: REVIEW_ENDS, resolved_at: START_TIME, event_seq: 2n },
   });
 }
 
@@ -51,7 +57,7 @@ describe("team window", () => {
   test("void refunds and the opening fee follows the cause: MissedWindow and TeamHouseFailure refund", async () => {
     const { w, member, config } = await teamWorld();
     for (const reason of [MissedWindow, TeamHouseFailure]) {
-      const c = await reviewed(w, Yes);
+      const c = await automatic(w, StaleFeed);
       expectOk(await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason, noteHash: NOTE })]));
       const after = readCampaign(w, c.campaign);
       // This campaign has no entry: finalize settles it at once (decision of 2026-10-09).
@@ -61,7 +67,7 @@ describe("team window", () => {
 
   test("void refunds and the opening fee follows the cause: UnreadableAccount is refused, TeamOutsideCause keeps", async () => {
     const { w, member, config } = await teamWorld();
-    const c = await reviewed(w, No);
+    const c = await automatic(w, UnreadableAccount);
     const before = accountData(w, c.campaign);
     expectError(
       await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason: UnreadableAccount, noteHash: NOTE })]),
@@ -76,7 +82,7 @@ describe("team window", () => {
 
   test("void refunds and the opening fee follows the cause: StaleFeed is kept", async () => {
     const { w, member, config } = await teamWorld();
-    const c = await reviewed(w, Yes);
+    const c = await automatic(w, StaleFeed);
     expectOk(await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason: StaleFeed, noteHash: NOTE })]));
     const after = readCampaign(w, c.campaign);
     expect([after.outcome, after.void_reason]).toEqual([Void, StaleFeed]);
@@ -84,39 +90,39 @@ describe("team window", () => {
 
   test("void refunds and the opening fee follows the cause: no reason is not a void for the team", async () => {
     const { w, member, config } = await teamWorld();
-    const c = await reviewed(w, Yes);
+    const c = await automatic(w, StaleFeed);
     expectError(
       await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason: None, noteHash: NOTE })]),
       "VoidReasonNotForTeam",
     );
   });
 
-  test("team window: a manual StaleFeed void after an update landed past the deadline", async () => {
+  test("team window: a team key never voids a YES or a NO result (decision of 2026-10-09)", async () => {
     const { w, member, config } = await teamWorld();
-    // resolve_campaign recorded No; the feed's update landed after its deadline, so the team voids by hand.
-    const c = await reviewed(w, No);
-    expectOk(await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason: StaleFeed, noteHash: NOTE })]));
-    expect(readCampaign(w, c.campaign).void_reason).toBe(StaleFeed);
-  });
-
-  test("team window: a manual MissedWindow void of a YES result", async () => {
-    const { w, member, config } = await teamWorld();
-    const c = await reviewed(w, Yes);
-    expectOk(
-      await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason: MissedWindow, noteHash: NOTE })]),
-    );
-    expect(readCampaign(w, c.campaign).void_reason).toBe(MissedWindow);
-  });
-
-  test("team window: an automatic void is confirmed, never turned into YES or NO", async () => {
-    const { w, member, config } = await teamWorld();
-    const c = await reviewed(w, Void);
+    const yes = await reviewed(w, Yes);
     expectError(
-      await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason: TeamOutsideCause, noteHash: NOTE })]),
-      "AutomaticVoidNotInvertible",
+      await send(w, [I.teamVoidCampaignIx(member, config, yes.campaign, { reason: StaleFeed, noteHash: NOTE })]),
+      "TeamVoidNotAutomatic",
     );
-    expectOk(await send(w, [I.teamConfirmResultIx(member, config, c.campaign)]));
-    expect(readCampaign(w, c.campaign).outcome).toBe(Void);
+    const no = await reviewed(w, No);
+    expectError(
+      await send(w, [I.teamVoidCampaignIx(member, config, no.campaign, { reason: MissedWindow, noteHash: NOTE })]),
+      "TeamVoidNotAutomatic",
+    );
+    expect(readCampaign(w, yes.campaign).outcome).toBe(Yes);
+    expect(readCampaign(w, no.campaign).outcome).toBe(No);
+  });
+
+  test("team window: an automatic void is confirmed or given the team's reason, never turned into YES or NO", async () => {
+    const { w, member, config } = await teamWorld();
+    const c = await automatic(w, StaleFeed);
+    expectOk(
+      await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason: TeamOutsideCause, noteHash: NOTE })]),
+    );
+    expect([readCampaign(w, c.campaign).outcome, readCampaign(w, c.campaign).void_reason]).toEqual([
+      Void,
+      TeamOutsideCause,
+    ]);
   });
 
   test("team window: confirm ends the window and the outcome stands", async () => {
@@ -137,20 +143,18 @@ describe("team window", () => {
         await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason: MissedWindow, noteHash: NOTE })]),
         "TeamKeyOutsideReview",
       );
-      expectError(await send(w, [I.teamOpenContestIx(member, config, c.campaign)]), "TeamKeyOutsideReview");
     }
   });
 
   test("team window: outside the window nobody voids", async () => {
     const { w, member, config } = await teamWorld();
-    const c = await reviewed(w, Yes);
+    const c = await automatic(w, StaleFeed);
     at(w, REVIEW_ENDS); // the instant the window closes
     expectError(await send(w, [I.teamConfirmResultIx(member, config, c.campaign)]), "OutsideReviewWindow");
     expectError(
       await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason: MissedWindow, noteHash: NOTE })]),
       "OutsideReviewWindow",
     );
-    expectError(await send(w, [I.teamOpenContestIx(member, config, c.campaign)]), "ContestOutsideReview");
   });
 
   test("team window: a signer who is not a team key is refused", async () => {
@@ -159,28 +163,21 @@ describe("team window", () => {
     expectError(await send(w, [I.teamConfirmResultIx(outsider, config, c.campaign)]), "NotTeamMember");
   });
 
-  test("team window: team_open_contest moves InReview to Contested, and nothing leaves it", async () => {
+  test("team window: team_open_contest is disabled until Sprint 14 and changes nothing", async () => {
     const { w, member, config } = await teamWorld();
     const c = await reviewed(w, Yes);
-    expectOk(await send(w, [I.teamOpenContestIx(member, config, c.campaign)]));
-    const after = readCampaign(w, c.campaign);
-    expect([after.status, after.contest_stage, after.contest_ends_at]).toEqual([
-      P.Status.Contested,
-      1, // ContestStage::Stage1
-      START_TIME + STAGE1_SECONDS,
-    ]);
-    // Payout is paused: no team act leaves Contested in this sprint (ContestExitDisabled has no instruction yet).
-    expectError(await send(w, [I.teamConfirmResultIx(member, config, c.campaign)]), "TeamKeyOutsideReview");
-    expectError(
-      await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason: MissedWindow, noteHash: NOTE })]),
-      "TeamKeyOutsideReview",
-    );
+    const before = accountData(w, c.campaign);
+    expectError(await send(w, [I.teamOpenContestIx(member, config, c.campaign)]), "ContestExitDisabled");
+    expect(accountData(w, c.campaign)).toEqual(before);
+    expect(readCampaign(w, c.campaign).status).toBe(P.Status.InReview);
   });
 
   test("team window: each act takes the campaign's next event number", async () => {
     const { w, member, config } = await teamWorld();
-    const c = await reviewed(w, Yes);
-    expectOk(await send(w, [I.teamOpenContestIx(member, config, c.campaign)]));
+    const c = await automatic(w, StaleFeed);
+    expectOk(
+      await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason: TeamOutsideCause, noteHash: NOTE })]),
+    );
     expect(readCampaign(w, c.campaign).event_seq).toBe(3n);
   });
 });

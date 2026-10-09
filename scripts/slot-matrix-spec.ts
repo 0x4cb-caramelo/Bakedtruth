@@ -166,6 +166,12 @@ export const OVERRIDES: Record<string, { expect: string; why: string }> = {
 
 export const overrideOf = (key: string, generic: string) => OVERRIDES[key]?.expect ?? generic;
 
+/**
+ * Instructions disabled by decision (2026-10-09): every case is refused with the one error. The baseline is refused
+ * too, so the matrix checks that the refusal moves no lamport.
+ */
+export const DISABLED: Record<string, string> = { TeamOpenContest: "ContestExitDisabled" };
+
 /** The source type of a slot's current account, as a type case or an alias sees it. */
 export function typeOf(slot: Slot): Source {
   if (slot.kind === "vault" || slot.kind === "feeVault") return "Vault";

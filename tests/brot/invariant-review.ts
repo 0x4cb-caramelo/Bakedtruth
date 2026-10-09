@@ -125,17 +125,19 @@ export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
     case "void":
       return {
         ixs: [teamVoidCampaignIx(h.team[op.member], config, campaign, { reason: op.reason, noteHash: NOTE_HASH })],
-        error:
-          c.phase !== "InReview"
+        // The program's order: the reason, the team key, the window, then the outcome (decision of 2026-10-09:
+        // a team key voids only an automatic void, so a YES or NO is refused).
+        error: !isTeamReason(op.reason)
+          ? "VoidReasonNotForTeam"
+          : c.phase !== "InReview"
             ? "TeamKeyOutsideReview"
             : !inWindow(c, t)
               ? "OutsideReviewWindow"
-              : !isTeamReason(op.reason)
-                ? "VoidReasonNotForTeam"
+              : c.outcome !== "Void"
+                ? "TeamVoidNotAutomatic"
                 : undefined,
         deltas: BLANK,
         apply: () => {
-          c.outcome = "Void";
           c.voidReason = op.reason;
           takeSnapshot(c);
         },
@@ -143,12 +145,10 @@ export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
     case "contest":
       return {
         ixs: [teamOpenContestIx(h.team[op.member], config, campaign)],
-        // A contest has its own refusal for the window (lane A, `ContestOutsideReview`).
-        error: c.phase !== "InReview" ? "TeamKeyOutsideReview" : !inWindow(c, t) ? "ContestOutsideReview" : undefined,
+        // Disabled until Sprint 14 (decision of 2026-10-09): every contest is refused and changes nothing.
+        error: "ContestExitDisabled",
         deltas: BLANK,
-        apply: () => {
-          c.phase = "Contested";
-        },
+        apply: () => undefined,
       };
     case "finalize": {
       const error: BrotErrorName | undefined =
@@ -164,7 +164,7 @@ export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
           const entry = await P.entryPda(campaign, baker.address);
           const joins = await Promise.all(mine.map((_, index) => P.joinPda(campaign, baker.address, index)));
           ixs.push(tallyLateJoinsIx(baker.address, campaign, entry, joins));
-          deltas.set(baker.address, BigInt(mine.length) * h.rent.join);
+          // The tally moves each Join's rent into the Entry (decision of 2026-10-09): no wallet is paid here.
         }
       }
       return {

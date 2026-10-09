@@ -84,7 +84,7 @@ describe("one-sided pot", () => {
 });
 
 describe("winners never get back less than their entry", () => {
-  test("worked example B: the creator's share comes from the pot and the winners keep their entries whole", () => {
+  test("worked example B: the creator's share comes from the losing side and the fee, never the prize", () => {
     const s = settleSplit({
       winning: 600n * SOL,
       losing: SOL,
@@ -92,8 +92,11 @@ describe("winners never get back less than their entry", () => {
       feeBps: FEE_BPS,
       creatorBps: CREATOR_BPS,
     });
-    expect(s.creatorFromPot + s.creatorFromFee).toBe(5_118_239_224n);
-    expect(s.distributable).toBe(600n * SOL);
+    // Decision of 2026-10-09: the losing side less the fee (0.9 SOL) then the fee (0.1 SOL): the creator gets 1 SOL.
+    expect(s.creatorFromPot + s.creatorFromFee).toBe(SOL);
+    expect(s.creatorFromPot).toBe(900_000_000n);
+    // The distributable pot holds the prize: V + P − fee − from_pot + R.
+    expect(s.distributable).toBe(604_118_239_224n);
   });
 
   test("worked example A: Ana and Bruno split 13.6182 SOL, the creator takes 0.1 SOL from the pot", () => {

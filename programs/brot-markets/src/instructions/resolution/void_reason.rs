@@ -30,13 +30,13 @@ pub fn team_may_choose(reason: VoidReason) -> Result<(), BrotError> {
     }
 }
 
-/// The outcome a team void records, given the stored one: `Void` for a YES or NO result, and
-/// `AutomaticVoidNotInvertible` for a campaign that `resolve_campaign` already voided. A team key
-/// confirms an automatic void (`team_confirm_result`) and changes nothing else about it.
+/// The outcome a team void records, given the stored one (decision of 2026-10-09): a team key voids only an
+/// automatic void, which stays `Void` with the team's reason and note. A YES or NO is never voided by a person
+/// (`TeamVoidNotAutomatic`).
 pub fn team_void_outcome(stored: Outcome) -> Result<Outcome, BrotError> {
     match stored {
-        Outcome::Yes | Outcome::No => Ok(Outcome::Void),
-        Outcome::Void => Err(BrotError::AutomaticVoidNotInvertible),
+        Outcome::Void => Ok(Outcome::Void),
+        Outcome::Yes | Outcome::No => Err(BrotError::TeamVoidNotAutomatic),
         Outcome::Unresolved => Err(BrotError::TeamKeyOutsideReview),
     }
 }

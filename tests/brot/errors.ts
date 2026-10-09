@@ -113,6 +113,7 @@ export const BrotError = {
   VoidReasonNotForTeam: 6094,
   ContestOutsideReview: 6095,
   ContestExitDisabled: 6096,
+  TeamVoidNotAutomatic: 6097,
   InvariantViolated: 6101,
   SnapshotInconsistent: 6102,
   NotFinalized: 6106,

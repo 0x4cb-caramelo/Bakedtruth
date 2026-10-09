@@ -71,13 +71,14 @@ fn math_snapshot_split_small_lopsided_pot_without_prize() {
 
 #[test]
 fn math_snapshot_split_small_lopsided_pot_with_prize() {
-    // The prize (450 in the test's units) covers the whole share from the pot; the fee is kept.
+    // Decision of 2026-10-09: the share comes from the losing side less the fee (9), then Brot's fee; the prize is
+    // not a source. The creator takes the 1 left from the fee, so Brot keeps nothing.
     let snap = take(yes_wins(990, 10, 450));
     assert_eq!(snap.creator_share, 10);
-    assert_eq!(snap.from_pot, 10);
-    assert_eq!(snap.creator_share_from_fee, 0);
-    assert_eq!(snap.distributable, 1_439);
-    assert_eq!(snap.brot_keeps, 1);
+    assert_eq!(snap.from_pot, 9);
+    assert_eq!(snap.creator_share_from_fee, 1);
+    assert_eq!(snap.distributable, 1_440);
+    assert_eq!(snap.brot_keeps, 0);
 }
 
 #[test]
@@ -94,12 +95,12 @@ fn math_snapshot_split_large_lopsided_pot_without_prize() {
 
 #[test]
 fn math_snapshot_split_large_lopsided_pot_with_prize() {
-    // With a 4,500 prize the pot covers the whole share; winners get back their entries plus the prize.
+    // With a 4,500 prize the share still comes from the losing side (990) and the fee (10), never the prize.
     let snap = take(yes_wins(98_900, 1_100, 4_500));
-    assert_eq!(snap.from_pot, 1_000);
-    assert_eq!(snap.creator_share_from_fee, 0);
-    assert_eq!(snap.distributable, 103_390);
-    assert_eq!(snap.brot_keeps, 110);
+    assert_eq!(snap.from_pot, 990);
+    assert_eq!(snap.creator_share_from_fee, 10);
+    assert_eq!(snap.distributable, 103_400);
+    assert_eq!(snap.brot_keeps, 100);
 }
 
 #[test]

@@ -195,7 +195,13 @@ export const BASELINES: Record<string, () => Promise<Baseline>> = {
   TeamVoidCampaign: async () => {
     const { w, admin } = await configWorld();
     const [team] = await setTeam(w, admin, 1);
-    const { campaign } = await injectReviewed(w.client, await base(w), P.Outcome.Yes, now(w.client) + P.HOUR * 6n);
+    // A team key voids only an automatic void (decision of 2026-10-09): the baseline is one.
+    const { campaign } = await injectReviewed(
+      w.client,
+      await base(w, { extra: { publish_time: now(w.client), void_reason: P.VoidReason.StaleFeed } }),
+      P.Outcome.Void,
+      now(w.client) + P.HOUR * 6n,
+    );
     const args = { reason: P.VoidReason.TeamHouseFailure, noteHash: new Uint8Array(32) };
     return { w, ix: S.teamVoidCampaignIx(team, await P.configPda(), campaign, args) };
   },

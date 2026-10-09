@@ -233,8 +233,10 @@ pub enum BrotError {
     VoidReasonNotForTeam = 6094,
     #[error("A contest opens only inside the review window")]
     ContestOutsideReview = 6095,
-    #[error("Nothing leaves `Contested` before Sprint 14")]
+    #[error("Contests are disabled until Sprint 14: a contest would freeze the pot")]
     ContestExitDisabled = 6096,
+    #[error("A team key voids only an automatic void; it never voids a YES or NO result")]
+    TeamVoidNotAutomatic = 6097,
     // Lane B (numbers from 6101).
     #[error("A money invariant (I1 to I15) does not hold")]
     InvariantViolated = 6101,

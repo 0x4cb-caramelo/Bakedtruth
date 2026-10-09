@@ -26,8 +26,10 @@ describe("slot matrix", () => {
       if (cases.length === 0) continue;
       const valid = await baseline();
       const sanity = await send(valid.w, [valid.ix]);
-      if (!sanity.ok) {
-        failures.push(`${name}: the baseline is refused (${sanity.error}); its cases prove nothing`);
+      // A disabled instruction (TeamOpenContest) is refused by design: its baseline must be refused with that error.
+      const disabled = name === "TeamOpenContest";
+      if (disabled ? sanity.ok || sanity.code !== BrotError.ContestExitDisabled : !sanity.ok) {
+        failures.push(`${name}: the baseline is ${sanity.ok ? "accepted" : `refused (${sanity.error})`}; its cases prove nothing`);
         continue;
       }
       const { w, ix } = await baseline();

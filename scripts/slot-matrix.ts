@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as prettier from "prettier";
 
-import { DISTINCT, GAP, overrideOf, SPEC, strangerError, swapError, TYPES, typeOf, type Slot } from "./slot-matrix-spec";
+import { DISABLED, DISTINCT, GAP, overrideOf, SPEC, strangerError, swapError, TYPES, typeOf, type Slot } from "./slot-matrix-spec";
 
 const ROOT = join(fileURLToPath(import.meta.url), "..", "..");
 export const IDL_PATH = join(ROOT, "packages/sdk/src/idl/brot_markets.json");
@@ -39,7 +39,11 @@ export async function buildMatrix() {
   const cases: Case[] = [];
   const gaps: Gap[] = [];
   let accepted = 0;
-  const push = (c: Case) => (c.expect === GAP ? gaps.push({ ...c, reason: gapReason(c) }) : cases.push(c));
+  const push = (c: Case) => {
+    const expect = DISABLED[c.ix] ?? c.expect;
+    if (expect === GAP) gaps.push({ ...c, reason: gapReason(c) });
+    else cases.push({ ...c, expect });
+  };
   for (const ix of idl.instructions) {
     const spec = SPEC[ix.name];
     if (!spec) throw new Error(`no slot spec for ${ix.name}`);

@@ -62,19 +62,13 @@ pub fn tally_late_joins(
     }
 
     let (mut late_yes, mut late_no, mut closed) = (0u64, 0u64, 0u32);
+    let mut rent_total = 0u64;
     for join in joins.iter_mut() {
         if next >= total {
             return Err(BrotError::JoinAccountsMismatch.into());
         }
-        let tallied = tally_join(
-            join,
-            baker,
-            &campaign_key,
-            &baker_key,
-            next,
-            rule,
-            program_id,
-        )?;
+        let tallied = tally_join(join, &campaign_key, &baker_key, next, rule, program_id)?;
+        rent_total = add(rent_total, tallied.rent)?;
         if tallied.late {
             if tallied.yes {
                 late_yes = add(late_yes, tallied.amount)?;
@@ -93,6 +87,10 @@ pub fn tally_late_joins(
     let campaign_no = add(campaign_state.late_no.get(), late_no)?;
     entry_state.late_yes.set(entry_yes);
     entry_state.late_no.set(entry_no);
+    // The closed joins' rent is held by the Entry until settlement returns it to the baker.
+    drop(entry_state);
+    let entry_lamports = add(entry.lamports(), rent_total)?;
+    entry.set_lamports(entry_lamports);
     campaign_state.late_yes.set(campaign_yes);
     campaign_state.late_no.set(campaign_no);
     if next == total {
@@ -113,7 +111,6 @@ pub fn tally_late_joins(
         late_yes_added: LeU64::new(late_yes),
         late_no_added: LeU64::new(late_no),
     };
-    drop(entry_state);
     drop(campaign_state);
     events::emit(&event, event_authority, program, program_id)
 }
