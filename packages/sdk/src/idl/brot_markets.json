@@ -3727,6 +3727,11 @@
       "msg": "The prize was already returned to the opener"
     },
     {
+      "code": 6127,
+      "name": "AccountNotEmpty",
+      "msg": "The account still holds lamports, so it cannot be closed"
+    },
+    {
       "code": 6131,
       "name": "JoinBufferRefused",
       "msg": "The sponsored price is within the join margin of the target"

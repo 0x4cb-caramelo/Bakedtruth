@@ -270,6 +270,8 @@ pub enum BrotError {
     FeeAlreadyCollected = 6125,
     #[error("The prize was already returned to the opener")]
     PrizeAlreadySettled = 6126,
+    #[error("The account still holds lamports, so it cannot be closed")]
+    AccountNotEmpty = 6127,
     // Lane G (numbers from 6131).
     #[error("The sponsored price is within the join margin of the target")]
     JoinBufferRefused = 6131,

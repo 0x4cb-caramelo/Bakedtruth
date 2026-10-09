@@ -25,8 +25,12 @@ use crate::{
     state::{AccountTag, LAYOUT_VERSION},
 };
 
+mod close;
+mod paying;
 mod top_level;
 mod upgrade;
+pub use close::close_account;
+pub use paying::paying_vault;
 pub use top_level::top_level;
 pub use upgrade::upgrade_authority;
 

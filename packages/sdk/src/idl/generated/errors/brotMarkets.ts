@@ -240,6 +240,8 @@ export const BROT_MARKETS_ERROR__ALREADY_CLOSED = 0x17ec; // 6124
 export const BROT_MARKETS_ERROR__FEE_ALREADY_COLLECTED = 0x17ed; // 6125
 /** PrizeAlreadySettled: The prize was already returned to the opener */
 export const BROT_MARKETS_ERROR__PRIZE_ALREADY_SETTLED = 0x17ee; // 6126
+/** AccountNotEmpty: The account still holds lamports, so it cannot be closed */
+export const BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY = 0x17ef; // 6127
 /** JoinBufferRefused: The sponsored price is within the join margin of the target */
 export const BROT_MARKETS_ERROR__JOIN_BUFFER_REFUSED = 0x17f3; // 6131
 /** BelowCampaignMinEntry: The entry is below the minimum this campaign opened with */
@@ -250,6 +252,7 @@ export const BROT_MARKETS_ERROR__FEED_NOT_ON_LIST = 0x17fd; // 6141
 export const BROT_MARKETS_ERROR__ILLEGAL_TRANSITION = 0x1802; // 6146
 
 export type BrotMarketsError =
+  | typeof BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY
   | typeof BROT_MARKETS_ERROR__ALREADY_CLOSED
   | typeof BROT_MARKETS_ERROR__ALREADY_INITIALIZED
   | typeof BROT_MARKETS_ERROR__ALREADY_PAUSED
@@ -371,6 +374,7 @@ export type BrotMarketsError =
 let brotMarketsErrorMessages: Record<BrotMarketsError, string> | undefined;
 if (process.env["NODE_ENV"] !== "production") {
   brotMarketsErrorMessages = {
+    [BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY]: `The account still holds lamports, so it cannot be closed`,
     [BROT_MARKETS_ERROR__ALREADY_CLOSED]: `The campaign is already closed`,
     [BROT_MARKETS_ERROR__ALREADY_INITIALIZED]: `The account already exists; the program never re-initialises one`,
     [BROT_MARKETS_ERROR__ALREADY_PAUSED]: `Entries are already paused`,

@@ -129,6 +129,7 @@ export const BrotError = {
   AlreadyClosed: 6124,
   FeeAlreadyCollected: 6125,
   PrizeAlreadySettled: 6126,
+  AccountNotEmpty: 6127,
   JoinBufferRefused: 6131,
   BelowCampaignMinEntry: 6132,
   FeedNotOnList: 6141,
