@@ -26,7 +26,8 @@ const QUIPS = [
 
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-const body = createBody({ size: SIZE, base: "img/baked-" });
+// From the site root, so the same script works on the home page and on /2/.
+const body = createBody({ size: SIZE, base: "/img/baked-" });
 const senses = createSenses();
 const saidAt = new Map();
 

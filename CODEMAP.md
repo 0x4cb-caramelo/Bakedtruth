@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **275** |
+| Arquivos mapeados | **274** |
 | Acima de 200 linhas | **30** ⚠️ |
 | Sem cabeçalho `Purpose:` | **100** ⚠️ |
 
@@ -520,13 +520,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`app.js`](services/landing/public/app.js) | browser script of the "coming soon" site: picks the theme before first paint and sends the waitlist forms. The mascot is a separate script, mascot.js | 111 |
 | [`mascot-body.js`](services/landing/public/mascot-body.js) | draws Baked, the mascot, on the landing page: the sprite with its eight poses, the shadow and the speech bubble. It knows nothing about where to stand; mascot.j | 90 |
 | [`mascot-senses.js`](services/landing/public/mascot-senses.js) | what Baked, the mascot, notices on the landing page: where the pointer rests, scrolling, keyboard focus, how long the visitor has been still, and which element  | 92 |
-| [`mascot.js`](services/landing/public/mascot.js) | makes Baked, the mascot, live on the landing page: it stands on declared perches, hops to the one nearest to where the pointer rests, reacts to what is under th | 188 |
-
-## `services/landing/public/2/`
-
-| Arquivo | Núcleo | Linhas |
-|---|---|---:|
-| [`two.js`](services/landing/public/2/two.js) | the example campaign of the /2 draft. A visitor joins YES or NO, the example resolves as YES (SOL touched $300), and the card says what that side gets back. Not | 49 |
+| [`mascot.js`](services/landing/public/mascot.js) | makes Baked, the mascot, live on the landing page: it stands on declared perches, hops to the one nearest to where the pointer rests, reacts to what is under th | 189 |
 
 ## `services/landing/public/pitch/`
 
@@ -562,7 +556,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`leads.test.mjs`](services/landing/tests/leads.test.mjs) | tests the waitlist store and the request limiter of the "coming soon" site (node --test) | 113 |
 | [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 199 |
 | [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 193 |
-| [`two.test.mjs`](services/landing/tests/two.test.mjs) | tests the /2 draft (the home page in the deck's look): every file it points at exists, it has no inline style or script, it stays out of search engines, its wai | 44 |
+| [`two.test.mjs`](services/landing/tests/two.test.mjs) | tests /2, the home page in the pitch deck's look: it says exactly what the home page says (only the look may differ), the mascot perches and moods are the same, | 53 |
 
 ## `target/types/`
 
