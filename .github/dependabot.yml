@@ -1,5 +1,5 @@
 # Keeps the SHA-pinned actions in ci.yml current. Cargo and npm deps are pinned on purpose
-# (anchor-lang, solana-epoch-stake, @solana/kit) and are bumped by hand.
+# (pinocchio, shank, mollusk-svm, @solana/kit) and are bumped by hand.
 version: 2
 updates:
   - package-ecosystem: github-actions

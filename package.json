@@ -1,8 +1,8 @@
 {
-  "name": "pred-provable",
+  "name": "brot-markets",
   "version": "0.1.0",
   "private": true,
-  "description": "Provable KPI Markets: outcome-token markets resolved by on-chain account reads",
+  "description": "Brot Markets: On-Chain Campaigns on Solana, answered by reading on-chain accounts",
   "author": "Ronaldo Pereira",
   "license": "MIT",
   "repository": {
@@ -16,12 +16,10 @@
     "services/*"
   ],
   "scripts": {
-    "build:program": "NO_DNA=1 anchor build -p pred_provable && cargo build-sbf --manifest-path programs/brot-markets/Cargo.toml --sbf-out-dir target/deploy -- --locked && cargo build-sbf --manifest-path tests/programs/cpi-proxy/Cargo.toml --sbf-out-dir target/deploy -- --locked && bun run idl && bun run sync-idl",
+    "build:program": "cargo build-sbf --manifest-path programs/brot-markets/Cargo.toml --sbf-out-dir target/deploy -- --locked && cargo build-sbf --manifest-path tests/programs/cpi-proxy/Cargo.toml --sbf-out-dir target/deploy -- --locked && bun run idl",
     "idl": "bun run scripts/build-idl.ts",
-    "sync-idl": "bun run --filter @pred-provable/app sync-idl",
     "test": "bun test tests/",
-    "test:rust": "cargo test -p pred-provable --features no-entrypoint && SBF_OUT_DIR=$PWD/target/deploy cargo test -p brot-markets --features no-entrypoint",
-    "deploy:devnet": "solana program deploy target/deploy/pred_provable.so --program-id target/deploy/pred_provable-keypair.json --keypair $HOME/.config/solana/pred-provable-devnet.json --url devnet",
+    "test:rust": "SBF_OUT_DIR=$PWD/target/deploy cargo test -p brot-markets --features no-entrypoint",
     "smoke:devnet": "bun run scripts/devnet-smoke.ts",
     "seed:devnet": "bun run scripts/devnet-seed.ts",
     "dev": "bun --filter @pred-provable/app dev",
