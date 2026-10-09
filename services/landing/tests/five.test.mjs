@@ -105,9 +105,16 @@ test("/5 reads shorter than /3: the opening line fits in one line", () => {
       .match(/<body>([\s\S]*)<\/body>/)[1]
       .replace(/<!--[\s\S]*?-->/g, "")
       .replace(/<p class="lede">[\s\S]*?<\/p>/, "")
+      .replace(/<img src="\/img\/(brot-loaf|baked-deadpan)\.webp"[^>]*>/, "")
       .replaceAll(`href="/${slug}/"`, 'href="/"')
       .replace(/\s+/g, " ");
   assert.equal(rest(five, "5"), rest(three, "3"));
+});
+
+test("the mark in the top bar of /5 is the plain loaf, not the mascot", () => {
+  const mark = five.match(/<a class="brand"[^>]*>\s*<img src="([^"]+)"/)[1];
+  assert.equal(mark, "/img/brot-loaf.webp");
+  assert.ok(existsSync(join(ROOT, mark)));
 });
 
 test("/5 keeps what must not change: the consent sentence, the mascot and the suggestion link", () => {
