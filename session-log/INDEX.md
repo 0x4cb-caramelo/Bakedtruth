@@ -56,3 +56,4 @@ Each entry captures the reasoning behind a material decision: what was true befo
 | 2026-10-09 | Sprint 04: como uma campanha sai de `Contested` antes da Sprint 14 (desativada até a 14) | [`2026-10-09-sprint-04-decisao-contested.md`](2026-10-09-sprint-04-decisao-contested.md) |
 | 2026-10-09 | Sprint 04: o contrato congelado em três commits (erros e eventos; matemática e vetores; instruções e kit), e o que ainda falta | [`2026-10-09-sprint-04-contrato-congelado.md`](2026-10-09-sprint-04-contrato-congelado.md) |
 | 2026-10-09 | Sprint 04: uma conta por junção, sem limite; `Join`, `join_count` e a entrada mínima da campanha | [`2026-10-09-sprint-04-uma-conta-por-entrada.md`](2026-10-09-sprint-04-uma-conta-por-entrada.md) |
+| 2026-10-09 | Sprint 04: a lista compilada de feeds (63 mainnet, 17 devnet), e a divergência 62 e 63 para o fundador | [`2026-10-09-sprint-04-lista-de-feeds.md`](2026-10-09-sprint-04-lista-de-feeds.md) |

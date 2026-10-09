@@ -12,6 +12,7 @@ pub mod constants;
 pub mod entrypoint;
 pub mod error;
 pub mod events;
+pub mod feeds;
 pub mod instructions;
 pub mod layout;
 pub mod math;

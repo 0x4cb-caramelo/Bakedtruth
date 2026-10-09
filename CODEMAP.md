@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **341** |
+| Arquivos mapeados | **344** |
 | Acima de 200 linhas | **33** ⚠️ |
 | Sem cabeçalho `Purpose:` | **78** ⚠️ |
 
@@ -177,13 +177,15 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`error.rs`](programs/brot-markets/src/error.rs) | every refusal the program can return, one code per cause, as custom program errors | 300 |
 | [`events.rs`](programs/brot-markets/src/events.rs) | the events, one per instruction, and how they leave the program: a self-CPI signed by the event-authority PDA, so they survive log truncation (T4) | 101 |
 | [`layout.rs`](programs/brot-markets/src/layout.rs) | zero-copy byte layouts shared by accounts, instruction arguments and events: the little-endian field types and the one place where bytes become a typed view | 126 |
-| [`lib.rs`](programs/brot-markets/src/lib.rs) | the Brot Markets program on Pinocchio: On-Chain Campaigns paid in SOL; declares the program id and wires the modules and the entrypoint | 26 |
+| [`lib.rs`](programs/brot-markets/src/lib.rs) | the Brot Markets program on Pinocchio: On-Chain Campaigns paid in SOL; declares the program id and wires the modules and the entrypoint | 27 |
 | [`vault.rs`](programs/brot-markets/src/vault.rs) | the lamport vault of a campaign: SOL arriving from a signer's wallet by System Program transfer, signed by that wallet (TP section 3.4.4) | 33 |
 
 ## `programs/brot-markets/src/checks/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
+| [`close.rs`](programs/brot-markets/src/checks/close.rs) | `checks::close_account`: closes one account the program owns. Its data is zeroed, its lamports must already have left (`AccountNotEmpty`), and then the crate's  | 24 |
+| [`paying.rs`](programs/brot-markets/src/checks/paying.rs) | `checks::paying_vault`: the checks every paying instruction makes on its vault before any lamport moves (TP 3.4.17, Sprint 04): the vault belongs to this progra | 25 |
 | [`top_level.rs`](programs/brot-markets/src/checks/top_level.rs) | `checks::top_level`, the guard that keeps `resolve_campaign` out of other programs' CPIs (TP section 3.4.17): the instruction must run at the transaction's top  | 34 |
 | [`upgrade.rs`](programs/brot-markets/src/checks/upgrade.rs) | `checks::upgrade_authority`, the one check that binds the config's first write to this program's upgrade authority (TP 3.4.17), with its own refusals and negati | 45 |
 
@@ -331,6 +333,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
+| [`checks_close_paying.rs`](programs/brot-markets/tests/checks_close_paying.rs) | the close helper (`checks::close_account`) and the paying check (`checks::paying_vault`) on the host: refusals change nothing; a closed account is the System Pr | 106 |
 | [`checks_host_accounts.rs`](programs/brot-markets/tests/checks_host_accounts.rs) | the checks that read whole accounts, on the host: the upgrade authority recorded in a ProgramData account, and the guards in front of account creation (T24) | 123 |
 | [`checks_host_loaders.rs`](programs/brot-markets/tests/checks_host_loaders.rs) | the frozen loaders of `state` running the `checks` module on the host: owner, exact length, tag and version, then the PDA from the stored bump, each failure wit | 110 |
 | [`checks_host.rs`](programs/brot-markets/tests/checks_host.rs) | each per-slot and per-byte check of the `checks` module on the host, over account views laid out like the runtime's: its own error on the wrong input, `Ok` on t | 181 |
