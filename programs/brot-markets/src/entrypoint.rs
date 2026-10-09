@@ -71,6 +71,9 @@ pub fn process_instruction(
             settlement::close_campaign::close_campaign(program_id, accounts, args)
         }
         ix::SWEEP_FEES => settlement::sweep_fees::sweep_fees(program_id, accounts, args),
+        ix::TALLY_LATE_JOINS => {
+            settlement::tally_late_joins::tally_late_joins(program_id, accounts, args)
+        }
         ix::EMIT_EVENT => events::process_event_instruction(accounts),
         _ => Err(BrotError::UnknownInstruction.into()),
     }

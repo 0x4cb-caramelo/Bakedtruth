@@ -148,8 +148,20 @@ pub struct Campaign {
     /// The minimum entry this campaign opened with, copied from the config (question 5, 2026-10-09).
     #[idl_type("u64")]
     pub min_entry_lamports: LeU64,
+    /// The YES proof's publish time, written by `resolve_campaign` (0 until then); the late refund compares
+    /// each join with it (amendment 2026-10-09, founder decisions 1 and 2).
+    #[idl_type("i64")]
+    pub publish_time: LeI64,
+    /// The late totals of each side, summed by `tally_late_joins`, and the entries not tallied yet: the
+    /// snapshot refuses to finalize while `entries_untallied` is not zero (`NotTallied`).
+    #[idl_type("u64")]
+    pub late_yes: LeU64,
+    #[idl_type("u64")]
+    pub late_no: LeU64,
+    #[idl_type("u32")]
+    pub entries_untallied: LeU32,
     #[padding]
-    pub _reserved: [u8; 48],
+    pub _reserved: [u8; 20],
 }
 
 zero_copy!(Campaign = 512);

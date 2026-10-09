@@ -25,6 +25,7 @@ export * from "./entryAdded";
 export * from "./entrySettled";
 export * from "./feeCollected";
 export * from "./feesSwept";
+export * from "./lateTallied";
 export * from "./operatingLevel";
 export * from "./outcome";
 export * from "./prizeSettled";

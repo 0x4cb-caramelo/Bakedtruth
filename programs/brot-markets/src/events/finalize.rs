@@ -7,7 +7,7 @@ use shank::ShankType;
 
 use super::Event;
 use crate::{
-    layout::{LeU64, Pubkey},
+    layout::{LeU32, LeU64, Pubkey},
     zero_copy,
 };
 
@@ -38,6 +38,24 @@ pub struct CampaignFinalized {
     pub distributable: LeU64,
 }
 
+/// `tally_late_joins`: the late amounts of a batch of one baker's joins, added to the campaign.
+#[derive(ShankType)]
+#[repr(C)]
+pub struct LateTallied {
+    pub campaign: Pubkey,
+    #[idl_type("u64")]
+    pub seq: LeU64,
+    pub baker: Pubkey,
+    /// Join accounts closed by this call.
+    #[idl_type("u32")]
+    pub joins_closed: LeU32,
+    /// Late amounts this call added to the campaign's totals.
+    #[idl_type("u64")]
+    pub late_yes_added: LeU64,
+    #[idl_type("u64")]
+    pub late_no_added: LeU64,
+}
+
 /// `close_campaign`: rent back to `rent_payer`, dust and surplus to the fee vault.
 #[derive(ShankType)]
 #[repr(C)]
@@ -52,11 +70,18 @@ pub struct CampaignClosed {
     pub surplus_swept: LeU64,
 }
 
-zero_copy!(CampaignFinalized = 97, CampaignClosed = 88,);
+zero_copy!(
+    CampaignFinalized = 97,
+    CampaignClosed = 88,
+    LateTallied = 92,
+);
 
 impl Event for CampaignFinalized {
     const DISCRIMINATOR: u8 = 10;
 }
 impl Event for CampaignClosed {
     const DISCRIMINATOR: u8 = 15;
+}
+impl Event for LateTallied {
+    const DISCRIMINATOR: u8 = 17;
 }

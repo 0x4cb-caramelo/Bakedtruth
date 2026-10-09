@@ -46,6 +46,7 @@ pub mod ix {
     pub const SETTLE_PRIZE: u8 = 18;
     pub const CLOSE_CAMPAIGN: u8 = 19;
     pub const SWEEP_FEES: u8 = 20;
+    pub const TALLY_LATE_JOINS: u8 = 21;
     /// Not an instruction: the self-CPI that carries an event (`events::EVENT_IX_TAG`).
     pub const EMIT_EVENT: u8 = crate::events::EVENT_IX_TAG;
 }

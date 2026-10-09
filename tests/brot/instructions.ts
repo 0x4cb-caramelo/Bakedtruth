@@ -101,7 +101,14 @@ export async function openCampaignIx(
   return ix(accounts, data(P.IX.USER_OPEN_CAMPAIGN, args));
 }
 
-export type JoinArgs = { side: number; amount: bigint; minReturnBps?: number; expectedEntryTotal?: bigint };
+export type JoinArgs = {
+  side: number;
+  amount: bigint;
+  minReturnBps?: number;
+  expectedEntryTotal?: bigint;
+  /** The Join account's index: the baker's `join_count` before this join (0 for the first). */
+  joinIndex?: number;
+};
 
 /** `user_join_campaign`. `metric` is the campaign's `metric_account`. */
 export async function joinCampaignIx(baker: TransactionSigner, campaign: Address, metric: Address, a: JoinArgs) {
@@ -112,7 +119,13 @@ export async function joinCampaignIx(baker: TransactionSigner, campaign: Address
     expected_entry_total: a.expectedEntryTotal ?? 0n,
   });
   const accounts = [signer(baker, true), ro(await P.configPda()), rw(campaign), rw(await P.vaultPda(campaign))];
-  accounts.push(rw(await P.entryPda(campaign, baker.address)), ro(metric), ro(P.SYSTEM_PROGRAM_ID), ...eventSlots());
+  accounts.push(
+    rw(await P.entryPda(campaign, baker.address)),
+    ro(metric),
+    rw(await P.joinPda(campaign, baker.address, a.joinIndex ?? 0)),
+    ro(P.SYSTEM_PROGRAM_ID),
+    ...eventSlots(),
+  );
   return ix(accounts, data(P.IX.USER_JOIN_CAMPAIGN, args));
 }
 

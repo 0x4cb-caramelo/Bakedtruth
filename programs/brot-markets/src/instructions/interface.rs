@@ -101,9 +101,10 @@ pub enum BrotInstruction {
     #[account(3, writable, name = "vault", desc = "The campaign's vault")]
     #[account(4, writable, name = "entry", desc = "Entry, PDA [\"entry\", campaign, baker], created on the first join")]
     #[account(5, name = "metric_account", desc = "Campaign.metric_account, read by the join lock")]
-    #[account(6, name = "system_program", desc = "System Program")]
-    #[account(7, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
-    #[account(8, name = "program", desc = "This program")]
+    #[account(6, writable, name = "join", desc = "Join, PDA [\"join\", campaign, baker, index], created: one per join")]
+    #[account(7, name = "system_program", desc = "System Program")]
+    #[account(8, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
+    #[account(9, name = "program", desc = "This program")]
     UserJoinCampaign(JoinCampaignArgs),
 
     /// Records the outcome the reader reads and opens the review window. Any wallet, top level
@@ -193,6 +194,7 @@ pub enum BrotInstruction {
     #[account(5, name = "program", desc = "This program")]
     CloseCampaign,
 
+
     /// Sends the fee vault's surplus to GlobalConfig.fee_recipient, never to the vault itself. Any wallet.
     #[account(0, name = "config", desc = "GlobalConfig, read")]
     #[account(1, writable, name = "fee_vault", desc = "The fee vault")]
@@ -200,4 +202,14 @@ pub enum BrotInstruction {
     #[account(3, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
     #[account(4, name = "program", desc = "This program")]
     SweepFees,
+
+    /// Reads and closes a baker's Join accounts (passed after the five listed slots, in index order),
+    /// adds their late amounts to the campaign and the entry, and marks the entry tallied when its last
+    /// join is closed. Inside the review window, after resolve. Any wallet. Founder decision, 2026-10-09.
+    #[account(0, writable, name = "campaign", desc = "Campaign, InReview, publish_time recorded")]
+    #[account(1, writable, name = "entry", desc = "Entry of the baker, not yet tallied")]
+    #[account(2, writable, name = "baker", desc = "The Entry's stored baker: receives the rent of the closed joins")]
+    #[account(3, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
+    #[account(4, name = "program", desc = "This program")]
+    TallyLateJoins,
 }

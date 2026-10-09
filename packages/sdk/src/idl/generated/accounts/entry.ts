@@ -52,6 +52,9 @@ export type Entry = {
   amountYes: bigint;
   amountNo: bigint;
   joinCount: number;
+  joinsTallied: number;
+  lateYes: bigint;
+  lateNo: bigint;
   reserved: ReadonlyUint8Array;
 };
 
@@ -65,6 +68,9 @@ export type EntryArgs = {
   amountYes: number | bigint;
   amountNo: number | bigint;
   joinCount: number;
+  joinsTallied: number;
+  lateYes: number | bigint;
+  lateNo: number | bigint;
   reserved: ReadonlyUint8Array;
 };
 
@@ -80,7 +86,10 @@ export function getEntryEncoder(): FixedSizeEncoder<EntryArgs> {
     ["amountYes", getU64Encoder()],
     ["amountNo", getU64Encoder()],
     ["joinCount", getU32Encoder()],
-    ["reserved", fixEncoderSize(getBytesEncoder(), 12)],
+    ["joinsTallied", getU32Encoder()],
+    ["lateYes", getU64Encoder()],
+    ["lateNo", getU64Encoder()],
+    ["reserved", fixEncoderSize(getBytesEncoder(), 8)],
   ]);
 }
 
@@ -96,7 +105,10 @@ export function getEntryDecoder(): FixedSizeDecoder<Entry> {
     ["amountYes", getU64Decoder()],
     ["amountNo", getU64Decoder()],
     ["joinCount", getU32Decoder()],
-    ["reserved", fixDecoderSize(getBytesDecoder(), 12)],
+    ["joinsTallied", getU32Decoder()],
+    ["lateYes", getU64Decoder()],
+    ["lateNo", getU64Decoder()],
+    ["reserved", fixDecoderSize(getBytesDecoder(), 8)],
   ]);
 }
 
@@ -156,5 +168,5 @@ export async function fetchAllMaybeEntry(
 }
 
 export function getEntrySize(): number {
-  return 100;
+  return 116;
 }

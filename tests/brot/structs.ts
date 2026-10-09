@@ -96,7 +96,11 @@ export const CAMPAIGN: Layout = [
   ["paid_out_total", "u64"],
   ["epoch", "u64"],
   ["min_entry_lamports", "u64"],
-  ["_reserved", { bytes: 48 }],
+  ["publish_time", "i64"],
+  ["late_yes", "u64"],
+  ["late_no", "u64"],
+  ["entries_untallied", "u32"],
+  ["_reserved", { bytes: 20 }],
 ];
 
 export const ENTRY: Layout = [
@@ -109,7 +113,10 @@ export const ENTRY: Layout = [
   ["amount_yes", "u64"],
   ["amount_no", "u64"],
   ["join_count", "u32"],
-  ["_reserved", { bytes: 12 }],
+  ["joins_tallied", "u32"],
+  ["late_yes", "u64"],
+  ["late_no", "u64"],
+  ["_reserved", { bytes: 8 }],
 ];
 
 export const JOIN: Layout = [

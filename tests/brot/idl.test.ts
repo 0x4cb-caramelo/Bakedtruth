@@ -116,6 +116,13 @@ const BUILDERS: Record<string, Builder> = {
       return IS.closeCampaignIx(campaign, await P.vaultPda(campaign), who.address, await P.feeVaultPda());
     },
   },
+  TallyLateJoins: {
+    args: null,
+    build: async (who) => {
+      const campaign = await P.campaignPda(CAMPAIGN_ID);
+      return IS.tallyLateJoinsIx(who.address, campaign, await P.entryPda(campaign, who.address), []);
+    },
+  },
   SweepFees: {
     args: null,
     build: async (who) => IS.sweepFeesIx(await P.configPda(), await P.feeVaultPda(), who.address),
@@ -143,6 +150,7 @@ async function expectedAddresses(who: Address): Promise<Record<string, Address>>
     // Sprint 04: the payee slots of the settlement instructions are the test wallet, which is also the
     // stored baker, creator, rent payer and fee recipient in these fixtures.
     recipient: who,
+    join: await P.joinPda(campaign, who, 0),
     rentPayer: who,
     feeRecipient: who,
   };

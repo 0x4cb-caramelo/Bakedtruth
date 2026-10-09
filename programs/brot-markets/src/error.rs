@@ -257,6 +257,8 @@ pub enum BrotError {
     PayoutExceedsSnapshot = 6112,
     #[error("The entry belongs to another campaign")]
     EntryNotOnCampaign = 6113,
+    #[error("The entry's joins are not all tallied yet: the late totals are not known")]
+    NotTallied = 6114,
     // Lane D (numbers from 6121).
     #[error("The campaign's fee, prize and creator share are not all settled")]
     CampaignNotSettled = 6121,

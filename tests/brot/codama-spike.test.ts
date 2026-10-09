@@ -106,7 +106,14 @@ describe("codama client matches the test kit", () => {
         await I.openCampaignIx(who, { ...open, direction: P.Direction.Below, maxLamports: 9n * P.SOL }),
       ],
       [
-        C.getUserJoinCampaignInstruction({ baker: who, ...accounts, entry, side: C.Side.No, ...join }),
+        C.getUserJoinCampaignInstruction({
+          baker: who,
+          ...accounts,
+          entry,
+          join: await P.joinPda(campaign, who.address, 0),
+          side: C.Side.No,
+          ...join,
+        }),
         await I.joinCampaignIx(who, campaign, metricAccount, { side: P.Side.No, ...join }),
       ],
       [
@@ -132,6 +139,10 @@ describe("codama client matches the test kit", () => {
         await IS.teamOpenContestIx(who, config, campaign),
       ],
       [C.getFinalizeCampaignInstruction({ campaign, config }), IS.finalizeCampaignIx(campaign, config)],
+      [
+        C.getTallyLateJoinsInstruction({ campaign, entry, baker: who.address }),
+        IS.tallyLateJoinsIx(who.address, campaign, entry, []),
+      ],
       [
         C.getSettleEntryInstruction({ entry, campaign, vault, baker: who.address }),
         IS.settleEntryIx(entry, campaign, vault, who.address),
