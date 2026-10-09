@@ -7,11 +7,11 @@ A instrução que abre a contestação (`team_open_contest`) muda as listas de c
 
 ## Decisão
 
-- **Sim:** `team_open_contest` e qualquer caminho para fora de `Contested` ficam **desativados** até a Sprint 14. A
-  Sprint 04 não escreve a saída; a Sprint 14 escreve `reread_campaign` e `admin_decide_contest` junto com a segunda
-  leitura.
-- Nenhuma campanha entra em `Contested` nesta versão do programa, porque a instrução que leva até lá está desativada.
-  Por isso o contrato congelado da Sprint 04 não inclui conta de saída.
+- **Entrada:** `team_open_contest` leva uma campanha de `InReview` (dentro da janela) a `Contested`, e o pagamento
+  fica pausado. Continua permitida, como diz a TP §3.4.2.
+- **Saída:** nenhum caminho sai de `Contested` até a Sprint 14. A instrução de saída (`reread_campaign`,
+  `admin_decide_contest`) é escrita só na Sprint 14, e enquanto isso fica desativada.
+- O contrato congelado da Sprint 04 não inclui conta de saída.
 
 ## Alternativas recusadas
 
@@ -20,10 +20,9 @@ A instrução que abre a contestação (`team_open_contest`) muda as listas de c
 
 ## Consequência para a Sprint 04
 
-- A contestação não tem teste de caminho feliz. Tem um teste de recusa: `team_open_contest` falha com o erro próprio
-  enquanto a instrução estiver desativada.
-- O estado `Contested` continua no enum (é a fase de payout pausado, TP §3.4.2); nenhuma instrução da Sprint 04 o
-  alcança.
+- Há um caminho feliz para entrar: `team_open_contest` em `InReview`, com o pagamento pausado.
+- Há testes de recusa para a saída: nenhuma instrução de saída de `Contested` é aceita nesta versão.
+- Uma contestação fora da janela, ou por chave que não é do time, é recusada com o erro próprio.
 
 Fontes: `docs/sprints/sprint-04-settlement-invariants.md` (item de `Contested`); `docs/technical/TECHNICAL-PLAN.md`,
-§3.4.2 e C48 (v0.1.2). Decisão do fundador, 2026-10-09 (resposta 1 da lista de decisões do `Contested`).
+§3.4.2 e C48 (v0.1.2). Resposta do fundador, 2026-10-09: "A campaign should leave Contested only by a disabled instruction until Sprint 14".

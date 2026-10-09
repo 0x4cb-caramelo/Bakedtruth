@@ -14,6 +14,15 @@ na `main` pelo PR #40 em 9/10/2026, com a tag `sprint-03` (`docs/sprints/sprint-
 mesclou os PRs #37 e #40 foi o Ronaldo, com a liberdade que o Lucas lhe deu; ele também respondeu as perguntas ao
 fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`).
 
+### Changed
+
+- **Sprint 04 em curso, na branch `sprint-04-settlement-invariants`** (ainda sem PR). Feito até aqui: o arquivo
+  `checks.rs` e o `state/campaign.rs` foram divididos sem mudança de comportamento; as pendências de documentação da
+  Sprint 03 foram copiadas para as Sprints 04, 05 e 06; a decisão sobre `Contested` foi registrada (entra por
+  `team_open_contest`; nada sai antes da Sprint 14); a leitura do código do push oracle da Pyth foi feita num commit
+  fixado; e o plano técnico foi para a v0.1.2, alinhado ao que a Sprint 03 construiu e às respostas do fundador de
+  9/10/2026.
+
 ### Added
 
 - **Sprint 03: o programa lê o resultado sozinho, e o Anchor sai do repositório** (`programs/brot-markets`,
