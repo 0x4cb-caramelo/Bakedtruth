@@ -1,6 +1,6 @@
 # Sprint 02 — Pot core on Pinocchio: config, paid opening, vault, entries
 
-**Status:** in review (pull request #30 open, not merged) · **Branch:** `sprint-02-pot-core` · **Dates:** none, by the founder's decision
+**Status:** merged into `main` in PR #35 on 2026-10-08 (PR #30 reviewed; no `sprint-02` tag yet) · **Branch:** `sprint-02-pot-core` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|

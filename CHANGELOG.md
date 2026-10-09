@@ -8,11 +8,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-A Sprint 02, o núcleo do pote em Pinocchio, está em revisão no pull request #30 (branch `sprint-02-pot-core`), sem
-mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-02-pot-core.md`).
+A Sprint 02, o núcleo do pote em Pinocchio, foi mesclada na `main` pelo fundador no pull request #35 (8/10/2026), sem
+a tag `sprint-02`. A Sprint 03, os leitores e a resolução, está em revisão no seu pull request (branch
+`sprint-03-readers-resolution`), sem mesclar: a mescla e a tag esperam o fundador
+(`docs/sprints/sprint-03-readers-resolution.md`).
 
 ### Added
 
+- **Sprint 03: o programa lê o resultado sozinho, e o Anchor sai do repositório** (`programs/brot-markets`,
+  9/10/2026). Os cinco tipos de campanha abrem, travam a entrada e resolvem on-chain:
+  - **Os quatro leitores do `pred-provable` portados para o Pinocchio**, um arquivo cada, com o aviso MIT: a queima
+    de um token (`SupplyAtMost`), a liquidez travada num pool DAMM v2 da Meteora (`DammV2LockedAtLeast`), o tamanho
+    de um pool de stake numa época (`StakePoolTvlAtLeast`) e o stake de um validador numa época (`StakeAtLeast`).
+    Cada um confere o dono e o formato da conta antes de ler um byte; uma conta cortada, esticada ou zerada é um erro,
+    nunca um travamento. Testados nas contas reais capturadas da rede principal, e conferidos contra o programa
+    congelado nas mesmas contas antes de ele sair: 62 casos, com cada diferença justificada
+    (`docs/sprints/sprint-03-parity.md`).
+  - **A divisão do leitor de preço:** na entrada, só a conta patrocinada da Pyth; para provar o SIM, qualquer conta
+    totalmente verificada do mesmo feed, publicada dentro do prazo e com até 60 segundos; o NÃO só 60 segundos
+    depois do prazo, para ninguém gravar NÃO na frente de uma prova; e o feed parado anula a campanha (`StaleFeed`)
+    em vez de virar NÃO. O alvo precisa ficar a pelo menos 1% da faixa de confiança e, no lado distante, até 10 vezes
+    o preço (ou um décimo); um alvo de 1 lamport deixa de abrir.
+  - **`user_open_campaign` para os cinco tipos**, com as recusas das linhas 1 a 3 do plano técnico e um erro para
+    cada uma; os argumentos sem uso têm de ser zero; a abertura recusa quando os parâmetros de criação mudaram desde
+    a prévia que o criador viu (`expected_params_version`); quatro códigos próprios dizem qual conta da Pyth falhou
+    na cobrança em SOL/USD. O `StakeAtLeast` fica fechado por uma feature de build até um SIM na devnet.
+  - **Os tipos de época:** o criador passa a época e o prazo; a época precisa começar antes do prazo; a entrada fecha
+    quando a época começa; uma época perdida anula (`MissedWindow`) e devolve, em vez de dizer NÃO.
+  - **`resolve_campaign`:** qualquer carteira dispara e não escolhe nada; recusa ser chamada de dentro de outro
+    programa (provado com um programa de teste que repassa a instrução); grava SIM, NÃO ou anulação com a janela de
+    revisão de seis horas e emite `CampaignResolved` com o valor lido, a conta e, no preço, o horário e o slot da
+    prova.
+  - **A trava de entrada (BR-06):** a entrada é recusada assim que o resultado já é conhecível.
+  - **Surfpool:** o leitor de preço rodou dentro das instruções sobre um fork da rede principal, com o preço cruzando
+    o alvo e a campanha resolvendo SIM; o CI fixa o Surfpool 1.6.0 pelo SHA-256 do arquivo e do binário.
+  - **O SIM do `StakeAtLeast` testado pela primeira vez**, no Mollusk, que injeta stake de época.
+  - **Fatos da rede, em `knowledge-base/tecnologia/`:** os feeds patrocinados da Pyth que ficam frescos na devnet e
+    na rede principal; o Alpenglow na devnet (tempo de slot, deriva do relógio, confirmado contra finalizado); o
+    endereço do Lighthouse; e que a conta patrocinada só anda para a frente.
+  - **Testes:** 252 em Rust e 258 em TypeScript, todos do programa novo; os oito filtros da sprint passam; tirar a
+    checagem de chamada de topo derruba o teste dela (X0.9).
 - **Sprint 02: o núcleo do pote, o programa novo em Pinocchio** (`programs/brot-markets`, 8/10/2026). Sai o
   esqueleto Anchor; entra o programa que guarda SOL de verdade, ainda sem leitura de resultado nem pagamento:
   - **A configuração e a equipe:** `admin_initialize_config` (só a autoridade de upgrade, lida da conta ProgramData),
@@ -238,6 +273,17 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
 
 ### Changed
 
+- **O `pred-provable` e o Anchor saem do repositório** (Sprint 03, 9/10/2026), num commit só: o programa congelado,
+  os seus testes, `tests/helpers.ts`, o IDL em `target/` e o `Anchor.toml`. O `Cargo.lock` perde 175 pacotes e não
+  sobe versão nenhuma; o `brot-markets` chama as syscalls de stake de época, altura da pilha e sysvar pelo próprio
+  Pinocchio, sem o crate `solana-epoch-stake` nem o seu pino. O CI deixa de instalar o Anchor CLI, e a checagem de
+  IDL cobre só o IDL do Shank e o cliente gerado. O pacote raiz passa a se chamar `brot-markets`. O site atual
+  continua com a cópia do IDL antigo em `app/lib` até a Sprint 09, e `smoke:devnet` e `seed:devnet` ainda falam com
+  a instalação antiga na devnet por ela. O `CLAUDE.md` foi reescrito sem o Anchor.
+- **Duas regras do plano técnico mudaram diante dos fatos** (Sprint 03): o `prev_publish_time` da Pyth é o agregado
+  anterior da Pythnet, não a escrita anterior da conta (em todas as contas capturadas vale `publish_time − 1`), então
+  o teste do feed parado passou a ser "nada foi gravado depois do prazo e a última escrita é mais velha que
+  `prazo − max_age`"; e o NÃO do tipo preço espera 60 segundos depois do prazo.
 - **A página em breve com o vocabulário do D6** (8/10/2026): título, meta tags, título principal, texto de abertura,
   formulário, exemplo e princípios passam de "prediction markets", "bet", "pool" e USDC para On-Chain Campaigns,
   entrar no YES ou NO, pote e SOL. O aviso legal do rodapé e o deck em `/pitch` não mudaram.
@@ -284,6 +330,13 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
 
 ### Em aberto
 
+- **Sprint 03, as sete perguntas ao fundador**, nenhuma respondida, com o que o código faz enquanto isso
+  (`session-log/2026-10-09-sprint-03-abertura-contrato-e-valores.md`): (1) quais feeds da Pyth uma campanha de preço
+  pode nomear — hoje qualquer um cujo endereço patrocinado passe nas checagens; (2) cobrar a abertura em `p − conf`
+  — hoje o preço médio; (3) o feed do SOL/USD como constante do programa — hoje um campo da configuração; (4) uma
+  cota própria para as aberturas gratuitas da equipe — hoje a mesma válvula; (5) copiar a entrada mínima na abertura
+  — hoje a leitura viva; (6) o Lucas e o Ronaldo com chaves da equipe (Q12); (7) recusar um preço zero ou negativo
+  como prova do SIM — hoje um preço negativo assinado pela Pyth provaria o SIM de uma campanha "abaixo de".
 - **Sprint 02, para o fundador confirmar:** que aprovar a proposta de arquitetura aprovou também a troca de nomes
   do D6; que o Lucas e o Ronaldo têm, os dois, chaves da equipe (Q12); a leitura de trabalho de "a equipe põe
   prêmio" (paga como qualquer carteira); se a entrada mínima de uma campanha aberta muda quando a configuração
