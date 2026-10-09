@@ -511,6 +511,7 @@ pot, out of the treasury or out of a baker's entry. Their findings, consolidated
 | F13 | A stake pool whose keeper stops cranking voids as `MissedWindow`, and the bakers lose nothing but their time | product | Record | The keeper's crank is Sprint 06's; the void refunds every entry (Sprint 04) |
 | P1 to P4 | Product: the opening preview must show the refusals before signing; the proof window needs a plain explanation on the campaign page; the review window needs a visible countdown; the void reasons need copy | product | Record | Sprints 05 (preview), 09 (copy) and 06 (the keeper's proof task, so a short touch is proved on mainnet) |
 
-The fixes added three Rust tests (255) and one TypeScript test (259); the IDL is unchanged. The X0.9 run was not
+The fixes added three Rust tests (255 in all) and changed three TypeScript files; `bun run test` counts 262 after
+them (the tests have not changed since); the IDL is unchanged. The X0.9 run was not
 repeated: no check in `checks.rs` or `checks/top_level.rs` was touched. Every finding that changes a rule (F2, F3,
 F4, F5) is in `CHANGELOG.md` under *Fixed*; F1 is in *Em aberto* as question 8.
