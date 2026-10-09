@@ -5,8 +5,8 @@
 //! Version: 0.0.1
 //! Sprint: 04 (lane C). The late totals come from `tally_late_joins` (amendment 2026-10-09): they leave V and P.
 //!
-//! Refusals, in order: `NotTallied` while an entry is untallied; `NoProofTime` for a YES or NO without a
-//! publish time (a void needs none: it refunds every entry whole); the transition (`IllegalTransition`); the
+//! Refusals, in order: `NotTallied` while an entry is untallied; `NoProofTime` for a YES on a price campaign without
+//! a publish time (only a YES proof is measured against late joins); the transition (`IllegalTransition`); the
 //! snapshot's own checks. The status is not read here as `InReview`: `team_void_campaign` sets the outcome
 //! and calls this before it writes `Settling`, and the transition table is the only gate.
 
@@ -20,7 +20,7 @@ use crate::{
     state::{
         campaign::Campaign,
         config::GlobalConfig,
-        enums::{Outcome, Status},
+        enums::{Outcome, ReaderKind, Status},
         transitions::transition,
     },
 };
@@ -77,12 +77,20 @@ pub fn finalize_snapshot(
     if campaign.entries_untallied.get() != 0 {
         return Err(BrotError::NotTallied);
     }
-    let needs_proof = !matches!(Outcome::try_from(campaign.outcome)?, Outcome::Void);
-    if needs_proof && campaign.publish_time.get() == 0 {
+    // Late joins are measured only against a YES price proof (2026-10-09): nothing else needs a publish time.
+    let price_yes = campaign.kind == ReaderKind::PriceTouch as u8
+        && Outcome::try_from(campaign.outcome)? == Outcome::Yes;
+    if price_yes && campaign.publish_time.get() == 0 {
         return Err(BrotError::NoProofTime);
     }
+    // With no entry at all nothing will ever be settled, so the campaign goes straight to Settled.
+    let target = if campaign.entries_open.get() == 0 {
+        Status::Settled
+    } else {
+        Status::Settling
+    };
     let from = Status::try_from(campaign.status)?;
-    transition(from, Status::Settling)?;
+    transition(from, target)?;
 
     let input = input_of(campaign)?;
     let snap = snapshot(input)?;
@@ -102,6 +110,6 @@ pub fn finalize_snapshot(
     campaign
         .creator_share_from_fee
         .set(snap.creator_share_from_fee);
-    campaign.status = Status::Settling as u8;
+    campaign.status = target as u8;
     Ok(())
 }

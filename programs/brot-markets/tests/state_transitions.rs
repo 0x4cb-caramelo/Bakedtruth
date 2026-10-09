@@ -17,11 +17,12 @@ const ALL: [Status; 5] = [
 ];
 
 #[test]
-fn the_table_has_exactly_its_six_edges() {
+fn the_table_has_exactly_its_seven_edges() {
     let allowed = [
         (Status::Open, Status::InReview),
         (Status::InReview, Status::Settling),
         (Status::InReview, Status::Contested),
+        (Status::InReview, Status::Settled),
         (Status::Contested, Status::Settling),
         (Status::Contested, Status::Contested),
         (Status::Settling, Status::Settled),

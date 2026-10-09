@@ -20,6 +20,9 @@ pub fn transition(from: Status, to: Status) -> Result<(), BrotError> {
         // reread_campaign and admin_decide_contest (Sprint 14; disabled until then)
         | (Status::Contested, Status::Settling)
         | (Status::Contested, Status::Contested)
+        // finalize_snapshot with no entry at all: nothing will ever be settled (used only there, with
+        // entries_open == 0)
+        | (Status::InReview, Status::Settled)
         // settle_entry, the last one
         | (Status::Settling, Status::Settled) => Ok(()),
         _ => Err(BrotError::IllegalTransition),

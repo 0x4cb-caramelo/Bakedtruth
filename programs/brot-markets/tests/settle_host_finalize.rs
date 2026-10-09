@@ -8,7 +8,7 @@ use brot_markets::{
     state::{
         campaign::Campaign,
         config::GlobalConfig,
-        enums::{Outcome, SettleMode, Status, VoidReason},
+        enums::{Outcome, ReaderKind, SettleMode, Status, VoidReason},
     },
 };
 
@@ -26,6 +26,7 @@ fn campaign(buf: &mut Vec<u8>) -> &mut Campaign {
     c.pool_yes = LeU64::new(6_000_000_000);
     c.pool_no = LeU64::new(4_000_000_000);
     c.late_yes = LeU64::new(1_000_000_000);
+    c.entries_open = LeU32::new(1);
     c.publish_time = LeI64::new(1_700_000_000);
     c.fee_bps = brot_markets::layout::LeU16::new(1000);
     c.one_sided_fee_bps = brot_markets::layout::LeU16::new(100);
@@ -53,12 +54,54 @@ fn settle_host_finalize_refuses_while_an_entry_is_untallied() {
 }
 
 #[test]
-fn settle_host_finalize_refuses_a_yes_without_publish_time() {
+fn settle_host_finalize_refuses_a_price_yes_without_publish_time() {
     let (mut cb, mut gb) = (Vec::new(), Vec::new());
     let c = campaign(&mut cb);
     c.publish_time = LeI64::new(0);
     let g = config(&mut gb, 1);
     assert_eq!(finalize_snapshot(c, g), Err(BrotError::NoProofTime));
+    assert_eq!(c.status, Status::InReview as u8);
+}
+
+#[test]
+fn settle_host_finalize_a_non_price_yes_without_publish_time_finalizes() {
+    let (mut cb, mut gb) = (Vec::new(), Vec::new());
+    let c = campaign(&mut cb);
+    c.publish_time = LeI64::new(0);
+    c.kind = ReaderKind::SupplyAtMost as u8;
+    let g = config(&mut gb, 1);
+    finalize_snapshot(c, g).unwrap();
+    assert_eq!(c.status, Status::Settling as u8);
+}
+
+#[test]
+fn settle_host_finalize_a_price_no_without_publish_time_finalizes() {
+    let (mut cb, mut gb) = (Vec::new(), Vec::new());
+    let c = campaign(&mut cb);
+    c.publish_time = LeI64::new(0);
+    c.outcome = NO;
+    let g = config(&mut gb, 1);
+    finalize_snapshot(c, g).unwrap();
+    assert_eq!(c.settle_mode, SettleMode::Split as u8);
+    assert_eq!(c.status, Status::Settling as u8);
+}
+
+#[test]
+fn settle_host_finalize_a_campaign_with_no_entries_goes_straight_to_settled() {
+    let (mut cb, mut gb) = (Vec::new(), Vec::new());
+    let c = campaign(&mut cb);
+    c.entries_open = LeU32::new(0);
+    c.pool_yes = LeU64::new(0);
+    c.pool_no = LeU64::new(0);
+    c.late_yes = LeU64::new(0);
+    c.publish_time = LeI64::new(0);
+    c.kind = ReaderKind::SupplyAtMost as u8;
+    let g = config(&mut gb, 1);
+    finalize_snapshot(c, g).unwrap();
+    assert_eq!(c.status, Status::Settled as u8);
+    assert_eq!(c.settle_mode, SettleMode::Refund as u8);
+    assert_eq!(c.creator_share.get(), 0);
+    assert_eq!(g.open_campaigns.get(), 0);
 }
 
 #[test]
