@@ -105,7 +105,8 @@ describe("events round-trip", () => {
     units.team_pause_entries = paused.computeUnits;
     units.admin_resume_entries = resumed.computeUnits;
 
-    const { campaign, sent } = await openedCampaign(w, creator);
+    // One `admin_set_creation_params` ran above, so the parameters are at version 1 (Sprint 03).
+    const { campaign, sent } = await openedCampaign(w, creator, { expectedParamsVersion: 1 });
     expect(expectOk(sent).events.map((e) => e.name)).toEqual(["CampaignOpened"]);
     units.user_open_campaign = expectOk(sent).computeUnits;
     const metric = readCampaign(w, campaign).metric_account as Address;

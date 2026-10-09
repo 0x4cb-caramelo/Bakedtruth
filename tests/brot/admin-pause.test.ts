@@ -44,7 +44,8 @@ describe("pause stops only joins and openings", () => {
 
     // Resumed: the same join and an opening go through.
     expectOk(await join(w, baker, campaign, second));
-    expectOk((await openPriceCampaign(w, creator)).sent);
-    expectOk((await openPriceCampaign(w, other, { openingUsd: 0n })).sent);
+    // The paused admin changed the parameters once: they are at version 1 (Sprint 03).
+    expectOk((await openPriceCampaign(w, creator, { expectedParamsVersion: 1 })).sent);
+    expectOk((await openPriceCampaign(w, other, { openingUsd: 0n, expectedParamsVersion: 1 })).sent);
   });
 });
