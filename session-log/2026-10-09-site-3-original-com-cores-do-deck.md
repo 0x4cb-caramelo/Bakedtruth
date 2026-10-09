@@ -56,6 +56,16 @@ gente gosta dele tbm."
   fundo azulado, os painéis brancos e a tinta da original, com os mesmos cartões azul-marinho e o mesmo laranja; o
   laranja de texto no claro é um tom mais fundo (`#c2410c`), para dar leitura. Um teste proíbe as cores creme e
   marrom no arquivo.
+- **O tema claro, puxado para o branco.** Depois da correção o Lucas escreveu: "ok, melhorou, mas agora que você me
+  disse e eu me dei conta, como fica a versão light? não pode ser marrom, tem que ser puxado pra branco." O claro já
+  não tinha creme, mas o fundo era o azul-acinzentado da original (`#eef1f6`). Passou a quase branco (`#f8f9fb`),
+  com os painéis brancos e a tinta azul-marinho. Os cartões azul-marinho ficaram, porque ele aprovou o escuro e
+  pediu só que o claro puxasse para o branco; trocá-los por cartões brancos é uma decisão dele, ainda não tomada.
+  Saíram também três tons que puxavam para o marrom, nos dois temas: o fundo do NO (`#3d2422`, agora o vinho da
+  original, `#402530`), o fundo dos números dos princípios (laranja a 15% sobre azul-marinho dava um marrom turvo,
+  agora `#2f3a4e`) e o laranja do link sob o ponteiro (`#9a3412`, agora a tinta). A letra miúda do claro escureceu
+  um pouco (`#5f6a7d`) e passou a ter contraste 5,2 sobre o fundo. O teste exige um fundo claro quase branco e
+  nunca quente, e proíbe os três tons.
 - **A `/3` continua na branch** para comparação; um teste garante que o texto das duas é o mesmo.
 
 ## Em aberto

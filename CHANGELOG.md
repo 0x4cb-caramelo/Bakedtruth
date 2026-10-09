@@ -61,8 +61,11 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
   temas, a faixa do topo escura, o botão liso, sem o anel giratório, e a caixa de sugestão com o destaque na borda
   esquerda. O aviso laranja continua. **A primeira versão da `/4` ainda saiu com creme e marrom,** porque copiou o
   tema claro da `/2`; o que os fundadores tinham aprovado era a `/2` no tema escuro, azul-marinho e laranja. Corrigida
-  no mesmo dia: o escuro é o azul-marinho da `/2`, o claro tem o fundo azulado da original com os mesmos cartões
-  azul-marinho e o mesmo laranja, e não há creme nem marrom em nenhum dos dois. Sete testes novos
+  no mesmo dia: o escuro é o azul-marinho da `/2`, o claro tem os mesmos cartões azul-marinho e o mesmo laranja, e
+  não há creme nem marrom em nenhum dos dois. **O claro foi puxado para o branco** a pedido do Lucas ("não pode ser
+  marrom, tem que ser puxado pra branco"): o fundo passou do azul-acinzentado da original para quase branco, e saíram
+  os três tons que ainda puxavam para o marrom (o fundo do NO, o fundo dos números dos princípios e o laranja do link
+  sob o ponteiro). Sete testes novos
   (`tests/four.test.mjs`): o texto é o da `/3`, palavra por palavra, o arquivo de cores só declara cor, e nenhuma
   cor creme ou marrom entra nele.
 - **`/3`, a página inicial original com as cores do deck e o texto mais curto** (fundadores, 9/10/2026; na branch

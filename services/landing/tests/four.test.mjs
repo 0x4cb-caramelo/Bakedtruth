@@ -3,7 +3,7 @@
  *          they approved), keeps the original layout and fonts (the home page's own styles.css), and its colour file
  *          sets colours only: navy and orange, no cream and no brown, with the example and the principles as navy
  *          cards in both themes. It also stays out of search engines and has no inline style or script.
- * Version: 0.2.0 · Sprint: out of band (landing page), 2026-10-09
+ * Version: 0.3.0 · Sprint: out of band (landing page), 2026-10-09
  */
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
@@ -83,14 +83,21 @@ test("the example and the principles of /4 are navy cards in both themes, and th
   assert.match(light, /--yes-bg: #1c3a30;/, "the YES and NO chips sit on a navy card, so they keep the dark pair");
 });
 
-test("/4 has no cream and no brown: navy and orange in dark, the original's cool page in light", () => {
-  // The cream page, the brown ink and the rust of the pitch deck's light slides, which /2 and /3 used in light.
-  const creamAndBrown = /#(f6eddb|fffaf0|efe2c8|e2d4ba|cdbb98|fbe3bd|1b1611|3d3328|6b5e4e|a8481b|7a3212|2b2416)/i;
+test("/4 has no cream and no brown: navy and orange in dark, pulled to white in light", () => {
+  // The cream page, the brown ink and the rust of the pitch deck's light slides, which /2 and /3 used in light, and
+  // the brownish chip, badge and link colours the first navy version still had.
+  const creamAndBrown =
+    /#(f6eddb|fffaf0|efe2c8|e2d4ba|cdbb98|fbe3bd|1b1611|3d3328|6b5e4e|a8481b|7a3212|2b2416|9a3412|3d2422|eea54626)/i;
   assert.doesNotMatch(colors, creamAndBrown);
   assert.match(colors, /:root \{\s*--bg: #10151c;/, "dark is the navy of /2");
-  const originalLight = styles.slice(styles.indexOf(':root[data-theme="light"] {'));
-  const bg = originalLight.match(/--bg: (#[0-9a-f]+);/)[1];
-  assert.match(colors.slice(colors.indexOf(':root[data-theme="light"] {')), new RegExp(`--bg: ${bg};`));
+  // The light page is near white and never warm: every channel high, and red no higher than blue.
+  const light = colors.slice(colors.indexOf(':root[data-theme="light"] {'));
+  const channels = light.match(/--bg: #([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2});/).slice(1);
+  const [red, green, blue] = channels.map((channel) => parseInt(channel, 16));
+  assert.ok(Math.min(red, green, blue) >= 0xf5, "the light page is pulled to white");
+  assert.ok(red <= blue, "the light page is not warm");
+  assert.match(light, /--panel: #fff;/);
+  assert.match(light, /--text: #131a26;/, "the ink of the light page is navy");
 });
 
 test("every file /4 points at exists, with no inline style or script, out of search engines", () => {
