@@ -9,7 +9,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 | | |
 |---|---|
 | Arquivos mapeados | **313** |
-| Acima de 200 linhas | **32** ⚠️ |
+| Acima de 200 linhas | **30** ⚠️ |
 | Sem cabeçalho `Purpose:` | **78** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -24,9 +24,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `app/lib/market.ts` — 211 linhas
 - `app/lib/mascot/engine.ts` — 302 linhas
 - `app/lib/metric.ts` — 691 linhas
-- `programs/brot-markets/src/checks.rs` — 201 linhas
 - `programs/brot-markets/src/error.rs` — 239 linhas
-- `programs/brot-markets/src/state/campaign.rs` — 201 linhas
 - `programs/brot-markets/tests/price_stale_feed.rs` — 201 linhas
 - `prototype-lab/prototype-b/view.js` — 265 linhas
 - `prototype-lab/prototype-e/view.js` — 258 linhas
@@ -170,7 +168,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`checks.rs`](programs/brot-markets/src/checks.rs) | every account check Anchor used to make, written by hand in one place (TP 3.4.17), each with its own error and a negative test that fails without it (T24, X0.9) | 201 |
+| [`checks.rs`](programs/brot-markets/src/checks.rs) | every account check Anchor used to make, written by hand in one place (TP 3.4.17), each with its own error and a negative test that fails without it (T24, X0.9) | 168 |
 | [`constants.rs`](programs/brot-markets/src/constants.rs) | seeds, program ids, code ceilings and the duration and window constants compiled into the program, with the devnet-only drill values behind the `drill` feature | 174 |
 | [`entrypoint.rs`](programs/brot-markets/src/entrypoint.rs) | the instruction dispatcher: the first byte of the instruction data picks the handler, the rest is that handler's arguments | 56 |
 | [`error.rs`](programs/brot-markets/src/error.rs) | every refusal the program can return, one code per cause, as custom program errors | 239 |
@@ -289,7 +287,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`campaign.rs`](programs/brot-markets/src/state/campaign.rs) | `Campaign` (`["campaign", id]`): everything about one campaign, and the loaders that check it. Its vault (`["vault", campaign]`) is data-less and its bump lives | 201 |
+| [`campaign.rs`](programs/brot-markets/src/state/campaign.rs) | `Campaign` (`["campaign", id]`): everything about one campaign, and the loaders that check it. Its vault (`["vault", campaign]`) is data-less and its bump lives | 163 |
 | [`config.rs`](programs/brot-markets/src/state/config.rs) | `GlobalConfig` (`["config"]`): roles, the pause, the creation parameters, the fee recipient and the open-campaign counter; and the creation parameters' own layo | 193 |
 | [`entry.rs`](programs/brot-markets/src/state/entry.rs) | `Entry` (`["entry", campaign, baker]`): one baker's entry in one campaign, both sides, created on the baker's first join and closed by `settle_entry` (Sprint 04 | 67 |
 | [`enums.rs`](programs/brot-markets/src/state/enums.rs) | the one-byte enums stored in accounts and passed in instruction data, with their checked conversion from a raw byte | 162 |
