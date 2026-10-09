@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **410** |
+| Arquivos mapeados | **434** |
 | Acima de 200 linhas | **48** ⚠️ |
 | Sem cabeçalho `Purpose:` | **80** ⚠️ |
 
@@ -176,11 +176,43 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`engine.ts`](app/lib/mascot/engine.ts) | Baked, the mascot, as a page resident. It does not follow the cursor freely: it hops to the | 302 |
 | [`perches.ts`](app/lib/mascot/perches.ts) | Where the mascot may stand. A page declares perches as data attributes on any element: | 65 |
 
-## `packages/sdk/src/`
+## `packages/sdk/src/read/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`index.ts`](packages/sdk/src/index.ts) | public entry of the Brot Markets client library, shared by the site, the services, the scripts and the tests. Must stay free of React and Next imports | 21 |
+| [`bytes.ts`](packages/sdk/src/read/bytes.ts) | small byte helpers the SDK shares, written without `Buffer`, `TextEncoder` or any Node or DOM API, so they run the same in a browser, in Bun and under React Nat | 33 |
+| [`constants.ts`](packages/sdk/src/read/constants.ts) | the program's address and the constants compiled into it that a client needs: seeds, other programs, code ceilings, price and reader bounds, account sizes, and  | 115 |
+| [`feeds.ts`](packages/sdk/src/read/feeds.ts) | the compiled lists of Pyth feeds a price campaign may name, one per cluster, as programs/brot-markets/src/feeds.rs compiles them (founder answer 1, 2026-10-09;  | 107 |
+| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 18 |
+| [`pdas.ts`](packages/sdk/src/read/pdas.ts) | every program-derived address a client needs: the config, the fee vault, a campaign and its vault, an entry, a join, the event authority, the program's ProgramD | 68 |
+
+## `packages/sdk/src/read/errors/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`codes.ts`](packages/sdk/src/read/errors/codes.ts) | the program's custom error codes by name (programs/brot-markets/src/error.rs), so a client names the exact refusal. Codes are appended there and here, never reu | 157 |
+| [`index.ts`](packages/sdk/src/read/errors/index.ts) | one message per program error code, read from the IDL, and the refusal the SDK throws when its mirror of a program rule refuses (math, creation checks), carryin | 79 |
+
+## `packages/sdk/src/read/math/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`fees.ts`](packages/sdk/src/read/math/fees.ts) | Brot's fee on the losing side and the one-sided fee per entry, both rounded up. Mirrors programs/brot-markets/src/math/fees.rs (P1 sections 3.3 and 3.5; TP 3.4. | 26 |
+| [`index.ts`](packages/sdk/src/read/math/index.ts) | the money and schedule math of the program as pure TypeScript, for previews, estimates and checks: the opening conversion and split, the fees, the creator share | 47 |
+| [`integers.ts`](packages/sdk/src/read/math/integers.ts) | the Rust integer types the program's math uses, as bigint bounds, and the checks that make bigint arithmetic fail where the program's checked arithmetic fails | 87 |
+| [`opening.ts`](packages/sdk/src/read/math/opening.ts) | the price of a paid opening in lamports at the Pyth SOL/USD price, and its split into the prize and Brot's opening fee. Mirrors programs/brot-markets/src/math/o | 52 |
+| [`payout.ts`](packages/sdk/src/read/math/payout.ts) | the creator share, what winners split, a winner's payout, the return estimate a join checks against `min_return_bps`, and a one-sided refund. Mirrors programs/b | 111 |
+| [`rounding.ts`](packages/sdk/src/read/math/rounding.ts) | the multiply-divide and basis-point shares every money formula uses, rounded down or up, with the program's refusals: the one place a rounding direction is writ | 53 |
+| [`schedule.ts`](packages/sdk/src/read/math/schedule.ts) | when entries close and which durations a campaign may have, for the real build and for the devnet drill build. Mirrors programs/brot-markets/src/math/schedule.r | 74 |
+| [`settle.ts`](packages/sdk/src/read/math/settle.ts) | what one entry is paid under its campaign's snapshot, the late-entry split, and the reserve path of a credit below rent. Mirrors programs/brot-markets/src/instr | 94 |
+| [`snapshot.ts`](packages/sdk/src/read/math/snapshot.ts) | the settlement snapshot: a campaign's totals and verdict turned into what finalize stores (the mode, the house fee, the creator share, `distributable`, what Bro | 136 |
+| [`void.ts`](packages/sdk/src/read/math/void.ts) | what a void, and a pot with no entry, returns to whoever opened and what Brot keeps. Mirrors programs/brot-markets/src/math/void.rs (TP 3.4.7, P-4, founder answ | 50 |
+
+## `packages/sdk/src/tx/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`index.ts`](packages/sdk/src/tx/index.ts) | `@brot/sdk/tx`, the transaction half (filled in below) | 7 |
 
 ## `programs/brot-markets/src/`
 
@@ -398,6 +430,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`math_snapshot_modes.rs`](programs/brot-markets/tests/math_snapshot_modes.rs) | the `OneSided` and no-entry snapshots: the one-sided pot of Ana, Bruno and Carla (100, 198, 297 back, 5 to Brot), the one-sided baker with and without the prize | 123 |
 | [`math_snapshot_split.rs`](programs/brot-markets/tests/math_snapshot_split.rs) | the `Split` snapshot on the sprint file's worked examples (V 600 / P 400 with and without a 450 prize), a team campaign, the late refunds, and the Economic Viab | 155 |
 | [`math_snapshot_void.rs`](programs/brot-markets/tests/math_snapshot_void.rs) | the `Refund` snapshot of a void, per class: every entry back whole (late ones too), the prize to the opener, and the 10% opening fee back to the opener on a hou | 114 |
+| [`math_vectors_snapshot.rs`](programs/brot-markets/tests/math_vectors_snapshot.rs) | the second set of committed math vectors (X0.3, Sprint 05): the finalize snapshot (every mode, the viability rule at its threshold, voids of both classes, team  | 52 |
 | [`math_vectors.rs`](programs/brot-markets/tests/math_vectors.rs) | the committed math vectors (X0.3, the Rust half): 12,000 rows from a fixed seed over the house fee, the creator share, the distributable pot, the split payout,  | 169 |
 | [`open_campaign_payment.rs`](programs/brot-markets/tests/open_campaign_payment.rs) | row 7 of TP section 3.4.10 on the host up to the conversion, each refusal with its own error (X0.7): who must pay, the US$ floor, the SOL/USD account derived fr | 189 |
 | [`open_campaign_rows.rs`](programs/brot-markets/tests/open_campaign_rows.rs) | rows 1, 2 and 4 of TP section 3.4.10 on the host, each refusal with its own error (X0.7): `readers::validate_at_creation` over runtime-shaped accounts holding t | 157 |
@@ -482,6 +515,14 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`accounts.rs`](programs/brot-markets/tests/settle_d_support/accounts.rs) | the host accounts of lane D's handler tests: a campaign that is finalized, its vault and the fee vault at their real PDAs, the config, and a `run` that calls a  | 123 |
+
+## `programs/brot-markets/tests/vectors_support/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`mod.rs`](programs/brot-markets/tests/vectors_support/mod.rs) | what the snapshot vector generator shares: the seeded generator, the amounts and rates it draws (zeros, values near `u64::MAX`, rates above 100%), and the print | 81 |
+| [`other_rows.rs`](programs/brot-markets/tests/vectors_support/other_rows.rs) | the `entry`, `estimate` and `schedule` rows of the snapshot vectors: what one entry is paid under each mode (late parts included), the join's return estimate, a | 134 |
+| [`snapshot_rows.rs`](programs/brot-markets/tests/vectors_support/snapshot_rows.rs) | the `snapshot` rows of the snapshot vectors: random pots under the four verdicts, with one row in three placed within a few lamports of the Economic Viability R | 103 |
 
 ## `prototype-lab/prototype-a/`
 
@@ -811,6 +852,14 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`lib.rs`](tests/programs/cpi-proxy/src/lib.rs) | a test-only program that forwards one instruction by CPI, so a test can show that `resolve_campaign` refuses to run below the top level (`checks::top_level`). N | 49 |
+
+## `tests/sdk/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`math-vectors.test.ts`](tests/sdk/math-vectors.test.ts) | X0.3, the TypeScript half, first file: every vector the program's Rust math wrote into tests/vectors/math-vectors.csv (programs/brot-markets/tests/math_vectors. | 56 |
+| [`snapshot-vectors.test.ts`](tests/sdk/snapshot-vectors.test.ts) | X0.3, the TypeScript half, second file: every vector of tests/vectors/snapshot-vectors.csv (programs/brot-markets/tests/math_vectors_snapshot.rs: the finalize s | 114 |
+| [`vectors.ts`](tests/sdk/vectors.ts) | what the two vector replays share: reading a vector file, running an SDK function the way the Rust generators print a `Result` (`ERR:<BrotError>` for a refusal) | 58 |
 
 ---
 

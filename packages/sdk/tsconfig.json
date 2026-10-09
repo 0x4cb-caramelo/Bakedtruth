@@ -1,0 +1,16 @@
+{
+  "//": "The SDK's portability check (proposal 3.2): ES2022 globals only, no DOM and no Node or Bun types, so a use of window, document, Buffer, process, fetch or TextEncoder in SDK code fails to compile. The Codama client's errors module reads process.env and is never imported by the SDK (a dependency-cruiser rule), so it stays out of this graph.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": [],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "isolatedModules": true
+  },
+  "include": ["src/read/**/*.ts", "src/tx/**/*.ts"]
+}
