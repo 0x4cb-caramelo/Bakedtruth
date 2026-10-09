@@ -1,35 +1,37 @@
 @import "tailwindcss";
+@import "../styles/tokens.css";
 
-/* Design tokens: direction C, "Tape" (docs/product/DESIGN-DIRECTION.md). Navy surfaces, hard 2px
-   edges and offset shadows, no rounded corners. Blue for chrome, crust amber for the brand and the
-   primary action, green and red only for YES and NO. */
+/* Purpose: Tailwind's theme on top of the Ledger² tokens (styles/tokens.css). Every colour, radius and shadow
+   points at a variable, so the dark theme (default) and the light theme come from one place. The names of the
+   old direction C classes (page, surface, ink, crust...) are kept as aliases until the site sprints (09 to 13)
+   rewrite their screens. Sprint -1. */
 @theme {
-  --color-page: #0b111c;
-  --color-surface: #111a2a;
-  --color-raised: #18243a;
-  --color-line: #2a3a58;
-  --color-muted: #92a3c0;
-  --color-dim: #63748f;
-  --color-ink: #e8eefb;
-  --color-brand: #6aa8ff;
-  --color-brand-strong: #8bbcff;
-  --color-crust: #f2a94e;
-  --color-yes: #3ddc97;
-  --color-no: #ff6b8a;
-  --color-warn: #f2b33d;
-  --color-shade: #04070d;
+  --color-page: var(--bg);
+  --color-surface: var(--panel);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-dim: var(--dim);
+  --color-ink: var(--text);
+  --color-brand: var(--accent);
+  --color-brand-strong: var(--accent-soft);
+  --color-crust: var(--crust);
+  --color-yes: var(--yes-fg);
+  --color-no: var(--no-fg);
+  --color-warn: var(--warn);
+  --color-shade: var(--shade);
 
   --radius-xs: 0px;
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-2xl: 0px;
-  --radius-3xl: 0px;
-  --radius-4xl: 0px;
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-lg);
+  --radius-2xl: var(--r-lg);
+  --radius-3xl: var(--r-lg);
+  --radius-4xl: var(--r-lg);
 
-  --shadow-hard: 4px 4px 0 var(--color-shade);
-  --shadow-hard-sm: 3px 3px 0 var(--color-shade);
+  --shadow-hard: var(--shadow);
+  --shadow-hard-sm: var(--shadow);
 
   --animate-blink: blink 1s steps(2) infinite;
   --animate-tape: tape 70s linear infinite;
@@ -46,22 +48,18 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-grotesk);
-  --font-display: var(--font-jersey);
-  --font-mono: var(--font-geist-mono);
-}
-
-:root {
-  color-scheme: dark;
+  --font-sans: var(--font-inter), Inter, system-ui, sans-serif;
+  --font-display: var(--font-barlow), "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 
 body {
   background: var(--color-page);
   color: var(--color-ink);
-  font-family: var(--font-grotesk), system-ui, sans-serif;
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
 }
 
-/* Jersey 15 has a single weight: never fake a bold. */
+/* Barlow Condensed has a single weight: never fake a bold. */
 .font-display {
   font-synthesis: none;
 }
@@ -70,14 +68,14 @@ body {
    this one, so these selectors carry an extra `html` for specificity. */
 html .wallet-adapter-button-trigger {
   height: 2.5rem;
-  border-radius: 0;
+  border-radius: var(--r-sm);
   padding: 0 1rem;
   background-color: var(--color-crust);
-  color: #1a0f02;
-  font-family: var(--font-jersey), system-ui, sans-serif;
+  color: var(--on-accent);
+  font-family: var(--font-display), "Arial Narrow", sans-serif;
   font-size: 1.25rem;
-  font-weight: 400;
-  box-shadow: var(--shadow-hard);
+  font-weight: 700;
+  box-shadow: var(--shadow);
   transition:
     transform 80ms,
     box-shadow 80ms;
@@ -86,12 +84,10 @@ html .wallet-adapter-button-trigger {
 html .wallet-adapter-button-trigger:not([disabled]):hover {
   background-color: var(--color-crust);
   transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0 var(--color-shade);
 }
 
 html .wallet-adapter-button-trigger:not([disabled]):active {
-  transform: translate(3px, 3px);
-  box-shadow: 1px 1px 0 var(--color-shade);
+  transform: translate(1px, 1px);
 }
 
 html .wallet-adapter-button-trigger .wallet-adapter-button-start-icon {
@@ -103,8 +99,8 @@ html .wallet-adapter-button-trigger .wallet-adapter-button-start-icon {
 html .wallet-adapter-dropdown-list,
 html .wallet-adapter-modal-wrapper {
   background: var(--color-surface);
-  border-radius: 0;
-  font-family: var(--font-grotesk), system-ui, sans-serif;
+  border-radius: var(--r);
+  font-family: var(--font-inter), Inter, system-ui, sans-serif;
 }
 
 /* Hide scrollbars on horizontal carousels. */
@@ -174,13 +170,11 @@ html .wallet-adapter-modal-wrapper {
   transform: translate(-50%, 6px);
   white-space: nowrap;
   padding: 6px 10px;
-  font:
-    400 19px/1 var(--font-jersey),
-    sans-serif;
-  color: var(--color-page);
-  background: var(--color-ink);
-  border: 2px solid var(--color-page);
-  box-shadow: 3px 3px 0 var(--color-shade);
+  border-radius: var(--pet-say-radius);
+  font: var(--pet-say-font);
+  color: var(--pet-say-fg);
+  background: var(--pet-say-bg);
+  box-shadow: var(--shadow-pop);
   opacity: 0;
   transition:
     opacity 0.18s,

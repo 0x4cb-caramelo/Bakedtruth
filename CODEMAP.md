@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **319** |
+| Arquivos mapeados | **327** |
 | Acima de 200 linhas | **30** ⚠️ |
 | Sem cabeçalho `Purpose:` | **100** ⚠️ |
 
@@ -69,7 +69,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`layout.tsx`](app/app/layout.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 56 |
+| [`layout.tsx`](app/app/layout.tsx) | The two faces of the Ledger² direction, served by the site itself (no third-party font host, K-10) | 60 |
 | [`page.tsx`](app/app/page.tsx) | HomeView reads the search params (query, category, tab), which needs a Suspense boundary | 13 |
 
 ## `app/app/api/chat/`
@@ -128,6 +128,18 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`proof-card.tsx`](app/components/market/proof-card.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 176 |
 | [`trade-card.tsx`](app/components/market/trade-card.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 315 |
 
+## `app/components/ui/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`button.tsx`](app/components/ui/button.tsx) | the primary and secondary buttons of the Ledger² direction, in both themes, from the tokens only | 22 |
+| [`notice.tsx`](app/components/ui/notice.tsx) | the notice bar shown above the content (sign-in, a refusal, a pause). It always carries a text line; its | 16 |
+| [`odds.tsx`](app/components/ui/odds.tsx) | the YES and NO buttons of a campaign: the side on the left, the price in cents on the right. The selected | 37 |
+| [`progress.tsx`](app/components/ui/progress.tsx) | the progress bar of the proof panel (role=progressbar), on the token track. Sprint -1 (DESIGN-DIRECTION.md) | 18 |
+| [`state-chip.tsx`](app/components/ui/state-chip.tsx) | the chip that names a campaign's state (P1 §3.1). Text on its own chip, never colour alone, so it reads | 24 |
+| [`theme-toggle.tsx`](app/components/ui/theme-toggle.tsx) | the theme switch (dark by default). It flips data-theme, saves the choice in localStorage under brot-theme, | 46 |
+| [`token.tsx`](app/components/ui/token.tsx) | the one-letter token tile of a campaign's kind (P1 §4.2). Five kinds, each with its own tile colour, none | 22 |
+
 ## `app/lib/`
 
 | Arquivo | Núcleo | Linhas |
@@ -142,6 +154,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`market.ts`](app/lib/market.ts) | Framework-free client helpers for pred-provable: addresses, the program's integer math, event | 211 |
 | [`metric.ts`](app/lib/metric.ts) | Reads a market's KPI the way the program's resolver does (same owners, layouts and comparisons), | 691 |
 | [`program.ts`](app/lib/program.ts) | Synced from target/ by `bun run sync-idl` after `anchor build` | 19 |
+| [`theme.ts`](app/lib/theme.ts) | the theme's storage key and the script that sets `data-theme` before the first paint. Dark is the default | 9 |
 | [`tokens.ts`](app/lib/tokens.ts) | Token names from Metaplex metadata, so markets on real tokens read "$BONK" instead of an address | 47 |
 | [`view.ts`](app/lib/view.ts) | How the app reads a market account: kind, status, phase and price. Framework-free | 155 |
 

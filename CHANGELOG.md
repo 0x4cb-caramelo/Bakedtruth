@@ -13,6 +13,13 @@ mesclar: a mescla e a tag `sprint-02` esperam o fundador (`docs/sprints/sprint-0
 
 ### Added
 
+- **Sprint -1, o porte para o `app/` (9/10/2026, em andamento).** Aprovado pelo Ronaldo no mesmo dia: as telas, a caixa
+  de abrir campanha, as telas em celular e as notas P-9, L-03 e L-24 (este em chip). Entram os tokens das duas
+  temas (`app/styles/tokens.css`, escuro por padrão), as duas fontes servidas pelo próprio site (Barlow Condensed 700
+  e Inter, sem fonte de terceiros), o script de tema no `<head>` com a chave `brot-theme` e os primeiros componentes em
+  `app/components/ui/` (botão, chip de estado, token, Sim/Não, barra de progresso, aviso e o botão de tema). O `app/`
+  antigo muda de aparência: as classes da direção C continuam como apelidos. Ainda faltam os itens de fechamento da
+  sprint (`docs/sprints/sprint--1-design-system.md`).
 - **Sprint -1: o protótipo das telas das campanhas** (`prototype-lab/campaigns/`, 8/10/2026), à espera da aprovação
   do fundador. Todas as telas do produto do BP v0.0.4 na linguagem Ledger², escuro por padrão e em inglês: a home e a
   lista, a página da campanha em 16 estados com a entrada inteira (do resumo antes de assinar ao recibo e às recusas),

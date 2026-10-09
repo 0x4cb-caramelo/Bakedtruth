@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Jersey_15, Space_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { BRAND } from "@/lib/brand";
+import { themeScript } from "@/lib/theme";
 import { CellField } from "@/components/cell-field";
 import { Mascot } from "@/components/mascot";
 import { ChatProvider } from "@/components/chat/chat";
@@ -10,9 +11,9 @@ import { SiteHeader } from "@/components/site-header";
 import { TapeProvider } from "@/components/tape-context";
 import { Ticker } from "@/components/ticker";
 
-const grotesk = Space_Grotesk({ variable: "--font-grotesk", subsets: ["latin"] });
-const jersey = Jersey_15({ variable: "--font-jersey", subsets: ["latin"], weight: "400" });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+// The two faces of the Ledger² direction, served by the site itself (no third-party font host, K-10).
+const barlow = localFont({ src: "../fonts/barlow-condensed-700.woff2", variable: "--font-barlow", weight: "700", display: "swap" });
+const inter = localFont({ src: "../fonts/inter-var.woff2", variable: "--font-inter", weight: "100 900", display: "swap" });
 
 export const metadata: Metadata = {
   title: `${BRAND.name} · ${BRAND.tagline}`,
@@ -21,7 +22,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${grotesk.variable} ${jersey.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="en" data-theme="dark" suppressHydrationWarning className={`${barlow.variable} ${inter.variable} h-full antialiased`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full">
         <Providers>
           <CellField />

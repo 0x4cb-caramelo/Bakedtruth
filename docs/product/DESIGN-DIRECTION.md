@@ -465,3 +465,26 @@ A grade se ajusta sozinha (`minmax(290px, 1fr)`). Não há ponto de quebra abaix
 - [x] The gaps table is filled in.
 - [x] `prototype-lab/prototype-n/`, `prototype-lab/prototype-d/` e `prototype-lab/shared/` estão no Git.
 - [ ] Conflitos e lacunas resolvidos na etapa de design system, antes do resumo de produto.
+
+## Porte para o `app/` (Sprint -1, 9/10/2026)
+
+O que o `app/` recebeu do protótipo aprovado, e o que ainda não:
+
+- **Tokens:** `app/styles/tokens.css`, cópia de `prototype-lab/campaigns/css/tokens.css`. Escuro em `:root` (o oficial,
+  o do ar em brot.markets), claro em `:root[data-theme='light']`. As variáveis `--display` e `--body` apontam para as
+  fontes do próprio site. O `@theme` do Tailwind (`app/app/globals.css`) aponta para essas variáveis; os nomes antigos
+  da direção C (`page`, `surface`, `ink`, `crust`...) continuam como apelidos até as Sprints 09 a 13.
+- **Fontes:** Barlow Condensed 700 e Inter (peso 100 a 900), em `app/fonts/`, por `next/font/local`. O build não
+  referencia nenhum host de fonte de terceiros na página. Os nomes `Space Grotesk`, `Jersey 15` e `Geist Mono` saíram.
+- **Tema:** o script de `app/lib/theme.ts` roda no `<head>`, antes do CSS, e lê `localStorage['brot-theme']` dentro de
+  `try/catch`. Padrão escuro; só o valor `light` troca. O botão (`app/components/ui/theme-toggle.tsx`) lê o atributo
+  `data-theme`, não o armazenamento, para o servidor e a primeira tela concordarem.
+- **Primitivos em `app/components/ui/`:** botão (primário e secundário), chip de estado (P1 §3.1, com texto), token de
+  tipo (P1 §4.2), Sim/Não com o lado escolhido marcado por texto, barra de progresso (`role="progressbar"`), aviso e
+  o botão de tema. Todos usam as variáveis, nenhum cor literal.
+
+**Ainda não portado:** o resto do inventário acima (cartão, carrossel, painel de prova, abas, campo de pontos, rodapé
+e os demais); a caixa de abrir campanha e as telas em celular, que são desenhadas no protótipo e portadas nas Sprints
+09 a 13 e 19; a re-leitura da tabela de conflitos (19 linhas) e de lacunas contra o BP v0.0.4. Os três pares de texto
+abaixo de 4,5:1 já vêm corrigidos nos valores de `tokens.css`, mas os quatro problemas de acessibilidade da lista não
+foram conferidos no `app/`: isso fica para a re-leitura das telas.

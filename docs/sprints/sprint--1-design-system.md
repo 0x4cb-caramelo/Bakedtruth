@@ -1,6 +1,6 @@
 # Sprint -1 — Design system, the opening screen and phone layouts
 
-**Status:** in progress (opened 2026-10-08); design approved by Ronaldo on 2026-10-09, port to `app/` next · **Branch:** `sprint--1-design-system`, stacked on `sprint-02-pot-core` (PR #30, which carries the plan's PR #27) · **Dates:** none, by the founder's decision
+**Status:** in progress (opened 2026-10-08). Design approved by Ronaldo on 2026-10-09. Ported to `app/` on 2026-10-09: tokens in both themes, the theme script, the two fonts served by the site, and seven primitives (button, state chip, token, Yes/No, progress, notice, theme toggle); lint and build pass. Still open: the other inventory primitives, the conflicts re-read, the creation box and the phone layouts recorded in `DESIGN-DIRECTION.md`, the contrast fixes in the app, and the closure · **Branch:** `sprint--1-design-system`, stacked on `sprint-02-pot-core` (PR #30, which carries the plan's PR #27) · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
