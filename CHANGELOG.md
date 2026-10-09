@@ -54,6 +54,14 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
     recusada).
   - **Testes:** 255 em Rust e 259 em TypeScript depois das correções da revisão (252 e 258 antes delas), todos do
     programa novo; os oito filtros da sprint passam; tirar a checagem de chamada de topo derruba o teste dela (X0.9).
+- **`/5`, o tema claro da `/3` com o tema escuro da `/4` e o título em duas linhas** (fundadores, 9/10/2026; mesma
+  branch, ainda não publicada). Pedido do Lucas: "vamos pegar o sistema light do /3 e o dark do /4, e o texto ainda
+  precisa diminuir um pouco, por exemplo o primeiro texto está com 3 linhas e queremos com duas linhas". No claro a
+  `/5` é a `/3` (creme, ferrugem, cartões claros) e no escuro é a `/4` (azul-marinho e laranja), sem diferença de cor
+  em nenhum elemento, conferido no navegador. O título continua o mesmo e passa a caber em duas linhas, "On-Chain
+  Campaigns" e "the chain answers.": o tamanho máximo caiu de 84px para 78px, porque 80px é o limite da coluna. A
+  frase de abertura ficou em uma linha no computador: "Join YES or NO with SOL. Winners split the pot. No vote, no
+  judge." O resto do texto é o da `/3`. Dez testes novos (`tests/five.test.mjs`).
 - **`/4`, o texto da `/3` com as cores usadas como na `/2`** (fundadores, 9/10/2026; mesma branch da `/3`, ainda não
   publicada). O texto curto da `/3` foi aprovado ("o copy no 3 acertou"); as cores dela, com tudo em creme e
   laranja, passaram do ponto. A `/4` mantém o texto, a disposição e as fontes da original (Barlow Condensed e

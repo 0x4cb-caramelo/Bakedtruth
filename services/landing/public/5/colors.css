@@ -1,0 +1,144 @@
+/* Purpose: the colours of /5. The page loads the home page's own styles.css (the original layout and fonts) and this
+   file after it. Dark is the dark theme of /4 (navy and orange, a flat button, the suggestion box marked on its left
+   edge); light is the light theme of /3 (the pitch deck's cream, with the rust accent and light cards). It sets
+   colours only, plus the orange "we are baking this website" notice, the room it takes above the hero, and the size
+   of the headline, which reads in two lines. Sprint: out of band (landing page), 2026-10-09. */
+
+/* Dark: every token of /4. */
+:root {
+  --bg: #10151c;
+  --panel: #171e29;
+  --raised: #171e29;
+  --line: #263041;
+  --line-strong: #3a4558;
+  --text: #f7eedb;
+  --muted: #d9d1c1;
+  --dim: #a3acba;
+  --accent: #eea546;
+  --accent-soft: #eea546;
+  --accent-hover: #f7cd8f;
+  --on-accent: #10151c;
+  --crust: #eea546;
+  --yes-bg: #1c3a30;
+  --yes-fg: #a6ffcf;
+  --no-bg: #402530;
+  --no-fg: #ff9a7a;
+  --strip-bg: #0b0f15;
+  --notice-bg: #1c3a30;
+  --track: #263041;
+  --fill: linear-gradient(90deg, #c2410c, #eea546);
+  --ic-bg: #2f3a4e;
+  --dot-rgb: 163, 172, 186;
+  --cta-hover: #f7cd8f;
+  --cta-ring: #eea546;
+  --say-bg: #f7eedb;
+  --say-fg: #10151c;
+  --pet-shadow: rgba(0, 0, 0, 0.55);
+  --error: #ff9a7a;
+  --shadow: none;
+  --baking-bg: #eea546;
+  --baking-fg: #10151c;
+}
+/* Light: every token of /3, and the ink /3 uses on the notice. */
+:root[data-theme="light"] {
+  --bg: #f6eddb;
+  --panel: #fffaf0;
+  --raised: #efe2c8;
+  --line: #e2d4ba;
+  --line-strong: #cdbb98;
+  --text: #1b1611;
+  --muted: #3d3328;
+  --dim: #6b5e4e;
+  --accent: #a8481b;
+  --accent-soft: #a8481b;
+  --accent-hover: #7a3212;
+  --on-accent: #f7eedb;
+  --crust: #a8481b;
+  --yes-bg: #dcefdc;
+  --yes-fg: #1c5a3f;
+  --no-bg: #f6dcd0;
+  --no-fg: #a32e17;
+  --strip-bg: #efe2c8;
+  --notice-bg: #fbe3bd;
+  --track: #e2d4ba;
+  --fill: linear-gradient(90deg, #a8481b, #eea546);
+  --ic-bg: #a8481b1f;
+  --dot-rgb: 107, 94, 78;
+  --cta-hover: #8c3a14;
+  --cta-ring: conic-gradient(from var(--spin), #a8481b 0 62%, #eea546 80%, #a8481b 100%);
+  --say-bg: #1b1611;
+  --say-fg: #f7eedb;
+  --pet-shadow: rgba(27, 22, 17, 0.3);
+  --error: #a32e17;
+  --shadow: 0 1px 2px rgba(27, 22, 17, 0.05), 0 10px 24px -14px rgba(27, 22, 17, 0.18);
+  --baking-fg: #1b1611;
+}
+
+/* What /4 changes beyond the tokens, in dark only: light is /3, which changes nothing beyond them. */
+:root:not([data-theme="light"]) .strip {
+  border-color: transparent;
+  color: #a3acba;
+}
+:root:not([data-theme="light"]) .strip b {
+  color: #eea546;
+}
+:root:not([data-theme="light"]) .joined {
+  border-color: transparent;
+  color: #a6ffcf;
+}
+:root:not([data-theme="light"]) .suggest {
+  border-color: var(--line);
+  border-left: 4px solid var(--accent);
+}
+:root:not([data-theme="light"]) .ghost {
+  border-color: var(--accent-soft);
+  background: transparent;
+  color: var(--accent-soft);
+}
+:root:not([data-theme="light"]) .ghost:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.baking {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin-top: 28px;
+  padding: 12px 18px;
+  border-radius: var(--r);
+  background: var(--baking-bg);
+  color: var(--baking-fg);
+  font-size: 13px;
+  font-weight: 500;
+}
+.baking b {
+  font: 700 24px/1 var(--display);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.baking + .hero {
+  padding-top: 52px;
+}
+@media (max-width: 860px) {
+  .baking {
+    margin-top: 18px;
+  }
+  /* On phones the hero keeps the original 44px, so the mascot on the headline stays clear of the notice. */
+  .baking + .hero {
+    padding-top: 44px;
+  }
+}
+
+/* The headline reads in two lines: "On-Chain Campaigns" and "the chain answers." At the 84px of the original it needs
+   three in the hero column, which is 593px wide from 1180px of window up; 80px is the most that fits. */
+.hero h1 {
+  font-size: clamp(44px, 6.4vw, 78px);
+}
+@media (max-width: 359px) {
+  .hero h1 {
+    font-size: 38px;
+  }
+}

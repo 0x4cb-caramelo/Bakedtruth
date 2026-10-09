@@ -78,9 +78,31 @@ gente gosta dele tbm."
   testado. Nada foi alterado no site por causa disso.
 - **A `/3` continua na branch** para comparação; um teste garante que o texto das duas é o mesmo.
 
+## A /5, no mesmo dia
+
+Depois de saber que o Opera dele escurecia as páginas claras, o Lucas escreveu: "ok, vamos pegar o sistema light do /3
+e o dark do /4, e o texto ainda precisa diminuir um pouco, por exemplo o primeiro texto está com 3 linhas e queremos
+com duas linhas 'On-Chain Campaigns the chain answers.'"
+
+- **Cores:** o tema claro é o da `/3` (o creme do deck, com ferrugem e cartões claros) e o escuro é o da `/4`
+  (azul-marinho e laranja). Li ao pé da letra: ele citou as duas páginas pelo número. O creme é justamente o que o
+  Opera dele pintava de marrom, então o parecer sobre o claro só vale visto num navegador que não force páginas
+  escuras. O `5/colors.css` copia os dois blocos de cor e põe só no escuro o que a `/4` muda além deles (a faixa, o
+  aviso de inscrição, a caixa de sugestão e o botão vazado). No navegador, os 84 elementos da página têm as mesmas
+  cores da `/3` no claro e da `/4` no escuro.
+- **Título em duas linhas:** as palavras são as mesmas. A coluna do título tem 593px a partir de 1180px de janela, e
+  "On-Chain Campaigns" só cabe nela até 80px de letra; o máximo caiu de 84px para 78px. Em celular muito estreito
+  (menos de 360px) a letra cai de 44px para 38px pelo mesmo motivo. Medido em dezesseis larguras, de 320px a 1920px:
+  duas linhas em todas, ou uma só em tablet.
+- **Texto:** li "diminuir" como menos linhas de leitura, que é o que ele vem pedindo. A frase de abertura perdeu "A
+  Solana account gives the answer", que o título e o primeiro princípio já dizem, e cabe em uma linha no computador.
+  O resto é o texto da `/3`, que ele aprovou. O rodapé (duas linhas) e a frase de consentimento (duas linhas) não
+  foram tocados: um é aviso legal e a outra tem a versão guardada com cada email.
+- **A `/3` e a `/4` continuam na branch** para comparação.
+
 ## Em aberto
 
-- A `/3` e a `/4` não foram publicadas: mescla e servidor esperam a palavra do Lucas.
+- A `/3`, a `/4` e a `/5` não foram publicadas: mescla e servidor esperam a palavra do Lucas.
 - Visitante com navegador que força páginas escuras vê o tema claro escurecido pelo navegador, fora das cores da
   marca. Abrir no tema escuro do site quando o sistema do visitante pede escuro resolveria; muda a regra de tema do
   `DESIGN-DIRECTION.md` e o `app.js` de todas as páginas, então é decisão do Lucas.
