@@ -66,11 +66,24 @@ gente gosta dele tbm."
   agora `#2f3a4e`) e o laranja do link sob o ponteiro (`#9a3412`, agora a tinta). A letra miúda do claro escureceu
   um pouco (`#5f6a7d`) e passou a ter contraste 5,2 sobre o fundo. O teste exige um fundo claro quase branco e
   nunca quente, e proíbe os três tons.
+- **A causa do marrom, achada depois.** O Lucas avisou que "o botão de light não funciona". O botão funciona: clique
+  real em cinco larguras de janela, partindo dos dois temas, sempre troca. O navegador padrão dele é o Opera, com a
+  opção de forçar páginas escuras ligada (`webkit.webprefs.force_dark_mode_enabled` nas preferências). Reproduzido
+  num Chromium sem tela com a mesma chave do motor (`--blink-settings=forceDarkModeEnabled=true`): a `/4` clara é
+  pintada cinza-escura, a `/3` creme é pintada **marrom**, e o tema escuro do site fica praticamente como é. Ou
+  seja, o "fundo marrom" que ele viu na `/3` e na primeira `/4` era o navegador escurecendo o creme, e o tema claro
+  nunca apareceu para ele como foi desenhado. A leitura registrada acima (ele teria visto a `/2` no escuro em
+  `brot.markets`) continua possível, mas não é mais a explicação principal. Pedir ao navegador que respeite o claro
+  (`color-scheme: only light`, por CSS ou por `meta`) não mudou nada nesse teste; no Opera de verdade não foi
+  testado. Nada foi alterado no site por causa disso.
 - **A `/3` continua na branch** para comparação; um teste garante que o texto das duas é o mesmo.
 
 ## Em aberto
 
 - A `/3` e a `/4` não foram publicadas: mescla e servidor esperam a palavra do Lucas.
+- Visitante com navegador que força páginas escuras vê o tema claro escurecido pelo navegador, fora das cores da
+  marca. Abrir no tema escuro do site quando o sistema do visitante pede escuro resolveria; muda a regra de tema do
+  `DESIGN-DIRECTION.md` e o `app.js` de todas as páginas, então é decisão do Lucas.
 - Qual delas vira a página inicial, e o que acontece com a `/2` e a `/3`.
 - O texto curto é uma proposta; o Lucas e o Ronaldo revisam frase por frase.
 - O aviso laranja só está na `/3`. Falta decidir se vai também para os termos, a privacidade e o docs.
