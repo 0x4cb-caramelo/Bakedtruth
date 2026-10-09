@@ -82,7 +82,9 @@ async function planPayout(
       const amount = collectDue(c);
       return {
         ixs: [collectFeeIx(campaign, vault, feeVault)],
-        error: notFinal ?? (c.feeMoved ? "FeeAlreadyCollected" : undefined),
+        // Before every entry is settled the fee is not yet known: `CampaignNotSettled` (lane D).
+        error:
+          notFinal ?? (c.phase !== "Settled" ? "CampaignNotSettled" : c.feeMoved ? "FeeAlreadyCollected" : undefined),
         deltas: new Map<string, bigint>([
           [vault, -amount],
           [feeVault, amount],

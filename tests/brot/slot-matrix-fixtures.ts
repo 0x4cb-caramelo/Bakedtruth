@@ -39,6 +39,8 @@ async function base(w: World, over: Partial<InjectedCampaign> = {}): Promise<Inj
     deadlineAt: t + 2n * P.DAY,
     poolYes: 2n * P.SOL,
     poolNo: P.SOL,
+    // A YES price campaign needs its proof time (`resolve_campaign` records it); other kinds ignore it.
+    extra: { publish_time: t },
     ...over,
   };
 }
@@ -52,6 +54,7 @@ async function settling(w: World, snapshot: Parameters<typeof injectSettling>[3]
 
 const SOL = P.SOL;
 const SNAPSHOT = {
+  settle_mode: 1, // Split
   winning_total: 2n * SOL,
   losing_total: SOL,
   distributable: (9n * SOL) / 10n,
@@ -170,7 +173,15 @@ export const BASELINES: Record<string, () => Promise<Baseline>> = {
   },
   SettlePrize: async () => {
     const { w } = await configWorld();
-    const { campaign, vault, creator } = await settling(w, SNAPSHOT);
+    // A one-sided pot returns the prize to whoever opened (a Split leaves it in the distributable).
+    const { campaign, vault, creator } = await settling(w, {
+      ...SNAPSHOT,
+      settle_mode: 2,
+      distributable: 0n,
+      fee_total: 0n,
+      creator_share: 0n,
+      opening_fee_lamports: SOL / 10n,
+    });
     return { w, ix: S.settlePrizeIx(campaign, vault, creator) };
   },
   CloseCampaign: async () => {
@@ -179,7 +190,7 @@ export const BASELINES: Record<string, () => Promise<Baseline>> = {
     const { campaign, vault } = await injectCampaign(w.client, {
       ...c,
       status: P.Status.Settled,
-      extra: { rent_payer: c.creator },
+      extra: { rent_payer: c.creator, fee_collected: 1, prize_settled: 1, creator_share_settled: 1 },
     });
     return { w, ix: S.closeCampaignIx(campaign, vault, c.creator as Address, await P.feeVaultPda()) };
   },

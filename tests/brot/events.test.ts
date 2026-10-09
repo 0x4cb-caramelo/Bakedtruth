@@ -22,7 +22,7 @@ import { isFailedTransaction } from "@solana/kit-plugin-litesvm";
 import { ComputeBudget } from "litesvm";
 
 import { EVENTS } from "./events";
-import { DEFAULT_PARAMS, initConfig, openedCampaign, readCampaign, setTeam } from "./flows";
+import { DEFAULT_PARAMS, initConfig, openedCampaign, readCampaign, setTeam, nextJoinIndex } from "./flows";
 import * as I from "./instructions";
 import * as P from "./program";
 import { createWorld, expectError, expectOk, fundedWallet, send, type World } from "./setup";
@@ -56,8 +56,15 @@ async function sendRaw(w: World, ixs: Instruction[]) {
   return result;
 }
 
-const joinIx = (baker: KeyPairSigner, campaign: Address, metric: Address, side: number, amount: bigint, before = 0n) =>
-  I.joinCampaignIx(baker, campaign, metric, { side, amount, expectedEntryTotal: before });
+const joinIx = (
+  baker: KeyPairSigner,
+  campaign: Address,
+  metric: Address,
+  side: number,
+  amount: bigint,
+  before = 0n,
+  joinIndex = 0,
+) => I.joinCampaignIx(baker, campaign, metric, { side, amount, expectedEntryTotal: before, joinIndex });
 
 describe("events round-trip", () => {
   test("every instruction of the sprint emits exactly one event", async () => {
@@ -132,7 +139,12 @@ describe("events round-trip", () => {
     ];
     const seen: unknown[][] = [];
     for (const [baker, side, amount, before] of entries) {
-      const { event } = await onlyEvent(w, await joinIx(baker, campaign, metric, side, amount, before), "EntryAdded");
+      const joinIndex = await nextJoinIndex(w, campaign, baker.address);
+      const { event } = await onlyEvent(
+        w,
+        await joinIx(baker, campaign, metric, side, amount, before, joinIndex),
+        "EntryAdded",
+      );
       seen.push([event.campaign, event.seq, event.baker, event.side, event.amount, event.pool_yes, event.pool_no]);
       if (seen.length === 3) expect([event.entry_yes, event.entry_no]).toEqual([SOL / 50n, SOL / 100n]);
     }

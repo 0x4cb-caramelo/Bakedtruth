@@ -83,11 +83,12 @@ fn settle_d_split_refuses_a_creator_share_larger_than_the_fee() {
 }
 
 #[test]
-fn settle_d_one_sided_refuses_until_the_one_sided_total_is_recorded() {
-    assert_eq!(
-        kept_of(SettleMode::OneSided, |_| {}),
-        Err(OneSidedFeesNotRecorded)
-    );
+fn settle_d_one_sided_keeps_the_recorded_fees_and_the_opening_fee() {
+    let kept = kept_of(SettleMode::OneSided, |c| {
+        c.one_sided_fees = LeU64::new(7);
+        c.opening_fee_lamports = LeU64::new(5);
+    });
+    assert_eq!(kept.map(|k| k.amount), Ok(12));
     // The prize still goes back to the opener in a one-sided pot: the opening fee is kept, the prize returns.
     let prize = prize_of(SettleMode::OneSided, |_| {}).unwrap();
     assert_eq!(

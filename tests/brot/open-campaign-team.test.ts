@@ -45,7 +45,8 @@ describe("team opening pays nothing", () => {
     expect(readCampaign(w, campaign)).toMatchObject({ ...team, ...fees, ...NOTHING_PAID, rent_payer: w.team.address });
     const event = ok.events.find((e) => e.name === "CampaignOpened");
     expect(event?.data).toMatchObject({ ...team, ...fees, ...NOTHING_PAID, campaign, seq: 0n });
-    expect((await readConfig(w)).open_campaigns).toBe(1);
+    // A free team opening is outside the valve (founder answer 4): it does not count.
+    expect((await readConfig(w)).open_campaigns).toBe(0);
     console.log(`T19: a free team opening (BTC/USD campaign) used ${ok.computeUnits} compute units`);
   });
 

@@ -16,6 +16,7 @@ import {
 import * as I from "./instructions";
 import {
   finalizeCampaignIx,
+  tallyLateJoinsIx,
   teamConfirmResultIx,
   teamOpenContestIx,
   teamVoidCampaignIx,
@@ -51,7 +52,8 @@ const BLANK = new Map<string, bigint>();
 /** The snapshot of a reviewed campaign: taken by `team_confirm_result`, `team_void_campaign` and `finalize`. */
 function takeSnapshot(c: ModelCampaign) {
   c.snapshot = snapshotOf(c);
-  c.phase = "Settling";
+  // A campaign with no entry has nothing to settle: finalize moves it straight to Settled (decision of 2026-10-09).
+  c.phase = new Set(c.joins.map((j) => j.baker)).size === 0 ? "Settled" : "Settling";
   c.counted = false;
   c.prizeSettled = prizeSettledAtSnapshot(c);
 }
@@ -71,7 +73,7 @@ export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
       setBtc(h.w, TOUCH, publish);
       return {
         ixs: [I.resolveCampaignIx(campaign, P.BTC_USD_ACCOUNT, P.BTC_USD_ACCOUNT)],
-        error: c.phase === "Open" ? undefined : "IllegalTransition",
+        error: c.phase === "Open" ? undefined : "CampaignNotOpen",
         deltas: BLANK,
         after: () => refreshBase(h.w),
         apply: () => {
@@ -88,9 +90,17 @@ export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
       if (stale) setBtc(h.w, BTC_PRICE, c.deadline - 700n);
       else refreshBase(h.w);
       const error: BrotErrorName | undefined =
-        c.phase !== "Open" ? "IllegalTransition" : t < c.deadline + PROOF_DELAY ? "NotResolvableYet" : undefined;
+        c.phase !== "Open"
+          ? "CampaignNotOpen"
+          : t < c.deadline + PROOF_DELAY
+            ? // An offered proof that is too old is refused as stale; with no proof the window is simply not over.
+              stale
+              ? "ProofStale"
+              : "NotResolvableYet"
+            : undefined;
       return {
-        ixs: [I.resolveCampaignIx(campaign, P.BTC_USD_ACCOUNT, P.BTC_USD_ACCOUNT)],
+        // A NO offers no proof: the program's own address in the proof slot. A stale case offers the stale account.
+        ixs: [I.resolveCampaignIx(campaign, P.BTC_USD_ACCOUNT, stale ? P.BTC_USD_ACCOUNT : P.PROGRAM_ID)],
         error,
         deltas: BLANK,
         after: () => refreshBase(h.w),
@@ -130,18 +140,36 @@ export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
     case "contest":
       return {
         ixs: [teamOpenContestIx(h.team[op.member], config, campaign)],
-        error: c.phase !== "InReview" ? "TeamKeyOutsideReview" : !inWindow(c, t) ? "OutsideReviewWindow" : undefined,
+        // A contest has its own refusal for the window (lane A, `ContestOutsideReview`).
+        error: c.phase !== "InReview" ? "TeamKeyOutsideReview" : !inWindow(c, t) ? "ContestOutsideReview" : undefined,
         deltas: BLANK,
         apply: () => {
           c.phase = "Contested";
         },
       };
-    case "finalize":
+    case "finalize": {
+      const error: BrotErrorName | undefined =
+        c.phase !== "InReview" ? "CampaignNotInReview" : t < c.reviewEndsAt ? "ReviewNotEnded" : undefined;
+      // Finalize needs every join tallied (amendment 2026-10-09): when it will succeed, the same transaction
+      // tallies each baker's joins first. Each closed Join returns its rent to its baker.
+      const ixs = [];
+      const deltas = new Map<string, bigint>();
+      if (error === undefined) {
+        for (const baker of h.bakers) {
+          const mine = c.joins.filter((j) => j.baker === baker.address);
+          if (mine.length === 0) continue;
+          const entry = await P.entryPda(campaign, baker.address);
+          const joins = await Promise.all(mine.map((_, index) => P.joinPda(campaign, baker.address, index)));
+          ixs.push(tallyLateJoinsIx(baker.address, campaign, entry, joins));
+          deltas.set(baker.address, BigInt(mine.length) * h.rent.join);
+        }
+      }
       return {
-        ixs: [finalizeCampaignIx(campaign, config)],
-        error: c.phase !== "InReview" ? "IllegalTransition" : inWindow(c, t) ? "OutsideReviewWindow" : undefined,
-        deltas: BLANK,
+        ixs: [...ixs, finalizeCampaignIx(campaign, config)],
+        error,
+        deltas,
         apply: () => takeSnapshot(c),
       };
+    }
   }
 }

@@ -11,7 +11,7 @@ import { describe, expect, test } from "bun:test";
 import { join, readCampaign, readEntry } from "./flows";
 import * as P from "./program";
 import { balance, expectOk, fundedWallet, rentFor, send } from "./setup";
-import { ENTRY_LEN, entryBump, joinWorld, snapshot, systemTransferIx } from "./join-campaign-support";
+import { ENTRY_LEN, JOIN_LEN, entryBump, joinWorld, snapshot, systemTransferIx } from "./join-campaign-support";
 
 const SOL = P.SOL;
 
@@ -23,7 +23,8 @@ describe("join adds an entry", () => {
     const [bakerBefore, vaultBefore] = [balance(w, baker.address), balance(w, vault)];
     const sent = expectOk(await join(w, baker, campaign, { side: P.Side.Yes, amount: 2n * SOL }));
 
-    expect(balance(w, baker.address)).toBe(bakerBefore - 2n * SOL - rent);
+    // The baker also pays the rent of its Join account (one account per join).
+    expect(balance(w, baker.address)).toBe(bakerBefore - 2n * SOL - rent - rentFor(w, JOIN_LEN));
     expect(balance(w, vault)).toBe(vaultBefore + 2n * SOL);
     const created = snapshot(w, await P.entryPda(campaign, baker.address));
     expect([created.owner, created.lamports, created.data.length]).toEqual([P.PROGRAM_ID, rent, ENTRY_LEN]);
@@ -80,7 +81,8 @@ describe("join adds an entry", () => {
       const before = balance(w, baker.address);
       sent.push(expectOk(await join(w, baker, campaign, args)));
       // Only a wallet's first join pays the Entry's rent; a later one pays exactly its entry.
-      if (args.expectedEntryTotal > 0n) expect(balance(w, baker.address)).toBe(before - args.amount);
+      if (args.expectedEntryTotal > 0n)
+        expect(balance(w, baker.address)).toBe(before - args.amount - rentFor(w, JOIN_LEN));
     }
 
     const added = sent.map((s) => s.events[0].data);
@@ -131,7 +133,7 @@ describe("join adds an entry", () => {
       expectOk(await join(w, baker, campaign, { side: P.Side.Yes, amount: SOL }));
       // The baker tops the address up to the Entry's rent and no further; the vault takes the entry.
       const topUp = prefund < rent ? rent - prefund : 0n;
-      expect(balance(w, baker.address)).toBe(before - SOL - topUp);
+      expect(balance(w, baker.address)).toBe(before - SOL - topUp - rentFor(w, JOIN_LEN));
       expect(snapshot(w, address)).toMatchObject({ owner: P.PROGRAM_ID, lamports: prefund + topUp });
       expect(balance(w, vault)).toBe(vaultBefore + SOL);
       expect(await readEntry(w, campaign, baker.address)).toMatchObject({

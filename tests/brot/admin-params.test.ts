@@ -132,7 +132,8 @@ describe("creation params apply to future campaigns only", () => {
     expectError((await open()).sent, "SolUsdStale");
     // The opening prices with the compiled SOL/USD id (founder answer 3): the config's field is unused,
     // so changing it changes nothing, and the same stale SOL/USD account is still refused.
-    await setParams({ sol_usd_feed_id: P.BTC_USD_FEED_ID });
+    // `setParams` takes the whole set from the defaults, so the 90 s bound is restated here.
+    await setParams({ max_price_age: 90, sol_usd_feed_id: P.BTC_USD_FEED_ID });
     expectError((await open()).sent, "SolUsdStale");
     // Back to the founder's values (version 3), then the same values again (version 4): every call
     // counts, so a preview signed under version 3 is refused.

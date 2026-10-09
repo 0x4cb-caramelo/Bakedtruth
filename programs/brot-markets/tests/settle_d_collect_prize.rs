@@ -81,19 +81,9 @@ fn settle_d_collect_fee_refuses_until_the_entries_are_settled() {
     let open_entries = settled(|c| c.entries_open = LeU32::new(1));
     refuses(collect_fee, collect_slots(open_entries), CampaignNotSettled);
     let in_review = settled(|c| c.status = Status::InReview as u8);
-    refuses(collect_fee, collect_slots(in_review), CampaignNotSettled);
+    refuses(collect_fee, collect_slots(in_review), NotFinalized);
     let not_finalized = settled(|c| c.settle_mode = SettleMode::Unset as u8);
     refuses(collect_fee, collect_slots(not_finalized), NotFinalized);
-}
-
-#[test]
-fn settle_d_collect_fee_refuses_a_one_sided_pot_until_lane_c_records_its_total() {
-    let one_sided = settled(|c| c.settle_mode = SettleMode::OneSided as u8);
-    refuses(
-        collect_fee,
-        collect_slots(one_sided),
-        OneSidedFeesNotRecorded,
-    );
 }
 
 #[test]

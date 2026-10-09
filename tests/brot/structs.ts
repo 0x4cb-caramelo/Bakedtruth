@@ -100,7 +100,9 @@ export const CAMPAIGN: Layout = [
   ["late_yes", "u64"],
   ["late_no", "u64"],
   ["entries_untallied", "u32"],
-  ["_reserved", { bytes: 20 }],
+  ["one_sided_fees", "u64"],
+  ["creator_share_reserved", "u64"],
+  ["_reserved", { bytes: 4 }],
 ];
 
 export const ENTRY: Layout = [

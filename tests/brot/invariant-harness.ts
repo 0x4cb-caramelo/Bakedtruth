@@ -14,7 +14,7 @@ import { decode, layoutSize } from "./layouts";
 import * as P from "./program";
 import type { BrotErrorName } from "./errors";
 import { balance, createWorld, fundedWallet, now, rentFor, setPriceAccount, type World } from "./setup";
-import { CAMPAIGN, ENTRY } from "./structs";
+import { CAMPAIGN, ENTRY, JOIN } from "./structs";
 
 /** A seeded generator (mulberry32): the same seed gives the same operations on every machine. */
 export function seededRandom(seed: number) {
@@ -59,7 +59,7 @@ export type Harness = {
   feeVault: Address;
   feeVaultModel: bigint;
   /** Rent of the 512-byte campaign, of the data-less vault, of an Entry and of a data-less wallet (the reserve). */
-  rent: { campaign: bigint; vault: bigint; entry: bigint; wallet: bigint };
+  rent: { campaign: bigint; vault: bigint; entry: bigint; wallet: bigint; join: bigint };
   drained: Set<string>;
   nextId: bigint;
   trace: string[];
@@ -81,6 +81,7 @@ export async function makeHarness(): Promise<Harness> {
     campaign: rentFor(w, layoutSize(CAMPAIGN)),
     vault: rentFor(w, 0),
     entry: rentFor(w, layoutSize(ENTRY)),
+    join: rentFor(w, layoutSize(JOIN)),
     wallet: rentFor(w, 0),
   };
   const feeVaultModel = balance(w, feeVault);

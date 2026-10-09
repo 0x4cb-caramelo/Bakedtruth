@@ -96,9 +96,19 @@ export async function openedCampaign(w: World, creator: KeyPairSigner, over: Par
 }
 
 /** Joins `campaign` (whose metric account is read from it) with `amount` lamports on `side`. */
+/** The index of this baker's next Join in the campaign: the entry's `join_count`, or 0 before the entry exists. */
+export async function nextJoinIndex(w: World, campaign: Address, baker: Address): Promise<number> {
+  const entry = await P.entryPda(campaign, baker);
+  // An address funded in advance holds lamports but no data: no entry, no joins yet.
+  const account = w.client.svm.getAccount(entry);
+  if (!account.exists || account.data.length === 0) return 0;
+  return Number(decode(ENTRY, accountData(w, entry)).join_count);
+}
+
 export async function join(w: World, baker: KeyPairSigner, campaign: Address, a: I.JoinArgs) {
   const metric = readCampaign(w, campaign).metric_account as Address;
-  return send(w, [await I.joinCampaignIx(baker, campaign, metric, a)]);
+  const joinIndex = a.joinIndex ?? (await nextJoinIndex(w, campaign, baker.address));
+  return send(w, [await I.joinCampaignIx(baker, campaign, metric, { ...a, joinIndex })]);
 }
 
 export const readConfig = async (w: World) => decode(GLOBAL_CONFIG, accountData(w, await P.configPda()));

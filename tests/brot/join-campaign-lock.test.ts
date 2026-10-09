@@ -81,9 +81,11 @@ describe("join refuses once the outcome is knowable", () => {
       const margin = (p: bigint) => (p * 100n + 9999n) / 10000n;
       const priceAtGap = (offset: bigint) => {
         let p = target;
-        for (let i = 0; i < 4; i++) p = target - sign * (margin(p) + offset + BTC_CONF);
+        // The margin is 1% of the price, so each step shrinks the error by 100x: ten steps are exact.
+        for (let i = 0; i < 10; i++) p = target - sign * (margin(p) + offset + BTC_CONF);
         return p;
       };
+      let joinedBefore = 0n;
       for (const [offset, passes] of [
         [-1n, false],
         [0n, true],
@@ -92,8 +94,11 @@ describe("join refuses once the outcome is knowable", () => {
         const p = priceAtGap(offset);
         expect(sign * (target - p) - BTC_CONF).toBe(margin(p) + offset);
         btc(w, { price: p });
-        if (passes) expectOk(await join(w, a, campaign, yes(SOL)));
-        else noEntry(await refusedJoin(w, a, campaign, yes(SOL), "JoinBufferRefused"));
+        // The baker's Entry already holds what it joined before (T10: the expected total must match).
+        if (passes) {
+          expectOk(await join(w, a, campaign, yes(SOL, joinedBefore)));
+          joinedBefore += SOL;
+        } else noEntry(await refusedJoin(w, a, campaign, yes(SOL), "JoinBufferRefused"));
       }
       // A baker already in is locked out as well once the band reaches the target.
       btc(w, { price: edge });

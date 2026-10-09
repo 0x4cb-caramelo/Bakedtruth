@@ -23,10 +23,17 @@ const REVIEW_ENDS = START_TIME + P.REVIEW_WINDOW_SECONDS;
 const NOTE = new Uint8Array(32).fill(7);
 
 /** A campaign with `outcome` in `status` (`InReview` unless told otherwise), its window ending at `REVIEW_ENDS`. */
-async function reviewed(w: World, outcome: number, status = P.Status.InReview) {
+async function reviewed(w: World, outcome: number, status: number = P.Status.InReview) {
   return campaignOn(w, P.ReaderKind.SupplyAtMost, await anyAddress(), 1_000_000n, {
     status,
-    extra: { outcome, review_ends_at: REVIEW_ENDS, resolved_at: START_TIME, event_seq: 2n },
+    // A void always carries the reason `resolve_campaign` recorded; an automatic one is StaleFeed here.
+    extra: {
+      outcome,
+      void_reason: outcome === Void ? StaleFeed : None,
+      review_ends_at: REVIEW_ENDS,
+      resolved_at: START_TIME,
+      event_seq: 2n,
+    },
   });
 }
 

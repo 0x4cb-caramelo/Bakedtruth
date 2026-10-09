@@ -15,6 +15,7 @@ import type { BrotErrorName } from "./errors";
 
 export type JoinOp = { k: "join"; c: number; baker: number; side: 0 | 1; amount: bigint };
 import * as P from "./program";
+import { balance } from "./setup";
 
 export const OPEN_USD = 500n;
 export const TARGET = (BTC_PRICE * 11n) / 10n;
@@ -28,6 +29,12 @@ export async function planOpenPaid(h: Harness, creatorIndex: number, days: numbe
   const t = clock(h);
   const deadline = t + BigInt(days) * DAY;
   const { prize, fee, paid } = split(openingLamports(OPEN_USD, OPENING_PRICE, -8));
+  // A creator the random run has drained cannot pay the opening: the operation waits (no transaction), so the
+  // run keeps going without a refusal the model does not name.
+  const needed = paid + h.rent.campaign + h.rent.vault + 10_000_000n;
+  if (balance(h.w, creator.address) < needed) {
+    return { ixs: [], deltas: new Map(), apply: () => undefined };
+  }
   refreshBase(h.w);
   refreshSol(h.w);
   const campaign = await P.campaignPda(id);
@@ -133,17 +140,20 @@ export async function planJoin(h: Harness, op: JoinOp): Promise<Plan> {
         : h.paused
           ? "JoinWhilePaused"
           : undefined;
+  // The Join account's index is this baker's joins so far (one account per join, no cap).
+  const joinIndex = c.joins.filter((j) => j.baker === baker.address).length;
   const ix = await I.joinCampaignIx(baker, campaign, P.BTC_USD_ACCOUNT, {
     side: op.side,
     amount: op.amount,
     expectedEntryTotal: mine,
+    joinIndex,
   });
   return {
     ixs: [ix],
     error,
     deltas: new Map<string, bigint>([
       [vault, op.amount],
-      [baker.address, -(op.amount + (first ? h.rent.entry : 0n))],
+      [baker.address, -(op.amount + (first ? h.rent.entry : 0n) + h.rent.join)],
     ]),
     apply: () => {
       const join: Join = { baker: baker.address, side: op.side, amount: op.amount, at: t };

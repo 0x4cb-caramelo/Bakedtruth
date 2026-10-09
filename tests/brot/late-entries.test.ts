@@ -12,7 +12,7 @@ import { describe, expect, test } from "bun:test";
 import { BTC_PRICE, initConfig, join, openedCampaign } from "./flows";
 import { setBtc } from "./invariant-harness";
 import { layoutSize } from "./layouts";
-import { finalizeCampaignIx, settleEntryIx } from "./instructions-settlement";
+import { finalizeCampaignIx, settleEntryIx, tallyLateJoinsIx } from "./instructions-settlement";
 import * as P from "./program";
 import { resolveWith } from "./price-support";
 import { balance, createWorld, expectOk, fundedWallet, now, rentFor, send, setTime } from "./setup";
@@ -41,6 +41,12 @@ describe("late-entry refund on the program", () => {
 
     setBtc(w, TOUCH, bruTime);
     expectOk(await resolveWith(w, campaign));
+    // Each baker's joins are tallied after the proof, before finalize (amendment 2026-10-09).
+    for (const baker of [ana, bruno]) {
+      const entry = await P.entryPda(campaign, baker.address);
+      const join = await P.joinPda(campaign, baker.address, 0);
+      expectOk(await send(w, [tallyLateJoinsIx(baker.address, campaign, entry, [join])]));
+    }
     setTime(w.client, now(w.client) + SIX_HOURS + 1n);
     expectOk(await send(w, [finalizeCampaignIx(campaign, await P.configPda())]));
 

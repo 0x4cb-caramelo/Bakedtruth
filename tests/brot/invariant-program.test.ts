@@ -1,7 +1,7 @@
 /**
  * Purpose: the money rules run through the program, with the Sprint 04 instructions on injected states:
  *          a one-sided pot's rows, the pause never blocking a payout (I10′), two wallets that cannot take
- *          each other's money, and every transition outside TP section 3.4.2 refused as IllegalTransition.
+ *          each other's money, and every transition outside TP section 3.4.2 refused with the instruction's own error (finalize: CampaignNotInReview; resolve: CampaignNotOpen).
  *          Needs the program binary (target/deploy/brot_markets.so): run it at integration.
  * Version: 0.0.1
  * Sprint:  04 (contract freeze, lane E)
@@ -127,7 +127,8 @@ describe("money rules on the program", () => {
       { winning_total: 6n * SOL, fee_total: 50_000_000n, distributable: 0n },
     );
     fund(w, vault, prize + opening);
-    await injectEntry(w.client, { campaign, baker: ana.address, amountYes: SOL });
+    // Ana joined the empty pot first: her entry is exempt from the one-sided fee (Q3).
+    await injectEntry(w.client, { campaign, baker: ana.address, amountYes: SOL, isFirst: true });
     await injectEntry(w.client, { campaign, baker: bruno.address, amountYes: 2n * SOL });
     await injectEntry(w.client, { campaign, baker: carla.address, amountYes: 3n * SOL });
     const feeVault = await P.feeVaultPda();
@@ -200,7 +201,7 @@ describe("money rules on the program", () => {
     expect(balance(w, ana.address)).toBe(anaBefore);
   });
 
-  test("every transition outside TP section 3.4.2 is refused with IllegalTransition", async () => {
+  test("every transition outside TP section 3.4.2 is refused with the instruction's own error", async () => {
     const w = await createWorld();
     await initConfig(w);
     const creator = await fundedWallet(w);
@@ -217,13 +218,13 @@ describe("money rules on the program", () => {
     const config = await P.configPda();
     for (const status of [P.Status.Open, P.Status.Contested, P.Status.Settling, P.Status.Settled]) {
       const { campaign } = await injectCampaign(w.client, { ...base, id: newId(), status });
-      expectError(await send(w, [finalizeCampaignIx(campaign, config)]), "IllegalTransition");
+      expectError(await send(w, [finalizeCampaignIx(campaign, config)]), "CampaignNotInReview");
     }
     for (const status of [P.Status.InReview, P.Status.Contested, P.Status.Settling, P.Status.Settled]) {
       const { campaign } = await injectCampaign(w.client, { ...base, id: newId(), status });
       expectError(
         await send(w, [I.resolveCampaignIx(campaign, P.BTC_USD_ACCOUNT, P.BTC_USD_ACCOUNT)]),
-        "IllegalTransition",
+        "CampaignNotOpen",
       );
     }
   });

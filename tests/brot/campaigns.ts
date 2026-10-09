@@ -81,6 +81,8 @@ export async function injectCampaign(client: Pick<Client, "svm">, c: InjectedCam
     late_yes: 0n,
     late_no: 0n,
     entries_untallied: 0,
+    one_sided_fees: 0n,
+    creator_share_reserved: 0n,
     ...c.extra,
   });
   const write = (at: Address, bytes: Uint8Array, extraLamports = 0n) =>
@@ -124,8 +126,10 @@ export const injectSettling = (
       | "fee_total"
       | "creator_share"
       | "creator_share_from_fee"
-      | "prize_lamports",
-      bigint
+      | "prize_lamports"
+      | "opening_fee_lamports"
+      | "settle_mode",
+      bigint | number
     >
   >,
 ) =>

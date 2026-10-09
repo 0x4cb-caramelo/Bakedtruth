@@ -74,12 +74,14 @@ pub fn collect_fee(
 }
 
 /// The entries are all settled and the campaign has been finalized: `Settling` or `Settled` with no
-/// `Entry` open. Before finalize the status is `Open` or `InReview`, which is `CampaignNotSettled`.
+/// `Entry` open. Before finalize the status is `Open` or `InReview`: `NotFinalized`, as the other payouts
+/// refuse; after finalize, with an entry still open, `CampaignNotSettled`.
 pub(crate) fn require_settled_entries(stored: &Campaign) -> ProgramResult {
     let status = Status::try_from(stored.status)?;
     let finalized = matches!(status, Status::Settling | Status::Settled);
+    checks::require(finalized, BrotError::NotFinalized)?;
     checks::require(
-        finalized && stored.entries_open.get() == 0,
+        stored.entries_open.get() == 0,
         BrotError::CampaignNotSettled,
     )
 }

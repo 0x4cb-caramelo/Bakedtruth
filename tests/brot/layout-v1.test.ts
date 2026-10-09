@@ -13,18 +13,33 @@ import { getAddressEncoder, getProgramDerivedAddress, lamports, type Address } f
 import { BTC_PRICE, initConfig, join, newId } from "./flows";
 import { setBtc } from "./invariant-harness";
 import { decode, encode, layoutSize, offsetOf, type Layout } from "./layouts";
+import * as I from "./instructions";
 import * as P from "./program";
-import { balance, createWorld, expectOk, fundedWallet, now, rentFor, type World } from "./setup";
+import { balance, createWorld, expectError, expectOk, fundedWallet, now, rentFor, send, type World } from "./setup";
 import { CAMPAIGN, ENTRY } from "./structs";
 
-/** Sprint 02's Campaign: this layout with `epoch` and `min_entry_lamports` out of the reserve (64 bytes). */
+/** The fields this sprint and Sprint 03 took out of the Campaign's 64 reserved bytes (the amendment included). */
+const CAMPAIGN_ADDED = [
+  "epoch",
+  "min_entry_lamports",
+  "publish_time",
+  "late_yes",
+  "late_no",
+  "entries_untallied",
+  "one_sided_fees",
+  "creator_share_reserved",
+];
+/** The fields the Entry took out of its 16 reserved bytes (the amendment included). */
+const ENTRY_ADDED = ["join_count", "joins_tallied", "late_yes", "late_no"];
+
+/** Sprint 02's Campaign: this layout with the added fields back in the 64-byte reserve. */
 export const CAMPAIGN_V1: Layout = [
-  ...CAMPAIGN.filter(([name]) => name !== "epoch" && name !== "min_entry_lamports" && name !== "_reserved"),
+  ...CAMPAIGN.filter(([name]) => !CAMPAIGN_ADDED.includes(name) && name !== "_reserved"),
   ["_reserved", { bytes: 64 }],
 ];
-/** Sprint 02's Entry: `join_count` out of the 16 reserved bytes. */
+/** Sprint 02's Entry: the added fields back in its 16 reserved bytes. */
 export const ENTRY_V1: Layout = [
-  ...ENTRY.filter(([name]) => name !== "join_count" && name !== "_reserved"),
+  ...ENTRY.filter(([name]) => !ENTRY_ADDED.includes(name) && name !== "_reserved"),
   ["_reserved", { bytes: 16 }],
 ];
 
@@ -71,7 +86,7 @@ describe("layout version 1 (Sprint 02 accounts)", () => {
     expect(layoutSize(CAMPAIGN_V1)).toBe(512);
     expect(layoutSize(CAMPAIGN)).toBe(512);
     expect(layoutSize(ENTRY_V1)).toBe(100);
-    expect(layoutSize(ENTRY)).toBe(100);
+    expect(layoutSize(ENTRY)).toBe(116);
   });
 
   test("the reserve growth keeps the first bytes: everything before the new fields is where it was", () => {
@@ -79,7 +94,18 @@ describe("layout version 1 (Sprint 02 accounts)", () => {
     const epochAt = offsetOf(CAMPAIGN, "epoch");
     expect(epochAt).toBe(offsetOf(CAMPAIGN_V1, "_reserved"));
     const old = encode(CAMPAIGN_V1, { ...values, _reserved: new Uint8Array(64).fill(0xab) });
-    const grown = encode(CAMPAIGN, { ...values, epoch: 0n, min_entry_lamports: 0n, _reserved: new Uint8Array(48) });
+    const grown = encode(CAMPAIGN, {
+      ...values,
+      epoch: 0n,
+      min_entry_lamports: 0n,
+      publish_time: 0n,
+      late_yes: 0n,
+      late_no: 0n,
+      entries_untallied: 0,
+      one_sided_fees: 0n,
+      creator_share_reserved: 0n,
+      _reserved: new Uint8Array(4),
+    });
     expect(Buffer.from(grown.subarray(0, epochAt)).equals(Buffer.from(old.subarray(0, epochAt)))).toBe(true);
     // A version 1 account reads back under the new layout with the new fields at zero.
     const read = decode(CAMPAIGN, old);
@@ -105,17 +131,30 @@ describe("layout version 1 (Sprint 02 accounts)", () => {
       campaign: P.PROGRAM_ID,
       baker: P.PROGRAM_ID,
       amount_yes: SOL,
+      join_count: 0,
+      joins_tallied: 0,
+      late_yes: 0n,
+      late_no: 0n,
+      amount_no: 0n,
+      is_first: false,
+      _reserved: new Uint8Array(8),
     });
     expect(offsetOf(ENTRY, "join_count")).toBe(offsetOf(ENTRY_V1, "_reserved"));
-    expect(Buffer.from(grown).equals(Buffer.from(old))).toBe(true);
-    expect(decode(ENTRY, old).join_count).toBe(0);
+    const at = offsetOf(ENTRY, "join_count");
+    expect(Buffer.from(grown.subarray(0, at)).equals(Buffer.from(old.subarray(0, at)))).toBe(true);
+    // The bytes the amendment added (the tally and the late totals) are zero in a version 1 entry.
+    expect(grown.subarray(at).every((byte) => byte === 0)).toBe(true);
+    // Read at the new size, a version 1 entry has join_count zero (its bytes past 100 are the new fields).
+    const padded = new Uint8Array(layoutSize(ENTRY));
+    padded.set(old);
+    expect(decode(ENTRY, padded).join_count).toBe(0);
   });
 
   test("a version 1 campaign reads its minimum entry as zero (the program must not treat that as a minimum)", () => {
     expect(decode(CAMPAIGN, encode(CAMPAIGN_V1, v1Values())).min_entry_lamports).toBe(0n);
   });
 
-  test("the new binary loads a Sprint 02 campaign and its entry, and takes a join on each", async () => {
+  test("the new binary loads a Sprint 02 campaign; a Sprint 02 entry (100 bytes) is refused with WrongLength", async () => {
     const w = await createWorld();
     await initConfig(w);
     const creator = await fundedWallet(w);
@@ -160,10 +199,17 @@ describe("layout version 1 (Sprint 02 accounts)", () => {
     setAccount(w, entry, entryData, rentFor(w, entryData.length), P.PROGRAM_ID);
     setBtc(w, BTC_PRICE, now(w.client) - 5n);
 
-    expectOk(await join(w, baker, campaign, { side: P.Side.Yes, amount: SOL / 10n, expectedEntryTotal: SOL }));
-    expect(decode(ENTRY, dataOf(w, entry)).amount_yes).toBe(SOL + SOL / 10n);
+    // A newcomer's join reads the version 1 campaign (512 bytes, the new fields zero) and creates its entry.
     expectOk(await join(w, newcomer, campaign, { side: P.Side.No, amount: SOL / 10n }));
     expect(balance(w, vault)).toBeGreaterThan(SOL);
+    // The baker's version 1 entry is 100 bytes; the Entry is 116 now, so it is refused. No version 1 account is
+    // deployed anywhere (Sprint 05 deploys), so this is the rule, not a migration (see the session log).
+    const ix = await I.joinCampaignIx(baker, campaign, P.BTC_USD_ACCOUNT, {
+      side: P.Side.Yes,
+      amount: SOL / 10n,
+      joinIndex: 0,
+    });
+    expectError(await send(w, [ix]), "WrongLength");
   });
 });
 

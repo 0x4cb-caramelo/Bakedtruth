@@ -112,14 +112,16 @@ describe("open campaign refuses", () => {
   test("row 8: max_open_campaigns reached", async () => {
     const w = await openingWorld();
     expectOk(await send(w, [await I.setCreationParamsIx(w.admin, { ...DEFAULT_PARAMS, max_open_campaigns: 1 })]));
-    expectOk((await tryOpen(w, w.creator, { expectedParamsVersion: 1 })).sent);
+    // The admin change raised the parameters version: every opening below states the version it read.
+    const { params_version: version } = await readConfig(w);
+    expectOk((await tryOpen(w, w.creator, { expectedParamsVersion: version })).sent);
     expect((await readConfig(w)).open_campaigns).toBe(1);
-    expectError((await tryOpen(w, w.creator)).sent, "TooManyOpenCampaigns");
+    expectError((await tryOpen(w, w.creator, { expectedParamsVersion: version })).sent, "TooManyOpenCampaigns");
     // A team key that adds a prize is a paid opening, so the limit refuses it too.
-    expectError((await tryOpen(w, w.team)).sent, "TooManyOpenCampaigns");
+    expectError((await tryOpen(w, w.team, { expectedParamsVersion: version })).sent, "TooManyOpenCampaigns");
     expect((await readConfig(w)).open_campaigns).toBe(1);
     // A team key's free opening is outside the limit (founder answer 4): it opens and does not count.
-    expectOk((await tryOpen(w, w.team, { openingUsd: 0n })).sent);
+    expectOk((await tryOpen(w, w.team, { openingUsd: 0n, expectedParamsVersion: version })).sent);
     expect((await readConfig(w)).open_campaigns).toBe(1);
   });
 });

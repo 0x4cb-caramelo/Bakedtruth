@@ -93,8 +93,8 @@ fn no_entry(c: &Campaign) -> bool {
 }
 
 /// What `collect_fee` moves to the fee vault. A split keeps the house fee not given to the creator plus
-/// the opening fee. A refund keeps what `opener_return` leaves to Brot. A one-sided pot also keeps the
-/// one-sided fees, whose running total lane C has not recorded yet (`OneSidedFeesNotRecorded`).
+/// the opening fee. A refund keeps what `opener_return` leaves to Brot. A one-sided pot keeps the one-sided
+/// fees recorded at each settlement, plus the opening fee.
 pub fn kept(c: &Campaign) -> Result<Kept, BrotError> {
     let opening = c.opening_fee_lamports.get();
     match SettleMode::try_from(c.settle_mode)? {
@@ -108,7 +108,15 @@ pub fn kept(c: &Campaign) -> Result<Kept, BrotError> {
             let amount = house.checked_add(opening).ok_or(BrotError::MathOverflow)?;
             Ok(Kept { amount, opening })
         }
-        SettleMode::OneSided => Err(BrotError::OneSidedFeesNotRecorded),
+        SettleMode::OneSided => {
+            // Each entry's one-sided fee is recorded at its settlement (`one_sided_fees`); the opening fee is Brot's.
+            let amount = c
+                .one_sided_fees
+                .get()
+                .checked_add(opening)
+                .ok_or(BrotError::MathOverflow)?;
+            Ok(Kept { amount, opening })
+        }
         SettleMode::Refund => {
             let ret = opener_return(c)?;
             Ok(Kept {
