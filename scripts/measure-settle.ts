@@ -49,12 +49,14 @@ async function settlingWith(w: World, k: number) {
       deadlineAt: 3n,
       poolYes: BigInt(k) * 2n * SOL,
       poolNo: BigInt(k) * SOL,
+      extra: { entries_open: k },
     },
     P.Outcome.Yes,
     {
+      settle_mode: 1, // Split (the fixtures' value)
       winning_total: BigInt(k) * 2n * SOL,
       losing_total: BigInt(k) * SOL,
-      distributable: (BigInt(k) * 9n * SOL) / 10n,
+      distributable: (BigInt(k) * 29n * SOL) / 10n, // the pot less the fee (no creator share in this fixture)
       fee_total: (BigInt(k) * SOL) / 10n,
     },
   );

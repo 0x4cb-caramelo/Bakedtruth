@@ -160,7 +160,15 @@ pub fn user_open_campaign(
 
     // All of the payment into the vault, bookkept below as prize and opening fee (I14).
     if payment.paid > 0 {
+        let vault_before = vault.lamports();
         crate::vault::deposit(creator, vault, payment.paid)?;
+        // The vault moves by exactly what the opening books: the rent is not in the payment (I14, TP 3.4.10).
+        crate::math::invariant::vault_change_matches(
+            vault_before,
+            vault.lamports(),
+            payment.paid,
+            0,
+        )?;
     }
 
     // Row 6 and every other field, then the count of open campaigns (I7), for a counted opening only.

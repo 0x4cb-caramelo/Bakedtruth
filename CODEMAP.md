@@ -25,7 +25,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `app/lib/mascot/engine.ts` — 302 linhas
 - `app/lib/metric.ts` — 691 linhas
 - `programs/brot-markets/src/error.rs` — 328 linhas
-- `programs/brot-markets/src/instructions/campaigns/open_campaign.rs` — 202 linhas
+- `programs/brot-markets/src/instructions/campaigns/open_campaign.rs` — 210 linhas
 - `programs/brot-markets/src/instructions/entries/join_campaign.rs` — 212 linhas
 - `programs/brot-markets/src/instructions/interface.rs` — 216 linhas
 - `programs/brot-markets/src/math/snapshot.rs` — 208 linhas
@@ -242,7 +242,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`mod.rs`](programs/brot-markets/src/instructions/campaigns/mod.rs) | opening a campaign (TP section 3.4.10). Resolution joins this folder in Sprint 03 | 6 |
-| [`open_campaign.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign.rs) | `user_open_campaign`: any wallet opens a campaign of any open kind paying US$500 in SOL at the Pyth SOL/USD price, 90% bookkept as the prize and 10% held as the | 202 |
+| [`open_campaign.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign.rs) | `user_open_campaign`: any wallet opens a campaign of any open kind paying US$500 in SOL at the Pyth SOL/USD price, 90% bookkept as the prize and 10% held as the | 210 |
 
 ## `programs/brot-markets/src/instructions/campaigns/open_campaign/`
 
@@ -600,7 +600,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`init-project.sh`](scripts/init-project.sh) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 25 |
 | [`instruction-drift.js`](scripts/instruction-drift.js) | catch references in instruction files (CLAUDE.md, templates, skills, agents, WIZARD) to agents, commands and wizard stages that do not exist, and model generati | 160 |
 | [`measure-cu.ts`](scripts/measure-cu.ts) | prints the compute units of each instruction's valid baseline and the program binary's size, in the Sprint 03 "Measurements" table's shape (T3). Runs in LiteSVM | 30 |
-| [`measure-settle.ts`](scripts/measure-settle.ts) | the settle batch (T3) and the per-account write limit (C7). For each batch size it builds one transaction of `settle_entry` instructions in LiteSVM (self-CPI ev | 115 |
+| [`measure-settle.ts`](scripts/measure-settle.ts) | the settle batch (T3) and the per-account write limit (C7). For each batch size it builds one transaction of `settle_entry` instructions in LiteSVM (self-CPI ev | 117 |
 | [`os-self-test.js`](scripts/os-self-test.js) | the `os-self-test` skill did this, but only when a human or a model remembered to invoke it — and three session logs record it NOT being run when it would have  | 406 |
 | [`pre-commit.js`](scripts/pre-commit.js) | the PreToolUse gate only sees commits Claude makes. A commit from a terminal or an editor skipped it entirely. This runs the same scan from git itself | 76 |
 | [`push-oracle-probe.ts`](scripts/push-oracle-probe.ts) | probe Pyth's push oracle read-only: watch that the sponsored SOL/USD and BTC/USD accounts only move forward on devnet and mainnet, and scan its recent transacti | 200 |
