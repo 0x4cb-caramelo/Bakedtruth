@@ -54,6 +54,16 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
     recusada).
   - **Testes:** 255 em Rust e 259 em TypeScript depois das correções da revisão (252 e 258 antes delas), todos do
     programa novo; os oito filtros da sprint passam; tirar a checagem de chamada de topo derruba o teste dela (X0.9).
+- **`/3`, a página inicial original com as cores do deck e o texto mais curto** (fundadores, 9/10/2026; na branch
+  `feat/site-3-original-com-cores-do-deck`, ainda não publicada). Depois de ver a `/2`, o Lucas e o Ronaldo
+  preferiram a disposição e as fontes da página original, com as cores do deck. A `/3` carrega o `styles.css` da
+  própria página inicial e, por cima, o `3/colors.css`, que só troca as cores (carvão no escuro, creme no claro,
+  laranja e ferrugem nos destaques). O texto ficou mais curto, no jeito do deck, um título e uma linha por bloco:
+  232 palavras contra 299, com cada princípio em uma linha onde havia três. Entra o aviso laranja "We are baking
+  this website. Some parts are still in the oven." A frase de consentimento do formulário não mudou, porque o
+  servidor grava a versão dela com cada email; o mascote e o link do X também são os mesmos. O rodapé deixou de
+  dizer "bet". Sete testes novos (`tests/three.test.mjs`), um deles falha se uma cor da original ficar sem troca.
+  Fora dos buscadores.
 - **`brot.markets/2`, a página inicial com o visual do deck** (opção A, fundador, 9/10/2026): o mesmo conteúdo da
   página inicial, palavra por palavra, com o pãozinho e o formulário, e só o visual trocado: as cores do deck (carvão
   no tema escuro, creme no claro), IBM Plex e os cartões escuros dos slides. Um teste falha se o texto da `/2` e o da
