@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **344** |
+| Arquivos mapeados | **354** |
 | Acima de 200 linhas | **33** ⚠️ |
 | Sem cabeçalho `Purpose:` | **78** ⚠️ |
 
@@ -176,6 +176,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`entrypoint.rs`](programs/brot-markets/src/entrypoint.rs) | the instruction dispatcher: the first byte of the instruction data picks the handler, the rest is that handler's arguments | 78 |
 | [`error.rs`](programs/brot-markets/src/error.rs) | every refusal the program can return, one code per cause, as custom program errors | 300 |
 | [`events.rs`](programs/brot-markets/src/events.rs) | the events, one per instruction, and how they leave the program: a self-CPI signed by the event-authority PDA, so they survive log truncation (T4) | 101 |
+| [`feeds.rs`](programs/brot-markets/src/feeds.rs) | the compiled list of Pyth feeds a price campaign may name (founder answer 1, 2026-10-09; TP 3.4.1, 3.4.10). One list per cluster, chosen by the `mainnet` featur | 147 |
 | [`layout.rs`](programs/brot-markets/src/layout.rs) | zero-copy byte layouts shared by accounts, instruction arguments and events: the little-endian field types and the one place where bytes become a typed view | 126 |
 | [`lib.rs`](programs/brot-markets/src/lib.rs) | the Brot Markets program on Pinocchio: On-Chain Campaigns paid in SOL; declares the program id and wires the modules and the entrypoint | 27 |
 | [`vault.rs`](programs/brot-markets/src/vault.rs) | the lamport vault of a campaign: SOL arriving from a signer's wallet by System Program transfer, signed by that wallet (TP section 3.4.4) | 33 |
@@ -250,11 +251,14 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`mod.rs`](programs/brot-markets/src/instructions/resolution/mod.rs) | the instructions that decide a campaign's outcome: `resolve_campaign` (Sprint 03); confirming, voiding and contesting arrive in Sprint 04 | 10 |
+| [`mod.rs`](programs/brot-markets/src/instructions/resolution/mod.rs) | the instructions that decide a campaign's outcome: `resolve_campaign` (Sprint 03), and the team's acts inside the review window: confirming, voiding and contest | 13 |
 | [`resolve_campaign.rs`](programs/brot-markets/src/instructions/resolution/resolve_campaign.rs) | `resolve_campaign`: any wallet records the outcome the campaign's reader reads, at the top level only, and opens the six-hour review window (TP sections 3.4.2,  | 79 |
-| [`team_confirm_result.rs`](programs/brot-markets/src/instructions/resolution/team_confirm_result.rs) | `team_confirm_result` (the team ends the review window and the snapshot runs at once (TP 3.4.3)) | 20 |
-| [`team_open_contest.rs`](programs/brot-markets/src/instructions/resolution/team_open_contest.rs) | `team_open_contest` (a team key contests an outcome inside the window; the campaign enters Contested (TP 3.4.7)) | 20 |
-| [`team_void_campaign.rs`](programs/brot-markets/src/instructions/resolution/team_void_campaign.rs) | `team_void_campaign(reason, note_hash)` (TP sections 3.4.3, 3.4.7): a team key voids a campaign inside the window with a reason it may choose and the hash of it | 34 |
+| [`team_confirm_result.rs`](programs/brot-markets/src/instructions/resolution/team_confirm_result.rs) | `team_confirm_result`: a team key ends the review window now and the outcome stands; the snapshot runs at once, so the campaign is `Settling` (TP sections 3.4.3 | 74 |
+| [`team_open_contest.rs`](programs/brot-markets/src/instructions/resolution/team_open_contest.rs) | `team_open_contest`: a team key contests the outcome inside the review window; the campaign enters `Contested`, payout is paused and the stage 1 clock starts (T | 79 |
+| [`team_shared.rs`](programs/brot-markets/src/instructions/resolution/team_shared.rs) | what the three team instructions share: the team-key check, the event number each event takes from the campaign, and the refusal of a status that is not the sto | 31 |
+| [`team_void_campaign.rs`](programs/brot-markets/src/instructions/resolution/team_void_campaign.rs) | `team_void_campaign(reason, note_hash)`: a team key voids a campaign inside the review window with a reason it may choose and the hash of its note; the snapshot | 98 |
+| [`void_reason.rs`](programs/brot-markets/src/instructions/resolution/void_reason.rs) | the class of each `VoidReason` (TP section 3.4.7, P-4): a house failure refunds the 10% opening fee, an outside cause keeps it; which reasons a team key may cho | 43 |
+| [`window.rs`](programs/brot-markets/src/instructions/resolution/window.rs) | the review window's rules (TP section 3.4.7): a team key acts only while the campaign is `InReview` (`TeamKeyOutsideReview`), and only before `review_ends_at` ( | 31 |
 
 ## `programs/brot-markets/src/instructions/resolution/resolve_campaign/`
 
@@ -269,10 +273,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`close_campaign.rs`](programs/brot-markets/src/instructions/settlement/close_campaign.rs) | `close_campaign`: moves dust and surplus to the fee vault, returns the rent to rent_payer, zeroes the data and gives both accounts back to the System Program (T | 19 |
 | [`collect_fee.rs`](programs/brot-markets/src/instructions/settlement/collect_fee.rs) | `collect_fee`: moves what Brot keeps to the fee vault: the house fee net of from_fee, the one-sided fees, the opening fee unless refunded (TP 3.4.16) | 19 |
 | [`finalize_campaign.rs`](programs/brot-markets/src/instructions/settlement/finalize_campaign.rs) | `finalize_campaign`: the snapshot of a reviewed campaign: the totals, the mode, the creator share; open_campaigns down for a paid campaign (TP 3.4.3, I7) | 19 |
-| [`mod.rs`](programs/brot-markets/src/instructions/settlement/mod.rs) | the instructions that settle a campaign after its outcome: the snapshot, the payouts to people and Brot's fee, the prize, the close and the sweep (TP section 3. | 13 |
+| [`mod.rs`](programs/brot-markets/src/instructions/settlement/mod.rs) | the instructions that settle a campaign after its outcome: the snapshot, the payouts to people and Brot's fee, the prize, the close and the sweep (TP section 3. | 14 |
 | [`settle_creator_share.rs`](programs/brot-markets/src/instructions/settlement/settle_creator_share.rs) | `settle_creator_share`: pays the creator's share once, to the stored creator only (TP 3.4.16, I13) | 19 |
 | [`settle_entry.rs`](programs/brot-markets/src/instructions/settlement/settle_entry.rs) | `settle_entry`: pays one entry from the vault to its stored baker and closes the Entry, its rent back to the baker (TP 3.4.5) | 19 |
 | [`settle_prize.rs`](programs/brot-markets/src/instructions/settlement/settle_prize.rs) | `settle_prize`: returns the prize to whoever opened in OneSided and Refund, and the opening fee on a house-failure void (P-4) | 19 |
+| [`snapshot.rs`](programs/brot-markets/src/instructions/settlement/snapshot.rs) | `finalize_snapshot`, the shared snapshot of a reviewed campaign: the totals, the mode, the creator share and the open count, run by `team_confirm_result` and `f | 20 |
 | [`sweep_fees.rs`](programs/brot-markets/src/instructions/settlement/sweep_fees.rs) | `sweep_fees`: sends the fee vault's lamports above its rent-exempt minimum to GlobalConfig.fee_recipient, and nowhere else (TP 3.4.4) | 19 |
 
 ## `programs/brot-markets/src/math/`
@@ -342,6 +347,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`config_params.rs`](programs/brot-markets/tests/config_params.rs) | the floors and ceilings of the creation parameters (TP section 3.4.1, C43): the founder's values pass, every bound passes, and one step past a bound fails with  | 192 |
 | [`cursor.rs`](programs/brot-markets/tests/cursor.rs) | the bounds-checked cursor on its own. Readers of variable layouts lean on it, so "an error, never a panic" is proved here and not through one reader's fixed siz | 69 |
 | [`event_cpi.rs`](programs/brot-markets/tests/event_cpi.rs) | the self-CPI events on the host (T4): the instruction data `emit` sends for each of the six events, and the handler that accepts only the event authority, signi | 82 |
+| [`feeds_list.rs`](programs/brot-markets/tests/feeds_list.rs) | the compiled feed list (`feeds::require_listed`): the SOL/USD and BTC/USD feeds are listed on this cluster, the feed ids are the ones the captured mainnet and d | 41 |
 | [`join_layout.rs`](programs/brot-markets/tests/join_layout.rs) | the layout of the per-join account and the fields the join and the refund read from `Entry` and `Campaign` (founder decision, 2026-10-09: one `Join` per join, n | 31 |
 | [`layout.rs`](programs/brot-markets/tests/layout.rs) | pins the program's frozen interface: account and argument sizes, event sizes, the event authority, the discriminators and the enum bytes. A change here is a cha | 123 |
 | [`math_estimate_properties.rs`](programs/brot-markets/tests/math_estimate_properties.rs) | the join's return estimate over random pots: in `Split` it is the settlement's own payout in bps and never below 10,000; in a one-sided pot it is the refund, wi | 100 |
@@ -376,6 +382,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`state_transitions.rs`](programs/brot-markets/tests/state_transitions.rs) | the transition table of TP section 3.4.2, checked over all 25 pairs of statuses: the six edges are allowed, every other pair is refused with `IllegalTransition` | 51 |
 | [`stubs_refuse.rs`](programs/brot-markets/tests/stubs_refuse.rs) | every instruction of Sprint 04 that has a stub body refuses with its own error, `UnknownInstruction`, and reads no account (its body lands in its lane) | 34 |
 | [`team_keys.rs`](programs/brot-markets/tests/team_keys.rs) | the team rules of `admin_set_team` (Q12, TP section 3.4.9): at most five keys, none zero, none twice, every slot past `team_len` zero; each refusal with its own | 87 |
+| [`team_window_rules.rs`](programs/brot-markets/tests/team_window_rules.rs) | the review window's rules of the team instructions on the host: a team key acts only while `InReview` (`TeamKeyOutsideReview`) and before `review_ends_at` (the  | 172 |
+| [`team_window_transitions.rs`](programs/brot-markets/tests/team_window_transitions.rs) | the status moves of the team instructions go through `state::transitions::transition`: confirm and void move `InReview` to `Settling`, contest moves it to `Cont | 48 |
+| [`team_window_void_reasons.rs`](programs/brot-markets/tests/team_window_void_reasons.rs) | the class of each `VoidReason` (TP section 3.4.7): one test per reason, for the 10% opening fee (refunded on a house failure, kept on an outside cause), for whe | 88 |
 | [`vault.rs`](programs/brot-markets/tests/vault.rs) | pins what `vault::deposit` does with zero (nothing moves, no System Program call, success) and that any other amount reaches the transfer, which refuses a borro | 43 |
 
 ## `programs/brot-markets/tests/checks_support/`
@@ -714,6 +723,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`resolve-support.ts`](tests/brot/resolve-support.ts) | what the resolution tests share: a world at a mainnet-like slot and epoch, a campaign of each kind written into it with its metric account (a synthetic mint, th | 195 |
 | [`setup.ts`](tests/brot/setup.ts) | a LiteSVM world for the program's tests: the binary loaded, the clock set next to the captured Pyth prices, the upgrade authority recorded, funded wallets, and  | 201 |
 | [`structs.ts`](tests/brot/structs.ts) | the program's structs as layouts: accounts (GlobalConfig, Campaign, Entry), instruction arguments and events, each in the field order of its Rust struct | 163 |
+| [`team-window.test.ts`](tests/brot/team-window.test.ts) | the team's acts in the review window, on the binary: confirm, void with each reason, and contest. Each act is refused outside `InReview`, outside the window, to | 178 |
 
 ## `tests/programs/cpi-proxy/src/`
 

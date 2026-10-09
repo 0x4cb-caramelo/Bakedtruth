@@ -9,4 +9,5 @@ pub mod finalize_campaign;
 pub mod settle_creator_share;
 pub mod settle_entry;
 pub mod settle_prize;
+pub mod snapshot;
 pub mod sweep_fees;
