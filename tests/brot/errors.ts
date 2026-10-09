@@ -132,6 +132,7 @@ export const BrotError = {
   AccountNotEmpty: 6127,
   JoinBufferRefused: 6131,
   BelowCampaignMinEntry: 6132,
+  JoinAccountsMismatch: 6133,
   FeedNotOnList: 6141,
   IllegalTransition: 6146,
 } as const;

@@ -1,9 +1,11 @@
 //! Purpose: `user_join_campaign`: a baker joins YES or NO with at least `min_entry_lamports` while
 //!          the outcome is not knowable; the entry moves from the baker's wallet into the vault
 //!          by System Program transfer, and the pot is bookkept, never read from the vault.
-//! Version: 0.0.3
+//! Version: 0.0.4
 //! Sprint: 02 (pot core on Pinocchio), accounts and arguments frozen at its opening, body by
-//!         lane E; 03 (readers and resolution) adds the join lock (BR-06), lane E
+//!         lane E; 03 (readers and resolution) adds the join lock (BR-06), lane E; 04 (lane G)
+//!         reads the campaign's own minimum (question 5) and the proximity buffer (question 7).
+//!         The `Join` record (`join_record.rs`) is not written here yet: the account list has no slot for it.
 //!
 //! Order: the arguments, the slots and the loads, as `checks.rs` orders them; then the
 //! campaign's rules: the metric account's address, `Open`, the entry close, the join lock (the
@@ -20,6 +22,7 @@ use shank::ShankType;
 use super::{
     entry_account::{create_entry, load_entry},
     join_lock::require_outcome_open,
+    join_rules,
 };
 use crate::{
     checks,
@@ -83,11 +86,10 @@ pub fn user_join_campaign(
     checks::system_program(system_program)?;
     checks::event_accounts(event_authority, program, program_id)?;
 
-    // The config is only read: the pause and the minimum, copied out at once.
-    let (paused, min_entry_lamports) = {
+    // The config is only read for the pause; the minimum is the campaign's own (question 5).
+    let paused = {
         let config = GlobalConfig::load(config, program_id)?;
-        let paused = config.operating_level != OperatingLevel::Normal as u8;
-        (paused, config.params.min_entry_lamports.get())
+        config.operating_level != OperatingLevel::Normal as u8
     };
     let campaign_key = *campaign.address();
     let baker_key = *baker.address();
@@ -115,9 +117,7 @@ pub fn user_join_campaign(
     if paused {
         return Err(BrotError::JoinWhilePaused.into());
     }
-    if amount < min_entry_lamports {
-        return Err(BrotError::EntryBelowMinimum.into());
-    }
+    join_rules::require_min_entry(amount, campaign.min_entry_lamports.get())?;
 
     let expected_total = args.expected_entry_total.get();
     let mut entry = if entry.owned_by(program_id) {

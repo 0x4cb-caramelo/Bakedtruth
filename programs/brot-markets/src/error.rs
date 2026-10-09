@@ -277,6 +277,8 @@ pub enum BrotError {
     JoinBufferRefused = 6131,
     #[error("The entry is below the minimum this campaign opened with")]
     BelowCampaignMinEntry = 6132,
+    #[error("The join accounts passed do not match the entry's joins, in order")]
+    JoinAccountsMismatch = 6133,
     // Lane H (numbers from 6141).
     #[error("The price feed is not on the compiled feed list")]
     FeedNotOnList = 6141,
