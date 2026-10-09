@@ -59,7 +59,8 @@ const i3: Check = (c, v) => {
   if (v.campaign && (v.campaign.distributable !== s.distributable || v.campaign.fee_total !== s.fee)) {
     return `chain snapshot ${v.campaign.distributable}/${v.campaign.fee_total}, model ${s.distributable}/${s.fee}`;
   }
-  const paid = ledgerTo(c, "entry").reduce((n, l) => n + l.amount, 0n);
+  // The entry payments include each late join's refund, which is not in the distributable (it came out of V and P).
+  const paid = ledgerTo(c, "entry").reduce((n, l) => n + l.amount, 0n) - s.late;
   return paid <= s.distributable ? null : `winners paid ${paid} above the distributable ${s.distributable}`;
 };
 

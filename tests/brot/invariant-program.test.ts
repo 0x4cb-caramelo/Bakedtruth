@@ -1,7 +1,7 @@
 /**
  * Purpose: the money rules run through the program, with the Sprint 04 instructions on injected states:
  *          a one-sided pot's rows, the pause never blocking a payout (I10′), two wallets that cannot take
- *          each other's money, and every transition outside TP section 3.4.2 refused with the instruction's own error (finalize: CampaignNotInReview; resolve: CampaignNotOpen).
+ *          each other's money, and every transition outside TP section 3.4.2 refused with the instruction's own error (finalize: CampaignNotInReview; resolve: CampaignNotOpen, or CutoffNotMovable in review).
  *          Needs the program binary (target/deploy/brot_markets.so): run it at integration.
  * Version: 0.0.1
  * Sprint:  04 (contract freeze, lane E)
@@ -220,12 +220,16 @@ describe("money rules on the program", () => {
       const { campaign } = await injectCampaign(w.client, { ...base, id: newId(), status });
       expectError(await send(w, [finalizeCampaignIx(campaign, config)]), "CampaignNotInReview");
     }
-    for (const status of [P.Status.InReview, P.Status.Contested, P.Status.Settling, P.Status.Settled]) {
+    // In review the re-proof rule answers first: only an earlier YES price proof moves the cut-off.
+    const refusedAs: [number, "CutoffNotMovable" | "CampaignNotOpen"][] = [
+      [P.Status.InReview, "CutoffNotMovable"],
+      [P.Status.Contested, "CampaignNotOpen"],
+      [P.Status.Settling, "CampaignNotOpen"],
+      [P.Status.Settled, "CampaignNotOpen"],
+    ];
+    for (const [status, error] of refusedAs) {
       const { campaign } = await injectCampaign(w.client, { ...base, id: newId(), status });
-      expectError(
-        await send(w, [I.resolveCampaignIx(campaign, P.BTC_USD_ACCOUNT, P.BTC_USD_ACCOUNT)]),
-        "CampaignNotOpen",
-      );
+      expectError(await send(w, [I.resolveCampaignIx(campaign, P.BTC_USD_ACCOUNT, P.BTC_USD_ACCOUNT)]), error);
     }
   });
 });

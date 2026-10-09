@@ -10,6 +10,7 @@ import { type Address } from "@solana/kit";
 import { readConfig } from "./flows";
 import { type Harness, type Plan, type Rng, clock } from "./invariant-harness";
 import { planJoin, planOpenPaid, planOpenTeam, planPause, type JoinOp } from "./invariant-open";
+import { drawPhaseOp } from "./invariant-phase";
 import { drawSettleOp, planSettle, type SettleOp } from "./invariant-settle";
 import { sweepFeesIx } from "./instructions-settlement";
 import * as P from "./program";
@@ -164,10 +165,13 @@ export function drawOp(h: Harness, r: Rng): Op {
   if (roll < 0.16 && live.length === 0) return { k: "fund", creator: anyCreator };
   if (roll < 0.16) return { k: "openPaid", creator: r.pick(live), days: r.int(3, 10) };
   if (roll < 0.2) return { k: "openTeam", member: r.int(0, h.team.length - 1) };
-  if (roll < 0.5 && open.length > 0)
+  // Most joins go to campaigns still taking entries; the rest name any open campaign, so refusals still run.
+  const taking = open.filter((i) => h.camps[i].phase === "Open");
+  const joinPool = taking.length > 0 && r.next() < 0.8 ? taking : open;
+  if (roll < 0.5 && joinPool.length > 0)
     return {
       k: "join",
-      c: r.pick(open),
+      c: r.pick(joinPool),
       baker,
       side: r.next() < 0.5 ? 0 : 1,
       amount: r.big(10_000_000n, 3_000_000_000n),
@@ -180,5 +184,11 @@ export function drawOp(h: Harness, r: Rng): Op {
   if (roll < 0.64) return { k: "fund", creator: anyCreator };
   if (roll < 0.66) return { k: "sweep" };
   if (open.length === 0) return { k: "openPaid", creator: 0, days: 3 };
-  return drawSettleOp(h, r, r.pick(open));
+  const target = r.pick(open);
+  // Most lifecycle draws name the step the phase allows (invariant-phase.ts); the rest stay random, so refusals still run.
+  if (r.next() < 0.7) {
+    const phased = drawPhaseOp(h, r, target);
+    if (phased) return phased;
+  }
+  return drawSettleOp(h, r, target);
 }

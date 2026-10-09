@@ -15,7 +15,7 @@ import { drawOp, runOp } from "./invariant-ops";
 /** The seed of the run; the report and the test output name it, so a failure can be replayed. */
 export const SEED = 0x0b_ad_c0de;
 /** The number of operations drawn from the seed. */
-export const OPERATIONS = 400;
+export const OPERATIONS = 1_200;
 
 async function checkAll(h: Harness) {
   const config = await readConfig(h.w);
@@ -52,6 +52,28 @@ describe("money invariants", () => {
       .join(", ");
     console.log(`randomized invariants: seed ${SEED}, ${OPERATIONS} operations, ${checks} campaign checks`);
     console.log(`operations: ${histogram}`);
+    const succeeded = new Map<string, number>();
+    for (const line of h.trace) {
+      const [k, outcome] = line.split(" ");
+      if (outcome === "ok") succeeded.set(k, (succeeded.get(k) ?? 0) + 1);
+    }
+    const okHistogram = [...succeeded]
+      .sort()
+      .map(([k, n]) => `${k} ${n}`)
+      .join(", ");
+    console.log(`succeeded: ${okHistogram}`);
+    const refusals = new Map<string, number>();
+    for (const line of h.trace) {
+      const [k, ...rest] = line.split(" ");
+      const outcome = rest.join(" ");
+      if (outcome !== "ok") refusals.set(`${k}: ${outcome}`, (refusals.get(`${k}: ${outcome}`) ?? 0) + 1);
+    }
+    console.log(
+      `refusals: ${[...refusals]
+        .sort()
+        .map(([k, n]) => `${k} ${n}`)
+        .join(" | ")}`,
+    );
     expect(h.camps.length).toBeGreaterThan(0);
   }, 600_000);
 });

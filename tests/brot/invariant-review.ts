@@ -5,15 +5,7 @@
  * Sprint:  04 (contract freeze, lane E)
  */
 import { BTC_PRICE } from "./flows";
-import {
-  isTeamReason,
-  PROOF_DELAY,
-  prizeSettledAtSnapshot,
-  shareDue,
-  SIX_HOURS,
-  snapshotOf,
-  type ModelCampaign,
-} from "./invariant-model";
+import { isTeamReason, PROOF_DELAY, shareDue, SIX_HOURS, snapshotOf, type ModelCampaign } from "./invariant-model";
 import * as I from "./instructions";
 import {
   finalizeCampaignIx,
@@ -58,7 +50,8 @@ function takeSnapshot(c: ModelCampaign) {
   // A campaign with no entry has nothing to settle: finalize moves it straight to Settled (decision of 2026-10-09).
   c.phase = new Set(c.joins.map((j) => j.baker)).size === 0 ? "Settled" : "Settling";
   c.counted = false;
-  c.prizeSettled = prizeSettledAtSnapshot(c);
+  // The prize step sets the flag, also for a Split (it pays nothing then): close waits for it (settle_prize).
+  c.prizeSettled = false;
 }
 
 export const inWindow = (c: ModelCampaign, t: bigint) => t < c.reviewEndsAt;
@@ -74,12 +67,20 @@ export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
       const back = op.back < t - c.opensAt ? op.back : t - c.opensAt;
       const publish = t - back;
       setBtc(h.w, TOUCH, publish);
+      // In review, only an earlier YES proof moves the cut-off back (decision of 2026-10-09); the window stays.
+      const moves = c.phase === "InReview" && c.outcome === "Yes" && c.publish !== null && publish < c.publish;
+      const error: BrotErrorName | undefined =
+        c.phase === "Open" || moves ? undefined : c.phase === "InReview" ? "CutoffNotMovable" : "CampaignNotOpen";
       return {
         ixs: [I.resolveCampaignIx(campaign, P.BTC_USD_ACCOUNT, P.BTC_USD_ACCOUNT)],
-        error: c.phase === "Open" ? undefined : "CampaignNotOpen",
+        error,
         deltas: BLANK,
         after: () => refreshBase(h.w),
         apply: () => {
+          if (c.phase === "InReview") {
+            c.publish = publish;
+            return;
+          }
           c.phase = "InReview";
           c.outcome = "Yes";
           c.publish = publish;
@@ -92,15 +93,19 @@ export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
       const stale = op.k === "resolveStale";
       if (stale) setBtc(h.w, BTC_PRICE, c.deadline - 700n);
       else refreshBase(h.w);
+      // An offered proof that is too old is refused as stale; with no proof the window is simply not over.
+      const reader: BrotErrorName | undefined =
+        t < c.deadline + PROOF_DELAY ? (stale ? "ProofStale" : "NotResolvableYet") : undefined;
+      // In review, a NO (or a void) is decided by the reader first, then refused as a re-proof, unless the outcome is
+      // not a YES: the program's order (decision of 2026-10-09). A campaign in review with a YES reads the same way.
       const error: BrotErrorName | undefined =
-        c.phase !== "Open"
-          ? "CampaignNotOpen"
-          : t < c.deadline + PROOF_DELAY
-            ? // An offered proof that is too old is refused as stale; with no proof the window is simply not over.
-              stale
-              ? "ProofStale"
-              : "NotResolvableYet"
-            : undefined;
+        c.phase === "Open"
+          ? reader
+          : c.phase === "InReview"
+            ? c.outcome === "Yes"
+              ? (reader ?? "CutoffNotMovable")
+              : "CutoffNotMovable"
+            : "CampaignNotOpen";
       return {
         // A NO offers no proof: the program's own address in the proof slot. A stale case offers the stale account.
         ixs: [I.resolveCampaignIx(campaign, P.BTC_USD_ACCOUNT, stale ? P.BTC_USD_ACCOUNT : P.PROGRAM_ID)],

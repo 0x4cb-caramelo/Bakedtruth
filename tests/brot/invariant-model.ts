@@ -10,7 +10,7 @@
  * pay no fee. The mode is set by the early totals: both sides above zero is `Split`, anything else
  * `OneSided`; a void is `Refund`.
  */
-import { oneSidedFee, payoutOf, settleSplit } from "./money-model";
+import { oneSidedFee, payoutOf, settleSplit, splitIsViable } from "./money-model";
 
 export type Phase = "Open" | "InReview" | "Contested" | "Settling" | "Settled" | "Closed";
 export type Outcome = "Unresolved" | "Yes" | "No" | "Void";
@@ -131,23 +131,20 @@ export function snapshotOf(c: ModelCampaign): Snapshot {
   const early = earlyJoins(c);
   const yes = sideTotal(early, 0);
   const no = sideTotal(early, 1);
-  if (yes === 0n || no === 0n) {
+  const side = winningSide(c);
+  const winning = side === 0 ? yes : no;
+  const losing = side === 0 ? no : yes;
+  const split = { winning, losing, prize: c.prize, feeBps: FEE_BPS, creatorBps: c.team ? 0n : CREATOR_BPS };
+  // One side empty, or a losing side too small to pay its fees (the Economic Viability Rule): one-sided.
+  if (yes === 0n || no === 0n || !splitIsViable(split)) {
     const oneSidedFees = early.reduce((n, j) => {
       const isFirst = j.baker === firstBaker;
       return n + oneSidedFee(j.amount, ONE_SIDED_BPS, isFirst);
     }, 0n);
-    return { ...blank("OneSided", late, firstBaker), winning: yes + no, oneSidedFees };
+    const totals = yes === 0n || no === 0n ? { winning: yes + no, losing: 0n } : { winning, losing };
+    return { ...blank("OneSided", late, firstBaker), ...totals, oneSidedFees };
   }
-  const side = winningSide(c);
-  const winning = side === 0 ? yes : no;
-  const losing = side === 0 ? no : yes;
-  const r = settleSplit({
-    winning,
-    losing,
-    prize: c.prize,
-    feeBps: FEE_BPS,
-    creatorBps: c.team ? 0n : CREATOR_BPS,
-  });
+  const r = settleSplit(split);
   return {
     mode: "Split",
     winning,
@@ -217,7 +214,5 @@ export const shareDue = (c: ModelCampaign) =>
   c.snapshot?.mode === "Split" ? c.snapshot.fromPot + c.snapshot.fromFee : 0n;
 
 /** `Split` with a prize, or nothing to return: the prize is settled when the snapshot is taken. */
-export const prizeSettledAtSnapshot = (c: ModelCampaign) => c.snapshot?.mode === "Split" || c.prize === 0n;
-
 export const isTeamReason = (reason: number) => TEAM_REASONS.has(reason);
 export const winnersOf = (c: ModelCampaign) => c.snapshot?.winners ?? 0;

@@ -29,7 +29,9 @@ describe("slot matrix", () => {
       // A disabled instruction (TeamOpenContest) is refused by design: its baseline must be refused with that error.
       const disabled = name === "TeamOpenContest";
       if (disabled ? sanity.ok || sanity.code !== BrotError.ContestExitDisabled : !sanity.ok) {
-        failures.push(`${name}: the baseline is ${sanity.ok ? "accepted" : `refused (${sanity.error})`}; its cases prove nothing`);
+        failures.push(
+          `${name}: the baseline is ${sanity.ok ? "accepted" : `refused (${sanity.error})`}; its cases prove nothing`,
+        );
         continue;
       }
       const { w, ix } = await baseline();
