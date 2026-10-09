@@ -169,6 +169,42 @@ jobs:
           SBF_OUT_DIR: ${{ github.workspace }}/target/deploy
         run: cargo test --locked -p brot-markets --features no-entrypoint,mainnet
 
+      # Sprint 03 (carried from Sprint 01): Surfpool runs the price reader inside the program's
+      # instructions. Pinned by version and by SHA-256, and downloaded rather than piped into a
+      # shell: a `curl | bash` whose curl fails exits with bash's status, which is how another
+      # project's gate went green having run nothing. Both hashes were computed on 2026-10-09 from
+      # the release asset; the archive's equals the digest GitHub publishes for it, and the release
+      # publishes no checksum file (knowledge-base/tecnologia/surfpool.md). The repository moved
+      # from txtx/surfpool, which redirects here. A mismatch, a missing file or another version
+      # fails the step; nothing is extracted before the archive's hash matches.
+      - name: Install Surfpool (pinned, checksum-verified)
+        env:
+          SURFPOOL_VERSION: "1.6.0"
+          SURFPOOL_ARCHIVE_SHA256: cb471b00aa3b7d603338eb74ebfec1d23959ecba005b5f1be42ba8d174107fc2
+          SURFPOOL_BINARY_SHA256: 53128829df4b482c2ade476bca5bbf6f34f30a4f32bab25e02d2aa5f9de49263
+        run: |
+          set -euo pipefail
+          download="$RUNNER_TEMP/surfpool-download"
+          bin="$RUNNER_TEMP/surfpool-bin"
+          mkdir "$download" "$bin"
+          curl -sSfL --retry 3 -o "$download/surfpool-linux-x64.tar.gz" \
+            "https://github.com/solana-foundation/surfpool/releases/download/v${SURFPOOL_VERSION}/surfpool-linux-x64.tar.gz"
+          echo "${SURFPOOL_ARCHIVE_SHA256}  $download/surfpool-linux-x64.tar.gz" | sha256sum --check --strict -
+          tar -xzf "$download/surfpool-linux-x64.tar.gz" -C "$bin" surfpool
+          echo "${SURFPOOL_BINARY_SHA256}  $bin/surfpool" | sha256sum --check --strict -
+          chmod +x "$bin/surfpool"
+          test "$("$bin/surfpool" --version)" = "surfpool ${SURFPOOL_VERSION}"
+          echo "$bin" >> "$GITHUB_PATH"
+
+      # A mainnet fork through the public RPC: a team campaign on SOL/USD's sponsored account is
+      # opened, resolving it is refused before the price moves, then a scenario moves the price
+      # across the target and the campaign resolves YES. The script refuses any other Surfpool.
+      - name: Price reader on Surfpool (scripts/surfpool/price-touch.ts)
+        timeout-minutes: 10
+        env:
+          SURFPOOL_EXPECTED_VERSION: "1.6.0"
+        run: bun run scripts/surfpool/price-touch.ts
+
       # The program is never built on the shared server (technical plan, section 10). What goes
       # to a cluster is this artifact. It is published only from main and only after every step
       # above passed, so a red run or a pull request never leaves a deployable binary behind.
