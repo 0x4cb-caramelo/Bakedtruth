@@ -35,12 +35,15 @@ import {
   getCampaignCodec,
   getEntryCodec,
   getGlobalConfigCodec,
+  getJoinCodec,
   type Campaign,
   type CampaignArgs,
   type Entry,
   type EntryArgs,
   type GlobalConfig,
   type GlobalConfigArgs,
+  type Join,
+  type JoinArgs,
 } from "../accounts";
 import {
   getAdminAcceptAdminInstruction,
@@ -136,6 +139,7 @@ export enum BrotMarketsAccount {
   Campaign,
   GlobalConfig,
   Entry,
+  Join,
 }
 
 export enum BrotMarketsInstruction {
@@ -415,6 +419,7 @@ export type BrotMarketsPluginAccounts = {
   campaign: ReturnType<typeof getCampaignCodec> & SelfFetchFunctions<CampaignArgs, Campaign>;
   globalConfig: ReturnType<typeof getGlobalConfigCodec> & SelfFetchFunctions<GlobalConfigArgs, GlobalConfig>;
   entry: ReturnType<typeof getEntryCodec> & SelfFetchFunctions<EntryArgs, Entry>;
+  join: ReturnType<typeof getJoinCodec> & SelfFetchFunctions<JoinArgs, Join>;
 };
 
 export type BrotMarketsPluginInstructions = {
@@ -487,6 +492,7 @@ export function brotMarketsProgram() {
           campaign: addSelfFetchFunctions(client, getCampaignCodec()),
           globalConfig: addSelfFetchFunctions(client, getGlobalConfigCodec()),
           entry: addSelfFetchFunctions(client, getEntryCodec()),
+          join: addSelfFetchFunctions(client, getJoinCodec()),
         },
         instructions: {
           adminInitializeConfig: (input) =>

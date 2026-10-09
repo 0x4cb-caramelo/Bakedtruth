@@ -145,8 +145,11 @@ pub struct Campaign {
     /// Epoch kinds only (Sprint 03): the epoch whose stake or pool snapshot is read; else zero.
     #[idl_type("u64")]
     pub epoch: LeU64,
+    /// The minimum entry this campaign opened with, copied from the config (question 5, 2026-10-09).
+    #[idl_type("u64")]
+    pub min_entry_lamports: LeU64,
     #[padding]
-    pub _reserved: [u8; 56],
+    pub _reserved: [u8; 48],
 }
 
 zero_copy!(Campaign = 512);

@@ -9,3 +9,4 @@
 export * from "./campaign";
 export * from "./entry";
 export * from "./globalConfig";
+export * from "./join";

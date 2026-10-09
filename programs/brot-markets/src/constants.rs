@@ -22,6 +22,9 @@ pub const CAMPAIGN_SEED: &[u8] = b"campaign";
 pub const VAULT_SEED: &[u8] = b"vault";
 /// One `Entry` per baker and campaign, both sides: `["entry", campaign, baker]`.
 pub const ENTRY_SEED: &[u8] = b"entry";
+
+/// `["join", campaign, baker, index]`: one account per join (founder decision, 2026-10-09).
+pub const JOIN_SEED: &[u8] = b"join";
 /// The PDA that signs the program's self-CPI events (T4): `["__event_authority"]`.
 pub const EVENT_AUTHORITY_SEED: &[u8] = b"__event_authority";
 

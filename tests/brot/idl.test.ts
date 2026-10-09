@@ -162,10 +162,11 @@ describe("idl matches the test kit", () => {
   });
 
   test("accounts have the hand-written layouts", () => {
-    expect(IDL.accounts.map((a) => a.name).sort()).toEqual(["Campaign", "Entry", "GlobalConfig"]);
+    expect(IDL.accounts.map((a) => a.name).sort()).toEqual(["Campaign", "Entry", "GlobalConfig", "Join"]);
     expect(idlLayout("GlobalConfig")).toEqual(camelLayout(S.GLOBAL_CONFIG));
     expect(idlLayout("Campaign")).toEqual(camelLayout(S.CAMPAIGN));
     expect(idlLayout("Entry")).toEqual(camelLayout(S.ENTRY));
+    expect(idlLayout("Join")).toEqual(camelLayout(S.JOIN));
     expect(idlLayout("CreationParams")).toEqual(camelLayout(S.CREATION_PARAMS));
   });
 

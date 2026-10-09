@@ -95,7 +95,8 @@ export const CAMPAIGN: Layout = [
   ["creator_share_from_fee", "u64"],
   ["paid_out_total", "u64"],
   ["epoch", "u64"],
-  ["_reserved", { bytes: 56 }],
+  ["min_entry_lamports", "u64"],
+  ["_reserved", { bytes: 48 }],
 ];
 
 export const ENTRY: Layout = [
@@ -107,7 +108,21 @@ export const ENTRY: Layout = [
   ["baker", "pubkey"],
   ["amount_yes", "u64"],
   ["amount_no", "u64"],
-  ["_reserved", { bytes: 16 }],
+  ["join_count", "u32"],
+  ["_reserved", { bytes: 12 }],
+];
+
+export const JOIN: Layout = [
+  ["tag", "u8"],
+  ["version", "u8"],
+  ["bump", "u8"],
+  ["side", "u8"],
+  ["campaign", "pubkey"],
+  ["baker", "pubkey"],
+  ["index", "u32"],
+  ["joined_at", "i64"],
+  ["amount", "u64"],
+  ["_reserved", { bytes: 8 }],
 ];
 
 // --- Instruction arguments (after the one-byte discriminator) ---------------------------------

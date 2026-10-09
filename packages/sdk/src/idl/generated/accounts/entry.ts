@@ -23,6 +23,8 @@ import {
   getBytesEncoder,
   getStructDecoder,
   getStructEncoder,
+  getU32Decoder,
+  getU32Encoder,
   getU64Decoder,
   getU64Encoder,
   getU8Decoder,
@@ -49,6 +51,7 @@ export type Entry = {
   baker: Address;
   amountYes: bigint;
   amountNo: bigint;
+  joinCount: number;
   reserved: ReadonlyUint8Array;
 };
 
@@ -61,6 +64,7 @@ export type EntryArgs = {
   baker: Address;
   amountYes: number | bigint;
   amountNo: number | bigint;
+  joinCount: number;
   reserved: ReadonlyUint8Array;
 };
 
@@ -75,7 +79,8 @@ export function getEntryEncoder(): FixedSizeEncoder<EntryArgs> {
     ["baker", getAddressEncoder()],
     ["amountYes", getU64Encoder()],
     ["amountNo", getU64Encoder()],
-    ["reserved", fixEncoderSize(getBytesEncoder(), 16)],
+    ["joinCount", getU32Encoder()],
+    ["reserved", fixEncoderSize(getBytesEncoder(), 12)],
   ]);
 }
 
@@ -90,7 +95,8 @@ export function getEntryDecoder(): FixedSizeDecoder<Entry> {
     ["baker", getAddressDecoder()],
     ["amountYes", getU64Decoder()],
     ["amountNo", getU64Decoder()],
-    ["reserved", fixDecoderSize(getBytesDecoder(), 16)],
+    ["joinCount", getU32Decoder()],
+    ["reserved", fixDecoderSize(getBytesDecoder(), 12)],
   ]);
 }
 

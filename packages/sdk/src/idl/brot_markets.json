@@ -1534,11 +1534,18 @@
             ]
           },
           {
+            "name": "minEntryLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
             "name": "reserved",
             "type": {
               "array": [
                 "u8",
-                56
+                48
               ]
             },
             "attrs": [
@@ -1685,11 +1692,88 @@
             ]
           },
           {
+            "name": "joinCount",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
             "name": "reserved",
             "type": {
               "array": [
                 "u8",
-                16
+                12
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Join",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tag",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "side",
+            "type": {
+              "defined": "Side"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "baker",
+            "type": "publicKey"
+          },
+          {
+            "name": "index",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "joinedAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "amount",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                8
               ]
             },
             "attrs": [
