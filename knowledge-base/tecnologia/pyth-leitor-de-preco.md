@@ -257,3 +257,68 @@ não patrocina, e quem as mantém: `pyth-feeds-patrocinados.md`.
 - https://docs.pyth.network/price-feeds/core/upgrade/preparing/solana
 - https://hermes.pyth.network/v2/price_feeds (identificadores, sem chave)
 - https://api.github.com/repos/txtx/surfpool/releases
+
+## Sprint 04: the push oracle's update rule (source read)
+
+**Fonte.** Repositório `pyth-network/pyth-crosschain`, commit `a4d38b18550067d79972c94eb31abce2a6c3efc2`, data do
+commit 2026-10-08 (19:00:30 UTC; a data do autor no commit é 15:00:30 -04:00). Clone raso em 2026-10-09. Caminhos
+abaixo são relativos a `target_chains/solana/`.
+
+**Quem é quem [F].**
+- `pyt2F414BA6dPttK6RddPZUdHfapoBN24GL5wbrPCou` é o push oracle: `sdk/js/pyth_solana_receiver/src/address.ts:33-35`
+  e `pyth_solana_receiver_sdk/src/lib.rs:19-20`, sob a feature `pro-compatible`. O código-fonte está em
+  `programs/pyth-push-oracle/src/lib.rs`, e a feature está em `programs/pyth-push-oracle/Cargo.toml:17`.
+- `rec2HHDDnjLfj4kE7VyEtFA1HPGQLK33259532cRyHp` é o receptor: `pyth_solana_receiver_sdk/src/lib.rs:18-19`, feature
+  `pro-compatible` de `programs/pyth-solana-receiver/Cargo.toml:17`. Código em `programs/pyth-solana-receiver/src/lib.rs`.
+- O push oracle chama o receptor por CPI (`pyth-push-oracle/src/lib.rs:97`, `pyth_solana_receiver_sdk::cpi::post_update`).
+  A conta patrocinada tem como `write_authority` a própria PDA do push oracle (`pyth-push-oracle/src/lib.rs:55`).
+
+**A regra de atualização do push oracle [F].** Em `programs/pyth-push-oracle/src/lib.rs`:
+- L66-76: o tempo atual é o `price_message.publish_time` da conta guardada (zero se a conta está vazia).
+- L84-92: o tempo da mensagem nova é o `publish_time` da `PriceFeedMessage` (outros tipos dão erro, L89-90).
+- L94-96: `if next_timestamp > current_timestamp`. O comentário de L94-95 diz: "Pushing a stale price suceeds without
+  changing the on-chain state." Estritamente maior: um `publish_time` igual também é pulado.
+- L97: a CPI para `post_update` só acontece dentro desse `if`. Sem `else`.
+- L109: `Ok(())`. Não há erro no caminho de pulo.
+
+**Resposta à pergunta [F].**
+1. **`publish_time` não maior: pulado, sem escrita, e a transação tem sucesso.** Não há CPI (L96-97), logo nenhuma escrita
+   na conta e nenhuma taxa paga ao receptor (a taxa é cobrada em `pay_single_update_fee`, chamado só dentro de
+   `post_price_update_from_vaa`, `receptor/src/lib.rs:459`). O teste `programs/pyth-push-oracle/tests/test_update_price_feed.rs:149-164`
+   manda uma atualização velha e espera sucesso; a linha 149 diz "The tx succeeds w/o updating on-chain account state."
+2. **`posted_slot` não maior: não há regra.** O push oracle não lê `posted_slot` em nenhuma linha de `src/` (busca
+   feita em todo o diretório). O `posted_slot` é gravado pelo receptor, `receptor/src/lib.rs:467`
+   (`price_update_account.posted_slot = Clock::get()?.slot;`), e não é comparado com nada. Logo, uma atualização com
+   `publish_time` igual e slot maior é pulada, e uma com `publish_time` maior é gravada, sem olhar o slot.
+3. **Monotonia no receptor: ausente.** `UpdatesNotMonotonic` é declarado em `pyth-push-oracle/src/lib.rs:28-29` e
+   não é usado em lugar nenhum da árvore (a única outra menção é a IDL TypeScript,
+   `sdk/js/pyth_solana_receiver/src/idl/pyth_push_oracle.ts:107,123`). O receptor não tem essa variante em
+   `programs/pyth-solana-receiver/src/error.rs`. Em `post_price_update_from_vaa` (`receptor/src/lib.rs:449-474`),
+   a gravação é incondicional: `price_update_account.price_message = price_feed_message;` (L466), com
+   `posted_slot` na L467. Não há comparação com o valor anterior.
+
+**O que isso significa para a regra "a conta patrocinada só anda para a frente" [F + INF].**
+- [F] Pelo caminho do push oracle, a conta só é reescrita quando `publish_time` cresce (L94-97). Logo, o
+  `publish_time` gravado nunca diminui por esse caminho.
+- [F] O receptor, sozinho, não impede regressão. Quem chamar `post_update` do receptor com uma conta de
+  `write_authority` própria pode reescrever. O que impede isso para a conta patrocinada é a checagem de
+  `write_authority` em `receptor/src/lib.rs:343` (`PostUpdate`, linhas 330-349): a conta existente só aceita o
+  signatário que é a sua `write_authority`, e a PDA só é assinada pelo push oracle (`pyth-push-oracle/src/lib.rs:58-63`).
+- [INF] Portanto o `StaleFeed` (que supõe que a conta só anda para a frente) está apoiado no código para o caminho
+  normal. Não está provado que a PDA não possa ser criada por outro caminho. A conferência da criação não foi feita.
+- [INF] O `posted_slot` não serve como segunda chave de ordenação: o código não garante que ele cresça junto com o
+  `publish_time`.
+
+**Observado on-chain, não verificado pelo código.**
+- Na devnet, em 2026-10-09, uma das 60 transações recentes na conta SOL/USD foi pulada por não ser mais nova, e a
+  transação teve sucesso (ver a tabela da seção 1.9 acima). Esse número veio de `scripts/push-oracle-probe.ts`,
+  não do código.
+- Que a versão ativa do programa na cadeia seja a deste commit. Não comparei o binário implantado com um build
+  deste SHA.
+
+**Não verificado.**
+- O hash do binário implantado em `pyt2F4...` e `rec2HH...` contra o build deste commit.
+- Se há atualização do push oracle depois de 2026-10-08 (o commit é o último que li; não olhei o histórico).
+- A criação da PDA da conta patrocinada: se alguém sem a chave da PDA pode criar a conta (ver [INF] acima).
+- O comportamento de contas de outros shards ou com `feed_id` diferente do da conta. A checagem de `feed_id`
+  (`pyth-push-oracle/src/lib.rs:103-106`) só roda depois da CPI.
