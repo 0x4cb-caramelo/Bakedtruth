@@ -84,7 +84,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09): the two fonts the site serves itself, the theme script in <head> before the stylesheet, the notice, the top bar, the page an | 61 |
+| [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09): the two fonts the site serves itself, the theme script in <head> before the stylesheet, the notice, the top bar, the page an | 62 |
 | [`manifest.ts`](app/app/manifest.ts) | the installable PWA, manifest only (Sprint 13 DoD, S2; TP §3.6): the name, the start page, standalone display, the dark theme's colours and the icons scripts/pw | 33 |
 | [`page.tsx`](app/app/page.tsx) | the home route (Sprint 10): the campaign list from the read API, with the search, the filters, the sort and the cards. Since Sprint 13 the campaigns the team un | 19 |
 
@@ -134,7 +134,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`copy-site.ts`](app/components/copy-site.ts) | the words every screen shows above any campaign or entry (BR-47; P1 §4.6), in English per L-01: the test-money notice and the not-audited notice, while each is  | 20 |
+| [`copy-site.ts`](app/components/copy-site.ts) | the words every screen shows above any campaign or entry (BR-47; P1 §4.6), in English per L-01: the test-money notice and the not-audited notice, while each is  | 22 |
 | [`mascot.tsx`](app/components/mascot.tsx) | Mounts the mascot once for the whole app. Each page decides where it may stand with | 31 |
 | [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 37 |
 | [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar (Sprint 09): the brand, the routes (Sprint 13 adds "How it works" and the fees, so both open from a phone too), the theme button and the wall | 68 |
@@ -279,7 +279,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`registry.ts`](app/features/notices/registry.ts) | every mandatory notice that holds on devnet (BR-47; P1 §4.6; TP §3.6 "Notices and copy"; Sprint 13 DoD), each with the screens that must show it and the compone | 171 |
+| [`registry.ts`](app/features/notices/registry.ts) | every mandatory notice that holds on devnet (BR-47; P1 §4.6; TP §3.6 "Notices and copy"; Sprint 13 DoD), each with the screens that must show it and the compone | 178 |
 
 ## `app/features/record/`
 
@@ -1097,7 +1097,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`server.mjs`](services/landing/server.mjs) | HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API), of the unlisted campaign preview under /dev0x/ and of docs.brot.markets (the docs. ho | 178 |
+| [`server.mjs`](services/landing/server.mjs) | HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API), of the unlisted campaign preview under /dev0x/ and of docs.brot.markets (the docs. ho | 189 |
 
 ## `services/landing/history/pitch-1/`
 
@@ -1192,7 +1192,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`dev0x.test.mjs`](services/landing/tests/dev0x.test.mjs) | tests the unlisted campaign preview under /dev0x/ over real HTTP: redirects, noindex, its CSP, the files it needs, the refusal of paths out of its folder, and t | 151 |
-| [`docs.test.mjs`](services/landing/tests/docs.test.mjs) | tests docs.brot.markets: each generated page says what its text in docs/wiki says, every page is in the menu, every link and file a page points at exists, and t | 135 |
+| [`docs.test.mjs`](services/landing/tests/docs.test.mjs) | tests docs.brot.markets: each generated page says what its text in docs/wiki says, every page is in the menu, every link and file a page points at exists, the s | 176 |
 | [`leads.test.mjs`](services/landing/tests/leads.test.mjs) | tests the waitlist store and the request limiter of the "coming soon" site (node --test) | 125 |
 | [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 229 |
 | [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 193 |
@@ -1301,7 +1301,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`helpers.ts`](tests/e2e/helpers.ts) | what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page opened with the injected wallet and the runner's answer f | 75 |
 | [`playwright.config.ts`](tests/e2e/playwright.config.ts) | the web smoke's Playwright configuration (Sprint 11; @playwright/test 1.63.0, pinned in package.json, whose Chromium is build 1243): the site built against the  | 27 |
 | [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 65 |
-| [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 158 |
+| [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 161 |
 | [`smoke.e2e.ts`](tests/e2e/smoke.e2e.ts) | the web smoke (Sprint 11 DoD; `bun run e2e`): the built site in Chromium at desktop width and at 412 CSS px, with an injected Wallet Standard test wallet, again | 198 |
 | [`states.e2e.ts`](tests/e2e/states.e2e.ts) | "campaign states" in the web smoke (Sprint 12 DoD; `bun run e2e -- --grep "campaign states"`): the built site in Chromium against the program in LiteSVM. Every  | 79 |
 | [`upgrade.e2e.ts`](tests/e2e/upgrade.e2e.ts) | A-8 in the web smoke (the founder's answer of 2026-10-10): the program is upgraded while a page built for its previous deploy is open (the site was built agains | 92 |

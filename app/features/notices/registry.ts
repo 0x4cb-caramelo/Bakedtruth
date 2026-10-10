@@ -5,11 +5,11 @@
  *          copy files: this list adds none. P1 §4.6's line on an automatic payout at the end of the 6-hour window is
  *          not here: on devnet nothing pays out by itself yet, so the founder replaced it (2026-10-10) with the review
  *          rule and "Waiting for payout", which promise no time.
- * Version: 0.2.1 (the founder's answer 9a: the footer's privacy link; 0.2.0, the Sprint 13 adversarial review: each
- *          notice names the screen that mounts it, never its copy file; the leaderboard's leave line)
+ * Version: 0.2.2 (the founder, 2026-10-10: the footer's age line; 0.2.1, answer 9a: the footer's privacy link; 0.2.0,
+ *          the Sprint 13 adversarial review: each notice names the screen that mounts it; the leaderboard's leave line)
  * Sprint:  13 (site: ranking, notices and copy)
  */
-import { AUDIT_NOTICE, PRIVACY_LABEL, TEST_NOTICE } from "../../components/copy-site";
+import { AGE_NOTICE, AUDIT_NOTICE, PRIVACY_LABEL, TEST_NOTICE } from "../../components/copy-site";
 import { CREATOR_NOTICE } from "../campaign-page/copy";
 import { REPORT, STATES, WAITING } from "../campaign-page/copy-states";
 import { LOCK_NOTICE, NOTICES, SHEET } from "../entry/copy";
@@ -55,6 +55,13 @@ export const MANDATORY_NOTICES: readonly MandatoryNotice[] = [
     text: PRIVACY_LABEL,
     screens: "every screen, in the footer, linking PRIVACY_URL (app/lib/config.ts)",
     drawnBy: [{ file: "app/layout.tsx", uses: "href={PRIVACY_URL}" }],
+  },
+  {
+    id: "adults",
+    source: "the founder (2026-10-10): the age rule, which lived in the terms (down until Sprint 17)",
+    text: AGE_NOTICE,
+    screens: "every screen, in the footer",
+    drawnBy: [{ file: "app/layout.tsx", uses: "{AGE_NOTICE}" }],
   },
   {
     id: "lock",

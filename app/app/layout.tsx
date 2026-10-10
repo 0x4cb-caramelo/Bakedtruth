@@ -1,9 +1,9 @@
 /**
  * Purpose: the site's root layout (Sprint 09): the two fonts the site serves itself, the theme script in <head> before
  *          the stylesheet, the notice, the top bar, the page and the footer, which since Sprint 13 says nothing here is
- *          an offer (BRAND.md's footer line) and, since the founder's answer 9a, links the privacy page. Providers wrap
- *          the page; the wallet is registered once in them.
- * Version: 0.2.2
+ *          an offer (BRAND.md's footer line) and, since the founder's answer 9a, links the privacy page and says the age
+ *          rule. Providers wrap the page; the wallet is registered once in them.
+ * Version: 0.2.3
  * Sprint:  09 (site shell, theme and wallet)
  */
 import type { Metadata } from "next";
@@ -15,7 +15,7 @@ import { THEME_HEAD_SCRIPT } from "@/lib/theme";
 import { Mascot } from "@/components/mascot";
 import { Providers } from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
-import { NOT_AN_OFFER, PRIVACY_LABEL } from "@/components/copy-site";
+import { AGE_NOTICE, NOT_AN_OFFER, PRIVACY_LABEL } from "@/components/copy-site";
 import { PRIVACY_URL } from "@/lib/config";
 import { SiteNotice } from "@/components/site-notice";
 
@@ -49,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 </a>
                 <span>{BRAND.motto}</span>
                 <p className="m-0 w-full">{NOT_AN_OFFER}</p>
+                <p className="m-0 w-full">{AGE_NOTICE}</p>
               </div>
             </footer>
           </div>

@@ -11,7 +11,7 @@ nothing about you to run a campaign, so we keep almost nothing.
 ## The whole thing in 30 seconds
 
 - **Waitlist:** your email, the date you joined, which version of the consent sentence you saw, and which form you
-  used. Gone when you leave, or after 12 months.
+  used. Gone when you leave, or after 12 months; our host's server backups keep a copy for up to 30 days more.
 - **Campaigns:** your wallet address and your entries. They live on Solana, which is public and permanent. We can't
   hide them or delete them, and neither can anyone else.
 - **Devnet leaderboard:** public wallet addresses ranked by points, worked out from Solana in our server's memory. You
@@ -21,7 +21,8 @@ nothing about you to run a campaign, so we keep almost nothing.
 ## 1. Who is responsible
 
 Brot Markets is run by its founders, Bernardo Nery, Lucas Galvão and Ronaldo Pereira. A company is being set up, and
-this page will name it when it exists. Contact: [@brotmarkets](https://x.com/brotmarkets) on X.
+this page will name it when it exists. Contact: [gm@brot.markets](mailto:gm@brot.markets), or
+[@brotmarkets](https://x.com/brotmarkets) on X.
 
 ## 2. What we collect, and why
 
@@ -92,18 +93,20 @@ The campaign site keeps a few notes in your browser's storage, on your device. I
 > **The crumb:** a few helpers, all named. No secret bakers.
 
 - **Cloudflare** carries every request to our server. Like any network provider, it sees your IP address, the page you
-  ask for and what you type into our forms, under its own [privacy policy](https://www.cloudflare.com/privacypolicy/). Cloudflare also tries to add
+  ask for and what you type into our forms, under its own [privacy policy](https://www.cloudflare.com/privacypolicy/).
+  It keeps basic logs of these requests for up to 7 days. Cloudflare also tries to add
   its own visitor statistics to our pages; our site's security settings block that script, so nothing is measured.
 - **Our server** is rented from Hostinger, in the United States. Only the services that run our sites, and the
   founders who manage the server, can read the waitlist file and the list of wallets that asked to leave the
-  leaderboard.
+  leaderboard. Hostinger's backups of the server hold both for up to 30 days.
 - **Solana, and the wallet you choose** (Phantom or another), handle your transactions under their own rules. We don't
   control them.
 - **The Solana RPC service** the campaign site reads the chain through (on devnet, Solana's public one,
   api.devnet.solana.com) sees your IP address and, when the page reads your balance or your entries, your wallet
   address, under its own rules.
 - **X** carries what you send us there, such as a report about a campaign or a request to leave the leaderboard. It
-  stays on X, under X's rules. Asking on X ties your X account to your wallet in our messages there.
+  stays on X, under X's rules. Asking on X ties your X account to your wallet in our messages there, until we delete
+  the conversation once your request is done.
 - **An email service** will be needed to send the "we're open" email. We haven't picked one. This page will name it
   before the first email goes out.
 
@@ -122,13 +125,14 @@ intelligence trained on your data.
 > **The crumb:** ask, and you'll get it. Usually in a single slice.
 
 Depending on where you live (for example under the LGPD in Brazil or the GDPR in Europe), you can ask us to show you,
-correct, export or delete your data, or to stop using it. In practice:
+correct, export or delete your data, or to stop using it. Ask at [gm@brot.markets](mailto:gm@brot.markets) or on X;
+we answer every request within 15 days. In practice:
 
-- **Leave the waitlist:** type your email at brot.markets/privacy. It is deleted at once. We keep no copy of the list
-  anywhere else; our hosting provider may keep its own backups of the whole server for a limited time.
+- **Leave the waitlist:** type your email at brot.markets/privacy. It is deleted from the list at once. We keep no
+  other copy, but our host's backups of the server can hold it for up to 30 days more, and then it's gone.
 - **A copy of your waitlist record:** ask us (section 1). It's four fields; we'll send them.
 - **Leave the devnet leaderboard:** send us a direct message on X. We'll ask your wallet to sign a short message, to
-  confirm the wallet is yours, then leave it out of the ranking. We answer within 15 days.
+  confirm the wallet is yours, then leave it out of the ranking and delete our conversation once it's done.
 - **Your activity on Solana** can't be deleted, by us or by anyone. Our copy of it lives only in memory and is rebuilt
   from Solana, so there's nothing of it on disk to delete.
 - **Complain to a data protection authority** in your country, like the ANPD in Brazil, if you think we got it wrong.

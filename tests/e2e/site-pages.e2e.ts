@@ -1,18 +1,18 @@
 /**
  * Purpose: "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built
  *          site in Chromium against the program in LiteSVM, at desktop width and at 412 px. Every route shows the devnet
- *          and not-audited notices, and its footer links the privacy page; the fee page shows P1 §1.2's worked
- *          example; "How it works" opens from the top bar on a phone without sideways scrolling, and the mascot's bubble
- *          stays inside the screen; the record publishes the powers table and checks its keys against the chain; every
- *          campaign page has "Report this campaign"; after a whole cycle the leaderboard ranks the test wallet as "You",
- *          from the read API's own route; the site sends its security headers (X2.5), loads no third-party script
- *          (K-10) and serves the PWA manifest with its icons and no service worker.
- * Version: 0.2.1 (the founder's answer 9a: the footer's privacy link; 0.2.0, the Sprint 13 reviews)
+ *          and not-audited notices, and its footer links the privacy page and says the age rule; the fee page shows P1
+ *          §1.2's worked example; "How it works" opens from the top bar on a phone without sideways scrolling, and the
+ *          mascot's bubble stays inside the screen; the record publishes the powers table and checks its keys against
+ *          the chain; every campaign page has "Report this campaign"; after a whole cycle the leaderboard ranks the test
+ *          wallet as "You", from the read API's own route; the site sends its security headers (X2.5), loads no
+ *          third-party script (K-10) and serves the PWA manifest with its icons and no service worker.
+ * Version: 0.2.2 (the founder, 2026-10-10: the age line; 0.2.1, answer 9a: the privacy link; 0.2.0, Sprint 13)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { expect, test, type Page } from "@playwright/test";
 
-import { AUDIT_NOTICE, PRIVACY_LABEL, TEST_NOTICE } from "../../app/components/copy-site";
+import { AGE_NOTICE, AUDIT_NOTICE, PRIVACY_LABEL, TEST_NOTICE } from "../../app/components/copy-site";
 import { PRIVACY_URL } from "../../app/lib/config";
 import { PANEL, SHEET } from "../../app/features/entry/copy";
 import { choose, connect, control, openCampaign, panel, sheet } from "./helpers";
@@ -26,7 +26,9 @@ async function noSidewaysScroll(page: Page) {
 }
 
 test.describe("site pages and notices", () => {
-  test("every route shows the devnet and not-audited notices, and links the privacy page", async ({ page }) => {
+  test("every route shows the devnet and not-audited notices, the age line, and links the privacy page", async ({
+    page,
+  }) => {
     const made = await control<{ id: string }>("/state", { name: "review" });
     for (const route of [...ROUTES, `/c/${made.id}`]) {
       await page.goto(route);
@@ -35,6 +37,7 @@ test.describe("site pages and notices", () => {
       await expect(notice).toContainText(AUDIT_NOTICE);
       const privacy = page.locator("footer").getByRole("link", { name: PRIVACY_LABEL });
       await expect(privacy).toHaveAttribute("href", PRIVACY_URL);
+      await expect(page.locator("footer")).toContainText(AGE_NOTICE);
       await noSidewaysScroll(page);
     }
   });
