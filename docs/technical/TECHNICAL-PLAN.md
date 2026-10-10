@@ -1,12 +1,13 @@
 # Brot Markets — Technical Plan
 
-**Version:** 0.1.4 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
+**Version:** 0.1.5 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
 todo em ingles") from the architecture proposal 0.4 the founder approved that day ("sim para todos") and from BP
 v0.0.4, merged into `main` with PR #35 on 2026-10-08; v0.1.1 aligns it with what Sprint 02 built and measured
 (`docs/sprints/sprint-02-pot-core.md`, "TP to align"); v0.1.2 aligns it with what Sprint 03 built and to the founder's
 answers of 2026-10-09 (`docs/sprints/sprint-03-readers-resolution.md`, "Record and retrospective";
 `session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`); v0.1.3 aligns it with Sprint 04 (§3.4.18) and
-v0.1.4 with Sprint 05 (§3.4.19) · **Date:** 2026-10-09 · **Supersedes:** v0.0.1 of 2026-10-05,
+v0.1.4 with Sprint 05 (§3.4.19); v0.1.5 records what Sprint 13 built (§3.5 points, §3.6 routes, §6, §7.2, §7.3) and its
+privacy review (§8.2) · **Date:** 2026-10-10 · **Supersedes:** v0.0.1 of 2026-10-05,
 written in Portuguese, approved by the founder ("docs aprovados, podemos dar início"). Its last text, with §8.1, is in
 git history at commit `2089b81` (`git show 2089b81:docs/technical/TECHNICAL-PLAN.md`), the last commit that changed it;
 `0b40554`, the `main` before v0.1.0, holds the same text; tag `sprint-01` holds it before §8.1 was added
@@ -1249,7 +1250,12 @@ notice of §3.6 on burn, lock and stake campaigns.
 *Points, devnet only* (P2 §2.5 test 1; BR-29). Points are for correct calls, never for volume **[FD]** (TP v0.0.1
 §3.5). The formula is Q7's working default: 1 point per campaign entered on the right side **[FD]** (§14.2). Many
 wallets can inflate the ranking; the brake is how much test SOL a wallet can get from the devnet faucet **[AC]**. The
-Seeker Genesis Token is an optional extra signal, not in the MVP (§3.7).
+Seeker Genesis Token is an optional extra signal, not in the MVP (§3.7). **Built in Sprint 13 [F]:** the rule is the
+SDK's `pointsTable` (`packages/sdk/src/read/points.ts`): a point once the result is final (settling or settled, or the
+6-hour window ended without a contest, since the program refuses every team act from `review_ends_at` on); a void
+scores nothing; a join tallied as late never scores; a wallet with entries on both sides scores when either wins (Q7
+read literally; `BOTH_SIDES_SCORE`, a founder question). Until the indexer, `services/api` reads the program's own
+history in memory for it (`/api/v1/leaderboard`, §6).
 
 *Display price* (D-e, D-f) **[FD]**. The indexer fetches CoinGecko `simple/price` for SOL in US$ every few minutes,
 server-side, and serves it at `/api/v1/price` with its source and time; Pyth SOL/USD is the fallback. It is for
@@ -1357,13 +1363,14 @@ system of Sprint -1; it replaces the provisional `services/landing` on `127.0.0.
 | `/c/[id]/opengraph-image` | The share card (below) | 10 |
 | `/abrir` | The creation box (below) | Design in -1; built in 19 |
 | "My entries" | A wallet's entries, results and payouts. Its path, like those of the ranking, register and fee pages, is named with the site language (L-01). **Built at `/my-entries` in Sprint 12 [F]:** read from the chain (the wallet's own transactions, decoded by the SDK; the open `Entry` accounts) until `GET /api/v1/wallets/:address/entries` exists | 12 |
-| Ranking | Points on devnet (§3.5) | 13 |
-| Register and powers | Who can do what, from `content/powers.md` (BR-41), and the void log from `content/void-log/` (BR-45). **The void log is at `/record` since Sprint 12 [F]**, read on the server; its record format is `@brot/sdk/schemas` `VoidLogRecord`, with a JSON Schema at `content/void-log/record.schema.json` checked in CI | 12–13 |
-| Fees | A worked example net of fee and creator share; the refund policy (BR-32) | 13 |
+| Ranking | Points on devnet (§3.5). **Built at `/leaderboard` in Sprint 13 [F]:** from `/api/v1/leaderboard`, read in pages; the request carries no wallet, and the connected wallet's own line is found in the browser (§8.2) | 13 |
+| Register and powers | Who can do what, from `content/powers.md` (BR-41), and the void log from `content/void-log/` (BR-45). **The void log is at `/record` since Sprint 12 [F]**, read on the server; its record format is `@brot/sdk/schemas` `VoidLogRecord`, with a JSON Schema at `content/void-log/record.schema.json` checked in CI. **The powers table is at `/record` since Sprint 13 [F]**, each key by role and address, and checked live against the program's config and ProgramData in the visitor's browser | 12–13 |
+| Fees | A worked example net of fee and creator share; the refund policy (BR-32). **Built at `/fees` in Sprint 13 [F]**, every number from the SDK's finalize math | 13 |
+| How it works | The six steps, chance, no early exit, one-sided pot, void, who reads the result. **Built at `/how-it-works` in Sprint 13 [F]**, linked from the top bar so it opens on a phone | 13 |
 | Incident page | Who pauses, who speaks, where it is published (BR-42) | 16 |
 | Cloak and SODAX | Their own pages, never the signing page (BR-46); each waits for P-8. The Cloak page serves undisclosed sponsors (BR-17) | Cloak 15; SODAX 17 |
 | `/.well-known/assetlinks.json` | The Android app's App Links (§3.7) **[AC]** | 20 |
-| `app/manifest.ts` | Installable PWA, manifest and icons only (S2) | 13 |
+| `app/manifest.ts` | Installable PWA, manifest and icons only (S2). **Built in Sprint 13 [F]** as `app/app/manifest.ts` (Next's file convention), with icons drawn by `scripts/pwa-icons.ts`; no service worker | 13 |
 | Removed | `/sugestoes`: the suggestions page leaves with open creation (P1 §4.1). `/api/chat`: Sprint 09 (below) | 09 |
 
 **The creation box** (`app/features/open-campaign/`; proposal §2.9) **[DP]**.
@@ -1844,7 +1851,7 @@ exposes only `GET /healthz` and `POST /restart` (TP v0.0.1 §5, §12) **[DP]**.
 | `GET /api/v1/campaigns/:id/chance` | The history of the YES/NO split | 08 |
 | `GET /api/v1/activity` | Recent activity across campaigns (X1.4) | 08 |
 | `GET /api/v1/wallets/:address/entries` | One wallet's entries, results and payouts ("my entries"). Not built yet: Sprint 12's page reads the chain meanwhile | 08 |
-| `GET /api/v1/leaderboard` | Devnet points | 08 |
+| `GET /api/v1/leaderboard` | Devnet points. **Built in Sprint 13 [F]** in `services/api` from the program's own history (`history.ts`, in memory, incremental by `until`) and the live accounts, until the indexer takes it over; paged; it takes no wallet parameter (§8.2) | 08; 13 |
 | `GET /api/v1/names` | Display names from `content/account-names.json` and the pinned Pyth feed list | 08 |
 | `GET /api/v1/price` | SOL in US$, with source and time | 08 |
 | `GET /api/v1/health` | `program_last_deploy_slot`, `schema_version`, `cluster`, `entries_allowed` | 08 |
@@ -1935,7 +1942,7 @@ The red-team review of what a baker signs (Sprint 11, 2026-10-10) was acted on i
 
 | Finding | Risk while open | Sprint |
 |---|---|---|
-| `script-src 'unsafe-inline'` in the CSP (`app/next.config.ts`); a nonce through `proxy.ts`, or a hash of the theme script | A future injection on the signing page runs with no CSP backstop; none was found today | 13 or 16 |
+| `script-src 'unsafe-inline'` in the CSP (`app/next.config.ts`); a nonce through `proxy.ts`, or a hash of the theme script | A future injection on the signing page runs with no CSP backstop; none was found today | 16 (Sprint 13 left it: this Next.js writes its own inline scripts for the React payload, so a nonce means rendering every page per request, a change of the site's runtime best made with the hardening sprint) |
 | Compare a landed join with the summary the baker read (`signAndSendTransaction` hides the signed bytes) | A wallet that changes the join's parameters goes unseen; the program's `min_return_bps` and `expected_entry_total` still bound the outcome | 16 |
 | A web-smoke wallet that changes the bytes (Lighthouse assertions, a priority fee, a new blockhash) | The guard's handling of a modified transaction is tested only in code review | 16 |
 | A-8 reads ProgramData through the public devnet RPC, not through `/rpc` (the founder's answer, 2026-10-10) | An RPC that lies about the slot can pause signing (a false mismatch) or hide an upgrade from the page (a false match), as it can lie about every account the page reads; the program's own checks still bound what a join does | 08 (the relay) |
@@ -1952,8 +1959,8 @@ share paid by `close_campaign` missing from "received", a refresh that could ski
 |---|---|---|
 | `close_campaign` pays a still-reserved creator share with the rents but emits no `CreatorShareSettled`; the site infers it from the campaign's `CampaignFinalized` (the last 100 transactions) | A campaign whose finalize lies further back shows the share as not received (less, never more) | The next program upgrade (emit the event from the close) |
 | The SDK's preparations take `deploySlot` as optional (`prepareJoin`, `prepareOpenCampaign`, `prepareClaim`); the site always passes it | A new client that leaves it out signs without A-8's pause | 20 (before the app uses the SDK) |
-| `personalDataIn` misses bare domains and some handle forms (`"@x"`, `[@x]`) | A team note could name a person by a link the filter misses; two reviewers read every record | 13 |
-| The site finds `content/void-log/` from its working directory (`app/`) | On another host or a standalone build the record and the notes would be empty without an error | 13 (file tracing, or fail the build) |
+| `personalDataIn` misses bare domains and some handle forms (`"@x"`, `[@x]`) | A team note could name a person by a link the filter misses; two reviewers read every record | **Fixed in Sprint 13:** both forms and a bare domain are refused (tests/site/void-log.test.ts) |
+| The site finds `content/void-log/` from its working directory (`app/`) | On another host or a standalone build the record and the notes would be empty without an error | **Fixed in Sprint 13:** `app/lib/content.ts` finds `content/` or fails the build, for the void log, the powers table and the unlisted list |
 | A wallet that adds its own priority fee needs a little more than `claimFloor`; the copy says so | The claim fails without cost and is retried | None |
 | A wallet's address reaches the RPC operator through `getSignaturesForAddress` (the public devnet RPC now) | The operator can link the address to the visitor's IP; the relay must not log request parameters | 08 (the relay) |
 
@@ -2040,6 +2047,34 @@ people sign up.
 purge and the deletion form at `/privacy` when `brot-web` takes the address, nor to `/pitch` and `/pitch2`. Either
 the new site keeps a deletion path and the purge running until the last line expires, or the list is used for its
 stated purpose and then deleted. The founder chooses before Sprint 09 closes; the choice is recorded here.
+
+### 8.2 Sprint 13: the leaderboard and the report channel (gate 5)
+
+The `privacy-audit` skill's nine questions, answered before the sprint closes (roadmap gate 5), for the two Sprint 13
+features that touch a person: the leaderboard ranks wallet addresses in public, and "Report this campaign" sends people
+to a channel. Cloudflare's part is C13, read from Cloudflare's own pages
+(`knowledge-base/tecnologia/cloudflare-logs-visitantes.md`) **[F]**.
+
+| Question | The leaderboard (`/leaderboard`, `/api/v1/leaderboard`) | "Report this campaign" (C-10) |
+|---|---|---|
+| 1. What data | Public wallet addresses, each with its points, the campaigns it entered and those decided. No amount, no name. The API holds in memory the program's events it needs (entries with their baker and amount, results) | Whatever a person writes to Brot on X: their X account and their words. The site sends nothing: a plain link, `rel="noopener noreferrer"`, so not even the page's address goes to X |
+| 2. Why | BR-29: the devnet beta's points (P2 §2.5, test 1) | C-10: abuse reports; the remedy is unlisting from the home page |
+| 3. Where | On-chain, public and permanent; a copy in the API's memory, never on disk; the visitor's browser while the page is open | On X, under X's terms. The site keeps only `content/unlisted.json`: a campaign's number, a public reason and a time, in Git |
+| 4. Who can access | Anyone | On X, the people who hold the Brot account's login **[AC: who, and with which second factor]**; `content/unlisted.json`, anyone |
+| 5. Control | None needed for public data. The request carries no wallet: the page reads the ranked list and finds the connected wallet's line itself, so no request ties a wallet to an IP address | X's own account controls. A reason that names a person (an email, a handle, a URL, a domain) fails the site's build (`personalDataIn`) |
+| 6. Retention | On-chain, forever; the API's copy until it restarts | X's retention; the unlisted list as long as Git keeps it, which is why it may hold no personal data |
+| 7. Logs | The API logs counts and an error's name only: never a wallet, an IP or a query. Cloudflare sees each request's IP and address, kept under Cloudflare's policy with no period written (C13); the address never holds a wallet | None by Brot. X logs under X's policy |
+| 8. Deletion and export | The chain cannot be changed; the ranking is a view of it. A wallet's owner who asks to leave the ranking has no switch today **[Q]**: a hide list like the unlisted one is the proposal, for the privacy policy of Sprint 17 | Deleted on X by whoever wrote it. Nothing personal is kept by Brot |
+| 9. Document or consent | The page says addresses are public and nothing about the visitor is stored; the review sheet says entries are public and permanent before a first entry. The privacy policy (L-21, C-08, Sprint 17) must name the ranking | The policy of Sprint 17 names X as the channel, as the waitlist's privacy page already does |
+
+**Cloudflare (C13), what was read.** Every request to the site and to the API through the tunnel passes Cloudflare
+with the visitor's IP address and the address requested; Cloudflare shows these to the account as "Customer Logs",
+acts as processor, and writes no retention period for them; Logpush is now offered on the free plan, and the zone is on
+the free plan. Whether any log export is switched on, and how long the dashboard keeps requests, can only be read in
+the dashboard **[AC]**, the founder's. Browser RPC calls go to the RPC provider directly, not through Cloudflare (§7.3).
+
+**Verdicts.** Leaderboard: PASS_WITH_NOTES (the leave-the-ranking path, question 8). Report channel: PASS_WITH_NOTES
+(who holds the X account, question 4). Nothing blocks the merge; the two notes are founder items.
 
 ## 9. Testing strategy
 
@@ -2459,7 +2494,7 @@ Closed in Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`; `session-log/
 | C10 | How this Next.js version serves fonts | -1; 09 |
 | C11 | A multisig with a public wait for program upgrades | 16 |
 | C12 | `unix_timestamp` drift on devnet over time (one sample in Sprint 01: 1 s ahead) | 03 |
-| C13 | What Cloudflare logs about visitors | 13; 17 |
+| C13 | What Cloudflare logs about visitors. **Read in Sprint 13** (`knowledge-base/tecnologia/cloudflare-logs-visitantes.md`, §8.2): the IP address and traffic data of every request, shown to the account in its dashboard ("Customer Logs"), Cloudflare as processor, no retention period written; Logpush now on the free plan. Still to check in the dashboard: whether any log export is on, and how long the dashboard keeps requests | 13; 17 |
 | C18 | How the program reaches `sol_get_epoch_stake`: through `solana-epoch-stake =3.0.0` or a Pinocchio binding, and whether the pin is still needed once Anchor leaves (§1) | 02–03 |
 | C19 | SOL/USD freshness on devnet, and which sponsored feeds stay fresh there | 02; 03 |
 | C20 | The `litesvm` crate's `set_epoch_stake` for the `StakeAtLeast` YES path, in a version that builds under Rust 1.89 (0.16 is the candidate; 0.17 resolves Agave 4.3, §1) | 03 |
