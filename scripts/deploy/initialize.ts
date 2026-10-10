@@ -2,17 +2,26 @@
  * Purpose: the two writes the deploy makes in the same session as the deploy itself (TP §3.4.3, §7; Sprint 05):
  *          `admin_initialize_config`, signed by the program's upgrade authority, then `admin_set_team`, signed
  *          by the admin. Each is checked by reading the config back, field by field.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Sprint:  05 (SDK and the devnet cycle), lane OPS
  *
- * Whoever runs the initialization first becomes admin, so it follows the deploy at once; initialization leaves
- * the team empty, so nobody can pause until `admin_set_team`. The values come from deploy/devnet/init-params.json.
+ * Only the upgrade authority can initialize (the program reads it from ProgramData), so nobody can take the admin
+ * role first; the session matters because initialization leaves the team empty, and nobody can pause until
+ * `admin_set_team`. A config address someone funded is not a config: the program takes the account over. The
+ * values come from deploy/devnet/init-params.json.
  */
 import { readFileSync } from "node:fs";
 
 import { address, type Address, type TransactionSigner } from "@solana/kit";
 
-import { configAddress, decodeGlobalConfig, hexToBytes, teamOf, type GlobalConfig } from "@brot/sdk/read";
+import {
+  configAddress,
+  decodeGlobalConfig,
+  hexToBytes,
+  SYSTEM_PROGRAM_ID,
+  teamOf,
+  type GlobalConfig,
+} from "@brot/sdk/read";
 import { buildInitializeConfig, buildSetTeam, type CreationParamsArgs } from "@brot/sdk/tx";
 
 import { account, expectOk, send, type Rpc } from "../validator/rpc";
@@ -45,10 +54,11 @@ export function readInitParams(path: string): CreationParamsArgs {
   return params as unknown as CreationParamsArgs;
 }
 
-/** The config as stored, or null before initialization. */
+/** The config as stored, or null before initialization (an absent address, or one someone funded). */
 export async function readConfig(rpc: Rpc): Promise<GlobalConfig | null> {
   const found = await account(rpc, await configAddress());
-  return found ? decodeGlobalConfig(found) : null;
+  if (!found || (found.owner === SYSTEM_PROGRAM_ID && found.data.length === 0)) return null;
+  return decodeGlobalConfig(found);
 }
 
 /** A value in comparable form: integers as decimal strings, byte arrays as plain arrays. */
@@ -61,9 +71,26 @@ const plain = (value: unknown): unknown =>
         ? value.map(plain)
         : value;
 
+const differs = (actual: unknown, expected: unknown) =>
+  JSON.stringify(plain(actual)) !== JSON.stringify(plain(expected));
+
 function same(label: string, actual: unknown, expected: unknown) {
-  const [a, e] = [JSON.stringify(plain(actual)), JSON.stringify(plain(expected))];
-  if (a !== e) throw new Error(`${label}: stored ${a}, expected ${e}`);
+  if (differs(actual, expected)) {
+    throw new Error(`${label}: stored ${JSON.stringify(plain(actual))}, expected ${JSON.stringify(plain(expected))}`);
+  }
+}
+
+export type InitPlan = { admin: Address; feeRecipient: Address; params: CreationParamsArgs };
+
+/** The fields of a stored config that differ from `plan` (empty when a resume can go on to the team). */
+export function configDifferences(config: GlobalConfig, plan: InitPlan): string[] {
+  const out = [];
+  if (differs(config.admin, plan.admin)) out.push("admin");
+  if (differs(config.feeRecipient, plan.feeRecipient)) out.push("fee recipient");
+  for (const [key, value] of Object.entries(plan.params)) {
+    if (differs((config.params as Record<string, unknown>)[key], value)) out.push(`params.${key}`);
+  }
+  return out;
 }
 
 /** `admin_initialize_config`, then the stored config compared with what was asked. */

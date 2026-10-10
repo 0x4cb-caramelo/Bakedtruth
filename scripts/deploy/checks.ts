@@ -15,6 +15,8 @@ import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, realpathSync } from "node:fs";
 import { isAbsolute, relative, resolve, sep } from "node:path";
 
+import { checkKeyFile } from "../validator/keys";
+
 /** The files CI's `programs-<sha>` artifact holds besides SHA256SUMS (.github/workflows/ci.yml). */
 export const ARTIFACT_FILES = ["brot_markets.so", "brot_markets.json"] as const;
 
@@ -69,25 +71,28 @@ export function idlAddress(idlPath: string): string {
   return idl.metadata.address;
 }
 
-/** True when `child` is `parent` or inside it. */
-function within(parent: string, child: string): boolean {
+/** True when `child` is `parent` or inside it; `<parent>/..keys` is inside, `<parent>/../keys` is not. */
+export function within(parent: string, child: string): boolean {
   const rel = relative(parent, child);
-  return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
+  return !(rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel));
 }
 
 /**
- * The program keypair must come from its backup: an existing file outside the repository working tree (so it
- * is never committed, and never the throwaway `target/deploy/brot_markets-keypair.json` cargo-build-sbf writes).
+ * A key file must be an existing file outside the repository working tree, so it is never committed. The
+ * program keypair, besides, comes from its backup, never the throwaway `target/deploy/brot_markets-keypair.json`
+ * cargo-build-sbf writes. `label` names the key in the refusal (the upgrade authority, the fee payer, the admin).
+ * Then the checks every key file gets (scripts/validator/keys.ts): in no Git work tree, readable only by its owner.
  */
-export function checkKeypairLocation(path: string, repoRoot: string): string {
-  if (!existsSync(path)) throw new Error(`program keypair ${path} does not exist`);
+export function checkKeypairLocation(path: string, repoRoot: string, label = "program keypair"): string {
+  if (!existsSync(path)) throw new Error(`${label} ${path} does not exist`);
   const real = realpathSync(path);
   const root = realpathSync(repoRoot);
   if (real.split(sep).join("/").includes("/target/deploy/")) {
-    throw new Error(`refusing a program keypair under target/deploy/ (${real}): use the backup`);
+    throw new Error(`refusing the ${label} under target/deploy/ (${real}): use the backup`);
   }
-  if (within(root, real)) throw new Error(`refusing a program keypair inside the repository (${real}): use the backup`);
-  return real;
+  if (within(root, real))
+    throw new Error(`refusing the ${label} inside the repository (${real}): keep keys outside it`);
+  return checkKeyFile(real, label);
 }
 
 /** The keypair's address must be the declared id; any other id breaks every instruction at its event. */

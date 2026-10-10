@@ -61,14 +61,20 @@ describe("deploy checks refuse what the procedure forbids", () => {
     const root = mkdtempSync(join(tmpdir(), "brot-repo-test-"));
     mkdirSync(join(root, "target", "deploy"), { recursive: true });
     mkdirSync(join(root, "keys"));
+    mkdirSync(join(root, "..keys"));
     const outside = mkdtempSync(join(tmpdir(), "brot-backup-test-"));
-    for (const path of [join(root, "target/deploy/k.json"), join(root, "keys/k.json"), join(outside, "k.json")]) {
-      writeFileSync(path, "[]");
-    }
+    const files = ["target/deploy/k.json", "keys/k.json", "..keys/k.json"].map((f) => join(root, f));
+    for (const path of [...files, join(outside, "k.json")]) writeFileSync(path, "[]", { mode: 0o600 });
     expect(() => checkKeypairLocation(join(root, "target/deploy/k.json"), root)).toThrow("target/deploy");
     expect(() => checkKeypairLocation(join(root, "keys/k.json"), root)).toThrow("inside the repository");
+    // A folder named `..keys` is inside the repository, though its relative path starts with two dots.
+    expect(() => checkKeypairLocation(join(root, "..keys/k.json"), root)).toThrow("inside the repository");
     expect(() => checkKeypairLocation(join(outside, "missing.json"), root)).toThrow("does not exist");
     expect(checkKeypairLocation(join(outside, "k.json"), root)).toContain("brot-backup-test-");
+    // The upgrade authority, the fee payer and the admin are held to the same rule, named in the refusal.
+    expect(() => checkKeypairLocation(join(root, "keys/k.json"), root, "upgrade authority")).toThrow(
+      "refusing the upgrade authority inside the repository",
+    );
     expect(() => checkProgramAddress("4JH2yMHRiwYzedAYbhpxeBTGS8EgrDPXpFaB4yXSAZ7q", DECLARED)).toThrow("refusing");
     expect(() => checkProgramAddress(DECLARED, DECLARED)).not.toThrow();
   });

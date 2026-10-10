@@ -2,9 +2,12 @@
  * Purpose: rehearse every step of the devnet deploy on a local offline surfnet, inside a loopback-only network
  *          namespace: the artifact check (and its refusal of a changed byte), the program keypair checks, a real
  *          `solana program deploy` on the upgradeable loader at a throwaway address, why the declared id is
- *          required (that binary at another address fails at its event), and the initialization in the same
- *          session at the declared id: `admin_initialize_config` then `admin_set_team`, read back.
- * Version: 0.1.0
+ *          required (that binary at another address fails at its event), and the deploy's second half at the
+ *          declared id as `devnet-deploy.ts` and its `--resume` run it (scripts/deploy/finish.ts): the deployed
+ *          bytes and upgrade authority checked, `admin_initialize_config` (over a config address a stranger
+ *          funded) then `admin_set_team`, read back, a repeated resume ending at once; and what a stranger's
+ *          lamports do at a program's addresses (scripts/deploy/rehearse-funded.ts).
+ * Version: 0.1.2
  * Sprint:  05 (SDK and the devnet cycle), lane OPS
  *
  * `bun run scripts/deploy/rehearse.ts`. The binary is the local build (target/deploy), which never goes to a
@@ -17,7 +20,7 @@ import { join } from "node:path";
 
 import { generateKeyPairSigner, getAddressEncoder, getProgramDerivedAddress, type Address } from "@solana/kit";
 
-import { BPF_LOADER_UPGRADEABLE_ID, PROGRAM_ID } from "@brot/sdk/read";
+import { BPF_LOADER_UPGRADEABLE_ID, configAddress, PROGRAM_ID } from "@brot/sdk/read";
 import { buildInitializeConfig } from "@brot/sdk/tx";
 
 import { isolateOrExit } from "../validator/isolate";
@@ -32,7 +35,9 @@ import {
   sha256File,
   verifyArtifactDir,
 } from "./checks";
-import { initializeConfig, readInitParams, setTeam } from "./initialize";
+import { finishDeploy } from "./finish";
+import { rehearseFundedAddresses } from "./rehearse-funded";
+import { readInitParams } from "./initialize";
 
 isolateOrExit(import.meta.path);
 
@@ -44,6 +49,16 @@ function refused(label: string, attempt: () => unknown) {
     return console.log(`  refused as expected (${label}): ${(error as Error).message.split("\n")[0]}`);
   }
   throw new Error(`${label} was not refused`);
+}
+
+/** `refused` for an async attempt. */
+async function refusedAsync(label: string, attempt: () => Promise<unknown>) {
+  const reason = await attempt().then(
+    () => null,
+    (error: Error) => error.message.split("\n")[0],
+  );
+  if (reason === null) throw new Error(`${label} was not refused`);
+  console.log(`  refused as expected (${label}): ${reason}`);
 }
 
 /** A local artifact folder shaped like CI's `programs-<sha>`, from the local build. */
@@ -103,6 +118,8 @@ async function main() {
       `  ${throwaway.address}: loader v3, our upgrade authority ${authorityMatch}, bytes = artifact ${bytesMatch}`,
     );
     if (!bytesMatch || !authorityMatch) throw new Error("the deployed program is not the artifact under our authority");
+    console.log("3b. a stranger's lamports at a program's addresses (the preflight names each case)");
+    await rehearseFundedAddresses(rpc, tmp, artifact.soPath, authorityPath);
 
     console.log("4. the same binary at another id cannot initialize: its event authority belongs to the declared id");
     const pda = async (seed: string) =>
@@ -121,22 +138,36 @@ async function main() {
     if (wrong.ok) throw new Error("initialization at a wrong id succeeded");
     console.log(`  refused as expected: ${JSON.stringify(wrong.err)}`);
 
-    console.log("5. at the declared id: admin_initialize_config, then admin_set_team, in the same session");
+    console.log("5. at the declared id, as the deploy's second half and a resume run it: bytes, then init and team");
+    // A stranger funded the config address first: the program takes the account over.
+    await airdrop(rpc, await configAddress(), 1_000_000n);
     const admin = await generateKeyPairSigner();
     await airdrop(rpc, admin.address, 2n * SOL);
-    const team = await Promise.all([generateKeyPairSigner(), generateKeyPairSigner(), generateKeyPairSigner()]);
+    const keys = await Promise.all([generateKeyPairSigner(), generateKeyPairSigner(), generateKeyPairSigner()]);
     const feeRecipient = (await generateKeyPairSigner()).address;
+    const finish = {
+      rpc,
+      feePayer: world.upgradeAuthority,
+      upgradeAuthority: world.upgradeAuthority,
+      admin: admin.address,
+      adminSigner: admin,
+      feeRecipient,
+      team: keys.map((k) => k.address),
+      params,
+      artifact,
+    };
+    const tampered = join(tmp, "tampered", "brot_markets.so");
+    const other = { ...finish, artifact: { soPath: tampered, soSha256: sha256File(tampered) } };
+    await refusedAsync("deployed bytes that are not the artifact's", () => finishDeploy(other));
+    await refusedAsync("another upgrade authority", () => finishDeploy({ ...finish, upgradeAuthority: admin }));
+    if ((await finishDeploy(finish)) !== "done") throw new Error("the deploy's second half did not finish");
     const plan = { authority: world.upgradeAuthority, admin: admin.address, feeRecipient, params };
-    await initializeConfig(rpc, world.upgradeAuthority, plan);
     const again = await send(rpc, world.upgradeAuthority, [await buildInitializeConfig(plan)]);
     expectRefusal(again, "AlreadyInitialized", "a second initialization");
     console.log("  refused as expected (a second initialization): AlreadyInitialized");
-    await setTeam(
-      rpc,
-      admin,
-      admin,
-      team.map((t) => t.address),
-    );
+    if ((await finishDeploy(finish)) !== "done") throw new Error("a resume of a finished deploy did not end at once");
+    const elsewhere = { ...finish, feeRecipient: admin.address };
+    await refusedAsync("a resume whose plan differs from the stored config", () => finishDeploy(elsewhere));
     console.log("rehearsal: every step behaved as the deploy expects");
   } finally {
     world.surfnet.stop();

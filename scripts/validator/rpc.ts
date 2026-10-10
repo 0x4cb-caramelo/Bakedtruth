@@ -3,7 +3,7 @@
  *          unless the caller names the cluster on purpose; the genesis hash is printed before anything is
  *          sent), account bytes and the Clock, and a transaction sent, landed and read back with its custom
  *          error code, its logs and the program's events decoded by the SDK (decoder rules of TP 3.4.14).
- * Version: 0.1.0
+ * Version: 0.1.1
  * Sprint:  05 (SDK and the devnet cycle), lane OPS
  *
  * Transactions go out with `skipPreflight`, so a refusal lands as a failed transaction whose error is read
@@ -65,7 +65,8 @@ export async function describeCluster(rpc: Rpc): Promise<{ genesisHash: string; 
   const genesisHash = await rpc.call<string>("getGenesisHash");
   const version = await rpc.call<Record<string, unknown>>("getVersion");
   const shown = String(version["solana-core"] ?? version["surfnet-version"] ?? "unknown");
-  console.log(`cluster: ${rpc.url.replace(/\/\/[^/]*@/, "//***@")}  genesis ${genesisHash}  version ${shown}`);
+  // Only the origin: a path or a query can carry a provider's API key (Sprint 05 deploy review, F9).
+  console.log(`cluster: ${new URL(rpc.url).origin}  genesis ${genesisHash}  version ${shown}`);
   return { genesisHash, version: shown };
 }
 
