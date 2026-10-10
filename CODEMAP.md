@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **410** |
+| Arquivos mapeados | **411** |
 | Acima de 200 linhas | **49** ⚠️ |
 | Sem cabeçalho `Purpose:` | **80** ⚠️ |
 
@@ -272,10 +272,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`mod.rs`](programs/brot-markets/src/instructions/resolution/mod.rs) | the instructions that decide a campaign's outcome: `resolve_campaign` (Sprint 03), and the team's acts inside the review window: confirming, voiding and contest | 13 |
 | [`resolve_campaign.rs`](programs/brot-markets/src/instructions/resolution/resolve_campaign.rs) | `resolve_campaign`: any wallet records the outcome the campaign's reader reads, at the top level only, and opens the six-hour review window (TP sections 3.4.2,  | 98 |
-| [`team_confirm_result.rs`](programs/brot-markets/src/instructions/resolution/team_confirm_result.rs) | `team_confirm_result`: a team key ends the review window now and the outcome stands; the snapshot runs at once, so the campaign is `Settling` (TP sections 3.4.3 | 74 |
+| [`team_confirm_result.rs`](programs/brot-markets/src/instructions/resolution/team_confirm_result.rs) | `team_confirm_result`: a team key ends the review window now and the outcome stands; the snapshot runs at once, so the campaign is `Settling` (TP sections 3.4.3 | 78 |
 | [`team_open_contest.rs`](programs/brot-markets/src/instructions/resolution/team_open_contest.rs) | `team_open_contest`: DISABLED until Sprint 14 (decision of 2026-10-09). A contest would freeze a pot with no exit (its payout is paused until an instruction tha | 22 |
 | [`team_shared.rs`](programs/brot-markets/src/instructions/resolution/team_shared.rs) | what the three team instructions share: the team-key check, the event number each event takes from the campaign, and the refusal of a status that is not the sto | 31 |
-| [`team_void_campaign.rs`](programs/brot-markets/src/instructions/resolution/team_void_campaign.rs) | `team_void_campaign(reason, note_hash)`: a team key voids a campaign inside the review window with a reason it may choose and the hash of its note; the snapshot | 98 |
+| [`team_void_campaign.rs`](programs/brot-markets/src/instructions/resolution/team_void_campaign.rs) | `team_void_campaign(reason, note_hash)`: a team key voids a campaign inside the review window with a reason it may choose and the hash of its note; the snapshot | 102 |
 | [`void_reason.rs`](programs/brot-markets/src/instructions/resolution/void_reason.rs) | the class of each `VoidReason` (TP section 3.4.7, P-4): a house failure refunds the 10% opening fee, an outside cause keeps it; which reasons a team key may cho | 43 |
 | [`window.rs`](programs/brot-markets/src/instructions/resolution/window.rs) | the review window's rules (TP section 3.4.7): a team key acts only while the campaign is `InReview` (`TeamKeyOutsideReview`), and only before `review_ends_at` ( | 31 |
 
@@ -292,13 +292,13 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`bookkeeping.rs`](programs/brot-markets/src/instructions/settlement/bookkeeping.rs) | the moves and counters every settlement instruction shares: the event sequence number, the lamport move out of the vault (checked against I1 by `math::invariant | 64 |
 | [`close_campaign.rs`](programs/brot-markets/src/instructions/settlement/close_campaign.rs) | `close_campaign`: once the fee, the prize and the creator share are settled, moves the vault's dust and hand-sent surplus to the fee vault, returns the rent of  | 128 |
 | [`collect_fee.rs`](programs/brot-markets/src/instructions/settlement/collect_fee.rs) | `collect_fee`: moves what Brot keeps to the fee vault, once, after the entries are settled: the house fee net of the creator's share from it, the opening fee un | 81 |
-| [`finalize_campaign.rs`](programs/brot-markets/src/instructions/settlement/finalize_campaign.rs) | `finalize_campaign`: the snapshot of a reviewed campaign once its window has ended. Any wallet, permissionless; it chooses nothing. It runs `finalize_snapshot`, | 77 |
+| [`finalize_campaign.rs`](programs/brot-markets/src/instructions/settlement/finalize_campaign.rs) | `finalize_campaign`: the snapshot of a reviewed campaign once its window has ended. Any wallet, permissionless; it chooses nothing. It runs `finalize_snapshot`, | 56 |
 | [`mod.rs`](programs/brot-markets/src/instructions/settlement/mod.rs) | the instructions that settle a campaign after its outcome: the snapshot, the payouts to people and Brot's fee, the prize, the close and the sweep (TP section 3. | 17 |
 | [`rules.rs`](programs/brot-markets/src/instructions/settlement/rules.rs) | the settlement rules as pure functions: what one entry is paid under the snapshot's mode, and the reserve path of a credit below rent (TP section 3.4.5; amendme | 131 |
 | [`settle_creator_share.rs`](programs/brot-markets/src/instructions/settlement/settle_creator_share.rs) | `settle_creator_share`: pays the creator's share once, to the stored creator only (TP 3.4.5, I13). A credit that would leave the creator's wallet below its rent | 126 |
 | [`settle_entry.rs`](programs/brot-markets/src/instructions/settlement/settle_entry.rs) | `settle_entry`: pays one entry from the vault to its stored baker and closes the Entry, its rent back to the baker (TP 3.4.5). A losing entry goes through the s | 161 |
 | [`settle_prize.rs`](programs/brot-markets/src/instructions/settlement/settle_prize.rs) | `settle_prize`: returns the prize to whoever opened in `OneSided` and `Refund`, and the opening fee too on a house-failure void (TP sections 3.4.7, 3.4.16; P-4) | 77 |
-| [`snapshot.rs`](programs/brot-markets/src/instructions/settlement/snapshot.rs) | `finalize_snapshot`, the one snapshot path that `finalize_campaign` and `team_confirm_result` both call: it takes the campaign's totals and verdict through lane | 122 |
+| [`snapshot.rs`](programs/brot-markets/src/instructions/settlement/snapshot.rs) | `finalize_snapshot`, the one snapshot path that `finalize_campaign`, `team_confirm_result` and `team_void_campaign` call: it takes the campaign's totals and ver | 158 |
 | [`sweep_fees.rs`](programs/brot-markets/src/instructions/settlement/sweep_fees.rs) | `sweep_fees`: sends the fee vault's lamports above its rent-exempt minimum to `GlobalConfig.fee_recipient`, and nowhere else (TP sections 3.4.3, 3.4.4). Any wal | 71 |
 | [`tally_late_joins.rs`](programs/brot-markets/src/instructions/settlement/tally_late_joins.rs) | `tally_late_joins` (amendment of 2026-10-09, founder decisions 1 and 2): reads a baker's Join accounts in index order, adds the late amounts (joined at or after | 121 |
 
@@ -749,7 +749,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`cutoff-reproof.test.ts`](tests/brot/cutoff-reproof.test.ts) | the earlier-proof re-proof (decision of 2026-10-09): a campaign already in review moves its cut-off back to an earlier valid YES price proof, and to no later on | 43 |
 | [`errors.ts`](tests/brot/errors.ts) | the program's custom error codes by name, so tests assert the exact refusal (X0.7). Mirrors programs/brot-markets/src/error.rs; a code appended there is appende | 152 |
 | [`events.test.ts`](tests/brot/events.test.ts) | the events round-trip (T4, X0.4): every instruction of Sprint 02 emits exactly one event by self-CPI, decoded from its inner instruction; campaign events carry  | 211 |
-| [`events.ts`](tests/brot/events.ts) | the program's events as layouts: an inner instruction to the program whose data is [0xFF, discriminator, payload], signed by the event authority (T4). Mirrors e | 102 |
+| [`events.ts`](tests/brot/events.ts) | the program's events as layouts: an inner instruction to the program whose data is [0xFF, discriminator, payload], signed by the event authority (T4). Mirrors e | 137 |
 | [`flows.ts`](tests/brot/flows.ts) | the common paths every test file starts from: a config initialised with the founder's values, a team, a paid or free price campaign opened on BTC/USD, an entry | 124 |
 | [`idl.test.ts`](tests/brot/idl.test.ts) | the drift check (X0.6): the hand-written test kit (struct layouts, events, instruction builders, error codes) against the Shank IDL that `bun run idl` writes fr | 231 |
 | [`idl.ts`](tests/brot/idl.ts) | the Shank IDL (packages/sdk/src/idl/brot_markets.json) in the test kit's terms: struct fields as layouts.ts types, enums as one byte, names as Shank writes them | 127 |
@@ -775,7 +775,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`join-campaign-slots.test.ts`](tests/brot/join-campaign-slots.test.ts) | the slot checks of `user_join_campaign` in the order of checks.rs, each with its own error: signer and writable flags, the three pairs that must differ, the Sys | 69 |
 | [`join-campaign-support.ts`](tests/brot/join-campaign-support.ts) | what the join tests share: a world with a paid price campaign, its sponsored price kept fresh across clock moves, a refused join that moves nothing, SOL sent by | 203 |
 | [`join-campaign-wallets.test.ts`](tests/brot/join-campaign-wallets.test.ts) | two wallets: A cannot change, close or redirect B's Entry, whichever slot of a join it puts that Entry in, and cannot join as B without B's signature (A-1) | 58 |
-| [`kit.test.ts`](tests/brot/kit.test.ts) | checks the test kit itself, without the program binary: addresses, layout sizes against the Rust structs, the codec, and the instruction shapes of the frozen co | 97 |
+| [`kit.test.ts`](tests/brot/kit.test.ts) | checks the test kit itself, without the program binary: addresses, layout sizes against the Rust structs, the codec, and the instruction shapes of the frozen co | 101 |
 | [`late-entries.test.ts`](tests/brot/late-entries.test.ts) | the late-entry refund (TP section 3.4.16, founder answer 7) on the program: a join at or after the YES proof's publish_time comes back to its baker whole, neith | 63 |
 | [`layout-v1.test.ts`](tests/brot/layout-v1.test.ts) | the Sprint 02 accounts (layout version 1) and this sprint's reserve changes. The reserve took the `epoch` and `min_entry_lamports` of the campaign (16 of its 64 | 245 |
 | [`layouts.ts`](tests/brot/layouts.ts) | the byte layouts of the program's accounts, instruction arguments and events, field by field in the order of the Rust structs, with one encoder and one decoder  | 133 |
@@ -804,7 +804,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`slot-matrix.gen.ts`](tests/brot/slot-matrix.gen.ts) | every slot case of the matrix: each signer unsigned (MissingSignature), each writable slot read-only (NotWritable), a stranger, an account of each other type, a | 428 |
 | [`slot-matrix.test.ts`](tests/brot/slot-matrix.test.ts) | runs every case of the slot matrix (tests/brot/slot-matrix.gen.ts) against the binary: each refused with its own BrotError, and no lamport of the instruction's  | 55 |
 | [`structs.ts`](tests/brot/structs.ts) | the program's structs as layouts: accounts (GlobalConfig, Campaign, Entry), instruction arguments and events, each in the field order of its Rust struct | 172 |
-| [`team-window.test.ts`](tests/brot/team-window.test.ts) | the team's acts in the review window, on the binary: confirm, void (an automatic void only: a team key never voids a YES or NO, decision of 2026-10-09), and con | 184 |
+| [`team-window-events.test.ts`](tests/brot/team-window-events.test.ts) | what the team's confirm and void emit, on the binary (TP sections 3.4.3, 3.4.14): their own event (`ResultConfirmed`, `CampaignVoided`) with the campaign's next | 119 |
+| [`team-window.test.ts`](tests/brot/team-window.test.ts) | the team's acts in the review window, on the binary: confirm, void (an automatic void only: a team key never voids a YES or NO, decision of 2026-10-09), and con | 185 |
 | [`void-refund.test.ts`](tests/brot/void-refund.test.ts) | a void on the binary: the prize goes back to the stored creator, the opening fee goes with it on a house failure and stays with Brot on an outside cause, and th | 82 |
 
 ## `tests/programs/cpi-proxy/src/`

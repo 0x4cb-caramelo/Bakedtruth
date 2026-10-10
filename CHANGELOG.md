@@ -353,6 +353,16 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
 
 ### Fixed
 
+- **`CampaignFinalized` também na confirmação e na anulação pela equipe** (9/10/2026; achado da revisão da Sprint
+  05, feito como PR à parte a pedido do Ronaldo). O plano técnico (§3.4.3, §3.4.14) promete que `team_confirm_result`
+  e `team_void_campaign` emitem o próprio evento e depois `CampaignFinalized`; o programa rodava o snapshot e emitia só
+  `ResultConfirmed` ou `CampaignVoided`, e um indexador que segue os eventos perderia o snapshot dessas campanhas.
+  Agora os dois emitem `CampaignFinalized` logo depois, com o `seq` seguinte e os mesmos campos de `finalize_campaign`,
+  montados num lugar só (`snapshot::finalized_event`). Custo no LiteSVM: confirmação de 3.539 para 4.785 CU, anulação
+  de 2.456 para 3.701; o binário passa de 158.072 para 159.576 bytes. Testes em
+  `tests/brot/team-window-events.test.ts` (os dois eventos, em ordem, com os campos do snapshot gravado), e o kit de
+  testes passa a ler os três eventos. Quando isto entrar, os eventos que o smoke da Sprint 05 espera mudam
+  (`scripts/validator/cycle-settle.ts`, na branch dela): a confirmação da equipe passa a emitir dois.
 - **Sprint 03, o que as revisões acharam e foi corrigido antes do pull request** (9/10/2026; quatro revisores:
   segurança, advogado do diabo, independente e produto; nenhum achou como tirar SOL de ninguém):
   - **a anulação por feed parado ganha um piso de 600 segundos** (`STALE_FEED_MIN_SECONDS` [AC]): a conta

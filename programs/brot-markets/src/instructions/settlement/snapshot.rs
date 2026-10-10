@@ -1,8 +1,9 @@
-//! Purpose: `finalize_snapshot`, the one snapshot path that `finalize_campaign` and `team_confirm_result` both
-//!          call: it takes the campaign's totals and verdict through lane B's pure `math::snapshot`, stores the
-//!          mode and the sums, moves the status to `Settling` through the transition table, and decrements the
-//!          open count for a paid campaign only (I7).
-//! Version: 0.0.1
+//! Purpose: `finalize_snapshot`, the one snapshot path that `finalize_campaign`, `team_confirm_result` and
+//!          `team_void_campaign` call: it takes the campaign's totals and verdict through lane B's pure
+//!          `math::snapshot`, stores the mode and the sums, moves the status to `Settling` through the transition
+//!          table, and decrements the open count for a paid campaign only (I7). `finalized_event` builds the
+//!          `CampaignFinalized` all three emit from what the snapshot stored (TP 3.4.3, 3.4.14).
+//! Version: 0.0.2 (`finalized_event`: the team's confirm and void emit `CampaignFinalized` too)
 //! Sprint: 04 (lane C). The late totals come from `tally_late_joins` (amendment 2026-10-09): they leave V and P.
 //!
 //! Refusals, in order: `NotTallied` while an entry is untallied; `NoProofTime` for a YES on a price campaign without
@@ -12,6 +13,8 @@
 
 use crate::{
     error::BrotError,
+    events::CampaignFinalized,
+    layout::{LeU64, Pubkey},
     math::{
         invariant::check_snapshot,
         snapshot::{snapshot, SnapshotInput, Verdict},
@@ -118,4 +121,37 @@ pub fn finalize_snapshot(
     }
     campaign.status = target as u8;
     Ok(())
+}
+
+/// The `CampaignFinalized` of a snapshot `finalize_snapshot` has just stored, numbered `seq`. One builder for the
+/// three instructions that finalize (`finalize_campaign`, `team_confirm_result`, `team_void_campaign`), so the
+/// event an indexer reads is the same whichever path took the snapshot.
+pub fn finalized_event(
+    campaign_key: Pubkey,
+    campaign: &Campaign,
+    seq: u64,
+) -> Result<CampaignFinalized, BrotError> {
+    let from_fee = campaign.creator_share_from_fee.get();
+    let from_pot = campaign
+        .creator_share
+        .get()
+        .checked_sub(from_fee)
+        .ok_or(BrotError::InvariantViolated)?;
+    let refunded_late = campaign
+        .late_yes
+        .get()
+        .checked_add(campaign.late_no.get())
+        .ok_or(BrotError::MathOverflow)?;
+    Ok(CampaignFinalized {
+        campaign: campaign_key,
+        seq: LeU64::new(seq),
+        settle_mode: campaign.settle_mode,
+        winning_total: campaign.winning_total,
+        losing_total: campaign.losing_total,
+        refunded_late: LeU64::new(refunded_late),
+        fee_total: campaign.fee_total,
+        from_pot: LeU64::new(from_pot),
+        from_fee: campaign.creator_share_from_fee,
+        distributable: campaign.distributable,
+    })
 }

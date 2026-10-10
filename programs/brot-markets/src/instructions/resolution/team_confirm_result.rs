@@ -1,6 +1,7 @@
 //! Purpose: `team_confirm_result`: a team key ends the review window now and the outcome stands;
-//!          the snapshot runs at once, so the campaign is `Settling` (TP sections 3.4.3, 3.4.7).
-//! Version: 0.0.2
+//!          the snapshot runs at once, so the campaign is `Settling` (TP sections 3.4.3, 3.4.7). It emits
+//!          `ResultConfirmed`, then `CampaignFinalized` with the next seq, as `finalize_campaign` would (3.4.14).
+//! Version: 0.0.3 (emits `CampaignFinalized` after `ResultConfirmed`; found missing by the Sprint 05 review)
 //! Sprint: 04 (lane A). Accounts: 0 team key (signer), 1 config (writable, the open count),
 //!         2 campaign (writable), 3 event authority, 4 program. Confirms an automatic void too.
 
@@ -16,7 +17,7 @@ use crate::{
             team_shared::{require_team_key, take_seq},
             window::require_review,
         },
-        settlement::snapshot::finalize_snapshot,
+        settlement::snapshot::{finalize_snapshot, finalized_event},
     },
     layout::LeU64,
     readers::ChainTime,
@@ -67,7 +68,10 @@ pub fn team_confirm_result(
         signer,
         outcome: outcome as u8,
     };
+    let finalized_seq = take_seq(&mut stored)?;
+    let finalized = finalized_event(campaign_key, &stored, finalized_seq)?;
     drop(stored);
     drop(config_state);
-    events::emit(&event, event_authority, program, program_id)
+    events::emit(&event, event_authority, program, program_id)?;
+    events::emit(&finalized, event_authority, program, program_id)
 }
