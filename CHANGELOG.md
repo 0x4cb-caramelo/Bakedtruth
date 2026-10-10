@@ -328,6 +328,11 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
 
 ### Changed
 
+- **A frase da capa do deck** (`/pitch`, slide 1; Lucas, 9/10/2026). Sai "Permissionless prediction markets, settled by
+  on-chain data." e entra "Permissionless prediction markets that turn on-chain milestones into growth campaigns,
+  settled by the chain itself.", a mesma frase que ele usou na inscrição do DemoDay. O título do slide não mudou. A
+  descrição da página, que aparece em prévias de link, acompanha a frase nova. "on-chain" e "the chain itself." não
+  quebram no meio da linha.
 - **As respostas do fundador de 9/10/2026** às perguntas que as Sprints 02 e 03 deixaram e às duas abertas da Sprint
   04, dadas pelo Ronaldo (`docs/business/ideacao-perguntas-e-respostas.md`, seção 1; comentário no PR #40). A Sprint
   04 constrói: uma lista nossa de feeds da Pyth, fixa no programa, que começa pela lista oficial de feeds

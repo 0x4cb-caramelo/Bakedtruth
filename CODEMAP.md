@@ -9,7 +9,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 | | |
 |---|---|
 | Arquivos mapeados | **316** |
-| Acima de 200 linhas | **32** ⚠️ |
+| Acima de 200 linhas | **33** ⚠️ |
 | Sem cabeçalho `Purpose:` | **78** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -47,6 +47,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `scripts/sync-selfhosted.js` — 349 linhas
 - `scripts/test/hooks.test.js` — 278 linhas
 - `scripts/tokenomics-model.ts` — 584 linhas
+- `services/landing/tests/pages.test.mjs` — 202 linhas
 - `tests/brot/setup.ts` — 201 linhas
 
 ---
@@ -611,7 +612,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`five.test.mjs`](services/landing/tests/five.test.mjs) | tests /5, the home page as the founders asked on 2026-10-09 after /4: the light theme of /3 and the dark theme of /4, token by token, the original layout and fo | 149 |
 | [`four.test.mjs`](services/landing/tests/four.test.mjs) | tests /4, the home page as the founders asked on 2026-10-09 after /3: it says exactly what /3 says (the copy they approved), keeps the original layout and fonts | 115 |
 | [`leads.test.mjs`](services/landing/tests/leads.test.mjs) | tests the waitlist store and the request limiter of the "coming soon" site (node --test) | 113 |
-| [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 199 |
+| [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 202 |
 | [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 193 |
 | [`three.test.mjs`](services/landing/tests/three.test.mjs) | tests /3, the home page as the founders asked on 2026-10-09: the original's layout (it loads the home page's own styles.css), the pitch deck's colours (every co | 110 |
 | [`two.test.mjs`](services/landing/tests/two.test.mjs) | tests /2, the home page in the pitch deck's look: it says exactly what the home page says (only the look may differ), the mascot perches and moods are the same, | 53 |
