@@ -3,7 +3,7 @@
  *          the void is saved to content/void-log/<campaign>-<UTC time>.md, and the SHA-256 of exactly the saved
  *          bytes goes on-chain with the reason. A team key may use `TeamHouseFailure` (the 10% opening fee goes
  *          back to the opener) or `TeamOutsideCause` (Brot keeps it).
- * Version: 0.1.1
+ * Version: 0.1.2 (Sprint 12: the personal-data rule from the record's format)
  * Sprint:  05 (SDK and the devnet cycle), lane OPS
  *
  * The program lets a team key void only an AUTOMATIC void (a campaign `resolve_campaign` voided: missed window,
@@ -11,7 +11,8 @@
  * record names the acting team key (accountability: the key is public on-chain as the signer anyway) and nothing
  * else about a person: text with an email address, an @handle or a URL is refused. It is written as `.pending`
  * only after the simulation passes and with --yes, renamed once the ledger confirms, removed on a refusal, and left
- * pending when the answer never comes (Sprint 05 deploy review, F10). Sprint 12 gives the record its public format.
+ * pending when the answer never comes (Sprint 05 deploy review, F10). Sprint 12 gave the record its public format
+ * (packages/sdk/src/schemas/void-log.ts): what `voidRecord` writes parses there, and CI checks every committed record.
  *
  *   TEAM_KEYPAIR=~/k.json bun run scripts/team/void.ts <campaign> --reason TeamOutsideCause --note note.md --cluster devnet [--yes]
  */
@@ -22,6 +23,7 @@ import { join } from "node:path";
 import { address, type Address } from "@solana/kit";
 
 import { Outcome, VoidReason, decodeCampaign } from "@brot/sdk/read";
+import { personalDataIn } from "@brot/sdk/schemas";
 import { buildTeamVoidCampaign } from "@brot/sdk/tx";
 
 import { account, send } from "../validator/rpc";
@@ -36,13 +38,8 @@ export function voidRecord(campaign: Address, reason: TeamVoidReason, signer: Ad
   return new TextEncoder().encode(`${header}${text.trimEnd()}\n`);
 }
 
-/** Why `text` cannot go into a permanent public record, or `null`: no email, @handle or URL. */
-export function personalDataIn(text: string): string | null {
-  if (/[^\s@]+@[^\s@]+\.[^\s@]+/.test(text)) return "an email address";
-  if (/(^|[\s(])@\w{2,}/.test(text)) return "an @handle";
-  if (/https?:\/\/|www\./i.test(text)) return "a URL";
-  return null;
-}
+/** The rule moved to the record's public format (Sprint 12), shared with the site and CI's check. */
+export { personalDataIn };
 
 export async function voidCampaign(
   ctx: TeamContext,

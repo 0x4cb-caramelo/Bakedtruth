@@ -82,7 +82,10 @@ describe("credit to an empty wallet below rent is reserved", () => {
     const fee = 5_000n;
     const floor = claimFloor(rentMinimum, fee);
     setLamports(w, w.creator.address, floor - 1n);
-    expect(await prepareClaim({ rpc, creator: w.creator, campaign })).toMatchObject({ refusal: "WalletBelowMinimum" });
+    expect(await prepareClaim({ rpc, creator: w.creator, campaign })).toMatchObject({
+      refusal: "WalletBelowMinimum",
+      floor: claimFloor(rentMinimum, fee),
+    });
     const short = await sendVia(chain, w.creator, [
       await buildSettleCreatorShare({ campaign, creator: w.creator.address }),
     ]);

@@ -3,8 +3,8 @@
  *          chance per side (none for an empty pot, L-05), the estimated return per side from the SDK's estimate, the listing
  *          rule (no entry 24 hours after opening leaves the home page), and the ranking groups (two-sided, one-sided, empty).
  *          Pure: it takes the chain's time as an input, so tests need no clock.
- * Version: 0.1.0
- * Sprint:  10 (site: campaign list)
+ * Version: 0.2.0 (Sprint 12: the state chip and line, state-line.ts)
+ * Sprint:  10 (site: campaign list); 12
  *
  * Assumption: the estimate uses one SOL on the joining side, as a first baker who is not the first of the campaign
  * (the program's own rules for a join). The campaign's rank is not the indexer's: the indexer (Sprint 08) is not built.
@@ -13,6 +13,7 @@ import { estimateReturnBps, type JoinedPot } from "@brot/sdk/read";
 
 import type { Campaign } from "@/lib/api-client";
 import { assetOf, sentenceOf } from "./sentence";
+import { chipOf, stateLine, type CardChip } from "./state-line";
 
 export const ONE_SOL = 1_000_000_000n;
 const DAY_SECONDS = 86_400n;
@@ -39,6 +40,9 @@ export type Card = {
   reviewEndsAt: bigint | null;
   estYesBps: bigint | null;
   estNoBps: bigint | null;
+  /** Sprint 12: the chip (contested apart) and the line after entries close. */
+  chip: CardChip;
+  stateLine: string | null;
 };
 
 const big = (value: string | null): bigint => (value === null ? 0n : BigInt(value));
@@ -101,5 +105,7 @@ export function toCard(c: Campaign, nowUnix: bigint): Card {
     reviewEndsAt: c.review_ends_at === null ? null : BigInt(c.review_ends_at),
     estYesBps: estimate(c, "yes"),
     estNoBps: estimate(c, "no"),
+    chip: chipOf(c),
+    stateLine: stateLine(c),
   };
 }

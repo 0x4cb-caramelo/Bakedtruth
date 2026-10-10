@@ -132,8 +132,8 @@ describe("received on screen matches settlement events", () => {
     ]);
     const rpc = createSolanaRpc(run.chain.url);
     const whole = await readWalletHistory(rpc, w.creator.address);
-    let paged = await readWalletHistory(rpc, w.creator.address, undefined, 1);
-    while (paged.before) paged = await readWalletHistory(rpc, w.creator.address, paged, 1);
+    let paged = await readWalletHistory(rpc, w.creator.address, undefined, { limit: 1 });
+    while (paged.before) paged = await readWalletHistory(rpc, w.creator.address, paged, { limit: 1 });
     expect(paged.events.map((e) => e.name)).toEqual(whole.events.map((e) => e.name));
     expect(receivedBy(w.creator.address, paged.events).total).toBe(receivedBy(w.creator.address, whole.events).total);
   });

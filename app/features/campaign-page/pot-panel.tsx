@@ -1,18 +1,17 @@
 /**
  * Purpose: the split and the pot (P1 §3.1–3.2; spec 3.5): each side's chance (its share of the entries; none for an
  *          empty pot, L-05) and its total in SOL, the bar, the prize that belongs to no side, the whole pot, the number
- *          of entries, and the note an empty or one-sided pot needs. Also "Your entry" for the connected wallet, read
- *          from its own `Entry` account.
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ *          of entries, and the note an empty or one-sided pot needs. The wallet's own entry moved to payout-panel.tsx
+ *          (Sprint 12).
+ * Version: 0.2.0
+ * Sprint:  11 (site: campaign page and entry); 12
  */
-import { Receipt, Vault } from "lucide-react";
+import { Vault } from "lucide-react";
 
 import { SplitBar } from "@/components/ui/split-bar";
-import type { Entry } from "@/lib/brot";
 import { sol4 } from "@/features/entry/amount";
 import { chance } from "@/features/entry/estimate";
-import { POT, STATE } from "./copy";
+import { POT } from "./copy";
 import type { PageData } from "./load";
 
 export function PotPanel({ data }: { data: PageData }) {
@@ -53,25 +52,6 @@ export function PotPanel({ data }: { data: PageData }) {
         <b className="font-display text-2xl tabular-nums">{sol4(pot)} SOL</b>
       </p>
       {note ? <p className="m-0 text-xs text-muted">{note}</p> : null}
-    </section>
-  );
-}
-
-export function YourEntry({ entry }: { entry: Entry | null }) {
-  if (!entry || entry.amountYes + entry.amountNo === 0n) return null;
-  const sides = [
-    entry.amountYes > 0n && `YES ${sol4(entry.amountYes)} SOL`,
-    entry.amountNo > 0n && `NO ${sol4(entry.amountNo)} SOL`,
-  ]
-    .filter(Boolean)
-    .join(" and ");
-  return (
-    <section aria-labelledby="mine-title" className="rounded-md border border-line bg-panel p-4">
-      <h2 id="mine-title" className="m-0 mb-2 flex items-center gap-2 font-display text-2xl font-bold">
-        <Receipt className="size-5" aria-hidden="true" />
-        {STATE.mine}
-      </h2>
-      <p className="m-0 text-sm">{STATE.mineSides(sides)}</p>
     </section>
   );
 }

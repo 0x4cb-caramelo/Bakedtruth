@@ -34,7 +34,16 @@ export type ClaimRefusal =
   | "WalletBelowMinimum";
 
 export type PreparedClaim =
-  | { ok: false; stage: "check"; refusal: ClaimRefusal; reserved: bigint; balance: bigint; rentMinimum: bigint }
+  | {
+      ok: false;
+      stage: "check";
+      refusal: ClaimRefusal;
+      reserved: bigint;
+      balance: bigint;
+      rentMinimum: bigint;
+      /** `WalletBelowMinimum`: the balance the wallet needs (`claimFloor`); `null` for the other refusals. */
+      floor: bigint | null;
+    }
   | { ok: false; stage: "simulation"; reserved: bigint; simulation: Simulation; summary: MessageSummary }
   | {
       ok: true;
@@ -74,13 +83,14 @@ export async function prepareClaim(a: {
   ]);
   const share = creatorShareStatus(c);
   const reserved = c.creatorShareReserved;
-  const refused = (refusal: ClaimRefusal): PreparedClaim => ({
+  const refused = (refusal: ClaimRefusal, floor: bigint | null = null): PreparedClaim => ({
     ok: false,
     stage: "check",
     refusal,
     reserved,
     balance,
     rentMinimum,
+    floor,
   });
   // The program's order: finalized, the stored creator, a share due; then the reserve and the wallet.
   if (c.status !== Status.Settling && c.status !== Status.Settled) return refused("NotFinalized");
@@ -96,7 +106,8 @@ export async function prepareClaim(a: {
   if (!summary.trusted) {
     throw new Error(`the SDK built a claim its summary does not trust: ${summary.lines.join(" | ")}`);
   }
-  if (balance < claimFloor(rentMinimum, summary.networkFeeAtMost)) return refused("WalletBelowMinimum");
+  const floor = claimFloor(rentMinimum, summary.networkFeeAtMost);
+  if (balance < floor) return refused("WalletBelowMinimum", floor);
   const simulation = await simulate(a.rpc, message);
   if (!simulation.ok) return { ok: false, stage: "simulation", reserved, simulation, summary };
   return {

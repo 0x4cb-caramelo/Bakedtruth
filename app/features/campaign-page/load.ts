@@ -3,8 +3,8 @@
  *          metric reading): the campaign at the route's id, the config (the pause), the chain's clock (A-7), the
  *          account the campaign reads, the connected wallet's `Entry`, and the creator's own `Entry` (BR-26's flag).
  *          The public state is the SDK's, against chain time, with the join lock read from the metric account.
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ * Version: 0.2.0 (Sprint 12: whether a missing campaign was closed)
+ * Sprint:  11 (site: campaign page and entry); 12
  *
  * Two round trips: the campaign first (it names the metric account), then the rest in one `getMultipleAccounts`.
  */
@@ -66,6 +66,17 @@ const decodeOrNull = <T>(decode: () => T): T | null => {
     throw error;
   }
 };
+
+/**
+ * Whether the campaign at `id` existed and was closed: no account now, but its address has history. `close_campaign`
+ * runs only after every payout, so a closed campaign has paid out; what it paid lives in its events.
+ */
+export async function campaignClosed(rpc: SolanaRpc, id: bigint): Promise<boolean> {
+  const page = await rpc
+    .getSignaturesForAddress(await campaignAddress(id), { limit: 1, commitment: "confirmed" })
+    .send();
+  return page.length > 0;
+}
 
 /** Reads the page's accounts; `null` when no campaign of this program lives at the id's address. */
 export async function loadCampaignPage(rpc: SolanaRpc, id: bigint, wallet: string | null): Promise<PageData | null> {
