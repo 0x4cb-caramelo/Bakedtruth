@@ -1,18 +1,18 @@
 /**
  * Purpose: the words of "How it works" (spec 3.2 and 3.15 of Sprint -1; D-m vocabulary; English per L-01): the six steps
  *          of a campaign from opening to payout, what chance means, why there is no early exit, the one-sided pot, the
- *          void, and who reads the result. Holds BP-5's line and the mascot's written name (BP-11), each once, so the
- *          founder's answer (P-9, open) changes one string. Nothing here promises an automatic payout or a time: on
- *          devnet nothing pays out by itself yet (the founder's answer, 2026-10-10).
+ *          void, and who reads the result. Holds BP-5's line and the mascot's written name (BP-11), each once (P-9;
+ *          both approved by the founder, answer 6a of 2026-10-10). Nothing here promises an automatic payout or a
+ *          time: on devnet nothing pays out by itself yet (the founder's answer, 2026-10-10).
  * Version: 0.2.0 (the Sprint 13 copy and legal reviews: the viability refund, the review's two facts, "Payout",
  *          the creator-control caveat next to BP-5's line)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 
-/** BP-5, as recommended (P-9, open): the line P1 §4.6 puts in place of the pitch's old one. Change it here only. */
+/** BP-5, approved (answer 6a, 2026-10-10): P1 §4.6's line in place of the pitch's old one. Change it here only. */
 export const PRINCIPLE = "No human picks the winner.";
 
-/** BP-11, as recommended (P-9, open): Baked in writing; Cacetinho is only the spoken nickname. Change it here only. */
+/** BP-11, approved (answer 6a, 2026-10-10): Baked in writing; Cacetinho is only the spoken nickname. Change it here. */
 export const MASCOT_NAME = "Baked";
 
 export const HOW = {
