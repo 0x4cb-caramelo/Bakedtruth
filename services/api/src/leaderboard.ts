@@ -1,9 +1,9 @@
 /**
  * Purpose: `GET /api/v1/leaderboard` (TP §6; Sprint 13, BR-29): devnet points from the program's events (history.ts)
  *          and the live campaign accounts (the snapshot), through the SDK's rule (`pointsTable`): 1 point per campaign
- *          entered on the side that won, once the result is final. Only wallets with points are ranked; `wallet=` adds
- *          that wallet's own line. No volume or profit column. Addresses are public on-chain already; nothing about
- *          the visitor is kept (TP §8, the Sprint 13 privacy review).
+ *          entered on the side that won, once the result is final. Only wallets with points are ranked, in pages. No
+ *          volume or profit column. The route takes no wallet: a visitor's page finds its own line in the list, so a
+ *          request never ties a wallet to an IP address (TP §8, the Sprint 13 privacy review).
  * Version: 0.1.0
  * Sprint:  13 (site: ranking, notices and copy)
  */
@@ -13,19 +13,15 @@ import type { History } from "./history";
 import { BadQuery, integer } from "./query";
 import type { Row, Snapshot } from "./snapshot";
 
-const BASE58 = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-const KNOWN = new Set(["limit", "offset", "wallet"]);
+const KNOWN = new Set(["limit", "offset"]);
 
-export type LeaderboardQuery = { limit: number; offset: number; wallet: string | null };
+export type LeaderboardQuery = { limit: number; offset: number };
 
 export function parseLeaderboardQuery(url: URL): LeaderboardQuery {
   for (const key of url.searchParams.keys()) if (!KNOWN.has(key)) throw new BadQuery(`unknown parameter: ${key}`);
-  const wallet = url.searchParams.get("wallet");
-  if (wallet !== null && !BASE58.test(wallet)) throw new BadQuery("wallet must be a base58 address");
   return {
     limit: integer(url, "limit", 50, 1, 100),
     offset: integer(url, "offset", 0, 0, Number.MAX_SAFE_INTEGER),
-    wallet,
   };
 }
 
@@ -40,9 +36,7 @@ export function leaderboardOf(history: History, snap: Snapshot, query: Leaderboa
   const now = new Map(snap.rows.map((row) => [row.address.toString(), nowOf(row)] as const));
   const all = pointsTable(history.events(), now);
   const ranks = ranksOf(all);
-  const lines = all.map((row, i) => ({ rank: ranks[i], ...row }));
-  const ranked = lines.filter((line) => line.points > 0);
-  const you = query.wallet === null ? null : (lines.find((line) => line.wallet === query.wallet) ?? null);
+  const ranked = all.map((row, i) => ({ rank: ranks[i], ...row })).filter((line) => line.points > 0);
   return {
     as_of_slot: snap.asOfSlot,
     chain_time: snap.chain.unixTimestamp,
@@ -53,6 +47,5 @@ export function leaderboardOf(history: History, snap: Snapshot, query: Leaderboa
     offset: query.offset,
     limit: query.limit,
     rows: ranked.slice(query.offset, query.offset + query.limit),
-    you,
   };
 }

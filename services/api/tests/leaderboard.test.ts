@@ -2,7 +2,7 @@
  * Purpose: the leaderboard route's contract with fake data and no cluster (Sprint 13): 503 until the program's history
  *          has been read (or with no history at all), what health says about that history, a live account's result
  *          counted only once it is final (the review window ended uncontested, or settling), and the paging of the
- *          ranked rows. The rule itself is tests/sdk/points.test.ts; the whole chain is tests/api/leaderboard.test.ts.
+ *          ranked rows; the route takes no wallet (the privacy review). The rule itself is tests/sdk/points.test.ts; the whole chain is tests/api/leaderboard.test.ts.
  * Version: 0.1.0
  * Sprint:  13 (site: ranking, notices and copy)
  */
@@ -89,14 +89,12 @@ describe("leaderboard route", () => {
   });
 
   test("ranks only wallets with points, pages them, and answers a wallet's own line", async () => {
-    const { status, body } = await call(
-      history(EVENTS),
-      "/api/v1/leaderboard?limit=1&offset=1&wallet=" + "1".repeat(32),
-    );
+    const { status, body } = await call(history(EVENTS), "/api/v1/leaderboard?limit=1&offset=1");
     expect(status).toBe(200);
     expect(body.total).toBe(3);
     expect(body.rows).toEqual([{ rank: 2, wallet: "ana", points: 1, entered: 2, decided: 1 }]);
-    expect(body.you).toBeNull();
+    expect(body.you).toBeUndefined(); // the route takes no wallet: a page finds its own line
+    expect((await call(history(EVENTS), "/api/v1/leaderboard?wallet=ana")).status).toBe(400);
     expect(body.complete).toBe(true);
     expect(body.as_of_slot).toBe("900");
     const all = (await call(history(EVENTS), "/api/v1/leaderboard")).body.rows;

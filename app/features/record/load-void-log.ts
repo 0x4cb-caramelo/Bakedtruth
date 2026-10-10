@@ -3,28 +3,20 @@
  *          record in content/void-log/ (not the README, the JSON Schema or a `.pending` file), its SHA-256 over
  *          exactly the file's bytes, parsed into the public format (`@brot/sdk/schemas`, checked in CI by
  *          tests/site/void-log.test.ts). Newest first. A file that does not parse is left out and counted.
- * Version: 0.1.0
- * Sprint:  12 (site: my entries and campaign states)
- *
- * The folder is found from the app's directory (the site runs from app/, so it is ../content/void-log), or from the
- * repository root; with neither, the log is empty.
+ * Version: 0.2.0 (Sprint 13: the folder from app/lib/content.ts, which fails the build when it is missing)
+ * Sprint:  12 (site: my entries and campaign states); 13
  */
 import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { parseVoidLog, type VoidLogRecord } from "@brot/sdk/schemas";
+import { contentDir } from "@/lib/content";
 
 export type VoidLog = { records: VoidLogRecord[]; skipped: string[] };
 
-const folder = (): string | null =>
-  [join(process.cwd(), "..", "content", "void-log"), join(process.cwd(), "content", "void-log")].find((dir) =>
-    existsSync(dir),
-  ) ?? null;
-
 /** Every record of the void log, newest first. */
-export function loadVoidLog(dir: string | null = folder()): VoidLog {
-  if (!dir) return { records: [], skipped: [] };
+export function loadVoidLog(dir: string = join(contentDir(), "void-log")): VoidLog {
   const records: VoidLogRecord[] = [];
   const skipped: string[] = [];
   for (const file of readdirSync(dir).sort()) {

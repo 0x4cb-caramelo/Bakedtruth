@@ -84,11 +84,11 @@ describe("leaderboard from the program's events", () => {
     campaigns.push(cycle.campaign);
     first = cycle.bakers;
     await history.refresh();
-    const { status, body } = await board(`?wallet=${first[1].address}`);
+    const { status, body } = await board();
     expect(status).toBe(200);
     expect(body.complete).toBe(true);
     expect(body.total).toBe(0);
-    expect(body.you).toEqual({ rank: null, wallet: first[1].address, points: 0, entered: 1, decided: 0 });
+    expect(body.rows).toEqual([]);
   });
 
   test("settling scores the side that won; the earlier window has passed, so its result is final too", async () => {
@@ -142,17 +142,16 @@ describe("leaderboard from the program's events", () => {
     campaigns.push(cycle.campaign);
     expect(w.client.svm.getAccount(cycle.campaign).exists).toBe(false);
     await history.refresh();
-    const { body } = await board(`?wallet=${second[1].address}&limit=1`);
-    expect(body.you).toEqual({ rank: 1, wallet: second[1].address, points: 2, entered: 2, decided: 2 });
-    expect(body.rows).toEqual([body.you]);
+    const { body } = await board("?limit=1");
+    expect(body.rows).toEqual([{ rank: 1, wallet: second[1].address, points: 2, entered: 2, decided: 2 }]);
     expect(body.total).toBe(3);
     const signatures = await createSolanaRpc(chain.url).getSignaturesForAddress(PROGRAM_ID).send();
     expect(signatures.length).toBeGreaterThan(10);
   });
 
-  test("an unknown parameter or a malformed wallet is a 400, never a guess", async () => {
+  test("an unknown parameter is a 400, never a guess; the route takes no wallet", async () => {
     expect((await board("?sort=points")).status).toBe(400);
-    expect((await board("?wallet=not-an-address")).status).toBe(400);
+    expect((await board(`?wallet=${second[1].address}`)).status).toBe(400);
     expect((await board("?limit=0")).status).toBe(400);
   });
 });

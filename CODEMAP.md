@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **769** |
+| Arquivos mapeados | **778** |
 | Acima de 200 linhas | **39** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -85,7 +85,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09): the two fonts the site serves itself, the theme script in <head> before the stylesheet, the notice, the top bar, the page an | 54 |
-| [`page.tsx`](app/app/page.tsx) | the home route (Sprint 10): the campaign list from the read API, with the search, the filters, the sort and the cards. Lucas's screens and the campaign page (Sp | 17 |
+| [`page.tsx`](app/app/page.tsx) | the home route (Sprint 10): the campaign list from the read API, with the search, the filters, the sort and the cards. Since Sprint 13 the campaigns the team un | 19 |
 
 ## `app/app/abrir/`
 
@@ -97,7 +97,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`page.tsx`](app/app/c/[id]/page.tsx) | one campaign by its id, the client-drawn u64 (TP §3.4.1): the campaign page and its entry panel (Sprint 11). The server only passes the route's id and the link' | 39 |
+| [`page.tsx`](app/app/c/[id]/page.tsx) | one campaign by its id, the client-drawn u64 (TP §3.4.1): the campaign page and its entry panel (Sprint 11). The server only passes the route's id and the link' | 42 |
 
 ## `app/app/fees/`
 
@@ -115,7 +115,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`page.tsx`](app/app/leaderboard/page.tsx) | The ranking (Sprint 13). A shell for Sprint 09: the route exists and shows its title; the content comes in Sprint 13 | 14 |
+| [`page.tsx`](app/app/leaderboard/page.tsx) | the devnet leaderboard at /leaderboard (Sprint 13; BR-29): wallets by points from the read API's /api/v1/leaderboard, read in the browser. The route existed as  | 20 |
 
 ## `app/app/my-entries/`
 
@@ -167,7 +167,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`activity-panel.tsx`](app/features/campaign-page/activity-panel.tsx) | the recent entries and the chance history (L-23, answered yes), read from the chain's `EntryAdded` events (activity.ts) once per page view and again after an en | 80 |
 | [`activity.ts`](app/features/campaign-page/activity.ts) | the campaign's recent activity and its chance history (L-23, answered yes), read from the chain until the indexer serves them (Sprint 08's activity route is not | 79 |
 | [`campaign-header.tsx`](app/features/campaign-page/campaign-header.tsx) | the campaign page's header (spec 3.5 of Sprint -1): the way back, the kind, the public state from chain time (A-7), the team chip, the sentence as the page's on | 81 |
-| [`campaign-page.tsx`](app/features/campaign-page/campaign-page.tsx) | the campaign page at /c/[id] (Sprint 11; spec 3.5 of Sprint -1): the header, the proof, the pot, the recent entries, the re-check panel, and the entry panel, or | 138 |
+| [`campaign-page.tsx`](app/features/campaign-page/campaign-page.tsx) | the campaign page at /c/[id] (Sprint 11; spec 3.5 of Sprint -1): the header, the proof, the pot, the recent entries, the re-check panel, and the entry panel, or | 168 |
 | [`chance-chart.tsx`](app/features/campaign-page/chance-chart.tsx) | the chance history (L-23): the YES share of the entries after each entry, as a step line (a share changes only when an entry goes in), one series in the design' | 89 |
 | [`copy-states.ts`](app/features/campaign-page/copy-states.ts) | the words of the campaign states (Sprint 12; D-m vocabulary; English per L-01): closed and why, in review with the six-hour window, contested (L-04, answered "C | 128 |
 | [`copy.ts`](app/features/campaign-page/copy.ts) | the campaign page's words (BR-23, BR-26, BR-27; D-m vocabulary; English per L-01): the rule of each kind in plain words, the proof's labels, the price facts and | 154 |
@@ -191,7 +191,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`arrange.test.ts`](app/features/campaigns/arrange.test.ts) | the list's rules: the ranking order, the state, kind and search filters, the saved filter, the unlisted switch, the sorts, and the empty pot's chance (none) | 103 |
 | [`arrange.ts`](app/features/campaigns/arrange.ts) | what the list shows and in which order (Sprint 10): the five states and "saved", the five kinds, the search, the unlisted switch, and the sort. The default orde | 62 |
 | [`campaign-card.tsx`](app/features/campaigns/campaign-card.tsx) | one campaign's card in the list (Sprint 10): the kind, the sentence, the state, the pot in SOL, the chance per side (none for an empty pot), the estimated retur | 84 |
-| [`campaign-list.tsx`](app/features/campaigns/campaign-list.tsx) | the home route's campaign list (Sprint 10): the search, the state and kind filters, the sort, the unlisted switch, and the cards in the ranking order. The data  | 142 |
+| [`campaign-list.tsx`](app/features/campaigns/campaign-list.tsx) | the home route's campaign list (Sprint 10): the search, the state and kind filters, the sort, the unlisted switch, and the cards in the ranking order. The data  | 146 |
 | [`model.test.ts`](app/features/campaigns/model.test.ts) | the card values: the chance (none for an empty pot), the estimated return from the SDK's math, the 24-hour listing rule, and the sentence of a price campaign fr | 117 |
 | [`model.ts`](app/features/campaigns/model.ts) | a campaign's card values, from the read API's fields and the SDK's math (Sprint 10): the pot in lamports, the chance per side (none for an empty pot, L-05), the | 112 |
 | [`saved.ts`](app/features/campaigns/saved.ts) | the "Saved" list of campaigns, kept in this browser's localStorage (Sprint 10: a per-viewer convenience, never state anyone else needs). Every read and write is | 45 |
@@ -249,6 +249,15 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`copy.ts`](app/features/how/copy.ts) | the words of "How it works" (spec 3.2 and 3.15 of Sprint -1; D-m vocabulary; English per L-01): the six steps of a campaign from opening to payout, what chance  | 77 |
 | [`how-page.tsx`](app/features/how/how-page.tsx) | "How it works" (spec 3.2 and 3.15 of Sprint -1, prototype-lab/campaigns/js/screens/how.js): the six steps as one ordered path that reads the same on a phone (th | 75 |
 
+## `app/features/leaderboard/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`copy.ts`](app/features/leaderboard/copy.ts) | the words of the devnet leaderboard (spec 3.9 of Sprint -1; BR-29; D-m vocabulary; English per L-01): the table, the connected wallet's own line, the loading, e | 47 |
+| [`leaderboard.tsx`](app/features/leaderboard/leaderboard.tsx) | the devnet leaderboard at /leaderboard (Sprint 13 DoD; spec 3.9 of Sprint -1, prototype-lab/campaigns/js/screens/ranking.js): wallets by points from /api/v1/lea | 162 |
+| [`model.ts`](app/features/leaderboard/model.ts) | the leaderboard's values, as pure functions (Sprint 13): a wallet's hit rate (its points over its campaigns with a final YES or NO), and the connected wallet's  | 19 |
+| [`use-leaderboard.ts`](app/features/leaderboard/use-leaderboard.ts) | the leaderboard's data in React (Sprint 13): every ranked wallet from the read API's /api/v1/leaderboard, read in pages of 100 up to 1,000 wallets, once when th | 47 |
+
 ## `app/features/my-entries/`
 
 | Arquivo | Núcleo | Linhas |
@@ -269,8 +278,16 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`copy.ts`](app/features/record/copy.ts) | the words of the public record (Sprint 12; BR-45; English per L-01, route `/record` confirmed by the founder): what the record holds, how to check a record agai | 32 |
-| [`load-void-log.ts`](app/features/record/load-void-log.ts) | the void log read on the server (the site's build and its server render; never in the browser): every record in content/void-log/ (not the README, the JSON Sche | 41 |
+| [`load-void-log.ts`](app/features/record/load-void-log.ts) | the void log read on the server (the site's build and its server render; never in the browser): every record in content/void-log/ (not the README, the JSON Sche | 33 |
 | [`record-list.tsx`](app/features/record/record-list.tsx) | the public record (Sprint 12 DoD: voids and decisions, with reasons, from content/void-log/; BR-45), drawn on the server from the void log: each void with its c | 85 |
+
+## `app/features/report/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`copy.ts`](app/features/report/copy.ts) | the words of "Report this campaign" (C-10; Sprint 13; D-m vocabulary; English per L-01): where a report goes, what the team can do about it (unlist the campaign | 22 |
+| [`report-campaign.tsx`](app/features/report/report-campaign.tsx) | "Report this campaign" on every campaign page (C-10, Sprint 13 DoD), in every state: a plain link to where reports go (no X script, widget or API, K-10), what t | 34 |
+| [`unlisted.ts`](app/features/report/unlisted.ts) | the campaigns the team unlisted after a report (C-10; proposal §2.7), read on the server when the site is built from content/unlisted.json: a list of `{ "id": " | 45 |
 
 ## `app/features/wallet/`
 
@@ -288,10 +305,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`api-client.test.ts`](app/lib/api-client.test.ts) | the read API client with a fake fetch: the URLs and query it builds, the body on 200 and on health's 503, the named ApiError on other answers, the unreachable c | 89 |
-| [`api-client.ts`](app/lib/api-client.ts) | a read-only client for the read API (`services/api`, /api/v1): health, the campaign list and one campaign. Typed from the API's JSON; it imports no server code. | 125 |
+| [`api-client.ts`](app/lib/api-client.ts) | a read-only client for the read API (`services/api`, /api/v1): health, the campaign list, one campaign and, since Sprint 13, the devnet leaderboard. Typed from  | 150 |
 | [`brand.ts`](app/lib/brand.ts) | Product name and copy in one place. The name is Brot Markets; Baked is the mascot. Only the copy the site shows lives | 13 |
 | [`brot.ts`](app/lib/brot.ts) | the site's one door to the Brot Markets SDK (Sprint 09, A-6): the read half (constants, PDAs, decoding, public state) and the tx half (the transaction builders  | 17 |
 | [`config.ts`](app/lib/config.ts) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 10 |
+| [`content.ts`](app/lib/content.ts) | where the repository's content/ folder is, for what the site reads on the server when it is built (the void log, the powers table, the unlisted campaigns). The  | 21 |
 | [`deploy.ts`](app/lib/deploy.ts) | A-8 on the site: the program deploy this bundle was built for (ProgramData's slot), baked at build time by next.config.ts. `null` when the build could not read  | 11 |
 | [`fonts.ts`](app/lib/fonts.ts) | the site's two fonts, served by the site itself: Barlow Condensed 700 for display and numbers, Inter 400, 500 and 600 for text. next/font downloads them at buil | 26 |
 | [`rpc.ts`](app/lib/rpc.ts) | the browser's one Kit RPC client, on the site's RPC (NEXT_PUBLIC_RPC_URL: public configuration, never a paid key, A-5). The SDK reads accounts, simulates and po | 13 |
@@ -375,7 +393,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`index.ts`](packages/sdk/src/schemas/index.ts) | `@brot/sdk/schemas`, the zod 4 schemas the site, the app and the services share: the opening's input; the public format of a void-log record (Sprint 12); the re | 11 |
 | [`open-campaign.ts`](packages/sdk/src/schemas/open-campaign.ts) | the zod schema of an opening's input (TP Appendix B, written here as Sprint 05 must), shared by the SDK, the site, the app and the preview: what a creator may c | 117 |
-| [`void-log.ts`](packages/sdk/src/schemas/void-log.ts) | the public format of a `content/void-log/` record (TP §3.4.7, BR-45; Sprint 12 gives it its public format, which Sprint 05's `scripts/team/void.ts` started): a  | 129 |
+| [`void-log.ts`](packages/sdk/src/schemas/void-log.ts) | the public format of a `content/void-log/` record (TP §3.4.7, BR-45; Sprint 12 gives it its public format, which Sprint 05's `scripts/team/void.ts` started): a  | 135 |
 
 ## `packages/sdk/src/tx/`
 
@@ -1007,7 +1025,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`config.ts`](services/api/src/config.ts) | the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only), the port and host (loopback by default), the refresh i | 57 |
 | [`dto.ts`](services/api/src/dto.ts) | the JSON shape of a campaign for the site. Amounts are lamport strings, addresses base58, times Unix seconds (strings for the big integers). The state is the SD | 58 |
 | [`history.ts`](services/api/src/history.ts) | the program's own history, read for the leaderboard (Sprint 13) until Sprint 08's indexer exists: every signature of the program through `getSignaturesForAddres | 97 |
-| [`leaderboard.ts`](services/api/src/leaderboard.ts) | `GET /api/v1/leaderboard` (TP §6; Sprint 13, BR-29): devnet points from the program's events (history.ts) and the live campaign accounts (the snapshot), through | 59 |
+| [`leaderboard.ts`](services/api/src/leaderboard.ts) | `GET /api/v1/leaderboard` (TP §6; Sprint 13, BR-29): devnet points from the program's events (history.ts) and the live campaign accounts (the snapshot), through | 52 |
 | [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, reads the program's new history for the leaderboa | 51 |
 | [`query.ts`](services/api/src/query.ts) | validates the list's query string. An unknown parameter, a bad state, or a limit or offset out of range is a 400 with a named code; nothing is guessed. The stat | 49 |
 | [`routes.ts`](services/api/src/routes.ts) | the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged), /api/v1/campaigns/:address and, since Sprint 13, /api/v1/leaderb | 100 |
@@ -1019,7 +1037,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`api.test.ts`](services/api/tests/api.test.ts) | the read API's contract with fake data and no cluster: the list's filters and paging, the 400 and 404 answers, the detail route, CORS, the method refusal, the h | 203 |
-| [`leaderboard.test.ts`](services/api/tests/leaderboard.test.ts) | the leaderboard route's contract with fake data and no cluster (Sprint 13): 503 until the program's history has been read (or with no history at all), what heal | 110 |
+| [`leaderboard.test.ts`](services/api/tests/leaderboard.test.ts) | the leaderboard route's contract with fake data and no cluster (Sprint 13): 503 until the program's history has been read (or with no history at all), what heal | 108 |
 
 ## `services/keeper/src/`
 
@@ -1170,7 +1188,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`leaderboard.test.ts`](tests/api/leaderboard.test.ts) | the read API's leaderboard against the program in LiteSVM behind the recording RPC (Sprint 13 DoD: the leaderboard shows the points of `/api/v1/leaderboard`): w | 159 |
+| [`leaderboard.test.ts`](tests/api/leaderboard.test.ts) | the read API's leaderboard against the program in LiteSVM behind the recording RPC (Sprint 13 DoD: the leaderboard shows the points of `/api/v1/leaderboard`): w | 158 |
 
 ## `tests/brot/`
 
@@ -1359,13 +1377,14 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`received.test.ts`](tests/site/received.test.ts) | what "my entries" says a wallet received equals the program's settlement events for that wallet, and the SOL that actually reached it (Sprint 12 DoD), on whole  | 172 |
 | [`recheck-commands.test.ts`](tests/site/recheck-commands.test.ts) | the re-check panel's commands fetch the bytes the program's readers read (BR-23): on real captured accounts, the byte range each command asks for decodes to the | 79 |
 | [`relay-trace.test.ts`](tests/site/relay-trace.test.ts) | the relay's allowlist is taken from a trace of the real client (Sprint 11 DoD; proposal §2.6): the campaign page's reads, the entry's preparation, the hand-off  | 111 |
+| [`report.test.ts`](tests/site/report.test.ts) | "Report this campaign" (C-10, Sprint 13 DoD): the link goes where reports go (the founder's [Q], built as recommended: the same X account as L-13), as a plain l | 77 |
 | [`retry-guard-rules.test.ts`](tests/site/retry-guard-rules.test.ts) | the retry guard's rules (A-9), without a chain: what a record means given the chain now (a signature's confirmed status decides; without one, the entry total; p | 170 |
 | [`retry-guard.test.ts`](tests/site/retry-guard.test.ts) | the site's retry guard (A-9; proposal §3.4 rule 6) end to end, against the program in LiteSVM behind a local RPC: the record is saved before the wallet sees the | 141 |
 | [`state-world.ts`](tests/site/state-world.ts) | a campaign account written into the program's world in each public state the site shows (Sprint 12), for the render test and the web smoke: closed on time, clos | 120 |
 | [`states-render.test.ts`](tests/site/states-render.test.ts) | every public state of the campaign page renders what the chain says (Sprint 12 DoD), one case per state: a campaign account in that state is written into the pr | 195 |
 | [`support.ts`](tests/site/support.ts) | what the site's tests share: the world's accounts read the way the page reads them (owner and bytes), the inputs of the entry panel's estimate, a key-value stor | 93 |
 | [`upgrade-pause.test.ts`](tests/site/upgrade-pause.test.ts) | A-8 on the site (the founder's answers of 2026-10-10: ProgramData read through the site's RPC; the floor at 1%): the entry's preparation passes the deploy the s | 89 |
-| [`void-log.test.ts`](tests/site/void-log.test.ts) | the void log's public format (Sprint 12 deliverable, "its JSON Schema check in CI"): the committed JSON Schema is the one generated from the zod schema; every r | 122 |
+| [`void-log.test.ts`](tests/site/void-log.test.ts) | the void log's public format (Sprint 12 deliverable, "its JSON Schema check in CI"): the committed JSON Schema is the one generated from the zod schema; every r | 132 |
 
 ---
 
