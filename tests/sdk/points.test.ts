@@ -3,7 +3,7 @@
  *          that won, once the result is final; never for volume, never for a void, never for a late join; ties share
  *          a rank. Built from the program's events as the SDK decodes them, and from what a live account says.
  *          Filter: `bun test tests/ -t "leaderboard points rule"`.
- * Version: 0.1.0
+ * Version: 0.2.0 (a reopened id is a new campaign)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { describe, expect, test } from "bun:test";
@@ -80,14 +80,14 @@ describe("leaderboard points rule", () => {
       resolved("unfinal", Outcome.No),
     ];
     const results = finalResults(events, new Map());
-    expect(results.get("gone")).toBe("No");
-    expect(results.has("unfinal")).toBe(false); // resolved but never finalized, and no account to say more
+    expect(results.get("gone#0")).toBe("No");
+    expect(results.has("unfinal#0")).toBe(false); // resolved but never finalized, and no account to say more
     expect(row(pointsTable(events, new Map()), "ana")).toEqual({ wallet: "ana", points: 1, entered: 2, decided: 1 });
   });
 
   test("the live account outranks its events while it exists", () => {
     const events = [entry("c1", "ana", Side.Yes), resolved("c1", Outcome.Yes), finalized("c1", SettleMode.Split)];
-    expect(finalResults(events, live([["c1", { outcome: Outcome.Yes, final: false }]])).has("c1")).toBe(false);
+    expect(finalResults(events, live([["c1", { outcome: Outcome.Yes, final: false }]])).has("c1#0")).toBe(false);
   });
 
   test("a join tallied as late comes back whole and never scores", () => {
@@ -119,6 +119,27 @@ describe("leaderboard points rule", () => {
     const events = [entry("c1", "ana", Side.Yes), entry("c1", "bia", Side.Yes)];
     const rows = pointsTable(events, live([["c1", { outcome: Outcome.Yes, final: true }]]));
     expect(rows.map((r) => r.points)).toEqual([1, 1]);
+  });
+
+  test("a closed campaign's id opened again is a new campaign: the old bakers keep the old result", () => {
+    const events = [
+      event("CampaignOpened", { campaign: "c1" }),
+      entry("c1", "ana", Side.No),
+      resolved("c1", Outcome.No),
+      finalized("c1", SettleMode.Split),
+      event("CampaignClosed", { campaign: "c1" }),
+      event("CampaignOpened", { campaign: "c1" }),
+      entry("c1", "bia", Side.Yes),
+    ];
+    // The new campaign at the same address is open: the old one's NO still scores; Bia has nothing decided yet.
+    const open = pointsTable(events, live([["c1", { outcome: Outcome.Unresolved, final: false }]]));
+    expect(row(open, "ana")).toEqual({ wallet: "ana", points: 1, entered: 1, decided: 1 });
+    expect(row(open, "bia")).toEqual({ wallet: "bia", points: 0, entered: 1, decided: 0 });
+    // The new one ends YES: Bia scores, and Ana's old NO is not rescored by it.
+    const yes = pointsTable(events, live([["c1", { outcome: Outcome.Yes, final: true }]]));
+    expect(row(yes, "ana")?.points).toBe(1);
+    expect(row(yes, "bia")?.points).toBe(1);
+    expect([...finalResults(events, new Map()).keys()]).toEqual(["c1#1"]);
   });
 
   test("highest points first, then by address; ties share a rank and zero points has none", () => {

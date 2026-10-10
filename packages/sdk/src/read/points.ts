@@ -1,16 +1,17 @@
 /**
  * Purpose: devnet points (BR-29; TP §3.5 "Points"; Q7 answered a): 1 point per campaign a wallet entered on the side
  *          that won, once that result is final. Volume and profit never score. Computed from the program's own events
- *          (`EntryAdded`, `LateTallied`, `CampaignResolved`, `CampaignVoided`, `CampaignFinalized`) and, for a
- *          campaign whose account still exists, what that account says now. Pure, so the read API and any client
- *          compute the same table from the same events.
- * Version: 0.1.0
+ *          (`CampaignOpened`, `EntryAdded`, `LateTallied`, `CampaignResolved`, `CampaignVoided`, `CampaignFinalized`)
+ *          and, for a campaign whose account still exists, what that account says now. Pure, so the read API and any
+ *          client compute the same table from the same events.
+ * Version: 0.2.0 (the Sprint 13 adversarial review: each opening of an address counts apart, since a closed campaign's
+ *          id can be opened again)
  * Sprint:  13 (site: ranking, notices and copy)
  *
- * A result is final when no key can change it any more: the campaign is settling or settled, or its 6-hour review
- * window has ended without a contest (the program refuses every team act from `review_ends_at` on). A void is final
- * but has no right side, so it scores nothing and is not "decided". A join tallied as late (after a YES proof) comes
- * back whole and never scores.
+ * A result is final when no key can change it any more (the read API decides it for a live account: `CampaignNow`); a
+ * campaign known only from its events is final once finalized. A void is final but has no right side, so it scores
+ * nothing and is not "decided". A join tallied as late (after a YES proof) comes back whole and never scores. A closed
+ * campaign's address can carry a new campaign later: every `CampaignOpened` starts a new campaign at that address.
  */
 import { Outcome, SettleMode, Side } from "./constants";
 import type { DecodedEvent } from "./decoder";
@@ -30,34 +31,58 @@ export type FinalResult = "Yes" | "No" | "Void";
 export type PointsRow = { wallet: string; points: number; entered: number; decided: number };
 
 type Track = { resolved?: Outcome; voided: boolean; finalized?: SettleMode };
+type Stake = { key: string; wallet: string; yes: bigint; no: bigint };
 
 const asResult = (outcome: Outcome | undefined): FinalResult | null =>
   outcome === Outcome.Yes ? "Yes" : outcome === Outcome.No ? "No" : outcome === Outcome.Void ? "Void" : null;
 
+const inOrder = (a: DecodedEvent, b: DecodedEvent) =>
+  a.slot !== b.slot ? (a.slot < b.slot ? -1 : 1) : a.key.ixIndex - b.key.ixIndex || a.key.innerIndex - b.key.innerIndex;
+
+/** The events read in chain order, each tied to one opening of its campaign: `<address>#<n>`, n counting openings. */
+function byOpening(events: readonly DecodedEvent[]) {
+  const openings = new Map<string, number>();
+  const keyOf = (campaign: string) => `${campaign}#${openings.get(campaign) ?? 0}`;
+  const tied: { key: string; event: DecodedEvent }[] = [];
+  for (const event of [...events].sort(inOrder)) {
+    const campaign = (event.data as { campaign?: string }).campaign;
+    if (typeof campaign !== "string") continue;
+    if (event.name === "CampaignOpened") openings.set(campaign, (openings.get(campaign) ?? 0) + 1);
+    tied.push({ key: keyOf(campaign), event });
+  }
+  // The account that exists now is the latest opening of its address.
+  return { tied, latest: keyOf };
+}
+
 /**
- * Each campaign's final result. The account's own outcome when it exists and its result is final; when the account is
- * gone (closed after its payouts), the events: finalized as a refund or voided is a void, otherwise the outcome read.
+ * Each campaign's final result, keyed `<address>#<opening>`. The account's own outcome for the latest opening of an
+ * address that still has an account; for any other opening, its events: finalized as a refund or voided is a void,
+ * otherwise the outcome read.
  */
 export function finalResults(
   events: readonly DecodedEvent[],
   now: ReadonlyMap<string, CampaignNow>,
 ): Map<string, FinalResult> {
+  const { tied, latest } = byOpening(events);
   const tracks = new Map<string, Track>();
-  const track = (campaign: string) => tracks.get(campaign) ?? tracks.set(campaign, { voided: false }).get(campaign)!;
-  for (const event of events) {
-    if (event.name === "CampaignResolved") track(event.data.campaign).resolved = event.data.outcome;
-    else if (event.name === "CampaignVoided") track(event.data.campaign).voided = true;
-    else if (event.name === "CampaignFinalized") track(event.data.campaign).finalized = event.data.settleMode;
+  const track = (key: string) => tracks.get(key) ?? tracks.set(key, { voided: false }).get(key)!;
+  for (const { key, event } of tied) {
+    if (event.name === "CampaignResolved") track(key).resolved = event.data.outcome;
+    else if (event.name === "CampaignVoided") track(key).voided = true;
+    else if (event.name === "CampaignFinalized") track(key).finalized = event.data.settleMode;
   }
   const results = new Map<string, FinalResult>();
+  const live = new Set<string>();
   for (const [campaign, stored] of now) {
+    const key = latest(campaign);
+    live.add(key);
     const result = stored.final ? asResult(stored.outcome) : null;
-    if (result) results.set(campaign, result);
+    if (result) results.set(key, result);
   }
-  for (const [campaign, t] of tracks) {
-    if (now.has(campaign) || t.finalized === undefined) continue;
+  for (const [key, t] of tracks) {
+    if (live.has(key) || t.finalized === undefined) continue;
     const result = t.voided || t.finalized === SettleMode.Refund ? "Void" : asResult(t.resolved);
-    if (result) results.set(campaign, result);
+    if (result) results.set(key, result);
   }
   return results;
 }
@@ -71,18 +96,18 @@ export function pointsTable(
   const bothSidesScore = options.bothSidesScore ?? BOTH_SIDES_SCORE;
   const results = finalResults(events, now);
   // What each wallet has on each side of each campaign, late joins taken out.
-  const stakes = new Map<string, { campaign: string; wallet: string; yes: bigint; no: bigint }>();
-  const stake = (campaign: string, wallet: string) => {
-    const key = `${campaign}|${wallet}`;
-    return stakes.get(key) ?? stakes.set(key, { campaign, wallet, yes: 0n, no: 0n }).get(key)!;
+  const stakes = new Map<string, Stake>();
+  const stake = (key: string, wallet: string) => {
+    const id = `${key}|${wallet}`;
+    return stakes.get(id) ?? stakes.set(id, { key, wallet, yes: 0n, no: 0n }).get(id)!;
   };
-  for (const event of events) {
+  for (const { key, event } of byOpening(events).tied) {
     if (event.name === "EntryAdded") {
-      const s = stake(event.data.campaign, event.data.baker);
+      const s = stake(key, event.data.baker);
       if (event.data.side === Side.Yes) s.yes += event.data.amount;
       else s.no += event.data.amount;
     } else if (event.name === "LateTallied") {
-      const s = stake(event.data.campaign, event.data.baker);
+      const s = stake(key, event.data.baker);
       s.yes -= event.data.lateYesAdded;
       s.no -= event.data.lateNoAdded;
     }
@@ -93,7 +118,7 @@ export function pointsTable(
       rows.get(s.wallet) ?? rows.set(s.wallet, { wallet: s.wallet, points: 0, entered: 0, decided: 0 }).get(s.wallet)!;
     if (s.yes <= 0n && s.no <= 0n) continue; // only late joins, all refunded: not an entry that called anything
     row.entered += 1;
-    const result = results.get(s.campaign);
+    const result = results.get(s.key);
     if (result !== "Yes" && result !== "No") continue;
     row.decided += 1;
     const [right, wrong] = result === "Yes" ? [s.yes, s.no] : [s.no, s.yes];

@@ -2,16 +2,18 @@
  * Purpose: the sheet "Check before you sign" (A-3): what the transaction carries, from the SDK's preparation of it —
  *          side, amount, the estimate net of the fee and the creator's share, `min_return_bps` (the floor the program
  *          enforces), `expected_entry_total` (the retry guard), the rents, the network fee, the total and the network —
- *          then the SDK's deterministic summary, read from the very bytes the wallet will sign, and the notices.
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ *          then the SDK's deterministic summary, read from the very bytes the wallet will sign, and the notices. Since
+ *          Sprint 13 the estimate is what finalize would pay if entries closed now (`shownReturnBps`), with a line when
+ *          the other side is too small to pay the fees; the floor stays the program's own estimate.
+ * Version: 0.2.0 (Sprint 13: the shown return)
+ * Sprint:  11 (site: campaign page and entry); 13
  */
 "use client";
 
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
-import { formatSol, PROGRAM_ID, shortAddress } from "@/lib/brot";
+import { formatSol, PROGRAM_ID, shortAddress, shownReturnBps, splitsIfWins, type JoinedPot } from "@/lib/brot";
 import { CLUSTER, explorerAddress } from "@/lib/config";
 import { sol4 } from "./amount";
 import { PANEL, SHEET } from "./copy";
@@ -25,6 +27,8 @@ export type ReviewFacts = {
   feeBps: number;
   creatorShareBps: number;
   oneSidedFeeBps: number;
+  /** The campaign's prize, for the estimate of what finalize would pay. */
+  prizeLamports: bigint;
   fromLink: boolean;
   firstEntry: boolean;
   /** This browser keeps the retry guard's record across a reload (localStorage works). */
@@ -62,7 +66,24 @@ export function EntryReview({
   const added = ready.simulation.events.find((e) => e.name === "EntryAdded");
   const otherAfter =
     added?.name === "EntryAdded" ? (choice.side === "yes" ? added.data.poolNo : added.data.poolYes) : 1n;
-  const back = (choice.amount * ready.check.estimateBps) / 10_000n;
+  const sideAfter =
+    added?.name === "EntryAdded" ? (choice.side === "yes" ? added.data.poolYes : added.data.poolNo) : null;
+  const pot: JoinedPot | null =
+    sideAfter === null
+      ? null
+      : {
+          amount: choice.amount,
+          sideAfter,
+          other: otherAfter,
+          prize: facts.prizeLamports,
+          feeBps: facts.feeBps,
+          oneSidedFeeBps: facts.oneSidedFeeBps,
+          creatorShareBps: facts.creatorShareBps,
+          isFirst: ready.check.isFirst,
+        };
+  const tooSmall = pot !== null && otherAfter > 0n && !splitsIfWins(pot);
+  const shown = pot && tooSmall ? shownReturnBps(pot) : ready.check.estimateBps;
+  const back = (choice.amount * shown) / 10_000n;
   return (
     <div className="space-y-4">
       {refreshed ? <p className="m-0 rounded-sm bg-notice-bg px-3 py-2 text-xs">{SHEET.refreshed}</p> : null}
@@ -74,10 +95,10 @@ export function EntryReview({
         <Row label={SHEET.sideAmount} note={facts.fromLink ? PANEL.fromLink : undefined}>
           <b>{S}</b> {formatSol(choice.amount)} SOL
         </Row>
-        <Row label={SHEET.estimate}>
+        <Row label={SHEET.estimate} note={tooSmall ? SHEET.tooSmall(O) : undefined}>
           {otherAfter === 0n
             ? SHEET.estimateOnesided(sol4(back), O)
-            : SHEET.estimateValue(perOne(ready.check.estimateBps), sol4(back), S)}
+            : SHEET.estimateValue(perOne(shown), sol4(back), S)}
         </Row>
         <Row label={SHEET.floor} note={SHEET.floorNote(ready.minReturnBps.toLocaleString("en-US"))}>
           {SHEET.floorValue(perOne(BigInt(ready.minReturnBps)))}

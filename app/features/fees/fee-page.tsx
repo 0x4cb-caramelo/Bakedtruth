@@ -2,8 +2,9 @@
  * Purpose: the fee page (BR-32; spec 3.10 of Sprint -1, prototype-lab/campaigns/js/screens/fees.js): what Brot keeps
  *          and what the creator gets, the worked example of P1 §1.2 with every number from the SDK's math
  *          (example.ts), the one-sided pot, the void and its opening fee, the opening's 90/10, the refund policy, and
- *          rent and network fees. Drawn on the server; no script runs here.
- * Version: 0.1.0
+ *          rent and network fees, the Economic Viability Rule's refund included. Drawn on the server; no script runs
+ *          here.
+ * Version: 0.1.1 (the Sprint 13 reviews: the too-small refund and the opening's rent)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import type { ReactNode } from "react";
@@ -81,6 +82,7 @@ function OneSided() {
         ])}
       />
       <p className="m-0 text-xs text-muted">{FEES.oneSidedNote(solText(kept))}</p>
+      <p className="m-0 text-xs text-muted">{FEES.tooSmall}</p>
     </Box>
   );
 }
@@ -112,6 +114,7 @@ export function FeePage() {
       <Box title={FEES.openingTitle}>
         <p className="m-0 text-sm">{FEES.opening}</p>
         <p className="m-0 text-sm">{FEES.openingMax}</p>
+        <p className="m-0 text-sm">{FEES.openingRent}</p>
         <p className="m-0 text-sm">{FEES.openingFree}</p>
         <p className="m-0 text-xs text-muted">{FEES.openingSite}</p>
       </Box>
