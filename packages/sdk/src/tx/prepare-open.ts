@@ -4,7 +4,7 @@
  *          of TP 3.4.10 with `validateOpenCampaign`, in the program's order; then build, summarise the very bytes
  *          the wallet signs, simulate, and show the whole debit (the payment, the two rents, the network fee)
  *          before the wallet. `ok` only when all of it passed.
- * Version: 0.2.0
+ * Version: 0.3.0 (Sprint 11: A-8, the deploy a client was built for is checked first when it names one)
  * Sprint:  05 (SDK)
  *
  * The opening's id is drawn here when not given and returned: the client saves it before signing and reuses
@@ -21,6 +21,7 @@ import type { FeedCluster } from "../read/feeds";
 import { U64_MAX } from "../read/math/integers";
 import type { ScheduleConstants } from "../read/math/schedule";
 import { campaignAddress, configAddress, sponsoredPriceAddress, vaultAddress } from "../read/pdas";
+import { assertDeploy } from "../read/program-data";
 import { openingDebit, openingQuote, type OpeningDebit, type OpeningQuote } from "../read/quote";
 import { fetchRaw, readChainTime, readEpochSchedule, rentExemptMinimum, type SolanaRpc } from "../read/rpc";
 import { validateOpenCampaign, type OpenCampaignCheck } from "../read/validate/open-campaign";
@@ -81,7 +82,10 @@ export async function prepareOpenCampaign(a: {
   /** The target cluster's build: its feed list, whether `StakeAtLeast` opens, its schedule (drill or real). */
   build?: { feeds?: FeedCluster; stakeAtLeastOpens?: boolean; schedule?: ScheduleConstants };
   voteStake?: bigint | null;
+  /** A-8: the program deploy this client was built for (`null`: none known); checked first when given. */
+  deploySlot?: bigint | null;
 }): Promise<PreparedOpening> {
+  if (a.deploySlot !== undefined) await assertDeploy(a.rpc, a.deploySlot);
   const id = a.id ?? randomCampaignId();
   const { choice, rpc } = a;
   const feedId =

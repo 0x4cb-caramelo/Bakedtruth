@@ -1,0 +1,72 @@
+/**
+ * Purpose: the live estimate under the amount (BR-09), in a polite live region: what the entry returns if its side
+ *          wins, net of Brot's fee and the creator's share, with the entry itself counted; the refund while the other
+ *          side is empty; the program's refusal in the panel's words when the entry would be refused. The numbers are
+ *          estimate.ts's, which are the SDK's `checkJoin` estimate.
+ * Version: 0.1.0
+ * Sprint:  11 (site: campaign page and entry)
+ */
+"use client";
+
+import { sol4 } from "./amount";
+import { PANEL } from "./copy";
+import { failureCopy, type FailureContext } from "./copy-failures";
+import { perOne, type EntryEstimate, type EntrySide } from "./estimate";
+import { fromRefusal } from "./failures";
+
+const other = (side: EntrySide) => (side === "yes" ? "NO" : "YES");
+
+export function EstimateBlock({
+  estimate,
+  side,
+  amount,
+  oneSidedFeeBps,
+  context,
+}: {
+  estimate: EntryEstimate | null;
+  side: EntrySide;
+  amount: bigint | null;
+  oneSidedFeeBps: number;
+  context: FailureContext;
+}) {
+  return (
+    <div aria-live="polite" className="min-h-14 rounded-sm bg-raised px-3 py-2.5 text-sm">
+      {body(estimate, side, amount, oneSidedFeeBps, context)}
+    </div>
+  );
+}
+
+function body(
+  e: EntryEstimate | null,
+  side: EntrySide,
+  amount: bigint | null,
+  oneSidedFeeBps: number,
+  context: FailureContext,
+) {
+  if (!e || amount === null) return <p className="m-0 text-muted">{PANEL.enterAmount}</p>;
+  if (!e.ok) {
+    const copy = failureCopy(fromRefusal(e.refusal).key, context);
+    return (
+      <p className="m-0 text-warn">
+        <b>{copy.title}.</b> {copy.text}
+      </p>
+    );
+  }
+  const S = side.toUpperCase();
+  if (e.mode === "onesided") {
+    return (
+      <>
+        <p className="m-0 font-semibold">{PANEL.onesided(other(side), sol4(e.returns))}</p>
+        <p className="m-0 mt-1 text-xs text-muted">{PANEL.onesidedSub(e.isFirst, other(side), oneSidedFeeBps)}</p>
+      </>
+    );
+  }
+  return (
+    <>
+      <p className="m-0 font-semibold tabular-nums">{PANEL.ifWins(S, sol4(e.returns), sol4(amount))}</p>
+      <p className="m-0 mt-1 text-xs text-muted tabular-nums">
+        {PANEL.perOne(perOne(e.bps))}. {PANEL.ifLoses(other(side))}
+      </p>
+    </>
+  );
+}

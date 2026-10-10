@@ -20,6 +20,57 @@ nos caminhos da equipe pelo PR #44 e o id novo do programa pelo PR #45; já em 1
 A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir da `origin/main` (`6b5e3ec`), na branch
 `sprint-06-keeper-server`. Nada de código entrou ainda: a primeira tarefa é a checagem do Bun 1.4.2 no servidor.
 
+### Changed
+
+- **Sprint 11 fechada e mesclada** (branch `sprint-11-site-campaign-entry`, PR #60, 10/10/2026, a pedido do Ronaldo,
+  com a tag `sprint-11`; `docs/sprints/sprint-11-site-campaign-entry.md`). O Ronaldo relatou o teste com a Phantom no
+  devnet: uma entrada de 0,01 SOL, assinada, com a página reagindo como esperado. **A transação não aparece no
+  devnet:** conferido no mesmo dia, só por leitura e por duas RPCs, a última transação do programa é uma abertura de
+  campanha às 04:48 UTC, antes de existir o código da entrada no site, e nenhuma entrada chegou depois disso. A página
+  só diz "You're in" quando a RPC dela confirma a assinatura; o mais provável é que o teste tenha passado por outra
+  RPC, outro cluster ou outro programa (inferência, não conferida). O programa não foi atualizado nesse meio-tempo
+  (ProgramData ainda no slot 509.389.614). Falta a assinatura da transação, que fica na atividade da Phantom, para
+  registrar a entrada assinada com carteira real; até lá ela segue em aberto.
+
+### Added
+
+- **A-8: a assinatura pausa quando o programa é atualizado** (Sprint 11, 10/10/2026, pela resposta do fundador): o SDK
+  lê o slot do último deploy do programa na conta ProgramData (só os 45 primeiros bytes, com o dono conferido antes)
+  pela RPC do site, a pública do devnet, até o relay `/rpc` existir; `prepareJoin` e `prepareOpenCampaign` recebem o
+  slot esperado e param antes de tudo quando ele mudou. O build do site grava o slot (hoje 509.389.614); o painel
+  confere na revisão e de novo logo antes da carteira. Se não bate, nada é assinado, a mensagem diz que o programa foi
+  atualizado e a página recarrega depois de 5 s, 30 s, 2 min e então 10 min. Por isso o site precisa ser construído de
+  novo depois de cada atualização do programa (`deploy/devnet/README.md`, passo 5).
+- **O piso que o baker assina fica 1% abaixo da estimativa no devnet** (resposta do fundador, 10/10/2026), agora
+  passado de forma explícita pelo `submit.ts`.
+- Testes: 2 no SDK, 2 no site (41 em `tests/site`) e 2 cenários novos no smoke web (12 passaram). A leitura do
+  ProgramData entrou na lista do relay (`docs/technical/relay-allowlist.md`).
+
+### Added
+
+- **A página da campanha e a entrada pelo site** (Sprint 11, 10/10/2026): `/c/[id]` mostra a frase, a regra de cada
+  tipo, a prova lida agora pelo leitor do SDK (com "se lido agora"), os campos de preço (preço, confiança, idade máxima
+  da campanha, o aviso sem preço fresco e o da margem de 1%), o pote, as entradas recentes e o histórico da chance (L-23,
+  lidos dos eventos na rede), o painel de reconferência com comandos nos bytes que o leitor lê e o `recheck` do SDK, e o
+  aviso do criador com a entrada da carteira dele. O painel de entrada: SIM ou NÃO, o valor exato em lamports, a
+  estimativa que é a do `checkJoin` do SDK (P1 §3.2 reproduzida: 3,10 e 3,067), os avisos antes da assinatura (o L-03 do
+  fundador), a revisão com o resumo determinístico do SDK (A-3), a carteira, o acompanhamento por consulta sem
+  WebSocket, a guarda de nova tentativa (A-9) e uma mensagem por falha. 38 testes em `tests/site`.
+- **O smoke web** (`bun run e2e`, Playwright 1.63.0 fixado): o site com uma carteira de teste injetada contra o
+  programa em LiteSVM, em desktop e 412 px; 10 passaram. Achou e corrigiu dois erros: "Use Installed Wallet" não
+  conectava depois de recarregar a página (código da Sprint 09), e a guarda dava como feita uma entrada que falhou
+  quando outra entrada da mesma carteira mudava o total.
+- **Revisões da sprint aplicadas:** a de texto ("est." em todo número estimado, o piso que não soa como promessa, uma
+  saída para cada falha, regras por tipo iguais às do programa) e a de segurança do que o baker assina: o registro da
+  guarda fica também na memória da página e pertence a uma tentativa; nenhuma tentativa nova enquanto outra está em
+  aberto ("Check again"); status só confirmado; erro atribuído ao programa só quando a instrução dele falhou; prazo e
+  validade medidos em blocos; o build recusa uma URL de RPC com chave; o registro da guarda sai do navegador um dia
+  depois de resolvido. O interruptor de entradas (K-11) ainda usa a saúde da API no lugar do `entries_allowed`.
+- **A lista do relay `/rpc` tirada do rastro do cliente** (`docs/technical/relay-allowlist.md`): 11 métodos, nenhum
+  WebSocket. O relay em si é da Sprint 08.
+- Em aberto: a assinatura no devnet com carteira real não foi verificada (a preparação e a simulação no devnet foram);
+  o fundador fará o teste com a Phantom. A A-8 foi construída no mesmo dia (acima).
+
 ### Added
 
 - **O texto do aviso de dinheiro preso (L-03) aprovado pelo fundador** (10/10/2026): "Your entry stays locked until the
