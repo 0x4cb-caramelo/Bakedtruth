@@ -33,6 +33,13 @@ function row(n: number, state: PublicState, status: Status, outcome: Outcome): R
     resolvedAt: 0n,
     target: 70_000n,
     metricAccount: "metric1111111111111111111111111111",
+    feedId: new Uint8Array(32).fill(0xab),
+    priceExponent: -8,
+    opensAt: 1_799_000_000n,
+    entriesOpen: 3,
+    feeBps: 1000,
+    oneSidedFeeBps: 100,
+    creatorShareBps: 100,
   } as unknown as Campaign;
   const view = {
     state,
@@ -132,6 +139,20 @@ describe("campaign detail, routing and methods", () => {
   test("other paths are 404; a POST is refused with 405", async () => {
     expect((await get(fakeStore(SNAP), "/api/v1/nope")).status).toBe(404);
     expect((await get(fakeStore(SNAP), "/api/v1/campaigns", { method: "POST" })).status).toBe(405);
+  });
+
+  test("the campaign carries the fields a card needs: feed, direction, exponent, fees and entries", async () => {
+    const found = await body(await get(fakeStore(SNAP), `/api/v1/campaigns/${ADDR(1)}`));
+    expect(found.campaign).toMatchObject({
+      feed_id: "ab".repeat(32),
+      direction: "Above",
+      price_exponent: -8,
+      opens_at: "1799000000",
+      entries_count: 3,
+      fee_bps: 1000,
+      one_sided_fee_bps: 100,
+      creator_share_bps: 100,
+    });
   });
 
   test("every answer carries the configured CORS origin and no-store", async () => {
