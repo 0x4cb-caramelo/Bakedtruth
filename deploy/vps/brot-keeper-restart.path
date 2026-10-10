@@ -1,0 +1,13 @@
+# Purpose: watches the flag file that the keeper's POST /restart writes, and starts brot-keeper-restart.service.
+# Installs: root, into /etc/systemd/system/. NOT INSTALLED: installing it changes the shared server and needs the
+#           server owner's notice first (see README, "Sprint 07"). The keeper's service user never gets sudo.
+
+[Unit]
+Description=Brot Markets: watch the keeper's restart flag
+
+[Path]
+PathExists=/run/brot-markets/restart.flag
+Unit=brot-keeper-restart.service
+
+[Install]
+WantedBy=multi-user.target
