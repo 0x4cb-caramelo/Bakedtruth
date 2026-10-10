@@ -396,6 +396,11 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
 
 ### Fixed
 
+- **O gancho de pre-commit volta a rodar** (9/10/2026, pedido do Ronaldo). O `.husky/pre-commit` estava no Git sem
+  permissão de execução desde a derivação do OS (2/10), e o Git o ignorava em silêncio ("hook was ignored because it's
+  not set as executable"): commits feitos fora do Claude Code não passavam pela varredura de segredos. Agora ele é
+  executável (modo 100755) e roda `scripts/pre-commit.js`: a varredura de segredos nos arquivos em stage; o lint do
+  Biome só se o Biome estiver instalado, e não está neste repositório.
 - **Sprint 03, o que as revisões acharam e foi corrigido antes do pull request** (9/10/2026; quatro revisores:
   segurança, advogado do diabo, independente e produto; nenhum achou como tirar SOL de ninguém):
   - **a anulação por feed parado ganha um piso de 600 segundos** (`STALE_FEED_MIN_SECONDS` [AC]): a conta
