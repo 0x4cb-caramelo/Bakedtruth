@@ -1,7 +1,8 @@
 //! Purpose: `team_void_campaign(reason, note_hash)`: a team key voids a campaign inside the review
 //!          window with a reason it may choose and the hash of its note; the snapshot runs at once
-//!          (TP sections 3.4.3, 3.4.7). The reason decides the 10% opening fee.
-//! Version: 0.0.2
+//!          (TP sections 3.4.3, 3.4.7). The reason decides the 10% opening fee. It emits `CampaignVoided`,
+//!          then `CampaignFinalized` with the next seq, as `finalize_campaign` would (3.4.14).
+//! Version: 0.0.3 (emits `CampaignFinalized` after `CampaignVoided`; found missing by the Sprint 05 review)
 //! Sprint: 04 (lane A). Accounts: 0 team key (signer), 1 config (writable, the open count),
 //!         2 campaign (writable), 3 event authority, 4 program. Arguments: `reason` (a `VoidReason`)
 //!         and `note_hash`, 33 bytes.
@@ -20,7 +21,7 @@ use crate::{
             void_reason::{team_may_choose, team_void_outcome},
             window::require_review,
         },
-        settlement::snapshot::finalize_snapshot,
+        settlement::snapshot::{finalize_snapshot, finalized_event},
     },
     layout::LeU64,
     readers::ChainTime,
@@ -91,7 +92,10 @@ pub fn team_void_campaign(
         void_reason: reason as u8,
         note_hash,
     };
+    let finalized_seq = take_seq(&mut stored)?;
+    let finalized = finalized_event(campaign_key, &stored, finalized_seq)?;
     drop(stored);
     drop(config_state);
-    events::emit(&event, event_authority, program, program_id)
+    events::emit(&event, event_authority, program, program_id)?;
+    events::emit(&finalized, event_authority, program, program_id)
 }

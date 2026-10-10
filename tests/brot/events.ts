@@ -1,8 +1,9 @@
 /**
  * Purpose: the program's events as layouts: an inner instruction to the program whose data is
  *          [0xFF, discriminator, payload], signed by the event authority (T4). Mirrors events.rs.
- * Version: 0.0.2
- * Sprint:  02 (pot core on Pinocchio); Sprint 03 adds `CampaignResolved` and the opening's `epoch`
+ * Version: 0.0.3
+ * Sprint:  02 (pot core on Pinocchio); Sprint 03 adds `CampaignResolved` and the opening's `epoch`; Sprint 04 adds
+ *          the team's `ResultConfirmed` and `CampaignVoided` and the snapshot's `CampaignFinalized`
  */
 import type { Layout } from "./layouts";
 import { CREATION_PARAMS } from "./structs";
@@ -96,6 +97,40 @@ export const EVENTS: Record<string, { discriminator: number; layout: Layout }> =
       ["review_ends_at", "i64"],
       ["slot", "u64"],
       ["epoch", "u64"],
+    ],
+  },
+  ResultConfirmed: {
+    discriminator: 7,
+    layout: [
+      ["campaign", "pubkey"],
+      ["seq", "u64"],
+      ["signer", "pubkey"],
+      ["outcome", "u8"],
+    ],
+  },
+  CampaignVoided: {
+    discriminator: 8,
+    layout: [
+      ["campaign", "pubkey"],
+      ["seq", "u64"],
+      ["signer", "pubkey"],
+      ["void_reason", "u8"],
+      ["note_hash", { bytes: 32 }],
+    ],
+  },
+  CampaignFinalized: {
+    discriminator: 10,
+    layout: [
+      ["campaign", "pubkey"],
+      ["seq", "u64"],
+      ["settle_mode", "u8"],
+      ["winning_total", "u64"],
+      ["losing_total", "u64"],
+      ["refunded_late", "u64"],
+      ["fee_total", "u64"],
+      ["from_pot", "u64"],
+      ["from_fee", "u64"],
+      ["distributable", "u64"],
     ],
   },
 };

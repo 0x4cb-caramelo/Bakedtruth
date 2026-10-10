@@ -351,6 +351,11 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
 
 ### Changed
 
+- **A frase da capa do deck** (`/pitch`, slide 1; Lucas, 9/10/2026). Sai "Permissionless prediction markets, settled by
+  on-chain data." e entra "Permissionless prediction markets that turn on-chain milestones into growth campaigns,
+  settled by the chain itself.", a mesma frase que ele usou na inscrição do DemoDay. O título do slide não mudou. A
+  descrição da página, que aparece em prévias de link, acompanha a frase nova. "on-chain" e "the chain itself." não
+  quebram no meio da linha.
 - **As respostas do fundador de 9/10/2026** às perguntas que as Sprints 02 e 03 deixaram e às duas abertas da Sprint
   04, dadas pelo Ronaldo (`docs/business/ideacao-perguntas-e-respostas.md`, seção 1; comentário no PR #40). A Sprint
   04 constrói: uma lista nossa de feeds da Pyth, fixa no programa, que começa pela lista oficial de feeds
@@ -403,6 +408,16 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
 
 ### Fixed
 
+- **`CampaignFinalized` também na confirmação e na anulação pela equipe** (9/10/2026; achado da revisão da Sprint
+  05, feito como PR à parte a pedido do Ronaldo). O plano técnico (§3.4.3, §3.4.14) promete que `team_confirm_result`
+  e `team_void_campaign` emitem o próprio evento e depois `CampaignFinalized`; o programa rodava o snapshot e emitia só
+  `ResultConfirmed` ou `CampaignVoided`, e um indexador que segue os eventos perderia o snapshot dessas campanhas.
+  Agora os dois emitem `CampaignFinalized` logo depois, com o `seq` seguinte e os mesmos campos de `finalize_campaign`,
+  montados num lugar só (`snapshot::finalized_event`). Custo no LiteSVM: confirmação de 3.539 para 4.785 CU, anulação
+  de 2.456 para 3.701; o binário passa de 158.072 para 159.576 bytes. Testes em
+  `tests/brot/team-window-events.test.ts` (os dois eventos, em ordem, com os campos do snapshot gravado), e o kit de
+  testes passa a ler os três eventos. Quando isto entrar, os eventos que o smoke da Sprint 05 espera mudam
+  (`scripts/validator/cycle-settle.ts`, na branch dela): a confirmação da equipe passa a emitir dois.
 - **O gancho de pre-commit volta a rodar** (9/10/2026, pedido do Ronaldo). O `.husky/pre-commit` estava no Git sem
   permissão de execução desde a derivação do OS (2/10), e o Git o ignorava em silêncio ("hook was ignored because it's
   not set as executable"): commits feitos fora do Claude Code não passavam pela varredura de segredos. Agora ele é

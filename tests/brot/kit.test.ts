@@ -1,8 +1,9 @@
 /**
  * Purpose: checks the test kit itself, without the program binary: addresses, layout sizes against
  *          the Rust structs, the codec, and the instruction shapes of the frozen contract.
- * Version: 0.0.2
- * Sprint:  02 (pot core on Pinocchio); the Sprint 03 sizes and `resolve_campaign`
+ * Version: 0.0.3
+ * Sprint:  02 (pot core on Pinocchio); the Sprint 03 sizes and `resolve_campaign`; Sprint 04's three events of a
+ *          team-finalized campaign
  */
 import { describe, expect, test } from "bun:test";
 import { AccountRole, generateKeyPairSigner } from "@solana/kit";
@@ -41,6 +42,9 @@ describe("test kit", () => {
       CampaignOpened: 263,
       EntryAdded: 114,
       CampaignResolved: 140,
+      ResultConfirmed: 73,
+      CampaignVoided: 105,
+      CampaignFinalized: 97,
     });
     expect(offsetOf(S.CAMPAIGN, "id")).toBe(16);
   });
