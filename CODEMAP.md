@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **683** |
+| Arquivos mapeados | **690** |
 | Acima de 200 linhas | **39** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -198,7 +198,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`entry-status.tsx`](app/features/entry/entry-status.tsx) | the sheet after "Sign in wallet": the signing steps (the wallet, then confirming by polling, or checking a transaction the wallet never answered for, with the b | 141 |
 | [`estimate.ts`](app/features/entry/estimate.ts) | the entry panel's estimate (BR-09; P1 §3.2): what an entry returns if its side wins, net of Brot's fee and the creator's share, with the baker's own amount adde | 82 |
 | [`failures.ts`](app/features/entry/failures.ts) | why an entry did not go in, as one of the panel's failures, each with its own message (copy-failures.ts). A program refusal is named by the SDK's error map: its | 129 |
-| [`retry-guard.ts`](app/features/entry/retry-guard.ts) | the retry guard (A-9; proposal §3.4 rule 6; TP §3.6 S1 rule 6). Before the wallet gets a join, the site saves what it read: the entry total the join is signed a | 107 |
+| [`retry-guard.ts`](app/features/entry/retry-guard.ts) | the retry guard (A-9; proposal §3.4 rule 6; TP §3.6 S1 rule 6). Before the wallet gets a join, the site saves what it read: the entry total the join is signed a | 112 |
 | [`side-picker.tsx`](app/features/entry/side-picker.tsx) | YES or NO in the entry panel: each side with its chance (its share of the entries) and its estimated return per 1 for a 1 SOL entry, or "refund if alone" while  | 55 |
 | [`submit.ts`](app/features/entry/submit.ts) | an entry from the panel to the chain, without React. `prepareEntry` is the SDK's A-3 preparation for the connected wallet's address (re-read, checked, built, su | 129 |
 | [`use-entry-flow.ts`](app/features/entry/use-entry-flow.ts) | the entry's steps in React, around submit.ts: review (A-3: the SDK re-reads the campaign and the wallet's entry, checks, builds, summarises the bytes and simula | 155 |
@@ -211,7 +211,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`mwa-chain.test.ts`](app/features/wallet/mwa-chain.test.ts) | X2.1. The chain the wallet registers for (from the site's cluster setting) equals the chain for the cluster the read API reports in /api/v1/health. Registration | 54 |
 | [`register-mwa.ts`](app/features/wallet/register-mwa.ts) | the explicit Mobile Wallet Adapter registration (S1, proposal §3.4). Registers the MWA wallet once, for the chain of the site's cluster (never the RPC URL's), w | 46 |
-| [`use-installed-wallet.ts`](app/features/wallet/use-installed-wallet.ts) | "Use Installed Wallet" (S1, proposal §3.4 rule 3): connect only from a person's click, through the installed wallet the site found (MWA on Android, or a browser | 32 |
+| [`use-installed-wallet.ts`](app/features/wallet/use-installed-wallet.ts) | "Use Installed Wallet" (S1, proposal §3.4 rule 3): connect only from a person's click, through the installed wallet the site found (MWA on Android, or a browser | 39 |
 | [`use-sol-balance.ts`](app/features/wallet/use-sol-balance.ts) | the connected wallet's SOL balance in lamports, read from the site's connection. `null` while it loads or when nothing is connected. A failed read leaves `null` | 33 |
 | [`wallet-state.test.ts`](app/features/wallet/wallet-state.test.ts) | the wallet's view: disconnected, connected with a balance, no SOL (faucet on devnet only), the balance still loading, and the SOL formatting (four decimals, tru | 54 |
 | [`wallet-state.ts`](app/features/wallet/wallet-state.ts) | the wallet's view, as pure logic: disconnected; connected with its address and SOL balance; connected with no SOL, which offers the devnet faucet only on devnet | 36 |
@@ -1142,6 +1142,18 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`team-window.test.ts`](tests/brot/team-window.test.ts) | the team's acts in the review window, on the binary: confirm, void (an automatic void only: a team key never voids a YES or NO, decision of 2026-10-09), and con | 185 |
 | [`void-refund.test.ts`](tests/brot/void-refund.test.ts) | a void on the binary: the prize goes back to the stored creator, the opening fee goes with it on a house failure and stays with Brot on an outside cause, and th | 82 |
 
+## `tests/e2e/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`chain.ts`](tests/e2e/chain.ts) | the web smoke's chain (Sprint 11, `bun run e2e`): the program in LiteSVM (CI's binary in target/deploy) with the founder's config, a team key and a paying creat | 56 |
+| [`control.ts`](tests/e2e/control.ts) | the web smoke's control endpoint (loopback, test only): what the Playwright runner asks of the chain. Sign the bytes the injected wallet was handed with the tes | 156 |
+| [`helpers.ts`](tests/e2e/helpers.ts) | what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page opened with the injected wallet and the runner's answer f | 75 |
+| [`playwright.config.ts`](tests/e2e/playwright.config.ts) | the web smoke's Playwright configuration (Sprint 11; @playwright/test 1.63.0, pinned in package.json, whose Chromium is build 1243): the site built against the  | 27 |
+| [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 60 |
+| [`smoke.e2e.ts`](tests/e2e/smoke.e2e.ts) | the web smoke (Sprint 11 DoD; `bun run e2e`): the built site in Chromium at desktop width and at 412 CSS px, with an injected Wallet Standard test wallet, again | 197 |
+| [`wallet.ts`](tests/e2e/wallet.ts) | the web smoke's injected wallet: a Wallet Standard wallet ("E2E Test Wallet") registered in the page before its own scripts run, the way a browser extension reg | 66 |
+
 ## `tests/ops/`
 
 | Arquivo | Núcleo | Linhas |
@@ -1219,11 +1231,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`copy-vocabulary.test.ts`](tests/site/copy-vocabulary.test.ts) | the site's words follow D-m (campaign, entry, baker, creator, pot, YES/NO) and never the D6 table's old copy (proposal 0.4 §5.2: "mercado", "aposta", "apostar", | 57 |
 | [`entry-estimate.test.ts`](tests/site/entry-estimate.test.ts) | the entry panel's estimate is the SDK's (BR-09; P1 §3.2): the number `checkJoin` gives for the pot with the baker's own amount added, which is the number `prepa | 135 |
 | [`entry-failures.test.ts`](tests/site/entry-failures.test.ts) | each way an entry can fail has its own message (Sprint 11 DoD): the program's refusals are named by the SDK's error map, with the program's own message from the | 135 |
-| [`fake-chain.ts`](tests/site/fake-chain.ts) | the SDK's LiteSVM-backed fake RPC (tests/sdk/fake-rpc.ts) with what the site's entry flow adds: the wallet's submission (`sendTransaction`, landed in LiteSVM an | 129 |
+| [`fake-chain.ts`](tests/site/fake-chain.ts) | the SDK's LiteSVM-backed fake RPC (tests/sdk/fake-rpc.ts) with what the site's entry flow adds: the wallet's submission (`sendTransaction`, landed in LiteSVM an | 152 |
 | [`page-format.test.ts`](tests/site/page-format.test.ts) | how the campaign page writes what it read: exact grouped integers, a value in its kind's units, an age, the visitor's local time (built with options a browser a | 37 |
 | [`recheck-commands.test.ts`](tests/site/recheck-commands.test.ts) | the re-check panel's commands fetch the bytes the program's readers read (BR-23): on real captured accounts, the byte range each command asks for decodes to the | 79 |
 | [`relay-trace.test.ts`](tests/site/relay-trace.test.ts) | the relay's allowlist is taken from a trace of the real client (Sprint 11 DoD; proposal §2.6): the campaign page's reads, the entry's preparation, the hand-off  | 70 |
-| [`retry-guard.test.ts`](tests/site/retry-guard.test.ts) | the site's retry guard (A-9; proposal §3.4 rule 6) end to end, against the program in LiteSVM behind a local RPC: the record is saved before the wallet sees the | 175 |
+| [`retry-guard.test.ts`](tests/site/retry-guard.test.ts) | the site's retry guard (A-9; proposal §3.4 rule 6) end to end, against the program in LiteSVM behind a local RPC: the record is saved before the wallet sees the | 181 |
 | [`support.ts`](tests/site/support.ts) | what the site's tests share: the world's accounts read the way the page reads them (owner and bytes), the inputs of the entry panel's estimate, a key-value stor | 93 |
 
 ---

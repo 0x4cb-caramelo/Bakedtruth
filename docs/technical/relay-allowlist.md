@@ -12,6 +12,12 @@ preparation (the SDK's `prepareJoin`), the hand-off to a stand-in wallet and the
 this table does not list, or when a row the client's code should call was not seen. The rows marked "Wallet adapter"
 are called by `@solana/wallet-adapter-react`'s web3.js connection, outside that trace.
 
+**The browser's own trace.** The web smoke (`bun run e2e`, `tests/e2e/`) runs the built site in Chromium with an
+injected test wallet against the same recording endpoint, and fails on any method off this table and on any WebSocket
+the page opens. On 2026-10-10 it saw these eleven, and no WebSocket: `getAccountInfo`, `getBalance`, `getBlockHeight`,
+`getLatestBlockhash`, `getMinimumBalanceForRentExemption`, `getMultipleAccounts`, `getSignatureStatuses`,
+`getSignaturesForAddress`, `getTransaction`, `sendTransaction` (the test wallet's), `simulateTransaction`.
+
 **No WebSocket.** The client polls `getSignatureStatuses` and `getBlockHeight` every two seconds; no `*Subscribe`
 method appears in the trace. The site's old `confirmTransaction` call (`app/lib/hooks.ts:228`) left with the old app in
 Sprint 09.

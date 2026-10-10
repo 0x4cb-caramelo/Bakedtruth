@@ -73,7 +73,7 @@ const TEXT: Record<FailureKey, (c: FailureContext) => FailureCopy> = {
   }),
   returnBelowMinimum: (c) => ({
     title: "The estimate fell below what you accepted",
-    text: `Other entries went in first, and the return fell under the floor you signed${c.floor ? ` (${c.floor} per 1)` : ""}. Review it again.`,
+    text: `Other entries went in first, and the return fell under the floor set for this entry${c.floor ? ` (${c.floor} per 1)` : ""}. Review it again.`,
     way: "again",
   }),
   signatureRefused: () => ({

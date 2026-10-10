@@ -163,6 +163,12 @@ describe("a retried entry fails on expected total", () => {
     expect(decidePending(record, now(10n, 101n))).toBe("not-landed");
     expect(decidePending(record, now(10n, 50n, "failed"))).toBe("failed");
     expect(decidePending(record, now(10n, 50n, "landed"))).toBe("landed");
+    // With a signature, its status decides: another entry moving the total does not make this one landed.
+    const signed = { ...record, signature: "sig" };
+    expect(decidePending(signed, now(15n, 50n, "failed"))).toBe("failed");
+    expect(decidePending(signed, now(15n, 50n))).toBe("wait");
+    expect(decidePending(signed, now(15n, 101n))).toBe("landed");
+    expect(decidePending(signed, now(10n, 101n))).toBe("not-landed");
     expect(savePending(refusingStore(), { ...record })).toBe(false);
     expect(loadPending(refusingStore(), "c", "b")).toBeNull();
     const store = memoryStore();

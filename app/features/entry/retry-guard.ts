@@ -6,7 +6,7 @@
  *          land once the finalized block height passed `lastValidBlockHeight` with the total unchanged; until then,
  *          wait. Every later attempt passes the saved total back, so a join that did land makes it fail
  *          (`EntryTotalMismatch`) instead of entering twice. Only a landing seen on-chain clears the record.
- * Version: 0.1.0
+ * Version: 0.1.1 (the web smoke: a returned signature's failure is not hidden by another entry moving the total)
  * Sprint:  11 (site: campaign page and entry)
  *
  * The store is the browser's localStorage, read and written inside try/catch: with storage blocked, the guard still
@@ -92,12 +92,17 @@ export type ChainNow = {
 
 export type PendingVerdict = "landed" | "failed" | "not-landed" | "wait";
 
-/** The guard's rule: what a record means given what the chain shows now. */
+/**
+ * The guard's rule: what a record means given what the chain shows now. A signature's status decides when the wallet
+ * returned one (another entry may move the total while this one fails); without a signature, the entry total is the
+ * only witness. Past `lastValidBlockHeight` nothing can land any more: a moved total then counts as landed.
+ */
 export function decidePending(entry: PendingEntry, now: ChainNow): PendingVerdict {
   if (now.status === "landed") return "landed";
-  if (now.entryTotal !== BigInt(entry.expectedEntryTotal)) return "landed";
   if (now.status === "failed") return "failed";
-  if (now.blockHeight > BigInt(entry.lastValidBlockHeight)) return "not-landed";
+  const moved = now.entryTotal !== BigInt(entry.expectedEntryTotal);
+  if (entry.signature === null && moved) return "landed";
+  if (now.blockHeight > BigInt(entry.lastValidBlockHeight)) return moved ? "landed" : "not-landed";
   return "wait";
 }
 
