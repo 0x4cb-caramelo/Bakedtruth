@@ -199,6 +199,19 @@ test("the deck at /pitch keeps what the founder decided on 2026-10-08 and, for v
     const asked = read(`pitch/${name}`).matchAll(/(?:url|show|sprite\([a-z]+,)\(?\s*"([a-zA-Z]+)"/g);
     for (const [, pose] of asked) assert.ok(poses[pose], `${name} asks for the pose "${pose}", which is not listed`);
   }
+  // The rocket setting (founder, 2026-10-10) is an extra one: it has its own button, key and module, every drawing it
+  // names exists, and the walk of the full setting is still what the Market slides play when it is off.
+  const moon = read("pitch/moon.js");
+  const rides = Object.fromEntries([...moon.matchAll(/^ {2}([a-z]+): "(2\d-[a-z-]+)",$/gm)].map((m) => [m[1], m[2]]));
+  assert.equal(Object.keys(rides).length, 9, "moon.js lists the nine drawings");
+  for (const file of Object.values(rides)) assert.ok(existsSync(join(ROOT, "pitch/img", `${file}.webp`)), file);
+  for (const [, pose] of moon.matchAll(/(?:seat|put|file)\("([a-z]+)"/g)) assert.ok(rides[pose], `no ride "${pose}"`);
+  for (const [, pose] of moon.matchAll(/^ {2}([a-z]+): \[/gm)) assert.ok(rides[pose], `a seat for no ride: ${pose}`);
+  assert.match(deck, /<button type="button" data-rocket aria-pressed="false"/);
+  assert.match(read("pitch/motion.js"), /if \(mode === "rocket"\) loadRides\(\);/);
+  assert.match(read("pitch/scenes.js"), /else \(stage\.rocket \? drive : months\)\(stage, slide\);/);
+  assert.match(read("pitch/scenes.js"), /return \(stage\.rocket \? liftOff : pullBack\)\(stage, slide\);/);
+  assert.ok(!/2\d-(lambo|foguete|capacete|batendo)/.test(read("pitch/sprites.js")), "not loaded by the other settings");
   // The team: the founder's lines and brands, three LinkedIn pages opened outside the deck, a photo behind each drawing.
   for (const brands of ["Vega Crypto · hōl", "Lopes Galvão Advogados · Complian.cc", "Young Market · RealSet"]) {
     assert.ok(text.includes(brands), brands);

@@ -68,6 +68,15 @@ dessa tag, na branch `sprint-13-site-notices-copy`.
 - **Para o fundador, achados fora da sprint:** as páginas `/terms` e `/privacy` no ar ainda falam em USDC e pagamento
   automático em até 55 horas; e entrar nos dois lados de uma campanha paga em que ninguém mais entra leva o prêmio sem
   risco (plano técnico, §13).
+- **O modo foguete do deck em `/pitch`** (10/10/2026, pedido do fundador e publicado com o de acordo dele: "pode
+  subir online, excelente"). Um botão de foguete na barra do deck (tecla R, ou `?motion=rocket`) liga um quarto modo:
+  todas as animações do modo completo e, nos dois slides de mercado, as nove imagens novas no lugar do pãozinho a pé.
+  No slide 4 ele entra na lambo e sobe o gráfico de junho a setembro; no 5 sai dela, põe o capacete e segue de foguete
+  a linha do cenário até bater na lua, e só então aparece o "$1B+ a month". Os modos completo, mais leve e sem
+  movimento não mudaram, nem o gráfico, os números e as frases. As imagens novas só são baixadas por quem liga o modo.
+  O modo inteiro está em `services/landing/public/pitch/moon.js`; o porquê de cada escolha, em
+  `session-log/2026-10-10-pitch-modo-foguete.md`. **Fica com o fundador:** se o modo vai ao vídeo do Colosseum,
+  já que lambo e lua são os memes de "ficar rico" e o guia de marca pede piadas que não convidem a pôr dinheiro.
 
 - **Sprint 12: minhas entradas e os estados da campanha** (branch `sprint-12-site-my-entries-states`, 10/10/2026;
   `docs/sprints/sprint-12-site-my-entries-states.md`). A página `/c/[id]` mostra cada estado público: entradas

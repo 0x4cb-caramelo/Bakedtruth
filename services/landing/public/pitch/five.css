@@ -87,3 +87,7 @@
 .proj-flag { position: absolute; right: 290px; top: 30px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; text-align: right; }
 .proj-flag span { font: 500 26px/1 "IBM Plex Mono", monospace; letter-spacing: 0.12em; color: #eea546; }
 .proj-flag b { font: 600 96px/1 "IBM Plex Mono", monospace; letter-spacing: -0.04em; }
+/* The rocket setting (moon.js, the bar's rocket button): the flag steps left, leaving the tip of the line to the
+   rocket and the moon. The moon that waits at the slide's edge is the last drawing, showing only its far side. */
+html.rocket .proj-flag { right: 500px; }
+.chart-moon { position: absolute; image-rendering: pixelated; pointer-events: none; -webkit-mask-image: linear-gradient(to right, transparent 86%, #000 95%); mask-image: linear-gradient(to right, transparent 86%, #000 95%); }
