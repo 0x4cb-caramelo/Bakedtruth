@@ -1692,13 +1692,12 @@ disagree, this section is what the code does.
 - **Open: anyone can make a program id undeployable on a cluster.** Lamports sent to the ProgramData address of an id
   not yet deployed make `solana program deploy` fail for good ("Create Account ... already in use"), and no key can move
   them out [F] on the local cluster (Surfpool, on LiteSVM); the same on devnet [INF], since LiteSVM runs Agave's loader
-  code. The id `6G2d…uVN` is public. The dry run
-  names the case; the remedy is a new id. For mainnet, a fresh id kept unpublished until its deploy (Sprint 18).
-- **Open: the team's finalizing paths emit no `CampaignFinalized`.** §3.4.3 and §3.4.14 say `team_confirm_result` and
-  `team_void_campaign` emit their event, then `CampaignFinalized`; the Sprint 04 code runs the snapshot but emits only
-  `ResultConfirmed` or `CampaignVoided` [F] (`instructions/resolution/team_confirm_result.rs`,
-  `team_void_campaign.rs`). An indexer that follows events must read the snapshot from the `Campaign` account for those
-  campaigns until the program emits it; the fix belongs before the indexer (Sprint 08).
+  code. The first id, `6G2d…uVN`, was replaced on 2026-10-09 by `5Rx8…n8o` (PR #45; its keypair was not on the
+  deploy machine). The dry run names the case; the remedy is a new id. For mainnet, a fresh id kept unpublished until its deploy (Sprint 18).
+- **Closed: the team's finalizing paths emit `CampaignFinalized`** (PR #44, merged 2026-10-09). As §3.4.3 and §3.4.14
+  say, `team_confirm_result` and `team_void_campaign` emit their event, then `CampaignFinalized` with the next seq,
+  built by `snapshot::finalized_event`, the builder `finalize_campaign` uses [F]. Cost on LiteSVM: confirm 3,539 to
+  4,785 CU, void 2,456 to 3,701.
 - **Open: the deploy-slot check (A-8) belongs in the SDK.** Planned for the site in Sprint 11, it guards every client
   that signs, so `prepare*` should refuse when ProgramData's last-deploy slot differs from the one expected (A-6).
 

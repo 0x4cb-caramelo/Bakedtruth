@@ -132,10 +132,10 @@ systemd-analyze security brot-indexer.service brot-rpc.service
 
 From Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and retrospective").
 
-- **`CampaignFinalized` from the team's finalizing paths.** `team_confirm_result` and `team_void_campaign` run the
-  finalize snapshot but emit only `ResultConfirmed` or `CampaignVoided` (TP §3.4.19). The program fix (a second
-  `emit`) lands before the indexer follows events, or the indexer reads those snapshots from the `Campaign` account.
-  The fix changes the events the smoke expects (`scripts/validator/cycle-settle.ts`).
+- **`CampaignFinalized` from the team's finalizing paths: done on 2026-10-09** (PR #44, merged): `team_confirm_result`
+  and `team_void_campaign` emit their own event, then `CampaignFinalized` with the next seq, built by the same
+  `snapshot::finalized_event` as `finalize_campaign`. The indexer can follow events for every finalized campaign; the
+  smoke expects the two events (`scripts/validator/cycle-settle.ts`).
 - **The import rules reach the services.** `read-services-import-read-only` cannot fire before `services/indexer`
   exists; when it does, plant a violation in `tests/sdk/boundaries.test.ts`, and add dependency-cruiser `reachable`
   rules, since the rules see direct imports only.

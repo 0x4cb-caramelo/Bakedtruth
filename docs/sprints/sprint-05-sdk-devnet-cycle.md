@@ -270,14 +270,15 @@ the second vector generator), so the binary CI builds on `main` after PR #41 mer
 
 **Findings that stay open**
 
-- `team_confirm_result` and `team_void_campaign` run the finalize snapshot but emit no `CampaignFinalized`, which TP
-  §3.4.3 and §3.4.14 promise: an indexer that follows events would miss the snapshot of team-finalized campaigns. A
-  program fix (Sprint 04's code), carried to Sprint 08's file; it changes the events the smoke expects
-  (`scripts/validator/cycle-settle.ts`).
+- **Closed on 2026-10-09:** `team_confirm_result` and `team_void_campaign` ran the finalize snapshot but emitted no
+  `CampaignFinalized`, which TP §3.4.3 and §3.4.14 promise. Fixed in Sprint 04's code by PR #44 (merged; both now
+  emit their own event, then `CampaignFinalized` with the next seq), at Ronaldo's request; the smoke expects the two
+  events (`scripts/validator/cycle-settle.ts`, checked on the local cluster).
 - **Anyone can make the program id undeployable on a cluster.** Rehearsed on the local cluster: lamports sent to the
   ProgramData address of an id not yet deployed make `solana program deploy` fail for good ("Create Account ...
-  already in use"), and no key can move them out. The id `6G2d…uVN` is public, so about 0.001 SOL could block it on
-  devnet today and on mainnet later. The dry run names the case; the remedy is a new id. For mainnet: a fresh id kept
+  already in use"), and no key can move them out. The first id, `6G2d…uVN`, was public; on 2026-10-09 it was replaced
+  by `5Rx8…n8o` (PR #45), because its keypair was not on the deploy machine, and any published id can be blocked the
+  same way until its deploy. The dry run names the case; the remedy is a new id. For mainnet: a fresh id kept
   unpublished until its deploy. For devnet: read that address's balance before deploy day (read-only).
 - **Loader v3 stays the deploy path.** Agave's current feature set declares Loader-v4's enabling gate as
   `LoaderV4WasAbandoned11111111111111111111111` and holds no gate that stops new loader-v3 deployments (read on
@@ -287,7 +288,7 @@ the second vector generator), so the binary CI builds on `main` after PR #41 mer
 
 **Carried to later sprints:** to Sprint 06, the negative run on Agave's runtime (a CI job on `solana-test-validator`),
 a week of devnet price and clock data (Sprint 02), the runbook line for a Pyth migration (Sprint 02, never written), and
-`tally_late_joins` before confirm or finalize in the keeper's order; to Sprint 08, the `CampaignFinalized` fix and the
+`tally_late_joins` before confirm or finalize in the keeper's order; to Sprint 08, the
 schemas entry point; to Sprint 11, the deploy-slot check in the SDK.
 
 **Retrospective**
