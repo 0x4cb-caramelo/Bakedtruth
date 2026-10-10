@@ -106,6 +106,9 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Changed
 
+- **O slide 4 do deck em `/pitch` diz só "world.xyz"** (10/10/2026, a pedido do fundador): saiu o trecho ", the
+  prediction market inside the Phantom wallet". O slide 2 continua com "World, inside Phantom", e o roteiro de fala
+  (`docs/business/roteiro-pitch-v5.md`) ainda explica quem é a world.xyz ao falar do gráfico.
 - **O `README.md` passa a descrever o Brot Markets, em inglês** (10/10/2026, a pedido do Lucas: "reescrever o readme
   ... elementos degen e memeiro, misturando com a seriedade que o documento exige ... nossa autoria, nossa marca").
   Sai a descrição do `pred-provable`. Entram: o que é uma campanha, um exemplo com a conta fechada, os cinco tipos de

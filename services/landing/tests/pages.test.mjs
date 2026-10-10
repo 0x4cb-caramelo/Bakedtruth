@@ -175,7 +175,9 @@ test("the deck at /pitch keeps what the founder decided on 2026-10-08 and, for v
   // The market: the measured months come from one place (chart.js), and what comes after them is called what it is.
   assert.match(read("pitch/chart.js"), /const MEASURED = \[1\.14, 13\.22, 22\.2, 15\.44\];/);
   assert.match(text, /PROJECTION\.\s+The dashed line is our own scenario, not a measured figure/);
-  assert.match(text, /world\.xyz\s*, the prediction market inside the Phantom wallet/);
+  // The slide names the company and nothing else about it (founder, 2026-10-10: the "inside the Phantom wallet" line out).
+  assert.match(text, /world\.xyz\s*: from\s+\$1\.1M\s+a month in June to\s+\$15\.4M\s+in September\./);
+  assert.ok(!/inside the Phantom wallet/.test(text.slice(text.indexOf("03 · MARKET"))), "not on the market slides");
   const hooks = ["data-demo", 'data-face="a"', 'data-face="b"', 'data-face="c"', "data-cursor", "data-balance"];
   const more = ["data-motion", "data-lite", 'data-chart="near"', 'data-chart="far"', "data-flag", "data-mk-words"];
   for (const part of [...hooks, ...more, "data-sticker", "data-card"]) {
