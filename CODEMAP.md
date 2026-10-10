@@ -748,7 +748,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`effects.js`](prototype-lab/campaigns/js/effects.js) | the approved prototype's two effects, the dot field that brightens around the pointer and the spotlight that follows the pointer across the card grid, plus the  | 71 |
 | [`format.js`](prototype-lab/campaigns/js/format.js) | how the site writes numbers and times: SOL amounts from lamports, the US$ display value, percentages, short addresses, a moment in UTC and in the visitor's time | 88 |
-| [`main.js`](prototype-lab/campaigns/js/main.js) | starts the prototype: icons, the theme switch (saved as `brot-theme`), the wallet button, the phone menu, the search box, the site-wide notices, the effects, th | 97 |
+| [`main.js`](prototype-lab/campaigns/js/main.js) | starts the prototype: icons, the theme switch (saved as `brot-theme`), the wallet button, the phone menu, the search box, the site-wide notices, the effects, th | 96 |
 | [`model.js`](prototype-lab/campaigns/js/model.js) | what the screens compute from a campaign: the pot's parts, the chance (each side's share of the entries), the estimated return of an entry net of Brot's fee and | 87 |
 | [`router.js`](prototype-lab/campaigns/js/router.js) | the prototype's hash router: each route of TP §3.6 maps to a screen module loaded on first use. A screen is `export default (params) => ({ title, html, mount(ma | 84 |
 | [`state.js`](prototype-lab/campaigns/js/state.js) | the prototype's state: the wallet in each of its states, the switches that show the site-wide notices (entries paused, a stale SOL/USD price, the country switch | 69 |
@@ -1097,7 +1097,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`server.mjs`](services/landing/server.mjs) | HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API), of the unlisted campaign preview under /dev0x/ and of docs.brot.markets (the docs. ho | 174 |
+| [`server.mjs`](services/landing/server.mjs) | HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API), of the unlisted campaign preview under /dev0x/ and of docs.brot.markets (the docs. ho | 178 |
 
 ## `services/landing/history/pitch-1/`
 
@@ -1146,7 +1146,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`api.mjs`](services/landing/lib/api.mjs) | the two waitlist endpoints of the "coming soon" site: join (POST /api/leads) and leave (/api/leads/remove) | 120 |
 | [`campaigns.mjs`](services/landing/lib/campaigns.mjs) | serves the Sprint -1 campaign screens under /dev0x/ (the team's preview, unlisted: noindex, no link from the site) from prototype-lab/campaigns, with a CSP that | 68 |
 | [`leads.mjs`](services/landing/lib/leads.mjs) | waitlist store for the "coming soon" page: validates an email and keeps one line per lead in a JSONL file | 91 |
-| [`rate-limit.mjs`](services/landing/lib/rate-limit.mjs) | in-memory request limiter per visitor address, so one address cannot flood the waitlist endpoint | 36 |
+| [`rate-limit.mjs`](services/landing/lib/rate-limit.mjs) | in-memory request limiter per visitor address, so one address cannot flood the waitlist endpoint | 40 |
 | [`static.mjs`](services/landing/lib/static.mjs) | serves the files under public/ for the "coming soon" site, with clean URLs and no way out of that folder | 104 |
 
 ## `services/landing/public/`
@@ -1193,7 +1193,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`dev0x.test.mjs`](services/landing/tests/dev0x.test.mjs) | tests the unlisted campaign preview under /dev0x/ over real HTTP: redirects, noindex, its CSP, the files it needs, the refusal of paths out of its folder, and t | 151 |
 | [`docs.test.mjs`](services/landing/tests/docs.test.mjs) | tests docs.brot.markets: each generated page says what its text in docs/wiki says, every page is in the menu, every link and file a page points at exists, and t | 135 |
-| [`leads.test.mjs`](services/landing/tests/leads.test.mjs) | tests the waitlist store and the request limiter of the "coming soon" site (node --test) | 113 |
+| [`leads.test.mjs`](services/landing/tests/leads.test.mjs) | tests the waitlist store and the request limiter of the "coming soon" site (node --test) | 125 |
 | [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 229 |
 | [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 193 |
 | [`two.test.mjs`](services/landing/tests/two.test.mjs) | tests /2, the home page in the pitch deck's look: it says exactly what the home page says (only the look may differ), the mascot perches and moods are the same, | 53 |
