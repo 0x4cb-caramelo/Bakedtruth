@@ -2044,9 +2044,9 @@ over unchanged in substance) **[DP]**:
 | 3. Where | A text file, `/var/lib/brot-markets/leads/leads.jsonl`, on the project's server in the United States. The privacy page names the country |
 | 4. Who can access | The site's service, as user `brot`, and whoever administers the server: Lucas and Ronaldo. The server's other projects cannot read the folder |
 | 5. Control | File permissions (folder 0700, file 0600). No panel or route lists the list. The API answers "ok" both to someone already on the list and to someone leaving who is not on it, so it never reveals who signed up |
-| 6. Retention | Until the person leaves, or twelve months after sign-up. The service deletes expired lines itself, at start and every 24 hours |
+| 6. Retention | Until the person leaves, or twelve months after sign-up. The service deletes expired lines itself, at start and every 24 hours. Hostinger's server backups, on, hold the file for up to 30 more days (the founder's reading of the panel, 2026-10-10) **[FD]** |
 | 7. Logs | The service logs only counts ("lead added (total N)"): never the email, never the IP. The visitor's address is the limiter's key, in memory, for about a minute: swept every 10 seconds since 2026-10-10 (before, an address stayed until the map filled or the service restarted; the legal review of answer 9a). Cloudflare's logs follow Cloudflare's account (C13 **[AC]**) |
-| 8. Deletion and export | The form at `/privacy` deletes at once. Export on request through X: the record is the items listed on the privacy page. Brot keeps no other copy of the file. Whether the host's own server backups are on (Hostinger offers weekly ones) is the founder's to read in the panel **[AC]**; the privacy page says the host may keep backups for a limited time, and their retention goes here and there once read |
+| 8. Deletion and export | The form at `/privacy` deletes at once. Export on request at gm@brot.markets or through X, answered within 15 days like every request (the founder, 2026-10-10): the record is the items listed on the privacy page. Brot keeps no other copy of the file; Hostinger's backups hold it for up to 30 days, and the privacy page says so **[FD]** |
 | 9. Document or consent | The `/privacy` page, in English, and the versioned consent sentence (`CONSENT_VERSION`). The site has no visitor statistics and no cookies |
 
 **Accepted risks, with the reason.**
@@ -2095,15 +2095,16 @@ to a channel. Cloudflare's part is C13, read from Cloudflare's own pages
 | 4. Who can access | Anyone | On X, whoever holds the Brot account's login: the CTO, with an authenticator app as the second factor (the founder's answer 8a, 2026-10-10) **[FD]**; `content/unlisted.json`, anyone |
 | 5. Control | The request to Brot's API carries no wallet: the page reads the ranked list and finds the connected wallet's line itself. The browser's own RPC reads (the balance, "My entries") do carry the wallet to the RPC provider, with the visitor's IP (§7.3) | X's own account controls. A reason that names a person (an email, a handle, a URL, a domain) fails the site's build (`personalDataIn`) |
 | 6. Retention | On-chain, forever; the API's copy until it restarts; an address on the hide list until its owner asks to come back | X's retention; the unlisted list as long as Git keeps it, which is why it may hold no personal data |
-| 7. Logs | The API logs counts and an error's name only: never a wallet, an IP or a query. Cloudflare sees each request's IP and address, kept under Cloudflare's policy with no period written (C13); the address never holds a wallet. Once a company exists, Marco Civil art. 15 may require access logs (C-14, the lawyer's) | None by Brot. X logs under X's policy |
-| 8. Deletion and export | The chain cannot be changed; the ranking is Brot's view of it. **A wallet's owner can leave it:** the request comes on X, the wallet signs a message to prove it, and the team adds the address to a hide list on the server (`API_LEADERBOARD_HIDDEN`, never public, applied before ranking; `services/api/README.md`), answering within 15 days (answer 8a; the lawyer confirms the period before mainnet) | Deleted on X by whoever wrote it. Nothing personal is kept by Brot |
+| 7. Logs | The API logs counts and an error's name only: never a wallet, an IP or a query. Cloudflare sees each request's IP and address and keeps basic access logs of them for up to 7 days (C13, the founder's reading of the dashboard, 2026-10-10 **[FD]**); the address never holds a wallet. Once a company exists, Marco Civil art. 15 may require access logs (C-14, the lawyer's) | None by Brot. X logs under X's policy |
+| 8. Deletion and export | The chain cannot be changed; the ranking is Brot's view of it. **A wallet's owner can leave it:** the request comes on X, the wallet signs a message to prove it, and the team adds the address to a hide list on the server (`API_LEADERBOARD_HIDDEN`, never public, applied before ranking; `services/api/README.md`), answering within 15 days (answer 8a; since 2026-10-10 the period of every request; the lawyer confirms it before mainnet), and deleting the conversation on X once the request is done (the founder, 2026-10-10) | Deleted on X by whoever wrote it. Nothing personal is kept by Brot |
 | 9. Document or consent | The page says what it keeps (in memory, never on disk), that no wallet is sent to Brot, who runs the ranking and how to leave it; the review sheet says, before a first entry, that entries are public and permanent and that a wallet that scores appears on the leaderboard. The privacy policy (L-21, C-08, Sprint 17) must name the ranking | The policy of Sprint 17 names X as the channel, as the waitlist's privacy page already does |
 
 **Cloudflare (C13), what was read.** Every request to the site and to the API through the tunnel passes Cloudflare
 with the visitor's IP address and the address requested; Cloudflare shows these to the account as "Customer Logs",
 acts as processor, and writes no retention period for them; Logpush is now offered on the free plan, and the zone is on
-the free plan. Whether any log export is switched on, and how long the dashboard keeps requests, can only be read in
-the dashboard **[AC]**, the founder's. Browser RPC calls go to the RPC provider directly, not through Cloudflare (§7.3).
+the free plan. The founder read the dashboard on 2026-10-10: Cloudflare keeps standard basic access logs for up to 7
+days **[FD]**, and the privacy page says so. Browser RPC calls go to the RPC provider directly, not through Cloudflare
+(§7.3).
 
 **The live legal pages (found by the legal review).** `brot.markets/terms` and `/privacy` (from `docs/legal/`,
 approved 2026-10-08, not reviewed by a lawyer) still describe the USDC product, say "Payouts are automatic" with a
@@ -2115,7 +2116,11 @@ the landing. **Prepared on 2026-10-10** (branch `fix/legal-pages-9a`): the landi
 (it answers 404; docs.brot.markets links it no more either), `docs/legal/PRIVACY-POLICY.md` describes the campaign
 product (the leaderboard and how to leave it, what the new site keeps in the browser, the RPC service, X), the
 waitlist's purpose sentence stays as consented, and the new site's footer links the page (`PRIVACY_URL`). Live once
-the founder deploys the landing; the page's own section 8 promises a post on X when it changes.
+the founder deploys the landing; the page's own section 8 promises a post on X when it changes. Merged with PR #65
+(2026-10-10). The founder's details the same evening are on the page too: the contact gm@brot.markets (once its email
+routing exists), Hostinger's 30-day backups, Cloudflare's 7-day logs, 15 days for every request, and the X conversation
+deleted after a request to leave the ranking. docs.brot.markets, which also described the earlier product, is offline
+(the docs host answers 410) until the docs are rewritten.
 
 **Verdicts.** Leaderboard: PASS with conditions before it goes public (the API redeploy): the live `/privacy` corrected
 and linked from the site (9a, prepared; live once the landing is deployed), and who holds the X login recorded (8a,
@@ -2542,7 +2547,7 @@ Closed in Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`; `session-log/
 | C10 | How this Next.js version serves fonts | -1; 09 |
 | C11 | A multisig with a public wait for program upgrades | 16 |
 | C12 | `unix_timestamp` drift on devnet over time (one sample in Sprint 01: 1 s ahead) | 03 |
-| C13 | What Cloudflare logs about visitors. **Read in Sprint 13** (`knowledge-base/tecnologia/cloudflare-logs-visitantes.md`, §8.2): the IP address and traffic data of every request, shown to the account in its dashboard ("Customer Logs"), Cloudflare as processor, no retention period written; Logpush now on the free plan. Still to check in the dashboard: whether any log export is on, and how long the dashboard keeps requests | 13; 17 |
+| C13 | What Cloudflare logs about visitors. **Read in Sprint 13** (`knowledge-base/tecnologia/cloudflare-logs-visitantes.md`, §8.2): the IP address and traffic data of every request, shown to the account in its dashboard ("Customer Logs"), Cloudflare as processor, no retention period written; Logpush now on the free plan. **Read in the dashboard by the founder on 2026-10-10:** basic access logs kept for up to 7 days | 13; 17 |
 | C18 | How the program reaches `sol_get_epoch_stake`: through `solana-epoch-stake =3.0.0` or a Pinocchio binding, and whether the pin is still needed once Anchor leaves (§1) | 02–03 |
 | C19 | SOL/USD freshness on devnet, and which sponsored feeds stay fresh there | 02; 03 |
 | C20 | The `litesvm` crate's `set_epoch_stake` for the `StakeAtLeast` YES path, in a version that builds under Rust 1.89 (0.16 is the candidate; 0.17 resolves Agave 4.3, §1) | 03 |

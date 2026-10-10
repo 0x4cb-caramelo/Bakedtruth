@@ -1,7 +1,8 @@
 /**
  * Purpose: tests docs.brot.markets: each generated page says what its text in docs/wiki says, every page is in the
- *          menu, every link and file a page points at exists, and the server answers the docs host apart from the site.
- * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-08
+ *          menu, every link and file a page points at exists, the server answers the docs host apart from the site,
+ *          and, offline (the founder, 2026-10-10, until the docs are rewritten), it answers every docs path with 410.
+ * Version: 0.2.0 · Sprint: out of band (landing page), 2026-10-08; 2026-10-10 (offline)
  */
 import assert from "node:assert/strict";
 import { existsSync, mkdtempSync, readdirSync, readFileSync } from "node:fs";
@@ -123,6 +124,46 @@ test("the docs host serves the docs and borrows only the site's shared files", a
   assert.match(missing.body, /Not baked yet/);
   assert.equal((await ask(docs, "/pitch/")).status, 404);
   assert.equal((await ask(docs, "/api/leads", "POST")).status, 405, "no waitlist API on the docs host");
+});
+
+test("offline, the docs host answers every path with 410 and serves nothing, while the site stays up", async () => {
+  const app = createApp({
+    root: SITE,
+    docsRoot: DOCS,
+    docsOffline: true,
+    store: createLeadStore(join(mkdtempSync(join(tmpdir(), "brot-docs-")), "leads.jsonl")),
+    limiter: createRateLimiter({ limit: 50, windowMs: 60_000 }),
+    allowedOrigins: ["https://brot.markets"],
+    siteOrigin: "https://brot.markets",
+  });
+  const offline = createServer(app);
+  await new Promise((resolve) => offline.listen(0, "127.0.0.1", resolve));
+  const askOffline = (host, path, method = "GET") =>
+    new Promise((resolve, reject) => {
+      const { port } = offline.address();
+      const req = request({ host: "127.0.0.1", port, path, method, headers: { Host: host } }, (res) => {
+        let body = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => (body += chunk));
+        res.on("end", () => resolve({ status: res.statusCode, headers: res.headers, body }));
+      });
+      req.on("error", reject);
+      req.end();
+    });
+  try {
+    for (const path of ["/", "/how-it-works/the-pot", "/styles.css", "/404.html"]) {
+      const res = await askOffline("docs.brot.markets", path);
+      assert.equal(res.status, 410, `${path} is gone`);
+      assert.match(res.body, /offline while we rewrite them/);
+      assert.ok(!res.body.includes("<"), "no page of the old docs is served");
+      assert.equal(res.headers["x-robots-tag"], "noindex, nofollow");
+    }
+    assert.equal((await askOffline("docs.brot.markets", "/api/leads", "POST")).status, 410);
+    assert.equal((await askOffline("brot.markets", "/")).status, 200, "the site itself stays up");
+    assert.equal((await askOffline("brot.markets", "/privacy")).status, 200);
+  } finally {
+    await new Promise((resolve) => offline.close(resolve));
+  }
 });
 
 test("the site host does not serve the docs, and the docs rule leaves the site indexable", async () => {

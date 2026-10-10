@@ -117,6 +117,15 @@ recomendado (1a a 12a).
 
 ### Changed
 
+- **Os detalhes do fundador na privacidade, a linha de 18 anos e o docs.brot.markets fora do ar** (10/10/2026, depois
+  da mescla do PR #65; branch `fix/privacy-details-docs-down`). A privacidade passa a dar o contato gm@brot.markets,
+  dizer que os backups da Hostinger guardam o arquivo da lista por até 30 dias e que a Cloudflare guarda os registros
+  básicos de acesso por até 7 dias, prometer resposta em até 15 dias para todo pedido e apagar a conversa no X depois
+  de atender um pedido de saída do ranking. O rodapé do site novo ganhou "Brot Markets is for adults, 18 and over.",
+  que antes só os termos diziam. O docs.brot.markets, que também descrevia o produto anterior, responde 410 em todo
+  endereço até a documentação ser reescrita; as páginas continuam no repositório. **Fica com o fundador:** o
+  roteamento do email gm@brot.markets (hoje o domínio não tem registro de email) antes de publicar a landing, e depois o
+  post no X e a nova API.
 - **As páginas legais, pela resposta 9a do fundador** (10/10/2026; branch `fix/legal-pages-9a`): os termos saem do ar
   até a Sprint 17, porque descreviam o produto anterior (USDC, pagamento automático em até 55 horas, outros poderes da
   equipe). O `/terms` deixa de ser gerado e responde 404, e nenhuma página da landing nem do docs.brot.markets aponta

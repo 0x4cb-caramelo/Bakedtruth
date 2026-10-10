@@ -242,8 +242,12 @@ from `main` at `sprint-13`); 8a added the 15 days to the leaderboard page.
    the repository; deploying the landing is the founder's. **Prepared** (branch `fix/legal-pages-9a`, 2026-10-10):
    `/terms` is no longer built or linked, here or on docs.brot.markets, and answers 404; `/privacy` describes the
    campaign product (the leaderboard and how to leave it, what the new site keeps in the browser, the RPC service, X),
-   with the waitlist's purpose sentence as consented; the new site's footer links it. **Waiting:** the founder's deploy
-   of the landing, and the post on X the page promises when it changes.
+   with the waitlist's purpose sentence as consented; the new site's footer links it. **Merged** (PR #65). The founder's
+   details the same evening went in a follow-up: the contact gm@brot.markets, Hostinger's 30-day backups, Cloudflare's
+   7-day logs, 15 days for every request, the X conversation deleted after a request to leave the ranking, an "18 and
+   over" line in the new site's footer, and docs.brot.markets offline (it also described the earlier product) until the
+   docs are rewritten. **Waiting:** the founder's email routing for gm@brot.markets, the deploy of the landing, and the
+   post on X the page promises when it changes, all before the read API's redeploy.
 10. **The success-rate column** (the approved prototype had it): **(a)**, kept dropped, as a profile.
 11. **"Your entry back plus your share of the rest, when the losing side can pay the fees"** (P1 §4.6's approved line,
     qualified by the viability rule): **(a)**, re-approved.
