@@ -719,7 +719,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`artifact.ts`](scripts/deploy/artifact.ts) | fetch the program CI built, by run id and never by name (Sprint 00's carried item): the run must be a completed, successful run of the CI workflow on `main` (th | 76 |
 | [`binding.ts`](scripts/deploy/binding.ts) | what binds a deploy to what was reviewed (Sprint 05 deploy review, F1). The CI run built the commit the operator names (`--expect-commit`); this checkout contai | 71 |
-| [`checks.ts`](scripts/deploy/checks.ts) | the pure checks of the devnet deploy (TP §10, §12; Sprint 05 DoD "Deploy from CI's artifact"): the artifact's SHA256SUMS parsed and every file checked against i | 127 |
+| [`checks.ts`](scripts/deploy/checks.ts) | the pure checks of the devnet deploy (TP §10, §12; Sprint 05 DoD "Deploy from CI's artifact"): the artifact's SHA256SUMS parsed and every file checked against i | 136 |
 | [`devnet-deploy.ts`](scripts/deploy/devnet-deploy.ts) | the first deploy of brot-markets to devnet from CI's artifact, and its initialization in the same session (TP §10, §12; deploy/devnet/README.md): the artifact b | 156 |
 | [`finish.ts`](scripts/deploy/finish.ts) | the deploy's second half, shared by the first run and a resume (`devnet-deploy.ts --resume`): the program at the declared id read back (loader v3, the expected  | 83 |
 | [`initialize.ts`](scripts/deploy/initialize.ts) | the two writes the deploy makes in the same session as the deploy itself (TP §3.4.3, §7; Sprint 05): `admin_initialize_config`, signed by the program's upgrade  | 142 |
@@ -962,7 +962,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`deploy-checks.test.ts`](tests/ops/deploy-checks.test.ts) | the pure checks of the devnet deploy (scripts/deploy/checks.ts), each refusal with its own case: SHA256SUMS parsing, the artifact folder against its sums, the p | 96 |
+| [`deploy-checks.test.ts`](tests/ops/deploy-checks.test.ts) | the pure checks of the devnet deploy (scripts/deploy/checks.ts), each refusal with its own case: SHA256SUMS parsing, the artifact folder against its sums, the p | 99 |
 | [`deploy-preflight.test.ts`](tests/ops/deploy-preflight.test.ts) | the deploy's preflight and bindings (Sprint 05 deploy review, F1, F4, F6, F7, F8, F9, F11), each refusal with its own case: a key file in any Git work tree or r | 120 |
 
 ## `tests/programs/cpi-proxy/src/`

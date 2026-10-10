@@ -3,7 +3,7 @@
  *          the artifact's SHA256SUMS parsed and every file checked against it, the program keypair taken
  *          only from outside the repository (never target/deploy/) and only when its address is the
  *          program's declared id, and the deploy command held to the upgradeable loader v3.
- * Version: 0.1.0
+ * Version: 0.1.1 (the deploy re-signs unconfirmed buffer writes for 50 rounds, with a small priority fee)
  * Sprint:  05 (SDK and the devnet cycle), lane OPS
  *
  * Why the address check: the program derives its event authority from its declared id (`crate::ID`), so a
@@ -104,11 +104,20 @@ export function checkProgramAddress(keypairAddress: string, declaredId: string):
 
 export type DeployPaths = { so: string; programKeypair: string; upgradeAuthority: string; feePayer: string };
 
+/**
+ * Rounds of re-signing the buffer writes still unconfirmed when a blockhash expires (the CLI's default is 5), and
+ * a small priority fee in micro-lamports per compute unit. The first devnet deploy (2026-10-09) died with "Data
+ * writes to account failed: Max retries exceeded" on the public RPC after the default 5 rounds.
+ */
+export const DEPLOY_SIGN_ATTEMPTS = "50";
+export const DEPLOY_CU_PRICE = "10000";
+
 /** `solana program deploy` with the upgradeable loader (v3), every key and the RPC named explicitly. */
 export function deployArgv(paths: DeployPaths, url: string): string[] {
   const argv = ["solana", "program", "deploy", paths.so, "--program-id", paths.programKeypair];
   argv.push("--upgrade-authority", paths.upgradeAuthority, "--fee-payer", paths.feePayer, "--keypair", paths.feePayer);
   argv.push("--url", url, "--commitment", "confirmed", "--use-rpc");
+  argv.push("--max-sign-attempts", DEPLOY_SIGN_ATTEMPTS, "--with-compute-unit-price", DEPLOY_CU_PRICE);
   assertLoaderV3Deploy(argv);
   return argv;
 }

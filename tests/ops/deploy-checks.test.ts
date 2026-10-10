@@ -2,7 +2,7 @@
  * Purpose: the pure checks of the devnet deploy (scripts/deploy/checks.ts), each refusal with its own case:
  *          SHA256SUMS parsing, the artifact folder against its sums, the program keypair's location and
  *          address, and the deploy command held to `solana program deploy` on loader v3. No cluster, no build.
- * Version: 0.1.1 (the declared id is the new program id)
+ * Version: 0.1.2 (the declared id is the new program id; the deploy's retry rounds and priority fee)
  * Sprint:  05 (SDK and the devnet cycle), lane OPS
  */
 import { describe, expect, test } from "bun:test";
@@ -88,6 +88,9 @@ describe("deploy checks refuse what the procedure forbids", () => {
     for (const flag of ["--program-id", "--upgrade-authority", "--fee-payer", "--keypair", "--url"]) {
       expect(argv).toContain(flag);
     }
+    // The public devnet RPC drops buffer writes: the default 5 re-signing rounds were not enough (2026-10-09).
+    expect(argv[argv.indexOf("--max-sign-attempts") + 1]).toBe("50");
+    expect(argv[argv.indexOf("--with-compute-unit-price") + 1]).toBe("10000");
     expect(() => assertLoaderV3Deploy([...argv, "--final"])).toThrow("--final");
     expect(() => assertLoaderV3Deploy(["solana", "program-v4", "deploy", "p.so"])).toThrow("loader v3");
     expect(() => assertLoaderV3Deploy(argv.filter((a) => a !== "--url"))).toThrow("--url");
