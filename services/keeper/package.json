@@ -1,0 +1,16 @@
+{
+  "name": "@brot/keeper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Brot Markets keeper (Sprint 06, MVP happy path): resolves open campaigns on the program when the reader says so",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "bun src/main.ts",
+    "test": "bun test services/keeper"
+  },
+  "dependencies": {
+    "@brot/sdk": "workspace:*",
+    "@solana/kit": "~8.4.0"
+  }
+}

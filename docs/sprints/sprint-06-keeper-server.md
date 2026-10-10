@@ -18,9 +18,13 @@ another's keys.
 
 ## Definition of done
 
-- [ ] **First step, on the server as the service user:** glibc 2.17 or newer, kernel 5.6 or newer recommended, SSE4.2
+- [x] **First step, on the server as the service user:** glibc 2.17 or newer, kernel 5.6 or newer recommended, SSE4.2
       in the CPU flags; the Bun 1.4.2 binary's checksum matches the pinned one. The result is recorded. If it fails,
-      D-p goes back to the founder before anything else (proposal §2.1, TP C8).
+      D-p goes back to the founder before anything else (proposal §2.1, TP C8). **Passed 2026-10-10**, as the `brot`
+      user in `/var/lib/brot-markets/bun-check/` (nothing system-wide): Ubuntu's glibc 2.35, kernel 5.15.0-191, SSE4.2
+      and AVX2 in the CPU flags; the zip matches the release's `SHASUMS256.txt` (`deploy/vps/bun-1.4.2.sha256`);
+      `bun --version` prints 1.4.2 and `ldd` shows only the system's libc. The binary's SHA-256 is
+      `a83d263767d839e4d2649ca8e35d07159c7afc99afdc96d731ced29e056dda0c`.
 - [ ] `services/keeper/src` has `loop.ts`, `tasks/`, `health.ts`, `signer.ts`, `rpc.ts` and `landing.ts` (TP §3.2). The
       keeper keeps no state: it re-reads the chain each cycle, decides with the SDK's `read` half, builds with `tx`, and
       simulates before sending.

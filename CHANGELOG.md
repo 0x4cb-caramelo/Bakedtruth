@@ -22,6 +22,12 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Added
 
+- **O keeper, o caminho feliz do MVP** (`services/keeper`, 10/10/2026): a cada 60 s lista as campanhas abertas do
+  programa no devnet, simula `resolve_campaign` em cada uma e envia só o que o programa aceita. Lê a URL do RPC de
+  uma variável de ambiente (Helius, plano gratuito por enquanto). `GET /healthz` só em `127.0.0.1:4210`. Ainda não
+  faz finalização, liquidação nem pagamento; nem o servidor, nem as unidades de sistema.
+- **A checagem do Bun 1.4.2 no servidor passou** (10/10/2026): glibc 2.35, kernel 5.15, SSE4.2 e AVX2; o binário
+  confere com o `SHASUMS256.txt` oficial (`deploy/vps/bun-1.4.2.sha256`). Instalado só na pasta do usuário `brot`.
 - **A prévia das telas de campanha em `brot.markets/dev0x/`** (10/10/2026, pedido do Ronaldo): as telas da Sprint -1
   (`prototype-lab/campaigns/`, dados de mentira) para o time clicar antes da Sprint 06. Sem listagem: `noindex` no
   cabeçalho, nada aponta para lá, o `robots.txt` não muda. A CSP deixa o script de tema do protótipo por hash.
