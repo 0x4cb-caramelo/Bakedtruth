@@ -17,8 +17,17 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
 nos caminhos da equipe pelo PR #44 e o id novo do programa pelo PR #45; já em 10/10, a Sprint 05 pelo PR #43 (tag
 `sprint-05`). O programa roda no devnet desde a noite de 9/10.
 
+A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir da `origin/main` (`6b5e3ec`), na branch
+`sprint-06-keeper-server`. Nada de código entrou ainda: a primeira tarefa é a checagem do Bun 1.4.2 no servidor.
+
 ### Added
 
+- **O keeper, o caminho feliz do MVP** (`services/keeper`, 10/10/2026): a cada 60 s lista as campanhas abertas do
+  programa no devnet, simula `resolve_campaign` em cada uma e envia só o que o programa aceita. Lê a URL do RPC de
+  uma variável de ambiente (Helius, plano gratuito por enquanto). `GET /healthz` só em `127.0.0.1:4210`. Ainda não
+  faz finalização, liquidação nem pagamento; nem o servidor, nem as unidades de sistema.
+- **A checagem do Bun 1.4.2 no servidor passou** (10/10/2026): glibc 2.35, kernel 5.15, SSE4.2 e AVX2; o binário
+  confere com o `SHASUMS256.txt` oficial (`deploy/vps/bun-1.4.2.sha256`). Instalado só na pasta do usuário `brot`.
 - **A prévia das telas de campanha em `brot.markets/dev0x/`** (10/10/2026, pedido do Ronaldo): as telas da Sprint -1
   (`prototype-lab/campaigns/`, dados de mentira) para o time clicar antes da Sprint 06. Sem listagem: `noindex` no
   cabeçalho, nada aponta para lá, o `robots.txt` não muda. A CSP deixa o script de tema do protótipo por hash.

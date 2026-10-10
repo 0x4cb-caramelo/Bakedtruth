@@ -1,6 +1,6 @@
 # Sprint 06 — Server and primary keeper (Bun check first)
 
-**Status:** planned · **Branch:** `sprint-06-keeper-server` · **Dates:** none, by the founder's decision
+**Status:** in progress, **not closed**: the keeper runs live on the server, but the real resolve is not yet proven (opened 2026-10-10 from `origin/main` at `6b5e3ec`) · **Branch:** `sprint-06-keeper-server` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -18,9 +18,13 @@ another's keys.
 
 ## Definition of done
 
-- [ ] **First step, on the server as the service user:** glibc 2.17 or newer, kernel 5.6 or newer recommended, SSE4.2
+- [x] **First step, on the server as the service user:** glibc 2.17 or newer, kernel 5.6 or newer recommended, SSE4.2
       in the CPU flags; the Bun 1.4.2 binary's checksum matches the pinned one. The result is recorded. If it fails,
-      D-p goes back to the founder before anything else (proposal §2.1, TP C8).
+      D-p goes back to the founder before anything else (proposal §2.1, TP C8). **Passed 2026-10-10**, as the `brot`
+      user in `/var/lib/brot-markets/bun-check/` (nothing system-wide): Ubuntu's glibc 2.35, kernel 5.15.0-191, SSE4.2
+      and AVX2 in the CPU flags; the zip matches the release's `SHASUMS256.txt` (`deploy/vps/bun-1.4.2.sha256`);
+      `bun --version` prints 1.4.2 and `ldd` shows only the system's libc. The binary's SHA-256 is
+      `a83d263767d839e4d2649ca8e35d07159c7afc99afdc96d731ced29e056dda0c`.
 - [ ] `services/keeper/src` has `loop.ts`, `tasks/`, `health.ts`, `signer.ts`, `rpc.ts` and `landing.ts` (TP §3.2). The
       keeper keeps no state: it re-reads the chain each cycle, decides with the SDK's `read` half, builds with `tx`, and
       simulates before sending.
@@ -78,14 +82,29 @@ The standby, the watchdog, `POST /restart` and the email alerts (Sprint 07). The
 
 ## Founder decisions that block the sprint
 
-- **Open: D4 for the keeper's RPC account.** The proposal recommends Helius Developer (US$49 a month) for the keeper
-  on devnet. Q8 is folded into D4.
+- **Answered 2026-10-10: D4 for the keeper's RPC account is Helius.** The key is a credential on the server and never
+  in the repository. The starting tier is the proposal's Helius Developer (US$49 a month, for devnet); it is sized
+  by credits measured in this sprint, not by the proposal's estimate. Q8 is folded into D4.
 - **Open: the server owner's agreement** to one identity per unit, which changes the house pattern of one user per
   project (proposal §2.10).
 - **Open: P-7 (treasury),** for the monthly conversion half of the SOL runbook. The refill half does not wait.
 - **If the Bun check fails:** D-p goes back to the founder.
 - **Answered:** Q11 (the domain is bought and on Cloudflare); the Hermes key waits for measurement ("ok",
   2026-10-05), and paid openings need no Pyth plan, since the SOL/USD account is free to read (D4).
+
+## Direction of 2026-10-10
+
+Given when the sprint was opened; it narrows the order of work and does not remove any item above.
+
+- **Real values.** The keeper runs against the program already on devnet (`5Rx8…n8o`, deployed with the real
+  constants, Sprint 05). The drill-constants run of X1.1 is not the target; the devnet run below is the real one.
+- **Helius RPC** for the keeper (see the decision above).
+- **MVP happy path first.** Order: one open campaign, its joins, its resolution, the finalize after the review window,
+  the settlement and the payouts, all done by the keeper with nobody triggering anything, on devnet. The Bun check on
+  the server comes before any of it, as the sprint says.
+- **Later in this sprint, not claimed by the happy-path run:** the error paths beyond the tests listed, the load run
+  of 1,000 campaigns, the Bun soak test, the per-unit identities and the tunnel-token rotation, the `deploy/vps/`
+  script with its rollback. Each stays open in the list above until it is done or decided in writing.
 
 ## Agents and skills
 
@@ -181,4 +200,20 @@ From Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and retros
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+Written 2026-10-10, before closure, at the founder's request to wrap up. **Not closed:** the closure gate
+(`docs/SPRINTS.md`, section 4) is not met, and 17 of the 18 Definition-of-Done items are still open.
+
+- **Done:** the Bun check on the server (passed, with the pinned hash); the keeper MVP in `services/keeper` (lists the
+  open campaigns, simulates `resolve_campaign`, sends only what the program accepts, `/healthz` on loopback); the
+  server unit `brot-keeper` (restarts on failure, sandboxed, port 4210 on loopback); the `ProofStale` diagnosis (the
+  60 s proof window against devnet's 63 s price update), and the cycle set to 15 s; the test campaign `FmDo…` open on
+  devnet.
+- **Not done, and it would be a false claim to say otherwise:** no real `resolve_campaign` has been sent yet, because no
+  price has touched the target of `FmDo…` (about 1.3% away at opening, four-day deadline). The happy path is running but
+  unproven end to end. Also open: the finalization and settlement tasks; batched reads; the Hermes proof refresh (needs
+  a key); per-unit identities; tunnel-token rotation; the Bun soak and load tests; the `deploy/vps` rollback script; the
+  Carried-over list.
+- **Decisions to record:** the RPC is the public devnet URL until the founder pastes the Helius Free Tier URL on the
+  server; the server runs this branch's commit, not `main`; the cycle is 15 s on the server and 60 s in the code.
+- **Retrospective:** the proof window is the real constraint, not the RPC or the key. A 429 after a send does not mean
+  failure: check the signer's recent transactions before retrying.
