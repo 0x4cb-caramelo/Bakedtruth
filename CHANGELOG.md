@@ -22,6 +22,12 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Added
 
+- **O texto do aviso de dinheiro preso (L-03) aprovado pelo fundador** (10/10/2026): "Your entry stays locked until the
+  campaign ends. You cannot take it out before then. Payouts go to your wallet automatically after the result is read."
+  Ele aparece na Sprint 11, antes da assinatura.
+
+### Added
+
 - **A lista de campanhas no site** (Sprint 10, 10/10/2026): a página inicial lista as campanhas da API de leitura, com
   busca, filtros de estado e de tipo, ordenação, o interruptor de não listadas e "Salvas" no navegador. Cada cartão mostra
   a frase, o pote em SOL, a chance por lado (nenhuma com pote vazio), o retorno estimado pela matemática do SDK e as datas.
