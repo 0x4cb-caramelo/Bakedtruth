@@ -1,6 +1,6 @@
 # Sprint 06 — Server and primary keeper (Bun check first)
 
-**Status:** in progress, **not closed**: the keeper runs live on the server, but the real resolve is not yet proven (opened 2026-10-10 from `origin/main` at `6b5e3ec`) · **Branch:** `sprint-06-keeper-server` · **Dates:** none, by the founder's decision
+**Status:** closed 2026-10-10 by the founder's decision, for the Hackathon MVP. The keeper runs live on the server; the real resolve is not yet observed, and the founder will let the test campaign's BTC/USD touch happen on its own (opened 2026-10-10 from `origin/main` at `6b5e3ec`) · **Branch:** `sprint-06-keeper-server` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -197,6 +197,19 @@ From Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and retros
 - **Changelog:** the primary keeper live on devnet; per-unit identities on the server.
 - **Session log:** the Bun check's result; what was installed and created on the server and the notice given; the
   owner's agreement; the RPC provider (T5) and its cost.
+
+## Closure (2026-10-10, founder's decision)
+
+The founder considers the sprint closed for the Hackathon MVP: the keeper is running and polling on the server, and the
+logic is sound. The founder accepts that the on-chain resolve has not been observed; the test campaign `FmDo…` resolves
+when its BTC/USD target is touched. The items below are not built. Each destination is a proposal, not yet approved by the
+founder:
+
+- The finalize, settlement and payout tasks, batched reads, and the Hermes price stream: Sprint 04's tasks wait for
+  Sprint 14 and 16; the Hermes plan waits for D4 before mainnet (Sprint 16).
+- Per-unit identities and the tunnel-token rotation: Sprint 16 (the server owner's agreement is still open).
+- The Bun soak test and the load run of 1,000 campaigns: Sprint 16.
+- The `deploy/vps` rollback script (`push-deploy.sh`): Post-Hackathon; the server was updated by hand on 2026-10-10.
 
 ## Record and retrospective
 

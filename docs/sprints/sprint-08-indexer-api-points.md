@@ -1,6 +1,15 @@
 # Sprint 08 — Indexer, API, relay and points
 
-**Status:** planned · **Branch:** `sprint-08-indexer-api-points` · **Dates:** none, by the founder's decision
+**Status:** in progress, **hackathon MVP** (founder, 2026-10-10): only the read API for Lucas's screens. Branch `sprint-08-read-api` · **Dates:** none, by the founder's decision
+
+## Hackathon MVP scope (founder, 2026-10-10)
+
+Lucas needs to list active and resolved campaigns without RPC calls in the browser. So the MVP is `services/api`, a
+read-only service that takes a snapshot of the chain every 15 s, keeps it in memory and serves `/api/v1/health`,
+`/api/v1/campaigns` (filter `state`, `limit`, `offset`) and `/api/v1/campaigns/:address`. Not in the MVP, and carried
+to later sprints: the SQLite indexer and its ingestion, the activity, history, leaderboard, points, price and names
+routes, the zod DTOs, `brot-rpc`, the partner file, and the Cloudflare cache rule. Its hosting is open: it runs on
+loopback, and a public address needs a tunnel route, which the founder has set aside for now.
 
 | | |
 |---|---|

@@ -1,0 +1,16 @@
+{
+  "name": "@brot/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Brot Markets read API (Sprint 08, hackathon MVP): campaign list and detail, read-only, from a chain snapshot",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "bun src/main.ts",
+    "test": "bun test services/api"
+  },
+  "dependencies": {
+    "@brot/sdk": "workspace:*",
+    "@solana/kit": "~8.4.0"
+  }
+}

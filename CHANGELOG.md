@@ -22,6 +22,11 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Added
 
+- **A API de leitura para o site** (`services/api`, Sprint 08 no mínimo, 10/10/2026): `/api/v1/campaigns` lista as
+  campanhas por estado (ativas, resolvidas) com paginação, `/api/v1/campaigns/:address` mostra uma, e `/api/v1/health`
+  diz se o snapshot está em dia. Lê a cadeia a cada 15 s e serve da memória. Ainda sem endereço público: aguarda a
+  decisão de hospedagem. Ver `services/api/README.md`.
+- **Sprint 06 fechada** pelo fundador, sem a resolução real observada (`docs/sprints/sprint-06-keeper-server.md`).
 - **Sprint 07 fechada para o hackathon** (10/10/2026): o primário roda a release `cc87637` no servidor, com
   `POST /restart` assinado (HMAC) ativo e `ReadWritePaths` na unidade. O modo standby, o segundo VM, a RPC B, o e-mail
   e o teste de queda em devnet ficam para depois do hackathon (D4). A unidade `path` de reinício não foi instalada, por
