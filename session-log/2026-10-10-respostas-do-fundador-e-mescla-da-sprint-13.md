@@ -65,6 +65,16 @@ isso, o GitHub não roda o CI de um PR em conflito.
   ciclo inteiro no LiteSVM com um pote de um lado só (`tests/api/leaderboard.test.ts`), onde a carteira dos dois lados
   agora fica com zero. Os arquivos de teste foram divididos para ficarem abaixo de 200 linhas.
 
+Uma revisão independente conferiu a regra contra o programa (as entradas fecham na resolução; toda campanha
+finalizada grava o modo; o modo previsto para um resultado final é o que o finalize grava) e não achou problema alto
+nem médio. Os achados de texto foram aplicados: "every entry comes back" virou "every entry is refunded instead of
+split", já que no pote de um lado só só a primeira carteira recebe tudo de volta; a linha de "No points yet" passou a
+dizer que o pote precisa ter sido dividido; e o texto da regra na API sai da mesma chave que a tabela. Ficaram para o
+indexador (Sprint 08, plano técnico §7.4) dois atrasos do histórico em relação às contas vivas: a campanha reaberta
+casada com a abertura antiga até o histórico ler a nova, e a entrada tardia contada até ele ler o `LateTallied`; e a
+transação pulada, que deixa de fora os eventos dela sem que o histórico se diga incompleto. Os dois duram segundos a
+um minuto e são raros no devnet, onde quase nada fecha nem finaliza sozinho.
+
 A regra mudou antes de a API ir ao ar no devnet, então nenhum ranking publicado é reescrito.
 
 ## Consequences

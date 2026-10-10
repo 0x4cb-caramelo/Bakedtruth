@@ -95,8 +95,11 @@ marked waiting below · **Branch:**
   opened a burn, lock or stake campaign (`creatorCanControl`); the creator's other wallets cannot be told apart
   on-chain, and the page now says so, with the 15 days of answer 8a. Tested on the rule
   (`tests/sdk/points-3a.test.ts`), on the route (`services/api/tests/leaderboard-pot.test.ts`) and on whole cycles in
-  LiteSVM, a one-sided pot included (`tests/api/leaderboard.test.ts`). The other answers confirm what was built, or
-  are recorded for later sprints (below).
+  LiteSVM, a one-sided pot included (`tests/api/leaderboard.test.ts`). An independent review checked the rule against
+  the program (entries close at resolution; a finalized campaign always stores its mode; the mode predicted for a final
+  result is the one finalize stores) and found no high or medium issue: its copy findings were applied, and two ways the
+  history can lag the live accounts for a moment are deferred to the indexer (TP §7.4). The other answers confirm what
+  was built, or are recorded for later sprints (below).
 
 | | |
 |---|---|

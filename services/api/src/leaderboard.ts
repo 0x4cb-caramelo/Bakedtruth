@@ -30,6 +30,13 @@ import type { Row, Snapshot } from "./snapshot";
 
 const KNOWN = new Set(["limit", "offset"]);
 
+/** The rule in words, from the same switch as the table. */
+const RULE = [
+  "1 point per campaign entered on the side that won, once the result is final and the pot splits",
+  ...(BOTH_SIDES_SCORE ? [] : ["none for a wallet with entries on both sides"]),
+  "none for the creator's own wallet where the creator can control the result",
+].join("; ");
+
 export type LeaderboardQuery = { limit: number; offset: number };
 export type Line = { rank: number | null; wallet: string; points: number; entered: number };
 
@@ -100,9 +107,7 @@ export function leaderboardOf(history: History, snap: Snapshot, query: Leaderboa
     as_of_slot: snap.asOfSlot,
     chain_time: snap.chain.unixTimestamp,
     complete: history.complete(),
-    rule:
-      "1 point per campaign entered on the side that won, once the result is final and the pot splits; none for a " +
-      "wallet with entries on both sides, nor for the creator's own wallet where the creator can control the result",
+    rule: RULE,
     both_sides_score: BOTH_SIDES_SCORE,
     total: lines.length,
     offset: query.offset,

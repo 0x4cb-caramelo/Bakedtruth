@@ -38,7 +38,8 @@ export const BOARD = {
   empty: "No points yet: they are counted when a campaign's result is final.",
   you: "You",
   connect: "Connect a wallet to see where it stands.",
-  youNone: "No points yet. They are counted when a campaign you entered ends on your side and its result is final.",
+  youNone:
+    "No points yet. A campaign you entered scores when its result is final, your side won and its pot was split. How points work has the details.",
   youReading: "Still reading the program's history: your points may not all be counted yet.",
   youBeyond: (n: number) => `Your wallet is not among the first ${n.toLocaleString("en-US")} wallets read.`,
   youRank: (rank: number, points: string) => `#${rank} · ${points}`,
@@ -52,7 +53,7 @@ export const BOARD = {
       ? "A wallet with entries on both sides of a campaign scores when either side wins."
       : "A wallet with entries on both sides of a campaign does not score for it.",
     "A voided campaign scores nothing: no side won.",
-    "A refunded pot scores nothing: when one side is empty, or the losing side cannot pay the fees, every entry comes back.",
+    "A refunded pot scores nothing: when one side is empty, or the losing side cannot pay the fees, every entry is refunded instead of split.",
     "Whoever opens a burn, lock or stake campaign can control its result, so the wallet that opened it does not score for it. Their other wallets cannot be told apart on-chain.",
     "One person can hold many wallets, so the ranking says nothing about who is behind them.",
     POINTS_WORTH,
