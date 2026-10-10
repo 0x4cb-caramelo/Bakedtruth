@@ -83,7 +83,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09): the two fonts the site serves itself, the theme script in <head> before the stylesheet, the notice, the top bar, the page an | 52 |
+| [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09): the two fonts the site serves itself, the theme script in <head> before the stylesheet, the notice, the top bar, the page an | 54 |
 | [`page.tsx`](app/app/page.tsx) | the home route (Sprint 09 shell): the campaign list comes in Sprint 10. Until then it shows the read API's status, so the wiring to /api/v1 is visible | 20 |
 
 ## `app/app/abrir/`
@@ -163,7 +163,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`api-client.test.ts`](app/lib/api-client.test.ts) | the read API client with a fake fetch: the URLs and query it builds, the body on 200 and on health's 503, the named ApiError on other answers, the unreachable c | 89 |
 | [`api-client.ts`](app/lib/api-client.ts) | a read-only client for the read API (`services/api`, /api/v1): health, the campaign list and one campaign. Typed from the API's JSON; it imports no server code. | 117 |
-| [`brand.ts`](app/lib/brand.ts) | Product name and copy in one place. The name is Brot Markets; Baked is the mascot. Only the copy the site shows lives | 19 |
+| [`brand.ts`](app/lib/brand.ts) | Product name and copy in one place. The name is Brot Markets; Baked is the mascot. Only the copy the site shows lives | 13 |
 | [`brot.ts`](app/lib/brot.ts) | the site's one door to the Brot Markets SDK (Sprint 09, A-6): the read half (constants, PDAs, decoding, public state) and the tx half (the transaction builders  | 17 |
 | [`config.ts`](app/lib/config.ts) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 10 |
 | [`fonts.ts`](app/lib/fonts.ts) | the site's two fonts, served by the site itself: Barlow Condensed 700 for display and numbers, Inter 400, 500 and 600 for text. next/font downloads them at buil | 26 |
