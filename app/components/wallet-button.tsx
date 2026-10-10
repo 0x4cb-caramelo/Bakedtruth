@@ -2,44 +2,28 @@
  * Purpose: the site's wallet control (Sprint 09, S1): "Use Installed Wallet" connects only from that click, through the
  *          installed wallet the site registered (MWA on Android, or an installed browser wallet). Connected, it shows the
  *          short address, the SOL balance, the faucet link when the wallet has no SOL on devnet, and Disconnect.
- * Version: 0.1.0
+ * Version: 0.1.1 (the connection moved to features/wallet/use-installed-wallet.ts, shared with the entry panel)
  * Sprint:  09 (site shell, theme and wallet)
  */
 "use client";
 
-import { useEffect, useRef } from "react";
-import { WalletReadyState } from "@solana/wallet-adapter-base";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 import { CLUSTER } from "@/lib/config";
+import { useInstalledWallet } from "@/features/wallet/use-installed-wallet";
 import { useSolBalance } from "@/features/wallet/use-sol-balance";
 import { walletView, FAUCET_URL } from "@/features/wallet/wallet-state";
 
 export function WalletButton() {
-  const { wallets, wallet, select, connect, disconnect, connected, connecting, publicKey } = useWallet();
-  const wantConnect = useRef(false);
+  const { disconnect, connected, publicKey } = useWallet();
+  const { installed, connecting, connectInstalled } = useInstalledWallet();
   const lamports = useSolBalance();
-
-  // select() is asynchronous: connect once the chosen wallet is the selected one, never from the effect's own state.
-  useEffect(() => {
-    if (wantConnect.current && wallet && !connected && !connecting) {
-      wantConnect.current = false;
-      connect().catch(() => undefined);
-    }
-  }, [wallet, connected, connecting, connect]);
-
-  const installed = wallets.find((candidate) => candidate.readyState === WalletReadyState.Installed);
-  const useInstalled = () => {
-    if (!installed) return;
-    wantConnect.current = true;
-    select(installed.adapter.name);
-  };
 
   if (!connected) {
     return (
       <button
         type="button"
-        onClick={useInstalled}
+        onClick={connectInstalled}
         disabled={!installed || connecting}
         className="rounded border-2 border-line px-3 py-1 text-sm text-ink disabled:opacity-50"
       >

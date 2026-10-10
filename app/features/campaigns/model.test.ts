@@ -108,4 +108,9 @@ describe("the sentence", () => {
   test("the target keeps at most two decimals and thousands separators", () => {
     expect(formatTarget(1234567n, -2)).toBe("12,345.67");
   });
+
+  test("a target below 1 keeps six significant digits instead of rounding to 0 (Sprint 11)", () => {
+    expect(formatTarget(2_150n, -8)).toBe("0.0000215");
+    expect(formatTarget(123_456_789n, -9)).toBe("0.123457");
+  });
 });
