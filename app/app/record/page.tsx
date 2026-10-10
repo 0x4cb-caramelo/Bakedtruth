@@ -6,11 +6,15 @@
  * Version: 0.3.0 (Sprint 13: the powers table)
  * Sprint:  09 (site shell, theme and wallet); 12 (content); 13
  */
+import type { Metadata } from "next";
+
 import { LiveKeys } from "@/features/record/live-keys";
 import { loadPowers } from "@/features/record/load-powers";
 import { PowersView } from "@/features/record/powers-view";
 import { RecordList } from "@/features/record/record-list";
 import { loadVoidLog } from "@/features/record/load-void-log";
+
+export const metadata: Metadata = { title: "Public record · Brot Markets" };
 
 export default function Page() {
   const powers = loadPowers();

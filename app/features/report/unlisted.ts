@@ -1,10 +1,11 @@
 /**
- * Purpose: the campaigns the team unlisted after a report (C-10; proposal §2.7), read on the server when the site is
- *          built from content/unlisted.json: a list of `{ "id": "<the campaign's u64 id>", "reason": "<public text>",
- *          "at": "<ISO UTC time>" }`, changed only by a commit with two people's review, as the void log is. Unlisting
- *          is display only: the home page hides the campaign; its page, its entries, its result and its payouts stay.
- *          A malformed file fails the build rather than unlisting the wrong campaign or none.
- * Version: 0.1.0
+ * Purpose: the campaigns the team unlisted after a report (C-10; proposal §2.7), read on the server from
+ *          content/unlisted.json: a list of `{ "id": "<the campaign's u64 id>", "opensAt": "<its opens_at, Unix
+ *          seconds>", "reason": "<public text>", "at": "<ISO UTC time>" }`, changed only by a commit with two people's
+ *          review, as the void log is. The opening time binds an entry to one campaign: a closed campaign's id can
+ *          carry a new campaign later. Unlisting is display only: the home page hides the campaign; its page, its
+ *          entries, its result and its payouts stay. A malformed file fails the build (the home page is static).
+ * Version: 0.2.0 (the Sprint 13 adversarial review: the opening time)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { readFileSync } from "node:fs";
@@ -13,7 +14,7 @@ import { join } from "node:path";
 import { personalDataIn } from "@brot/sdk/schemas";
 import { contentDir } from "../../lib/content";
 
-export type Unlisted = { id: string; reason: string; at: string };
+export type Unlisted = { id: string; opensAt: string; reason: string; at: string };
 
 const U64 = /^(0|[1-9]\d{0,19})$/;
 const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
@@ -27,15 +28,17 @@ export function parseUnlisted(text: string): Unlisted[] {
     const keys = Object.keys(e ?? {})
       .sort()
       .join(",");
-    if (keys !== "at,id,reason") throw new Error(`unlisted[${i}]: exactly id, reason and at`);
+    if (keys !== "at,id,opensAt,reason") throw new Error(`unlisted[${i}]: exactly id, opensAt, reason and at`);
     if (typeof e.id !== "string" || !U64.test(e.id) || BigInt(e.id) > 18_446_744_073_709_551_615n)
       throw new Error(`unlisted[${i}].id: a campaign's u64 id, as a string`);
+    if (typeof e.opensAt !== "string" || !/^\d{1,20}$/.test(e.opensAt))
+      throw new Error(`unlisted[${i}].opensAt: the campaign's opens_at, Unix seconds, as a string`);
     if (typeof e.reason !== "string" || e.reason.trim().length === 0 || e.reason.length > 280)
       throw new Error(`unlisted[${i}].reason: public text, 1 to 280 characters`);
     const personal = personalDataIn(e.reason);
     if (personal) throw new Error(`unlisted[${i}].reason holds ${personal}`);
     if (typeof e.at !== "string" || !ISO.test(e.at)) throw new Error(`unlisted[${i}].at: an ISO UTC time`);
-    return { id: e.id, reason: e.reason, at: e.at };
+    return { id: e.id, opensAt: e.opensAt, reason: e.reason, at: e.at };
   });
 }
 

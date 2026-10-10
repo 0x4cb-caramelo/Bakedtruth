@@ -1,10 +1,11 @@
 /**
  * Purpose: the devnet leaderboard at /leaderboard (Sprint 13 DoD; spec 3.9 of Sprint -1,
  *          prototype-lab/campaigns/js/screens/ranking.js): wallets by points from /api/v1/leaderboard (1 per campaign
- *          entered on the side that won, once final), with each wallet's hit rate and campaigns entered, the
- *          connected wallet's own line as "You", when the chain was read, and how points work. No column for the size
- *          of entries or what a wallet gained. Loading, error and empty states; 50 rows at first, then "Show more".
- * Version: 0.1.0
+ *          entered on the side that won, once final), with the campaigns each entered, the connected wallet's own line
+ *          as "You", when the chain was read, how points work, what the page keeps and sends, and how to leave the
+ *          ranking. No column for the size of entries, what a wallet gained, or a success rate (the legal review).
+ *          Loading, error and empty states; 50 rows at first, then "Show more".
+ * Version: 0.2.0 (the Sprint 13 reviews: the hit rate removed; the leave line; "still reading" for You)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 "use client";
@@ -19,15 +20,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { shortAddress } from "@/lib/brot";
 import { explorerAddress } from "@/lib/config";
 import type { PointsLine } from "@/lib/api-client";
-import { BOARD } from "./copy";
-import { hitRate, lineOf } from "./model";
+import { BOARD, LEAVE_URL } from "./copy";
+import { lineOf } from "./model";
 import { useLeaderboard } from "./use-leaderboard";
 
 const FIRST = 50;
-const rate = (line: PointsLine) => {
-  const r = hitRate(line);
-  return r === null ? BOARD.hitRateNone : `${r}%`;
-};
 
 function Row({ line, mine }: { line: PointsLine; mine: boolean }) {
   return (
@@ -44,30 +41,37 @@ function Row({ line, mine }: { line: PointsLine; mine: boolean }) {
         {mine ? <span className="ml-2 rounded-sm border border-line px-1.5 text-xs">{BOARD.you}</span> : null}
       </td>
       <td className="py-2 pr-3 text-right font-bold tabular-nums">{line.points}</td>
-      <td className="py-2 pr-3 text-right tabular-nums">{rate(line)}</td>
       <td className="py-2 text-right tabular-nums">{line.entered}</td>
     </tr>
   );
 }
 
-/** `read`: how many ranked wallets the page read; past it a wallet may still have points (`total` is larger). */
+/**
+ * `read`: how many ranked wallets the page read; past it a wallet may still have points (`total` is larger).
+ * `complete`: the API has read the whole history; until then a missing line says so instead of "no points".
+ */
 function You({
   mine,
   connected,
   read,
   total,
+  complete,
 }: {
   mine: PointsLine | null;
   connected: boolean;
   read: number;
   total: number;
+  complete: boolean;
 }) {
   if (!connected) return <p className="m-0 text-sm text-muted">{BOARD.connect}</p>;
-  if (!mine) return <p className="m-0 text-sm">{total > read ? BOARD.youBeyond(read) : BOARD.youNone}</p>;
+  if (!mine) {
+    const text = total > read ? BOARD.youBeyond(read) : complete ? BOARD.youNone : BOARD.youReading;
+    return <p className="m-0 text-sm">{text}</p>;
+  }
   return (
     <div data-testid="leaderboard-you">
       <p className="m-0 font-display text-2xl font-bold">{BOARD.youRank(mine.rank ?? 0, BOARD.points(mine.points))}</p>
-      <p className="m-0 text-sm text-muted">{BOARD.youDetail(mine.points, mine.decided, mine.entered)}</p>
+      <p className="m-0 text-sm text-muted">{BOARD.youDetail(mine.points, mine.entered)}</p>
     </div>
   );
 }
@@ -83,13 +87,12 @@ function Board({ rows, total, wallet }: { rows: PointsLine[]; total: number; wal
       data-perch="leaderboard"
       data-perch-x="0.9"
     >
-      <table className="w-full min-w-[480px] border-collapse text-sm">
+      <table className="w-full min-w-[360px] border-collapse text-sm">
         <thead className="text-left text-xs text-muted">
           <tr>
             <th className="pb-2 pr-3 font-semibold">{BOARD.columns.rank}</th>
             <th className="pb-2 pr-3 font-semibold">{BOARD.columns.wallet}</th>
             <th className="pb-2 pr-3 text-right font-semibold">{BOARD.columns.points}</th>
-            <th className="pb-2 pr-3 text-right font-semibold">{BOARD.columns.hitRate}</th>
             <th className="pb-2 text-right font-semibold">{BOARD.columns.entered}</th>
           </tr>
         </thead>
@@ -157,6 +160,7 @@ export function LeaderboardPage() {
               connected={wallet !== null}
               read={state.status === "ready" ? state.rows.length : 0}
               total={state.status === "ready" ? state.total : 0}
+              complete={state.status === "ready" && state.complete}
             />
           </Card>
           <Card as="section" aria-labelledby="points-how" className="space-y-2 p-4">
@@ -169,6 +173,17 @@ export function LeaderboardPage() {
               ))}
             </ul>
             <p className="m-0 text-xs text-muted">{BOARD.public}</p>
+            <p className="m-0 text-xs text-muted" data-testid="leaderboard-leave">
+              {BOARD.leave}{" "}
+              <a
+                href={LEAVE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-soft hover:underline"
+              >
+                {BOARD.leaveLink}
+              </a>
+            </p>
           </Card>
         </div>
       </div>

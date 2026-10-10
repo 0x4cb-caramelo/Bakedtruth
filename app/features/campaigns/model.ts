@@ -35,6 +35,8 @@ export type Card = {
   entries: number;
   group: 0 | 1 | 2;
   listed: boolean;
+  /** When the campaign opened (Unix seconds): with the id, it names one opening of an address that can be reused. */
+  opensAt: bigint | null;
   entriesCloseAt: bigint | null;
   deadlineAt: bigint | null;
   reviewEndsAt: bigint | null;
@@ -104,6 +106,7 @@ export function toCard(c: Campaign, nowUnix: bigint): Card {
     entries,
     group,
     listed: !idle,
+    opensAt,
     entriesCloseAt: c.entries_close_at === null ? null : BigInt(c.entries_close_at),
     deadlineAt: c.deadline_at === null ? null : BigInt(c.deadline_at),
     reviewEndsAt: c.review_ends_at === null ? null : BigInt(c.review_ends_at),

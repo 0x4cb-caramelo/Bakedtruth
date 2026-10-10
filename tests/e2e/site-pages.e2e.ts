@@ -7,13 +7,14 @@
  *          after a whole cycle the leaderboard ranks the test wallet as "You", from the read API's own route; the
  *          site sends its security headers (X2.5), loads no third-party script (K-10) and serves the PWA manifest
  *          with its icons and no service worker.
- * Version: 0.1.0
+ * Version: 0.2.0 (the Sprint 13 reviews: the first-entry line, the too-small refund, the leave line, no hit rate)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { expect, test, type Page } from "@playwright/test";
 
 import { AUDIT_NOTICE, TEST_NOTICE } from "../../app/components/copy-site";
-import { control, openCampaign } from "./helpers";
+import { PANEL, SHEET } from "../../app/features/entry/copy";
+import { choose, connect, control, openCampaign, panel, sheet } from "./helpers";
 
 const ROUTES = ["/", "/leaderboard", "/record", "/fees", "/how-it-works", "/my-entries", "/abrir"];
 const desktopOnly = (name: string) => test.skip(name !== "desktop", "runs once, at desktop width");
@@ -45,7 +46,7 @@ test.describe("site pages and notices", () => {
     await page.goto("/");
     await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "How it works" }).click();
     await expect(page.getByRole("heading", { name: "Six steps, from opening to payout" })).toBeVisible();
-    for (const step of ["Open", "Join", "Entries close", "The chain is read", "6-hour review", "Paid"])
+    for (const step of ["Open", "Join", "Entries close", "The chain is read", "6-hour review", "Payout"])
       await expect(page.getByRole("heading", { name: step, exact: true })).toBeVisible();
     await expect(page.getByText("No human picks the winner.")).toBeVisible();
     await noSidewaysScroll(page);
@@ -80,7 +81,8 @@ test.describe("site pages and notices", () => {
         "href",
         "https://x.com/brotmarkets",
       );
-      await expect(report).toContainText(`Mention campaign ${made.id}`);
+      await expect(report).toContainText(`(campaign ${made.id})`);
+      await expect(report).not.toContainText("pays as usual");
     }
   });
 
@@ -95,7 +97,36 @@ test.describe("site pages and notices", () => {
     await expect(row).toBeVisible();
     await expect(row).toContainText("You");
     await expect(page.getByTestId("leaderboard-you")).toContainText(/#\d+ · \d+ points?/);
-    await expect(page.getByText("Points are a devnet game.")).toBeVisible();
+    await expect(page.getByText("Points only count on devnet.")).toBeVisible();
+    await expect(page.getByTestId("leaderboard-leave")).toContainText("To leave it, send us a direct message on X");
+    await expect(page.getByText("Hit rate")).toHaveCount(0);
+  });
+
+  test("before a first entry the sheet says entries are public and a wallet that scores is ranked", async ({
+    page,
+  }, info) => {
+    desktopOnly(info.project.name);
+    const c = await control<{ id: string }>("/campaign");
+    await openCampaign(page, c.id);
+    await connect(page);
+    await choose(page, "YES", "0.5");
+    await panel(page).getByRole("button", { name: "Review entry" }).click();
+    await expect(sheet(page).getByText(SHEET.public)).toBeVisible();
+    await sheet(page).getByRole("button", { name: "Back" }).click();
+  });
+
+  test("a pot whose losing side is too small to pay the fees shows the refund, not the split", async ({
+    page,
+  }, info) => {
+    desktopOnly(info.project.name);
+    const c = await control<{ id: string; address: string }>("/campaign");
+    await control("/join", { campaign: c.address, side: "yes", amount: "1000000000" });
+    await control("/join", { campaign: c.address, side: "no", amount: "10000000" });
+    await openCampaign(page, c.id);
+    await connect(page);
+    await choose(page, "YES", "0.01");
+    await expect(panel(page).getByText(PANEL.tooSmall("NO", 100))).toBeVisible();
+    await expect(panel(page).getByText("If YES wins: est. 0.0099 SOL back on your 0.0100 SOL")).toBeVisible();
   });
 
   test("security headers, no third-party script, and the manifest with its icons and no service worker", async ({

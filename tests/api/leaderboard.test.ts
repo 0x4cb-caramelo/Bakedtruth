@@ -121,7 +121,7 @@ describe("leaderboard from the program's events", () => {
     expect(points(body, second[2].address)).toBe(1); // both sides: Q7 read literally
     expect(points(body, second[0].address)).toBe(0);
     expect(body.rows.every((r: any) => r.points > 0)).toBe(true);
-    expect(Object.keys(body.rows[0]).sort()).toEqual(["decided", "entered", "points", "rank", "wallet"]);
+    expect(Object.keys(body.rows[0]).sort()).toEqual(["entered", "points", "rank", "wallet"]); // no success rate
   });
 
   test("a campaign closed after its payouts still scores, from its events alone", async () => {
@@ -143,7 +143,7 @@ describe("leaderboard from the program's events", () => {
     expect(w.client.svm.getAccount(cycle.campaign).exists).toBe(false);
     await history.refresh();
     const { body } = await board("?limit=1");
-    expect(body.rows).toEqual([{ rank: 1, wallet: second[1].address, points: 2, entered: 2, decided: 2 }]);
+    expect(body.rows).toEqual([{ rank: 1, wallet: second[1].address, points: 2, entered: 2 }]);
     expect(body.total).toBe(3);
     const signatures = await createSolanaRpc(chain.url).getSignaturesForAddress(PROGRAM_ID).send();
     expect(signatures.length).toBeGreaterThan(10);

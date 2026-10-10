@@ -4,7 +4,8 @@
  *          It reads the campaign by its id through the SDK (the sentence, the result the program recorded, the value
  *          read and the target, the review window or a void's public reason) and prints the post and its length. It
  *          refuses a campaign whose result has not been read, and it promises no payout and no time.
- * Version: 0.1.0
+ * Version: 0.2.0 (the Sprint 13 reviews: a price NO and a target met late say why; the devnet line before the link; one
+ *          link; the length as X counts it)
  * Sprint:  13 (site: ranking, notices and copy)
  *
  * Usage: bun run scripts/team/resolution-post.ts --campaign <id> [--site https://<the site>] --cluster devnet [--url ...]
@@ -28,9 +29,9 @@ import {
   type Campaign,
   type ChainTime,
   type SolanaRpc,
+  VoidReason,
 } from "@brot/sdk/read";
 
-import { VOID_REASON } from "../../app/features/campaign-page/copy-states";
 import { valueText } from "../../app/features/campaign-page/format";
 import { KIND_OF } from "../../app/features/campaign-page/proof";
 import { sentenceOf } from "../../app/features/campaigns/sentence";
@@ -46,8 +47,15 @@ const LINK = 23;
 /** A post's length as X counts it: each link as 23 characters. */
 export const xLength = (post: string): number => post.replace(/https?:\/\/\S+/g, "x".repeat(LINK)).length;
 
-/** The first sentence of a void's public reason: the post keeps it short; the campaign page has the rest. */
-const firstSentence = (text: string) => text.split(/(?<=\.) /)[0];
+/** Each void's public reason, short enough for a post (the campaign page has the full text, `VOID_REASON`). */
+export const POST_REASON: Record<VoidReason, string> = {
+  [VoidReason.None]: "No reason recorded.",
+  [VoidReason.MissedWindow]: "Brot's service missed the reading.",
+  [VoidReason.UnreadableAccount]: "The account could no longer be read.",
+  [VoidReason.StaleFeed]: "The price feed stopped updating before the deadline.",
+  [VoidReason.TeamHouseFailure]: "The team recorded the cause as Brot's.",
+  [VoidReason.TeamOutsideCause]: "The team recorded the cause as outside Brot.",
+};
 
 export type PostOptions = { cluster: "devnet" | "local"; site?: string };
 
@@ -66,20 +74,26 @@ export function resolutionPost(campaign: Campaign, address: string, chain: Chain
   });
   const voided = campaign.outcome === Outcome.Void;
   const value = (v: bigint) => valueText(kind, v, campaign.priceExponent);
+  const read = voided
+    ? `${POST_REASON[campaign.voidReason as VoidReason]} Entries come back in full.`
+    : campaign.outcome === Outcome.No && kind === "price"
+      ? "No YES proof was recorded before the deadline."
+      : campaign.metLate
+        ? `Value read: ${value(campaign.observedValue)}. Target: ${value(campaign.target)}, met only after the deadline, which counts as NO.`
+        : `Value read: ${value(campaign.observedValue)}. Target: ${value(campaign.target)}.`;
+  const explorer = `https://explorer.solana.com/address/${address}${options.cluster === "devnet" ? "?cluster=devnet" : ""}`;
   const fields: Record<string, string> = {
     id: campaign.id.toString(),
     sentence,
     result: voided ? "voided" : campaign.outcome === Outcome.Yes ? "YES" : "NO",
-    read: voided
-      ? `${firstSentence(VOID_REASON[campaign.voidReason])} Every entry is refunded in full.`
-      : `Value read: ${value(campaign.observedValue)}. Target: ${value(campaign.target)}.`,
+    read,
     status: view.contested
       ? "Contested: the payout is paused while the result is checked again."
       : view.state === "InReview" && !view.windowEnded
-        ? `Final after the 6-hour review, at ${formatUtc(campaign.reviewEndsAt)}.`
+        ? `Review ends ${formatUtc(campaign.reviewEndsAt)}.`
         : "The result is final.",
-    explorer: `https://explorer.solana.com/address/${address}${options.cluster === "devnet" ? "?cluster=devnet" : ""}`,
-    page: options.site ? `${options.site.replace(/\/+$/, "")}/c/${campaign.id}` : "",
+    // One link: the campaign's page when a site is given (it has the re-check panel), else the account on the explorer.
+    link: options.site ? `${options.site.replace(/\/+$/, "")}/c/${campaign.id}` : `Check it: ${explorer}`,
   };
   const template = readFileSync(TEMPLATE_PATH, "utf8");
   return template
@@ -112,9 +126,8 @@ async function main() {
   const read = await readForPost(rpcFor(ops.url), BigInt(id));
   const post = resolutionPost(read.campaign, read.address, read.chain, { cluster, site });
   console.log(`\n${post}\n`);
-  console.log(
-    `${post.length} characters${post.length > POST_LIMIT ? `: over X's ${POST_LIMIT}, shorten it by hand` : ""}.`,
-  );
+  const length = xLength(post);
+  console.log(`${length} characters as X counts them${length > POST_LIMIT ? `: over ${POST_LIMIT}, shorten it` : ""}.`);
   console.log("Nothing was posted: copy the text above and post it yourself.");
 }
 

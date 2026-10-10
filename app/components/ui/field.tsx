@@ -45,5 +45,13 @@ export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
 }
 
 export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={cx("min-h-9 rounded-sm border border-field-line bg-panel px-2.5 py-1.5 text-[12.5px] text-muted", props.className)} />;
+  return (
+    <select
+      {...props}
+      className={cx(
+        "min-h-9 rounded-sm border border-field-line bg-panel px-2.5 py-1.5 text-[12.5px] text-muted",
+        props.className,
+      )}
+    />
+  );
 }

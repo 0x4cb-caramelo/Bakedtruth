@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <section className="py-6">
       <h1 className="mb-4 text-3xl font-bold text-ink">Campaigns</h1>
-      <CampaignList unlisted={loadUnlisted().map((u) => u.id)} />
+      <CampaignList unlisted={loadUnlisted().map((u) => ({ id: u.id, opensAt: u.opensAt }))} />
     </section>
   );
 }

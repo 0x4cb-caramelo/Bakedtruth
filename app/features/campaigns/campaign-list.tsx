@@ -37,8 +37,11 @@ const SORTS: { id: Sort; label: string }[] = [
 const NO_SAVED = new Set<string>();
 const serverSaved = () => NO_SAVED;
 
-/** `unlisted`: the ids the team unlisted after a report (C-10); they show only with "Show unlisted". */
-export function CampaignList({ unlisted = [] }: { unlisted?: readonly string[] }) {
+/**
+ * `unlisted`: the campaigns the team unlisted after a report (C-10), each by its id and opening time, since a closed
+ * campaign's id can carry a new campaign later; they show only with "Show unlisted".
+ */
+export function CampaignList({ unlisted = [] }: { unlisted?: readonly { id: string; opensAt: string }[] }) {
   const loaded = useCampaigns();
   const saved = useSyncExternalStore(subscribeSaved, getSaved, serverSaved);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
@@ -61,8 +64,10 @@ export function CampaignList({ unlisted = [] }: { unlisted?: readonly string[] }
     );
   }
 
-  const hidden = new Set(unlisted);
-  const cards = loaded.cards.map((card) => (hidden.has(card.id) ? { ...card, listed: false } : card));
+  const hidden = new Set(unlisted.map((u) => `${u.id}@${u.opensAt}`));
+  const cards = loaded.cards.map((card) =>
+    hidden.has(`${card.id}@${card.opensAt ?? ""}`) ? { ...card, listed: false } : card,
+  );
   const kinds = [...new Set(cards.map((c) => c.kind))];
   const shown = arrange(cards, filters, saved);
   return (

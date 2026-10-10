@@ -9,7 +9,7 @@
 export const RECORD = {
   title: "Public record",
   intro:
-    "Every void the team records, with its reason and the team's own words, and every correction to one. A team key can void a campaign only after the program voided it by itself (a missed reading, an unreadable account or a stale price feed), and only inside the 6-hour review; it can never void or change a YES or a NO.",
+    "Every void the team records, with its reason and the team's own words, and every correction to one. The program voids a campaign by itself when it cannot read the result: a missed reading, an unreadable account or a stale price feed. Inside the 6-hour review, a team key can then record the cause, which decides who keeps the 10% opening fee. A team key can never void or change a YES or a NO.",
   check:
     "Each record's SHA-256 is of exactly its file's bytes, and a void's is stored in the campaign on-chain, so anyone can check that the text was not changed. Records are never edited: a correction is a new record.",
   automatic: "Voids the program records by itself show their reason on the campaign's page.",

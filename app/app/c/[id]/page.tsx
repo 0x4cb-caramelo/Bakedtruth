@@ -3,8 +3,9 @@
  *          The server only passes the route's id and the link's prefill (`?side=yes|no`, `?amount=<lamports>`; TP §3.6
  *          "Links": a link prefills the panel and never signs); the page reads the chain in the browser. Since Sprint
  *          12 it also passes the team's void notes, read here on the server from content/void-log/; since Sprint 13,
- *          whether the team unlisted this campaign after a report (content/unlisted.json, C-10).
- * Version: 0.4.0
+ *          whether the team unlisted this campaign after a report (content/unlisted.json, C-10), shown only when the
+ *          entry's opening time is this campaign's. Either file failing to read never takes the page down.
+ * Version: 0.4.1
  * Sprint:  11 (site: campaign page and entry); 12; 13
  */
 import { CampaignPage } from "@/features/campaign-page/campaign-page";
@@ -14,6 +15,15 @@ import { loadVoidLog } from "@/features/record/load-void-log";
 import { loadUnlisted } from "@/features/report/unlisted";
 
 const one = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
+
+function readOr<T>(what: string, fallback: T, read: () => T): T {
+  try {
+    return read();
+  } catch (error) {
+    console.error(`campaign page: ${what} could not be read (${error instanceof Error ? error.name : "Error"})`);
+    return fallback;
+  }
+}
 
 /** The prefill a link may carry: a side, and an amount in lamports from 1 up to 1,000,000 SOL; anything else is dropped. */
 function prefillOf(query: Record<string, string | string[] | undefined>): Prefill {
@@ -29,10 +39,16 @@ export default async function Page(props: PageProps<"/c/[id]">) {
   const query = await props.searchParams;
   // The team's void notes, read on the server from content/void-log/; the page shows one only when its hash is the
   // one the chain stored for this campaign.
-  const notes: VoidNote[] = loadVoidLog().records.flatMap((r) =>
-    r.kind === "void" ? [{ file: r.file, campaign: r.campaign, reason: r.reason, text: r.text, sha256: r.sha256 }] : [],
+  // Read on every request (the route is dynamic). A file that cannot be read never takes the page down: the page goes
+  // on without the notes or the unlisting, and the error is logged. The static pages fail the build on the same files.
+  const notes: VoidNote[] = readOr("the void log", [], () =>
+    loadVoidLog().records.flatMap((r) =>
+      r.kind === "void"
+        ? [{ file: r.file, campaign: r.campaign, reason: r.reason, text: r.text, sha256: r.sha256 }]
+        : [],
+    ),
   );
-  const unlisted = loadUnlisted().find((u) => u.id === id) ?? null;
+  const unlisted = readOr("the unlisted list", null, () => loadUnlisted().find((u) => u.id === id) ?? null);
   return (
     <section className="py-2">
       <CampaignPage idParam={id} prefill={prefillOf(query)} notes={notes} unlisted={unlisted} />

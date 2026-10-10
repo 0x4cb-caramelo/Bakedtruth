@@ -197,6 +197,7 @@ describe("config", () => {
       corsOrigin: "*",
       cluster: "devnet",
       historyPerRefresh: 200,
+      hiddenFile: null,
     });
   });
 });

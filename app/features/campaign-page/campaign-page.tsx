@@ -90,7 +90,7 @@ export function CampaignPage({
         action={
           <>
             <Report />
-            <ReportCampaign id={idParam} unlisted={unlisted} />
+            <ReportCampaign id={idParam} unlisted={null} />
           </>
         }
       >
@@ -135,7 +135,13 @@ export function CampaignPage({
       />
     ),
     mine: <PayoutPanel key="mine" data={data} wallet={wallet} round={round} onChange={landed} />,
-    report: <ReportCampaign key="report" id={data.campaign.id.toString()} unlisted={unlisted} />,
+    report: (
+      <ReportCampaign
+        key="report"
+        id={data.campaign.id.toString()}
+        unlisted={unlisted && unlisted.opensAt === data.campaign.opensAt.toString() ? unlisted : null}
+      />
+    ),
   };
   const stale = state.failed ? <p className="m-0 text-xs text-warn">{PAGE.loadFailedText}</p> : null;
   if (phone) {

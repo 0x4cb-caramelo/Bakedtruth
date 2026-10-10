@@ -59,8 +59,8 @@ export type CampaignList = {
 
 export type ListQuery = { state?: ListState; limit?: number; offset?: number };
 
-/** One wallet's line of the devnet leaderboard (Sprint 13). `rank` is null with no points. */
-export type PointsLine = { rank: number | null; wallet: string; points: number; entered: number; decided: number };
+/** One wallet's line of the devnet leaderboard (Sprint 13): its rank, points and the campaigns it entered. */
+export type PointsLine = { rank: number | null; wallet: string; points: number; entered: number };
 
 export type Leaderboard = {
   as_of_slot: string;

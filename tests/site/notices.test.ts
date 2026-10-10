@@ -71,7 +71,7 @@ async function page(id: bigint): Promise<PageData> {
 
 describe("every mandatory notice is on its screen", () => {
   test("each notice has words and a screen, and the component it names draws it", () => {
-    expect(MANDATORY_NOTICES.length).toBeGreaterThanOrEqual(14);
+    expect(MANDATORY_NOTICES.length).toBeGreaterThanOrEqual(15);
     for (const n of MANDATORY_NOTICES) {
       expect(`${n.id}: ${n.text.length > 0 && n.screens.length > 0}`).toBe(`${n.id}: true`);
       for (const d of n.drawnBy)
@@ -130,6 +130,8 @@ describe("every mandatory notice is on its screen", () => {
 
   test("How it works says BP-5's line; the leaderboard says what points are worth (L-09)", () => {
     expect(render(C.HowPage)).toContain(notice("no-human"));
-    expect(render(C.LeaderboardPage)).toContain(notice("points-worth"));
+    const board = render(C.LeaderboardPage);
+    expect(board).toContain(notice("points-worth"));
+    expect(board).toContain(notice("leave-ranking"));
   });
 });

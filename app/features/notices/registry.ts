@@ -5,7 +5,8 @@
  *          copy files: this list adds none. P1 §4.6's "Pago sozinho, ao fim da janela de 6 horas" is not here: on
  *          devnet nothing pays out by itself yet, so the founder replaced it (2026-10-10) with the review rule and
  *          "Waiting for payout", which promise no time.
- * Version: 0.1.0
+ * Version: 0.2.0 (the Sprint 13 adversarial review: each notice names the screen that mounts it, never its copy file;
+ *          the leaderboard's leave line)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { AUDIT_NOTICE, TEST_NOTICE } from "../../components/copy-site";
@@ -13,7 +14,7 @@ import { CREATOR_NOTICE } from "../campaign-page/copy";
 import { REPORT, STATES, WAITING } from "../campaign-page/copy-states";
 import { LOCK_NOTICE, NOTICES, SHEET } from "../entry/copy";
 import { PRINCIPLE } from "../how/copy";
-import { POINTS_WORTH } from "../leaderboard/copy";
+import { BOARD, POINTS_WORTH } from "../leaderboard/copy";
 import { REPORT_CAMPAIGN } from "../report/copy";
 
 export type MandatoryNotice = {
@@ -33,42 +34,61 @@ export const MANDATORY_NOTICES: readonly MandatoryNotice[] = [
     source: "P1 §4.6; BR-47",
     text: TEST_NOTICE,
     screens: "every screen",
-    drawnBy: [{ file: "components/site-notice.tsx", uses: "TEST_NOTICE" }],
+    drawnBy: [
+      { file: "components/site-notice.tsx", uses: "TEST_NOTICE" },
+      { file: "app/layout.tsx", uses: "<SiteNotice />" },
+    ],
   },
   {
     id: "unaudited",
     source: 'BR-47 ("Programa ainda sem auditoria")',
     text: AUDIT_NOTICE,
     screens: "every screen",
-    drawnBy: [{ file: "components/site-notice.tsx", uses: "AUDIT_NOTICE" }],
+    drawnBy: [
+      { file: "components/site-notice.tsx", uses: "AUDIT_NOTICE" },
+      { file: "app/layout.tsx", uses: "<SiteNotice />" },
+    ],
   },
   {
     id: "lock",
     source: "L-03, the founder's devnet wording (2026-10-10); BR-12",
     text: LOCK_NOTICE,
     screens: "the entry panel and the review sheet, before signing",
-    drawnBy: [{ file: "features/entry/entry-notices.tsx", uses: "NOTICES.lock" }],
+    drawnBy: [
+      { file: "features/entry/entry-notices.tsx", uses: "NOTICES.lock" },
+      { file: "features/entry/entry-panel.tsx", uses: "<EntryNotices" },
+      { file: "features/entry/entry-review.tsx", uses: "<EntryNotices" },
+    ],
   },
   {
     id: "estimate",
     source: "BR-09; P1 §3.2",
     text: NOTICES.estimate,
     screens: "the entry panel and the review sheet, before signing",
-    drawnBy: [{ file: "features/entry/entry-notices.tsx", uses: "NOTICES.estimate" }],
+    drawnBy: [
+      { file: "features/entry/entry-notices.tsx", uses: "NOTICES.estimate" },
+      { file: "features/entry/entry-panel.tsx", uses: "<EntryNotices" },
+    ],
   },
   {
     id: "fee",
     source: "BR-09; P1 §3.3, §3.4",
     text: NOTICES.fee(1_000, 100),
     screens: "the entry panel and the review sheet, before signing",
-    drawnBy: [{ file: "features/entry/entry-notices.tsx", uses: "NOTICES.fee" }],
+    drawnBy: [
+      { file: "features/entry/entry-notices.tsx", uses: "NOTICES.fee" },
+      { file: "features/entry/entry-panel.tsx", uses: "<EntryNotices" },
+    ],
   },
   {
     id: "one-sided",
     source: "BR-10; P1 §3.5",
     text: NOTICES.oneSided(100),
     screens: "the entry panel and the review sheet, before signing",
-    drawnBy: [{ file: "features/entry/entry-notices.tsx", uses: "NOTICES.oneSided" }],
+    drawnBy: [
+      { file: "features/entry/entry-notices.tsx", uses: "NOTICES.oneSided" },
+      { file: "features/entry/entry-panel.tsx", uses: "<EntryNotices" },
+    ],
   },
   {
     id: "public-entries",
@@ -100,7 +120,8 @@ export const MANDATORY_NOTICES: readonly MandatoryNotice[] = [
     text: WAITING,
     screens: 'a paid campaign\'s page and "My entries", while payouts wait',
     drawnBy: [
-      { file: "features/campaign-page/copy-states.ts", uses: "WAITING" },
+      { file: "features/campaign-page/state-panel.tsx", uses: "STATES.waiting" },
+      { file: "features/campaign-page/payout-panel.tsx", uses: "WAITING" },
       { file: "features/my-entries/entry-row.tsx", uses: "WAITING" },
     ],
   },
@@ -123,13 +144,20 @@ export const MANDATORY_NOTICES: readonly MandatoryNotice[] = [
     source: "BP-5 as recommended (P-9)",
     text: PRINCIPLE,
     screens: "How it works",
-    drawnBy: [{ file: "features/how/copy.ts", uses: "${PRINCIPLE}" }],
+    drawnBy: [{ file: "features/how/how-page.tsx", uses: "HOW.more" }],
+  },
+  {
+    id: "leave-ranking",
+    source: "TP §8.2, the privacy review (question 8): who runs the ranking and how to leave it",
+    text: BOARD.leave,
+    screens: "the leaderboard",
+    drawnBy: [{ file: "features/leaderboard/leaderboard.tsx", uses: "BOARD.leave" }],
   },
   {
     id: "points-worth",
     source: "L-09 as recommended",
     text: POINTS_WORTH,
     screens: "the leaderboard",
-    drawnBy: [{ file: "features/leaderboard/copy.ts", uses: "POINTS_WORTH," }],
+    drawnBy: [{ file: "features/leaderboard/leaderboard.tsx", uses: "BOARD.how" }],
   },
 ];

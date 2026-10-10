@@ -5,7 +5,7 @@
  *          and, for a campaign whose account still exists, what that account says now. Pure, so the read API and any
  *          client compute the same table from the same events.
  * Version: 0.2.0 (the Sprint 13 adversarial review: each opening of an address counts apart, since a closed campaign's
- *          id can be opened again)
+ *          id can be opened again; the events are taken in the order given, which must be the chain's)
  * Sprint:  13 (site: ranking, notices and copy)
  *
  * A result is final when no key can change it any more (the read API decides it for a live account: `CampaignNow`); a
@@ -36,15 +36,16 @@ type Stake = { key: string; wallet: string; yes: bigint; no: bigint };
 const asResult = (outcome: Outcome | undefined): FinalResult | null =>
   outcome === Outcome.Yes ? "Yes" : outcome === Outcome.No ? "No" : outcome === Outcome.Void ? "Void" : null;
 
-const inOrder = (a: DecodedEvent, b: DecodedEvent) =>
-  a.slot !== b.slot ? (a.slot < b.slot ? -1 : 1) : a.key.ixIndex - b.key.ixIndex || a.key.innerIndex - b.key.innerIndex;
-
-/** The events read in chain order, each tied to one opening of its campaign: `<address>#<n>`, n counting openings. */
+/**
+ * The events, already in chain order (oldest first, as the read API's history keeps them: a slot holds many
+ * transactions, so their order cannot be rebuilt from slots), each tied to one opening of its campaign:
+ * `<address>#<n>`, n counting openings.
+ */
 function byOpening(events: readonly DecodedEvent[]) {
   const openings = new Map<string, number>();
   const keyOf = (campaign: string) => `${campaign}#${openings.get(campaign) ?? 0}`;
   const tied: { key: string; event: DecodedEvent }[] = [];
-  for (const event of [...events].sort(inOrder)) {
+  for (const event of events) {
     const campaign = (event.data as { campaign?: string }).campaign;
     if (typeof campaign !== "string") continue;
     if (event.name === "CampaignOpened") openings.set(campaign, (openings.get(campaign) ?? 0) + 1);
