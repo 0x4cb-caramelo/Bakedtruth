@@ -2,16 +2,17 @@
  * Purpose: the read API's leaderboard against the program in LiteSVM behind the recording RPC (Sprint 13 DoD: the
  *          leaderboard shows the points of `/api/v1/leaderboard`): whole campaign cycles through the SDK's builders,
  *          the program's history read by services/api/src/history.ts, and the route's answer. A result in its review
- *          window scores nothing; once the window has passed it is final; a settling campaign scores; a closed one
+ *          window scores nothing; once the window has passed it is final; a settling campaign scores, but not a wallet
+ *          on both sides of it; a pot refunded as one-sided scores nothing (the founder's answer 3a); a closed campaign
  *          still scores from its events. A refresh reads only the new transactions.
  *          Filter: `bun test tests/ -t "leaderboard from the program's events"`.
- * Version: 0.1.0
+ * Version: 0.2.0 (the founder's answer 3a)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { createSolanaRpc, type Address, type KeyPairSigner } from "@solana/kit";
 
-import { decodeCampaign, PROGRAM_ID, publicState, readChainTime, Side } from "@brot/sdk/read";
+import { decodeCampaign, PROGRAM_ID, publicState, readChainTime, SettleMode, Side } from "@brot/sdk/read";
 
 import { createHistory, type History } from "../../services/api/src/history";
 import { createHandler } from "../../services/api/src/routes";
@@ -118,10 +119,25 @@ describe("leaderboard from the program's events", () => {
     expect(points(body, first[1].address)).toBe(1); // the first campaign's window ended while this one ran
     expect(points(body, first[0].address)).toBe(0);
     expect(points(body, second[1].address)).toBe(1);
-    expect(points(body, second[2].address)).toBe(1); // both sides: Q7 read literally
+    expect(points(body, second[2].address)).toBe(0); // both sides: no point (the founder's answer 3a)
     expect(points(body, second[0].address)).toBe(0);
     expect(body.rows.every((r: any) => r.points > 0)).toBe(true);
     expect(Object.keys(body.rows[0]).sort()).toEqual(["entered", "points", "rank", "wallet"]); // no success rate
+  });
+
+  test("a pot with entries on one side only is refunded, and scores nothing", async () => {
+    freshPrices();
+    const cycle = await runCycle(w, (b) => [{ who: b[0], side: Side.No, amount: SOL }], {
+      how: "no",
+      stopAt: "settling",
+      chain,
+    });
+    campaigns.push(cycle.campaign);
+    await history.refresh();
+    const { body } = await board();
+    expect(decodeCampaign(rawOf(w, cycle.campaign)).settleMode).toBe(SettleMode.OneSided);
+    expect(points(body, cycle.bakers[0].address)).toBe(0);
+    expect(body.total).toBe(2);
   });
 
   test("a campaign closed after its payouts still scores, from its events alone", async () => {
@@ -144,7 +160,7 @@ describe("leaderboard from the program's events", () => {
     await history.refresh();
     const { body } = await board("?limit=1");
     expect(body.rows).toEqual([{ rank: 1, wallet: second[1].address, points: 2, entered: 2 }]);
-    expect(body.total).toBe(3);
+    expect(body.total).toBe(2);
     const signatures = await createSolanaRpc(chain.url).getSignaturesForAddress(PROGRAM_ID).send();
     expect(signatures.length).toBeGreaterThan(10);
   });

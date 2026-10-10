@@ -4,86 +4,18 @@
  *          counted only once it is final (the window ended uncontested; a YES price campaign only once settling, since
  *          its late joins are known then), the paging of the ranked rows with no success rate, the hide list applied
  *          before ranking, and the table kept until something changes. The route takes no wallet (the privacy
- *          review). The rule itself is tests/sdk/points.test.ts; the whole chain is tests/api/leaderboard.test.ts.
- * Version: 0.2.0 (the Sprint 13 reviews)
+ *          review). Refunded pots and the creator's own wallet: leaderboard-pot.test.ts. The rule itself is
+ *          tests/sdk/points.test.ts; the whole chain is tests/api/leaderboard.test.ts.
+ * Version: 0.3.0 (the fake data moved to board-kit.ts with the founder's answer 3a; 0.2.0, the Sprint 13 reviews)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { describe, expect, test } from "bun:test";
-import { Outcome, ReaderKind, Side, Status, type DecodedEvent } from "@brot/sdk/read";
+import { Outcome, ReaderKind, SettleMode } from "@brot/sdk/read";
 
-import { createHidden, parseHidden, type Hidden } from "../src/hidden";
+import { createHidden, parseHidden } from "../src/hidden";
 import type { History } from "../src/history";
 import { createBoard, nowOf } from "../src/leaderboard";
-import { createHandler } from "../src/routes";
-import type { Row, Snapshot } from "../src/snapshot";
-import type { Store } from "../src/store";
-
-const CHAIN = { slot: 900n, epoch: 9n, unixTimestamp: 1_800_000_000n };
-const ADDR = (n: number) => `${"1".repeat(31)}${n}`;
-const WALLET = (n: number) => `${"9".repeat(31)}${n}`;
-const view = (state: string, more: Record<string, unknown> = {}) =>
-  ({
-    state,
-    closedBecause: null,
-    contested: false,
-    reviewEndsAt: null,
-    windowEnded: false,
-    settled: false,
-    ...more,
-  }) as unknown as Row["view"];
-const row = (n: number, outcome: Outcome, v: Row["view"], kind = ReaderKind.SupplyAtMost): Row =>
-  ({ address: ADDR(n), campaign: { outcome, kind, status: Status.InReview }, view: v }) as unknown as Row;
-
-const entry = (campaign: string, baker: string, side: Side, n: number) =>
-  ({
-    name: "EntryAdded",
-    discriminator: 5,
-    data: { campaign, baker, side, amount: 10_000_000n, seq: 0n, isFirst: false },
-    key: { signature: `s${n}`, ixIndex: 0, innerIndex: 0 },
-    slot: BigInt(n),
-    blockTime: null,
-  }) as unknown as DecodedEvent;
-
-const history = (events: DecodedEvent[], ready = true, complete = true, version = 1): History => ({
-  events: () => events,
-  version: () => version,
-  ready: () => ready,
-  complete: () => complete,
-  skipped: () => 0,
-  refresh: async () => {},
-});
-const hideOnly = (wallets: string[]): Hidden => ({
-  current: () => new Set(wallets),
-  version: () => wallets.length,
-  lastError: () => null,
-  refresh: () => {},
-});
-
-const SNAP: Snapshot = {
-  takenAt: "2026-10-10T06:00:00.000Z",
-  asOfSlot: 900n,
-  chain: CHAIN,
-  rows: [
-    row(1, Outcome.Yes, view("InReview", { windowEnded: true })),
-    row(2, Outcome.No, view("InReview", { windowEnded: false })),
-    row(3, Outcome.No, view("Paid")),
-  ],
-};
-const store: Store = { current: () => SNAP, lastError: () => null, refresh: async () => {} };
-const call = async (h: History | undefined, path: string, hidden?: Hidden) => {
-  const res = await createHandler(store, { corsOrigin: "*", cluster: "devnet", history: h, hidden })(
-    new Request(`http://api.test${path}`),
-  );
-  return { status: res.status, body: (await res.json()) as any };
-};
-
-const EVENTS = [
-  entry(ADDR(1), WALLET(1), Side.Yes, 1),
-  entry(ADDR(2), WALLET(1), Side.No, 2),
-  entry(ADDR(3), WALLET(2), Side.No, 3),
-  entry(ADDR(3), WALLET(3), Side.No, 4),
-  entry(ADDR(1), WALLET(3), Side.Yes, 5),
-];
+import { call, EVENTS, hideOnly, history, row, SNAP, view, WALLET } from "./board-kit";
 
 describe("leaderboard route", () => {
   test("503 with no history, or before its first read; health says so", async () => {
@@ -99,7 +31,8 @@ describe("leaderboard route", () => {
     expect(nowOf(SNAP.rows[1]).final).toBe(false);
     expect(nowOf(SNAP.rows[2]).final).toBe(true);
     expect(nowOf(row(4, Outcome.Yes, view("InReview", { windowEnded: true, contested: true }))).final).toBe(false);
-    const priceYes = (state: string) => row(5, Outcome.Yes, view(state, { windowEnded: true }), ReaderKind.PriceTouch);
+    const priceYes = (state: string) =>
+      row(5, Outcome.Yes, view(state, { windowEnded: true }), ReaderKind.PriceTouch, { settleMode: SettleMode.Split });
     expect(nowOf(priceYes("InReview")).final).toBe(false); // its late joins are known only once tallied
     expect(nowOf(priceYes("Paid")).final).toBe(true);
     expect(nowOf(row(6, Outcome.No, view("InReview", { windowEnded: true }), ReaderKind.PriceTouch)).final).toBe(true);

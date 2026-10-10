@@ -21,7 +21,9 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 `sprint-06-keeper-server`. Nada de código entrou ainda: a primeira tarefa é a checagem do Bun 1.4.2 no servidor.
 
 Em 10/10/2026 a Sprint 12 entrou na `main` pelo PR #61 (tag `sprint-12`, `107fec2`), e a Sprint 13 foi aberta a partir
-dessa tag, na branch `sprint-13-site-notices-copy`.
+dessa tag, na branch `sprint-13-site-notices-copy`. Na mesma noite a Sprint 13 entrou na `main` pelo PR #63 (tag
+`sprint-13`, `2dc5cb1`, depois do CI verde na `main`), e o fundador respondeu as doze perguntas dela, todas como
+recomendado (1a a 12a).
 
 ### Added
 
@@ -115,6 +117,21 @@ dessa tag, na branch `sprint-13-site-notices-copy`.
 
 ### Changed
 
+- **A regra de pontos do ranking, pela resposta 3a do fundador** (10/10/2026, depois da mescla da Sprint 13; branch
+  `sprint-13-founder-answers`): deixam de pontuar a carteira com entradas nos dois lados de uma campanha
+  (`BOTH_SIDES_SCORE` agora é falso), o pote devolvido por ter um lado só ou um lado perdedor pequeno demais para pagar
+  as taxas, e a carteira que abriu uma campanha de queima, trava ou stake, cujo resultado quem abriu pode controlar. As
+  outras carteiras de quem abriu não têm como ser reconhecidas na rede e continuam pontuando; a página diz isso, e diz
+  também que um pedido para sair do ranking é respondido em até 15 dias (resposta 8a). A API de leitura passa a dizer,
+  para cada campanha viva, se o pote vai ser devolvido (pela conta do programa no SDK), quem a abriu e de que tipo ela
+  é. Testes novos: a regra (`tests/sdk/points-3a.test.ts`), a rota (`services/api/tests/leaderboard-pot.test.ts`) e um
+  ciclo inteiro no LiteSVM com pote de um lado só. Mudou antes de a API ir ao ar no devnet, então nenhum ranking
+  publicado é reescrito.
+- **As respostas do fundador às doze perguntas da Sprint 13 registradas** no documento da sprint, no roteiro, no plano
+  técnico (v0.1.6: §3.4.7, §3.5, §3.6, §7.4, §8.2, §13, §14.2) e no log da sessão. Quem guarda o login da conta do X é
+  o CTO, com aplicativo autenticador como segundo fator. Ficam pendentes: as páginas `/terms` (sair do ar até a Sprint
+  17) e `/privacy` (corrigir e linkar no rodapé do site), que o fundador publica (resposta 9a); o relatório do parceiro,
+  da Sprint 08 (L-24 respondida); e a regra contra a colheita de prêmio, antes da mainnet (resposta 12a).
 - **Sprint 13:** o cartão da lista usava outra redação do aviso do criador; agora usa a da página. O filtro de dado
   pessoal do void log recusa também domínio solto e "@x" / "[@x]", e o site falha o build se não achar `content/`
   (os dois achados que a Sprint 12 deixou para esta). Os dois avisos de toda tela foram para um arquivo de texto

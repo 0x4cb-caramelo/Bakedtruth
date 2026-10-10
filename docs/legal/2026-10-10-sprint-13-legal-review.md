@@ -7,6 +7,14 @@
 > response period went to the founder; M5 and M6 went to the founder (`docs/sprints/sprint-13-site-notices-copy.md`,
 > "Founder decisions that block the sprint", items 2, 8 and 9); B4's display half was applied (`shownReturnBps`), its
 > program half is deferred (TP §7.4). The B-items and the questions for the lawyer below stand.
+>
+> **The founder's answers (2026-10-10, after the merge).** M3: a request to leave the ranking is answered within 15
+> days, the period this review proposed, for the lawyer to confirm; the page says so. M4: the success rate stays
+> dropped. M5: `/terms` comes down until Sprint 17, and `/privacy` is corrected and linked from the site's footer
+> before the site is public (not done yet; the founder deploys the landing). M6: L-09 is answered with the line as
+> built. N10: a wallet with entries on both sides no longer scores, nor does a refunded pot or the creator's own wallet
+> on a burn, lock or stake campaign. The X account's login is held by the CTO, with an authenticator app as the second
+> factor.
 
 > **Disclaimer.** I am not a lawyer. This is a safe first draft built from public standards and the project's own
 > documents. Before real money, sensitive data or critical jurisdictions (health, fintech, minors), a lawyer must review

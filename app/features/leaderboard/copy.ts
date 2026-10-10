@@ -1,18 +1,18 @@
 /**
  * Purpose: the words of the devnet leaderboard (spec 3.9 of Sprint -1; BR-29; D-m vocabulary; English per L-01): the
- *          table, the connected wallet's own line, the loading, error and empty states, how points work (the both-sides
- *          line follows the SDK's `BOTH_SIDES_SCORE`), what the page keeps and sends, and how to leave the ranking (the
- *          privacy review, TP §8.2). What points are worth after devnet is L-09, still open: `POINTS_WORTH` is the
- *          recommended answer, one string. No line names a return or a reward.
- * Version: 0.2.0 (the Sprint 13 reviews: no success rate, the leave line, no "game")
+ *          table, the connected wallet's own line, the loading, error and empty states, how points work (the SDK's
+ *          rule, with the founder's answer 3a; the both-sides line follows `BOTH_SIDES_SCORE`), what the page keeps and
+ *          sends, and how to leave the ranking (the privacy review, TP §8.2; the 15 days of answer 8a). What points are
+ *          worth after devnet is L-09, answered 2a: `POINTS_WORTH`, one string. No line names a return or a reward.
+ * Version: 0.3.0 (the founder's answers of 2026-10-10: what scores, and the answer within 15 days)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 
 import { BOTH_SIDES_SCORE } from "@brot/sdk/read";
 
 /**
- * L-09 (Product Brief v0.0.1 gap, open), as recommended: points promise nothing. No "game" and no "beta" (the legal
- * and copy reviews). Change it here only.
+ * L-09 (Product Brief v0.0.1 gap), answered 2a on 2026-10-10: points promise nothing. No "game" and no "beta" (the
+ * legal and copy reviews). Change it here only.
  */
 export const POINTS_WORTH =
   "Points only count on devnet. They are not money, and nothing is promised for them after the test phase.";
@@ -38,7 +38,8 @@ export const BOARD = {
   empty: "No points yet: they are counted when a campaign's result is final.",
   you: "You",
   connect: "Connect a wallet to see where it stands.",
-  youNone: "No points yet. They are counted when a campaign you entered ends on your side and its result is final.",
+  youNone:
+    "No points yet. A campaign you entered scores when its result is final, your side won and its pot was split. How points work has the details.",
   youReading: "Still reading the program's history: your points may not all be counted yet.",
   youBeyond: (n: number) => `Your wallet is not among the first ${n.toLocaleString("en-US")} wallets read.`,
   youRank: (rank: number, points: string) => `#${rank} · ${points}`,
@@ -52,12 +53,14 @@ export const BOARD = {
       ? "A wallet with entries on both sides of a campaign scores when either side wins."
       : "A wallet with entries on both sides of a campaign does not score for it.",
     "A voided campaign scores nothing: no side won.",
+    "A refunded pot scores nothing: when one side is empty, or the losing side cannot pay the fees, every entry is refunded instead of split.",
+    "Whoever opens a burn, lock or stake campaign can control its result, so the wallet that opened it does not score for it. Their other wallets cannot be told apart on-chain.",
     "One person can hold many wallets, so the ranking says nothing about who is behind them.",
     POINTS_WORTH,
   ],
   public:
     "Wallet addresses and their entries are public on Solana. This ranking is computed from them on Brot's server and kept in memory, never written to disk. The page does not send your wallet to Brot: it finds your line in your browser.",
   leave:
-    "The Brot Markets team runs this ranking. To leave it, send us a direct message on X; we will ask your wallet to sign a short message to confirm the request.",
+    "The Brot Markets team runs this ranking. To leave it, send us a direct message on X; we will ask your wallet to sign a short message to confirm the request, and answer within 15 days.",
   leaveLink: "x.com/brotmarkets",
 } as const;
