@@ -32,7 +32,8 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
     aninhada e em tabela de endereços.
   - **React Native:** o SDK empacota com o Metro para Android e roda no Hermes, com os vetores sem diferença; o app vai
     precisar de `crypto.subtle.digest` e `crypto.getRandomValues`
-    (`knowledge-base/tecnologia/sdk-react-native.md`). Novo trabalho de CI, "Mobile bundle".
+    (`knowledge-base/tecnologia/sdk-react-native.md`). Novo trabalho de CI, "Mobile bundle", verde no PR #43 (os
+    24.000 vetores sem diferença no Hermes).
   - **Regras de fronteira** (`bun run lint:sdk`, dentro de `bun run lint`): `read` não importa `tx`; nada de Node,
     React, Next, React Native, web3.js v1, Anchor nem zod em `read` e `tx`, que também não importam `schemas`; nenhum
     global de Node, Bun ou DOM. Um teste planta uma violação de cada regra numa cópia do SDK e exige que todas disparem.

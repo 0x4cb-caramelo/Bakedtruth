@@ -2063,7 +2063,7 @@ brot-markets binary; the step "Mainnet build carries the real values",
 `cargo test --locked -p brot-markets --features no-entrypoint,mainnet` (T12); and, on `main` only, a `programs-<sha>`
 artifact with `brot_markets.so`, its IDL (`brot_markets.json`, the committed one) and `SHA256SUMS`. *Repo:*
 `codemap.js --check`, `os-self-test.js`, the landing's tests and the secret scan over the branch. *App:* lint and
-build. *Mobile bundle* (added in Sprint 05; its first run is that sprint's pull request): Node 24.21.0,
+build. *Mobile bundle* (added in Sprint 05; green on its pull request, PR #43, run 38009888067): Node 24.21.0,
 `npm ci --ignore-scripts` in `tests/react-native`, then `node run.mjs`.
 
 **What changes** **[DP]** (proposal §2.1, §2.3, §6).
@@ -2074,7 +2074,7 @@ build. *Mobile bundle* (added in Sprint 05; its first run is that sprint's pull 
 | Toolchain | The Anchor CLI install and the `pred-provable` clippy line leave with the frozen program | 03 |
 | IDL check | Over the Shank output and the generated client, instead of `target/idl`, `target/types` and `app/lib/idl` | 02 (added beside the old paths), 03–05 |
 | New checks | `dependency-cruiser` read/tx rule and the SDK's portability check (`bun run lint:sdk`, inside `bun run lint`, done in 05); the Rust-generated math vectors (done in 04 and 05); JSON Schema of `content/`; a check that the mainnet build carries the real window and duration (T12, done in 02) | 02–05 |
-| Mobile bundle | The "Mobile bundle" job (added in 05; first green run on its pull request): both SDK halves bundled by Metro 0.87.1 for Android as React Native 0.87.1 bundles a release, compiled with that version's hermesc, and the 24,000 math vectors replayed on a Hermes VM pinned by SHA-256 (`tests/react-native/run.mjs`) | 05 |
+| Mobile bundle | The "Mobile bundle" job (done in 05: green on PR #43, run 38009888067): both SDK halves bundled by Metro 0.87.1 for Android as React Native 0.87.1 bundles a release, compiled with that version's hermesc, and the 24,000 math vectors replayed on a Hermes VM pinned by SHA-256 (`tests/react-native/run.mjs`) | 05 |
 | Services | `bun test services/` | 06–08 |
 | Web | The Playwright smoke at desktop and Android widths | 11 |
 | Lockfile | `bun install --frozen-lockfile` resolving from npmjs.org (T15) | 02, at its opening, before the Codama spike (done, `7d770ce`) |

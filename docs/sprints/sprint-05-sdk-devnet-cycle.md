@@ -44,7 +44,7 @@ read, the window passes, the winners and the creator are paid.
       (BR-23).
 - [x] `view` computes the public state from chain time, never the device clock (A-7); one unit test per state.
 - [x] `errors` holds one message per program error code.
-- [ ] **The React Native check** (proposal §3.2): the SDK ships ESM with `exports`; a CI job bundles both halves with
+- [x] **The React Native check** (proposal §3.2): the SDK ships ESM with `exports`; a CI job bundles both halves with
       Metro for Android and runs the math vectors under the React Native engine [AC: the tool, with no app yet]. What
       the app must polyfill (`crypto.getRandomValues`, `crypto.subtle`, `bigint`) is recorded.
 - [x] `@solana/kit` moves to 8.4.0 if a frozen install and the typecheck pass; otherwise the reason is recorded
@@ -199,6 +199,7 @@ the second vector generator), so the binary CI builds on `main` after PR #41 mer
 | `recheck` | `tests/sdk/recheck.test.ts` through a local RPC endpoint backed by LiteSVM: the burn, the stake pool and a price YES (its proof found through the event) equal to the recorded value, then the documented mismatch or `null` once the account moves, `consistent` when it moved the only way it can; the event found three pages deep, past malformed answers |
 | `view` | `tests/sdk/view.test.ts`: one test per public state, with chain times decades from the machine's clock |
 | `errors` | One message per code, from the IDL; `tests/sdk/contract-source.test.ts` against `error.rs` |
+| React Native check | CI's "Mobile bundle" job, green on PR #43 (run 38009888067, commit `a4588d7`): Metro bundles both halves for Android (`read` 180 exports, `tx` 39), React Native 0.87.1's hermesc (Hermes 1.0.0) compiles them, and the 24,000 vectors replay with 0 mismatches. Caveat: CI runs the JavaScript on Hermes v0.13.0's VM (it reports 0.12.0); the 1.0.0 bytecode itself ran once, by hand, on a VM built from its tag. The app's polyfills are recorded (`crypto.subtle.digest`, `crypto.getRandomValues`; `knowledge-base/tecnologia/sdk-react-native.md`) |
 | Kit 8.4.0, zod | Kit `~8.4.0`: clean frozen install, typecheck and the 307 tests passed on it; zod 4.6.5 pinned |
 | Test helpers on the SDK | `tests/helpers.ts` does not exist; the row maps to `tests/brot/setup.ts`, which decodes every event of every LiteSVM transaction through the SDK (the fields cross-checked for the 7 events the kit lays out; for Sprint 04's other 11, the discriminator and the size, against the Rust source), and `tests/brot/flows.ts`, which builds with the SDK. No script or test imports `app/lib` |
 | Team scripts | `scripts/team/`, rehearsed (`bun run team:rehearse`, exit 0): every act simulated unsigned; the void's on-chain note hash equals the SHA-256 of the saved record, written as `.pending` until the ledger confirms |
@@ -206,10 +207,6 @@ the second vector generator), so the binary CI builds on `main` after PR #41 mer
 
 **Open rows, and why**
 
-- **React Native check:** passes locally (four runs; the last after the reviews' fixes: 24,000 vectors, 0 mismatches,
-  `tx` with 39 exports, 44 s); the "Mobile bundle" CI job runs on this branch's pull request. Its tick will carry a
-  caveat: CI runs the JavaScript on Hermes v0.13.0's VM (it reports 0.12.0), compiled by React Native 0.87.1's
-  hermesc (Hermes 1.0.0); the bytecode itself ran once, by hand, on a 1.0.0 VM built from its tag.
 - **Real validator:** `bun run validator:negative` exits 0 on Surfpool 1.5.0 `--offline` in a loopback-only namespace:
   373 slot cases, 50 refusals of `user_open_campaign` and `user_join_campaign`, one paid opening equal to the SDK. That
   is the row's letter, not its reason: Surfpool runs on LiteSVM, and the admin, resolve and settlement refusal suites
