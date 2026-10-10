@@ -1,109 +1,172 @@
 /**
- * Purpose: the deterministic summary of a transaction before the wallet signs it (A-3): each instruction
- *          decoded from its own bytes (never from the inputs it was built from) and said in words, the
- *          most lamports it can take from the signers, and a flag on anything this SDK did not build: an
- *          unknown program, a malformed instruction, or a System Program transfer.
- * Version: 0.1.0
+ * Purpose: the deterministic summary of a transaction before the wallet signs it (A-3). `summarizeMessage`
+ *          reads the very bytes the wallet signs: the compiled message, decompiled from its static keys only,
+ *          with its fee payer and its network fee; `summarizeInstructions` reads a list of instructions. Each
+ *          instruction is decoded from its own bytes (never from the inputs it was built from) and said in
+ *          words, with the most lamports it can take from a signer, and anything this SDK did not build is
+ *          flagged.
+ * Version: 0.2.0
  * Sprint:  05 (SDK)
  *
- * Pure code, no model and no network: the same instructions always give the same text.
+ * Trusted means: this program's instructions shaped as the IDL says, and compute-unit limits and prices this
+ * SDK reads, with the priority fee under the cap. Untrusted: a System Program instruction or any other
+ * program's, a malformed instruction, a message that loads address lookup tables or is not legacy or v0, bytes
+ * past the message, or a fee payer other than the signer named. Pure code, no model and no network: the same
+ * bytes always give the same text.
  */
-import { type Instruction } from "@solana/kit";
-
 import {
-  BrotMarketsInstruction,
-  identifyBrotMarketsInstruction,
-  parseBrotMarketsInstruction,
-} from "../idl/generated/programs";
-import { PROGRAM_ID, ReaderKind, Side, SYSTEM_PROGRAM_ID, VoidReason } from "../read/constants";
-import { bytesToHex } from "../read/bytes";
-import { formatBps, formatSol, formatUtc } from "../read/format";
-import { DATA_SIZE, describeOther } from "./summary-other";
+  compileTransaction,
+  decompileTransactionMessage,
+  getCompiledTransactionMessageDecoder,
+  getCompiledTransactionMessageEncoder,
+  type Address,
+  type Instruction,
+  type ReadonlyUint8Array,
+} from "@solana/kit";
+
+import { PROGRAM_ID, SYSTEM_PROGRAM_ID } from "../read/constants";
+import { bytesEqual } from "../read/bytes";
+import { formatSol } from "../read/format";
+import type { ReadyMessage } from "./simulate";
+import {
+  COMPUTE_BUDGET_PROGRAM_ID,
+  DEFAULT_PRIORITY_FEE_CAP,
+  describeBudget,
+  priorityFeeAtMost,
+  readComputeBudget,
+  type ComputeBudget,
+} from "./summary-budget";
+import { summarizeBrot, type SummaryContext } from "./summary-brot";
+
+export type { SummaryContext } from "./summary-brot";
 
 export type SummaryItem = {
   index: number;
   name: string;
   text: string;
-  /** Built by this SDK for this program, or a compute-budget setting. */
+  /** This program's instruction shaped as the IDL says, or a compute-budget setting read and under the cap. */
   trusted: boolean;
-  /** The most lamports this instruction can move out of a signer's wallet, rents and fees apart. */
+  /**
+   * The most lamports this instruction can take from a signer's wallet: what the program can move out of it,
+   * or the priority fee a compute-unit price sets. Rents (returned later) and the base fee are apart.
+   */
   lamportsAtMost: bigint;
 };
 
-export type TransactionSummary = { items: SummaryItem[]; trusted: boolean; lamportsAtMost: bigint; lines: string[] };
+export type TransactionSummary = {
+  items: SummaryItem[];
+  trusted: boolean;
+  lamportsAtMost: bigint;
+  /** The priority fee the compute-budget instructions allow, at most (already in `lamportsAtMost`). */
+  priorityFeeAtMost: bigint;
+  lines: string[];
+};
 
-type Parsed = ReturnType<typeof parseBrotMarketsInstruction>;
+/** The summary of the bytes a wallet signs. */
+export type MessageSummary = TransactionSummary & {
+  feePayer: Address | null;
+  /** The signatures the message requires. */
+  signatures: number;
+  /** The base fee of every signature plus the priority fee, at most. */
+  networkFeeAtMost: bigint;
+};
 
-function describeBrot(parsed: Parsed): { text: string; lamports: bigint } {
-  const d = parsed.data as Record<string, any>;
-  const a = parsed.accounts as Record<string, { address: string }>;
-  switch (parsed.instructionType) {
-    case BrotMarketsInstruction.UserOpenCampaign: {
-      const what =
-        d.kind === ReaderKind.PriceTouch
-          ? `price of feed ${bytesToHex(d.feedId).slice(0, 8)}… ${d.direction === 0 ? "at or above" : "at or below"} ${d.target}`
-          : `${ReaderKind[d.kind]} of ${a.metricAccount.address}, target ${d.target}`;
-      const pays =
-        d.openingUsd === 0n
-          ? "free (team key)"
-          : `US$${d.openingUsd}, at most ${formatSol(d.maxLamports)} SOL into its vault`;
-      return {
-        text: `Open campaign #${d.id} on the ${what}, deadline ${formatUtc(d.deadlineAt)}; pays ${pays}, plus the rents of the campaign and its vault (returned at close)`,
-        lamports: d.openingUsd === 0n ? 0n : d.maxLamports,
-      };
-    }
-    case BrotMarketsInstruction.UserJoinCampaign:
-      return {
-        text: `Join campaign ${a.campaign.address} on ${Side[d.side]} with ${formatSol(d.amount)} SOL from ${a.baker.address}; refused if the return estimate is below ${formatBps(d.minReturnBps)} or the entry total is not ${formatSol(d.expectedEntryTotal)} SOL; plus the rent of the join's record`,
-        lamports: d.amount,
-      };
-    case BrotMarketsInstruction.TeamVoidCampaign:
-      return {
-        text: `Void campaign ${a.campaign.address} (${VoidReason[d.reason]}), note hash ${bytesToHex(d.noteHash)}`,
-        lamports: 0n,
-      };
-    default:
-      return { text: describeOther(parsed.instructionType, a), lamports: 0n };
-  }
-}
+export type SummaryOptions = {
+  /** The highest priority fee a trusted summary accepts: 0.001 SOL unless set. */
+  priorityFeeCap?: bigint;
+  /** What the screen read, so the summary names it in words. */
+  context?: SummaryContext;
+  /** The fee payer, which may fill any slot as a writable signer (`summarizeMessage` sets it). */
+  feePayer?: Address;
+};
 
-/** The data is exactly the instruction's size, as the program requires (`BadInstructionData` otherwise). */
-const exactSize = (ix: Instruction, parsed: Parsed) => ix.data?.length === DATA_SIZE[parsed.instructionType];
+/** The base fee per signature. */
+export const LAMPORTS_PER_SIGNATURE = 5_000n;
 
-function itemOf(ix: Instruction, index: number): SummaryItem {
-  const base = { index, trusted: false, lamportsAtMost: 0n };
+function itemOf(ix: Instruction, index: number, budget: ComputeBudget, options: SummaryOptions): SummaryItem {
   if (ix.programAddress === PROGRAM_ID) {
-    let parsed: Parsed;
-    try {
-      identifyBrotMarketsInstruction(ix.data ?? new Uint8Array());
-      parsed = parseBrotMarketsInstruction(ix as never);
-    } catch {
-      return { ...base, name: "unknown", text: "Malformed Brot Markets instruction: do not sign" };
-    }
-    if (!exactSize(ix, parsed)) return { ...base, name: "unknown", text: "Malformed instruction: do not sign" };
-    const { text, lamports } = describeBrot(parsed);
-    return {
-      index,
-      name: BrotMarketsInstruction[parsed.instructionType],
-      text,
-      trusted: true,
-      lamportsAtMost: lamports,
-    };
+    return { index, ...summarizeBrot(ix, options.context ?? {}, options.feePayer) };
   }
-  if (ix.programAddress === "ComputeBudget111111111111111111111111111111") {
-    return { ...base, name: "computeBudget", text: "Compute budget setting", trusted: true };
+  if (ix.programAddress === COMPUTE_BUDGET_PROGRAM_ID) {
+    const read = describeBudget(budget, index, options.priorityFeeCap ?? DEFAULT_PRIORITY_FEE_CAP);
+    return { index, name: "computeBudget", text: read.text, trusted: read.trusted, lamportsAtMost: read.lamports };
   }
   const what = ix.programAddress === SYSTEM_PROGRAM_ID ? "System Program instruction" : `program ${ix.programAddress}`;
-  return { ...base, name: "unknown", text: `A ${what} this SDK did not build: do not sign` };
+  return {
+    index,
+    name: "unknown",
+    text: `A ${what} this SDK did not build: do not sign`,
+    trusted: false,
+    lamportsAtMost: 0n,
+  };
 }
 
-/** The summary of `instructions`, in order. `trusted` only when every one is. */
-export function summarizeInstructions(instructions: readonly Instruction[]): TransactionSummary {
-  const items = instructions.map(itemOf);
+/** The summary of `instructions`, in order. `trusted` only when there is at least one and every one is. */
+export function summarizeInstructions(
+  instructions: readonly Instruction[],
+  options: SummaryOptions = {},
+): TransactionSummary {
+  const budget = readComputeBudget(instructions);
+  const items = instructions.map((ix, index) => itemOf(ix, index, budget, options));
   return {
     items,
-    trusted: items.every((item) => item.trusted),
+    trusted: items.length > 0 && items.every((item) => item.trusted),
     lamportsAtMost: items.reduce((sum, item) => sum + item.lamportsAtMost, 0n),
+    priorityFeeAtMost: priorityFeeAtMost(budget),
     lines: items.map((item) => `${item.index + 1}. ${item.text}`),
+  };
+}
+
+const refused = (text: string): MessageSummary => ({
+  items: [],
+  trusted: false,
+  lamportsAtMost: 0n,
+  priorityFeeAtMost: 0n,
+  lines: [`${text}: do not sign`],
+  feePayer: null,
+  signatures: 0,
+  networkFeeAtMost: 0n,
+});
+
+/**
+ * The summary of the bytes the wallet signs: `message`'s compiled bytes, or the bytes given. Call it last,
+ * just before the wallet; `signer` is the wallet that must pay the fee.
+ */
+export function summarizeMessage(
+  message: ReadyMessage | ReadonlyUint8Array,
+  options: SummaryOptions & { signer?: Address } = {},
+): MessageSummary {
+  const bytes = message instanceof Uint8Array ? message : compileTransaction(message as ReadyMessage).messageBytes;
+  let compiled;
+  let decompiled;
+  try {
+    compiled = getCompiledTransactionMessageDecoder().decode(bytes);
+    if (!bytesEqual(getCompiledTransactionMessageEncoder().encode(compiled), bytes)) {
+      return refused("These bytes are not exactly one transaction message");
+    }
+    if (compiled.version !== 0 && compiled.version !== "legacy") {
+      return refused(`A version-${compiled.version} transaction message, which this SDK never builds`);
+    }
+    if ((("addressTableLookups" in compiled && compiled.addressTableLookups) || []).length > 0) {
+      return refused("The message loads accounts from address lookup tables, which this SDK never builds");
+    }
+    decompiled = decompileTransactionMessage(compiled);
+  } catch {
+    return refused("These bytes do not decode as a transaction message");
+  }
+  const feePayer = decompiled.feePayer.address;
+  const summary = summarizeInstructions(decompiled.instructions, { ...options, feePayer });
+  const signatures = compiled.header.numSignerAccounts;
+  const networkFeeAtMost = LAMPORTS_PER_SIGNATURE * BigInt(signatures) + summary.priorityFeeAtMost;
+  const payerOk = options.signer === undefined || options.signer === feePayer;
+  const fee = `network fee at most ${formatSol(networkFeeAtMost)} SOL (${signatures} signature${signatures === 1 ? "" : "s"}${summary.priorityFeeAtMost > 0n ? " and the priority fee" : ""})`;
+  const payer = payerOk ? "" : `; the signing wallet is ${options.signer}: do not sign`;
+  return {
+    ...summary,
+    trusted: summary.trusted && payerOk,
+    lines: [`Paid by ${feePayer}: ${fee}${payer}`, ...summary.lines],
+    feePayer,
+    signatures,
+    networkFeeAtMost,
   };
 }

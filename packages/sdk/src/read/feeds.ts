@@ -5,7 +5,7 @@
  * Sprint:  05 (SDK); the lists are Sprint 04's
  *
  * A build with the `mainnet` feature compiles `MAINNET_FEEDS`; every other build, devnet's included,
- * compiles `DEVNET_FEEDS`. Append-only, as in the program; tests/sdk/constants.test.ts parses feeds.rs
+ * compiles `DEVNET_FEEDS`. Append-only, as in the program; tests/sdk/contract-source.test.ts parses feeds.rs
  * and fails when the two copies differ. Each entry is the feed id in hex and Pyth's symbol.
  */
 
@@ -104,3 +104,9 @@ export type FeedCluster = "mainnet" | "devnet";
 /** The list a build for `cluster` compiles. */
 export const feedsOf = (cluster: FeedCluster): readonly FeedEntry[] =>
   cluster === "mainnet" ? MAINNET_FEEDS : DEVNET_FEEDS;
+
+/** Pyth's symbol for a feed id in either list (`"Crypto.BTC/USD"`), or `null` for a feed neither compiles. */
+export function feedSymbol(hex: string): string | null {
+  const id = hex.toLowerCase();
+  return (MAINNET_FEEDS.find(([h]) => h === id) ?? DEVNET_FEEDS.find(([h]) => h === id))?.[1] ?? null;
+}
