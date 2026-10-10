@@ -116,7 +116,8 @@ export function createApp({
         return;
       }
       // The earlier decks are kept in history/, not served (founder, 2026-10-08). Links already sent to /pitch2,
-      // /pitch3 or /pitch4 land on the current deck. Temporary on purpose: browsers do not keep a 302.
+      // /pitch3, /pitch4 or /pitch5 (the preview of v5, which became /pitch on 2026-10-10) land on the current deck.
+      // Temporary on purpose: browsers do not keep a 302.
       if (/^\/pitch[2-9]\d*(\/|$)/.test(path)) {
         res.writeHead(302, { Location: "/pitch/" }).end();
         return;

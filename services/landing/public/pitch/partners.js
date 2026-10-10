@@ -1,5 +1,5 @@
 /**
- * Purpose: the launch partners counter of the Growth slide of /pitch4: two seconds after the slide arrives the number
+ * Purpose: the launch partners counter of the Growth slide of /pitch: two seconds after the slide arrives the number
  *          climbs to the partners in the list, their logos come in at the same pace, the number starts to glow and
  *          the last four logos fan out.
  * Version: 0.3.0 · Sprint: out of band (landing page), 2026-10-07

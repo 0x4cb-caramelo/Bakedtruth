@@ -137,9 +137,10 @@ test("the terms and privacy pages say what the reviewed texts in docs/legal say,
   assert.match(privacy, /data-leave/, "the privacy page keeps the form to leave the waitlist");
 });
 
-test("the deck at /pitch keeps what the founder decided on 2026-10-08, after the mentors' review", async () => {
+test("the deck at /pitch keeps what the founder decided on 2026-10-08 and, for v5.1, on 2026-10-10", async () => {
   const slides = [...deck.matchAll(/<section class="slide" data-label="([^"]+)"/g)].map((match) => match[1]);
-  const labels = "Title, Problem, Solution, Market, How we earn, Open a market, Growth, Team, Close";
+  // v5.1: "How we earn" and "Open a market" are gone, folded into the Solution demo; Market is two slides, one chart.
+  const labels = "Title, Problem, Solution, Market, Projection, Growth, Team, Close";
   assert.equal(slides.join(", "), labels);
   assert.match(deck, new RegExp(`<span data-count aria-live="polite">1 / ${slides.length}</span>`));
   // motion.js is a module and deck.js is deferred: both run in document order, and the listener has to come first.
@@ -158,17 +159,26 @@ test("the deck at /pitch keeps what the founder decided on 2026-10-08, after the
   assert.match(text, /one market settled on an event that never happened/);
   assert.ok(!/not to scale/i.test(text), "the market slide has no 'not to scale'");
   assert.match(text, /RESOLVED BY THE CHAIN/, "the demo says who resolved the market before showing the result");
-  // The fee is 10% of the losing side, and the creator's 1% of the volume comes out of the same pot: 950 to winners.
+  // The fee is 10% of the losing side and the creator's share is 1% of the volume. Everything is in SOL: the platform
+  // has no other currency. Where the 1% comes from is one word in pot.js, which the founder still has to settle: the
+  // deck says "out of our fee" (0.30, 0.10 and 9.60 of a 10 SOL pot) and the program takes it from the pot.
   assert.match(text, /10%\s+of the losing side/);
-  assert.match(text, /950\s+USDC to the winners/);
-  assert.match(text, /10\s+USDC to the creator/);
-  assert.match(read("pitch/demo.js"), /const FEE = \{ of: "losers", rate: 0\.1 \};/);
-  assert.match(read("pitch/demo.js"), /const CREATOR = 0\.01;/);
-  assert.match(text, /initial seed/i);
+  assert.match(text, /1%\s+of the market's volume goes to whoever opened it/);
+  assert.match(text, /SOL to the winners/);
+  assert.match(text, /SOL to the creator/);
+  assert.ok(!/USDC/.test(text) && !/USDC/.test(read("pitch/demo.js") + read("pitch/tally.js")), "no USDC anywhere");
+  assert.match(read("pitch/pot.js"), /export const FEE = \{ of: "losers", rate: 0\.1 \};/);
+  assert.match(read("pitch/pot.js"), /export const CREATOR = 0\.01;/);
+  assert.match(read("pitch/pot.js"), /export const CREATOR_FROM = "(fee|pot)";/);
   assert.ok(!/pump\.fun/i.test(text) && !/Share to take a side/.test(text) && !deck.includes("data-arrow"));
   assert.match(text, /Launch fees, first 3 months/);
-  const hooks = ["data-demo", 'data-face="a"', 'data-face="b"', "data-cursor", "data-motion", "data-lite", "data-tam"];
-  for (const part of [...hooks, "data-sticker", "data-lever", "data-lever-knob", "data-card"]) {
+  // The market: the measured months come from one place (chart.js), and what comes after them is called what it is.
+  assert.match(read("pitch/chart.js"), /const MEASURED = \[1\.14, 13\.22, 22\.2, 15\.44\];/);
+  assert.match(text, /PROJECTION\.\s+The dashed line is our own scenario, not a measured figure/);
+  assert.match(text, /world\.xyz\s*, the prediction market inside the Phantom wallet/);
+  const hooks = ["data-demo", 'data-face="a"', 'data-face="b"', 'data-face="c"', "data-cursor", "data-balance"];
+  const more = ["data-motion", "data-lite", 'data-chart="near"', 'data-chart="far"', "data-flag", "data-mk-words"];
+  for (const part of [...hooks, ...more, "data-sticker", "data-card"]) {
     assert.ok(deck.includes(part), `${part} is missing`);
   }
   // A count of partners is a claim about the business. The list holds examples for now, at the founder's request:

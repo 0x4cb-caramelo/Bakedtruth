@@ -1,5 +1,5 @@
 /**
- * Purpose: the mascot's plain run across a slide of /pitch4, used where a slide has no scene of its own. It runs
+ * Purpose: the mascot's plain run across a slide of /pitch, used where a slide has no scene of its own. It runs
  *          along the bottom, in the direction of the slide change, alone or with smaller ones behind it.
  * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-07
  */

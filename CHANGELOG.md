@@ -50,6 +50,31 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Added
 
+- **A revisão do pitch de 10/10/2026, organizada por slide**
+  (`docs/business/_review/revisao-do-pitch-2026-10-10.md`), a pedido do Lucas, a partir da gravação da conversa depois
+  da apresentação (9 minutos; a transcrição bruta está em `knowledge-base/pitch/2026-10-10-revisao-voz-bruta.md`). Duas
+  vozes de fora da equipe, sem nome confirmado. As duas ideias grandes: uma cena só, com o demo rodando e o texto
+  mudando, no lugar dos slides 2, 3, 5 e 6; e um gráfico de crescimento em dois passos no lugar das bolinhas de TAM,
+  SAM e SOM. O documento propõe um deck de cinco slides e separa o que não tem fonte: a série mensal do World cai 30%
+  em setembro, "90% ao mês" e a projeção de dois anos não estão na pesquisa, e a comparação com a Collector Crypt não
+  foi conferida. **Nada foi mudado no deck.** Ficam oito decisões com o fundador (seção 6 do documento).
+- **O deck v5.1 em `/pitch`** (`services/landing/public/pitch/`, 10/10/2026), a pedido do fundador ("subir e deployar
+  para o lugar do /pitch no site"). O v4 foi para `services/landing/history/pitch-4/`, com o roteiro dele, e o
+  endereço `/pitch5`, que serviu de prévia durante o dia, redireciona para `/pitch/`. O roteiro de fala novo, em
+  português e em inglês, com o corte de 2 minutos para o vídeo do Colosseum, está em
+  `docs/business/roteiro-pitch-v5.md`; o porquê de cada escolha, em
+  `session-log/2026-10-10-pitch-v5-revisao-e-publicacao.md`. O que segue descreve o caminho: a versão 5 nasceu como
+  prévia em `/pitch5`, com o que o fundador decidiu depois da revisão acima (seção 8 do documento). O demo do slide de solução toca quatro exemplos em sequência, com o texto
+  da esquerda trocando no terceiro (os 10% do lado perdedor) e no quarto (o 1% de quem abriu) e um saldo que soma os
+  quatro; o slide "How we earn" saiu; o de mercado virou dois, as barras de 13 vezes e a projeção de dois anos, para
+  a qual o slide gira. O servidor deixa de redirecionar `/pitch5` para `/pitch` (`server.mjs`), e o teste confere
+  isso. O `/pitch` no ar não mudou. **Três pendências:** a prévia diz que o 1% sai da nossa taxa (30, 10 e 960), como
+  o fundador pediu, e o programa tira do pote (40, 10 e 950); o "$1B+ a month" da projeção é número provisório, sem
+  fonte; e a versão parada do deck, que vira o PDF, não mostra a taxa nem o 1%. **Versão 5.1, no mesmo dia:** o demo
+  passou para SOL e toca a 0,8 da velocidade; os dois slides de mercado dividem um gráfico só (`pitch/chart.js`), com
+  o mascote correndo de junho a setembro de 2026 mês a mês e, na troca de slide, subindo enquanto o gráfico se afasta
+  até outubro de 2028, com o cenário em linha pontilhada; a linha do site e do X foi para o pé da capa; e o slide "Open
+  a market" saiu, então a prévia tem oito slides e não diz mais quanto custa abrir um mercado.
 - **A API de leitura para o site** (`services/api`, Sprint 08 no mínimo, 10/10/2026): `/api/v1/campaigns` lista as
   campanhas por estado (ativas, resolvidas) com paginação, `/api/v1/campaigns/:address` mostra uma, e `/api/v1/health`
   diz se o snapshot está em dia. Lê a cadeia a cada 15 s e serve da memória. Ainda sem endereço público: aguarda a

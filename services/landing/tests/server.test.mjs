@@ -139,7 +139,7 @@ test("/pitch is served, is reachable by link only and is kept out of search engi
   assert.match(res.headers.get("content-security-policy"), /style-src 'self' 'unsafe-inline'/);
   assert.match((await fetch(`${base}/pitch/motion.js?v=6`)).headers.get("content-type"), /javascript/);
   // The earlier decks are no longer served: their addresses, and anything under them, go to the current deck.
-  for (const old of ["/pitch2", "/pitch2/", "/pitch3/", "/pitch3/motion.js?v=6", "/pitch4/"]) {
+  for (const old of ["/pitch2", "/pitch2/", "/pitch3/", "/pitch3/motion.js?v=6", "/pitch4/", "/pitch5/"]) {
     const moved = await fetch(`${base}${old}`, { redirect: "manual" });
     assert.equal(moved.status, 302, old);
     assert.equal(moved.headers.get("location"), "/pitch/", old);
