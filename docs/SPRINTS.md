@@ -97,7 +97,7 @@ mainnet line, which still says "and a cap" and whose new wording waits for the f
 | 04 | [Window, settlement, payout, fees, creator share and invariants](sprints/sprint-04-settlement-invariants.md) (merged, PR #41, tag `sprint-04`) | B4 | 03 |
 | 05 | [SDK and the devnet cycle](sprints/sprint-05-sdk-devnet-cycle.md) (merged, PR #43, tag `sprint-05`; the program on devnet) | B5 | 04 |
 | 06 | [Server and primary keeper (Bun check first)](sprints/sprint-06-keeper-server.md) (in progress, opened 2026-10-10, branch `sprint-06-keeper-server`) | B6 | 05 |
-| 07 | [Standby keeper and watchdog](sprints/sprint-07-standby-watchdog.md) | B6 | 06 |
+| 07 | [Standby keeper and watchdog](sprints/sprint-07-standby-watchdog.md) (closed 2026-10-10 for the Hackathon MVP; the standby and D4 deferred to Post-Hackathon; the primary's restart endpoint live on the server) | B6 | 06 |
 | 08 | [Indexer, API, relay and points](sprints/sprint-08-indexer-api-points.md) | B7 | 05; 06 to publish |
 | 09 | [Site: shell, theme and wallet](sprints/sprint-09-site-shell.md) | B8 | 05, 06, 08, -1 |
 | 10 | [Site: campaign list](sprints/sprint-10-site-campaign-list.md) | B8 | 09 |

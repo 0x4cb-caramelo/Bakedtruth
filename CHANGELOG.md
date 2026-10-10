@@ -22,6 +22,11 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Added
 
+- **Sprint 07 fechada para o hackathon** (10/10/2026): o primário roda a release `cc87637` no servidor, com
+  `POST /restart` assinado (HMAC) ativo e `ReadWritePaths` na unidade. O modo standby, o segundo VM, a RPC B, o e-mail
+  e o teste de queda em devnet ficam para depois do hackathon (D4). A unidade `path` de reinício não foi instalada, por
+  decisão do fundador. Itens não construídos têm destino no documento da sprint.
+
 - **O keeper em modo standby** (`services/keeper`, Sprint 07, 10/10/2026): `KEEPER_MODE=standby` não envia enquanto o
   primário responde; a regra está no envio, e não só no laço. O watchdog sonda o primário a cada 5 min, pede reinício
   assinado até 3 vezes e assume depois. A observação contínua de campanhas de preço e a segunda leitura (com fila de

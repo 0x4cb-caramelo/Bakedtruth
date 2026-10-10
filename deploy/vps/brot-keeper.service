@@ -28,6 +28,8 @@ TasksMax=64
 # Sandboxing. The keeper writes nothing: its only output is the journal.
 NoNewPrivileges=true
 ProtectSystem=strict
+# Sprint 07: POST /restart writes its flag here (KEEPER_RESTART_FLAG). Created by /etc/tmpfiles.d/brot-markets.conf.
+ReadWritePaths=/run/brot-markets
 ProtectHome=true
 PrivateTmp=true
 PrivateDevices=true

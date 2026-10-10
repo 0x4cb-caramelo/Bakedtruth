@@ -31,16 +31,24 @@ the change is wanted; then restart the unit. Check with `curl -s http://127.0.0.
 `sudo systemctl stop brot-keeper` (or `disable --now` to keep it off after a reboot). The other units (`brot-landing`,
 `brot-tunnel`) are not affected.
 
-## Sprint 07: the standby, the restart and the alerts (nothing installed yet)
+## Sprint 07: the standby, the restart and the alerts (closed for the Hackathon MVP, 2026-10-10)
 
-The files below are in the repository. None is installed on the server or on VM 2; installing any of them changes the
-shared server and needs the server owner's notice first.
+On the server, as the founder authorised on 2026-10-10: `brot-keeper` runs release `cc87637` (`main` at PR #48), with
+`ReadWritePaths=/run/brot-markets` in its unit, `/etc/brot-markets/restart-secret` (root:brot, 0440), the two
+`KEEPER_RESTART_*` keys in `keeper.env`, and `/etc/tmpfiles.d/brot-markets.conf`. Backups of the previous env and unit
+are in `/etc/brot-markets/bak-sprint07/`. Rollback: point `current` back to `releases/755798c` and restart.
+
+The restart path unit is **not installed, by decision** (founder, 2026-10-10): the standby is deferred to
+Post-Hackathon, so nothing needs a restart from outside. A signed `POST /restart` is accepted and writes the flag, but
+nothing acts on it yet. The standby VM 2 and its unit are deferred too.
+
+The files below are in the repository. None of the rest is installed on the server or on VM 2.
 
 | What | File | Where it goes | Status |
 |---|---|---|---|
-| Restart flag watcher (root) | `brot-keeper-restart.path` | `/etc/systemd/system/` | Not installed |
-| Restart action (root, oneshot) | `brot-keeper-restart.service` | `/etc/systemd/system/` | Not installed |
-| Standby unit for VM 2 | `brot-keeper-standby.service` | VM 2's `/etc/systemd/system/` | Not installed; VM 2 is a founder decision (D4) |
+| Restart flag watcher (root) | `brot-keeper-restart.path` | `/etc/systemd/system/` | Not installed, by decision (2026-10-10) |
+| Restart action (root, oneshot) | `brot-keeper-restart.service` | `/etc/systemd/system/` | Not installed, by decision (2026-10-10) |
+| Standby unit for VM 2 | `brot-keeper-standby.service` | VM 2's `/etc/systemd/system/` | Not installed; deferred to Post-Hackathon (D4) |
 | Alert runbooks | `runbooks/` | repository only | Written; the e-mail channel is not chosen |
 
 **The restart flag.** The keeper's `POST /restart` (signed with HMAC-SHA256) writes `/run/brot-markets/restart.flag`.

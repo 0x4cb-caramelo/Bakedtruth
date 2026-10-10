@@ -1,6 +1,6 @@
 # Sprint 07 — Standby keeper and watchdog
 
-**Status:** in progress, **not closed** (opened 2026-10-10 from `origin/main` at `c3ba1ff`) · **Branch:** `sprint-07-standby-watchdog` · **Dates:** none, by the founder's decision
+**Status:** closed 2026-10-10 for the Hackathon MVP, by the founder's decision; the standby and D4 are deferred to Post-Hackathon · **Branch:** `sprint-07-standby-watchdog` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -13,6 +13,33 @@
 If the primary keeper falls, the second takes over and the CTO knows. The standby runs at another provider, with
 another wallet and another company's RPC, sized for a full takeover. It also re-reads every resolution through that
 other RPC and puts any mismatch in front of a person, so that review happens by exception (T22).
+
+## Closure (2026-10-10, founder's decision)
+
+The founder closed this sprint for the Hackathon MVP. The primary's restart endpoint is live on the server (release
+`cc87637`, PR #48, merged). Each Definition-of-done item is disposed of below; none is ticked that was not verified.
+
+| Item | Disposition |
+|---|---|
+| Standby on VM 2, with wallet 2 and RPC B | **Deferred to Post-Hackathon** (D4). Code exists and is tested in-process |
+| Takeover (watchdog, restarts, takeover) | Built and tested in-process. The live drill and the email are **Deferred to Post-Hackathon** |
+| Continuous feed watcher | Built and tested in-process; a live run is part of the deferred drill |
+| `POST /restart` (HMAC, flag, root path unit) | Endpoint **live on the primary**. The path unit is **not installed, by decision** (2026-10-10) |
+| Tunnel ops host (`/healthz` and `/restart` only) | **Deferred to Post-Hackathon** (founder: no Cloudflare change now) |
+| Liveness alerts: campaign idle 10 and 30 min | **Not built.** Carried to Sprint 13 or 16 (founder to confirm) |
+| Keeper SOL floor alert | Built; journal only |
+| Second read: RPC B and the proof transaction at `posted_slot` | Partly built: price campaigns, two providers, no proof transaction. The proof-transaction check and RPC B are carried (founder to confirm) |
+| Other kinds in the second read | **Not built.** Carried to Sprint 14 |
+| Alerts by email, to two inboxes | **Deferred to Post-Hackathon** (D4). The journal carries the alerts |
+| "Two keepers change nothing twice" test | **Not built.** Carried to Sprint 14 |
+| VM 2 snapshot ready (Sprint 08) | **Deferred to Post-Hackathon** (D4) |
+| Drill on devnet | **Deferred to Post-Hackathon** (D4) |
+| Runbook per alert in `deploy/vps/` | Done (eight runbooks and an index) |
+| Carried over: Pyth receiver and push-oracle watch | **Not built.** Carried to Sprint 16 |
+| Common closure: secrets scan, codemap | Done (secrets scan clean on the PR; codemap current) |
+
+**Still open for the program:** Sprint 06 is not closed. Its real resolve on devnet has not been seen yet, and the
+standby code is untested against a live primary.
 
 ## Definition of done
 
