@@ -16,6 +16,53 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
 
 ### Changed
 
+- **Sprint 05 em revisão, empilhada sobre a Sprint 04** (branch `sprint-05-sdk-devnet-cycle`, aberta da cabeça do PR
+  #41, ainda não mesclado; `docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and retrospective"). O programa não
+  mudou. O que entrou:
+  - **O SDK, `@brot/sdk`** (antes `@brot-markets/sdk`), a biblioteca única de site, app, serviços, scripts e testes,
+    com três entradas: `read` (endereços, decodificação de contas e eventos, a matemática do dinheiro, as regras de
+    abertura e de entrada na ordem do programa, a cotação da abertura com o débito inteiro, o estado público pelo
+    relógio da rede, `recheck`, uma mensagem por código de erro), `tx` (os 22 construtores, a simulação, o resumo
+    determinístico e a preparação de uma entrada e de uma abertura antes da assinatura) e `schemas` (zod 4.6.5).
+  - **T9 decidido:** o cliente gerado pelo Codama a partir do IDL do Shank é a camada de codecs e construtores.
+  - **Conferido contra o programa:** os 24.000 vetores do Rust (12.000 da Sprint 04 e 12.000 novos, do snapshot com a
+    regra de viabilidade, do pagamento por entrada, da estimativa e do calendário) passam sem nenhuma diferença; 37
+    códigos de recusa da abertura dão o mesmo erro no SDK e no programa; os 22 construtores dão os mesmos bytes que o
+    kit de testes; o decodificador recusa evento forjado, transação que falhou e duplicata, e lê evento em chamada
+    aninhada e em tabela de endereços.
+  - **React Native:** o SDK empacota com o Metro para Android e roda no Hermes, com os vetores sem diferença; o app vai
+    precisar de `crypto.subtle.digest` e `crypto.getRandomValues`
+    (`knowledge-base/tecnologia/sdk-react-native.md`). Novo trabalho de CI, "Mobile bundle".
+  - **Regras de fronteira** (`bun run lint:sdk`, dentro de `bun run lint`): `read` não importa `tx`; nada de Node,
+    React, Next, React Native, web3.js v1, Anchor nem zod em `read` e `tx`, que também não importam `schemas`; nenhum
+    global de Node, Bun ou DOM. Um teste planta uma violação de cada regra numa cópia do SDK e exige que todas disparem.
+  - **Dependências:** `@solana/kit` 8.4.0, zod 4.6.5 e dependency-cruiser 18.4.0, fixados.
+  - **O kit de testes usa o SDK:** todo evento de todo teste passa pelo decodificador do SDK; os 7 eventos que o kit
+    descreve à mão têm os campos conferidos, e os outros 11, da Sprint 04, o discriminador e o tamanho contra o
+    código do programa; os fluxos comuns são montados pelos construtores do SDK.
+  - **O deploy no devnet está preparado e ensaiado, não feito** (`deploy/devnet/README.md`): o artefato do CI pelo id
+    da execução, o `SHA256SUMS` primeiro, o keypair do programa só do backup e só no id declarado, só o loader v3, e
+    a inicialização e o time na mesma sessão. Espera o fundador escolher o caminho e quem segura a chave.
+  - **`smoke:devnet` e `seed:devnet` reescritos em SOL sobre o SDK** (o ciclo completo do smoke passa num cluster
+    local, com todo valor igual ao do SDK e as duas tentativas repetidas recusadas); **`scripts/team/`**, um comando
+    por ato da equipe, cada pessoa com a própria chave; o texto de cada anulação em `content/void-log/`.
+  - **Os testes negativos num cluster local:** os 373 casos da matriz de slots, 50 recusas de regra e uma abertura
+    paga igual à cotação do SDK, no Surfpool offline isolado da rede (o `solana-test-validator` precisa de AVX2, que
+    esta máquina não tem).
+  - **Três revisões (segurança do SDK, coordenação do registro, segurança do deploy), e o que mudou por causa delas:**
+    o resumo antes da assinatura lê os bytes que a carteira assina, limita e põe teto na taxa de prioridade, só confia
+    nas instruções do programa no formato do IDL e diz em palavras a campanha, o alvo na unidade do feed, quem cria, o
+    preço abaixo do qual a abertura é recusada e os termos; uma entrada repetida com o total salvo é recusada em vez de
+    dobrar; a simulação lê o formato que um nó de verdade devolve (antes não via evento nenhum); o `recheck` pagina e
+    aguenta resposta malformada; os casos de recusa que faltavam passam nos dois lados, e as recusas da entrada também.
+    O deploy ficou amarrado ao commit revisado e ao hash do binário, confere os endereços e os saldos antes de agir,
+    retoma uma inicialização que não terminou, e recusa chave dentro de qualquer repositório Git; os scripts da equipe
+    simulam sem assinar; o registro de anulação só vale depois que a rede confirma.
+  - **Achados em aberto:** a confirmação e a anulação pela equipe não emitem o `CampaignFinalized` que o plano promete
+    (correção do programa, antes do indexador); e qualquer pessoa pode impedir para sempre o deploy de um id de
+    programa num cluster mandando cerca de 0,001 SOL ao endereço do ProgramData desse id (ensaiado no cluster local; o
+    id do programa é público). O loader v3 continua sendo o caminho: o Agave abandonou o loader v4.
+  - Plano técnico na v0.1.4 (§3.4.19).
 - **Sprint 04 fechada para revisão, com PR aberto e não mesclado** (`docs/sprints/sprint-04-settlement-invariants.md`, "Closure status"). O programa ganhou liquidação, pagamento, taxas, parte do criador, a apuração tardia (`Join` por entrada, `tally_late_joins`), a regra de viabilidade (um pote só divide se o lado perdedor pagar as taxas) e o corte de revisão por prova anterior. Teste aleatório com semente fixa: 1.200 operações, 35.288 checagens de I1 a I15, sem falha. Medido: liquidação de 2.926 a 3.180 CU por entrada, 12 entradas por transação. Ficou em aberto: a redação da regra de viabilidade (taxa sobre o lado perdedor, não sobre o principal do lado vencedor), a cobertura dos caminhos de time (`confirm`, `void`) no teste aleatório e a conferência das linhas da definição de pronto sem teste. Plano técnico na v0.1.3 (§3.4.18).
 - **Sprint 04 em curso, na branch `sprint-04-settlement-invariants`** (ainda sem PR). Feito até aqui: o arquivo
   `checks.rs` e o `state/campaign.rs` foram divididos sem mudança de comportamento; as pendências de documentação da
