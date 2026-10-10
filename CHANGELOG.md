@@ -49,11 +49,15 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
   - **O kit de testes usa o SDK:** todo evento de todo teste passa pelo decodificador do SDK; os 7 eventos que o kit
     descreve à mão têm os campos conferidos, e os outros 11, da Sprint 04, o discriminador e o tamanho contra o
     código do programa; os fluxos comuns são montados pelos construtores do SDK.
-  - **O deploy no devnet está preparado e ensaiado, não feito** (`deploy/devnet/README.md`): o artefato do CI pelo id
-    da execução, o `SHA256SUMS` primeiro, o keypair do programa só do backup e só no id declarado, só o loader v3, e
-    a inicialização e o time na mesma sessão. O Ronaldo respondeu as decisões do deploy em 9/10 à noite (ele segura a
-    chave de upgrade; o id fica no devnet; valores reais, não os de treino); o deploy ainda espera a mescla do PR #41,
-    o keypair do programa, as chaves públicas do admin, do recebedor e do time, e SOL de teste.
+  - **O programa está no devnet** (9/10/2026, 23h27; `deploy/devnet/README.md`):
+    `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o`, do artefato do CI da `main` em `c20e79a` (execução 38014319993),
+    com o `SHA256SUMS` e o IDL conferidos, o keypair só no id declarado, só o loader v3, e a inicialização e o time na
+    mesma sessão. A chave de upgrade, o admin e o recebedor das taxas são a chave de devnet do Ronaldo, que respondeu as
+    decisões do deploy na mesma noite; valores reais, não os de treino. Duas tentativas morreram escrevendo o buffer no
+    RPC público; o deploy passou a reassinar por 50 rodadas, com uma taxa de prioridade pequena, e a terceira passou por
+    um RPC com chave, mantida fora do repositório. **O smoke passou no devnet** logo depois: abertura paga, as duas
+    entradas, a resolução, a confirmação da equipe com os dois eventos, os pagamentos, a taxa, o fechamento e a
+    varredura, cada lamport igual ao do SDK, e as duas tentativas repetidas recusadas.
   - **As leituras só de leitura no devnet** (9/10/2026, 22h, com a autorização do Ronaldo; nada enviado;
     `knowledge-base/tecnologia/devnet-o-que-so-o-cluster-mostra.md`, seção 5): o id do programa, o ProgramData dele e
     a config estão livres; os aluguéis (`Campaign` 3.251.200 lamports, `Entry` 1.239.520, `Join` 1.137.920); a conta

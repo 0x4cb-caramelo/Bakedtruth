@@ -1669,15 +1669,19 @@ disagree, this section is what the code does.
 - **Settlement order.** Every campaign with entries needs one `tally_late_joins` per baker after `resolve_campaign` and
   before `team_confirm_result` or `finalize_campaign`, whatever its kind and outcome (`NotTallied`, §3.4.18); the
   keeper of Sprint 06 follows the same order.
-- **The devnet deploy is prepared, not run** (`deploy/devnet/README.md`, `scripts/deploy/`): CI's artifact by run id,
+- **The devnet deploy ran on 2026-10-09** [F]: program `5Rx8…n8o` from CI run 38014319993 (`main` at `c20e79a`, sha256
+  `cf235937…a3a8`), the real constants, Ronaldo's devnet key as upgrade authority, admin and fee recipient; the smoke
+  passed on devnet after it. The first two attempts died writing the buffer on the public RPC ("Max retries exceeded",
+  then 429s): the deploy re-signs unconfirmed writes for 50 rounds with a small priority fee, and the run that landed
+  used a keyed RPC. The procedure (`deploy/devnet/README.md`, `scripts/deploy/`): CI's artifact by run id,
   bound to the commit the operator reviewed (`--expect-commit`), from a checkout that contains it with the program,
   its build inputs and its IDL unchanged, the artifact's IDL byte for byte the checkout's, `SHA256SUMS` first and the
   binary's hash typed again at `--execute`; key files outside any Git work tree, mode 600; the program keypair only from
   its backup and only at the declared id; loader v3 only; a preflight of the program id, its ProgramData and the config
   address and of the balances each key needs; then `admin_initialize_config` and `admin_set_team` in the same session,
-  the admin proven by its key or typed; an idempotent `--resume` for a deploy whose initialization did not land. It
-  waits on the founder: the deploy path, who holds the upgrade key (Q12, §14.2), the keypair backup, the drill or real
-  values and the devnet keys (`docs/sprints/sprint-05-sdk-devnet-cycle.md`).
+  the admin proven by its key or typed; an idempotent `--resume` for a deploy whose initialization did not land. The
+  founder's answers (Q12: Ronaldo holds the devnet upgrade key; a new id; the real values) are in
+  `docs/sprints/sprint-05-sdk-devnet-cycle.md`.
 - **The scripts.** `smoke:devnet` and `seed:devnet` run in SOL on the SDK, locally by default and on devnet only with
   `--cluster devnet`; `scripts/team/` holds one command per team act, each simulated unsigned and sent only with
   `--yes`; a void's text, free of emails, handles and URLs, is saved in `content/void-log/` with its SHA-256 on-chain.

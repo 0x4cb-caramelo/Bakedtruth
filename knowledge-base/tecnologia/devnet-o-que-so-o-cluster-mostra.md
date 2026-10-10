@@ -77,9 +77,9 @@ autorização do fundador para tocar um cluster, que esta sessão não tinha. Os
 
 ## 4. O que não foi feito
 
-- Nada foi enviado ao devnet nem à mainnet. O RPC público do devnet só foi lido, na noite de 9/10 (seção 5).
+- Nada foi enviado à mainnet. No devnet, as leituras de 9/10 às 22h (seção 5) e, depois, o deploy e o smoke (5.7).
 - O `solana-test-validator` não rodou (1.1).
-- O deploy, a inicialização, o smoke e o seed no devnet esperam o que a seção 5.6 lista.
+- O seed não rodou no devnet (seção 5.7 para o deploy e o smoke).
 
 ## 5. As leituras no devnet, 9/10/2026, das 22h00 às 22h06 (horário de Brasília)
 
@@ -142,14 +142,45 @@ intervalos de desempenho deram slots de 236 a 241 ms, então a virada cai por vo
 meia-noite de 10 para 11/10 no horário de Brasília [INF: estimativa pelo slot médio]. A carteira que o smoke usa por
 padrão (`G5chPqqGEaPUCivPYD5pTTcE5bMYmi5hb79Lnud1SVNM`, `DEVNET_WALLET`) tinha 1,93 SOL no devnet.
 
-### 5.6 O que o deploy e o smoke ainda esperam
+### 5.6 O id mudou depois destas leituras
 
-- A mescla do PR #41 na `main`, de onde sai o artefato do CI.
-- O keypair do programa `6G2d…uVN`, que não está nesta máquina (o id foi declarado no commit `ae8b837`, de 5/10).
-- O arquivo da chave de upgrade do Ronaldo, e as chaves públicas do admin, do recebedor das taxas e do time.
-- SOL de teste. O deploy pede cerca de 1,62 SOL a quem paga: 0,80 do buffer (devolvido no fim), 0,80 do ProgramData,
-  o programa e até 0,01 de taxas, para um binário do tamanho do da Sprint 04 (158.072 bytes) a 5.080 lamports por byte.
-  O smoke pede cerca de 4,7 SOL.
+As leituras de 5.1 são do id `6G2d…uVN`. Na mesma noite o id virou `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o` (PR
+#45): ninguém tinha o keypair do primeiro. Antes do deploy, o id novo, o ProgramData dele
+(`8Vy9jyzijx41ntzQHniZFUBA4jFvuwueFtNXUtGvUYGK`), a config (`GKM8TyXJXMcHqceY3F3AZnoUQAq15LLftkMzGLqH13bn`) e a
+autoridade de eventos (`CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx`) foram lidos vazios. O deploy pediu 1,637 SOL a
+quem pagou (o buffer de 0,81 SOL volta no fim), para o binário de 159.576 bytes.
+
+### 5.7 O deploy e o smoke no devnet, 9/10/2026, 23h27 e 23h28 (horário de Brasília)
+
+- **O RPC público não aguentou o deploy.** Duas tentativas morreram escrevendo o buffer pelo
+  `https://api.devnet.solana.com`: "Data writes to account failed: Max retries exceeded" depois das 5 rodadas padrão
+  do CLI; com 50 rodadas, a segunda ficou 20 minutos sem terminar, com o RPC respondendo 429 (Too Many Requests) às
+  leituras, e foi interrompida. Cada buffer (0,81 SOL) foi fechado pela chave de upgrade. A terceira, por um RPC com
+  chave (Helius), terminou em cerca de dois minutos, e o smoke também passou por ele.
+- **O artefato no devnet é o do CI:** os bytes do programa lidos de volta têm o sha256
+  `cf2359377323449bac0f67f6464f5e21dcb7ac85a9ffe07bfa52ec185b46a3a8`, o mesmo do `SHA256SUMS` da execução 38014319993; o
+  build local da mesma fonte deu o mesmo hash.
+- **Custo em unidades de computação, devnet contra LiteSVM** (as transações do smoke, uma instrução cada):
+
+| Instrução | Devnet | LiteSVM |
+|---|---|---|
+| `admin_initialize_config` | 16.611 | — |
+| `admin_set_team` | 1.726 | — |
+| `user_open_campaign`, paga | 19.957 | 25.022 (Sprint 04, outro cenário) |
+| `user_join_campaign` | 13.296 e 12.522 | — |
+| `resolve_campaign` (queima) | 2.267 | — |
+| `tally_late_joins` | 2.655 e 2.656 | — |
+| `team_confirm_result` | 4.778 | 4.785 (PR #44) |
+| `settle_entry`, uma entrada | 2.924 e 2.681 | 2.926 a 3.180 por entrada (Sprint 04) |
+| `settle_creator_share` | 2.214 | — |
+| `collect_fee` | 6.585 | — |
+| `settle_prize` | 2.006 | — |
+| `close_campaign` | 7.099 | — |
+| `sweep_fees` | 2.047 | — |
+
+- **O que ainda falta medir no devnet:** o lote de 12 entradas numa transação de `settle_entry` (o smoke liquida uma
+  por transação); a virada de época (a 1179 termina perto da meia-noite de 10 para 11/10, horário de Brasília); e um
+  SIM de `StakeAtLeast`, que continua fechado.
 
 ## Fontes
 

@@ -96,16 +96,18 @@ The test suites load `target/deploy/brot_markets.so` (and `cpi_proxy.so` for the
 `CODEMAP.md` is stale, if `Cargo.lock` disagrees with the manifests, or if the branch adds something shaped like a
 credential.
 
-Devnet: brot-markets is not deployed yet. The procedure is `deploy/devnet/README.md` (CI's artifact by run id and its
-`SHA256SUMS`, the program keypair from its backup outside `target/deploy/` and at the declared id, loader v3 only,
-initialization and the team in one session, the run bound to the reviewed commit and the binary's hash typed at
-`--execute`); it waits on the founder's choice of deploy path and of who holds the upgrade key. Sprint 05 changed no
-program source, so CI's `main` build after Sprint 04's merge is the tested binary (`scripts/deploy/binding.ts` refuses
-a checkout whose program differs from the run's commit). Anyone can fund a public address: a funded ProgramData
+Devnet: brot-markets runs at `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o` since 2026-10-09 (CI run 38014319993,
+`main` at `c20e79a`; upgrade authority, admin and fee recipient are Ronaldo's devnet key, the team his team key), and
+`smoke:devnet -- --cluster devnet` passed there the same night. The procedure is `deploy/devnet/README.md` (CI's
+artifact by run id and its `SHA256SUMS`, the program keypair from its backup outside `target/deploy/` and at the
+declared id, loader v3 only, initialization and the team in one session, the run bound to the reviewed commit and the
+binary's hash typed at `--execute`; `scripts/deploy/binding.ts` refuses a checkout whose program differs from the run's
+commit). The public devnet RPC drops buffer writes and answers 429 under load: pass a keyed RPC with `--url` or
+`DEVNET_RPC_URL`, and keep its key out of every file in the repository and out of the logs. Anyone can fund a public address: a funded ProgramData
 address makes a program id undeployable for good (rehearsed; the dry run names it). `smoke:devnet` and
 `seed:devnet` drive brot-markets in SOL through the SDK; they default to a local cluster and act on devnet only with
-`-- --cluster devnet` (`DEVNET_WALLET`, default `~/.config/solana/pred-provable-devnet.json`, pays about 4.7 SOL per
-smoke run; `TEAM_KEYPAIR` is the person's own team key; `DEVNET_RPC_URL` overrides the RPC). `scripts/team/` holds one
+`-- --cluster devnet` (`DEVNET_WALLET`, default `~/.config/solana/pred-provable-devnet.json`, needs about 6.3 SOL for
+a first smoke run, since it tops the creator up to 6 SOL, and the wallets it derives keep what the cycle pays back; `TEAM_KEYPAIR` is the person's own team key; `DEVNET_RPC_URL` overrides the RPC). `scripts/team/` holds one
 command per team act, each simulating unless `--yes`. `solana-test-validator` 3.1.10 needs AVX2, which the development
 machine lacks: the local rehearsals (`deploy:rehearse`, `team:rehearse`, `validator:negative`, the smoke and the seed)
 run Surfpool `--offline` inside a loopback-only network namespace (`scripts/validator/isolate.ts`). The current site

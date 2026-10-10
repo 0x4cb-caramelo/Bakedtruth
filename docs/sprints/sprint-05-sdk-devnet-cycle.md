@@ -51,7 +51,7 @@ read, the window passes, the winners and the creator are paid.
       (`CLAUDE.md` gotcha). zod 4 is pinned.
 - [x] `tests/helpers.ts` uses the SDK. `app/lib` stops being the shared library; the old site keeps its copy until
       Sprint 09 [INF].
-- [ ] **Deploy from CI's artifact** (TP §10, §12): downloaded by run id
+- [x] **Deploy from CI's artifact** (TP §10, §12): downloaded by run id
       (`gh run download <run id> --repo 0x4cb-caramelo/Bakedtruth`), its `SHA256SUMS` checked; the program keypair
       taken from its backup outside `target/deploy/`; the deploy and `admin_initialize_config` in the same session,
       followed by `admin_set_team` (initialization leaves the team empty, so nobody can pause until then). The deploy
@@ -62,10 +62,10 @@ read, the window passes, the winners and the creator are paid.
 - [x] `scripts/team/` opens (team key, free), confirms, voids, contests, pauses and sets the creation params; each
       person uses their own key. A void saves its public text under `content/void-log/` and passes that text's hash
       with the `VoidReason` (TP §3.4.7); Sprint 12 gives the record its public format.
-- [ ] **`bun run smoke:devnet`, rewritten for SOL, exits 0 on a full cycle** (X0.2, manual at closure): a wallet
+- [x] **`bun run smoke:devnet`, rewritten for SOL, exits 0 on a full cycle** (X0.2, manual at closure): a wallet
       outside the team opens a campaign and pays at the Pyth price; two wallets join YES and NO; the result is read;
       the window ends (drill constants or a team confirmation); the winners and the creator share are paid.
-- [ ] On devnet, a retried entry fails on `expected_entry_total` and a retried opening fails on its `id` (X0.5).
+- [x] On devnet, a retried entry fails on `expected_entry_total` and a retried opening fails on its `id` (X0.5).
 - [x] The opening preview shows the whole debit: `max_lamports` covers only what moves into the vault, and the two
       rents (3,901,440 lamports on devnet, Sprint 02) come on top.
 - [ ] The negative tests, the slot tests and one paid opening run once on a real validator (Surfpool or
@@ -93,16 +93,14 @@ read API schemas (08). The site (09). The Android app (20).
 
 ## Founder decisions that block the sprint
 
-- **Answered on 2026-10-09, evening (Ronaldo; text pasted into the session, written by another assistant from his
-  answers; `session-log/2026-10-09-sprint-05-respostas-do-deploy-e-leituras-devnet.md`):** Ronaldo holds the devnet
-  upgrade key (Q12's remainder); the id `6G2d…uVN` stays on devnet if its ProgramData is clean (it was, read-only, on
-  2026-10-09 at 22:00 BRT), and mainnet gets a fresh id kept private; the real constants on devnet, not the drill
-  ones; `main` treated as protected; read-only devnet checks allowed; PR #41 to be merged (not done: the session's
-  safety check stopped the merge, which needs his confirmation in his own words).
-- **Still open, blocking the deploy:** the program-address keypair of `6G2d…uVN` (not on the development machine; the
-  id was declared in Lucas's commit `ae8b837`), backed up outside `target/deploy/`; the path of Ronaldo's upgrade key;
-  the public keys of the admin, the fee recipient and the team (the answer says "already prepared", but no file in the
-  repository holds them); devnet SOL for the deploy and the smoke.
+- **Answered on 2026-10-09, evening (Ronaldo; first in a text pasted into the session, then confirmed in the session;
+  `session-log/2026-10-09-sprint-05-respostas-do-deploy-e-leituras-devnet.md`):** Ronaldo holds the devnet upgrade key
+  (Q12's remainder); a new program id, `5Rx8…n8o` (PR #45), since nobody had the first id's keypair, and mainnet gets
+  its own id, kept private until its deploy; new devnet keys made on his machine: his upgrade key (also admin and fee
+  recipient) and his team key; the real constants on devnet, not the drill ones; `main` treated as protected (no
+  GitHub setting changed); PRs #41, #44 and #45 merged at his request. All of it done; the deploy and the smoke ran.
+- **Still open, not blocking:** Lucas's and Bernardo's team keys (the admin adds them with `scripts/team/set-team.ts`);
+  the wording of Sprint 04's viability rule.
 - **Answered:** Q10 falls away: devnet SOL comes from the faucet, and there is no test USDC.
 
 ## Agents and skills
@@ -212,6 +210,9 @@ the second vector generator), so the binary CI builds on `main` after PR #41 mer
 | Team scripts | `scripts/team/`, rehearsed (`bun run team:rehearse`, exit 0): every act simulated unsigned; the void's on-chain note hash equals the SHA-256 of the saved record, written as `.pending` until the ledger confirms |
 | Whole debit | The smoke's preview: payment, `max_lamports`, both rents from the cluster, the network fee; the creator's debit equal to it |
 | Drill or real constants | Decided by Ronaldo on 2026-10-09: the real constants on the public devnet; recorded in `session-log/2026-10-09-sprint-05-respostas-do-deploy-e-leituras-devnet.md` |
+| Deploy from CI's artifact | 2026-10-09, 23:27 BRT: CI run 38014319993 (`main` at `c20e79a`), `SHA256SUMS` and the IDL checked, sha256 `cf235937…a3a8` typed at `--execute`; program `5Rx8…n8o` read back on loader v3 with the upgrade authority recorded and the bytes equal to the artifact; deploy `2RrgGS8R…`, `admin_initialize_config` `5h8Xmnzv…`, `admin_set_team` `dVuqmiuZ…` (full signatures in the session log). The keypair at the declared id, outside any repository; the refusals rehearsed on the local cluster |
+| Smoke on devnet | `bun run smoke:devnet -- --cluster devnet`, exit 0, 23:27 to 23:28 BRT: a paid opening at US$500 (4.561686416 SOL at 109.60858649 SOL/USD), YES 0.05 and NO 0.03 SOL at the SDK's estimates, YES from the burned mint, the team's confirmation (`ResultConfirmed`, then `CampaignFinalized`), both entries, the creator share, the fee, the prize, the close and the sweep, each lamport equal to the SDK; 16 transactions, signatures in the session log |
+| Retries on devnet (X0.5) | The retried opening failed (`2AbmMide…`, `AlreadyInitialized`) and the retried entry failed (`2U96iXj6…`, `EntryTotalMismatch`), nothing charged twice |
 
 **Open rows, and why**
 
@@ -219,22 +220,25 @@ the second vector generator), so the binary CI builds on `main` after PR #41 mer
   373 slot cases, 50 refusals of `user_open_campaign` and `user_join_campaign`, one paid opening equal to the SDK. That
   is the row's letter, not its reason: Surfpool runs on LiteSVM, and the admin, resolve and settlement refusal suites
   did not run there. `solana-test-validator` 3.1.10 needs AVX2, which this machine lacks. A CI job on GitHub's runners
-  is carried to Sprint 06.
-- **Seed:** rewritten in SOL on the SDK and rehearsed locally (exit 0); the devnet run waits on the deploy, like the
-  smoke.
-- **Deploy, smoke and retries on devnet:** prepared (`deploy/devnet/README.md`) and rehearsed on the local cluster, not
-  run. The founder chose the path on 2026-10-09 (above); the deploy still waits on PR #41's merge (its branch now has
-  `main` merged in, `dadd513`, CI green), the program keypair, the keys and devnet SOL. The deploy need not wait for
-  this sprint's merge: CI's `main` build after PR #41 carries the tested binary, and `scripts/deploy/binding.ts`
-  refuses a checkout whose program differs.
+  is carried to Sprint 06. Since 2026-10-09 the paid opening and two refusals (the retries) have also run on devnet's
+  Agave runtime (the smoke); the refusal suites still have not.
+- **Seed:** rewritten in SOL on the SDK and rehearsed locally (exit 0, again after the new id); not run on devnet: it
+  opens public example campaigns with a team key, which waits on the founder's word.
+- **Deploy, smoke and retries on devnet:** done on 2026-10-09 (the evidence table above). The binary is CI's `main`
+  build after PRs #41, #44 and #45, not this branch's: `scripts/deploy/binding.ts` checked that this checkout holds
+  that commit with the program unchanged. Two attempts died first on the public RPC (above); a keyed RPC carried the
+  third, and the smoke.
 - **The devnet checks:** the three read-only ones ran on 2026-10-09, 22:00 to 22:06 BRT, with Ronaldo's go-ahead,
   sending nothing (`knowledge-base/tecnologia/devnet-o-que-so-o-cluster-mostra.md`, section 5): the program id, its
   ProgramData and the config are absent (the id is not blocked); the rents are 3,251,200 lamports for `Campaign`,
   1,239,520 for `Entry`, 1,137,920 for `Join` and 2,682,240 for `GlobalConfig` (5,080 per byte); the SOL/USD account
   updated every 61 to 63 s and was at most 64 s old against `max_price_age` 120, at 2 to 3 bps against 50; the Clock
   sysvar ran 0.2 to 1.7 s behind this machine's NTP clock (median 1.1 s, whole seconds). Five minutes, not the week
-  Sprint 02 asked for. The epoch turn, the settle batch and a `StakeAtLeast` YES wait on the deploy, so the row stays
-  open.
+  Sprint 02 asked for. After the deploy, the smoke measured each instruction's compute units on devnet (the note,
+  section 5.7): one entry per `settle_entry` transaction, 2,924 and 2,681 CU, inside or near the 2,926 to 3,180 of
+  LiteSVM; the team's confirmation 4,778 against 4,785. Still open: the batch of 12 entries in one transaction, the
+  epoch turn (devnet's epoch 1179 ends near midnight from 10 to 11 October, BRT), and `StakeAtLeast`, which stays closed
+  (no build with the feature was deployed).
 - **Drill or real constants on devnet:** decided on 2026-10-09: the real ones (Ronaldo: "Use `real` values for
   Devnet, not drill"), CI's default artifact, with which the smoke completes. Sprint 06's definition of done asks for
   the drill constants for X1.1, which takes a drill build with its own artifact, then an upgrade or a second program:
