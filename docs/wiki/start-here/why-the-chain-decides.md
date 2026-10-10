@@ -39,7 +39,6 @@ can't list are exactly the ones where someone has to be trusted, so it's a trade
 
 We'd rather say it than have you find it. After the program reads a result, our team has a 6-hour window in which it
 can only **confirm** the result or **annul** the market, which refunds everyone. It can never switch YES and NO. The
-team can also pause the program, and a pause never blocks a payout or a refund. Who holds which power is listed in
-the [Terms of Service](https://brot.markets/terms), section 9.
+team can also pause the program, and a pause never blocks a payout or a refund.
 
 No human picks the winner. Humans can only stop a wrong result from being paid.

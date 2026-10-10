@@ -1,28 +1,21 @@
 /**
- * Purpose: builds public/terms.html and public/privacy.html from docs/legal/TERMS-OF-SERVICE.md and PRIVACY-POLICY.md,
- *          the reviewed texts. Edit those files, then run `node services/landing/scripts/build-legal.mjs`; the page
- *          tests fail when a page and its text disagree. Reads only the small Markdown those two files use.
- * Version: 0.2.0 · Sprint: out of band (landing page), 2026-10-08 (the converter moved to markdown.mjs)
+ * Purpose: builds public/privacy.html from docs/legal/PRIVACY-POLICY.md, the reviewed text. Edit that file, then run
+ *          `node services/landing/scripts/build-legal.mjs`; the page tests fail when the page and its text disagree.
+ *          Reads only the small Markdown that file uses. The terms are not published: the founder's answer 9a
+ *          (2026-10-10) took /terms down until Sprint 17 writes the campaign product's, so docs/legal/TERMS-OF-SERVICE.md
+ *          is a record, never built into a page.
+ * Version: 0.3.0 · Sprint: out of band (landing page), 2026-10-08; 2026-10-10 (the terms taken down)
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { convert } from "./markdown.mjs";
 
-const LINKS = { "PRIVACY-POLICY.md": "/privacy", "TERMS-OF-SERVICE.md": "/terms" };
+const LINKS = { "PRIVACY-POLICY.md": "/privacy" };
 const link = (href) => LINKS[href] ?? href;
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const pages = [
-  {
-    md: "docs/legal/TERMS-OF-SERVICE.md",
-    out: "terms.html",
-    title: "Terms of Service",
-    description:
-      "The rules of Brot Markets, short and in plain English: who can use it, how markets work and are decided, fees, and what we control.",
-    img: "baked-terms.webp",
-    alt: "Baked, the Brot Markets bread roll, holding a checklist",
-  },
   {
     md: "docs/legal/PRIVACY-POLICY.md",
     out: "privacy.html",
@@ -105,7 +98,6 @@ ${body}
         <p>Brot Markets is in a test phase on Solana devnet, with test tokens. The program is not audited.</p>
         <nav aria-label="Footer">
           <a href="/">Home</a>
-          <a href="/terms">Terms</a>
           <a href="/privacy">Privacy</a>
           <a href="https://x.com/brotmarkets" rel="noopener">X</a>
           <span>© 2026 Brot Markets</span>

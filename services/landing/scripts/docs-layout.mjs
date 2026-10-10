@@ -1,7 +1,7 @@
 /**
  * Purpose: the HTML around each page of docs.brot.markets: header, side menu (a drop-down on phones), previous and
  *          next links, footer. build-docs.mjs fills it. Styles: public/styles.css (the site's) plus docs-site/docs.css.
- * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-08
+ * Version: 0.1.1 · Sprint: out of band (landing page), 2026-10-08; 2026-10-10 (no link to the terms: answer 9a)
  */
 export const ORIGIN = "https://docs.brot.markets";
 
@@ -88,7 +88,6 @@ ${steps}
         <p>Brot Markets is in a test phase on Solana devnet, with test tokens. The program is not audited.</p>
         <nav aria-label="Footer">
           <a href="https://brot.markets" rel="noopener">brot.markets</a>
-          <a href="https://brot.markets/terms" rel="noopener">Terms</a>
           <a href="https://brot.markets/privacy" rel="noopener">Privacy</a>
           <a href="https://x.com/brotmarkets" rel="noopener">X</a>
           <span>© 2026 Brot Markets</span>

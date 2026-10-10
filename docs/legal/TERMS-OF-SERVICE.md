@@ -1,5 +1,9 @@
 # Terms of Service
 
+> **Not published since 10 October 2026.** The founder's answer 9a took `brot.markets/terms` down until Sprint 17
+> writes the terms of the campaign product: this text describes the earlier product (USDC, automatic payouts, other
+> team powers) and is kept only as the record of what was published from 8 October 2026. Nothing builds it into a page.
+
 **Brot Markets** · Last updated: 8 October 2026
 
 We wrote these to be read. Each section opens with **the crumb**, a one-line summary from Baked, our grumpy bread

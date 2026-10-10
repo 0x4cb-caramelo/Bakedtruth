@@ -5,7 +5,8 @@
  *          the founder approved the same day in Sprint 12 (no automatic payout, no time promised, until the keeper
  *          settles); changing it is the founder's decision. English, per L-01. Failures have their own file
  *          (copy-failures.ts).
- * Version: 0.3.0 (Sprint 13: the too-small refund before signing; the public leaderboard in the first-entry line)
+ * Version: 0.3.1 (the founder's answer 9a: a winning entry "can appear" on the leaderboard, since answer 3a leaves
+ *          some unscored; 0.3.0, Sprint 13: the too-small refund before signing, the leaderboard in the first-entry line)
  * Sprint:  11 (site: campaign page and entry); 12; 13
  */
 
@@ -102,7 +103,7 @@ export const SHEET = {
   bytes: "What you sign, read from the transaction's bytes",
   walletDiffers: "If your wallet shows something different from this summary, reject it.",
   public:
-    "Entries are public and permanent: anyone can see this wallet's entries on-chain, and a wallet that enters on the side that wins appears on the public devnet leaderboard.",
+    "Entries are public and permanent: anyone can see this wallet's entries on-chain, and a wallet that enters on the side that wins can appear on the public devnet leaderboard.",
   back: "Back",
   sign: "Sign in wallet",
 } as const;

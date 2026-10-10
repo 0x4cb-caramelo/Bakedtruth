@@ -42,7 +42,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `scripts/test/hooks.test.js` — 278 linhas
 - `scripts/tokenomics-model.ts` — 584 linhas
 - `services/api/tests/api.test.ts` — 206 linhas
-- `services/landing/tests/pages.test.mjs` — 227 linhas
+- `services/landing/tests/pages.test.mjs` — 229 linhas
 - `tests/brot/codama-spike.test.ts` — 219 linhas
 - `tests/brot/events.test.ts` — 211 linhas
 - `tests/brot/idl.test.ts` — 231 linhas
@@ -84,7 +84,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09): the two fonts the site serves itself, the theme script in <head> before the stylesheet, the notice, the top bar, the page an | 56 |
+| [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09): the two fonts the site serves itself, the theme script in <head> before the stylesheet, the notice, the top bar, the page an | 61 |
 | [`manifest.ts`](app/app/manifest.ts) | the installable PWA, manifest only (Sprint 13 DoD, S2; TP §3.6): the name, the start page, standalone display, the dark theme's colours and the icons scripts/pw | 33 |
 | [`page.tsx`](app/app/page.tsx) | the home route (Sprint 10): the campaign list from the read API, with the search, the filters, the sort and the cards. Since Sprint 13 the campaigns the team un | 19 |
 
@@ -134,7 +134,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`copy-site.ts`](app/components/copy-site.ts) | the words every screen shows above any campaign or entry (BR-47; P1 §4.6), in English per L-01: the test-money notice and the not-audited notice, while each is  | 17 |
+| [`copy-site.ts`](app/components/copy-site.ts) | the words every screen shows above any campaign or entry (BR-47; P1 §4.6), in English per L-01: the test-money notice and the not-audited notice, while each is  | 20 |
 | [`mascot.tsx`](app/components/mascot.tsx) | Mounts the mascot once for the whole app. Each page decides where it may stand with | 31 |
 | [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 37 |
 | [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar (Sprint 09): the brand, the routes (Sprint 13 adds "How it works" and the fees, so both open from a phone too), the theme button and the wall | 68 |
@@ -216,7 +216,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`amount-field.tsx`](app/features/entry/amount-field.tsx) | the amount of an entry, in SOL: a decimal field (exact lamports, amount.ts), quick amounts, "Max" (the balance less the rents and the network fee, in 0.01 SOL s | 100 |
 | [`amount.ts`](app/features/entry/amount.ts) | the amount a baker types, as lamports, exactly: no floating point between the text and the bigint the transaction carries. Accepts a dot or a comma, at most nin | 36 |
 | [`copy-failures.ts`](app/features/entry/copy-failures.ts) | one message for each way an entry can fail (the Sprint 11 list: entries closed, outcome already known, no fresh price, pause, below the minimum, not enough SOL, | 150 |
-| [`copy.ts`](app/features/entry/copy.ts) | the entry panel's words (BR-12, BR-27; D-m vocabulary): the panel, the five notices a baker reads before signing (the estimate, a large entry, the lock, the fee | 131 |
+| [`copy.ts`](app/features/entry/copy.ts) | the entry panel's words (BR-12, BR-27; D-m vocabulary): the panel, the five notices a baker reads before signing (the estimate, a large entry, the lock, the fee | 132 |
 | [`entry-action.tsx`](app/features/entry/entry-action.tsx) | the entry panel's one button, the one that fits the moment: entries paused, waiting for a fresh price, "Use Installed Wallet", the devnet faucet when the wallet | 66 |
 | [`entry-estimate.tsx`](app/features/entry/entry-estimate.tsx) | the live estimate under the amount (BR-09), in a polite live region: what the entry returns if its side wins, net of Brot's fee and the creator's share, with th | 77 |
 | [`entry-notices.tsx`](app/features/entry/entry-notices.tsx) | the notices a baker reads before signing (Sprint 11 DoD; BR-12, P1 §3.2, P1 §4.6): the return is an estimate that changes until entries close; a large entry low | 51 |
@@ -279,7 +279,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`registry.ts`](app/features/notices/registry.ts) | every mandatory notice that holds on devnet (BR-47; P1 §4.6; TP §3.6 "Notices and copy"; Sprint 13 DoD), each with the screens that must show it and the compone | 164 |
+| [`registry.ts`](app/features/notices/registry.ts) | every mandatory notice that holds on devnet (BR-47; P1 §4.6; TP §3.6 "Notices and copy"; Sprint 13 DoD), each with the screens that must show it and the compone | 171 |
 
 ## `app/features/record/`
 
@@ -320,7 +320,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`api-client.ts`](app/lib/api-client.ts) | a read-only client for the read API (`services/api`, /api/v1): health, the campaign list, one campaign and, since Sprint 13, the devnet leaderboard. Typed from  | 150 |
 | [`brand.ts`](app/lib/brand.ts) | Product name and copy in one place. The name is Brot Markets; Baked is the mascot. Only the copy the site shows lives | 13 |
 | [`brot.ts`](app/lib/brot.ts) | the site's one door to the Brot Markets SDK (Sprint 09, A-6): the read half (constants, PDAs, decoding, public state) and the tx half (the transaction builders  | 17 |
-| [`config.ts`](app/lib/config.ts) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 10 |
+| [`config.ts`](app/lib/config.ts) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 16 |
 | [`content.ts`](app/lib/content.ts) | where the repository's content/ folder is, for what the site reads on the server when it is built (the void log, the powers table, the unlisted campaigns). The  | 21 |
 | [`deploy.ts`](app/lib/deploy.ts) | A-8 on the site: the program deploy this bundle was built for (ProgramData's slot), baked at build time by next.config.ts. `null` when the build could not read  | 11 |
 | [`fonts.ts`](app/lib/fonts.ts) | the site's two fonts, served by the site itself: Barlow Condensed 700 for display and numbers, Inter 400, 500 and 600 for text. next/font downloads them at buil | 26 |
@@ -1182,9 +1182,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`build-docs.mjs`](services/landing/scripts/build-docs.mjs) | builds docs.brot.markets (services/landing/docs-site/*.html) from the pages in docs/wiki/, the reviewed text. Edit a page there, or the menu below, then run `no | 121 |
-| [`build-legal.mjs`](services/landing/scripts/build-legal.mjs) | builds public/terms.html and public/privacy.html from docs/legal/TERMS-OF-SERVICE.md and PRIVACY-POLICY.md, the reviewed texts. Edit those files, then run `node | 121 |
-| [`docs-layout.mjs`](services/landing/scripts/docs-layout.mjs) | the HTML around each page of docs.brot.markets: header, side menu (a drop-down on phones), previous and next links, footer. build-docs.mjs fills it. Styles: pub | 102 |
+| [`build-docs.mjs`](services/landing/scripts/build-docs.mjs) | builds docs.brot.markets (services/landing/docs-site/*.html) from the pages in docs/wiki/, the reviewed text. Edit a page there, or the menu below, then run `no | 120 |
+| [`build-legal.mjs`](services/landing/scripts/build-legal.mjs) | builds public/privacy.html from docs/legal/PRIVACY-POLICY.md, the reviewed text. Edit that file, then run `node services/landing/scripts/build-legal.mjs`; the p | 113 |
+| [`docs-layout.mjs`](services/landing/scripts/docs-layout.mjs) | the HTML around each page of docs.brot.markets: header, side menu (a drop-down on phones), previous and next links, footer. build-docs.mjs fills it. Styles: pub | 101 |
 | [`markdown.mjs`](services/landing/scripts/markdown.mjs) | the small Markdown the reviewed texts use (docs/legal and docs/wiki) turned into HTML: headings, the Baked's one-line summaries (block quotes, as <p class="crum | 109 |
 
 ## `services/landing/tests/`
@@ -1194,7 +1194,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`dev0x.test.mjs`](services/landing/tests/dev0x.test.mjs) | tests the unlisted campaign preview under /dev0x/ over real HTTP: redirects, noindex, its CSP, the files it needs, the refusal of paths out of its folder, and t | 151 |
 | [`docs.test.mjs`](services/landing/tests/docs.test.mjs) | tests docs.brot.markets: each generated page says what its text in docs/wiki says, every page is in the menu, every link and file a page points at exists, and t | 135 |
 | [`leads.test.mjs`](services/landing/tests/leads.test.mjs) | tests the waitlist store and the request limiter of the "coming soon" site (node --test) | 113 |
-| [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 227 |
+| [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 229 |
 | [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 193 |
 | [`two.test.mjs`](services/landing/tests/two.test.mjs) | tests /2, the home page in the pitch deck's look: it says exactly what the home page says (only the look may differ), the mascot perches and moods are the same, | 53 |
 
@@ -1301,7 +1301,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`helpers.ts`](tests/e2e/helpers.ts) | what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page opened with the injected wallet and the runner's answer f | 75 |
 | [`playwright.config.ts`](tests/e2e/playwright.config.ts) | the web smoke's Playwright configuration (Sprint 11; @playwright/test 1.63.0, pinned in package.json, whose Chromium is build 1243): the site built against the  | 27 |
 | [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 65 |
-| [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 155 |
+| [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 158 |
 | [`smoke.e2e.ts`](tests/e2e/smoke.e2e.ts) | the web smoke (Sprint 11 DoD; `bun run e2e`): the built site in Chromium at desktop width and at 412 CSS px, with an injected Wallet Standard test wallet, again | 198 |
 | [`states.e2e.ts`](tests/e2e/states.e2e.ts) | "campaign states" in the web smoke (Sprint 12 DoD; `bun run e2e -- --grep "campaign states"`): the built site in Chromium against the program in LiteSVM. Every  | 79 |
 | [`upgrade.e2e.ts`](tests/e2e/upgrade.e2e.ts) | A-8 in the web smoke (the founder's answer of 2026-10-10): the program is upgraded while a page built for its previous deploy is open (the site was built agains | 92 |

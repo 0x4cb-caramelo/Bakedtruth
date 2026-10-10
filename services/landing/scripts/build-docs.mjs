@@ -2,7 +2,7 @@
  * Purpose: builds docs.brot.markets (services/landing/docs-site/*.html) from the pages in docs/wiki/, the reviewed
  *          text. Edit a page there, or the menu below, then run `node services/landing/scripts/build-docs.mjs`; the docs
  *          tests fail when a page and its text disagree. A link to a .md page that is not in the menu stops the build.
- * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-08
+ * Version: 0.1.1 · Sprint: out of band (landing page), 2026-10-08; 2026-10-10 (no link to the terms: answer 9a)
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, posix } from "node:path";
@@ -29,7 +29,6 @@ const SECTIONS = [
 const LEGAL = {
   title: "Legal",
   items: [
-    { title: "Terms of Service", href: "https://brot.markets/terms" },
     { title: "Privacy Policy", href: "https://brot.markets/privacy" },
   ],
 };
