@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **754** |
+| Arquivos mapeados | **755** |
 | Acima de 200 linhas | **39** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -42,7 +42,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `scripts/test/hooks.test.js` — 278 linhas
 - `scripts/tokenomics-model.ts` — 584 linhas
 - `services/api/tests/api.test.ts` — 202 linhas
-- `services/landing/tests/pages.test.mjs` — 214 linhas
+- `services/landing/tests/pages.test.mjs` — 227 linhas
 - `tests/brot/codama-spike.test.ts` — 219 linhas
 - `tests/brot/events.test.ts` — 211 linhas
 - `tests/brot/idl.test.ts` — 231 linhas
@@ -1093,17 +1093,18 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`chart.js`](services/landing/public/pitch/chart.js) | the one chart behind the two Market slides of /pitch: World's four measured months and, after them, our two-year scenario, drawn at any point between the close  | 128 |
+| [`chart.js`](services/landing/public/pitch/chart.js) | the one chart behind the two Market slides of /pitch: World's four measured months and, after them, our two-year scenario, drawn at any point between the close  | 152 |
 | [`deck.js`](services/landing/public/pitch/deck.js) | runs the pitch deck at /pitch: scales the 1920 x 1080 slides to the window and moves between them by keyboard, click, swipe and the address (#3 opens slide 3) | 135 |
 | [`demo.js`](services/landing/public/pitch/demo.js) | plays the product demo on the Solution slide of /pitch: four examples in a row, each finished before the next begins. A pointer picks a side on three markets an | 177 |
-| [`exits.js`](services/landing/public/pitch/exits.js) | what the mascot does on a slide of /pitch before the deck leaves it, when the presenter moves forward. An exit is short, and it ends by calling `go`, which is w | 67 |
+| [`exits.js`](services/landing/public/pitch/exits.js) | what the mascot does on a slide of /pitch before the deck leaves it, when the presenter moves forward. An exit is short, and it ends by calling `go`, which is w | 69 |
 | [`finale.js`](services/landing/public/pitch/finale.js) | the finale of the closing slide of /pitch: the badge lands, blinks twice, gives a thumbs-up with sparkles and points at the code. The timings are the ones of th | 56 |
-| [`market.js`](services/landing/public/pitch/market.js) | what moves on the two Market slides of /pitch, which share one chart (chart.js). "Market": the mascot runs from June to September 2026, a month at a time, and s | 84 |
-| [`motion.js`](services/landing/public/pitch/motion.js) | the motion of the deck at /pitch: it decides what plays when a slide arrives or is left (the scenes are in scenes.js and exits.js), starts the product demo and  | 178 |
+| [`market.js`](services/landing/public/pitch/market.js) | what moves on the two Market slides of /pitch, which share one chart (chart.js). "Market": the mascot runs from June to September 2026, a month at a time, and s | 93 |
+| [`moon.js`](services/landing/public/pitch/moon.js) | the rocket setting of the two Market slides of /pitch (the bar's rocket button, the "R" key). In place of the mascot on foot: on "Market" it gets into a lambo a | 127 |
+| [`motion.js`](services/landing/public/pitch/motion.js) | the motion of the deck at /pitch: it decides what plays when a slide arrives or is left (the scenes are in scenes.js and exits.js), starts the product demo and  | 190 |
 | [`partners.js`](services/landing/public/pitch/partners.js) | the launch partners counter of the Growth slide of /pitch: two seconds after the slide arrives the number climbs to the partners in the list, their logos come i | 69 |
 | [`pot.js`](services/landing/public/pitch/pot.js) | the pot arithmetic of the /pitch demo: what a market holds after the visitor's stake and how it is shared when the chain resolves it | 55 |
 | [`runner.js`](services/landing/public/pitch/runner.js) | the mascot's plain run across a slide of /pitch, used where a slide has no scene of its own. It runs along the bottom, in the direction of the slide change, alo | 33 |
-| [`scenes.js`](services/landing/public/pitch/scenes.js) | the mascot's scenes of the deck at /pitch, by the slide that arrives: what plays when it comes going forward, going back, or when the page opens on it. A slide  | 91 |
+| [`scenes.js`](services/landing/public/pitch/scenes.js) | the mascot's scenes of the deck at /pitch, by the slide that arrives: what plays when it comes going forward, going back, or when the page opens on it. A slide  | 96 |
 | [`sprites.js`](services/landing/public/pitch/sprites.js) | the mascot images of /pitch: which file is which pose, loading them ahead of time, and putting a pose on a slide at a place given in the slide's own 1920 x 1080 | 78 |
 | [`tally.js`](services/landing/public/pitch/tally.js) | the two things around the demo card of /pitch that follow the examples: the text on the left of the Solution slide, which changes with the example (a "beat"), a | 80 |
 | [`team.js`](services/landing/public/pitch/team.js) | the Team slide of the v4 deck: the mascot runs in and pulls the rope of each curtain in turn, showing each person drawn as a bread roll; a few seconds later eac | 67 |
@@ -1124,7 +1125,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`dev0x.test.mjs`](services/landing/tests/dev0x.test.mjs) | tests the unlisted campaign preview under /dev0x/ over real HTTP: redirects, noindex, its CSP, the files it needs, the refusal of paths out of its folder, and t | 151 |
 | [`docs.test.mjs`](services/landing/tests/docs.test.mjs) | tests docs.brot.markets: each generated page says what its text in docs/wiki says, every page is in the menu, every link and file a page points at exists, and t | 135 |
 | [`leads.test.mjs`](services/landing/tests/leads.test.mjs) | tests the waitlist store and the request limiter of the "coming soon" site (node --test) | 113 |
-| [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 214 |
+| [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 227 |
 | [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 193 |
 | [`two.test.mjs`](services/landing/tests/two.test.mjs) | tests /2, the home page in the pitch deck's look: it says exactly what the home page says (only the look may differ), the mascot perches and moods are the same, | 53 |
 

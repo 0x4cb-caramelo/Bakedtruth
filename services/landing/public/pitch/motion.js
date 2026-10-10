@@ -1,18 +1,19 @@
 /**
  * Purpose: the motion of the deck at /pitch: it decides what plays when a slide arrives or is left (the scenes are
  *          in scenes.js and exits.js), starts the product demo and the finale, and holds the switch that turns it off.
- * Version: 0.3.0 · Sprint: out of band (landing page), 2026-10-07
+ * Version: 0.4.0 · Sprint: out of band (landing page), 2026-10-10
  *
  * Three rules, from the founder's review of 2026-10-07 (docs/business/_review/plano-do-pitch3.md): a transition lasts
  * 1.5 seconds at most, the next slide change cancels whatever is playing, and the "M" key or the bar button turns all
- * motion off. The "N" key is the setting in between. With "reduce motion" on, or with the slides stacked on a phone,
- * nothing moves either.
+ * motion off. The "N" key is the setting in between, and "R" the rocket setting. With "reduce motion" on, or with the
+ * slides stacked on a phone, nothing moves either.
  * It listens to the "slidechange" event that deck.js sends.
  */
 import { startDemo, stopDemo } from "./demo.js?v=3";
-import { EXITS } from "./exits.js?v=2";
+import { EXITS } from "./exits.js?v=3";
 import { finale, resetFinale } from "./finale.js?v=1";
-import { SCENES, plain, settled } from "./scenes.js?v=7";
+import { load as loadRides } from "./moon.js?v=1";
+import { SCENES, plain, settled } from "./scenes.js?v=8";
 import { preload } from "./sprites.js?v=1";
 
 const EASE = "cubic-bezier(.2,.8,.2,1)";
@@ -21,6 +22,7 @@ const root = document.documentElement;
 const still = matchMedia("(prefers-reduced-motion: reduce)");
 const button = document.querySelector("[data-motion]");
 const liteButton = document.querySelector("[data-lite]");
+const rocketButton = document.querySelector("[data-rocket]");
 let mode = "full";
 let before = "full"; // the setting "M" goes back to
 let timers = [];
@@ -74,6 +76,9 @@ const stage = {
   every,
   get lite() {
     return mode === "lite";
+  },
+  get rocket() {
+    return mode === "rocket";
   },
 };
 
@@ -134,30 +139,37 @@ document.addEventListener("keydown", beforeLeaving, true);
 document.addEventListener("click", beforeLeaving, true);
 
 /**
- * Three settings. "full": every scene. "lite", the "N" key: only the scenes the founder picked on 2026-10-07 (scenes.js
- * reads stage.lite). "off", the "M" key: nothing moves. Changing it puts the slide on screen in its new state at rest.
+ * Four settings. "full": every scene. "lite", the "N" key: only the scenes the founder picked on 2026-10-07 (scenes.js
+ * reads stage.lite). "rocket", the "R" key, added 2026-10-10: every scene of "full", with the lambo and the rocket on
+ * the two Market slides (moon.js). "off", the "M" key: nothing moves. Changing it puts the slide on screen in its new
+ * state at rest.
  */
 function setMode(next) {
   if (next === "off" && mode !== "off") before = mode;
   mode = next;
   root.classList.toggle("calm", mode === "off");
+  root.classList.toggle("rocket", mode === "rocket");
+  if (mode === "rocket") loadRides();
   if (button) button.setAttribute("aria-pressed", String(mode !== "off"));
   if (liteButton) liteButton.setAttribute("aria-pressed", String(mode === "lite"));
+  if (rocketButton) rocketButton.setAttribute("aria-pressed", String(mode === "rocket"));
   const active = document.querySelector("[data-deck-active]");
   if (active) arrive(active, "open");
 }
 const toggleOff = () => setMode(mode === "off" ? before : "off");
-const toggleLite = () => setMode(mode === "lite" ? "full" : "lite");
+const toggle = (setting) => () => setMode(mode === setting ? "full" : setting);
 if (button) button.addEventListener("click", toggleOff);
-if (liteButton) liteButton.addEventListener("click", toggleLite);
+if (liteButton) liteButton.addEventListener("click", toggle("lite"));
+if (rocketButton) rocketButton.addEventListener("click", toggle("rocket"));
 document.addEventListener("keydown", (event) => {
   if (event.ctrlKey || event.metaKey || event.altKey) return;
   const key = event.key.toLowerCase();
   if (key === "m") toggleOff();
-  if (key === "n") toggleLite();
+  if (key === "n") toggle("lite")();
+  if (key === "r") toggle("rocket")();
 });
 const asked = new URLSearchParams(location.search).get("motion");
-if (asked === "off" || asked === "lite") setMode(asked);
+if (["off", "lite", "rocket"].includes(asked)) setMode(asked);
 
 // A click on the demo plays it again. Caught on the way down, so the stage does not read it as "next slide".
 document.addEventListener(

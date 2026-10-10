@@ -22,6 +22,16 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Added
 
+- **O modo foguete do deck em `/pitch`** (10/10/2026, pedido do fundador e publicado com o de acordo dele: "pode
+  subir online, excelente"). Um botão de foguete na barra do deck (tecla R, ou `?motion=rocket`) liga um quarto modo:
+  todas as animações do modo completo e, nos dois slides de mercado, as nove imagens novas no lugar do pãozinho a pé.
+  No slide 4 ele entra na lambo e sobe o gráfico de junho a setembro; no 5 sai dela, põe o capacete e segue de foguete
+  a linha do cenário até bater na lua, e só então aparece o "$1B+ a month". Os modos completo, mais leve e sem
+  movimento não mudaram, nem o gráfico, os números e as frases. As imagens novas só são baixadas por quem liga o modo.
+  O modo inteiro está em `services/landing/public/pitch/moon.js`; o porquê de cada escolha, em
+  `session-log/2026-10-10-pitch-modo-foguete.md`. **Fica com o fundador:** se o modo vai ao vídeo do Colosseum,
+  já que lambo e lua são os memes de "ficar rico" e o guia de marca pede piadas que não convidem a pôr dinheiro.
+
 - **Sprint 12: minhas entradas e os estados da campanha** (branch `sprint-12-site-my-entries-states`, 10/10/2026;
   `docs/sprints/sprint-12-site-my-entries-states.md`). A página `/c/[id]` mostra cada estado público: entradas
   fechadas e por quê, em revisão (o resultado lido, o valor, a meta, a conta lida e o relógio das 6 horas),
