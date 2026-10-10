@@ -6,7 +6,7 @@
  * Version: 0.1.0
  * Sprint:  13 (site: ranking, notices and copy)
  */
-import { REPORT } from "@/features/campaign-page/copy-states";
+import { REPORT } from "../campaign-page/copy-states";
 
 export const REPORT_CAMPAIGN = {
   /** [Q], open: the same channel as L-13 (https://x.com/brotmarkets), as recommended. A plain link, never an X script. */

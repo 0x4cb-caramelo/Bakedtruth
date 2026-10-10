@@ -8,7 +8,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { contentDir } from "@/lib/content";
+import { contentDir } from "../../lib/content";
 import { parseMarkdown, publishedKeys, type Block } from "./markdown";
 
 export const ROLES = ["Upgrade authority", "Admin", "Fee recipient", "Team key"] as const;

@@ -11,7 +11,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { parseVoidLog, type VoidLogRecord } from "@brot/sdk/schemas";
-import { contentDir } from "@/lib/content";
+import { contentDir } from "../../lib/content";
 
 export type VoidLog = { records: VoidLogRecord[]; skipped: string[] };
 

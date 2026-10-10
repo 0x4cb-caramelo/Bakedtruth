@@ -11,7 +11,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { personalDataIn } from "@brot/sdk/schemas";
-import { contentDir } from "@/lib/content";
+import { contentDir } from "../../lib/content";
 
 export type Unlisted = { id: string; reason: string; at: string };
 
