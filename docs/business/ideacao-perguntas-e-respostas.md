@@ -33,6 +33,12 @@ Dadas pelo Ronaldo, depois da mescla do PR #63: "Yes, 1a to 12a all as recommend
 - **"Your entry back plus your share of the rest", com "when the losing side can pay the fees"**: aprovada de novo.
 - **A colheita de prêmio** (uma carteira nos dois lados de uma campanha paga em que ninguém mais entra leva o prêmio):
   a regra se decide antes da mainnet; nada muda no devnet.
+- **Depois da mescla do PR #65 (as páginas legais), na mesma noite,** o Ronaldo respondeu as perguntas que a revisão
+  jurídica deixou: os backups da Hostinger estão ligados e guardam 30 dias ("backups are enabled and kept for 30
+  days"); o email de contato é gm@brot.markets ("Use gm@brot.markets for now"), que ele vai rotear; o prazo de 15 dias
+  vale para todo pedido; a conversa no X é apagada depois de atendido o pedido de saída do ranking; o site novo ganha
+  uma linha "18 and over" no rodapé; a Cloudflare guarda os registros básicos de acesso por até 7 dias; e o
+  docs.brot.markets sai do ar até ser reescrito ("Please take it down for now until it's rewritten").
 
 ### Decisões de 9 de outubro de 2026, sobre as perguntas das Sprints 02 a 04 — prevalecem sobre tudo abaixo
 

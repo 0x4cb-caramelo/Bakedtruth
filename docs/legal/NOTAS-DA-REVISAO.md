@@ -9,7 +9,9 @@ página. Este arquivo de notas não vai ao ar.
 USDC, pagamento automático, outros poderes da equipe) e a privacidade foi corrigida para o produto de hoje: as
 campanhas em SOL, o ranking do devnet e como sair dele, o que o site guarda no navegador e o serviço de RPC. A frase
 de propósito da lista de espera ficou como as pessoas consentiram. O porquê está em
-`session-log/2026-10-10-paginas-legais-9a.md`. As notas abaixo são de 8/10.
+`session-log/2026-10-10-paginas-legais-9a.md`. Na mesma noite entraram os detalhes do fundador: o contato
+gm@brot.markets, os backups de 30 dias da Hostinger, os registros de 7 dias da Cloudflare, 15 dias para todo pedido e a
+conversa no X apagada depois de um pedido de saída do ranking. As notas abaixo são de 8/10.
 
 **Pedido do fundador, 8/10/2026:** "crie um nosso, com o que você julgar ser um contrato bom pra gente, porém
 minimalista, e sem juridiquês, direto ao ponto, e inclusive trazendo um pouco de brincadeira do nosso tom do

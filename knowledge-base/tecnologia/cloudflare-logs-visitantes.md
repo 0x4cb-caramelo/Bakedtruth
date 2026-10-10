@@ -36,7 +36,8 @@ Levantamento de 10 de outubro de 2026, na Sprint 13, para a revisão de privacid
 
 - Se o Logpush, o Instant Logs ou o Log Explorer estão ligados na conta. Pelo repositório, nenhum foi configurado
   [A CONFERIR].
-- Quanto tempo o painel mostra os registros de pedidos nesse plano [A CONFERIR]: as páginas lidas não dizem.
+- ~~Quanto tempo o painel mostra os registros de pedidos nesse plano.~~ **Lido pelo fundador no painel em
+  10/10/2026:** a Cloudflare guarda os registros básicos de acesso por até 7 dias. A página de privacidade diz isso.
 - Desligar a injeção do script de estatísticas na zona.
 
 ## Fontes

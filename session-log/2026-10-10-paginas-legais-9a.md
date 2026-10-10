@@ -88,6 +88,22 @@ está na lista de espera deu um email, não uma conta do X) e se o prazo de 15 d
 conversa no X depois de atender um pedido de saída do ranking; uma linha "18 anos ou mais" no site novo, já que ela
 morava nos termos; e o que o painel da Cloudflare guarda e se ele põe cookies (C13).
 
+### 6. Depois da mescla: os detalhes do fundador
+
+Com o PR #65 mesclado, o Ronaldo respondeu o que a revisão jurídica deixou com ele: os backups da Hostinger estão
+ligados e guardam 30 dias; o contato é gm@brot.markets; 15 dias valem para todo pedido; a conversa no X é apagada
+depois de um pedido de saída do ranking; o site novo ganha uma linha de 18 anos no rodapé; a Cloudflare guarda os
+registros básicos por até 7 dias; e o docs.brot.markets sai do ar. A mensagem veio colada, e por isso o assistente
+pediu a confirmação dele com as próprias palavras antes de mesclar e publicar fatos novos na página; ele confirmou.
+
+- **O email.** O domínio brot.markets não tem registro MX nem SPF: hoje um email para gm@brot.markets volta. A
+  página já dá o endereço, e o roteamento (o Email Routing da Cloudflare, por exemplo) vem antes de publicar a landing.
+  O Ronaldo disse que cuida disso.
+- **O docs.brot.markets** responde 410 em todo endereço, com uma linha de texto e sem nenhuma página antiga. Um 404
+  sugeriria um endereço errado; o 410 diz que saiu do ar. As páginas e o gerador ficam no repositório para a reescrita.
+- **A linha de 18 anos** está no rodapé de toda página do site novo e na lista de avisos obrigatórios; o smoke web a
+  confere em toda rota.
+
 ## Consequences
 
 - Quando o fundador publicar a landing, `/terms` some e a privacidade nova entra no ar. A própria página promete um
