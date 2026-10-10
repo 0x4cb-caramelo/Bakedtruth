@@ -1,11 +1,12 @@
 /**
- * Purpose: what the mascot does on a slide of /pitch4 before the deck leaves it, when the presenter moves forward.
+ * Purpose: what the mascot does on a slide of /pitch before the deck leaves it, when the presenter moves forward.
  *          An exit is short, and it ends by calling `go`, which is what changes the slide.
  * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-07
  *
  * motion.js catches the "next" key or click, plays the exit and then lets the deck move on. A second "next" while an
  * exit plays skips it. An exit and the scene that follows it last 1.5 seconds together, at most.
  */
+import { wordsAway } from "./market.js?v=2";
 import { place, running, sprite, url } from "./sprites.js?v=1";
 
 /** Cover: the mascot leaves its sticker, drops to the floor and runs off to the right. The empty sticker stays. */
@@ -61,4 +62,5 @@ function peekAndGrab(stage, slide, go) {
 export const EXITS = {
   Title: leaveSticker,
   Problem: peekAndGrab,
+  Market: wordsAway, // v5.1: its words go, and the same chart goes on to the projection
 };

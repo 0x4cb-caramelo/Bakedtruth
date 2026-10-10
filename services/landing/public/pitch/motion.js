@@ -1,5 +1,5 @@
 /**
- * Purpose: the motion of the deck at /pitch4: it decides what plays when a slide arrives or is left (the scenes are
+ * Purpose: the motion of the deck at /pitch: it decides what plays when a slide arrives or is left (the scenes are
  *          in scenes.js and exits.js), starts the product demo and the finale, and holds the switch that turns it off.
  * Version: 0.3.0 · Sprint: out of band (landing page), 2026-10-07
  *
@@ -9,10 +9,10 @@
  * nothing moves either.
  * It listens to the "slidechange" event that deck.js sends.
  */
-import { startDemo, stopDemo } from "./demo.js?v=2";
-import { EXITS } from "./exits.js?v=1";
+import { startDemo, stopDemo } from "./demo.js?v=3";
+import { EXITS } from "./exits.js?v=2";
 import { finale, resetFinale } from "./finale.js?v=1";
-import { SCENES, plain, settled } from "./scenes.js?v=6";
+import { SCENES, plain, settled } from "./scenes.js?v=7";
 import { preload } from "./sprites.js?v=1";
 
 const EASE = "cubic-bezier(.2,.8,.2,1)";

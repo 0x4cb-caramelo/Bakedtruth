@@ -1,19 +1,22 @@
 /**
- * Purpose: the mascot's scenes of the deck at /pitch4, by the slide that arrives: what plays when it comes going
+ * Purpose: the mascot's scenes of the deck at /pitch, by the slide that arrives: what plays when it comes going
  *          forward, going back, or when the page opens on it. A slide with no scene gets the plain run.
- * Version: 0.5.0 · Sprint: out of band (landing page), 2026-10-07
+ * Version: 0.6.0 · Sprint: out of band (landing page), 2026-10-10
  *
  * A scene is `scene(stage, slide, how)`, with `how` being "forward", "back" or "open". `stage` comes from motion.js:
  * stage.enter(slide, forward) is the slide's usual entrance; stage.keep(thing) registers an element, an animation or
  * a `{ remove }` to be undone on the next slide change; stage.later(fn, ms) and stage.every(fn, ms) are timers
  * cancelled the same way. A scene, with the exit before it (exits.js), lasts 1.5 seconds at most; the curtains of the
- * Team slide and the closing finale are the two longer moments.
+ * Team slide, the climb of the Projection slide and the closing finale are the longer moments.
+ *
+ * v5 (2026-10-10): the "How we earn" slide and its bite are gone, folded into the Solution demo. v5.1, the same day:
+ * the "Open a market" slide and its lever are gone too, and Market is two slides over one chart (market.js).
  */
-import { bite } from "./bite.js?v=2";
-import { pull, pulled as leverDown } from "./lever.js?v=1";
+
+import { months, pullBack, still } from "./market.js?v=2";
 import { partners } from "./partners.js?v=3";
 import { run } from "./runner.js?v=1";
-import { running, sprite } from "./sprites.js?v=1";
+import { sprite } from "./sprites.js?v=1";
 import { curtains, photos } from "./team.js?v=2";
 
 /** The usual arrival: the slide's entrance and the plain run. */
@@ -38,31 +41,11 @@ function pulled(stage, slide) {
   stage.later(() => bun.box.animate(leave, { duration: 140, fill: "forwards" }), 820);
 }
 
-/** Market: the big circle rolls in from the right with the mascot running on top, then it jumps off. */
-function tamBall(stage, slide) {
-  const wrap = slide.querySelector("[data-tam-wrap]");
-  const ball = slide.querySelector("[data-tam]");
-  if (!wrap || !ball) return run(stage, slide, true);
-  const rider = sprite(wrap, "runA", { x: -5, y: -322, h: 340, flip: true });
-  stage.keep(rider.box);
-  running(stage, rider.img, 100);
-  const roll = { duration: 1050, easing: "cubic-bezier(.2,.7,.3,1)" };
-  stage.keep(wrap.animate([{ transform: "translateX(1500px)" }, { transform: "none" }], roll));
-  stage.keep(ball.animate([{ transform: "rotate(540deg)" }, { transform: "none" }], roll));
-  const off = [
-    { transform: "none" },
-    { transform: "none", offset: 0.7 },
-    { transform: "translate(-260px,-150px)", offset: 0.84 },
-    { transform: "translate(-700px,520px)", opacity: 0 },
-  ];
-  rider.box.animate(off, { duration: 1500, easing: "linear", fill: "forwards" });
-}
-
 /**
  * `stage.lite` is the lighter setting (the "N" key). The founder's list of what plays in it, of 2026-10-07: the whole
- * change from the cover to the Problem slide; the Solution slide pulled in, and its demo; on Sponsors only the glow;
- * nothing on How we earn; the circle and its rider on Market; the partners count on Growth; all of Team; all of
- * Close. Where a slide plays nothing it still comes in with its usual entrance.
+ * change from the cover to the Problem slide; the Solution slide pulled in, and its demo; the partners count on
+ * Growth; all of Team; all of Close. The two Market slides of v5 play in both settings: they are the chart itself.
+ * Where a slide plays nothing it still comes in with its usual entrance.
  */
 export const SCENES = {
   Title(stage, slide, how) {
@@ -74,25 +57,17 @@ export const SCENES = {
     if (how === "forward") pulled(stage, slide);
     else if (how === "back") stage.lite ? stage.enter(slide, false) : plain(stage, slide, false);
   },
-  "Open a market"(stage, slide, how) {
-    // v4: the Sponsors and Creators slides in one. The mascot pulls the lever; in the lighter setting the lever moves
-    // on its own, and "the chain" glows in both.
-    if (how === "back" && !stage.lite) plain(stage, slide, false);
-    else if (how !== "open") stage.enter(slide, how === "forward");
-    pull(stage, slide, { withMascot: !stage.lite, wait: how === "open" ? 300 : 700 });
-  },
-  "How we earn"(stage, slide, how) {
-    if (how !== "open") stage.enter(slide, how === "forward");
-    if (stage.lite) return;
-    if (how === "back") run(stage, slide, false);
-    bite(stage, slide, { runIn: how === "forward" });
-  },
   Market(stage, slide, how) {
-    if (how === "back") return stage.lite ? stage.enter(slide, false) : plain(stage, slide, false);
-    if (how === "forward") {
-      stage.enter(slide, true);
-      tamBall(stage, slide);
-    }
+    // The mascot is in the chart here, so there is no plain run across the slide.
+    if (how !== "open") stage.enter(slide, how === "forward");
+    if (how === "back") still(slide);
+    else months(stage, slide);
+  },
+  Projection(stage, slide, how) {
+    // Coming from Market it does not "arrive": it opens on Market's last frame and the chart pulls back.
+    if (how === "forward") return pullBack(stage, slide);
+    if (how === "back") stage.enter(slide, false);
+    still(slide);
   },
   Growth(stage, slide, how) {
     // The mascot with three smaller ones behind it: the community coming along. Not in the lighter setting.
@@ -110,6 +85,6 @@ export const SCENES = {
 /** What a slide shows when nothing moves: the states a scene would have reached. */
 export function settled(stage, slide) {
   partners(stage, slide, { animate: false });
-  leverDown(slide);
+  still(slide);
   photos(slide);
 }

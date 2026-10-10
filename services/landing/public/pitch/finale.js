@@ -1,5 +1,5 @@
 /**
- * Purpose: the finale of the closing slide of /pitch4: the badge lands, blinks twice, gives a thumbs-up with
+ * Purpose: the finale of the closing slide of /pitch: the badge lands, blinks twice, gives a thumbs-up with
  *          sparkles and points at the code. The timings are the ones of the founder's own deck.
  * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-07
  */

@@ -1,5 +1,5 @@
 /**
- * Purpose: the mascot images of /pitch4: which file is which pose, loading them ahead of time, and putting a pose
+ * Purpose: the mascot images of /pitch: which file is which pose, loading them ahead of time, and putting a pose
  *          on a slide at a place given in the slide's own 1920 x 1080 coordinates.
  * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-07
  *
