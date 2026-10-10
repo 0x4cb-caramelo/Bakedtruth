@@ -20,6 +20,18 @@ nos caminhos da equipe pelo PR #44 e o id novo do programa pelo PR #45; já em 1
 A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir da `origin/main` (`6b5e3ec`), na branch
 `sprint-06-keeper-server`. Nada de código entrou ainda: a primeira tarefa é a checagem do Bun 1.4.2 no servidor.
 
+### Changed
+
+- **Sprint 11 fechada e mesclada** (branch `sprint-11-site-campaign-entry`, PR #60, 10/10/2026, a pedido do Ronaldo,
+  com a tag `sprint-11`; `docs/sprints/sprint-11-site-campaign-entry.md`). O Ronaldo relatou o teste com a Phantom no
+  devnet: uma entrada de 0,01 SOL, assinada, com a página reagindo como esperado. **A transação não aparece no
+  devnet:** conferido no mesmo dia, só por leitura e por duas RPCs, a última transação do programa é uma abertura de
+  campanha às 04:48 UTC, antes de existir o código da entrada no site, e nenhuma entrada chegou depois disso. A página
+  só diz "You're in" quando a RPC dela confirma a assinatura; o mais provável é que o teste tenha passado por outra
+  RPC, outro cluster ou outro programa (inferência, não conferida). O programa não foi atualizado nesse meio-tempo
+  (ProgramData ainda no slot 509.389.614). Falta a assinatura da transação, que fica na atividade da Phantom, para
+  registrar a entrada assinada com carteira real; até lá ela segue em aberto.
+
 ### Added
 
 - **A-8: a assinatura pausa quando o programa é atualizado** (Sprint 11, 10/10/2026, pela resposta do fundador): o SDK

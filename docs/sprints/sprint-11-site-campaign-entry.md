@@ -1,6 +1,6 @@
 # Sprint 11 — Site: campaign page and entry
 
-**Status:** built for the Hackathon MVP (2026-10-10), A-8 built the same day on the founder's answer; in review (PR #60) · **Branch:** `sprint-11-site-campaign-entry` · **Dates:** none, by the founder's decision
+**Status:** merged 2026-10-10 (PR #60, tag `sprint-11`) at the founder's request, after the founder reported the Phantom test passed; built for the Hackathon MVP, A-8 the same day on the founder's answer. The test's entry is not found on devnet yet (record below) · **Branch:** `sprint-11-site-campaign-entry` · **Dates:** none, by the founder's decision
 
 ## Record (2026-10-10)
 
@@ -51,8 +51,16 @@
   signing. The same answer kept the floor a baker signs at 1% below the estimate on devnet (`FLOOR_BPS` in
   `submit.ts`).
 - **Waiting:** the API's activity (Sprint 08's rest); the `brot-rpc` configuration (the relay is not built; the trace,
-  with the ProgramData read, is in `docs/technical/relay-allowlist.md`); the founder's own ten-minute test with Phantom
-  on devnet.
+  with the ProgramData read, is in `docs/technical/relay-allowlist.md`); the signature of the founder's Phantom entry
+  (next item).
+- **The founder's Phantom test (2026-10-10):** reported passed: a 0.01 SOL entry, signed in Phantom, the page reacting
+  as expected; on that report the founder asked for the merge. **Not found on devnet:** checked read-only the same day
+  (15:45 UTC) through two RPC providers, the program's last transaction is a campaign opening at 04:48 UTC, before the
+  site's entry code existed (its first commit is from 08:29 UTC, A-8's from 10:10 UTC), and no join has landed since.
+  The page says "You're in" only when its own RPC reports the signature confirmed (`watch.ts`), so the test most likely
+  went through another RPC, cluster or program (an inference, not checked). The program was not upgraded meanwhile
+  (ProgramData still at slot 509,389,614). The signature (Phantom's activity) or the RPC in the local `app/.env.local`
+  is asked of the founder; until then a signed devnet entry with a real wallet is not recorded.
 
 | | |
 |---|---|
@@ -114,8 +122,8 @@ every fee, and signs. It is the first entry made through the site, and a retry c
       panel follows Sprint 09's stand-in, the API's health being `ok`, so it fails closed (no API, no panel).
 - [ ] An entry made through the site appears on-chain, then in the API's activity. **Partly:** on-chain in the web
       smoke (LiteSVM) and on devnet up to the wallet (simulation); the page's own activity panel shows it from the
-      chain's events. **Waiting:** the API has no activity route (Sprint 08's rest), and a signed devnet entry needs a
-      real wallet.
+      chain's events. **Waiting:** the API has no activity route (Sprint 08's rest), and the founder's Phantom entry
+      (reported 2026-10-10) is not found on devnet yet (record above).
 - [x] **The web smoke:** Playwright, pinned here, at desktop width and about 412 CSS px, with an injected test wallet,
       on Surfpool: entries on both sides, each failure message the smoke can provoke, and the retry guard
       (`bun run e2e`). **Done on LiteSVM, not Surfpool** (record above); the failures run once, at desktop width.
@@ -128,8 +136,9 @@ every fee, and signs. It is the first entry made through the site, and a retry c
       (L-01): campaign, entry, baker, creator, pot, YES/NO; `tests/site/copy-vocabulary.test.ts` fails on the D6 row's
       old words and their English equivalents (market, bet, odds, position, a chance in cents…) in every `copy*.ts`.
 - [x] `cd app && bun run lint && bun run build` passes.
-- [ ] Common closure (`docs/SPRINTS.md`, section 4). **Partly:** checks, secret scan, code map, CHANGELOG and
-      session log done; the copy, security and coordinator reviews ran (record above); merge and tag wait for the founder.
+- [x] Common closure (`docs/SPRINTS.md`, section 4). **Done:** checks, secret scan, code map, CHANGELOG and
+      session log; the copy, security and coordinator reviews ran (record above); merged with PR #60 on 2026-10-10 at
+      the founder's request, tag `sprint-11`.
 
 ## Deliverables
 
@@ -222,7 +231,8 @@ The record is at the top of this file (2026-10-10). Retrospective:
 - **A-8 (same day, after the founder's answers):** built in the SDK and the site, read through the public devnet RPC;
   the web smoke drives an upgrade before the review and one between the review and the wallet. The site must be
   built again after every program upgrade.
-- **Carried:** a signed entry on devnet with a real wallet (the founder's own Phantom test); the API's
+- **Carried:** a signed entry on devnet with a real wallet, recorded by its signature (the founder reported the Phantom
+  test passed; its transaction is not found on devnet yet); the API's
   activity route and `entries_allowed` (Sprint 08); the relay's configuration from `docs/technical/relay-allowlist.md`
   (Sprint 08); the CSP against MWA's local WebSocket in the deferred mobile tests; and the security review's three
   deferrals (TP §7.2): a CSP nonce instead of `'unsafe-inline'`, comparing a landed transaction with the summary, and
@@ -230,3 +240,5 @@ The record is at the top of this file (2026-10-10). Retrospective:
 - **Coordinator review:** approved with caveats, no code blocker. Its documentation findings (the allowlist's
   commitments and callers, stale wording here and in the session log, the deferrals in the Technical Plan) and its
   privacy point (the guard's browser record is now deleted a day after it settles) were applied before the PR.
+- **Closure (2026-10-10):** the founder reported the Phantom test passed and asked for the merge and the tag; merged
+  with PR #60, tag `sprint-11` on the merge commit. Sprint 12 starts from `main`.
