@@ -15,7 +15,7 @@
 - **De onde vêm as regras:** quase todas descrevem a página aprovada. Onde uma regra generaliza além dela (os limites
   de palavras, por exemplo), isso está dito no próprio trecho e na seção 13.
 - **Por que as decisões foram tomadas:**
-  [`session-log/2026-10-09-site-3-original-com-cores-do-deck.md`](../../session-log/2026-10-09-site-3-original-com-cores-do-deck.md).
+  `session-log/2026-10-09-site-3-original-com-cores-do-deck.md` (no branch `feat/site-3-original-com-cores-do-deck`).
 
 ---
 
