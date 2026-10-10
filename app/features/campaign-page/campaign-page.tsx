@@ -3,8 +3,8 @@
  *          entries, the re-check panel, and the entry panel, or the state card once entries close or when the site takes
  *          none (K-11). Two columns on a wide screen, the panel sticky on the right; under 860 px one column in the
  *          spec's phone order, so the reading order follows what is seen. Everything reads the chain through the SDK.
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ * Version: 0.2.0 (Sprint 12: every state after entries close, the wallet's payout and the team's void note)
+ * Sprint:  11 (site: campaign page and entry); 12 (site: my entries and campaign states)
  */
 "use client";
 
@@ -20,12 +20,14 @@ import { ActivityPanel } from "./activity-panel";
 import { CampaignHeader } from "./campaign-header";
 import { PAGE } from "./copy";
 import { campaignIdFrom, type PageData } from "./load";
-import { PotPanel, YourEntry } from "./pot-panel";
+import { PayoutPanel } from "./payout-panel";
+import { PotPanel } from "./pot-panel";
 import { proofOf } from "./proof";
 import { ProofPanel } from "./proof-panel";
 import { RecheckPanel } from "./recheck-panel";
-import { StateCard } from "./state-card";
+import { Report, StatePanel } from "./state-panel";
 import { useCampaignPage, useEntriesAllowed } from "./use-campaign-page";
+import { noteFor, type VoidNote } from "./void-note";
 
 const PHONE = "(max-width: 860px)";
 const subscribe = (notify: () => void) => {
@@ -50,10 +52,11 @@ const sentence = (data: PageData) =>
     metricAccount: data.campaign.metricAccount,
   });
 
-export function CampaignPage({ idParam, prefill }: { idParam: string; prefill: Prefill }) {
+export function CampaignPage({ idParam, prefill, notes }: { idParam: string; prefill: Prefill; notes: VoidNote[] }) {
   const id = campaignIdFrom(idParam);
   const { publicKey } = useWallet();
-  const { state, reload } = useCampaignPage(id, publicKey?.toBase58() ?? null);
+  const wallet = publicKey?.toBase58() ?? null;
+  const { state, reload } = useCampaignPage(id, wallet);
   const allowed = useEntriesAllowed();
   const phone = usePhone();
   const [round, setRound] = useState(0);
@@ -69,7 +72,13 @@ export function CampaignPage({ idParam, prefill }: { idParam: string; prefill: P
     );
   }
   if (state.status === "missing") {
-    return <EmptyState title={PAGE.notFound}>{PAGE.notFoundText(idParam)}</EmptyState>;
+    return state.closed ? (
+      <EmptyState title={PAGE.closedAccount} action={<Report />}>
+        {PAGE.closedAccountText}
+      </EmptyState>
+    ) : (
+      <EmptyState title={PAGE.notFound}>{PAGE.notFoundText(idParam)}</EmptyState>
+    );
   }
   if (state.status === "error") {
     return <EmptyState title={PAGE.loadFailed}>{PAGE.loadFailedText}</EmptyState>;
@@ -97,9 +106,15 @@ export function CampaignPage({ idParam, prefill }: { idParam: string; prefill: P
         onBusy={setBusy}
       />
     ) : (
-      <StateCard key="panel" data={data} entriesTaken={allowed !== false} />
+      <StatePanel
+        key="panel"
+        data={data}
+        proof={proof}
+        entriesTaken={allowed !== false}
+        note={noteFor(data.campaign, data.address, notes)}
+      />
     ),
-    mine: <YourEntry key="mine" entry={data.mine} />,
+    mine: <PayoutPanel key="mine" data={data} wallet={wallet} round={round} onChange={landed} />,
   };
   const stale = state.failed ? <p className="m-0 text-xs text-warn">{PAGE.loadFailedText}</p> : null;
   if (phone) {

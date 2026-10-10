@@ -3,8 +3,8 @@
  *          metric reading): the campaign at the route's id, the config (the pause), the chain's clock (A-7), the
  *          account the campaign reads, the connected wallet's `Entry`, and the creator's own `Entry` (BR-26's flag).
  *          The public state is the SDK's, against chain time, with the join lock read from the metric account.
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ * Version: 0.2.0 (Sprint 12: whether a missing campaign was closed)
+ * Sprint:  11 (site: campaign page and entry); 12
  *
  * Two round trips: the campaign first (it names the metric account), then the rest in one `getMultipleAccounts`.
  */
@@ -31,6 +31,8 @@ import {
   type PublicView,
   type SolanaRpc,
 } from "@brot/sdk/read";
+
+import { eventsIn } from "../my-entries/events-in";
 
 export type PageData = {
   address: Address;
@@ -66,6 +68,22 @@ const decodeOrNull = <T>(decode: () => T): T | null => {
     throw error;
   }
 };
+
+/**
+ * Whether the campaign at `id` existed and was closed: no account now, and its address's recent history holds the
+ * program's own `CampaignClosed` for it (a stranger's transfer to the address proves nothing). `close_campaign` runs
+ * only after every payout, so a closed campaign has paid out; what it paid lives in its events.
+ */
+export async function campaignClosed(rpc: SolanaRpc, id: bigint): Promise<boolean> {
+  const at = await campaignAddress(id);
+  const sigs = await rpc.getSignaturesForAddress(at, { limit: 10, commitment: "confirmed" }).send();
+  for (const s of sigs) {
+    if (s.err !== null) continue;
+    const events = await eventsIn(rpc, s.signature as string);
+    if (events?.some((e) => e.name === "CampaignClosed" && e.data.campaign === at)) return true;
+  }
+  return false;
+}
 
 /** Reads the page's accounts; `null` when no campaign of this program lives at the id's address. */
 export async function loadCampaignPage(rpc: SolanaRpc, id: bigint, wallet: string | null): Promise<PageData | null> {

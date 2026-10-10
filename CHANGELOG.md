@@ -20,6 +20,43 @@ nos caminhos da equipe pelo PR #44 e o id novo do programa pelo PR #45; já em 1
 A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir da `origin/main` (`6b5e3ec`), na branch
 `sprint-06-keeper-server`. Nada de código entrou ainda: a primeira tarefa é a checagem do Bun 1.4.2 no servidor.
 
+### Added
+
+- **Sprint 12: minhas entradas e os estados da campanha** (branch `sprint-12-site-my-entries-states`, 10/10/2026;
+  `docs/sprints/sprint-12-site-my-entries-states.md`). A página `/c/[id]` mostra cada estado público: entradas
+  fechadas e por quê, em revisão (o resultado lido, o valor, a meta, a conta lida e o relógio das 6 horas),
+  contestada (L-04: "Contested"), paga (a divisão, o pote de um lado só com a taxa de 1% para todos menos o primeiro, e a
+  campanha sem nenhuma entrada) e anulada (o motivo público, a nota da equipe quando o hash bate com o da rede, o que
+  volta para quem abriu e se os 10% da abertura voltam ou ficam). Em toda campanha já lida ela diz onde reportar um
+  resultado errado (L-13: https://x.com/brotmarkets). A carteira conectada vê o que a entrada rende (estimativa), o que
+  espera pagamento (exato, ao lamport) e o que recebeu.
+- **`/my-entries`**: as entradas da carteira, o total recebido (somado só dos eventos de liquidação) e o que espera
+  pagamento. Como a API ainda não tem a rota da carteira, o histórico é lido da própria rede (as transações da carteira,
+  50 por vez, com "Read older transactions").
+- **"Receive"**, o único resgate do site: só para a parte de 1% do criador que o programa guardou no cofre porque a
+  carteira estava vazia. O SDK prepara (`prepareClaim`, com a checagem A-8 antes de tudo); a carteira precisa do mínimo
+  de aluguel mais a taxa de rede.
+- **`/record`**: o registro público dos anulamentos da equipe, de `content/void-log/`, com o formato público em zod e o
+  JSON Schema gerado (`content/void-log/record.schema.json`), checado no CI.
+- **No devnet nada paga sozinho ainda:** pela decisão do fundador, a tela diz "Waiting for payout" e não promete hora;
+  isso substitui "Pago sozinho, ao fim da janela de 6 horas" no devnet. O cartão da lista deixou de dizer "pays <hora>".
+- **O ensaio das cinco campanhas no devnet** (`deploy/devnet/rehearsal-sprint-12.md`), com dois scripts novos:
+  `scripts/rehearsal/open-paid.ts` (abertura paga por carteira fora da equipe) e `scripts/rehearsal/settle.ts` (a
+  liquidação passo a passo). As escritas no devnet são do fundador.
+- Testes: ciclos inteiros no LiteSVM conferidos contra os eventos e contra o SOL que chegou a cada carteira; um caso por
+  estado; o caminho da reserva de ponta a ponta; o formato do void log; os scripts do ensaio; e o cenário "campaign
+  states" no smoke web (14 passaram).
+- **As respostas do fundador às quatro perguntas da Sprint 12** (10/10/2026): 1a, o texto da campanha sem nenhuma
+  entrada aprovado como estava (e a consequência: num anulamento por falha da casa sem entrada, a Brot fica com os
+  10%, como o programa faz); 2a, o aviso L-03 no devnet passa a dizer "Payouts go to your wallet after the result is
+  read; on devnet that is not automatic yet, and no time is promised."; 3a, o chip diz "Result final" enquanto o
+  pagamento espera e "Paid" depois que as entradas foram pagas. A assinatura da Phantom da Sprint 11 não está à mão:
+  a entrada segue relatada, não verificada, sem travar nada. O ensaio no devnet fica com o fundador.
+- **As revisões da sprint aplicadas:** a de texto (nenhuma tela promete pagamento automático ou hora, nem o recibo da
+  Sprint 11; a equipe só confirma um resultado, nunca anula um SIM ou NÃO) e a de segurança (a parte reservada que o
+  fechamento paga conta como recebida; o histórico não esconde lacuna; a estimativa antes do tally). O aviso L-03 e o
+  chip "Paid" esperam o fundador.
+
 ### Changed
 
 - **Sprint 11 fechada e mesclada** (branch `sprint-11-site-campaign-entry`, PR #60, 10/10/2026, a pedido do Ronaldo,

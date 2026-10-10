@@ -13,7 +13,7 @@ import { sol4 } from "../entry/amount";
 import type { KindName } from "./proof";
 
 /** The chip's names (components/ui/state-chip.tsx). */
-export type ChipState = "open" | "closed" | "in_review" | "paid" | "void" | "contested";
+export type ChipState = "open" | "closed" | "in_review" | "final" | "paid" | "void" | "contested";
 
 /** 1234567n → "1,234,567", exactly. */
 export function grouped(value: bigint): string {
@@ -58,8 +58,12 @@ export function ageText(seconds: bigint): string {
   return `${s / 3_600n} h${(s % 3_600n) / 60n ? ` ${(s % 3_600n) / 60n} min` : ""}`;
 }
 
-/** The SDK's public state as the chip names it; a contested review shows as such. */
+/**
+ * The SDK's public state as the chip names it; a contested review shows as such, and a Paid campaign is "Result final"
+ * until its entries are paid out (the founder's answer 3a, Sprint 12).
+ */
 export function stateChip(view: PublicView): ChipState {
   if (view.state === "InReview") return view.contested ? "contested" : "in_review";
+  if (view.state === "Paid" && !view.settled) return "final";
   return ({ Open: "open", Closed: "closed", Paid: "paid", Void: "void" } as const)[view.state];
 }

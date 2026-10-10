@@ -3,13 +3,13 @@
  *          side (none for an empty pot), the estimated return per side (labelled as an estimate), the two moments (entries
  *          close, deadline), the review clock, the save button, and the notice on burn, lock and stake campaigns (BR-26).
  *          There is no redemption here.
- * Version: 0.1.0
- * Sprint:  10 (site: campaign list)
+ * Version: 0.2.0 (Sprint 12: the state chip and line, state-line.ts)
+ * Sprint:  10 (site: campaign list); 12
  */
 import Link from "next/link";
 
 import { SplitBar } from "@/components/ui/split-bar";
-import { StateChip, type PublicStateName } from "@/components/ui/state-chip";
+import { StateChip } from "@/components/ui/state-chip";
 import { formatUtc } from "@/lib/brot";
 import { formatSol as formatSolFour } from "@/features/wallet/wallet-state";
 import type { Card } from "./model";
@@ -27,7 +27,7 @@ export function CampaignCard({ card, saved, onToggle }: { card: Card; saved: boo
     <article className="rounded-md border border-line bg-panel p-4">
       <div className="flex flex-wrap items-center gap-2 text-xs text-dim">
         <span>{KIND_LABEL[card.kind] ?? card.kind}</span>
-        <StateChip state={card.state as PublicStateName} />
+        <StateChip state={card.chip} />
         {!card.listed && <span>Not on the home page: no entries in its first 24 hours.</span>}
         <button
           type="button"
@@ -60,14 +60,21 @@ export function CampaignCard({ card, saved, onToggle }: { card: Card; saved: boo
         )}
       </div>
       <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-dim">
-        {card.estYesBps !== null && (
-          <span>If YES wins: ×{(Number(card.estYesBps) / 10_000).toFixed(2)} (estimate)</span>
-        )}
-        {card.estNoBps !== null && <span>If NO wins: ×{(Number(card.estNoBps) / 10_000).toFixed(2)} (estimate)</span>}
-        {card.entriesCloseAt !== null && <span>Entries close {formatUtc(card.entriesCloseAt)}</span>}
-        {card.deadlineAt !== null && <span>Deadline {formatUtc(card.deadlineAt)}</span>}
-        {card.state === "in_review" && card.reviewEndsAt !== null && (
-          <span className="col-span-2">In review · pays {formatUtc(card.reviewEndsAt)}</span>
+        {card.stateLine === null ? (
+          <>
+            {card.estYesBps !== null && (
+              <span>If YES wins: ×{(Number(card.estYesBps) / 10_000).toFixed(2)} (estimate)</span>
+            )}
+            {card.estNoBps !== null && (
+              <span>If NO wins: ×{(Number(card.estNoBps) / 10_000).toFixed(2)} (estimate)</span>
+            )}
+            {card.entriesCloseAt !== null && <span>Entries close {formatUtc(card.entriesCloseAt)}</span>}
+            {card.deadlineAt !== null && <span>Deadline {formatUtc(card.deadlineAt)}</span>}
+          </>
+        ) : (
+          <span className="col-span-2" data-testid="card-state">
+            {card.stateLine}
+          </span>
         )}
       </div>
       {card.kind !== "PriceTouch" && <p className="mt-2 text-xs text-dim">{NOTICE}</p>}

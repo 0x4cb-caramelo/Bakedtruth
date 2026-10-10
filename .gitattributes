@@ -4,6 +4,9 @@
 # different account.
 *.bin binary
 
+# The void log (Sprint 12): each record's SHA-256 is on-chain, so Git must keep its bytes exactly as written.
+content/void-log/*.md -text
+
 *.bat text eol=crlf
 *.cmd text eol=crlf
 *.ps1 text eol=crlf

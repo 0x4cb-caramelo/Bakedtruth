@@ -2,25 +2,30 @@
  * Purpose: the relay's allowlist is taken from a trace of the real client (Sprint 11 DoD; proposal §2.6): the campaign
  *          page's reads, the entry's preparation, the hand-off and its watch, the activity and the re-check run against
  *          the program in LiteSVM behind a recording RPC, and every method they call must be in the table of
- *          docs/technical/relay-allowlist.md. No subscription is ever opened: the client polls.
+ *          docs/technical/relay-allowlist.md. No subscription is ever opened: the client polls. Sprint 12 adds the
+ *          wallet's history, its entries, an entry's settlement, a closed campaign and the claim of a reserved share.
  *          Filter: `bun test tests/ -t "the client's rpc trace"`.
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ * Version: 0.2.0
+ * Sprint:  11 (site: campaign page and entry); 12
  */
 import { afterEach, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { createSolanaRpc } from "@solana/kit";
+import { createSolanaRpc, getBase64EncodedWireTransaction, lamports, signTransaction } from "@solana/kit";
 
-import { recheck } from "@brot/sdk/read";
+import { recheck, Side } from "@brot/sdk/read";
 
 import { readActivity } from "../../app/features/campaign-page/activity";
-import { loadCampaignPage } from "../../app/features/campaign-page/load";
+import { campaignClosed, loadCampaignPage } from "../../app/features/campaign-page/load";
+import { claimTransaction, lastValidOf, prepareReceive, watchClaim } from "../../app/features/claim/claim";
+import { readEntrySettlement, readWalletHistory } from "../../app/features/my-entries/history";
+import { loadMyEntries } from "../../app/features/my-entries/load";
 import { handToWallet, pendingOf, prepareEntry } from "../../app/features/entry/submit";
 import { openedCampaign } from "../brot/flows";
 import { openingWorld } from "../brot/opening";
 import * as P from "../brot/program";
 import { fundedWallet } from "../brot/setup";
 import { ready } from "../sdk/prepared";
+import { runCycle } from "./cycle-run";
 import { startFakeChain, type FakeChain } from "./fake-chain";
 import { memoryStore, testWallet } from "./support";
 
@@ -65,5 +70,41 @@ describe("the client's rpc trace", () => {
     // Every row the client's own code calls was seen; the wallet adapter's rows are outside this trace.
     const fromSite = allowed.filter((a) => !a.caller.startsWith("Wallet adapter")).map((a) => a.method);
     expect(fromSite.filter((m) => !seen.has(m))).toEqual([]);
+  });
+
+  test("the Sprint 12 reads and the claim stay on the allowlist: history, entries, settlements, a closed campaign", async () => {
+    const w = await openingWorld();
+    const run = await runCycle(
+      w,
+      ([ana, bruno]) => [
+        { who: ana, side: Side.Yes, amount: 10_000_000n },
+        { who: bruno, side: Side.No, amount: 10_000_000n },
+      ],
+      { how: "no", stopAt: "closed", emptyCreator: true },
+    );
+    chain = run.chain;
+    const before = chain.methods.length;
+    const rpc = createSolanaRpc(chain.url);
+    const [ana] = run.bakers;
+    const history = await readWalletHistory(rpc, ana.address);
+    await loadMyEntries(rpc, ana.address, [run.campaign]);
+    expect((await readEntrySettlement(rpc, run.campaign, ana.address)).event).not.toBeNull();
+    await loadCampaignPage(rpc, run.id, ana.address);
+    expect(await campaignClosed(rpc, run.id + 1_000n)).toBe(false);
+    expect(history.events.length).toBeGreaterThan(0);
+    // The creator's reserved share: prepared (A-8 first), handed to a stand-in wallet, watched.
+    w.client.svm.airdrop(w.creator.address, lamports(P.SOL));
+    const prepared = await prepareReceive({ rpc, wallet: w.creator.address, campaign: run.campaign, deploySlot: 0n });
+    if (!prepared.ok) throw new Error(`claim not prepared: ${prepared.failure}`);
+    // The wallet is handed exactly the bytes the SDK summarised (security review L3).
+    expect(new Uint8Array(claimTransaction(prepared.ready).message.serialize())).toEqual(
+      new Uint8Array(prepared.ready.transaction.messageBytes),
+    );
+    const signed = await signTransaction([w.creator.keyPair], prepared.ready.transaction);
+    const sig = await rpc.sendTransaction(getBase64EncodedWireTransaction(signed), { encoding: "base64" }).send();
+    expect(await watchClaim(rpc, sig, lastValidOf(prepared.ready))).toBe("landed");
+    const seen = new Set(chain.methods.slice(before));
+    expect([...seen].filter((m) => !documented().some((a) => a.method === m))).toEqual([]);
+    expect([...seen].some((m) => /subscribe|getProgramAccounts/i.test(m))).toBe(false);
   });
 });

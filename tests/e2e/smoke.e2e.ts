@@ -58,7 +58,8 @@ test("an entry on each side lands once, and the estimate on screen is the SDK's"
     yes: String(SOL / 2n),
     no: String(SOL / 4n),
   });
-  await expect(page.getByText("You have YES 0.5000 SOL and NO 0.2500 SOL in this campaign.")).toBeVisible();
+  // Sprint 12: the wallet's own amounts are written exactly, to the lamport (copy-states.ts `exactSol`).
+  await expect(page.getByText("You have YES 0.5 SOL and NO 0.25 SOL in this campaign.")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   expect(sockets).toEqual([]);
 });

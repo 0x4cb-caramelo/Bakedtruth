@@ -28,17 +28,23 @@ Sprint 09.
 
 | Method | Called by | What it may read or carry |
 |---|---|---|
-| `getAccountInfo` | Page, SDK preparation, guard, recheck, A-8 | The program's accounts (`Campaign`, `GlobalConfig`, `Entry`, owner `5Rx8…n8o`); the Clock sysvar; a metric account whose owner is one of the five readers' programs (Pyth receiver `rec2HH…`, SPL Token, Meteora DAMM v2, SPL Stake Pool, Vote); an `Entry` that does not exist yet answers `null`; and the program's ProgramData (A-8: below), only as a `dataSlice` of offset 0 and length 45. Encoding `base64`, commitment `confirmed` |
-| `getMultipleAccounts` | Page | The same accounts, up to three per call (campaign and config; then metric, the wallet's entry, the creator's entry) |
-| `getLatestBlockhash` | SDK preparation | Commitment `confirmed`; its `lastValidBlockHeight` is what the retry guard saves first |
-| `simulateTransaction` | SDK preparation | One transaction whose top-level instructions are the program's (`user_join_campaign`); `sigVerify: false`, `replaceRecentBlockhash: true`, `innerInstructions: true`, encoding `base64` |
-| `getMinimumBalanceForRentExemption` | SDK preparation | The sizes of a `Join` (96 bytes) and an `Entry` (116 bytes) |
+| `getAccountInfo` | Page, SDK preparation, guard, recheck, A-8, claim | The program's accounts (`Campaign`, `GlobalConfig`, `Entry`, owner `5Rx8…n8o`); the Clock sysvar; a metric account whose owner is one of the five readers' programs (Pyth receiver `rec2HH…`, SPL Token, Meteora DAMM v2, SPL Stake Pool, Vote); an `Entry` that does not exist yet answers `null`; and the program's ProgramData (A-8: below), only as a `dataSlice` of offset 0 and length 45. Encoding `base64`, commitment `confirmed` |
+| `getMultipleAccounts` | Page, my entries | The same accounts, up to three per call on the campaign page (campaign and config; then metric, the wallet's entry, the creator's entry); on "My entries" (Sprint 12) up to 100 per call: each campaign with the wallet's `Entry`, then the metric accounts of the open ones |
+| `getLatestBlockhash` | SDK preparation, claim | Commitment `confirmed`; its `lastValidBlockHeight` is what the retry guard saves first |
+| `simulateTransaction` | SDK preparation, claim | One transaction whose top-level instructions are the program's (`user_join_campaign`; `settle_creator_share` for the claim of a reserved share, Sprint 12); `sigVerify: false`, `replaceRecentBlockhash: true`, `innerInstructions: true`, encoding `base64` |
+| `getMinimumBalanceForRentExemption` | SDK preparation, claim | The sizes of a `Join` (96 bytes) and an `Entry` (116 bytes); 0 bytes for the claim's wallet floor (Sprint 12) |
 | `sendTransaction` | Wallet adapter, and the trace's stand-in wallet | Only when a wallet lacks `signAndSendTransaction`: the adapter then sends the signed bytes through this RPC. Top-level instructions of the program, ComputeBudget, and known wallet-assertion programs: Lighthouse `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95` (recorded in Sprint 03, `knowledge-base/tecnologia/lighthouse.md`). A wallet with `signAndSendTransaction` (MWA's `sign_and_send_transactions`) sends through its own RPC, which the relay cannot gate |
-| `getSignatureStatuses` | Guard | One signature per call, the one the wallet returned; once with `searchTransactionHistory: true`, before the guard declares an attempt unlanded |
-| `getBlockHeight` | Guard | Three commitments, each needed: `finalized` (past the deadline, a join can no longer land), `processed` (when the wallet answers, the deadline grows to that height plus 150) and `confirmed` (before signing, a blockhash with under 60 blocks left is prepared again). A relay that pins one commitment breaks the other two |
-| `getSignaturesForAddress` | Activity, recheck | A campaign account of the program; `limit` 20 for the activity; the SDK's recheck pages up to 1,000 at a time and stops at 10,000 |
-| `getTransaction` | Activity, recheck, guard | Signatures the previous call returned, and the guard's own signature when it failed (to read which program's instruction failed); encoding `json`, `maxSupportedTransactionVersion: 0`, commitment `confirmed` |
-| `getBalance` | Wallet adapter | The connected wallet's own address |
+| `getSignatureStatuses` | Guard, claim | One signature per call, the one the wallet returned; once with `searchTransactionHistory: true`, before the guard declares an attempt unlanded |
+| `getBlockHeight` | Guard, claim | Three commitments, each needed: `finalized` (past the deadline, a join can no longer land), `processed` (when the wallet answers, the deadline grows to that height plus 150) and `confirmed` (before signing, a blockhash with under 60 blocks left is prepared again). A relay that pins one commitment breaks the other two |
+| `getSignaturesForAddress` | Activity, recheck, my entries, campaign page | A campaign account of the program; `limit` 20 for the activity; the SDK's recheck pages up to 1,000 at a time and stops at 10,000. Since Sprint 12: the connected wallet's own address (`limit` 50, with `before` for older pages; a refresh pages back up to 10 pages of 50 until it meets what was read: "My entries"); an `Entry` address of the program (`limit` 25: what settled the wallet's entry); a campaign address with `limit` 10 (whether a missing campaign was closed: its `CampaignClosed`) and with `limit` 100 (a reserved creator share the close paid: its `CampaignFinalized`) |
+| `getTransaction` | Activity, recheck, guard, my entries | Signatures the previous call returned (since Sprint 12 also those of the wallet's own history and of an `Entry` address), and the guard's own signature when it failed (to read which program's instruction failed); encoding `json`, `maxSupportedTransactionVersion: 0`, commitment `confirmed` |
+| `getBalance` | Wallet adapter, claim | The connected wallet's own address (the claim reads it for the wallet's floor, Sprint 12) |
+
+**Sprint 12 (2026-10-10).** "My entries", an entry's settlement, a closed campaign and the claim of a reserved creator
+share added callers and arguments, not methods: `tests/site/relay-trace.test.ts` runs them and fails on any method off
+this table, a subscription, or `getProgramAccounts`. A wallet's history has no owner to check: the relay should accept
+`getSignaturesForAddress` on any address, bounded by `limit`, and `getTransaction` on any signature, since both answer
+public ledger data; the page decodes only this program's events, under the SDK's rules.
 
 ## Not on the list
 

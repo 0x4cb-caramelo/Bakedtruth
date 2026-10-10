@@ -2,8 +2,8 @@
  * Purpose: `team_void_campaign(reason, note_hash)` with your own team key (TP §3.4.7, BR-45): the public text of
  *          the void is saved to content/void-log/<campaign>-<UTC time>.md, and the SHA-256 of exactly the saved
  *          bytes goes on-chain with the reason. A team key may use `TeamHouseFailure` (the 10% opening fee goes
- *          back to the opener) or `TeamOutsideCause` (Brot keeps it).
- * Version: 0.1.1
+ *          back to the opener, unless nobody had entered) or `TeamOutsideCause` (Brot keeps it).
+ * Version: 0.1.3 (Sprint 12: the personal-data rule from the record's format; line endings made LF before hashing)
  * Sprint:  05 (SDK and the devnet cycle), lane OPS
  *
  * The program lets a team key void only an AUTOMATIC void (a campaign `resolve_campaign` voided: missed window,
@@ -11,7 +11,8 @@
  * record names the acting team key (accountability: the key is public on-chain as the signer anyway) and nothing
  * else about a person: text with an email address, an @handle or a URL is refused. It is written as `.pending`
  * only after the simulation passes and with --yes, renamed once the ledger confirms, removed on a refusal, and left
- * pending when the answer never comes (Sprint 05 deploy review, F10). Sprint 12 gives the record its public format.
+ * pending when the answer never comes (Sprint 05 deploy review, F10). Sprint 12 gave the record its public format
+ * (packages/sdk/src/schemas/void-log.ts): what `voidRecord` writes parses there, and CI checks every committed record.
  *
  *   TEAM_KEYPAIR=~/k.json bun run scripts/team/void.ts <campaign> --reason TeamOutsideCause --note note.md --cluster devnet [--yes]
  */
@@ -22,6 +23,7 @@ import { join } from "node:path";
 import { address, type Address } from "@solana/kit";
 
 import { Outcome, VoidReason, decodeCampaign } from "@brot/sdk/read";
+import { personalDataIn } from "@brot/sdk/schemas";
 import { buildTeamVoidCampaign } from "@brot/sdk/tx";
 
 import { account, send } from "../validator/rpc";
@@ -30,19 +32,17 @@ import { act, contextFromCli, requireRole, runCli, type TeamContext } from "./co
 export type TeamVoidReason = "TeamHouseFailure" | "TeamOutsideCause";
 const REASONS: TeamVoidReason[] = ["TeamHouseFailure", "TeamOutsideCause"];
 
-/** The record's bytes: a short header the reader can check against the chain, then the team's text. */
+/**
+ * The record's bytes: a short header the reader can check against the chain, then the team's text with its line
+ * endings made `\n` first, so the bytes hashed on-chain are the bytes Git keeps (Sprint 12 review, L2).
+ */
 export function voidRecord(campaign: Address, reason: TeamVoidReason, signer: Address, at: string, text: string) {
   const header = `# Void of campaign ${campaign}\n\n- Reason: ${reason}\n- Team key: ${signer}\n- Written (UTC): ${at}\n\n`;
-  return new TextEncoder().encode(`${header}${text.trimEnd()}\n`);
+  return new TextEncoder().encode(`${header}${text.replace(/\r\n?/g, "\n").trimEnd()}\n`);
 }
 
-/** Why `text` cannot go into a permanent public record, or `null`: no email, @handle or URL. */
-export function personalDataIn(text: string): string | null {
-  if (/[^\s@]+@[^\s@]+\.[^\s@]+/.test(text)) return "an email address";
-  if (/(^|[\s(])@\w{2,}/.test(text)) return "an @handle";
-  if (/https?:\/\/|www\./i.test(text)) return "a URL";
-  return null;
-}
+/** The rule moved to the record's public format (Sprint 12), shared with the site and CI's check. */
+export { personalDataIn };
 
 export async function voidCampaign(
   ctx: TeamContext,

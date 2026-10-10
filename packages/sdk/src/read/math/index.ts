@@ -1,9 +1,10 @@
 /**
  * Purpose: the money and schedule math of the program as pure TypeScript, for previews, estimates and
  *          checks: the opening conversion and split, the fees, the creator share, the payouts, the
- *          finalize snapshot, the void returns, the entry close (TP 3.4.16).
- * Version: 0.1.0
- * Sprint:  05 (SDK: the math mirror)
+ *          finalize snapshot, the void returns, the entry close (TP 3.4.16); and, since Sprint 12, what a
+ *          stored campaign owes (stored.ts: the pot rule, the opener's return, the creator share's status).
+ * Version: 0.1.1
+ * Sprint:  05 (SDK: the math mirror); 12 (stored.ts)
  *
  * Every function mirrors one Rust function of programs/brot-markets/src/math/ (or settlement/rules.rs),
  * with the same rounding and the same refusals, thrown as `BrotRefusal`. The data contract (TP 3.1):
@@ -42,5 +43,18 @@ export {
   type PotRule,
 } from "./settle";
 export { snapshot, splitIsViable, type Snapshot, type SnapshotInput, type Verdict } from "./snapshot";
+export {
+  AUTOMATIC_VOIDS,
+  amountsOf,
+  creatorShareStatus,
+  entryIfFinalized,
+  entryOwed,
+  noEntryEver,
+  potRuleOf,
+  prizeReturnOf,
+  snapshotOf,
+  storedVerdict,
+  type CreatorShareStatus,
+} from "./stored";
 export { keptOpeningReturn, voidClassOf, voidReturn, type OpenerReturn, type VoidClass } from "./void";
 export { I128_MAX, I128_MIN, I64_MAX, I64_MIN, U128_MAX, U64_MAX } from "./integers";

@@ -24,6 +24,8 @@ const ALLOWED_COMMANDS = new Set([
   'abrir', // the site's route for opening a campaign (docs/SPRINTS.md, Sprint 19); not a Claude command
   'rpc', // the site's JSON-RPC relay path, served by brot-rpc (Technical Plan §3.5); not a Claude command
   'pitch2', // the provisional site's second deck, served by services/landing; not a Claude command
+  'my-entries', // the site's "My entries" route (Sprint 12, L-01); not a Claude command
+  'record', // the site's public record route (Sprint 12, L-01); not a Claude command
 ]);
 const ALLOWED_AGENT_WORDS = new Set([
   'multi-agent', // ordinary word ("multi-agent review"), not an agent name

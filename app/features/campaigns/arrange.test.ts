@@ -28,6 +28,8 @@ const card = (over: Partial<Card> & { address: string }): Card => ({
   entriesCloseAt: null,
   deadlineAt: null,
   reviewEndsAt: null,
+  chip: "open",
+  stateLine: null,
   estYesBps: null,
   estNoBps: null,
   ...over,

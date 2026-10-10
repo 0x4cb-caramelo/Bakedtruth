@@ -212,7 +212,7 @@ SOL.
 | 09 | **Open [Q]:** what happens to the waitlist, its twelve-month purge, its deletion form and the decks at `/pitch` and `/pitch2` when the landing leaves (TP §8.1, §14.2), and whether and when the waitlist gets its promised notice; turning off the Cloudflare zone's analytics injection, which waits for the founder's agreement (`CHANGELOG.md`). Needs L-01 and the default theme from -1. D-q is decided (the inherited chat route goes); Bun or Node 22 for the site is decided by the staging test (D-p), not by the founder |
 | 10 | None new. Needs the partner seal's place (L-24) from -1 |
 | 11 | L-03 answered 2026-10-10 (the lock notice text is in the sprint doc); L-23 answered yes; the creator notice as -1 drew it (BP-14). **Answered 2026-10-10:** A-8 reads ProgramData from the public devnet RPC, in the SDK, until the `/rpc` relay exists; the floor a baker signs stays at `min_return_bps` 1% below the estimate on devnet |
-| 12 | **Open:** the public contest channel (L-13); the public name of the state while a payout is paused (L-04); the "my entries" route name, with L-01 |
+| 12 | **Answered 2026-10-10:** L-13, wrong results are reported on the official X account (https://x.com/brotmarkets); L-04, "Contested"; L-01, the routes `/my-entries` and `/record`; the payout wording on devnet, "Waiting for payout" with no time promised until the keeper settles (it replaces "Pago sozinho, ao fim da janela de 6 horas" there). **Answered the same day (1a, 2a, 3a):** the copy of a campaign that ends with no entry, as drafted; the L-03 lock notice's devnet wording (no automatic payout, no time promised, until the keeper settles); the chip says "Result final" until the entries are paid out. Sprint 11's Phantom signature stays open without blocking |
 | 13 | **Open:** what the points are worth after devnet (L-09); the partner report's format and what happens to a partner who does not post (L-24); where the report link leads (with L-13); BP-5's wording, "no human picks the winner", and BP-11, the mascot's names (P-9); the thresholds of the three demand tests, before the devnet beta (P2 §2.5). The suggestions page of v0.0.1 (L-17) is gone: BP v0.0.4 dropped it (P1 §4.1) |
 | 14 | **Answered:** Q9 (b: the 90 days start at the referred baker's first entry). **Open:** P-6 (rebate ceiling 0.05 SOL); L-14 (stage 2 before phase 1.2, and the second oracle, T8); who signs the weekly referral payout; D5 (attestation and screening: (a) on devnet, decide before 14, after L0); BP-9 (referral from day one on mainnet, P-9); where the referral balance shows (L-10); whether the 1% a referred baker pays in a one-sided pot counts toward the 20% |
 | 15 | **Answered:** Q5 (a: a sponsor's sided entry follows the common rule); Q6; D-t. **Open:** may a third party add a prize to someone else's campaign (P1 §3.7; keeps or drops `sponsor_add_prize`); the sponsor perks and whether the sealed entry has the US$500 floor (BP-3, P-9); P-8 and the Cloak page (L-18); the sponsor screens (L-11) |
@@ -321,13 +321,12 @@ no longer carries. Raising a cap by steps, a routine of v0.0.1, went with the ca
     builds the relay (X1.2).
 - **One placement is this roadmap's reading** [INF]: the alerts the indexer feeds are wired in Sprint 08.
 - **Files renamed now.** The proposal's D6 table names Sprints 11 and 12's files with the site language (L-01);
-  this roadmap renamed them now, and only the "my entries" route waits for L-01.
+  this roadmap renamed them now; the "my entries" route was named with L-01 in Sprint 12 (`/my-entries`).
 
 **Points the sources leave open, which the sprints name without choosing** [AC]: how a team key adds a prize (02; the
 TP's working reading is that it pays like any wallet, with a zero share); the minimum target distance per kind, how
 `StakeAtLeast` stays closed until a devnet YES, and how the epoch kinds meet the 3-to-90-day rule with no `deadline_at`
-in the proposal's sketch (03); how a campaign leaves `Contested` before Sprint 14, and whether `close_campaign` waits
-for a reserved creator share (04); the SDK package's name and whether the public devnet deployment carries the drill
+in the proposal's sketch (03); how a campaign leaves `Contested` before Sprint 14 (04); the SDK package's name and whether the public devnet deployment carries the drill
 constants (05); the sealed entry's shape, a flag on the join or an instruction of its own (15). The TP settles one more
 as a working reading [INF]: a price campaign copies its maximum price age from `GlobalConfig`, so its creator does not
 choose it. Two of v0.0.1's open points are closed: creation is tested in Sprint 02 with the price reader that exists

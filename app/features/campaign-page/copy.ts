@@ -3,8 +3,8 @@
  *          plain words, the proof's labels, the price facts and the screen when no fresh price exists (L-22), the
  *          re-check panel, the creator notice (BR-26, BP-14's recommendation, still open in P-9), the pot, the activity
  *          and the state card. The entry panel's words are in features/entry/copy.ts.
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ * Version: 0.2.0 (Sprint 12: the closed account; the state words moved to copy-states.ts)
+ * Sprint:  11 (site: campaign page and entry); 12
  */
 import type { KindName } from "./proof";
 
@@ -49,6 +49,9 @@ export const PAGE = {
   back: "All campaigns",
   notFound: "No campaign at this address",
   notFoundText: (id: string) => `Nothing of this program lives at campaign id ${id}. The link may be wrong.`,
+  closedAccount: "This campaign is settled",
+  closedAccountText:
+    "Every payout went out and the program closed the campaign's account. Its history stays on-chain; what your wallet received is in My entries.",
   loadFailed: "Can't reach Solana right now",
   loadFailedText: "The page could not read the campaign from the network. It tries again by itself.",
   team: "Team",
@@ -147,21 +150,4 @@ export const ACTIVITY = {
   failed: "The recent entries could not be read now.",
   row: (side: string, sol: string) => `${side} ${sol} SOL`,
   refresh: "Read again",
-} as const;
-
-export const STATE = {
-  closed: "Entries closed",
-  closedText: (deadline: string) =>
-    `The program reads the account when the answer is on-chain, or at the deadline (${deadline}) at the latest.`,
-  knowable: "The answer is already on-chain, so entries are closed. The program records it next.",
-  review: "In review",
-  reviewText: (side: string, ends: string) =>
-    `The program read ${side}. Paid automatically once the 6-hour review ends (${ends}), or sooner if the team confirms; the team can also void it.`,
-  reviewVoid: (ends: string) => `Voided. Every entry is refunded in full once the 6-hour review ends (${ends}).`,
-  paid: "Paid",
-  paidText: (side: string) => `Result: ${side}. Paid automatically to the wallets that entered ${side}.`,
-  void: "Voided",
-  voidText: "Every entry is refunded in full, with no fee.",
-  mine: "Your entry",
-  mineSides: (sides: string) => `You have ${sides} in this campaign.`,
 } as const;

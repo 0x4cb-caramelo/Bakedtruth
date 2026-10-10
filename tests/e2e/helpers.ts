@@ -69,6 +69,6 @@ export function perOne(bps: bigint): string {
   return `${bps / 10_000n}.${fraction}`;
 }
 
-/** The founder's L-03 text (2026-10-10), which must show before every signature. */
+/** The founder's L-03 text (2026-10-10), in its devnet wording (Sprint 12, answer 2a), shown before every signature. */
 export const LOCK_NOTICE =
-  "Your entry stays locked until the campaign ends. You cannot take it out before then. Payouts go to your wallet automatically after the result is read.";
+  "Your entry stays locked until the campaign ends. You cannot take it out before then. Payouts go to your wallet after the result is read; on devnet that is not automatic yet, and no time is promised.";

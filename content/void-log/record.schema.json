@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "void"
+        },
+        "campaign": {
+          "type": "string",
+          "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$",
+          "description": "The voided campaign's address"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "TeamHouseFailure",
+            "TeamOutsideCause"
+          ],
+          "description": "The VoidReason sent on-chain: the opening fee is refunded on a house failure, kept otherwise"
+        },
+        "file": {
+          "type": "string",
+          "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}-\\d{4}-\\d{2}-\\d{2}T\\d{2}-\\d{2}-\\d{2}-\\d{3}Z\\.md$",
+          "description": "The record's file name in content/void-log/"
+        },
+        "teamKey": {
+          "type": "string",
+          "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$",
+          "description": "The team key that acted; the same key signs the void on-chain"
+        },
+        "writtenAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "description": "When the team script wrote the record, UTC"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The team's public text: no email address, @handle or URL"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "The SHA-256 of exactly the file's bytes; a void's equals the campaign's void_note_hash on-chain"
+        }
+      },
+      "required": [
+        "kind",
+        "campaign",
+        "reason",
+        "file",
+        "teamKey",
+        "writtenAt",
+        "text",
+        "sha256"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "correction"
+        },
+        "corrects": {
+          "type": "string",
+          "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}-\\d{4}-\\d{2}-\\d{2}T\\d{2}-\\d{2}-\\d{2}-\\d{3}Z\\.md$",
+          "description": "The earlier record this one corrects; that record is never edited"
+        },
+        "file": {
+          "type": "string",
+          "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}-\\d{4}-\\d{2}-\\d{2}T\\d{2}-\\d{2}-\\d{2}-\\d{3}Z\\.md$",
+          "description": "The record's file name in content/void-log/"
+        },
+        "teamKey": {
+          "type": "string",
+          "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$",
+          "description": "The team key that acted; the same key signs the void on-chain"
+        },
+        "writtenAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "description": "When the team script wrote the record, UTC"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The team's public text: no email address, @handle or URL"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "The SHA-256 of exactly the file's bytes; a void's equals the campaign's void_note_hash on-chain"
+        }
+      },
+      "required": [
+        "kind",
+        "corrects",
+        "file",
+        "teamKey",
+        "writtenAt",
+        "text",
+        "sha256"
+      ],
+      "additionalProperties": false
+    }
+  ],
+  "title": "A content/void-log/ record (Brot Markets)",
+  "description": "Generated from packages/sdk/src/schemas/void-log.ts by scripts/void-log-schema.ts; the zod schema is the check (it also refuses personal data and a file name that does not start with the voided campaign)."
+}
