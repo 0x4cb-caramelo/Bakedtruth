@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **604** |
+| Arquivos mapeados | **605** |
 | Acima de 200 linhas | **45** ⚠️ |
 | Sem cabeçalho `Purpose:` | **77** ⚠️ |
 
@@ -759,6 +759,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`detach-os.ps1`](scripts/detach-os.ps1) | detach-os.ps1 — desconecta seu projeto do repositório AI Dev Operating System | 161 |
 | [`detach-os.sh`](scripts/detach-os.sh) | detach-os.sh — desconecta seu projeto do repositório AI Dev Operating System | 157 |
 | [`devnet-clock-probe.ts`](scripts/devnet-clock-probe.ts) | measure a cluster's clock against wall time (slot length, the confirmed-to-finalized gap, the drift of the Clock sysvar and, under Alpenglow, of the leader's na | 201 |
+| [`devnet-open-test.ts`](scripts/devnet-open-test.ts) | open one short-lived BTC/USD price campaign on devnet for the keeper's real-resolve test (Sprint 06): target 1.2% above the sponsored price (past its confidence | 47 |
 | [`devnet-seed.ts`](scripts/devnet-seed.ts) | seed a cluster with example campaigns opened free by a team key (Sprint 05 DoD), one per kind that can open there: a price campaign above and one below (targets | 137 |
 | [`devnet-settle-batch.ts`](scripts/devnet-settle-batch.ts) | the real settle batch on a cluster (Sprint 05 DoD, "the real settle batch with self-CPI events and its compute cost", T3, C7): a free team burn campaign, twelve | 153 |
 | [`devnet-smoke.ts`](scripts/devnet-smoke.ts) | the full cycle in SOL (Sprint 05 DoD, X0.2 and X0.5): a wallet outside the team opens a burn campaign and pays US$500 at the Pyth price after previewing the who | 76 |
