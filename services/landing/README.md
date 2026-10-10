@@ -1,6 +1,6 @@
 # services/landing
 
-O site "em breve" do Brot Markets: a página inicial com a lista de espera, os termos, a privacidade e o deck em
+O site "em breve" do Brot Markets: a página inicial com a lista de espera, a privacidade e o deck em
 `/pitch`. O mesmo serviço responde por `docs.brot.markets`, a documentação. É provisório. Na Sprint 09 o site de verdade (`app/`, em Next.js) assume o endereço e esta pasta sai.
 
 Não tem dependências. Roda com o Node que já existe no servidor (22 ou mais novo).
@@ -16,7 +16,7 @@ Não tem dependências. Roda com o Node que já existe no servidor (22 ou mais n
 | `lib/static.mjs` | Serve `public/`, sem deixar sair da pasta |
 | `lib/campaigns.mjs` | Serve a prévia das telas de campanha em `/dev0x/`, a partir de `prototype-lab/campaigns/` (uma cópia só) e com a CSP do protótipo |
 | `public/` | Página inicial, privacidade, 404, fontes e imagens |
-| `public/terms.html`, `public/privacy.html` | Termos e privacidade, gerados de `docs/legal/*.md` por `scripts/build-legal.mjs`. Edite o texto lá e rode o script; os testes falham se página e texto divergirem |
+| `public/privacy.html` | A privacidade, gerada de `docs/legal/PRIVACY-POLICY.md` por `scripts/build-legal.mjs`. Edite o texto lá e rode o script; os testes falham se página e texto divergirem. Os termos saíram do ar em 10/10/2026 (resposta 9a do fundador) até a Sprint 17: `/terms` responde 404, e um teste falha se uma página voltar a apontar para ele |
 | `public/2/` | A página inicial com o visual do deck (opção A, 9/10/2026), em `/2`, fora dos buscadores: o mesmo conteúdo de `index.html`, palavra por palavra (`tests/two.test.mjs` compara), com `base.css` e `home.css` próprios e as fontes de `public/pitch/`. Mudou o texto da página inicial? Mude aqui também |
 | `public/mascot*.js` | O Baked andando pela página inicial: `mascot.js` decide onde ele fica, `mascot-body.js` desenha, `mascot-senses.js` percebe o ponteiro, a rolagem e o teclado. Não guarda nem envia nada |
 | `public/pitch/` | O deck, desde 8/10/2026 o v4: nove slides, a demo animada e uma cena do mascote por troca, com os modos completo, leve (`N`) e desligado (`M`). Um palco leve (`deck.js`, `deck.css`) e o movimento em módulos curtos (`motion.js` decide; `scenes.js`, `exits.js`, `lever.js`, `team.js` têm as cenas; `sprites.js` as imagens de `img/`) |

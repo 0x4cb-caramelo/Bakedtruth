@@ -28,9 +28,6 @@ to what each one put in. The prize for being right is the money of the people wh
 
 Every 1 USDC on YES gets back 950 ÷ 600 = 1.583. Put in 60, get 95.
 
-The opener's share is set out in the [Terms of Service](https://brot.markets/terms), section 7. Its fine print is
-still being written, and this page will follow it.
-
 ## Why the fee comes from the losing side
 
 There's no price in a pot, so we can't charge a little on every trade the way order-book markets do. Charging on the

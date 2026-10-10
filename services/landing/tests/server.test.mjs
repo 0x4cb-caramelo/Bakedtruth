@@ -123,7 +123,7 @@ test("pages are served with the security headers", async () => {
   assert.equal(res.headers.get("x-robots-tag"), null);
   assert.match(await res.text(), /Brot Markets/);
   assert.equal((await fetch(`${base}/privacy`)).status, 200);
-  assert.equal((await fetch(`${base}/terms`)).status, 200);
+  assert.equal((await fetch(`${base}/terms`)).status, 404); // down until Sprint 17 (the founder's answer 9a)
   assert.equal(await (await fetch(`${base}/healthz`)).text(), "ok");
 });
 

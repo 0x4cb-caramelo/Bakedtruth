@@ -2045,8 +2045,8 @@ over unchanged in substance) **[DP]**:
 | 4. Who can access | The site's service, as user `brot`, and whoever administers the server: Lucas and Ronaldo. The server's other projects cannot read the folder |
 | 5. Control | File permissions (folder 0700, file 0600). No panel or route lists the list. The API answers "ok" both to someone already on the list and to someone leaving who is not on it, so it never reveals who signed up |
 | 6. Retention | Until the person leaves, or twelve months after sign-up. The service deletes expired lines itself, at start and every 24 hours |
-| 7. Logs | The service logs only counts ("lead added (total N)"): never the email, never the IP. The visitor's address is the limiter's key, in memory, for one minute. Cloudflare's logs follow Cloudflare's account (C13 **[AC]**) |
-| 8. Deletion and export | The form at `/privacy` deletes at once. Export on request through X: the record is the items listed on the privacy page. There is no backup of the file, so deleting is final; if a backup ever exists, its retention goes here |
+| 7. Logs | The service logs only counts ("lead added (total N)"): never the email, never the IP. The visitor's address is the limiter's key, in memory, for about a minute: swept every 10 seconds since 2026-10-10 (before, an address stayed until the map filled or the service restarted; the legal review of answer 9a). Cloudflare's logs follow Cloudflare's account (C13 **[AC]**) |
+| 8. Deletion and export | The form at `/privacy` deletes at once. Export on request through X: the record is the items listed on the privacy page. Brot keeps no other copy of the file. Whether the host's own server backups are on (Hostinger offers weekly ones) is the founder's to read in the panel **[AC]**; the privacy page says the host may keep backups for a limited time, and their retention goes here and there once read |
 | 9. Document or consent | The `/privacy` page, in English, and the versioned consent sentence (`CONSENT_VERSION`). The site has no visitor statistics and no cookies |
 
 **Accepted risks, with the reason.**
@@ -2111,11 +2111,16 @@ approved 2026-10-08, not reviewed by a lawyer) still describe the USDC product, 
 Brot's copy of a wallet's activity. The new site's footer links no privacy page. **Answered 9a (2026-10-10)
 [FD]:** before the new site is public, take `/terms` down until Sprint 17, correct `/privacy` (keeping the waitlist's
 deletion form), and link it from every page's footer; the text is prepared in the repository and the founder deploys
-the landing. Not done yet.
+the landing. **Prepared on 2026-10-10** (branch `fix/legal-pages-9a`): the landing no longer builds or links `/terms`
+(it answers 404; docs.brot.markets links it no more either), `docs/legal/PRIVACY-POLICY.md` describes the campaign
+product (the leaderboard and how to leave it, what the new site keeps in the browser, the RPC service, X), the
+waitlist's purpose sentence stays as consented, and the new site's footer links the page (`PRIVACY_URL`). Live once
+the founder deploys the landing; the page's own section 8 promises a post on X when it changes.
 
 **Verdicts.** Leaderboard: PASS with conditions before it goes public (the API redeploy): the live `/privacy` corrected
-and linked from the site (9a, not done yet), and who holds the X login recorded (8a, done). Report channel: PASS, its
-X-login condition met (8a). Nothing blocked the merge; the condition left is 9a's.
+and linked from the site (9a, prepared; live once the landing is deployed), and who holds the X login recorded (8a,
+done). Report channel: PASS, its X-login condition met (8a). Nothing blocked the merge; the condition left is deploying
+9a's pages.
 
 ## 9. Testing strategy
 

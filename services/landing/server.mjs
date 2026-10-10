@@ -2,7 +2,7 @@
  * Purpose: HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API), of the unlisted campaign preview
  *          under /dev0x/ and of docs.brot.markets (the docs. host, from docs-site/), bound to localhost behind the
  *          project's Cloudflare tunnel.
- * Version: 0.3.0 · Sprint: out of band (landing page), 2026-10-05; docs host 2026-10-08; /dev0x 2026-10-10
+ * Version: 0.3.1 · Sprint: out of band (landing page), 2026-10-05; docs host 2026-10-08; /dev0x and sweep 2026-10-10
  *
  * Run: `node services/landing/server.mjs`. No dependencies. Configuration comes from the environment
  * (see .env.example): PORT, HOST, SITE_ORIGIN, LEADS_FILE.
@@ -152,13 +152,17 @@ function start() {
   purge();
   setInterval(purge, DAY_MS).unref();
 
+  // The privacy page says a visitor's address is used for about a minute: drop it once its window has ended.
+  const limiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
+  setInterval(() => limiter.sweep(), 10_000).unref();
+
   const app = createApp({
     root: join(HERE, "public"),
     docsRoot: join(HERE, "docs-site"),
     // The campaign screens live once, in prototype-lab/, and are served from there (the deploy copies the whole repo).
     campaignsRoot: join(HERE, "..", "..", "prototype-lab", "campaigns"),
     store,
-    limiter: createRateLimiter({ limit: 5, windowMs: 60_000 }),
+    limiter,
     allowedOrigins: [siteOrigin, `http://${host}:${port}`, `http://localhost:${port}`],
     siteOrigin,
     log,

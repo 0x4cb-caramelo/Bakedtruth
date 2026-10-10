@@ -5,11 +5,11 @@
  *          copy files: this list adds none. P1 §4.6's line on an automatic payout at the end of the 6-hour window is
  *          not here: on devnet nothing pays out by itself yet, so the founder replaced it (2026-10-10) with the review
  *          rule and "Waiting for payout", which promise no time.
- * Version: 0.2.0 (the Sprint 13 adversarial review: each notice names the screen that mounts it, never its copy file;
- *          the leaderboard's leave line)
+ * Version: 0.2.1 (the founder's answer 9a: the footer's privacy link; 0.2.0, the Sprint 13 adversarial review: each
+ *          notice names the screen that mounts it, never its copy file; the leaderboard's leave line)
  * Sprint:  13 (site: ranking, notices and copy)
  */
-import { AUDIT_NOTICE, TEST_NOTICE } from "../../components/copy-site";
+import { AUDIT_NOTICE, PRIVACY_LABEL, TEST_NOTICE } from "../../components/copy-site";
 import { CREATOR_NOTICE } from "../campaign-page/copy";
 import { REPORT, STATES, WAITING } from "../campaign-page/copy-states";
 import { LOCK_NOTICE, NOTICES, SHEET } from "../entry/copy";
@@ -48,6 +48,13 @@ export const MANDATORY_NOTICES: readonly MandatoryNotice[] = [
       { file: "components/site-notice.tsx", uses: "AUDIT_NOTICE" },
       { file: "app/layout.tsx", uses: "<SiteNotice />" },
     ],
+  },
+  {
+    id: "privacy-link",
+    source: "TP §8.2; the legal review (M5); the founder's answer 9a (2026-10-10)",
+    text: PRIVACY_LABEL,
+    screens: "every screen, in the footer, linking PRIVACY_URL (app/lib/config.ts)",
+    drawnBy: [{ file: "app/layout.tsx", uses: "href={PRIVACY_URL}" }],
   },
   {
     id: "lock",
