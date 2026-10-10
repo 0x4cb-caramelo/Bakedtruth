@@ -17,6 +17,9 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
 nos caminhos da equipe pelo PR #44 e o id novo do programa pelo PR #45; já em 10/10, a Sprint 05 pelo PR #43 (tag
 `sprint-05`). O programa roda no devnet desde a noite de 9/10.
 
+A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir da `origin/main` (`6b5e3ec`), na branch
+`sprint-06-keeper-server`. Nada de código entrou ainda: a primeira tarefa é a checagem do Bun 1.4.2 no servidor.
+
 ### Added
 
 - **A prévia das telas de campanha em `brot.markets/dev0x/`** (10/10/2026, pedido do Ronaldo): as telas da Sprint -1

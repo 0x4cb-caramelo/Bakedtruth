@@ -1,6 +1,6 @@
 # Sprint 06 — Server and primary keeper (Bun check first)
 
-**Status:** planned · **Branch:** `sprint-06-keeper-server` · **Dates:** none, by the founder's decision
+**Status:** in progress (opened 2026-10-10 from `origin/main` at `6b5e3ec`) · **Branch:** `sprint-06-keeper-server` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -78,14 +78,29 @@ The standby, the watchdog, `POST /restart` and the email alerts (Sprint 07). The
 
 ## Founder decisions that block the sprint
 
-- **Open: D4 for the keeper's RPC account.** The proposal recommends Helius Developer (US$49 a month) for the keeper
-  on devnet. Q8 is folded into D4.
+- **Answered 2026-10-10: D4 for the keeper's RPC account is Helius.** The key is a credential on the server and never
+  in the repository. The starting tier is the proposal's Helius Developer (US$49 a month, for devnet); it is sized
+  by credits measured in this sprint, not by the proposal's estimate. Q8 is folded into D4.
 - **Open: the server owner's agreement** to one identity per unit, which changes the house pattern of one user per
   project (proposal §2.10).
 - **Open: P-7 (treasury),** for the monthly conversion half of the SOL runbook. The refill half does not wait.
 - **If the Bun check fails:** D-p goes back to the founder.
 - **Answered:** Q11 (the domain is bought and on Cloudflare); the Hermes key waits for measurement ("ok",
   2026-10-05), and paid openings need no Pyth plan, since the SOL/USD account is free to read (D4).
+
+## Direction of 2026-10-10
+
+Given when the sprint was opened; it narrows the order of work and does not remove any item above.
+
+- **Real values.** The keeper runs against the program already on devnet (`5Rx8…n8o`, deployed with the real
+  constants, Sprint 05). The drill-constants run of X1.1 is not the target; the devnet run below is the real one.
+- **Helius RPC** for the keeper (see the decision above).
+- **MVP happy path first.** Order: one open campaign, its joins, its resolution, the finalize after the review window,
+  the settlement and the payouts, all done by the keeper with nobody triggering anything, on devnet. The Bun check on
+  the server comes before any of it, as the sprint says.
+- **Later in this sprint, not claimed by the happy-path run:** the error paths beyond the tests listed, the load run
+  of 1,000 campaigns, the Bun soak test, the per-unit identities and the tunnel-token rotation, the `deploy/vps/`
+  script with its rollback. Each stays open in the list above until it is done or decided in writing.
 
 ## Agents and skills
 
