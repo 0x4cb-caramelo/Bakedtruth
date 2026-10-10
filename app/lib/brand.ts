@@ -5,14 +5,8 @@ export const BRAND = {
   name: "Brot Markets",
   tagline: "On-chain campaigns on Solana",
   motto: "Resolution is a read, not a judgement.",
-  /** What the mascot says when poked. It is quietly grumpy: short, dry, never salesy. */
-  quips: [
-    "Resolution is a read.",
-    "Not a judgement.",
-    "Prove it.",
-    "I only believe accounts.",
-    "No oracle. Just me, reading.",
-    "Half-baked goals resolve NO.",
-    "Fine. It checks out.",
-  ],
+  /** The footer line on every page (docs/product/BRAND.md). */
+  footer: "Not audited. Stay sharp.",
+  /** What the mascot says when poked (docs/product/BRAND.md, section 2). Short, dry, never salesy. */
+  quips: ["Prove it.", "I only believe accounts.", "Not audited. Stay sharp.", "Devnet. Test money.", "Still baking."],
 } as const;
