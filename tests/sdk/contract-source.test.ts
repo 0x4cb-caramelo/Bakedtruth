@@ -1,13 +1,14 @@
 /**
  * Purpose: the SDK's hand-written copies of the program's contract, checked against the program's own
  *          source so they cannot drift: the error codes (and one IDL message per code), the constants of
- *          constants.rs and join_rules.rs, the real and drill time constants, and both compiled feed lists.
+ *          constants.rs and join_rules.rs, the real and drill time constants, both compiled feed lists, and
+ *          the event authority's seeds used to sign only in `emit`.
  *          Needs no binary.
  * Version: 0.1.0
  * Sprint:  05 (SDK)
  */
 import { describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 
 import * as R from "@brot/sdk/read";
 
@@ -138,6 +139,17 @@ describe("sdk constants match the program source", () => {
       .replace(/0x/g, "");
     expect(feedBytes).toBe(R.SOL_USD_FEED_HEX);
     expect(source("lib.rs")).toContain(`declare_id!("${R.PROGRAM_ID}")`);
+  });
+
+  test("the event authority's seeds sign only in emit, which the decoder's rule 2 rests on", () => {
+    // Rule 2 trusts an inner instruction of this program whose one account is the event authority, because
+    // only `emit` can sign for that PDA. A second signer of the seeds would break it (Sprint 05 review).
+    const files = readdirSync(SRC, { recursive: true, encoding: "utf8" }).filter((f) => f.endsWith(".rs"));
+    const signers = files.filter((f) =>
+      /EVENT_AUTHORITY_SEED|EVENT_AUTHORITY_BUMP|b"__event_authority"/.test(source(f)),
+    );
+    expect(signers.sort()).toEqual(["constants.rs", "events/self_cpi.rs"]);
+    expect(source("events/self_cpi.rs").match(/Seed::from\(EVENT_AUTHORITY_SEED\)/g)).toHaveLength(1);
   });
 
   test("both compiled feed lists, in order", () => {

@@ -4,8 +4,12 @@
  *          or React Native, nothing from the app, the tests, the scripts or the services, and never the
  *          Codama client's error module (it reads `process.env`); the indexer and the relay import only
  *          the read half. `bun run lint:sdk` runs it, with the SDK's own typecheck for DOM and Node globals.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Sprint:  05 (SDK)
+ *
+ * The rules see direct imports. That is why `read` and `tx` may not import `schemas` at all: through it, zod
+ * would reach them one step removed. tests/sdk/boundaries.test.ts plants one violation of each rule in a
+ * copy of the SDK and fails unless every rule fires.
  */
 module.exports = {
   forbidden: [
@@ -22,6 +26,13 @@ module.exports = {
       severity: "error",
       from: { path: "^packages/sdk/src/(read|tx)/" },
       to: { path: "node_modules/zod/" },
+    },
+    {
+      name: "sdk-read-tx-never-import-schemas",
+      comment: "schemas is zod's own entry point (@brot/sdk/schemas): imported by read or tx, zod would follow.",
+      severity: "error",
+      from: { path: "^packages/sdk/src/(read|tx)/" },
+      to: { path: "^packages/sdk/src/schemas/" },
     },
     {
       name: "sdk-no-node-builtins",
