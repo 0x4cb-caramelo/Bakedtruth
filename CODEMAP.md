@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **620** |
+| Arquivos mapeados | **628** |
 | Acima de 200 linhas | **45** ⚠️ |
 | Sem cabeçalho `Purpose:` | **77** ⚠️ |
 
@@ -859,6 +859,24 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`spl-token.ts`](scripts/validator/spl-token.ts) | the few System Program and classic SPL Token instructions the ops scripts need to make a burn campaign's mint (`SupplyAtMost`): create an account, transfer SOL, | 115 |
 | [`surfnet.ts`](scripts/validator/surfnet.ts) | start and stop a local OFFLINE Surfpool surfnet for the ops rehearsals: no datasource (`--offline`), bound to 127.0.0.1 on two free ports in 4200-4299, run from | 95 |
 | [`world.ts`](scripts/validator/world.ts) | a local cluster ready for the ops rehearsals: an offline surfnet, the brot-markets binary installed at the id the program declares with an upgrade authority hel | 114 |
+
+## `services/api/src/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`config.ts`](services/api/src/config.ts) | the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only), the port and host (loopback by default), the refresh i | 53 |
+| [`dto.ts`](services/api/src/dto.ts) | the JSON shape of a campaign for the site. Amounts are lamport strings, addresses base58, times Unix seconds (strings for the big integers). The state is the SD | 48 |
+| [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, and serves /api/v1 on the loopback address. Logs  | 40 |
+| [`query.ts`](services/api/src/query.ts) | validates the list's query string. An unknown parameter, a bad state, or a limit or offset out of range is a 400 with a named code; nothing is guessed. The stat | 49 |
+| [`routes.ts`](services/api/src/routes.ts) | the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged) and /api/v1/campaigns/:address. Every answer is JSON with CORS fo | 85 |
+| [`snapshot.ts`](services/api/src/snapshot.ts) | one read of the chain: every campaign account of the program, decoded by the SDK (a wrong owner, tag or version is skipped), with its public state computed from | 46 |
+| [`store.ts`](services/api/src/store.ts) | holds the last good chain snapshot in memory and refreshes it on a timer. A failed refresh keeps the last good snapshot and records the error, so the API answer | 33 |
+
+## `services/api/tests/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`api.test.ts`](services/api/tests/api.test.ts) | the read API's contract with fake data and no cluster: the list's filters and paging, the 400 and 404 answers, the detail route, CORS, the method refusal, the h | 181 |
 
 ## `services/keeper/src/`
 
