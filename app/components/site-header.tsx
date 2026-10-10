@@ -1,8 +1,9 @@
 /**
- * Purpose: the site's top bar (Sprint 09): the brand, the five routes, the theme button and the wallet button. The theme
- *          follows the stored choice after the first paint (the head script already set it, so there is no flash).
- * Version: 0.1.0
- * Sprint:  09 (site shell, theme and wallet)
+ * Purpose: the site's top bar (Sprint 09): the brand, the routes (Sprint 13 adds "How it works" and the fees, so both
+ *          open from a phone too), the theme button and the wallet button. The theme follows the stored choice after
+ *          the first paint (the head script already set it, so there is no flash).
+ * Version: 0.2.0 (Sprint 13: How it works, Fees)
+ * Sprint:  09 (site shell, theme and wallet); 13
  */
 "use client";
 
@@ -19,6 +20,8 @@ const ROUTES = [
   { href: "/my-entries", label: "My entries" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/record", label: "Record" },
+  { href: "/how-it-works", label: "How it works" },
+  { href: "/fees", label: "Fees" },
 ];
 
 // The theme is whatever <html> carries: the head script sets it, and applyTheme changes it, so the observer keeps the

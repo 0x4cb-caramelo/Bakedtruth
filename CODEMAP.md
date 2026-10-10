@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **754** |
+| Arquivos mapeados | **765** |
 | Acima de 200 linhas | **39** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -16,7 +16,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 A regra diz "under 200 lines where practical". Estes passaram — vale checar se dá pra separar:
 
-- `app/lib/mascot/engine.ts` — 302 linhas
+- `app/lib/mascot/engine.ts` — 304 linhas
 - `programs/brot-markets/src/error.rs` — 328 linhas
 - `programs/brot-markets/src/instructions/campaigns/open_campaign.rs` — 210 linhas
 - `programs/brot-markets/src/instructions/entries/join_campaign.rs` — 212 linhas
@@ -99,6 +99,18 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`page.tsx`](app/app/c/[id]/page.tsx) | one campaign by its id, the client-drawn u64 (TP §3.4.1): the campaign page and its entry panel (Sprint 11). The server only passes the route's id and the link' | 39 |
 
+## `app/app/fees/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`page.tsx`](app/app/fees/page.tsx) | the fee page at /fees (Sprint 13; BR-32): what Brot keeps, what the creator gets, a worked example net of the fee and the creator share, the one-sided pot, the  | 21 |
+
+## `app/app/how-it-works/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`page.tsx`](app/app/how-it-works/page.tsx) | "How it works" at /how-it-works (Sprint 13; spec 3.2 and 3.15 of Sprint -1): the six steps of a campaign as one path that opens the same on a phone, then what t | 21 |
+
 ## `app/app/leaderboard/`
 
 | Arquivo | Núcleo | Linhas |
@@ -123,7 +135,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`mascot.tsx`](app/components/mascot.tsx) | Mounts the mascot once for the whole app. Each page decides where it may stand with | 31 |
 | [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 37 |
-| [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar (Sprint 09): the brand, the five routes, the theme button and the wallet button. The theme follows the stored choice after the first paint (t | 65 |
+| [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar (Sprint 09): the brand, the routes (Sprint 13 adds "How it works" and the fees, so both open from a phone too), the theme button and the wall | 68 |
 | [`site-notice.tsx`](app/components/site-notice.tsx) | the two notices every screen shows (Sprint 09, BR-47, P1 §4.6), in English per the founder's L-01 decision: the test-money notice and the not-audited notice. St | 17 |
 | [`toast.tsx`](app/components/toast.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 71 |
 | [`wallet-button.tsx`](app/components/wallet-button.tsx) | the site's wallet control (Sprint 09, S1): "Use Installed Wallet" connects only from that click, through the installed wallet the site registered (MWA on Androi | 58 |
@@ -222,6 +234,21 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`use-rents.ts`](app/features/entry/use-rents.ts) | the rents an entry opens, from the cluster (`getMinimumBalanceForRentExemption`), read once per page: a `Join` record on every entry and the `Entry` account on  | 53 |
 | [`watch.ts`](app/features/entry/watch.ts) | watching an entry after the wallet, by polling and never a WebSocket (proposal §2.6): the signature's status (`getSignatureStatuses`), the finalized block heigh | 107 |
 
+## `app/features/fees/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`copy.ts`](app/features/fees/copy.ts) | the words of the fee page (BR-32; P1 §1.2, §3.3–§3.5, §3.7; D-m vocabulary; English per L-01): what Brot keeps, what the creator gets, the worked example, the o | 88 |
+| [`example.ts`](app/features/fees/example.ts) | the fee page's worked examples (BR-32), every number computed by the SDK's mirror of the program: the split of P1 §1.2 (6 SOL on YES and 4 SOL on NO, YES wins)  | 72 |
+| [`fee-page.tsx`](app/features/fees/fee-page.tsx) | the fee page (BR-32; spec 3.10 of Sprint -1, prototype-lab/campaigns/js/screens/fees.js): what Brot keeps and what the creator gets, the worked example of P1 §1 | 129 |
+
+## `app/features/how/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`copy.ts`](app/features/how/copy.ts) | the words of "How it works" (spec 3.2 and 3.15 of Sprint -1; D-m vocabulary; English per L-01): the six steps of a campaign from opening to payout, what chance  | 77 |
+| [`how-page.tsx`](app/features/how/how-page.tsx) | "How it works" (spec 3.2 and 3.15 of Sprint -1, prototype-lab/campaigns/js/screens/how.js): the six steps as one ordered path that reads the same on a phone (th | 75 |
+
 ## `app/features/my-entries/`
 
 | Arquivo | Núcleo | Linhas |
@@ -274,7 +301,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`engine.ts`](app/lib/mascot/engine.ts) | Baked, the mascot, as a page resident. It does not follow the cursor freely: it hops to the | 302 |
+| [`bubble.ts`](app/lib/mascot/bubble.ts) | keeps the mascot's speech bubble inside the screen (Sprint 13 DoD: on phones the bubble does not cut). The | 16 |
+| [`engine.ts`](app/lib/mascot/engine.ts) | Baked, the mascot, as a page resident. It does not follow the cursor freely: it hops to the | 304 |
 | [`perches.ts`](app/lib/mascot/perches.ts) | Where the mascot may stand. A page declares perches as data attributes on any element: | 65 |
 
 ## `packages/sdk/src/read/`
@@ -288,9 +316,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`events.ts`](packages/sdk/src/read/events.ts) | the program's events: each name with its discriminator and the Codama decoder of its payload, and the decoding of one event's inner-instruction data `[0xFF, dis | 99 |
 | [`feeds.ts`](packages/sdk/src/read/feeds.ts) | the compiled lists of Pyth feeds a price campaign may name, one per cluster, as programs/brot-markets/src/feeds.rs compiles them (founder answer 1, 2026-10-09;  | 113 |
 | [`format.ts`](packages/sdk/src/read/format.ts) | exact, deterministic display of the program's units: lamports as SOL with all nine decimals (no floating point), Unix seconds as a UTC date, basis points as a p | 54 |
-| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 36 |
+| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 37 |
 | [`knowable.ts`](packages/sdk/src/read/knowable.ts) | the join lock (BR-06) as the program applies it, for a client that wants to know whether a join can still go in: `outcomeKnowable` per kind (the price band reac | 66 |
 | [`pdas.ts`](packages/sdk/src/read/pdas.ts) | every program-derived address a client needs: the config, the fee vault, a campaign and its vault, an entry, a join, the event authority, the program's ProgramD | 68 |
+| [`points.ts`](packages/sdk/src/read/points.ts) | devnet points (BR-29; TP §3.5 "Points"; Q7 answered a): 1 point per campaign a wallet entered on the side that won, once that result is final. Volume and profit | 115 |
 | [`program-data.ts`](packages/sdk/src/read/program-data.ts) | the program's last deploy (A-8), read from its ProgramData account under the upgradeable loader (loader v3), whose first 45 bytes are `[state u32 = 3 (ProgramDa | 86 |
 | [`quote.ts`](packages/sdk/src/read/quote.ts) | what an opening pays (row 7 of TP 3.4.10): US$ at the sponsored Pyth SOL/USD price charged at `price − conf`, the 90/10 split, the `max_lamports` the creator si | 146 |
 | [`recheck.ts`](packages/sdk/src/read/recheck.ts) | `recheck(campaign, rpcUrl)` (BR-23, "Anyone can re-check. Same account, same answer"): through any RPC the caller chooses, read the campaign, then the very acco | 158 |
@@ -1281,6 +1310,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`join-parity.test.ts`](tests/sdk/join-parity.test.ts) | `checkJoin` against `user_join_campaign` (Sprint 05 closure review: a baker's money path had no parity harness). Each case of the program's join tests that the  | 131 |
 | [`math-vectors.test.ts`](tests/sdk/math-vectors.test.ts) | X0.3, the TypeScript half, first file: every vector the program's Rust math wrote into tests/vectors/math-vectors.csv (programs/brot-markets/tests/math_vectors. | 56 |
 | [`open-parity.ts`](tests/sdk/open-parity.ts) | the parity harness of A-10 / X0.7 (SDK half): one opening fed to both `validateOpenCampaign` (from the world's accounts and clock, read before anything is sent) | 124 |
+| [`points.test.ts`](tests/sdk/points.test.ts) | the leaderboard's points rule (Sprint 13; BR-29; Q7 answered a): 1 point per campaign entered on the side that won, once the result is final; never for volume,  | 146 |
 | [`prepare-claim.test.ts`](tests/sdk/prepare-claim.test.ts) | the reserve path end to end (TP §3.4.5; TP v0.0.1 Q2, answered b): a creator share that would leave the creator's empty wallet below the rent-exempt minimum sta | 136 |
 | [`prepare-guards.test.ts`](tests/sdk/prepare-guards.test.ts) | the guards of the A-3 preparation (Sprint 05 review): a retried join that already landed is refused instead of doubled (A-9, M2); the slippage is bounded (L3);  | 109 |
 | [`prepare.test.ts`](tests/sdk/prepare.test.ts) | A-3 end to end against the program's state (LiteSVM behind a local RPC endpoint): a join and a paid opening are re-read, checked, built, summarised from the byt | 138 |
@@ -1308,12 +1338,13 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`amount.test.ts`](tests/site/amount.test.ts) | the amount a baker types becomes lamports exactly (no floating point), with a dot or a comma and at most nine decimals; anything else is refused, never guessed. | 54 |
 | [`campaign-load.test.ts`](tests/site/campaign-load.test.ts) | what the campaign page reads through the RPC, against the program in LiteSVM: the campaign at the route's u64 id (nothing at an unknown one), its public state a | 101 |
 | [`campaign-proof.test.ts`](tests/site/campaign-proof.test.ts) | the campaign page's proof (BR-23) for each kind, from the program's own campaign accounts and real captured bytes of the accounts they read: the value read now  | 120 |
-| [`copy-vocabulary.test.ts`](tests/site/copy-vocabulary.test.ts) | the site's words follow D-m (campaign, entry, baker, creator, pot, YES/NO) and never the D6 table's old copy (proposal 0.4 §5.2: "mercado", "aposta", "apostar", | 57 |
+| [`copy-vocabulary.test.ts`](tests/site/copy-vocabulary.test.ts) | the site's words follow D-m (campaign, entry, baker, creator, pot, YES/NO) and never the D6 table's old copy (proposal 0.4 §5.2: "mercado", "aposta", "apostar", | 132 |
 | [`cycle-run.ts`](tests/site/cycle-run.ts) | one campaign's life run end to end through the recording RPC (cycle.ts), stopping where a test needs it: in review (just resolved), settling (finalized, nothing | 97 |
 | [`cycle.ts`](tests/site/cycle.ts) | a campaign's whole life driven through the site tests' recording RPC (fake-chain.ts), so every transaction is in the RPC's history and a wallet's page can read  | 192 |
 | [`entry-estimate.test.ts`](tests/site/entry-estimate.test.ts) | the entry panel's estimate is the SDK's (BR-09; P1 §3.2): the number `checkJoin` gives for the pot with the baker's own amount added, which is the number `prepa | 135 |
 | [`entry-failures.test.ts`](tests/site/entry-failures.test.ts) | each way an entry can fail has its own message (Sprint 11 DoD): the program's refusals are named by the SDK's error map, with the program's own message from the | 163 |
 | [`fake-chain.ts`](tests/site/fake-chain.ts) | the SDK's LiteSVM-backed fake RPC (tests/sdk/fake-rpc.ts) with what the site's entry flow adds: the wallet's submission (`sendTransaction`, landed in LiteSVM an | 161 |
+| [`fee-example.test.ts`](tests/site/fee-example.test.ts) | the fee page's worked example is the SDK's math, and it is P1 §1.2's case (Sprint 13 DoD; BR-32): 600 on YES and 400 on NO (here 6 and 4 SOL) give a fee of 40,  | 64 |
 | [`my-entries.test.ts`](tests/site/my-entries.test.ts) | the rows of "My entries" through a whole cycle, read the way the page reads them (the chain behind the recording RPC, the wallet's history): while settling, eac | 150 |
 | [`page-format.test.ts`](tests/site/page-format.test.ts) | how the campaign page writes what it read: exact grouped integers, a value in its kind's units, an age, the visitor's local time (built with options a browser a | 37 |
 | [`received.test.ts`](tests/site/received.test.ts) | what "my entries" says a wallet received equals the program's settlement events for that wallet, and the SOL that actually reached it (Sprint 12 DoD), on whole  | 172 |

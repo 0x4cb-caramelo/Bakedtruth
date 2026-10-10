@@ -33,3 +33,4 @@ export * from "./recheck";
 export * from "./format";
 export * from "./validate/join";
 export * from "./program-data";
+export * from "./points";
