@@ -35,7 +35,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <main className="mx-auto w-full max-w-[1320px] flex-1 px-4 py-6 sm:px-6">{children}</main>
             <footer className="mt-16 border-t-2 border-line">
               <div className="mx-auto flex max-w-[1320px] flex-wrap items-center justify-between gap-3 px-4 py-6 text-xs text-dim sm:px-6">
-                <span>{BRAND.name} · devnet · not audited, do not use with real funds</span>
+                <span>
+                  © 2026 {BRAND.name} · devnet · {BRAND.footer}
+                </span>
                 <a href={programExplorerUrl()} target="_blank" rel="noreferrer" className="underline">
                   Program
                 </a>
