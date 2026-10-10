@@ -1,6 +1,6 @@
 # Sprint 09 — Site: shell, theme and wallet
 
-**Status:** in progress (opened 2026-10-10 from `origin/main`) · **Branch:** `sprint-09-site-shell` · **Dates:** none, by the founder's decision
+**Status:** closed 2026-10-10 for the Hackathon MVP, by the founder's decision; the server and mobile items are deferred to the end of the Hackathon · **Branch:** `sprint-09-site-shell` · **Dates:** none, by the founder's decision
 
 ## Founder decisions of 2026-10-10 (blocks answered)
 
@@ -54,6 +54,31 @@
 The new site, in Ledger², stands on the server: the shell, the light and dark themes, a wallet connected through
 explicit Mobile Wallet Adapter registration, and the wiring to `/api/v1`, `/rpc` and the SDK. The chat route inherited
 from upstream leaves. There is no campaign screen yet.
+
+## Closure (2026-10-10, founder's decision)
+
+The founder closed this sprint so Lucas can build the Campaign, Entry and Leaderboard screens on the shells and the SDK
+access. Each Definition-of-done item has a disposition below. Nothing is ticked that was not checked.
+
+| Item | Disposition |
+|---|---|
+| `app/` organised by feature; `components/ui/` holds Sprint -1's primitives | Primitives done; feature folders started (`features/wallet/`). The rest is Lucas's screen work (Sprints 10 to 13) |
+| Direction C components gone; providers, wallet button, toast and mascot kept | Done |
+| The app imports `@brot/sdk/read` and `@brot/sdk/tx`; no copy of the program's rules in `app/lib` | Done: `app/lib/brot.ts` re-exports both; the footer's program link uses the SDK's `PROGRAM_ID`. `@anchor-lang/core` and the old client removed |
+| Chat route, components and library deleted; `OPENROUTER_*` gone | Done (PR #52), and the root `.env.example` is rewritten |
+| Routes exist: `/`, `/c/[id]`, `/abrir`, my entries, leaderboard, public record | Done as shells, with the approved names `/my-entries`, `/leaderboard`, `/record` and `/abrir` |
+| Explicit MWA registration, once, chain from config, relative icon, "Use Installed Wallet" | Done. Sending through `sendTransaction` comes with the entry flow (Sprint 11) |
+| The MWA chain equals the API's `cluster` (X2.1) | Done, tested |
+| Wallet states: disconnected, connected, no SOL with the faucet link | Done, tested (the 0.005 SOL floor is approved) |
+| Notices on every screen, in English | Done |
+| The shell reads `entries_allowed` and hands it to the features | Function done (`entriesAllowed`) and shown on the home page; the entry panel that hides on it is Sprint 11 |
+| The old name "baked" is gone from the brand; Baked is the mascot | Done: the brand is Brot Markets, and the old USDC copy is removed. The motto and the mascot's quips are kept; the founder may review them |
+| Security headers and a CSP; no paid key in the bundle | Done (X2.5), checked on a running build |
+| Bun staging test (D-p), `brot-web.service`, deploy, tunnel routes | **Deferred to the end of the Hackathon** (founder, 2026-10-10: no server changes now) |
+| Emulator and device tests for MWA (S1b) | **Deferred to the end of the Hackathon** (founder, 2026-10-10) |
+| The waitlist, the pitch decks, and `services/landing` retirement | Founder decision: the waitlist stays active as a separate route, and the decks stay as they are, by link. So `services/landing` is **not retired** in this sprint |
+| `cd app && bun run lint && bun run build` | Passes |
+| Common closure (`docs/SPRINTS.md`, section 4) | Codemap and changelog updated; secret scan runs on the PR |
 
 ## Definition of done
 

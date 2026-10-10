@@ -8,6 +8,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { BRAND } from "@/lib/brand";
+import { programExplorerUrl } from "@/lib/brot";
 import { fontClassName } from "@/lib/fonts";
 import { THEME_HEAD_SCRIPT } from "@/lib/theme";
 import { Mascot } from "@/components/mascot";
@@ -17,7 +18,7 @@ import { SiteNotice } from "@/components/site-notice";
 
 export const metadata: Metadata = {
   title: `${BRAND.name} · ${BRAND.tagline}`,
-  description: `Bounties on on-chain goals. ${BRAND.motto}`,
+  description: `${BRAND.tagline}. ${BRAND.motto}`,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -35,6 +36,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <footer className="mt-16 border-t-2 border-line">
               <div className="mx-auto flex max-w-[1320px] flex-wrap items-center justify-between gap-3 px-4 py-6 text-xs text-dim sm:px-6">
                 <span>{BRAND.name} · devnet · not audited, do not use with real funds</span>
+                <a href={programExplorerUrl()} target="_blank" rel="noreferrer" className="underline">
+                  Program
+                </a>
                 <span>{BRAND.motto}</span>
               </div>
             </footer>
