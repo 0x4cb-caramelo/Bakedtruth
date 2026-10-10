@@ -1325,7 +1325,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`states-render.test.ts`](tests/site/states-render.test.ts) | every public state of the campaign page renders what the chain says (Sprint 12 DoD), one case per state: a campaign account in that state is written into the pr | 182 |
 | [`support.ts`](tests/site/support.ts) | what the site's tests share: the world's accounts read the way the page reads them (owner and bytes), the inputs of the entry panel's estimate, a key-value stor | 93 |
 | [`upgrade-pause.test.ts`](tests/site/upgrade-pause.test.ts) | A-8 on the site (the founder's answers of 2026-10-10: ProgramData read through the site's RPC; the floor at 1%): the entry's preparation passes the deploy the s | 89 |
-| [`void-log.test.ts`](tests/site/void-log.test.ts) | the void log's public format (Sprint 12 deliverable, "its JSON Schema check in CI"): the committed JSON Schema is the one generated from the zod schema; every r | 112 |
+| [`void-log.test.ts`](tests/site/void-log.test.ts) | the void log's public format (Sprint 12 deliverable, "its JSON Schema check in CI"): the committed JSON Schema is the one generated from the zod schema; every r | 122 |
 
 ---
 

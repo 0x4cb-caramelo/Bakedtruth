@@ -1,6 +1,6 @@
 # Sprint 12 — Site: my entries and campaign states
 
-**Status:** built, PR open, waiting for the founder's devnet rehearsal and three answers (2026-10-10) · **Branch:** `sprint-12-site-my-entries-states`, cut from `origin/main` at `sprint-11` · **Dates:** none, by the founder's decision
+**Status:** built, PR #61 open with CI green, waiting for the founder's devnet rehearsal and four answers (the empty-campaign copy, the L-03 notice, the "Paid" chip, Sprint 11's Phantom signature) (2026-10-10) · **Branch:** `sprint-12-site-my-entries-states`, cut from `origin/main` at `sprint-11` · **Dates:** none, by the founder's decision
 
 ## Record (2026-10-10)
 
@@ -55,9 +55,13 @@
   "entered" and "closed" only from the program's own events, a void note made LF before its hash (and
   `content/void-log/*.md -text`), a test that the wallet gets the summarised bytes, the floor from the SDK's
   `claimFloor`. Deferred: TP §7.3. The L-03 notice and the "Paid" chip are the founder's, so they were not changed.
+  The coordinator review approved with caveats (no blocker); its documentation findings were applied before the PR's
+  last commit (the relay's limits, the plan's closing rule, the recipe's stale lines, the four open questions named
+  alike everywhere).
 - **Waiting:** the five-campaign rehearsal (the founder's devnet writes); the founder's approval of the empty-campaign
-  copy ([Q] below) and of a devnet wording for the L-03 lock notice, which still promises automatic payouts; Sprint 11's
-  Phantom entry (still "reported, not verified" until its signature or the wallet's devnet address is sent).
+  copy ([Q] below) and of a devnet wording for the L-03 lock notice, which still promises automatic payouts; whether the
+  "Paid" chip should wait until the payouts went out; Sprint 11's Phantom entry (still "reported, not verified" until
+  its signature or the wallet's devnet address is sent).
 
 | | |
 |---|---|
@@ -149,20 +153,23 @@ MVP (L-16; proposal §3.9). A team dashboard. The two-stage dispute's instructio
   entry at all, Brot keeps the 10% opening fee, whatever the cause of the void."
 - **New, waiting:** the L-03 lock notice (approved in Sprint 11) ends "Payouts go to your wallet automatically after the
   result is read", which devnet does not do yet. Any change to it is the founder's.
+- **New, waiting:** the "Paid" chip (one of BR-05's five public states) shows while payouts still wait. The page's own
+  title says "Result: YES" and "Waiting for payout"; whether the chip should change is the founder's.
 - **Answered:** TP v0.0.1 Q2 (b, the recipient may call the settle instruction; with SOL only the below-rent case
   remains); Q1 (B, any wallet may trigger resolution and payout, choosing nothing); P-1; P-4; D7 (b).
 
 ## Agents and skills
 
 - **Agents:** `dev-product-agent`, `copywriter-agent` (the copy of each state), `technical-security-red-team-agent`
-  (the "receber" action), `coordinator-agent`.
+  (the "Receive" action), `coordinator-agent`.
 - **Skills:** `feature-scaffold`, `sprint-management`, `verify-build-works`, `codemap`, `secrets-scan`,
   `release-check`.
 
 ## Security gates
 
 - `content/void-log/` lives in Git and changes only with two people's review.
-- "Receber" exists only for a reserved credit, and the destination is always the wallet the program recorded.
+- "Receive" ("receber") exists only for a reserved credit, and the destination is always the wallet the program
+  recorded.
 - The copy says "Pago sozinho, ao fim da janela de 6 horas", never "pago em minutos" (P1 §4.6). **On devnet, by the
   founder's answer (2026-10-10), until the keeper settles: "Waiting for payout", with no time promised.**
 - `secrets-scan` at closure.
@@ -186,7 +193,8 @@ The five-campaign rehearsal on devnet, by hand, through every screen: `deploy/de
 
 ## Risks
 
-- What was received exists only in events: if the indexer lags, the screen shows less until it catches up.
+- What was received exists only in events: the site reads them from the chain (no indexer yet), so a read that fails
+  or a history read only in part shows less until a later read, never more.
 - With no notification channel, a baker learns of a payout only by coming back.
 - The contested state has no exit before Sprint 14's dispute instructions.
 - The opening's 10% and the prize follow different rules on a void; the copy must not blur them.

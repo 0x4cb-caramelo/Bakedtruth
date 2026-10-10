@@ -597,9 +597,10 @@ that already holds SOL is above that minimum.
   creator signs and pays the network fee, and the cluster refuses a fee payer left below the rent-exempt minimum, so the
   wallet needs that minimum plus the fee (`claimFloor`), more than the program's own check (`claimable`). The keeper's
   daily retry is not built (the deployed keeper only resolves), so the screen promises none.
-- **Consequence for closing.** `close_campaign` waits for the share. In Sprint 04 the team chooses between keeping the
-  wait, as the proposal does, and letting `close_campaign` pay a reserved share together with the rent when the creator
-  is the rent payer, a credit that always clears the minimum **[AC]**.
+- **Consequence for closing [F]** (decided in Sprint 04's closure review, 2026-10-09): `close_campaign` refuses while a
+  share is reserved, unless the creator is the rent payer (an opener always is); then it pays the reserve together with
+  the rents, a credit that always clears the minimum (`close_campaign.rs`). It emits no `CreatorShareSettled` for it,
+  so Sprint 12's site reads the share from the campaign's `CampaignFinalized` (§7.3).
 - **A referral rebate** can also be small; it is paid off-chain (§3.4.11), and the weekly routine holds it in the same
   way **[INF]**.
 

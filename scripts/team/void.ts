@@ -2,7 +2,7 @@
  * Purpose: `team_void_campaign(reason, note_hash)` with your own team key (TP §3.4.7, BR-45): the public text of
  *          the void is saved to content/void-log/<campaign>-<UTC time>.md, and the SHA-256 of exactly the saved
  *          bytes goes on-chain with the reason. A team key may use `TeamHouseFailure` (the 10% opening fee goes
- *          back to the opener) or `TeamOutsideCause` (Brot keeps it).
+ *          back to the opener, unless nobody had entered) or `TeamOutsideCause` (Brot keeps it).
  * Version: 0.1.3 (Sprint 12: the personal-data rule from the record's format; line endings made LF before hashing)
  * Sprint:  05 (SDK and the devnet cycle), lane OPS
  *

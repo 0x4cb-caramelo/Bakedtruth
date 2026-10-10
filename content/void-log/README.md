@@ -13,7 +13,8 @@ file's bytes**, which the program stores in the campaign (`void_note_hash`) and 
   delete it otherwise. Never commit a `.pending` file.
 - **What a team key may void.** Only an automatic void (a campaign `resolve_campaign` voided: missed window,
   unreadable account, stale feed), never a YES or NO (`TeamVoidNotAutomatic`, decision of 2026-10-09). The reason is
-  `TeamHouseFailure` (the 10% opening fee goes back to the opener) or `TeamOutsideCause` (Brot keeps it).
+  `TeamHouseFailure` (the 10% opening fee goes back to the opener, unless nobody had entered) or `TeamOutsideCause`
+  (Brot keeps it).
 - **Who acted, and nothing more about a person.** The header names the acting team key, for accountability: the same
   key signs the void on-chain, where anyone can read it, and `content/powers.md` (Sprint 13) will say whose keys the
   team keys are. The text explains the cause in public terms and names no person and no private wallet owner; the

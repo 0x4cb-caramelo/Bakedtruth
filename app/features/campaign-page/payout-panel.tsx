@@ -84,7 +84,7 @@ function useClaimFloor(needed: boolean): bigint | null {
     let live = true;
     // The wallet pays one signature's fee (5,000 lamports, no priority fee) and must stay at the minimum after it.
     rentExemptMinimum(rpc, 0)
-      .then((rent) => live && setFloor(tx.claimFloor(rent, 5_000n)))
+      .then((rent) => live && setFloor(tx.claimFloor(rent, tx.LAMPORTS_PER_SIGNATURE)))
       .catch(() => undefined);
     return () => {
       live = false;

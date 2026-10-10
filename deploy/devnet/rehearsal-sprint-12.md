@@ -6,7 +6,7 @@ program in LiteSVM by `tests/ops/rehearsal.test.ts`; not yet on a local surfnet 
 founder's to run. Program `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o`, the real constants
 (`deploy/devnet/README.md:34-38`).
 
-The DoD line (docs/sprints/sprint-12-site-my-entries-states.md:46-47): "A devnet rehearsal with the keeper takes five
+The DoD line (docs/sprints/sprint-12-site-my-entries-states.md, "Definition of done"): "A devnet rehearsal with the keeper takes five
 campaigns through every screen: a YES, a NO, a void, a one-sided pot, and a paid opening whose prize returns."
 
 Markers: **[F]** checked in the code or on devnet; **[INF]** inference, not checked.
@@ -108,11 +108,11 @@ same run, all steps at once (too fast to see In review). Spec:
     "reserved N lamports" (`creatorShareReserved > 0`, no event). Run again after the creator funds the wallet to claim.
   - `fee`: `buildCollectFee({ campaign })` (needs every entry settled).
   - `prize`: `buildSettlePrize({ campaign, recipient: c.creator })`.
-  - `close`: `buildCloseCampaign({ campaign, rentPayer: c.rentPayer })`, with a warning: after it the site's page
-    for the campaign shows nothing (section 10).
+  - `close`: `buildCloseCampaign({ campaign, rentPayer: c.rentPayer })`, with a warning when a creator share is
+    still reserved (the close pays it with the rents); after it the site's page shows the campaign as settled.
   - `sweep`: `buildSweepFees({ feeRecipient: config.feeRecipient })`.
 - Builders: `packages/sdk/src/tx/builders/settlement.ts` (finalize, tally, entry, share, fee, prize, close, sweep) and
-  `packages/sdk/src/tx/builders/campaign.ts` (resolve). Probably two files to stay under 200 lines.
+  `packages/sdk/src/tx/builders/campaign.ts` (resolve). Written as two files, `settle.ts` and `settle-steps.ts`.
 
 ### 2.3 Not written (optional): a join script
 
@@ -386,8 +386,8 @@ bun run scripts/rehearsal/settle.ts <C1_ADDRESS> prize --cluster devnet --yes
 ```
 
 The claim emits CreatorShareSettled for 600,000 lamports. Do not close C1 yet: close would pay a still-reserved share
-to CY with the rents [F] (`instructions/settlement/close_campaign.rs:60-78`, `:113-119`), and after close the page
-is gone (section 10).
+to CY with the rents [F] (`instructions/settlement/close_campaign.rs:60-78`, `:113-119`) before the claim screen is
+seen, and after the close the page only shows the campaign as settled (section 10).
 
 C5, paying out (no tally, no entries, no share):
 

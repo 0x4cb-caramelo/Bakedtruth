@@ -130,6 +130,8 @@ A paid opening and a team-key opening by hand on devnet, in a desktop browser an
   openings fail.
 - Devnet's SOL/USD updates every 62 to 64 s, so `max_price_age` there is at least 90 s (proposal §2.4.5).
 - Browser storage cleared between the hand-off and the return loses the `id`; the indexer check reduces the risk.
+- A campaign that ends with no entry returns the prize but not the 10% opening fee, even on a house-failure void (the
+  program's rule since Sprint 04; Sprint 12's copy review): the box should say so next to the price, before paying.
 - Any token the reader accepts can be used (D-i), and a creator who controls the measured account can force the
   outcome once the other side holds just over US$56 of third-party money. The notice is the defence the box adds.
 

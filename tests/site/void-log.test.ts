@@ -64,6 +64,16 @@ describe("void log", () => {
     });
   });
 
+  test("a note written with Windows line endings is hashed as Git keeps it, with LF only (security review L2)", async () => {
+    const r = await written("TeamHouseFailure", "First line.\r\nSecond line.\r\n");
+    const text = new TextDecoder().decode(r.bytes);
+    expect(text.includes("\r")).toBe(false);
+    expect(parseVoidLog(r.file, text, sha(r.bytes))).toMatchObject({
+      ok: true,
+      record: { text: "First line.\nSecond line." },
+    });
+  });
+
   test("a correction names the record it corrects", async () => {
     const r = await written();
     const text = `# Correction of ${r.file}\n\n- Team key: ${r.team}\n- Written (UTC): ${AT}\n\nThe cause was the feed, not the keeper.\n`;
