@@ -1,6 +1,6 @@
 # Sprint 06 — Server and primary keeper (Bun check first)
 
-**Status:** in progress (opened 2026-10-10 from `origin/main` at `6b5e3ec`) · **Branch:** `sprint-06-keeper-server` · **Dates:** none, by the founder's decision
+**Status:** in progress, **not closed**: the keeper runs live on the server, but the real resolve is not yet proven (opened 2026-10-10 from `origin/main` at `6b5e3ec`) · **Branch:** `sprint-06-keeper-server` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -200,4 +200,20 @@ From Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and retros
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+Written 2026-10-10, before closure, at the founder's request to wrap up. **Not closed:** the closure gate
+(`docs/SPRINTS.md`, section 4) is not met, and 17 of the 18 Definition-of-Done items are still open.
+
+- **Done:** the Bun check on the server (passed, with the pinned hash); the keeper MVP in `services/keeper` (lists the
+  open campaigns, simulates `resolve_campaign`, sends only what the program accepts, `/healthz` on loopback); the
+  server unit `brot-keeper` (restarts on failure, sandboxed, port 4210 on loopback); the `ProofStale` diagnosis (the
+  60 s proof window against devnet's 63 s price update), and the cycle set to 15 s; the test campaign `FmDo…` open on
+  devnet.
+- **Not done, and it would be a false claim to say otherwise:** no real `resolve_campaign` has been sent yet, because no
+  price has touched the target of `FmDo…` (about 1.3% away at opening, four-day deadline). The happy path is running but
+  unproven end to end. Also open: the finalization and settlement tasks; batched reads; the Hermes proof refresh (needs
+  a key); per-unit identities; tunnel-token rotation; the Bun soak and load tests; the `deploy/vps` rollback script; the
+  Carried-over list.
+- **Decisions to record:** the RPC is the public devnet URL until the founder pastes the Helius Free Tier URL on the
+  server; the server runs this branch's commit, not `main`; the cycle is 15 s on the server and 60 s in the code.
+- **Retrospective:** the proof window is the real constraint, not the RPC or the key. A 429 after a send does not mean
+  failure: check the signer's recent transactions before retrying.
