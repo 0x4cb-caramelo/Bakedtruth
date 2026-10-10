@@ -4,7 +4,7 @@
  *          refused outside `InReview`, outside the window, to a signer who is not a team key, and with a reason
  *          the team may not choose.
  *          Run one with `bun test tests/ -t "void refunds and the opening fee follows the cause"`.
- * Version: 0.0.2
+ * Version: 0.0.3 (a void now takes two event numbers: `CampaignFinalized` follows `CampaignVoided`)
  * Sprint:  04 (lane A; team void and contest restricted at the closure review). Needs target/deploy/brot_markets.so, and lane C's `finalize_snapshot` for the
  *          successful paths (a stub refuses with UnknownInstruction). Written here, run at integration.
  */
@@ -178,6 +178,7 @@ describe("team window", () => {
     expectOk(
       await send(w, [I.teamVoidCampaignIx(member, config, c.campaign, { reason: TeamOutsideCause, noteHash: NOTE })]),
     );
-    expect(readCampaign(w, c.campaign).event_seq).toBe(3n);
+    // Two events, two numbers: CampaignVoided takes 2, CampaignFinalized 3 (team-window-events.test.ts).
+    expect(readCampaign(w, c.campaign).event_seq).toBe(4n);
   });
 });
