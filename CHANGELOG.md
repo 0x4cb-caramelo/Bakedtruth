@@ -54,6 +54,11 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
     recusada).
   - **Testes:** 255 em Rust e 259 em TypeScript depois das correções da revisão (252 e 258 antes delas), todos do
     programa novo; os oito filtros da sprint passam; tirar a checagem de chamada de topo derruba o teste dela (X0.9).
+- **Roteiro de fala do deck v4, `docs/business/roteiro-pitch-v4.md`** (Lucas, pedido em 8/10/2026 e comitado em
+  9/10/2026, quando ele mandou comitar o que estava pendente). Os nove slides em português (443 palavras, cerca de
+  3 min 25 s) e em inglês (426 palavras, cerca de 3 min), as recomendações antes de apresentar, o corte para os 2
+  minutos do vídeo do Colosseum e o que mudou em relação ao roteiro do `/pitch3`. Não é publicado. Ele ainda fala em
+  USDC, semente e teto, como o deck no ar; o arquivo diz isso no fim.
 - **Documento oficial de marca, `docs/product/BRAND.md`** (fundadores, 9/10/2026). O Lucas aprovou a `/5` ("o cinco
   ficou excelente, encontramos nosso copy e nossas cores") e pediu que virasse a base de todos. O documento descreve,
   lido da página: nome, assinatura, símbolo e mascote; voz e palavras; o texto oficial bloco por bloco, com palavras
