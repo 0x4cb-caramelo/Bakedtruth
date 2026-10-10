@@ -22,6 +22,10 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Added
 
+- **A lista de campanhas no site** (Sprint 10, 10/10/2026): a página inicial lista as campanhas da API de leitura, com
+  busca, filtros de estado e de tipo, ordenação, o interruptor de não listadas e "Salvas" no navegador. Cada cartão mostra
+  a frase, o pote em SOL, a chance por lado (nenhuma com pote vazio), o retorno estimado pela matemática do SDK e as datas.
+  O preço em US$, a barra de prova, o cartão de compartilhar e o selo do parceiro ficam para depois (ver a sprint).
 - **O guia de marca no repositório** (`docs/product/BRAND.md`, aprovado pelo Lucas em nome dos fundadores). O rodapé e
   as falas do mascote do site seguem o guia.
 

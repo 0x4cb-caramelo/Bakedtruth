@@ -1,6 +1,36 @@
 # Sprint 10 — Site: campaign list
 
-**Status:** planned · **Branch:** `sprint-10-site-campaign-list` · **Dates:** none, by the founder's decision
+**Status:** built for the Hackathon MVP (2026-10-10), by the AI on the founder's decision (Lucas's UI is not in the repository; the founder's 2026-10-10 plan gives the list to the AI, with `/5` and `/dev0x/` as references) · **Branch:** `sprint-10-site-campaign-list` · **Dates:** none, by the founder's decision
+
+## Record (2026-10-10)
+
+- **Built:** the home route `/` lists every campaign from `/api/v1/campaigns` (read in pages), with search, the five
+  states and "Saved", the kinds, the sort (ranking, pot, entries close, YES chance) and the unlisted switch. Each card
+  shows the kind, the sentence (price campaigns name the feed and the target from the SDK's pinned list), the state, the
+  pot in SOL, the chance per side (no chance for an empty pot, L-05), the estimated return per side (the SDK's
+  `estimateReturnBps`, labelled "estimate", one SOL on the side), the entries-close and deadline dates, the review date
+  for campaigns in review, and the notice on burn, lock and stake cards (BR-26). There is no redemption.
+- **Ranking, computed on the site** (the founder's decision: no wait for the indexer): two-sided campaigns first, by
+  entries and then by time left to close; one-sided next; empty last. A campaign with no entry 24 hours after opening
+  leaves the list unless "Show unlisted" is on.
+- **Saved:** kept in this browser's localStorage only (a per-viewer convenience).
+- **Verified:** `bun test` for the card values, the sentence and the arrangement (33 app tests, 14 API tests); lint,
+  build; in headless Chrome against the live devnet read API, the list rendered its four campaigns with the values above.
+
+## Not built (carried, with the reason)
+
+- **The US$ value and its source and time:** the read API has no SOL/USD price yet. Carried to the price endpoint
+  (Sprint 08's `/api/v1/price`) and the decision D-e (CoinGecko or Pyth).
+- **The proof bar** on each card: the price campaign's proof progress is not computed yet.
+- **The share card (BR-33)** and its link: carried to a later sprint.
+- **Partner seal, name and 72-hour highlight:** no `content/partners.json` exists yet, so no card moves up for a partner.
+- **Names from `content/account-names.json`:** the file does not exist; the shortened address shows instead.
+- **Sentences of burn, lock and stake campaigns:** a generic form ("Burn campaign 4Rq3…m9X8") until the templates are
+  confirmed with the founder.
+- **Indexer rank and listed flags:** computed on the site instead (see above); the indexer's own values are Sprint 08.
+- **Visual parity:** the cards follow the sprint's fields and the Sprint -1 tokens, but are not yet a pixel match of `/5`
+  or of the `/dev0x/` table. The founder should review the layout; phone widths were not checked.
+
 
 | | |
 |---|---|

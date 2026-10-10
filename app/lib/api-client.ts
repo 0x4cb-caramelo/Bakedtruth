@@ -37,6 +37,14 @@ export type Campaign = {
   resolved_at: string | null;
   target: string | null;
   metric_account: string;
+  feed_id: string;
+  direction: "Above" | "Below" | "unknown";
+  price_exponent: number;
+  opens_at: string | null;
+  entries_count: number;
+  fee_bps: number;
+  one_sided_fee_bps: number;
+  creator_share_bps: number;
 };
 
 export type CampaignList = {

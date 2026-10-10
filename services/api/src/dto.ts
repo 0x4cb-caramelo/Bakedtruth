@@ -6,7 +6,7 @@
  *
  * Assumption: these field names are a first draft for Lucas's screens; the D6 names (TP §6) are not fixed yet.
  */
-import { Outcome, ReaderKind, Status } from "@brot/sdk/read";
+import { Direction, Outcome, ReaderKind, Status } from "@brot/sdk/read";
 import type { PublicState } from "@brot/sdk/read";
 import type { Row } from "./snapshot";
 
@@ -19,6 +19,8 @@ export const STATE_NAME: Record<PublicState, string> = {
   Paid: "paid",
   Void: "void",
 };
+
+const hex = (bytes: ArrayLike<number>): string => Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 
 const big = (value: bigint | null | undefined): string | null =>
   value === null || value === undefined ? null : value.toString();
@@ -43,5 +45,13 @@ export function toCampaign(row: Row) {
     resolved_at: big(c.resolvedAt),
     target: big(c.target),
     metric_account: c.metricAccount.toString(),
+    feed_id: hex(c.feedId),
+    direction: Direction[c.direction] ?? "unknown",
+    price_exponent: c.priceExponent,
+    opens_at: big(c.opensAt),
+    entries_count: c.entriesOpen,
+    fee_bps: c.feeBps,
+    one_sided_fee_bps: c.oneSidedFeeBps,
+    creator_share_bps: c.creatorShareBps,
   };
 }
