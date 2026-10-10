@@ -342,9 +342,17 @@ Solana is the product, not a settlement layer under it. One Solana program holds
 
 **What category best describes your product?**
 
-As opções da lista não vieram em nenhuma das duas colagens. Se houver uma de mercados de previsão, é ela. Se não,
-"Consumer": o Melee, o precedente mais próximo, foi premiado nessa categoria no Breakout (FATO, registro do Colosseum,
-em `knowledge-base/market/pumpfun-model-for-open-markets.md`).
+As opções chegaram em 10/10/2026, numa imagem da lista: DeFi, Real World Assets (RWA), RegTech & Compliance, FinTech,
+Markets & Exchanges, DePIN, Developer Infrastructure, Consumer Apps, AI Platforms / Agents, Gaming, Wallet
+Infrastructure, Security Tools, Social / SocialFi, NFTs, Governance/DAOs, Climate, EdTech, Supply Chain e Other. Não há
+uma de mercados de previsão.
+
+Recomendação: **Markets & Exchanges**. É a única que contém a palavra que a descrição pública usa na primeira frase
+("prediction market"), e um revisor que compara os campos entre si lê as duas juntas. "Consumer Apps" é a segunda
+opção: o Melee, o precedente mais próximo, foi premiado em Consumer no Breakout (FATO, registro do Colosseum, em
+knowledge-base/market/pumpfun-model-for-open-markets.md), mas o Brot ainda não tem tela para o usuário, e o cliente
+que paga é o projeto. "DeFi", que aparecia selecionada na imagem, descreve pior: não há empréstimo, troca nem
+rendimento.
 
 **Is your project a mobile-focused dApp?**
 
