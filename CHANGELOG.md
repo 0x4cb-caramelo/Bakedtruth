@@ -22,6 +22,12 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Added
 
+- **Sprint 09 fechada para o hackathon** (10/10/2026): o site usa `@brot/sdk` (leitura e transação) por `app/lib/brot.ts`;
+  o nome é Brot Markets; o `.env.example` da raiz lista as variáveis de cada parte. Servidor e testes em celular ficam
+  para o fim do hackathon, por decisão do fundador. Ver `docs/sprints/sprint-09-site-shell.md`.
+
+### Added
+
 - **Sprint -1 fechada** pela aprovação do fundador: tema escuro oficial, inglês, avisos mínimos e os layouts de `/dev0x/`.
   Os itens de código da sprint vão para a Sprint 09.
 - **Sprint 09, primeiro incremento:** o chat embutido foi removido (D-q), e o site envia cabeçalhos de segurança e uma

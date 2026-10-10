@@ -25,6 +25,7 @@
       "name": "@pred-provable/app",
       "version": "0.1.0",
       "dependencies": {
+        "@brot/sdk": "workspace:*",
         "@solana-mobile/wallet-standard-mobile": "0.6.0",
         "@solana/wallet-adapter-base": "^0.9.28",
         "@solana/wallet-adapter-phantom": "^0.9.30",
