@@ -3,7 +3,7 @@
  *          preflight (the simulation already ran), rebroadcast as the same bytes every 2 s until it is confirmed
  *          or 60 s pass, then its status read back. Nothing is sent unless the caller simulated it first.
  * Version: 0.1.0
- * Sprint:  06 (server and primary keeper), MVP happy path (proposal 2.6, in short form)
+ * Sprint:  07 (standby keeper and watchdog): the send guard, checked here so no caller can skip it
  */
 import {
   appendTransactionMessageInstructions,
@@ -45,7 +45,15 @@ export async function buildMessage(
   ) as ReadyMessage;
 }
 
+/** The gate every send passes through. A standby installs one that closes while the primary is alive. */
+let maySend: () => boolean = () => true;
+
+export function setSendGate(gate: () => boolean): void {
+  maySend = gate;
+}
+
 export async function signAndSend(rpc: SolanaRpc, message: ReadyMessage): Promise<Landed> {
+  if (!maySend()) throw new Error("send refused: this keeper is not taking over (the primary answers)");
   const tx = await signTransactionMessageWithSigners(message);
   const signature = getSignatureFromTransaction(tx);
   const wire = getBase64EncodedWireTransaction(tx);

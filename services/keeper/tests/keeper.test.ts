@@ -30,6 +30,17 @@ describe("loadConfig", () => {
       dryRun: false,
       healthHost: "127.0.0.1",
       healthPort: 4210,
+      mode: "primary",
+      primaryUrl: null,
+      rpcUrlB: null,
+      restartSecretFile: null,
+      restartFlagPath: "/run/brot-markets/restart.flag",
+      reviewQueuePath: "/var/lib/brot-markets/review-queue.jsonl",
+      watchMs: 5_000,
+      watchdogMs: 300_000,
+      takeoverAfterMs: 600_000,
+      restartTries: 3,
+      solFloorLamports: 500_000_000n,
     });
   });
 

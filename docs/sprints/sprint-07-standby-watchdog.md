@@ -1,6 +1,6 @@
 # Sprint 07 — Standby keeper and watchdog
 
-**Status:** planned · **Branch:** `sprint-07-standby-watchdog` · **Dates:** none, by the founder's decision
+**Status:** in progress, **not closed** (opened 2026-10-10 from `origin/main` at `c3ba1ff`) · **Branch:** `sprint-07-standby-watchdog` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -18,7 +18,8 @@ other RPC and puts any mismatch in front of a person, so that review happens by 
 
 - [ ] `services/keeper/src` gains `watchdog.ts` and `alert.ts`; the same package runs with `KEEPER_MODE=standby` on a
       small VM at a second provider, with keeper wallet 2 (different from wallet 1, SOL only) and an RPC account at
-      another company, sized for a full takeover.
+      another company, sized for a full takeover. **Deferred to Post-Hackathon** (founder, 2026-10-10: no second VM,
+      no second RPC now). The code path exists and is tested in-process.
 - [ ] **The takeover** (BR-24; P1 §4.4): the watchdog checks the primary every 5 minutes; after 10 minutes without an
       answer it asks for a restart up to 3 times; then it runs the same loop itself and emails the CTO. Tested with
       the primary down.
@@ -35,16 +36,17 @@ other RPC and puts any mismatch in front of a person, so that review happens by 
       `posted_slot` is fetched through RPC B and compared on price, `publish_time` and account; for the other kinds,
       the metric account is re-read and compared with `observed_value`. A mismatch puts the campaign in the review
       queue (T22). Tested with a forged mismatch.
-- [ ] **Alerts by email, to two inboxes:** primary down; standby took over; keeper SOL low; NO recorded with
+- [ ] **Alerts by email, to two inboxes** (**email part deferred to Post-Hackathon**, founder 2026-10-10: the MVP alert
+      channel is the journal, `transports: journal`): primary down; standby took over; keeper SOL low; NO recorded with
       `met_late`; second read differs; a reserved credit older than 7 days; `open_campaigns` above 80% of
       `max_open_campaigns`; openings per hour above a threshold; any opening by a team key; SOL/USD older than
       `max_price_age` (paid openings blocked); the SOL held in all open vaults (the exposure no cap bounds); the Pyth
       receiver's or push oracle's upgrade slot or configuration changed.
 - [ ] With both keepers on, the second call of the same instruction fails and nothing changes (test).
-- [ ] VM 2 is ready to receive the nightly snapshot that Sprint 08 produces.
+- [ ] VM 2 is ready to receive the nightly snapshot that Sprint 08 produces. **Deferred to Post-Hackathon** (D4).
 - [ ] **Drill on devnet, without `/rpc` load:** `brot-keeper.service` stopped; the standby takes over within the
       timings above; the email reaches both inboxes (X1.2, first half). Sprint 08, which builds the relay, repeats the
-      drill under `/rpc` load.
+      drill under `/rpc` load. **Deferred to Post-Hackathon** (D4): it needs VM 2 and the email channel.
 - [ ] **A runbook per alert** in `deploy/vps/` says who acts, how, and how fast (proposal Phase 1).
 - [ ] Each item of "Carried over" below is done, or decided in writing with the reason.
 - [ ] Common closure (`docs/SPRINTS.md`, section 4).
@@ -53,7 +55,8 @@ other RPC and puts any mismatch in front of a person, so that review happens by 
 
 - The standby mode, the continuous feed watcher and the watchdog, on VM 2 (S each).
 - The remote restart, the second read feeding the review queue, and the alerts (S each).
-- The second provider, the second RPC company and the email provider chosen (T5, within D4).
+- The second provider, the second RPC company and the email provider chosen (T5, within D4). **Deferred to
+  Post-Hackathon** (founder, 2026-10-10).
 
 ## Out of scope
 
@@ -62,9 +65,10 @@ named reviewer per day and the keeper key custody before mainnet (16). The alert
 
 ## Founder decisions that block the sprint
 
-- **Open: D4** for the second provider's VM, the RPC account at another company (the proposal names Alchemy Free or
-  QuickNode Build, US$49 a month) and the email provider. v0.0.1 recommended buying now rather than postponing the
-  second service; that recommendation stands.
+- **D4, decided 2026-10-10 by the founder, Hackathon MVP mode: Deferred to Post-Hackathon.** No second VM, no RPC
+  account at another company (the proposal's Alchemy Free or QuickNode Build, US$49 a month), and the email provider
+  is deferred; alerts go to the journal. This overrides v0.0.1's recommendation to buy now, for this sprint only.
+  The standby code stays, unused in production, and the drill moves with it.
 
 ## Agents and skills
 
@@ -124,4 +128,20 @@ notes, the README with the rotation of each secret, `CODEMAP.md`.
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+Written 2026-10-10, during the sprint. **Not closed:** most of the Definition of done is open (see the list above).
+
+- **Done in the repository:** the standby mode with its send gate in `send.ts` (refused while the primary answers,
+  tested before the rest); the watchdog and the takeover timeline (alert at the first miss, restarts at 10, 15 and 20
+  minutes, takeover at 25); `POST /restart` with HMAC-SHA256, 60 s window, constant-time compare; the feed watcher for
+  price campaigns; the second read of price campaigns with the review queue; the alerts, on the journal only; the
+  systemd units and the runbooks, not installed. `bun test services/keeper`: 59 tests.
+- **Done on this machine:** two real processes (primary and standby) against an unreachable RPC: the primary's
+  `/healthz` and `POST /restart` answer; the standby with its primary down emits the alert chain and takes over.
+- **Not done:** VM 2, the second RPC company, the email provider (all founder decisions, D4); the devnet drill with both
+  machines; the alerts not yet wired (listed in the session log); the proof-transaction second read; the server's changes (the flag's
+  `ReadWritePaths`, the tunnel route, the HMAC secret, the path unit). No server action was taken in this session.
+- **Decisions taken without the founder:** recorded in `session-log/2026-10-10-sprint-07-standby-e-watchdog.md`
+  (restart spacing, no automatic hand-back, journal-only alerts, the two-provider second read, the 0.5 SOL floor).
+- **Retrospective (so far):** the gate is the rule that matters most, so it sits at the send and not in the loop. A
+  second read that compares two providers is weaker than the one the proposal describes, and the sprint should say so
+  rather than claim the stronger check.

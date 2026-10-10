@@ -1,0 +1,52 @@
+# Purpose: the standby keeper for VM 2 (Sprint 07): the same package as brot-keeper, in KEEPER_MODE=standby.
+#          It probes the primary, sends nothing while the primary answers, and takes over after the silence rule.
+# Installs: VM 2 only, at another provider, as the unit of that machine. NOT INSTALLED anywhere yet: the second
+#           provider is a founder decision (D4). The ExecStart path below is the one on VM 2 and will differ from
+#           the primary's: adjust it when the machine is set up.
+# Secrets: the restart HMAC secret is a credential (LoadCredential=), never an environment variable. The keeper's
+#          keypair (wallet 2, SOL only) and the RPC URLs are read from the env file, root-owned, mode 0640.
+
+[Unit]
+Description=Brot Markets keeper, standby (VM 2): watchdog and takeover
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=brot
+Group=brot
+WorkingDirectory=/srv/brot-markets/keeper/current/services/keeper
+EnvironmentFile=/etc/brot-markets/keeper-standby.env
+LoadCredential=restart-secret:/etc/brot-markets/restart-secret
+Environment=HOME=/var/lib/brot-markets
+Environment=KEEPER_MODE=standby
+Environment=KEEPER_RESTART_SECRET_FILE=%d/restart-secret
+ExecStart=/var/lib/brot-markets/bun/bun src/main.ts
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+# Limits: sized for a full takeover, on a machine that serves nothing else.
+MemoryMax=256M
+CPUQuota=50%
+TasksMax=64
+
+# Sandboxing, as the primary's unit.
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/brot-markets
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target
