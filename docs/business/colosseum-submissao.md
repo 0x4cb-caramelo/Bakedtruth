@@ -7,8 +7,8 @@
   estão em inglês e as explicações em português.
 - **Trilha:** Solana (dez prêmios de US$ 10 mil; FATO, `colosseum.com/worldsfair`, lido em 9/10/2026).
 
-**O que este rascunho não viu.** A primeira aba do formulário de verdade chegou depois e está na seção 5; as outras
-duas ainda não. O formulário fica dentro do portal, atrás do login, e eu não o abri. Os
+**O que este rascunho não viu.** A primeira aba do formulário de verdade chegou depois e está na seção 5; a segunda,
+na seção 6; a terceira ("Team") ainda não. O formulário fica dentro do portal, atrás do login, e eu não o abri. Os
 campos da seção 1 são os que o Colosseum publica nas perguntas frequentes (`colosseum.com/hackathon`, lido em
 9/10/2026). O portal pode ter outros nomes, outros campos e limites de caracteres. Quando o Lucas colar os campos
 reais, as respostas são ajustadas campo por campo.
@@ -382,3 +382,199 @@ Everything was built inside the hackathon window: first commit on 1 Oct 2026. It
 
 **O aviso no topo da página:** "Você ainda não está inscrito no Colosseum 2026 pela Superteam Brasil. Inscreva-se em
 hackathon.superteam.com.br". A inscrição pela Superteam Brasil é um passo à parte, ainda não feito.
+
+## 6. O formulário real, parte 2: "Media and code"
+
+Em 10/10/2026 o Lucas colou a segunda aba. Os campos seguem a ordem do formulário. Os dois vídeos não existem; para
+eles a resposta é o roteiro, e não um endereço.
+
+**O aviso no topo da colagem:** "Não foi possível salvar; tentaremos de novo na próxima alteração". O portal avisou que
+não gravou. Vale conferir se a primeira aba ficou salva antes de continuar.
+
+**Project logo or graphic** (Yes ou No: só confirma que o logotipo está pronto)
+
+`Yes`. Três arquivos PNG quadrados, de 1024 × 1024, em `docs/business/colosseum/`, feitos do desenho aprovado
+(`docs/product/poses/large/14-pao-inteiro.png`), ampliado sem suavizar para manter o pixel:
+
+- `logo-brot-1024-azul.png`: o pão sobre o azul-marinho da marca (`#10151c`). É o recomendado: é o fundo do site.
+- `logo-brot-1024-creme.png`: o pão sobre o creme (`#f6eddb`).
+- `logo-brot-1024-transparente.png`: sem fundo.
+
+O portal aceita JPEG, PNG, WebP ou GIF. O tamanho e a proporção que ele pede não aparecem na colagem.
+
+**GitHub link**
+
+```text
+https://github.com/0x4cb-caramelo/Bakedtruth
+```
+
+**"Meu repositório é privado e já dei acesso a hackathon@colosseum.com"**
+
+**Não marcar ainda.** Conferido em 10/10/2026 pela API do GitHub: o repositório é privado, os colaboradores são
+`0x4cb-caramelo` (dono) e `0xcf07` (escrita), e não há convite pendente. O acesso não foi dado. O convite por email só
+se faz pelo site do GitHub: Settings, Collaborators, Add people, `hackathon@colosseum.com`, com permissão de leitura.
+É um convite a alguém de fora, e por isso é do Lucas.
+
+Antes de dar o acesso, vale lembrar o que o repositório guarda além do código: o plano de negócio, as notas
+jurídicas e os registros de decisão, com nomes. Os jurados passam a ler tudo isso.
+
+**Please share any important context about your repo** (496 de 500 caracteres)
+
+```text
+Private monorepo, all written inside the hackathon window. The product is programs/brot-markets (the Solana program), packages/sdk (the client), scripts/ (devnet deploy and the full-cycle smoke) and tests/. Not product yet: app/ still renders the UI of our first design and is replaced in the site sprints, and README.md still describes that first design (pred-provable). services/landing is brot.markets. docs/ is our plan, in Portuguese. .claude/, templates/ and stack-packs/ are a process kit.
+```
+
+Se o `README.md` for reescrito antes do envio, sai a frase sobre ele.
+
+**Please submit a demo video of your product** (YouTube, Loom ou Vimeo; até 3 minutos; "Should show the live product,
+not a slide deck, not a code walkthrough")
+
+Não gravado. O que existe para mostrar é o programa na devnet, e não um site: as telas das campanhas são um protótipo
+com dados de mentira. O roteiro abaixo mostra o produto de verdade (as transações na rede) e diz no fim o que falta.
+São 285 palavras faladas, cerca de 2 minutos a 140 palavras por minuto, o que deixa um minuto para as pausas
+de tela. Ninguém cronometrou.
+
+Dois jeitos de gravar:
+
+1. **Só com o navegador,** abrindo no Solana Explorer as transações que já estão na rede (os endereços estão no campo
+   "Access instructions", abaixo). Qualquer sócio grava, sem chave nenhuma.
+2. **Com o terminal rodando o ciclo ao vivo** (`bun run smoke:devnet -- --cluster devnet`). Mostra mais, mas precisa
+   das chaves e do SOL de teste do Ronaldo (cerca de 4,7 SOL por rodada). **Cuidado:** o endereço do RPC usado no
+   deploy tem uma chave paga; ele não pode aparecer na tela.
+
+O protótipo das telas (`brot.markets/dev0x/`) ficou fora do roteiro de propósito: são dados de mentira, a página foi
+publicada sem listagem para a equipe, e os nomes de projetos reais que aparecem nela esperam a confirmação do Ronaldo.
+Se entrar no vídeo, precisa de um letreiro "design preview, mock data".
+
+```text
+[0:00 SCREEN: brot.markets home]
+This is Brot Markets: prediction markets the chain itself resolves. Today the product is a Solana program, live on devnet. Let me show it working.
+
+[0:12 SCREEN: Solana Explorer, the program address, cluster devnet]
+This is the program. No vote, no company key and no AI model decides a result here. The program reads an account.
+
+[0:25 SCREEN: terminal, the cycle starting; or the opening transaction on Explorer]
+A campaign opens on a real question: will this token's supply be burned down to 990,000 before the deadline? Opening costs 500 dollars, charged in SOL at the Pyth price that the program reads on-chain: 4.56 SOL. Ninety percent of it becomes the prize.
+
+[0:50 SCREEN: the two entry transactions]
+Two wallets take sides. One joins YES, one joins NO, both in SOL. No sign-up, just a wallet.
+
+[1:05 SCREEN: the refused retry]
+If a wallet sends the same entry twice, the program refuses the second one. Nothing is charged twice.
+
+[1:15 SCREEN: the burn, then the resolution transaction and its event]
+Now the tokens are burned. Anyone can ask the program to resolve. It opens the token's mint account, checks who owns it, reads the supply and compares it with the target. The answer is YES, and it is written on-chain with the number it read.
+
+[1:45 SCREEN: the mint account on Explorer, supply field]
+And this is the point: you can open the same account yourself and see the same number. Same account, same answer.
+
+[2:00 SCREEN: the payout transactions]
+The winners are paid straight to their wallets. The creator gets one percent of the entries. Brot keeps ten percent of the losing side. Every lamport matches what our SDK predicted before signing.
+
+[2:25 SCREEN: the three open campaigns on Explorer]
+Three campaigns are open on devnet right now: Bitcoin's price, Solana's price, and a token burn.
+
+[2:40 SCREEN: brot.markets]
+What is not here yet: the site where you click YES or NO, and the service that resolves on its own. This is devnet, unaudited, with no real money. Mainnet comes after an external audit and a multisig.
+
+Brot Markets. Proof over promises.
+```
+
+**Show demo video on the public project page**
+
+Marcar. O roteiro não mostra nada que não esteja na rede pública. Só não marque se o vídeo mostrar o terminal com
+alguma chave ou o endereço do RPC.
+
+**Live product link**
+
+```text
+https://explorer.solana.com/address/5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o?cluster=devnet
+```
+
+O campo pede o produto no ar, "if available". O que está no ar é o programa; `brot.markets` é a página de lista de
+espera, e não o produto. Pôr o site aqui faria o jurado clicar e achar um formulário de email. A alternativa é deixar
+em branco e explicar no campo seguinte.
+
+**Access instructions** (sem limite na tela; 1279 caracteres)
+
+```text
+No login is needed, and there is no hosted app yet: today the product is the program on Solana devnet, driven by scripts. Everything below opens in a browser on Solana Explorer (cluster: devnet).
+
+Program:
+https://explorer.solana.com/address/5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o?cluster=devnet
+
+A full paid cycle, run on 9 Oct 2026:
+- Opening, US$500 charged as 4.5617 SOL at the Pyth SOL/USD price:
+https://explorer.solana.com/tx/5QReYZ2pYcjhmCNuxMo593CkZawTFk75BMNAozACbZkn3hYEJTLWEnvRkiJMeXtkxUFMQZUcSJYBmPLJtRD1grPD?cluster=devnet
+- Resolution, YES read from the mint's supply after the burn:
+https://explorer.solana.com/tx/4ayGsUNYWkih6qf1ZsbdxU6mtZeoEd1wWUQFNxdrjroCEtuoK1aB5mjZo51qAFd76j7wdWuVwpcFjYkvSkwGjqfj?cluster=devnet
+
+Three campaigns open now, opened by the team:
+- BTC/USD above US$86,759.43 within 14 days: 5w8fmXruBuMswT4Aa8XAcNZihEf3T5jU8sxTpJCChPE4
+- SOL/USD below US$104.25 within 7 days: G6UntC4XuXZUZ6JiDEc8dY12SRkzUfTmDKoZTa7PbFkm
+- A token burn to 500,000 within 30 days: CufcjrYXt36YkeS2FdMx5voBkbbSdw2rTmrcQTSbL59J
+
+To run the cycle yourself, see the header of scripts/devnet-smoke.ts in the repository: one command runs it on a local cluster, another on devnet (about 4.7 devnet SOL).
+
+Product docs: https://docs.brot.markets
+```
+
+Conferido na rede em 10/10/2026, só leitura: as duas transações estão finalizadas e as três contas de campanha
+pertencem ao programa. `docs.brot.markets` está no ar, fora dos buscadores, e as seções 4, 5 e 9 dele esperam
+decisões; se o Lucas não quiser mostrá-lo aos jurados, sai a última linha.
+
+**Pitch video** (público; YouTube, Loom ou Vimeo; até 2 minutos; "introduce yourselves, tell us what you're building,
+and tell us why you're the people to build it")
+
+Não gravado. O roteiro do deck (`roteiro-pitch-v4.md`, na branch do site) não serve como está: fala em USDC, semente e
+teto, e quase não fala da equipe, que é um terço do que o campo pede. O roteiro abaixo é novo: 255 palavras,
+cerca de 1 minuto e 50 segundos a 140 palavras por minuto. Ninguém cronometrou.
+
+Dois pontos para o Lucas completar ou corrigir, porque os arquivos não dizem:
+
+- **A linha do Bernardo.** O slide de equipe só traz "Vega Crypto · hōl".
+- **"I'm the lawyer on the team, and I run operations."** Vem do cargo no slide (COO and CLO) e de "we have a lawyer
+  in our team" (BP v0.0.4, Parte 4, seção 5.1). É leitura minha.
+
+O vídeo é público e cita os três pelo nome: falta o de acordo escrito do Bernardo e do Ronaldo (decisão 12).
+
+```text
+Hi, I'm Lucas. With Bernardo and Ronaldo, I'm building Brot Markets: prediction markets the blockchain itself resolves.
+
+In a prediction market, when it really counts, who decides what's true? In March 2025, a seven-million-dollar market on Polymarket settled on an event that never happened. No refunds. There is always someone between the event and your payout: a token vote, a company key, an AI model.
+
+So Brot only opens markets the chain can answer. A project picks a promise Solana can measure: a token burn, locked liquidity, staked SOL. It opens a campaign for five hundred dollars in SOL, and ninety percent becomes the prize for its community. People take sides, YES or NO. At the deadline, the program reads the account and pays the winners. Nobody picks the winner, and anyone can check the same account.
+
+We earn ten percent of the losing side. And the project gets what a post never gave it: a promise its community follows, and proof that it delivered.
+
+Why us? Ronaldo, our CTO, wrote the on-chain readers this product stands on. Bernardo, our CEO, [ONE LINE: what he did at Vega Crypto and hol]. And I'm the lawyer on the team, and I run operations.
+
+In ten days we went from the first commit to a program live on devnet: a campaign opened and paid for, resolved from a burned token, and paid out, with more than seven hundred tests behind it.
+
+Next: the site, an external audit, and our first launch partners.
+
+Brot Markets. Proof over promises.
+```
+
+**X profile**
+
+```text
+@brotmarkets
+```
+
+É o endereço que o deck traz (`x.com/brotmarkets`).
+
+**Pitch deck** (extra da Superteam Brasil; PDF de até 20 MB e 40 páginas; "A revisão lê os slides e confere se contam a
+mesma história do formulário")
+
+Não enviar o deck como está. Ele conta outra história em quatro pontos, e é isso que a revisão confere:
+
+| Slide | O deck diz | O formulário e o programa dizem |
+|---|---|---|
+| 04, como ganhamos | "A 1,000 USDC pot", "40 USDC to Brot", "10 USDC to the creator", "950 USDC to the winners" | Tudo em SOL |
+| 05, abrir um mercado | "initial seed, from $500", "Bigger seed, higher on the site", "$10K" | US$ 500 em SOL, cobrados pelo preço da Pyth; taxas fixas. Não achei no BP v0.0.4 a regra de semente maior, lugar melhor: a conferir |
+| 06, crescimento | "MAINNET After an audit, a multisig and a cap." | Sem teto (decisão de 8/10/2026) |
+| 02, solução | "No human in the loop" | A equipe pode anular e devolver, nunca inverter. O BP propõe "No human picks the winner" (decisão 5, ainda aberta) |
+
+O deck é um HTML; o PDF sai por um navegador sem tela, como as capturas das outras páginas. Não foi gerado: mexer nos
+slides é decisão do Lucas, e dois dos quatro pontos dependem de resposta dele.

@@ -23,7 +23,9 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
   portal) e o que depende do fundador. O formulário do portal não foi visto; nada foi enviado. O prazo é 12/10/2026,
   23h59 do Pacífico (3h59 de 13/10 em Brasília). Em 10/10/2026 a primeira aba do formulário ("Project details")
   ganhou a segunda versão das respostas, mais longas e na ordem das perguntas, e a seção sobre o que existe foi
-  refeita: o programa está na devnet desde a noite de 9/10, e um ciclo inteiro rodou lá.
+  refeita: o programa está na devnet desde a noite de 9/10, e um ciclo inteiro rodou lá. No mesmo dia entraram a
+  categoria, as respostas da segunda aba ("Media and code"), os roteiros dos dois vídeos e três arquivos de
+  logotipo em `docs/business/colosseum/`.
 - **Sprint 03: o programa lê o resultado sozinho, e o Anchor sai do repositório** (`programs/brot-markets`,
   9/10/2026). Os cinco tipos de campanha abrem, travam a entrada e resolvem on-chain:
   - **Os quatro leitores do `pred-provable` portados para o Pinocchio**, um arquivo cada, com o aviso MIT: a queima

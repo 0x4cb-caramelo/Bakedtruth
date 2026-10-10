@@ -86,3 +86,37 @@ abre, e contradiz o formulário. Entrou na lista do que falta.
 
 **Em aberto.** As abas "Media and code" e "Team"; a categoria (a lista de opções não veio); país, Telegram, a marca
 da aceleradora; a confirmação das identidades do Git e de que ninguém de fora trabalhou no projeto.
+
+## 10/10/2026: a categoria e a segunda aba, "Media and code"
+
+**O que o Lucas pediu.** Mandou a imagem com as opções da categoria e depois colou a segunda aba: "agora as proximas
+perguntas".
+
+**As escolhas.**
+
+- **Categoria: "Markets & Exchanges".** Não há opção de mercados de previsão. É a que repete a palavra da descrição
+  pública; "Consumer Apps" ficou como segunda, pelo precedente do Melee.
+- **O acesso ao repositório não foi dado.** Conferi pela API do GitHub: privado, dois colaboradores, nenhum convite
+  pendente. A caixa "já dei acesso" não deve ser marcada antes de o Lucas fazer o convite, que é dele: é um convite a
+  alguém de fora, e os jurados passam a ler o plano e os registros, com nomes.
+- **"Live product link" aponta para o programa no Explorer,** e não para brot.markets. O campo pede o produto no ar;
+  o site é uma lista de espera.
+- **O vídeo de demonstração mostra as transações na rede,** e não o protótipo das telas. O campo pede "the live
+  product, not a slide deck, not a code walkthrough". O protótipo em /dev0x tem dados de mentira, foi publicado sem
+  listagem para a equipe e traz nomes de projetos reais que esperam a confirmação do Ronaldo.
+- **O roteiro do vídeo de apresentação é novo.** O do deck fala em USDC, semente e teto e quase não fala da equipe; o
+  campo pede quem são, o que constroem e por que eles. A linha do Bernardo ficou em branco; a do Lucas é leitura minha
+  do cargo no slide.
+- **O deck em PDF não foi gerado.** A revisão da Superteam confere se os slides contam a mesma história do
+  formulário, e o deck diverge em quatro pontos (USDC, semente, teto, "No human in the loop"). Mexer nos slides é
+  decisão dele.
+- **Três logotipos quadrados** saíram do desenho aprovado do pão, ampliado sem suavizar.
+
+**Conferido na rede, só leitura.** As duas transações citadas estão finalizadas; as três contas de campanha pertencem
+ao programa.
+
+**Achado.** A colagem trazia "Não foi possível salvar; tentaremos de novo na próxima alteração": o portal avisou que
+não gravou.
+
+**Em aberto.** A aba "Team"; o convite a hackathon@colosseum.com; quem grava os dois vídeos; os quatro pontos do deck;
+o README.
