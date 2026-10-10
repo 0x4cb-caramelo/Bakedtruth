@@ -2,7 +2,7 @@
  * Purpose: the second half of the smoke cycle (Sprint 05, X0.2): resolve a burn campaign YES, tally each baker's
  *          joins, end the window with a team confirmation, then settle every entry, the creator share, the fee and
  *          the prize, close and sweep, each lamport checked against the SDK's math (`snapshot`, `entryPayout`).
- * Version: 0.1.0
+ * Version: 0.1.1 (the team confirmation emits CampaignFinalized after ResultConfirmed, PR #44)
  * Sprint:  05 (SDK and the devnet cycle), lane OPS
  *
  * The amounts the program moves are recomputed by the SDK from the stored campaign, never read back from the
@@ -72,12 +72,12 @@ export async function resolveAndConfirm(s: Session, campaign: Address, metric: A
     await send(s.rpc, s.payer, [await buildTeamConfirmResult({ teamMember: s.team, campaign })]),
     "confirm",
   );
-  // TP 3.4.3 and 3.4.14 list CampaignFinalized after ResultConfirmed; the program emits ResultConfirmed only
-  // (finalize_snapshot runs inside it). Reported to the lead (lane OPS report); this checks what the program does.
+  // TP 3.4.3 and 3.4.14: ResultConfirmed, then CampaignFinalized with the next seq (the program since PR #44).
   const status = (await readCampaign(s, campaign)).status;
+  const [own, finalized] = confirmed.events.map((e) => (e.data as { seq: bigint }).seq);
   check(
-    names(confirmed) === "ResultConfirmed" && status >= 3,
-    `team_confirm_result finalizes at once (${names(confirmed)})`,
+    names(confirmed) === "ResultConfirmed,CampaignFinalized" && finalized === own! + 1n && status >= 3,
+    `team_confirm_result finalizes at once and emits the snapshot (${names(confirmed)})`,
   );
 }
 
