@@ -3,7 +3,7 @@
  *          chain's clock through the RPC; check them with the SDK's mirror of the program's rules; build the
  *          instruction from the checked inputs; summarise the very bytes the wallet signs; simulate; and show
  *          the whole debit (amount, rents, network fee) before the wallet. `ok` only when all of it passed.
- * Version: 0.2.0
+ * Version: 0.3.0 (Sprint 11: A-8, the deploy a client was built for is checked first when it names one)
  * Sprint:  05 (SDK)
  *
  * A refusal stops here, named as the program names it. The retry guard (A-9): the join is signed against the
@@ -17,6 +17,7 @@ import { ACCOUNT_LEN, Side } from "../read/constants";
 import { decodeCampaign, decodeEntry, decodeGlobalConfig } from "../read/accounts";
 import { U32_MAX } from "../read/math/integers";
 import { configAddress, entryAddress } from "../read/pdas";
+import { assertDeploy } from "../read/program-data";
 import { fetchRaw, readChainTime, rentExemptMinimum, type SolanaRpc } from "../read/rpc";
 import { checkJoin, type JoinCheck } from "../read/validate/join";
 import { buildJoinCampaign } from "./builders/campaign";
@@ -62,11 +63,15 @@ export async function prepareJoin(a: {
   slippageBps?: number;
   /** On a retry: the `expectedEntryTotal` saved from the first attempt. */
   expectedEntryTotal?: bigint;
+  /** A-8: the program deploy (ProgramData's slot) this client was built for; `null` when it knows none. Given, the
+   * preparation throws `ProgramUpgraded` unless the program's last deploy is that one. Left out, nothing is checked. */
+  deploySlot?: bigint | null;
 }): Promise<PreparedJoin> {
   const slippageBps = a.slippageBps ?? 100;
   if (!Number.isInteger(slippageBps) || slippageBps < 0 || slippageBps > MAX_SLIPPAGE_BPS) {
     throw new RangeError(`slippageBps must be an integer from 0 to ${MAX_SLIPPAGE_BPS}`);
   }
+  if (a.deploySlot !== undefined) await assertDeploy(a.rpc, a.deploySlot);
   const [campaignRaw, configRaw, entryRaw] = await Promise.all([
     fetchRaw(a.rpc, a.campaign),
     fetchRaw(a.rpc, await configAddress()),

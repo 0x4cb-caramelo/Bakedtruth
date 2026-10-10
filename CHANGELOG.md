@@ -22,6 +22,20 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Added
 
+- **A-8: a assinatura pausa quando o programa é atualizado** (Sprint 11, 10/10/2026, pela resposta do fundador): o SDK
+  lê o slot do último deploy do programa na conta ProgramData (só os 45 primeiros bytes, com o dono conferido antes)
+  pela RPC do site, a pública do devnet, até o relay `/rpc` existir; `prepareJoin` e `prepareOpenCampaign` recebem o
+  slot esperado e param antes de tudo quando ele mudou. O build do site grava o slot (hoje 509.389.614); o painel
+  confere na revisão e de novo logo antes da carteira. Se não bate, nada é assinado, a mensagem diz que o programa foi
+  atualizado e a página recarrega depois de 5 s, 30 s, 2 min e então 10 min. Por isso o site precisa ser construído de
+  novo depois de cada atualização do programa (`deploy/devnet/README.md`, passo 5).
+- **O piso que o baker assina fica 1% abaixo da estimativa no devnet** (resposta do fundador, 10/10/2026), agora
+  passado de forma explícita pelo `submit.ts`.
+- Testes: 2 no SDK, 2 no site (41 em `tests/site`) e 2 cenários novos no smoke web (12 passaram). A leitura do
+  ProgramData entrou na lista do relay (`docs/technical/relay-allowlist.md`).
+
+### Added
+
 - **A página da campanha e a entrada pelo site** (Sprint 11, 10/10/2026): `/c/[id]` mostra a frase, a regra de cada
   tipo, a prova lida agora pelo leitor do SDK (com "se lido agora"), os campos de preço (preço, confiança, idade máxima
   da campanha, o aviso sem preço fresco e o da margem de 1%), o pote, as entradas recentes e o histórico da chance (L-23,
@@ -42,9 +56,8 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
   depois de resolvido. O interruptor de entradas (K-11) ainda usa a saúde da API no lugar do `entries_allowed`.
 - **A lista do relay `/rpc` tirada do rastro do cliente** (`docs/technical/relay-allowlist.md`): 11 métodos, nenhum
   WebSocket. O relay em si é da Sprint 08.
-- Em aberto: A-8 (pausa da assinatura durante atualização do programa) espera o fundador dizer de onde ler o
-  ProgramData até o relay existir; a assinatura no devnet com carteira real não foi verificada (a preparação e a
-  simulação no devnet foram).
+- Em aberto: a assinatura no devnet com carteira real não foi verificada (a preparação e a simulação no devnet foram);
+  o fundador fará o teste com a Phantom. A A-8 foi construída no mesmo dia (acima).
 
 ### Added
 

@@ -31,7 +31,8 @@ import { startFakeChain, type FakeChain } from "./fake-chain";
 let chain: FakeChain | null = null;
 afterEach(() => chain?.close());
 
-/** The Sprint 11 list, then the three the panel adds (the price buffer, a landed earlier entry, an expired attempt). */
+/** The Sprint 11 list, then what the panel adds (the price buffer, a landed earlier entry, an expired attempt, a watch
+ * that stopped, another wallet) and A-8's two (tests/site/upgrade-pause.test.ts). */
 const KEYS: FailureKey[] = [
   "entriesClosed",
   "outcomeKnown",
@@ -49,6 +50,8 @@ const KEYS: FailureKey[] = [
   "notLanded",
   "stillChecking",
   "walletChanged",
+  "programUpgraded",
+  "versionUnknown",
 ];
 
 describe("each entry failure has its own message", () => {

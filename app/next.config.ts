@@ -1,11 +1,14 @@
 /**
  * Purpose: the site's Next.js settings: the security headers and the Content-Security-Policy (Sprint 09, X2.5). The
  *          policy allows the page's own origin, the one RPC origin the browser reads from (NEXT_PUBLIC_RPC_URL), and the
- *          read API (NEXT_PUBLIC_API_URL); nothing else. No third-party script and no framing by another origin.
- * Version: 0.3.0 (Sprint 11: the build refuses an RPC URL with a key in its query or credentials, A-5)
+ *          read API (NEXT_PUBLIC_API_URL); nothing else. No third-party script and no framing by another origin. And
+ *          A-8: the program deploy a build is for, baked into the bundle as NEXT_PUBLIC_PROGRAM_DEPLOY_SLOT.
+ * Version: 0.4.0 (Sprint 11: A-8's deploy slot; the build refuses an RPC URL with a key, A-5)
  * Sprint:  09 (site shell, theme and wallet)
  */
 import type { NextConfig } from "next";
+import { PHASE_DEVELOPMENT_SERVER, PHASE_PRODUCTION_BUILD } from "next/constants";
+import { deploySlotFrom, readProgramDeploy, rpcFor } from "@brot/sdk/read";
 
 // A-5: no client holds a paid key. NEXT_PUBLIC_* values ship in the bundle (and the re-check panel prints the RPC URL),
 // so a URL carrying a key in its query or its credentials stops the build. A key hidden in a path cannot be told apart.
@@ -19,7 +22,9 @@ import type { NextConfig } from "next";
     return;
   }
   if (url.search || url.username || url.password) {
-    throw new Error("NEXT_PUBLIC_RPC_URL must not carry a key (query string or credentials): it ships to every browser");
+    throw new Error(
+      "NEXT_PUBLIC_RPC_URL must not carry a key (query string or credentials): it ships to every browser",
+    );
   }
 })();
 
@@ -70,4 +75,31 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+/**
+ * A-8: the program deploy (ProgramData's slot) this build is for. Given in NEXT_PUBLIC_PROGRAM_DEPLOY_SLOT, or read once
+ * through the site's RPC when the site is built or served in development (the build's workers load this file again and
+ * find it in the environment). A failed read leaves it empty: that build does not sign until it is built again. Build
+ * the site again after every program upgrade; until then the old bundle pauses signing.
+ */
+async function deploySlot(phase: string): Promise<string> {
+  const given = process.env.NEXT_PUBLIC_PROGRAM_DEPLOY_SLOT;
+  if (given !== undefined) return deploySlotFrom(given) === null ? "" : given;
+  if (phase !== PHASE_PRODUCTION_BUILD && phase !== PHASE_DEVELOPMENT_SERVER) return "";
+  let slot = "";
+  try {
+    slot = (
+      await readProgramDeploy(rpcFor(process.env.NEXT_PUBLIC_RPC_URL ?? "https://api.devnet.solana.com"))
+    ).slot.toString();
+    console.log(`A-8: this build is for the program deploy at slot ${slot}`);
+  } catch (error) {
+    console.warn(
+      `A-8: the program's deploy could not be read (${error instanceof Error ? error.name : "error"}); this build will not sign`,
+    );
+  }
+  process.env.NEXT_PUBLIC_PROGRAM_DEPLOY_SLOT = slot;
+  return slot;
+}
+
+export default async function config(phase: string): Promise<NextConfig> {
+  return { ...nextConfig, env: { NEXT_PUBLIC_PROGRAM_DEPLOY_SLOT: await deploySlot(phase) } };
+}

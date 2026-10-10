@@ -47,7 +47,7 @@ describe("the client's rpc trace", () => {
       amount: P.SOL,
     };
     await loadCampaignPage(rpc, args.id, baker.address);
-    const prepared = ready(await prepareEntry({ rpc, ...choice }));
+    const prepared = ready(await prepareEntry({ rpc, ...choice, deploySlot: 0n })); // A-8: ProgramData read too
     const outcome = await handToWallet({
       rpc,
       ready: prepared,

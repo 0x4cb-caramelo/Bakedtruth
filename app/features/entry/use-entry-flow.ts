@@ -5,20 +5,24 @@
  *          (on mount, on "Review entry", and on "Check again" after the network stopped answering) (A-9). Every attempt
  *          passes the saved total while a record is kept. A summary whose blockhash has under 60 blocks left is prepared
  *          again before the wallet sees it, and an entry prepared for another wallet is never handed over.
- * Version: 0.2.0 (Sprint 11 review: one unresolved attempt at a time, freshness in blocks, the wallet re-checked)
+ *          A-8: the program's last deploy (its ProgramData, through the site's RPC) is checked by the SDK's preparation
+ *          and again right before the wallet; when it is not the deploy this site was built for, nothing is signed and
+ *          the failure counts down to a reload (upgrade-pause.ts).
+ * Version: 0.3.0 (A-8, 2026-10-10; 0.2.0, the Sprint 11 review: one unresolved attempt at a time, freshness in
+ *          blocks, the wallet re-checked)
  * Sprint:  11 (site: campaign page and entry)
- *
- * Not here: A-8, the pause of signing during a program upgrade. It reads ProgramData through `/rpc`, which Sprint 08
- * has not built; where to read it from until then is the founder's question (Sprint 11 record).
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { assertDeploy } from "@brot/sdk/read";
 
+import { BUILT_FOR } from "@/lib/deploy";
 import { rpc } from "@/lib/rpc";
 import { failure as plain, fromError, fromRefusal, fromSimulation, type Failure } from "./failures";
 import { clearPending, guardedTotal, layeredStore, loadPending, retrying, type PendingEntry } from "./retry-guard";
 import { handToWallet, lastValidOf, pendingOf, prepareEntry, settle } from "./submit";
 import type { Cost, EntryChoice, Outcome, ReadyJoin, Stage } from "./submit";
+import { deployConfirmed } from "./upgrade-pause";
 import { browserStore } from "./use-rents";
 import type { Sides } from "./watch";
 
@@ -112,7 +116,9 @@ export function useEntryFlow(a: { campaign: string; wallet: string | null; onCha
       setState({ step: "preparing", choice });
       const retry = retrying(saved);
       try {
-        const prepared = await prepareEntry({ rpc, ...choice, expectedEntryTotal: guardedTotal(saved) });
+        const expectedEntryTotal = guardedTotal(saved);
+        const prepared = await prepareEntry({ rpc, ...choice, expectedEntryTotal, deploySlot: BUILT_FOR });
+        deployConfirmed(); // the SDK checked the deploy before anything else
         if (prepared.ok) {
           setState({ step: "review", choice, ready: prepared, retry, refreshed: false });
           return;
@@ -143,7 +149,10 @@ export function useEntryFlow(a: { campaign: string; wallet: string | null; onCha
     }
     let left: bigint;
     try {
-      left = lastValidOf(ready) - (await rpc.getBlockHeight({ commitment: "confirmed" }).send());
+      // A-8 again: an upgrade may have landed while the summary was on screen.
+      const height = rpc.getBlockHeight({ commitment: "confirmed" }).send();
+      const [now] = await Promise.all([height, assertDeploy(rpc, BUILT_FOR)]);
+      left = lastValidOf(ready) - now;
     } catch (error) {
       setState({ step: "failed", choice, failure: fromError(error), cost: "nothing", floorBps: null });
       return;

@@ -4,8 +4,10 @@
  *          from the IDL, and only when the program's own instruction failed. A wallet, network or funds failure is told
  *          apart from the RPC's and the wallet's errors. Only a refusal in the wallet, or a preflight that refused to
  *          send, proves "nothing was sent"; any other wallet error may hide a sent transaction, and the retry guard
- *          watches it (retry-guard.ts).
- * Version: 0.2.0 (Sprint 11 review: a code is the program's only when its instruction failed; preflight refusals)
+ *          watches it (retry-guard.ts). A-8's pause (the SDK's `ProgramUpgraded`, thrown before the wallet) is "nothing
+ *          was sent" too.
+ * Version: 0.3.0 (A-8, 2026-10-10; 0.2.0, the Sprint 11 review: a code is the program's only when its instruction
+ *          failed; preflight refusals)
  * Sprint:  11 (site: campaign page and entry)
  */
 import {
@@ -13,6 +15,8 @@ import {
   customErrorCode,
   errorMessage,
   errorName,
+  ProgramDataRefused,
+  ProgramUpgraded,
   PROGRAM_ID,
   SYSTEM_PROGRAM_ID,
   type BrotErrorName,
@@ -35,7 +39,9 @@ export type FailureKey =
   | "networkDown"
   | "notLanded"
   | "stillChecking"
-  | "walletChanged";
+  | "walletChanged"
+  | "programUpgraded"
+  | "versionUnknown";
 
 export type Failure = {
   key: FailureKey;
@@ -145,6 +151,11 @@ export function isNetworkError(error: unknown): boolean {
 
 /** What a thrown error means for the panel: refused in the wallet, the network down, or a plain failure. */
 export function fromError(error: unknown): Failure {
+  // A-8: the program is not the deploy this site was built for (or the site knows none): nothing is signed.
+  if (error instanceof ProgramUpgraded) {
+    return { ...plain(error.builtFor === null ? "versionUnknown" : "programUpgraded"), notSent: true };
+  }
+  if (error instanceof ProgramDataRefused) return { ...plain("versionUnknown"), notSent: true };
   if (refusedInWallet(error)) return { ...plain("signatureRefused"), notSent: true };
   const preflight = refusedInPreflight(error);
   if (preflight) return preflight;

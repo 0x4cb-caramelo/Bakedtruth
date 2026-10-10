@@ -2,9 +2,11 @@
  * Purpose: one message for each way an entry can fail (the Sprint 11 list: entries closed, outcome already known, no
  *          fresh price, pause, below the minimum, not enough SOL, entry changed since it was read, return below
  *          min_return_bps, signature refused, transaction failed, network down), plus the price buffer, an earlier
- *          entry that already landed, and an attempt that expired. Each says what happened, what it cost and the way
- *          out; the program's own message (from the SDK's error map) is shown under it. D-m words; English (L-01).
- * Version: 0.1.0
+ *          entry that already landed, an attempt that expired, and A-8's pause: the program updated since this site
+ *          was built (the page reloads after a back-off), or a site that does not know its program's version. Each
+ *          says what happened, what it cost and the way out; the program's own message (from the SDK's error map) is
+ *          shown under it. D-m words; English (L-01).
+ * Version: 0.2.0 (A-8, 2026-10-10)
  * Sprint:  11 (site: campaign page and entry)
  */
 import type { FailureKey } from "./failures";
@@ -18,8 +20,11 @@ export type FailureContext = {
   need?: { amount: string; rents: string; fee: string };
 };
 
-/** "again": review again; "amount": change the amount; "close": nothing to retry; "faucet": get devnet SOL. */
-export type WayOut = "again" | "amount" | "close" | "faucet" | "wait" | "check";
+/**
+ * "again": review again; "amount": change the amount; "close": nothing to retry; "faucet": get devnet SOL; "check":
+ * watch an unresolved attempt again; "reload": reload the page for a site built for the program's new version (A-8).
+ */
+export type WayOut = "again" | "amount" | "close" | "faucet" | "wait" | "check" | "reload";
 
 export type FailureCopy = { title: string; text: string; way: WayOut };
 
@@ -101,6 +106,16 @@ const TEXT: Record<FailureKey, (c: FailureContext) => FailureCopy> = {
     text: "The network stopped answering while this page checked whether your entry landed. It may still land. Check again; nothing new can be signed here until this one is settled.",
     way: "check",
   }),
+  programUpgraded: () => ({
+    title: "Brot's program was just updated",
+    text: "This page was built for the program's previous version, so it does not ask your wallet to sign. It reloads to get the page built for the new one.",
+    way: "reload",
+  }),
+  versionUnknown: () => ({
+    title: "This page can't confirm the program's version",
+    text: "The page does not know which version of Brot's program it was built for, so it does not ask your wallet to sign. Try again later.",
+    way: "close",
+  }),
   walletChanged: () => ({
     title: "Your wallet changed",
     text: "The connected wallet is not the one this entry was prepared for. Review it again with the wallet you want to use.",
@@ -126,4 +141,9 @@ export const ACTIONS: Record<WayOut, string> = {
   faucet: "Get devnet SOL",
   wait: "Try again",
   check: "Check again",
+  reload: "Reload now",
 };
+
+/** A-8's countdown: seconds under a minute, whole minutes (rounded up) above. */
+export const RELOADING = (seconds: number) =>
+  seconds < 60 ? `Reloading in ${seconds} s.` : `Reloading in ${Math.ceil(seconds / 60)} min.`;

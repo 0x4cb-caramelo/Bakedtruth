@@ -68,10 +68,11 @@ export async function fundedWallet(w: { client: Client }, sol = 100n): Promise<K
   return signer;
 }
 
-/** A loader-v3 ProgramData account naming `authority` (null: an immutable program). */
-export function setUpgradeAuthority(client: Client, programData: Address, authority: Address | null) {
+/** A loader-v3 ProgramData account naming `authority` (null: an immutable program), last deployed at `slot`. */
+export function setUpgradeAuthority(client: Client, programData: Address, authority: Address | null, slot = 0n) {
   const data = new Uint8Array(45);
   new DataView(data.buffer).setUint32(0, 3, true); // UpgradeableLoaderState::ProgramData
+  new DataView(data.buffer).setBigUint64(4, slot, true);
   if (authority) {
     data[12] = 1;
     data.set(getAddressEncoder().encode(authority), 13);

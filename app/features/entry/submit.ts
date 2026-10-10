@@ -1,11 +1,13 @@
 /**
  * Purpose: an entry from the panel to the chain, without React. `prepareEntry` is the SDK's A-3 preparation for the
  *          connected wallet's address (re-read, checked, built, summarised from the bytes, simulated), passing the
- *          retry guard's saved total when there is one. `handToWallet` saves the guard's record for this attempt first,
+ *          retry guard's saved total when there is one, the floor the baker signs (1% below the estimate) and the
+ *          program deploy the site was built for (A-8). `handToWallet` saves the guard's record for this attempt first,
  *          gives the wallet the very message bytes the summary read, and watches the result by polling (watch.ts). The
  *          wallet signs and sends (`sendTransaction`, which maps to MWA's `sign_and_send_transactions`, TP §3.6 S1 rule
  *          4); the site never holds a key.
- * Version: 0.2.0 (Sprint 11 review: records per attempt, a deadline raised for a late answer, errors by program)
+ * Version: 0.3.0 (2026-10-10, the founder's answers: the 1% floor, A-8; 0.2.0, the Sprint 11 review: records per
+ *          attempt, a deadline raised for a late answer, errors by program)
  * Sprint:  11 (site: campaign page and entry)
  */
 import { address, createNoopSigner } from "@solana/kit";
@@ -32,8 +34,17 @@ export type EntryChoice = { campaign: string; baker: string; side: EntrySide; am
 /** A blockhash lives this many blocks: a wallet that signs a newer one can land up to this far past its answer. */
 export const BLOCKHASH_LIFE = 150n;
 
-/** A-3 for this entry. `expectedEntryTotal`: the retry guard's saved total, when a record is kept. */
-export function prepareEntry(a: EntryChoice & { rpc: SolanaRpc; expectedEntryTotal?: bigint }): Promise<PreparedJoin> {
+/** The floor a baker signs: `min_return_bps` 1% below the estimate (founder's answer, 2026-10-10, for devnet). */
+export const FLOOR_BPS = 100;
+
+/**
+ * A-3 for this entry. `expectedEntryTotal`: the retry guard's saved total, when a record is kept. `deploySlot`: A-8, the
+ * program deploy the site was built for; the SDK throws `ProgramUpgraded` before anything else when it is not the
+ * program's last deploy.
+ */
+export function prepareEntry(
+  a: EntryChoice & { rpc: SolanaRpc; expectedEntryTotal?: bigint; deploySlot?: bigint | null },
+): Promise<PreparedJoin> {
   return prepareJoin({
     rpc: a.rpc,
     // Only names the fee payer: nothing is signed here; the wallet signs the compiled bytes later.
@@ -42,6 +53,8 @@ export function prepareEntry(a: EntryChoice & { rpc: SolanaRpc; expectedEntryTot
     side: sideOf(a.side),
     amount: a.amount,
     expectedEntryTotal: a.expectedEntryTotal,
+    slippageBps: FLOOR_BPS,
+    deploySlot: a.deploySlot,
   });
 }
 

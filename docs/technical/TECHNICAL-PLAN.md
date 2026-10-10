@@ -1337,7 +1337,7 @@ system of Sprint -1; it replaces the provisional `services/landing` on `127.0.0.
 | Theme | `data-theme` on `<html>`, set by a short script in `<head>` before the CSS, as in the prototype. The `localStorage` key becomes `brot-theme`. Which dark is official and which theme is the default are Sprint -1 decisions (`DESIGN-DIRECTION.md:159, 448-450`) **[DP]** |
 | Fonts | Barlow Condensed 700 and Inter 400, 500 and 600, served by the site itself; how this Next version serves fonts is C10 **[AC]** |
 | Data | Lists and history from `/api/v1` (§6); chain reads, simulation and signature status through `/rpc` (§3.5). Before signing, the panel re-reads `Campaign` and `Entry` and simulates (A-3). Public state comes from the SDK's `view` against chain time, never the device clock (A-7) **[DP]** |
-| Signing pause on upgrade | The client compares the program's last-deploy slot (ProgramData) with the one its bundle was built for; on a mismatch it stops signing, backs off and reloads. Signing never depends on the indexer (A-8) **[DP]** |
+| Signing pause on upgrade | The client compares the program's last-deploy slot (ProgramData) with the one its bundle was built for; on a mismatch it stops signing, backs off and reloads. Signing never depends on the indexer (A-8) **[DP]**. Built in Sprint 11 (2026-10-10, the founder's answer) **[F]**: the SDK's `assertDeploy` reads ProgramData's first 45 bytes through the site's RPC (the public devnet one until `/rpc` exists), and `prepareJoin` and `prepareOpenCampaign` take the expected slot; the site's build bakes the slot in (`NEXT_PUBLIC_PROGRAM_DEPLOY_SLOT`), checks at review and right before the wallet, and reloads after 5 s, 30 s, 2 min, then 10 min. The site is built again after every program upgrade; until then it pauses signing |
 | Third-party code | None on campaign pages (K-10). Security headers and a CSP in `next.config.ts`, which is empty today **[F]** (Sprint 09 DoD). Cloak and SODAX get their own routes; X is reached only through a plain share-intent link, with no X script, widget or API **[DP]** |
 | Country switch | `GEO_BLOCK`: when on, the server reads the visitor's country from Cloudflare (C9 **[AC]**) and hides the entry panel; it also reads `entries_allowed` from `/api/v1/health`. Entries, results and payouts stay visible, and payouts are never blocked (K-11; P4 §5.2) **[DP]** |
 | Team panel | None in the MVP. The team operates through `scripts/team/`, each person with their own key. The public register page exists from the MVP (L-12) **[DP]** |
@@ -1703,8 +1703,10 @@ disagree, this section is what the code does.
   say, `team_confirm_result` and `team_void_campaign` emit their event, then `CampaignFinalized` with the next seq,
   built by `snapshot::finalized_event`, the builder `finalize_campaign` uses [F]. Cost on LiteSVM: confirm 3,539 to
   4,785 CU, void 2,456 to 3,701.
-- **Open: the deploy-slot check (A-8) belongs in the SDK.** Planned for the site in Sprint 11, it guards every client
-  that signs, so `prepare*` should refuse when ProgramData's last-deploy slot differs from the one expected (A-6).
+- **Closed: the deploy-slot check (A-8) is in the SDK** (Sprint 11, 2026-10-10). `assertDeploy` throws
+  `ProgramUpgraded` when ProgramData's last-deploy slot differs from the one expected, and `prepareJoin` and
+  `prepareOpenCampaign` run it first when given `deploySlot` (A-6); the scripts and the keeper leave it out. The site
+  reads ProgramData through its own RPC, the public devnet one, until `/rpc` exists (the founder's answer).
 
 ## 4. Data model
 
@@ -1931,6 +1933,8 @@ The red-team review of what a baker signs (Sprint 11, 2026-10-10) was acted on i
 | `script-src 'unsafe-inline'` in the CSP (`app/next.config.ts`); a nonce through `proxy.ts`, or a hash of the theme script | A future injection on the signing page runs with no CSP backstop; none was found today | 13 or 16 |
 | Compare a landed join with the summary the baker read (`signAndSendTransaction` hides the signed bytes) | A wallet that changes the join's parameters goes unseen; the program's `min_return_bps` and `expected_entry_total` still bound the outcome | 16 |
 | A web-smoke wallet that changes the bytes (Lighthouse assertions, a priority fee, a new blockhash) | The guard's handling of a modified transaction is tested only in code review | 16 |
+| A-8 reads ProgramData through the public devnet RPC, not through `/rpc` (the founder's answer, 2026-10-10) | An RPC that lies about the slot can pause signing (a false mismatch) or hide an upgrade from the page (a false match), as it can lie about every account the page reads; the program's own checks still bound what a join does | 08 (the relay) |
+| The site bakes the program's deploy slot in at build time | After a program upgrade the site pauses signing until it is built again; nothing is signed against the new program by a page built for the old one | Each upgrade (`deploy/devnet/README.md`) |
 
 ## 8. Privacy and compliance baseline
 

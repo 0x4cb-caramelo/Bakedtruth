@@ -2,8 +2,10 @@
  * Purpose: the sheet after "Sign in wallet": the signing steps (the wallet, then confirming by polling, or checking a
  *          transaction the wallet never answered for, with the blocks left before it expires), the receipt, and each
  *          failure with what happened, what it cost, the program's own message from the SDK's error map, and its way
- *          out (review again, change the amount, the devnet faucet, or close).
- * Version: 0.2.0 (Sprint 11 review: "Check again" for a stopped watch; the entry's sides when no signature came back)
+ *          out (review again, change the amount, the devnet faucet, check again, reload for the program's new version
+ *          with its countdown (A-8), or close).
+ * Version: 0.3.0 (A-8, 2026-10-10; 0.2.0, the Sprint 11 review: "Check again" for a stopped watch; the entry's sides
+ *          when no signature came back)
  * Sprint:  11 (site: campaign page and entry)
  */
 "use client";
@@ -17,6 +19,8 @@ import { FAUCET_URL } from "@/features/wallet/wallet-state";
 import { sol4 } from "./amount";
 import { DONE, STEPS } from "./copy";
 import { ACTIONS, COST, failureCopy, programLine, type FailureContext } from "./copy-failures";
+import { ReloadCountdown } from "./reload-countdown";
+import { reloadForUpgrade } from "./upgrade-pause";
 import type { FlowState } from "./use-entry-flow";
 
 type Signing = Extract<FlowState, { step: "signing" }>;
@@ -114,7 +118,9 @@ export function FailureView({
         ? onCheck
         : copy.way === "again" || copy.way === "wait"
           ? onAgain
-          : null;
+          : copy.way === "reload"
+            ? () => reloadForUpgrade()
+            : null;
   // A stopped watch says itself what it does not know; an expired attempt with no signature may have cost its fee.
   const cost =
     state.cost === "fee"
@@ -131,6 +137,7 @@ export function FailureView({
         <span>{copy.text}</span>
       </p>
       {cost ? <p className="m-0 text-muted">{cost}</p> : null}
+      {copy.way === "reload" ? <ReloadCountdown /> : null}
       {code !== null && name && programMessage ? (
         <p className="m-0 font-mono text-[11px] text-muted">{programLine(code, name, programMessage)}</p>
       ) : null}

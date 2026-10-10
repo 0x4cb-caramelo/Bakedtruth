@@ -8,7 +8,8 @@ by default, with no key).
 **How it was taken.** `tests/site/relay-trace.test.ts` runs the site's own code against the program in LiteSVM behind
 a recording JSON-RPC endpoint (`tests/site/fake-chain.ts`): the campaign page's reads (`load.ts`), the entry's
 preparation (the SDK's `prepareJoin`), the hand-off to a stand-in wallet and the retry guard's watch (`submit.ts`,
-`watch.ts`), the recent entries (`activity.ts`) and the SDK's `recheck`. The test fails when the client calls a method
+`watch.ts`), the recent entries (`activity.ts`), the SDK's `recheck` and, since A-8, the program's ProgramData read
+before signing (the SDK's `assertDeploy`). The test fails when the client calls a method
 this table does not list, or when a row the client's code should call was not seen. The rows marked "Wallet adapter"
 are called by `@solana/wallet-adapter-react`'s web3.js connection, outside that trace.
 
@@ -16,7 +17,8 @@ are called by `@solana/wallet-adapter-react`'s web3.js connection, outside that 
 injected test wallet against the same recording endpoint, and fails on any method off this table and on any WebSocket
 the page opens. On 2026-10-10 it saw these eleven, and no WebSocket: `getAccountInfo`, `getBalance`, `getBlockHeight`,
 `getLatestBlockhash`, `getMinimumBalanceForRentExemption`, `getMultipleAccounts`, `getSignatureStatuses`,
-`getSignaturesForAddress`, `getTransaction`, `sendTransaction` (the test wallet's), `simulateTransaction`.
+`getSignaturesForAddress`, `getTransaction`, `sendTransaction` (the test wallet's), `simulateTransaction`. After A-8
+(the same day) it saw the same eleven: the ProgramData read is a `getAccountInfo`.
 
 **No WebSocket.** The client polls `getSignatureStatuses` and `getBlockHeight` every two seconds; no `*Subscribe`
 method appears in the trace. The site's old `confirmTransaction` call (`app/lib/hooks.ts:228`) left with the old app in
@@ -26,7 +28,7 @@ Sprint 09.
 
 | Method | Called by | What it may read or carry |
 |---|---|---|
-| `getAccountInfo` | Page, SDK preparation, guard, recheck | The program's accounts (`Campaign`, `GlobalConfig`, `Entry`, owner `5Rx8…n8o`); the Clock sysvar; a metric account whose owner is one of the five readers' programs (Pyth receiver `rec2HH…`, SPL Token, Meteora DAMM v2, SPL Stake Pool, Vote); an `Entry` that does not exist yet answers `null`. Encoding `base64`, commitment `confirmed` |
+| `getAccountInfo` | Page, SDK preparation, guard, recheck, A-8 | The program's accounts (`Campaign`, `GlobalConfig`, `Entry`, owner `5Rx8…n8o`); the Clock sysvar; a metric account whose owner is one of the five readers' programs (Pyth receiver `rec2HH…`, SPL Token, Meteora DAMM v2, SPL Stake Pool, Vote); an `Entry` that does not exist yet answers `null`; and the program's ProgramData (A-8: below), only as a `dataSlice` of offset 0 and length 45. Encoding `base64`, commitment `confirmed` |
 | `getMultipleAccounts` | Page | The same accounts, up to three per call (campaign and config; then metric, the wallet's entry, the creator's entry) |
 | `getLatestBlockhash` | SDK preparation | Commitment `confirmed`; its `lastValidBlockHeight` is what the retry guard saves first |
 | `simulateTransaction` | SDK preparation | One transaction whose top-level instructions are the program's (`user_join_campaign`); `sigVerify: false`, `replaceRecentBlockhash: true`, `innerInstructions: true`, encoding `base64` |
@@ -52,7 +54,14 @@ it for the keeper), and batches (one method per request).
 
 - Account reads are allowed by owner, as the proposal says (D-i: no list of accounts): the relay returns an account only
   when its owner is the program, a reader's program, or a sysvar the client reads (Clock), and `null` when it does not
-  exist.
+  exist. One exception, by address: the program's ProgramData (A-8).
+- **ProgramData (A-8, added 2026-10-10):** before every preparation and again right before the wallet, the client reads
+  the program's last-deploy slot from the ProgramData account, owner the upgradeable loader
+  `BPFLoaderUpgradeab1e11111111111111111111111`. On devnet its address is
+  `8Vy9jyzijx41ntzQHniZFUBA4jFvuwueFtNXUtGvUYGK` (derived from the program id `5Rx8…n8o` under that loader). The relay
+  serves that one address, only with a `dataSlice` of offset 0 and length at most 45 (the state, the slot and the
+  upgrade authority, never the program's bytes), and **never caches it**: an upgrade must reach the page at once. Until
+  the relay exists, the site reads it through the public devnet RPC (the founder's answer, 2026-10-10).
 - The re-check panel's commands go to whatever RPC a visitor chooses, not necessarily the relay; they use
   `getAccountInfo` with a `dataSlice`, and `getVoteAccounts` for the stake kind.
 - The content security policy (`app/next.config.ts`) still allows the RPC's WebSocket origin. Nothing in the client

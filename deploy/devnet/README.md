@@ -93,6 +93,8 @@ authority, admin and fee recipient, and his team key as the only team key until 
       prints the admin's command (`scripts/team/set-team.ts`); until it runs, nobody can pause entries.
 4. **Record** in the session log: the run id, the commit, the artifact's SHA-256, the signatures, who held the upgrade
    key, and the devnet checks of the sprint file.
+5. **Build the site again** after any deploy or upgrade (`cd app && bun run build`; its log names the slot, "A-8: this
+   build is for the program deploy at slot …"). A site built for the previous deploy pauses signing until then (A-8).
 
 ## If it stops halfway
 
