@@ -1,6 +1,6 @@
 //! Purpose: the Brot Markets program on Pinocchio: On-Chain Campaigns paid in SOL; declares the
 //!          program id and wires the modules and the entrypoint.
-//! Version: 0.0.2
+//! Version: 0.0.3 (new program id 5Rx8…n8o, 2026-10-09: the keypair of 6G2d…uVN was not at hand for the devnet deploy)
 //! Sprint: 02 (pot core on Pinocchio)
 //!
 //! Every account check Anchor used to make is written by hand in `checks`, and every balance is
@@ -20,7 +20,7 @@ pub mod readers;
 pub mod state;
 pub mod vault;
 
-pinocchio::address::declare_id!("6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN");
+pinocchio::address::declare_id!("5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o");
 
 #[cfg(not(feature = "no-entrypoint"))]
 pinocchio::entrypoint!(entrypoint::process_instruction);
