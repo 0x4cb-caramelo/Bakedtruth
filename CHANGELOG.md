@@ -16,6 +16,14 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
 
 ### Changed
 
+- **Novo id do programa: `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o`** (9/10/2026, decisão do Ronaldo). O keypair
+  do id anterior, `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN`, não estava na máquina de quem faz o deploy no
+  devnet; o id foi declarado no commit `ae8b837`, de 5/10, e ninguém sabia por onde o keypair tinha andado desde
+  então. O novo keypair foi gerado na máquina do Ronaldo, fora de qualquer repositório. Mudam o `declare_id!`, a
+  autoridade de eventos (`CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx`, bump 254 como antes), o IDL e o cliente
+  Codama regenerados (`bun run idl`), e as constantes do kit de testes. O id antigo fica abandonado; nunca foi
+  publicado em cluster nenhum. A mainnet terá um id próprio, mantido em segredo até o deploy.
+
 - **Sprint 04 fechada para revisão, com PR aberto e não mesclado** (`docs/sprints/sprint-04-settlement-invariants.md`, "Closure status"). O programa ganhou liquidação, pagamento, taxas, parte do criador, a apuração tardia (`Join` por entrada, `tally_late_joins`), a regra de viabilidade (um pote só divide se o lado perdedor pagar as taxas) e o corte de revisão por prova anterior. Teste aleatório com semente fixa: 1.200 operações, 35.288 checagens de I1 a I15, sem falha. Medido: liquidação de 2.926 a 3.180 CU por entrada, 12 entradas por transação. Ficou em aberto: a redação da regra de viabilidade (taxa sobre o lado perdedor, não sobre o principal do lado vencedor), a cobertura dos caminhos de time (`confirm`, `void`) no teste aleatório e a conferência das linhas da definição de pronto sem teste. Plano técnico na v0.1.3 (§3.4.18).
 - **Sprint 04 em curso, na branch `sprint-04-settlement-invariants`** (ainda sem PR). Feito até aqui: o arquivo
   `checks.rs` e o `state/campaign.rs` foram divididos sem mudança de comportamento; as pendências de documentação da

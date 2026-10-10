@@ -2,13 +2,13 @@
  * Purpose: the program's addresses for the LiteSVM tests: ids, seeds, discriminators, PDAs and
  *          the known outside accounts (Pyth, the loader). Mirrors programs/brot-markets/src
  *          (constants.rs, instructions/mod.rs).
- * Version: 0.0.2
+ * Version: 0.0.3 (the new program id and its event authority)
  * Sprint:  02 (pot core on Pinocchio); Sprint 03 adds `resolve_campaign`, the outcome enums, the
  *          readers' programs and constants, frozen at its opening
  */
 import { address, getAddressEncoder, getProgramDerivedAddress, type Address } from "@solana/kit";
 
-export const PROGRAM_ID = address("6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN");
+export const PROGRAM_ID = address("5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o");
 export const PROGRAM_SO = "target/deploy/brot_markets.so";
 export const SYSTEM_PROGRAM_ID = address("11111111111111111111111111111111");
 export const LOADER_V3_ID = address("BPFLoaderUpgradeab1e11111111111111111111111");
@@ -25,7 +25,7 @@ export const EPOCH_SCHEDULE_SYSVAR_ID = address("SysvarEpochSchedu1e111111111111
 /** The test-only CPI proxy (tests/programs/cpi-proxy), loaded at any address a test picks. */
 export const CPI_PROXY_SO = "target/deploy/cpi_proxy.so";
 /** PDA `["__event_authority"]` of the program (bump 254), checked in tests/brot/kit.test.ts. */
-export const EVENT_AUTHORITY = address("E5CgcK5xs4YfPdBLnCWTAA9ruStbTqLjEzTxtVaRuB5o");
+export const EVENT_AUTHORITY = address("CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx");
 
 export const hex = (h: string) => Uint8Array.from(h.match(/../g)!.map((b) => parseInt(b, 16)));
 export const SOL_USD_FEED_ID = hex("ef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d");

@@ -60,8 +60,8 @@ export type UserJoinCampaignInstruction<
   TAccountMetricAccount extends string | AccountMeta<string> = string,
   TAccountJoin extends string | AccountMeta<string> = string,
   TAccountSystemProgram extends string | AccountMeta<string> = "11111111111111111111111111111111",
-  TAccountEventAuthority extends string | AccountMeta<string> = "E5CgcK5xs4YfPdBLnCWTAA9ruStbTqLjEzTxtVaRuB5o",
-  TAccountProgram extends string | AccountMeta<string> = "6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN",
+  TAccountEventAuthority extends string | AccountMeta<string> = "CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx",
+  TAccountProgram extends string | AccountMeta<string> = "5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o",
   TRemainingAccounts extends readonly AccountMeta<string>[] = [],
 > = Instruction<TProgram> &
   InstructionWithData<ReadonlyUint8Array> &
@@ -235,7 +235,7 @@ export function getUserJoinCampaignInstruction<
   }
   if (!accounts.eventAuthority.value) {
     accounts.eventAuthority.value =
-      "E5CgcK5xs4YfPdBLnCWTAA9ruStbTqLjEzTxtVaRuB5o" as Address<"E5CgcK5xs4YfPdBLnCWTAA9ruStbTqLjEzTxtVaRuB5o">;
+      "CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx" as Address<"CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx">;
   }
   if (!accounts.program.value) {
     accounts.program.value = programAddress;
