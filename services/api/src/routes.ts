@@ -1,15 +1,19 @@
 /**
- * Purpose: the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged) and
- *          /api/v1/campaigns/:address. Every answer is JSON with CORS for the site; errors are
- *          {"error": {"code", "message"}}, never a stack trace. Reads only the in-memory snapshot.
- * Version: 0.1.0
- * Sprint:  08 (indexer and API, hackathon MVP)
+ * Purpose: the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged),
+ *          /api/v1/campaigns/:address and, since Sprint 13, /api/v1/leaderboard (leaderboard.ts). Every answer is JSON
+ *          with CORS for the site; errors are {"error": {"code", "message"}}, never a stack trace. Reads only what is
+ *          in memory: the chain snapshot and the program's history.
+ * Version: 0.2.0 (Sprint 13: the leaderboard)
+ * Sprint:  08 (indexer and API, hackathon MVP); 13
  */
+import type { History } from "./history";
+import { leaderboardOf, parseLeaderboardQuery } from "./leaderboard";
 import { BadQuery, parseListQuery } from "./query";
 import { toCampaign } from "./dto";
 import type { Store } from "./store";
 
-export type RouteOptions = { corsOrigin: string; cluster: string };
+/** `history` is the program's own history for the leaderboard; without it the route answers 503. */
+export type RouteOptions = { corsOrigin: string; cluster: string; history?: History };
 
 const json = (body: unknown, status: number, cors: string) =>
   new Response(
@@ -39,6 +43,7 @@ export function createHandler(store: Store, options: RouteOptions) {
           taken_at: snap ? snap.takenAt : null,
           campaigns_total: snap ? snap.rows.length : null,
           last_refresh_error: store.lastError(),
+          leaderboard_complete: options.history?.ready() ? options.history.complete() : null,
         },
         snap ? 200 : 503,
         cors,
@@ -67,6 +72,16 @@ export function createHandler(store: Store, options: RouteOptions) {
         200,
         cors,
       );
+    }
+    if (url.pathname === "/api/v1/leaderboard") {
+      const history = options.history;
+      if (!snap || !history?.ready()) return fail(503, "starting", "the program's history has not been read yet", cors);
+      try {
+        return json(leaderboardOf(history, snap, parseLeaderboardQuery(url)), 200, cors);
+      } catch (error) {
+        if (error instanceof BadQuery) return fail(400, "bad_query", error.message, cors);
+        throw error;
+      }
     }
     const detail = url.pathname.match(/^\/api\/v1\/campaigns\/([1-9A-HJ-NP-Za-km-z]{32,44})$/);
     if (detail) {

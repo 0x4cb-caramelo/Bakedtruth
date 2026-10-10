@@ -1,7 +1,8 @@
 /**
  * Purpose: the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only),
- *          the port and host (loopback by default), the refresh interval, and the CORS origin for the site.
- * Version: 0.1.0
+ *          the port and host (loopback by default), the refresh interval, the CORS origin for the site, and how many
+ *          program transactions a refresh reads for the leaderboard (Sprint 13).
+ * Version: 0.2.0
  * Sprint:  08 (indexer and API, hackathon MVP)
  */
 
@@ -12,6 +13,8 @@ export type ApiConfig = {
   refreshMs: number;
   corsOrigin: string;
   cluster: "devnet" | "local";
+  /** At most this many program transactions read per refresh for the leaderboard (Sprint 13). */
+  historyPerRefresh: number;
 };
 
 type Env = Record<string, string | undefined>;
@@ -34,6 +37,7 @@ export function loadApiConfig(env: Env = process.env): ApiConfig {
     refreshMs: positive(env.API_REFRESH_MS, 15_000, "API_REFRESH_MS"),
     corsOrigin: env.API_CORS_ORIGIN?.trim() || "*",
     cluster: cluster(env.API_CLUSTER),
+    historyPerRefresh: positive(env.API_HISTORY_PER_REFRESH, 200, "API_HISTORY_PER_REFRESH"),
   };
 }
 

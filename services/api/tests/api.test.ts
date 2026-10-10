@@ -187,7 +187,7 @@ describe("config", () => {
     );
   });
 
-  test("defaults: loopback 4220, 15 s refresh, any origin (read-only), devnet", () => {
+  test("defaults: loopback 4220, 15 s refresh, any origin (read-only), devnet, 200 history reads a refresh", () => {
     const c = loadApiConfig({ API_RPC_URL: "https://rpc.example.test" });
     expect(c).toEqual({
       rpcUrl: "https://rpc.example.test",
@@ -196,6 +196,7 @@ describe("config", () => {
       refreshMs: 15_000,
       corsOrigin: "*",
       cluster: "devnet",
+      historyPerRefresh: 200,
     });
   });
 });
