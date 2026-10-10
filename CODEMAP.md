@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **783** |
+| Arquivos mapeados | **786** |
 | Acima de 200 linhas | **39** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -85,6 +85,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09): the two fonts the site serves itself, the theme script in <head> before the stylesheet, the notice, the top bar, the page an | 54 |
+| [`manifest.ts`](app/app/manifest.ts) | the installable PWA, manifest only (Sprint 13 DoD, S2; TP §3.6): the name, the start page, standalone display, the dark theme's colours and the icons scripts/pw | 33 |
 | [`page.tsx`](app/app/page.tsx) | the home route (Sprint 10): the campaign list from the read API, with the search, the filters, the sort and the cards. Since Sprint 13 the campaigns the team un | 19 |
 
 ## `app/app/abrir/`
@@ -926,6 +927,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`os-self-test.js`](scripts/os-self-test.js) | the `os-self-test` skill did this, but only when a human or a model remembered to invoke it — and three session logs record it NOT being run when it would have  | 406 |
 | [`pre-commit.js`](scripts/pre-commit.js) | the PreToolUse gate only sees commits Claude makes. A commit from a terminal or an editor skipped it entirely. This runs the same scan from git itself | 76 |
 | [`push-oracle-probe.ts`](scripts/push-oracle-probe.ts) | probe Pyth's push oracle read-only: watch that the sponsored SOL/USD and BTC/USD accounts only move forward on devnet and mainnet, and scan its recent transacti | 200 |
+| [`pwa-icons.ts`](scripts/pwa-icons.ts) | writes the PWA's icons (Sprint 13 DoD, S2: the manifest and its icons, no service worker) from the mascot's deadpan pose on the dark theme's page colour: 192 an | 42 |
 | [`pyth-sponsored-feeds.ts`](scripts/pyth-sponsored-feeds.ts) | list which Pyth feeds have a shard-0 push account on devnet and mainnet, which of those stay fresh, how often they update and who pays for the writes, read-only | 201 |
 | [`release-v0.2.0.ps1`](scripts/release-v0.2.0.ps1) | Release helper for AI Dev Operating System v0.2.0 | 11 |
 | [`release-v0.2.0.sh`](scripts/release-v0.2.0.sh) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 16 |
@@ -1376,6 +1378,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`entry-failures.test.ts`](tests/site/entry-failures.test.ts) | each way an entry can fail has its own message (Sprint 11 DoD): the program's refusals are named by the SDK's error map, with the program's own message from the | 163 |
 | [`fake-chain.ts`](tests/site/fake-chain.ts) | the SDK's LiteSVM-backed fake RPC (tests/sdk/fake-rpc.ts) with what the site's entry flow adds: the wallet's submission (`sendTransaction`, landed in LiteSVM an | 161 |
 | [`fee-example.test.ts`](tests/site/fee-example.test.ts) | the fee page's worked example is the SDK's math, and it is P1 §1.2's case (Sprint 13 DoD; BR-32): 600 on YES and 400 on NO (here 6 and 4 SOL) give a fee of 40,  | 64 |
+| [`manifest.test.ts`](tests/site/manifest.test.ts) | the PWA is the manifest and its icons only (Sprint 13 DoD, S2): the manifest names the site, opens at "/" standalone in the dark theme's colour, and lists icons | 43 |
 | [`my-entries.test.ts`](tests/site/my-entries.test.ts) | the rows of "My entries" through a whole cycle, read the way the page reads them (the chain behind the recording RPC, the wallet's history): while settling, eac | 150 |
 | [`page-format.test.ts`](tests/site/page-format.test.ts) | how the campaign page writes what it read: exact grouped integers, a value in its kind's units, an age, the visitor's local time (built with options a browser a | 37 |
 | [`powers.test.ts`](tests/site/powers.test.ts) | the powers table (BR-41, Sprint 13 DoD): content/powers.md is published on /record with who holds each key and the limit of each power (P4 §4.2), its four roles | 74 |
