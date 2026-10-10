@@ -5,7 +5,7 @@
  * Version: 0.1.0
  * Sprint:  05 (SDK)
  *
- * A builder checks nothing a program rule decides: ../../read/validate-open-campaign.ts mirrors the
+ * A builder checks nothing a program rule decides: ../../read/validate/open-campaign.ts mirrors the
  * opening's rules for the preview, and the program decides (A-10).
  */
 import { type Address, type Instruction, type TransactionSigner } from "@solana/kit";

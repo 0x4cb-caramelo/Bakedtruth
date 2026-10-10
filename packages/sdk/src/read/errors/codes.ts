@@ -6,7 +6,7 @@
  *
  * The messages are not here: they come from the IDL (`./index.ts`), which shank-cli writes from the
  * `#[error("...")]` of each variant, so a code and its message cannot drift apart. The test
- * `tests/sdk/errors.test.ts` checks this map against error.rs and the IDL.
+ * `tests/sdk/contract-source.test.ts` checks this map against error.rs and the IDL.
  */
 export const BROT_ERROR_CODES = {
   MathOverflow: 6000,

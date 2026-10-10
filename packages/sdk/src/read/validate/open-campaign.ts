@@ -9,7 +9,8 @@
  * Order, as programs/brot-markets/src/instructions/campaigns/open_campaign.rs runs it: the argument
  * sizes (row 9); row 1; the canonical arguments and the feed list; the config (row 8: the pause and
  * the valve); the terms the creator saw; row 5; rows 2 to 4 in the kind's reader; row 7, the payment;
- * row 10, the new accounts. tests/sdk/validate-open-campaign.test.ts feeds every refused case to both.
+ * row 10, the new accounts. tests/sdk/validate-open-*.test.ts feed the program's own refused cases to both,
+ * the slot and data-format ones aside (the SDK's builders cannot produce them).
  */
 import { BrotRefusal, isRefusal, refuse } from "../errors";
 import { OperatingLevel, PROGRAM_ID, ReaderKind, SOL_USD_ACCOUNT, SYSTEM_PROGRAM_ID } from "../constants";

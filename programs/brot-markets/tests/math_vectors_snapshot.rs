@@ -2,7 +2,7 @@
 //!          the viability rule at its threshold, voids of both classes, team campaigns, late entries), what
 //!          one entry is paid under each mode, the join's return estimate, and the schedule, each with its
 //!          result or its refusal. The SDK's TypeScript mirror replays the same file
-//!          (tests/sdk/math-vectors.test.ts).
+//!          (tests/sdk/snapshot-vectors.test.ts).
 //! Version: 0.0.1
 //! Sprint: 05 (SDK and the devnet cycle)
 //!

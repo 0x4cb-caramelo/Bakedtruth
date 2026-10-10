@@ -5,8 +5,8 @@
  * Version: 0.1.0
  * Sprint:  05 (SDK); the seeds are Sprint 02's, the join's Sprint 04's
  *
- * The IDL carries no seeds (Shank), so they are written here once; tests/sdk/pdas.test.ts derives
- * each against the test kit's own derivation and the program's checked constants.
+ * The IDL carries no seeds (Shank), so they are written here once; tests/sdk/contract-source.test.ts checks
+ * them against constants.rs, and tests/sdk/builders.test.ts compares every derived slot with the test kit's.
  */
 import {
   getAddressEncoder,

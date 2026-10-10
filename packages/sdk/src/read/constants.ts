@@ -1,7 +1,7 @@
 /**
  * Purpose: the program's address and the constants compiled into it that a client needs: seeds, other
  *          programs, code ceilings, price and reader bounds, account sizes, and the enums. Mirrors
- *          programs/brot-markets/src/constants.rs; tests/sdk/constants.test.ts compares the two.
+ *          programs/brot-markets/src/constants.rs; tests/sdk/contract-source.test.ts compares the two.
  * Version: 0.1.0
  * Sprint:  05 (SDK)
  *

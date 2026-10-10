@@ -1,7 +1,7 @@
 /**
  * Purpose: the Codama spike (T9): renders a Kit client from the Shank IDL of brot-markets into
- *          packages/sdk/src/idl/generated. Sprint 05 decides whether the SDK adopts it; until then
- *          only tests/brot/codama-spike.test.ts and tests/brot/idl.test.ts import it.
+ *          packages/sdk/src/idl/generated. T9, decided in Sprint 05: the generated client is the SDK's
+ *          codec and builder layer (`@brot/sdk/tx` wraps its builders; `read` its decoders).
  * Version: 0.0.1
  * Sprint:  02 (pot core on Pinocchio), lane F
  *

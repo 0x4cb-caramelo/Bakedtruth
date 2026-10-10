@@ -1,6 +1,6 @@
-//! Purpose: the `snapshot` rows of the snapshot vectors: random pots under the four verdicts, with one row
-//!          in three placed within a few lamports of the Economic Viability Rule's threshold, where the
-//!          pot turns from one-sided to split (decision of 2026-10-09).
+//! Purpose: the `snapshot` rows of the snapshot vectors: random pots under the four verdicts, one in three
+//!          of the YES and NO rows (about a sixth of all) placed within a few lamports of the Economic
+//!          Viability Rule's threshold, where the pot turns from one-sided to split (decision of 2026-10-09).
 //! Version: 0.0.1
 //! Sprint: 05 (SDK and the devnet cycle)
 //!
