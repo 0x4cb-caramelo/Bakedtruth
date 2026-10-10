@@ -1,0 +1,97 @@
+/* Purpose: the design tokens of Brot Markets' site, Ledger² in both themes: colours, type, radii, spacing and
+   motion, with the kind and state colours the new product adds. Dark is the default and the official dark is the
+   one live on brot.markets (prototype N's dark, prototype-lab/shared/ledger.css), as the founder chose on
+   2026-10-08. Version: 0.1.0 · Sprint -1 (design system).
+   Changed from the approved values only where a text pair was below WCAG 4.5:1 (DESIGN-DIRECTION.md, contrast
+   table): --dim in dark (3.64 → 4.92 on panels), the primary button in dark (3.68 → 5.29) and small amber text in
+   light (3.47 → 5.23), and --dim in light on the page floor (4.05 → 4.82). Sprint -1 (test "design tokens meet contrast"): --dim in dark
+   #808ba0 → #8590a4 (4.29 → 4.58 on the raised surface) and in light #5f6a7d → #5e697c (4.44 → 4.51 there). Sprint -1 ports this file to
+   app/styles/tokens.css. */
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; font-display: swap; src: url("../fonts/barlow-condensed-700.woff2") format("woff2"); }
+@font-face { font-family: Inter; font-weight: 400 600; font-display: swap; src: url("../fonts/inter-var.woff2") format("woff2"); }
+@property --spin { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+
+:root {
+  /* Surfaces and text. */
+  --bg: #10141b; --panel: #181d27; --raised: #212838; --line: #2a3243; --line-strong: #36466a;
+  --text: #edf0f5; --muted: #9aa4b6; --dim: #8590a4;
+  /* One blue for the interface; amber for the brand; green and red only for YES and NO. */
+  --accent: #4f7dff; --accent-soft: #a8beff; --accent-hover: #bdccff; --on-accent: #fff;
+  --cta-bg: #3560e6; --cta-hover: #2b52cc;
+  --cta-ring: conic-gradient(from var(--spin), #2b4fc2 0 62%, #dfe8ff 80%, #2b4fc2 100%);
+  --crust: #efbc74; --crust-ink: #efbc74; --warn: #f2b33d; --error: #fa9aac;
+  --yes-bg: #153b32; --yes-fg: #6be1b4; --yes-bar: #2fb886;
+  --no-bg: #402530; --no-fg: #fa9aac; --no-bar: #e0607a;
+  --prize-bar: #c99a52;
+  /* The five public states (P1 §3.1) and the contested stage. Text on its own chip, never colour alone. */
+  --st-open-bg: #1f2a44; --st-open-fg: #a8beff;
+  --st-closed-bg: #293242; --st-closed-fg: #b4bdcd;
+  --st-review-bg: #33291a; --st-review-fg: #f2b33d;
+  --st-paid-bg: #23392f; --st-paid-fg: #b9e9d6;
+  --st-void-bg: #232b3a; --st-void-fg: #c7d1e4;
+  --st-contest-bg: #33291a; --st-contest-fg: #f2b33d;
+  /* The five kinds (P1 §4.2): tile background and letter. None uses YES/NO green or red, or the UI blue. */
+  --k-price-bg: #2d3a51; --k-price-fg: #a8c9ef;
+  --k-burn-bg: #4a2d26; --k-burn-fg: #f7b778;
+  --k-lock-bg: #393746; --k-lock-fg: #c6c0e5;
+  --k-pool-bg: #3a3424; --k-pool-fg: #e2c77e;
+  --k-stake-bg: #383440; --k-stake-fg: #d0b9dc;
+  /* Borders of fields and controls: 3:1 against their surface (WCAG 1.4.11). */
+  --field-line: #64718c;
+  /* Chrome. */
+  --strip-bg: #0c1016; --strip-fg: var(--muted);
+  --top-bg: color-mix(in srgb, var(--bg) 88%, transparent);
+  --feature-bg: linear-gradient(115deg, #1f2735, #151b25 70%);
+  --note-bg: #232b3a; --note-fg: #c7d1e4; --notice-bg: #263249; --danger-bg: #3a1f27;
+  --track: #2c3547; --fill: linear-gradient(90deg, #5d7fe0, #9db8ff);
+  --pressed-bg: #293242; --pressed-fg: var(--text); --row-hover: #1d2431;
+  --ic-bg: #23305180; --spot: rgba(79, 125, 255, 0.16); --spot-edge: #8fb0ff; --dot-rgb: 150, 175, 235;
+  --scrim: rgba(5, 8, 12, 0.66);
+  --say-bg: #f3dfbd; --say-fg: #1c1408; --pet-shadow: rgba(0, 0, 0, 0.5);
+  --shadow: none; --shadow-pop: 0 18px 50px -12px rgba(0, 0, 0, 0.6);
+  /* Shape, type, rhythm. */
+  --bw: 1px; --r: 10px; --r-sm: 7px; --r-lg: 12px; --r-pill: 999px;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif; --body: Inter, system-ui, sans-serif; --num: var(--display);
+  --gutter: 28px; --page-max: 1440px; --tap: 44px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #eef1f6; --panel: #fff; --raised: #e3e8f0; --line: #d5dbe6; --line-strong: #b4bfd2;
+  --text: #131a26; --muted: #556074; --dim: #5e697c;
+  --accent: #2f5fe6; --accent-soft: #2a52c9; --accent-hover: #1b3a9c; --on-accent: #fff;
+  --cta-bg: #2f5fe6; --cta-hover: #2450cf;
+  --cta-ring: conic-gradient(from var(--spin), #1f43b0 0 62%, #c9d8ff 80%, #1f43b0 100%);
+  --crust: #b5670f; --crust-ink: #8f4e08; --warn: #a86200; --error: #c0243f;
+  --yes-bg: #dff5ea; --yes-fg: #0a7a52; --yes-bar: #14a06c;
+  --no-bg: #fde6ea; --no-fg: #c0243f; --no-bar: #dc4b66;
+  --prize-bar: #c48a35;
+  --st-open-bg: #e3eaff; --st-open-fg: #2a52c9;
+  --st-closed-bg: #e3e8f0; --st-closed-fg: #3a4557;
+  --st-review-bg: #fbeed3; --st-review-fg: #8f5200;
+  --st-paid-bg: #dff5ea; --st-paid-fg: #0a6b48;
+  --st-void-bg: #e3e8f0; --st-void-fg: #3a4557;
+  --st-contest-bg: #fbeed3; --st-contest-fg: #8f5200;
+  --k-price-bg: #dcecf7; --k-price-fg: #1d5a80;
+  --k-burn-bg: #fde6d6; --k-burn-fg: #a3470f;
+  --k-lock-bg: #e8e4f7; --k-lock-fg: #4f3f9a;
+  --k-pool-bg: #f8ecc9; --k-pool-fg: #7a5005;
+  --k-stake-bg: #f3e6f6; --k-stake-fg: #74398a;
+  --field-line: #7d899f;
+  --strip-bg: #e3e8f0;
+  --feature-bg: linear-gradient(115deg, #fff, #e8eefa 70%);
+  --note-bg: #e3e8f0; --note-fg: #3a4557; --notice-bg: #dfe8ff; --danger-bg: #fde6ea;
+  --track: #dde3ec; --fill: linear-gradient(90deg, #2f5fe6, #6f93ff);
+  --pressed-bg: #d9e0ec; --row-hover: #f3f6fb;
+  --ic-bg: #e3eaff; --spot: rgba(47, 95, 230, 0.09); --spot-edge: #2f5fe6; --dot-rgb: 60, 85, 140;
+  --scrim: rgba(19, 26, 38, 0.45);
+  --say-bg: #131a26; --say-fg: #fff; --pet-shadow: rgba(19, 26, 38, 0.28);
+  --shadow: 0 1px 2px rgba(19, 26, 38, 0.05), 0 10px 24px -14px rgba(19, 26, 38, 0.18);
+  --shadow-pop: 0 20px 50px -14px rgba(19, 26, 38, 0.35);
+  color-scheme: light;
+}
+
+@media (max-width: 860px) {
+  :root { --gutter: 16px; }
+}
