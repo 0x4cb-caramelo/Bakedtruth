@@ -6,18 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "sync-idl": "mkdir -p lib/idl && cp ../target/idl/pred_provable.json ../target/types/pred_provable.ts lib/idl/"
+    "lint": "eslint"
   },
   "dependencies": {
-    "@anchor-lang/core": "^1.2.0",
+    "@brot/sdk": "workspace:*",
+    "@solana-mobile/wallet-standard-mobile": "0.6.0",
     "@solana/wallet-adapter-base": "^0.9.28",
     "@solana/wallet-adapter-phantom": "^0.9.30",
     "@solana/wallet-adapter-react": "^0.15.40",
     "@solana/wallet-adapter-react-ui": "^0.9.40",
     "@solana/wallet-adapter-solflare": "^0.6.34",
     "@solana/web3.js": "^1.99.0",
-    "buffer": "^6.0.3",
     "lucide-react": "^1.49.0",
     "next": "16.3.8",
     "react": "19.2.8",

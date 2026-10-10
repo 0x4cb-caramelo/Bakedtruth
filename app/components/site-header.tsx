@@ -1,94 +1,61 @@
+/**
+ * Purpose: the site's top bar (Sprint 09): the brand, the five routes, the theme button and the wallet button. The theme
+ *          follows the stored choice after the first paint (the head script already set it, so there is no flash).
+ * Version: 0.1.0
+ * Sprint:  09 (site shell, theme and wallet)
+ */
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useRef, useState } from "react";
-import { Search } from "lucide-react";
+import { useSyncExternalStore } from "react";
 
-import { CATEGORIES } from "@/lib/view";
-import { Logo } from "@/components/primitives";
 import { WalletButton } from "@/components/wallet-button";
+import { BRAND } from "@/lib/brand";
+import { applyTheme, type Theme } from "@/lib/theme";
 
-function SearchBox() {
-  const router = useRouter();
-  const input = useRef<HTMLInputElement>(null);
-  const [query, setQuery] = useState("");
+const ROUTES = [
+  { href: "/", label: "Campaigns" },
+  { href: "/abrir", label: "Open" },
+  { href: "/my-entries", label: "My entries" },
+  { href: "/leaderboard", label: "Leaderboard" },
+  { href: "/record", label: "Record" },
+];
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const typing = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
-      if (e.key === "/" && !typing) {
-        e.preventDefault();
-        input.current?.focus();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  return (
-    <form
-      role="search"
-      onSubmit={(e) => {
-        e.preventDefault();
-        router.push(query.trim() ? `/?q=${encodeURIComponent(query.trim())}#browse` : "/#browse");
-      }}
-      className="flex h-10 w-64 items-center gap-2 border-2 border-line bg-page px-3 text-sm focus-within:border-brand"
-    >
-      <Search className="size-4 shrink-0 text-dim" />
-      <input
-        ref={input}
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search markets, tokens, addresses"
-        className="min-w-0 flex-1 bg-transparent text-ink outline-none placeholder:text-dim"
-        aria-label="Search markets"
-      />
-      <kbd className="hidden border-2 border-line px-1 text-[11px] text-dim sm:inline">/</kbd>
-    </form>
-  );
-}
-
-/** Segmented category row: Trending plus one entry per resolver family. */
-export function CategoryNav() {
-  const params = useSearchParams();
-  const active = params.get("category");
-  const item = (href: string, label: string, on: boolean) => (
-    <Link
-      key={label}
-      href={href}
-      aria-current={on ? "page" : undefined}
-      className={`shrink-0 border-l-2 border-line px-3 py-1.5 text-[13px] font-medium transition first:border-l-0 ${
-        on ? "bg-brand font-bold text-page" : "text-muted hover:text-ink"
-      }`}
-    >
-      {label}
-    </Link>
-  );
-  return (
-    <nav aria-label="Market categories" className="no-scrollbar flex max-w-full overflow-x-auto border-2 border-line">
-      {item("/", "Trending", !active)}
-      {CATEGORIES.map((c) => item(`/?category=${c.slug}#browse`, c.label, active === c.slug))}
-    </nav>
-  );
-}
+// The theme is whatever <html> carries: the head script sets it, and applyTheme changes it, so the observer keeps the
+// button in step without any state of its own.
+const subscribe = (notify: () => void) => {
+  const observer = new MutationObserver(notify);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  return () => observer.disconnect();
+};
+const currentTheme = (): Theme => (document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark");
+const serverTheme = (): Theme => "dark";
 
 export function SiteHeader() {
+  const theme = useSyncExternalStore(subscribe, currentTheme, serverTheme);
+  const toggle = () => applyTheme(theme === "dark" ? "light" : "dark");
   return (
-    <header className="sticky top-0 z-40 border-b-2 border-line bg-page">
-      <div className="mx-auto flex max-w-[1320px] flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-6">
-        <Link href="/" className="shrink-0">
-          <Logo />
+    <header className="border-b-2 border-line">
+      <div className="mx-auto flex max-w-[1320px] flex-wrap items-center gap-4 px-4 py-3 sm:px-6">
+        <Link href="/" className="font-bold text-ink">
+          {BRAND.name}
         </Link>
-        <div className="order-3 w-full lg:order-none lg:w-auto">
-          <Suspense>
-            <CategoryNav />
-          </Suspense>
-        </div>
-        <div className="ml-auto flex items-center gap-4">
-          <div className="hidden md:block">
-            <SearchBox />
-          </div>
+        <nav aria-label="Main" className="flex flex-wrap gap-4 text-sm text-dim">
+          {ROUTES.map((route) => (
+            <Link key={route.href} href={route.href} className="hover:text-ink">
+              {route.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="ml-auto flex items-center gap-3">
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+            className="rounded border-2 border-line px-3 py-1 text-sm text-ink"
+          >
+            {theme === "dark" ? "Light" : "Dark"}
+          </button>
           <WalletButton />
         </div>
       </div>

@@ -22,6 +22,34 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Added
 
+- **O texto do aviso de dinheiro preso (L-03) aprovado pelo fundador** (10/10/2026): "Your entry stays locked until the
+  campaign ends. You cannot take it out before then. Payouts go to your wallet automatically after the result is read."
+  Ele aparece na Sprint 11, antes da assinatura.
+
+### Added
+
+- **A lista de campanhas no site** (Sprint 10, 10/10/2026): a página inicial lista as campanhas da API de leitura, com
+  busca, filtros de estado e de tipo, ordenação, o interruptor de não listadas e "Salvas" no navegador. Cada cartão mostra
+  a frase, o pote em SOL, a chance por lado (nenhuma com pote vazio), o retorno estimado pela matemática do SDK e as datas.
+  O preço em US$, a barra de prova, o cartão de compartilhar e o selo do parceiro ficam para depois (ver a sprint).
+- **O guia de marca no repositório** (`docs/product/BRAND.md`, aprovado pelo Lucas em nome dos fundadores). O rodapé e
+  as falas do mascote do site seguem o guia.
+
+### Added
+
+- **Sprint 09 fechada para o hackathon** (10/10/2026): o site usa `@brot/sdk` (leitura e transação) por `app/lib/brot.ts`;
+  o nome é Brot Markets; o `.env.example` da raiz lista as variáveis de cada parte. Servidor e testes em celular ficam
+  para o fim do hackathon, por decisão do fundador. Ver `docs/sprints/sprint-09-site-shell.md`.
+
+### Added
+
+- **Sprint -1 fechada** pela aprovação do fundador: tema escuro oficial, inglês, avisos mínimos e os layouts de `/dev0x/`.
+  Os itens de código da sprint vão para a Sprint 09.
+- **Sprint 09, primeiro incremento:** o chat embutido foi removido (D-q), e o site envia cabeçalhos de segurança e uma
+  Content-Security-Policy (X2.5). O restante da sprint segue aberto.
+
+### Added
+
 - **A revisão do pitch de 10/10/2026, organizada por slide**
   (`docs/business/_review/revisao-do-pitch-2026-10-10.md`), a pedido do Lucas, a partir da gravação da conversa depois
   da apresentação (9 minutos; a transcrição bruta está em `knowledge-base/pitch/2026-10-10-revisao-voz-bruta.md`). Duas
@@ -43,7 +71,7 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
   isso. O `/pitch` no ar não mudou. **Três pendências:** a prévia diz que o 1% sai da nossa taxa (30, 10 e 960), como
   o fundador pediu, e o programa tira do pote (40, 10 e 950); o "$1B+ a month" da projeção é número provisório, sem
   fonte; e a versão parada do deck, que vira o PDF, não mostra a taxa nem o 1%. **Versão 5.1, no mesmo dia:** o demo
-  passou para SOL e toca a 0,8 da velocidade; os dois slides de mercado dividem um gráfico só (`pitch5/chart.js`), com
+  passou para SOL e toca a 0,8 da velocidade; os dois slides de mercado dividem um gráfico só (`pitch/chart.js`), com
   o mascote correndo de junho a setembro de 2026 mês a mês e, na troca de slide, subindo enquanto o gráfico se afasta
   até outubro de 2028, com o cenário em linha pontilhada; a linha do site e do X foi para o pé da capa; e o slide "Open
   a market" saiu, então a prévia tem oito slides e não diz mais quanto custa abrir um mercado.

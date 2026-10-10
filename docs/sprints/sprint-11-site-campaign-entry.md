@@ -74,7 +74,10 @@ every fee, and signs. It is the first entry made through the site, and a retry c
 
 ## Founder decisions that block the sprint
 
-- From Sprint -1: the lock notice's text (L-03) and the chance chart and activity (L-23).
+- **Answered 2026-10-10, L-03 (the lock notice), approved by the founder, in English:** "Your entry stays locked until the
+  campaign ends. You cannot take it out before then. Payouts go to your wallet automatically after the result is read."
+  The entry panel shows this text before signing (BR-12). Any change to the text is a founder decision.
+- From Sprint -1: the chance chart and activity (L-23), answered yes.
 - **Answered:** P-5 (minimum entry 0.01 SOL); TP v0.0.1 Q3 (both sides allowed; the first-baker exemption covers the
   person); Q4 (maximum price age per campaign, 30 s floor); Q10 falls away with D-a (devnet SOL faucet, no test
   dollars).
