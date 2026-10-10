@@ -1,0 +1,89 @@
+/* Purpose: what only the /pitch preview adds to the deck: the Solution slide's text beats, the demo's three cards in
+   a row with the split of the pot and the running balance, and the two Market slides (the bars and the projection).
+   Sprint: out of band (landing page), 2026-10-10. */
+
+/* Solution: the left column changes with the example the demo is on. One beat shows at a time. */
+.beats { min-height: 640px; display: flex; align-items: flex-start; }
+.beat { display: flex; flex-direction: column; gap: 26px; transition: opacity 0.3s, transform 0.3s; }
+.beat[hidden] { display: none; }
+.beat.is-away { opacity: 0; transform: translateY(14px); }
+.beat-kicker { font: 400 24px/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em; color: #a8481b; }
+.beat-big { font: 600 250px/0.95 "IBM Plex Mono", monospace; letter-spacing: -0.05em; color: #a8481b; }
+.beat-line { font: 600 46px/1.2 "IBM Plex Mono", monospace; max-width: 900px; text-wrap: balance; }
+.beat-note { font: 400 34px/1.4 "IBM Plex Sans", sans-serif; color: #3d3328; max-width: 900px; }
+
+/* The demo: one card at a time, each coming in from the right once the one before it is resolved. */
+.demo-col { display: flex; flex-direction: column; gap: 18px; }
+.demo.is-row { height: 640px; perspective: none; }
+.demo.is-row .demo-face { opacity: 0; transform: translateX(70px); pointer-events: none; transition: opacity 0.45s, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.demo.is-row .demo-face.is-on { opacity: 1; transform: none; }
+.demo.is-row .demo-face.is-gone { opacity: 0; transform: translateX(-70px); }
+
+/* The third card, resolved: where every USDC of the pot went. */
+.demo-split { display: none; flex-direction: column; gap: 14px; margin-top: auto; }
+.demo-face.is-split .demo-split { display: flex; }
+.demo-face.is-split .demo-sides, .demo-face.is-split .demo-result { display: none; }
+/* Room for the mascot that stands on the right end of the bar. */
+.demo-face.is-split .demo-status { padding-right: 150px; }
+.split-wrap { position: relative; }
+.split-bun { position: absolute; right: -6px; bottom: 100%; height: 96px; margin-bottom: -8px; image-rendering: pixelated; transform: scaleX(-1); }
+.split-bar { display: flex; height: 62px; border-radius: 14px; overflow: hidden; font: 600 22px/62px "IBM Plex Mono", monospace; }
+.split-bar span { min-width: 0; white-space: nowrap; overflow: hidden; transition: flex 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.split-win { flex: 600; padding: 0 18px; background: #1c3a30; color: #a6ffcf; }
+.split-lose { flex: 360; padding: 0 18px; background: #3d2422; color: #ff9a7a; }
+.split-creator { flex: 0; background: #9ad0ff; }
+.split-brot { flex: 40; background: #eea546; }
+.split-chips { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 12px; }
+.chip { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px; border-radius: 14px; background: #171e29; border: 3px solid #263041; }
+.chip b { font: 600 52px/1 "IBM Plex Mono", monospace; }
+.chip span { font: 400 20px/1.25 "IBM Plex Sans", sans-serif; color: #d9d1c1; }
+.chip.brot b { color: #eea546; }
+.chip.creator { display: none; }
+.chip.creator b { color: #9ad0ff; }
+.chip.winners { background: #f6eddb; border-color: #f6eddb; }
+.chip.winners b { color: #a8481b; }
+.chip.winners span { color: #3d3328; }
+.demo-face.is-split:not(.has-creator) .chip.brot { border-color: #eea546; }
+.demo-face.has-creator .chip.creator { display: flex; border-color: #9ad0ff; animation: chip-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes chip-in { from { opacity: 0; transform: scale(0.8); } }
+
+/* The balance under the card: what the visitor won or lost in each example, added up. */
+.demo-balance { display: flex; flex-direction: column; gap: 12px; padding: 18px 26px; border-radius: 18px; background: #1b1611; color: #f6eddb; font-family: "IBM Plex Mono", monospace; }
+.demo-balance-top { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; }
+.demo-balance-top span { font-size: 19px; letter-spacing: 0.1em; color: #cdbfa6; }
+.demo-balance-top b { font-size: 44px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.demo-balance-top b.is-up { color: #a6ffcf; }
+.demo-balance-top b.is-down { color: #ff9a7a; }
+.demo-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.demo-steps i { font-style: normal; font-size: 19px; padding: 7px 0; border-radius: 8px; text-align: center; background: #2a231b; color: #8c7f6c; font-variant-numeric: tabular-nums; }
+.demo-steps i.is-win { background: #1c3a30; color: #a6ffcf; }
+.demo-steps i.is-loss { background: #3d2422; color: #ff9a7a; }
+.demo-steps i.is-flat { background: #253042; color: #9ad0ff; }
+
+/* Market: two slides over one chart. chart.js draws it and places the mascot; the words on the right belong to the
+   first slide and the flag to the second. Both slides have the same boxes at the same heights, so the change from one
+   to the other is not seen. */
+.mk-title { position: relative; margin-top: 28px; }
+.mk-title h2 { margin: 0; font: 600 68px/1.1 "IBM Plex Mono", monospace; letter-spacing: -0.02em; white-space: nowrap; }
+.mk-title h2[data-title-was] { position: absolute; left: 0; top: 0; opacity: 0; }
+.chart { position: relative; width: 1700px; height: 600px; margin-top: auto; }
+.chart svg { display: block; overflow: visible; }
+.chart-axis { stroke: #3a4558; stroke-width: 3; }
+.chart-line { fill: none; stroke: #eea546; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; }
+.chart-line.is-scenario { stroke-dasharray: 2 20; }
+.chart-tick { font-family: "IBM Plex Mono", monospace; letter-spacing: 0.06em; fill: #a3acba; text-anchor: middle; transition: opacity 0.25s; }
+.chart-year { font: 500 20px "IBM Plex Mono", monospace; fill: #6f7a8c; text-anchor: middle; transition: opacity 0.25s; }
+.chart-dot { fill: #f7eedb; transition: opacity 0.2s; }
+.chart-value { font: 600 34px "IBM Plex Mono", monospace; fill: #f7eedb; text-anchor: middle; transition: opacity 0.2s; }
+.chart-today { font: 400 24px "IBM Plex Sans", sans-serif; fill: #d9d1c1; }
+.chart-bun { position: absolute; width: 225px; height: 150px; image-rendering: pixelated; pointer-events: none; }
+.mk-words { position: absolute; right: 0; top: -20px; width: 640px; display: flex; flex-direction: column; gap: 24px; }
+.mk-times { display: flex; flex-direction: column; gap: 12px; font: 600 190px/0.9 "IBM Plex Mono", monospace; letter-spacing: -0.05em; color: #eea546; }
+.mk-times small { font: 400 24px/1 "IBM Plex Mono", monospace; letter-spacing: 0.1em; color: #a3acba; }
+.mk-lead { margin: 0; font-size: 32px; line-height: 1.4; color: #d9d1c1; text-wrap: pretty; }
+.mk-lead b { color: #f7eedb; }
+.mk-foot { height: 60px; margin-top: 14px; font: 400 21px/1.4 "IBM Plex Mono", monospace; color: #a3acba; }
+.mk-foot b { color: #eea546; font-weight: 500; }
+.proj-flag { position: absolute; right: 290px; top: 30px; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; text-align: right; }
+.proj-flag span { font: 500 26px/1 "IBM Plex Mono", monospace; letter-spacing: 0.12em; color: #eea546; }
+.proj-flag b { font: 600 96px/1 "IBM Plex Mono", monospace; letter-spacing: -0.04em; }
