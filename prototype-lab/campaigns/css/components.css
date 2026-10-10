@@ -1,0 +1,111 @@
+/* Purpose: the primitives every screen shares: buttons, the kind tile, state chips, fields, the segmented control,
+   notices, the YES/NO split bar with the prize, skeletons, the dialog and bottom sheet, menus and toasts.
+   Version: 0.1.0 · Sprint -1 (design system), 2026-10-08. One primitive here becomes one file in app/components/ui. */
+
+/* Buttons. The primary keeps the approved orbiting edge; secondary and quiet ones are flat. */
+.cta { position: relative; display: inline-block; padding: 1.5px; border-radius: var(--r-sm); background: var(--cta-ring);
+  animation: spin 3.2s linear infinite; }
+.cta > span { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 15px;
+  border-radius: calc(var(--r-sm) - 1.5px); background: var(--cta-bg); color: var(--on-accent); font-weight: 600;
+  font-size: 13px; white-space: nowrap; }
+.cta:hover > span { background: var(--cta-hover); }
+.cta.wide { display: block; width: 100%; } .cta.wide > span { min-height: var(--tap); font-size: 14px; }
+.cta:disabled { animation: none; background: var(--line); } .cta:disabled > span { background: var(--raised); color: var(--dim); }
+@keyframes spin { to { --spin: 360deg; } }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 36px; padding: 8px 14px;
+  border: var(--bw) solid var(--line-strong); border-radius: var(--r-sm); color: var(--text); font-size: 13px; font-weight: 600; }
+.btn:hover { border-color: var(--muted); background: var(--row-hover); }
+.btn.quiet { border-color: transparent; color: var(--accent-soft); font-weight: 500; }
+.btn.small { min-height: 30px; padding: 5px 10px; font-size: 12px; }
+.btn.wide { width: 100%; min-height: var(--tap); }
+.icon-btn { display: inline-grid; place-items: center; width: 36px; height: 36px; border: var(--bw) solid var(--line);
+  border-radius: var(--r-sm); color: var(--muted); }
+.icon-btn:hover { color: var(--text); border-color: var(--muted); }
+.side-btn { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 40px; padding: 9px 12px;
+  border-radius: var(--r-sm); font-size: 13px; font-weight: 600; transition: filter 0.15s; }
+.side-btn.yes { background: var(--yes-bg); color: var(--yes-fg); } .side-btn.no { background: var(--no-bg); color: var(--no-fg); }
+.side-btn:hover { filter: brightness(1.15); } [data-theme="light"] .side-btn:hover { filter: brightness(0.96); }
+.side-btn[aria-pressed="true"] { box-shadow: inset 0 0 0 2px currentColor; }
+
+/* The kind tile: a letter on the kind's colour, never colour alone (the label sits next to it). */
+.kind-tile { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: var(--r-sm);
+  background: var(--kb); color: var(--kf); font: 700 21px/1 var(--display); }
+.kind-tile.sm { width: 30px; height: 30px; font-size: 16px; }
+.kind-price { --kb: var(--k-price-bg); --kf: var(--k-price-fg); } .kind-burn { --kb: var(--k-burn-bg); --kf: var(--k-burn-fg); }
+.kind-lock { --kb: var(--k-lock-bg); --kf: var(--k-lock-fg); } .kind-pool { --kb: var(--k-pool-bg); --kf: var(--k-pool-fg); }
+.kind-stake { --kb: var(--k-stake-bg); --kf: var(--k-stake-fg); }
+
+/* Chips: the public state, the partner seal, small facts. */
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: var(--r-pill);
+  background: var(--raised); color: var(--muted); font-size: 11px; font-weight: 600; white-space: nowrap; }
+.state { background: var(--sb); color: var(--sf); }
+.state::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.state-open { --sb: var(--st-open-bg); --sf: var(--st-open-fg); } .state-closed { --sb: var(--st-closed-bg); --sf: var(--st-closed-fg); }
+.state-review { --sb: var(--st-review-bg); --sf: var(--st-review-fg); } .state-paid { --sb: var(--st-paid-bg); --sf: var(--st-paid-fg); }
+.state-void { --sb: var(--st-void-bg); --sf: var(--st-void-fg); } .state-contest { --sb: var(--st-contest-bg); --sf: var(--st-contest-fg); }
+.seal { background: color-mix(in srgb, var(--crust) 18%, transparent); color: var(--crust-ink); }
+.chip.yes { background: var(--yes-bg); color: var(--yes-fg); } .chip.no { background: var(--no-bg); color: var(--no-fg); }
+
+/* Fields. */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label, .field > .label { color: var(--muted); font-size: 12px; font-weight: 500; }
+.input { width: 100%; min-height: var(--tap); padding: 10px 12px; border: var(--bw) solid var(--field-line);
+  border-radius: var(--r-sm); background: var(--bg); color: var(--text); font-size: 16px; }
+.input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.input[aria-invalid="true"] { border-color: var(--error); }
+.input-wrap { position: relative; } .input-wrap .unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; }
+.help { margin: 0; color: var(--muted); font-size: 12px; } .help.error { color: var(--error); }
+.seg { display: inline-flex; padding: 2px; border: var(--bw) solid var(--field-line); border-radius: var(--r-sm); background: var(--panel); }
+.seg button { min-height: 32px; padding: 5px 11px; border-radius: calc(var(--r-sm) - 2px); color: var(--muted); font-size: 12.5px; }
+.seg button[aria-pressed="true"] { color: var(--pressed-fg); background: var(--pressed-bg); }
+select.select { min-height: 36px; padding: 6px 9px; border: var(--bw) solid var(--field-line); border-radius: var(--r-sm); background: var(--panel); color: var(--muted); font-size: 12.5px; }
+
+/* Notices: info, warn, danger. Each carries an icon and text, so colour is never the only signal. */
+.notice { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-radius: var(--r-sm); background: var(--notice-bg); font-size: 12.5px; }
+.notice > svg { margin-top: 1px; flex-shrink: 0; color: var(--accent-soft); }
+.notice.warn { background: var(--st-review-bg); color: var(--st-review-fg); } .notice.warn > svg { color: currentColor; }
+.notice.danger { background: var(--danger-bg); color: var(--error); } .notice.danger > svg { color: currentColor; }
+.notice b { font-weight: 600; } .notice p { margin: 0; } .notice .close { margin-left: auto; font-size: 18px; line-height: 1; }
+
+/* The pot as a bar: YES, then NO, then the prize as a neutral end cap (it belongs to no side). */
+.split { display: flex; height: 10px; border-radius: var(--r-pill); overflow: hidden; background: var(--track); }
+.split > span { height: 100%; } .split .y { background: var(--yes-bar); } .split .n { background: var(--no-bar); }
+.split .p { background: repeating-linear-gradient(135deg, var(--prize-bar) 0 4px, color-mix(in srgb, var(--prize-bar) 60%, transparent) 4px 8px); }
+.split.thin { height: 6px; }
+.split-legend { display: flex; justify-content: space-between; gap: 10px; margin-top: 6px; font-size: 11.5px; color: var(--muted); }
+.split-legend b { color: var(--text); font-weight: 600; } .split-legend .y b { color: var(--yes-fg); } .split-legend .n b { color: var(--no-fg); }
+
+/* Loading: skeleton blocks shimmer unless reduced motion is on. */
+.skel { border-radius: var(--r-sm); background: linear-gradient(90deg, var(--raised), var(--row-hover), var(--raised)); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* Dialog on desktop, bottom sheet on phones. Built by js/ui/layer.js, which traps focus and closes on Escape. */
+.scrim { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 20px; background: var(--scrim); animation: fade 0.15s; }
+.dialog { width: min(520px, 100%); max-height: min(86vh, 760px); overflow: auto; padding: 20px 22px; border: var(--bw) solid var(--line-strong);
+  border-radius: var(--r-lg); background: var(--panel); box-shadow: var(--shadow-pop); animation: rise 0.2s var(--ease); }
+.dialog-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; } .dialog-head h2 { margin: 0; font: 700 26px/1 var(--display); }
+.dialog-head .icon-btn { margin-left: auto; }
+@keyframes fade { from { opacity: 0; } } @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+.menu { position: absolute; z-index: 60; min-width: 220px; padding: 6px; border: var(--bw) solid var(--line-strong); border-radius: var(--r);
+  background: var(--panel); box-shadow: var(--shadow-pop); }
+.menu button, .menu a { display: flex; width: 100%; align-items: center; gap: 8px; padding: 9px 10px; border-radius: var(--r-sm); color: var(--text); font-size: 13px; text-align: left; }
+.menu button:hover, .menu a:hover { background: var(--row-hover); text-decoration: none; }
+.menu .help { padding: 4px 10px 8px; } .btn.between { justify-content: space-between; }
+.toasts { position: fixed; right: 18px; bottom: 18px; z-index: 95; display: flex; flex-direction: column; gap: 8px; width: min(380px, calc(100vw - 32px)); }
+.toast { display: flex; gap: 10px; padding: 12px 14px; border: var(--bw) solid var(--line-strong); border-radius: var(--r); background: var(--panel);
+  box-shadow: var(--shadow-pop); font-size: 13px; animation: rise 0.2s var(--ease); }
+
+@media (max-width: 700px) {
+  .scrim { align-items: end; padding: 0; }
+  .dialog { width: 100%; max-height: 92vh; border-radius: var(--r-lg) var(--r-lg) 0 0; padding: 18px 16px calc(18px + env(safe-area-inset-bottom)); }
+  .toasts { left: 16px; right: 16px; bottom: 16px; width: auto; }
+  .btn, .seg button { min-height: 40px; } .icon-btn { width: var(--tap); height: var(--tap); }
+}
+
+/* Shared pieces the screens repeat: the empty state, the proof's two big numbers, the two moments' UTC line. */
+.empty { display: grid; justify-items: center; gap: 10px; padding: 34px 16px; text-align: center; color: var(--muted); }
+.empty img { width: 150px; height: auto; } .empty p { margin: 0; max-width: 420px; }
+.read-values { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin: 0 0 14px; }
+.read-values small { display: block; margin-bottom: 4px; color: var(--dim); font-size: 11px; }
+.read-values b { font: 700 34px/1 var(--num); font-variant-numeric: tabular-nums; } .read-values b.dim { font-size: 26px; color: var(--muted); }
+.moments-rows dd { display: flex; flex-direction: column; align-items: flex-end; } .moments-rows small { color: var(--dim); font-size: 11px; font-weight: 400; }

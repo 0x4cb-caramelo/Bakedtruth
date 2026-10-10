@@ -1,7 +1,8 @@
 /**
- * Purpose: HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API) and of docs.brot.markets (the
- *          docs. host, from docs-site/), bound to localhost behind the project's Cloudflare tunnel.
- * Version: 0.2.0 · Sprint: out of band (landing page), 2026-10-05; docs host 2026-10-08
+ * Purpose: HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API), of the unlisted campaign preview
+ *          under /dev0x/ and of docs.brot.markets (the docs. host, from docs-site/), bound to localhost behind the
+ *          project's Cloudflare tunnel.
+ * Version: 0.3.0 · Sprint: out of band (landing page), 2026-10-05; docs host 2026-10-08; /dev0x 2026-10-10
  *
  * Run: `node services/landing/server.mjs`. No dependencies. Configuration comes from the environment
  * (see .env.example): PORT, HOST, SITE_ORIGIN, LEADS_FILE.
@@ -10,6 +11,7 @@ import { createServer } from "node:http";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { handleLeadApi } from "./lib/api.mjs";
+import { campaignsCsp, isCampaigns, serveCampaigns } from "./lib/campaigns.mjs";
 import { createLeadStore } from "./lib/leads.mjs";
 import { createRateLimiter } from "./lib/rate-limit.mjs";
 import { resolveStatic, serveStatic } from "./lib/static.mjs";
@@ -33,14 +35,17 @@ function isPitch(path) {
 // What the docs host borrows from the site's folder: the theme script, the styles, the fonts and the images.
 const SHARED = /^\/(img|fonts)\/|^\/(styles\.css|app\.js)$/;
 
-function setSecurityHeaders(res, path, docs) {
-  res.setHeader("Content-Security-Policy", isPitch(path) ? CSP_PITCH : CSP_SITE);
+function setSecurityHeaders(res, path, docs, campaignCsp) {
+  const campaigns = !docs && isCampaigns(path);
+  res.setHeader("Content-Security-Policy", campaigns ? campaignCsp : isPitch(path) ? CSP_PITCH : CSP_SITE);
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "no-referrer");
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), interest-cohort=()");
   res.setHeader("Strict-Transport-Security", "max-age=31536000");
   // The deck is reachable by link only until the founder approves each row of the redaction table in PITCH.md.
   if (isPitch(path)) res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+  // The campaign preview is for the team: out of search engines and out of the archive, linked from nowhere.
+  if (campaigns) res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
   // The docs stay out of search engines until the founder approves them for indexing (docs/wiki/README.md).
   if (docs) res.setHeader("X-Robots-Tag", "noindex, nofollow");
 }
@@ -55,8 +60,18 @@ function sendNotFound(root, req, res) {
 }
 
 /** Builds the request handler. Tests call this with a temporary folder and their own store. */
-export function createApp({ root, docsRoot, store, limiter, allowedOrigins, siteOrigin, log = () => {} }) {
+export function createApp({
+  root,
+  docsRoot,
+  campaignsRoot,
+  store,
+  limiter,
+  allowedOrigins,
+  siteOrigin,
+  log = () => {},
+}) {
   const canonical = siteOrigin ? new URL(siteOrigin) : null;
+  const campaignCsp = campaignsRoot ? campaignsCsp(campaignsRoot) : CSP_SITE;
   const docsHost = canonical && docsRoot ? `docs.${canonical.host}` : null;
   // The docs host answers pages from docsRoot and only the shared files from root; never the waitlist API.
   function serveDocs(req, res, path) {
@@ -79,7 +94,7 @@ export function createApp({ root, docsRoot, store, limiter, allowedOrigins, site
       return;
     }
     const onDocs = docsHost !== null && req.headers.host === docsHost;
-    setSecurityHeaders(res, path, onDocs);
+    setSecurityHeaders(res, path, onDocs, campaignCsp);
     // One address for the site: "www" goes to the bare domain. The target is ours; only path and query are kept.
     if (canonical && req.headers.host === `www.${canonical.host}`) {
       res.writeHead(301, { Location: `${canonical.origin}${path}${search}` }).end();
@@ -104,6 +119,10 @@ export function createApp({ root, docsRoot, store, limiter, allowedOrigins, site
       // /pitch3 or /pitch4 land on the current deck. Temporary on purpose: browsers do not keep a 302.
       if (/^\/pitch[2-9]\d*(\/|$)/.test(path)) {
         res.writeHead(302, { Location: "/pitch/" }).end();
+        return;
+      }
+      if (campaignsRoot && isCampaigns(path)) {
+        serveCampaigns(req, res, path, campaignsRoot);
         return;
       }
       if (path !== "/404.html" && serveStatic(root, req, res, path)) return;
@@ -135,6 +154,8 @@ function start() {
   const app = createApp({
     root: join(HERE, "public"),
     docsRoot: join(HERE, "docs-site"),
+    // The campaign screens live once, in prototype-lab/, and are served from there (the deploy copies the whole repo).
+    campaignsRoot: join(HERE, "..", "..", "prototype-lab", "campaigns"),
     store,
     limiter: createRateLimiter({ limit: 5, windowMs: 60_000 }),
     allowedOrigins: [siteOrigin, `http://${host}:${port}`, `http://localhost:${port}`],
