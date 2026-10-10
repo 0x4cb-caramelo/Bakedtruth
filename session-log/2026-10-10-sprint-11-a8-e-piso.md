@@ -5,9 +5,9 @@
 - A Sprint 11 estava pronta no PR #60 (`7240c66`, CI verde), com duas perguntas ao fundador: de onde ler o ProgramData
   para a A-8 até o relay `/rpc` existir, e se o piso que o baker assina fica em 1% abaixo da estimativa.
 - O Ronaldo respondeu as duas pela opção (a): ler o slot do último deploy pela RPC pública do devnet agora, dentro do
-  SDK; manter o piso em 1% no devnet. Ele fará o teste de dez minutos com a Phantom no devnet na máquina dele, sem que
-  eu espere o resultado, e o PR #60 só será mesclado depois da A-8 pronta e do teste dele. Pediu também que a leitura do
-  ProgramData entrasse em `docs/technical/relay-allowlist.md`, e que a Sprint 12 não começasse.
+  SDK; manter o piso em 1% no devnet. O teste de dez minutos com a Phantom no devnet fica com o Ronaldo, na própria
+  máquina, sem que eu espere o resultado, e o PR #60 só será mesclado depois da A-8 pronta e desse teste. O pedido
+  incluiu a leitura do ProgramData em `docs/technical/relay-allowlist.md` e nenhum começo da Sprint 12.
 
 ## Decisões do fundador (10/10/2026)
 
