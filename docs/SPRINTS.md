@@ -102,7 +102,7 @@ mainnet line, which still says "and a cap" and whose new wording waits for the f
 | 09 | [Site: shell, theme and wallet](sprints/sprint-09-site-shell.md) (closed 2026-10-10 for the Hackathon MVP; server and mobile items deferred to the end of the Hackathon) | B8 | 05, 06, 08, -1 |
 | 10 | [Site: campaign list](sprints/sprint-10-site-campaign-list.md) | B8 | 09 |
 | 11 | [Site: campaign page and entry](sprints/sprint-11-site-campaign-entry.md) (merged 2026-10-10, PR #60, tag `sprint-11`; A-8 built on the founder's answer; the founder's Phantom entry reported, its devnet transaction not found yet) | B8 | 09, 10 |
-| 12 | [Site: my entries and campaign states](sprints/sprint-12-site-my-entries-states.md) | B8 | 11, 06 |
+| 12 | [Site: my entries and campaign states](sprints/sprint-12-site-my-entries-states.md) (merged 2026-10-10, PR #61, tag `sprint-12`; the five-campaign devnet rehearsal is the founder's) | B8 | 11, 06 |
 | 13 | [Site: ranking, notices and copy (closes the devnet MVP)](sprints/sprint-13-site-notices-copy.md) | B8 | 12, 08, 07, 19 |
 | 14 | [Referral and second read](sprints/sprint-14-referral-second-read.md) | B9 | 04, 07, 08, 12 |
 | 15 | [Sponsorship: the sealed entry](sprints/sprint-15-sponsorship.md) | B9 | 04, 05, 12 |

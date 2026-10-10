@@ -50,9 +50,20 @@ function Row({ line, mine }: { line: PointsLine; mine: boolean }) {
   );
 }
 
-function You({ mine, connected }: { mine: PointsLine | null; connected: boolean }) {
+/** `read`: how many ranked wallets the page read; past it a wallet may still have points (`total` is larger). */
+function You({
+  mine,
+  connected,
+  read,
+  total,
+}: {
+  mine: PointsLine | null;
+  connected: boolean;
+  read: number;
+  total: number;
+}) {
   if (!connected) return <p className="m-0 text-sm text-muted">{BOARD.connect}</p>;
-  if (!mine) return <p className="m-0 text-sm">{BOARD.youNone}</p>;
+  if (!mine) return <p className="m-0 text-sm">{total > read ? BOARD.youBeyond(read) : BOARD.youNone}</p>;
   return (
     <div data-testid="leaderboard-you">
       <p className="m-0 font-display text-2xl font-bold">{BOARD.youRank(mine.rank ?? 0, BOARD.points(mine.points))}</p>
@@ -141,7 +152,12 @@ export function LeaderboardPage() {
         <div className="space-y-4">
           <Card as="section" className="space-y-1 p-4" aria-label={BOARD.you}>
             <small className="block text-xs font-semibold text-muted">{BOARD.you}</small>
-            <You mine={state.status === "ready" ? lineOf(state.rows, wallet) : null} connected={wallet !== null} />
+            <You
+              mine={state.status === "ready" ? lineOf(state.rows, wallet) : null}
+              connected={wallet !== null}
+              read={state.status === "ready" ? state.rows.length : 0}
+              total={state.status === "ready" ? state.total : 0}
+            />
           </Card>
           <Card as="section" aria-labelledby="points-how" className="space-y-2 p-4">
             <h2 id="points-how" className="m-0 font-display text-2xl font-bold">

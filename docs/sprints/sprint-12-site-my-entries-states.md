@@ -1,6 +1,6 @@
 # Sprint 12 — Site: my entries and campaign states
 
-**Status:** built; the founder's answers applied (2026-10-10: 1a, 2a, 3a; the Phantom signature stays open without blocking); PR #61 with CI green; the devnet rehearsal is the founder's, run after the merge · **Branch:** `sprint-12-site-my-entries-states`, cut from `origin/main` at `sprint-11` · **Dates:** none, by the founder's decision
+**Status:** merged 2026-10-10 (PR #61, tag `sprint-12` on `107fec2`); the founder's answers applied (1a, 2a, 3a; the Phantom signature stays open without blocking); the devnet rehearsal is the founder's, run after the merge · **Branch:** `sprint-12-site-my-entries-states`, cut from `origin/main` at `sprint-11` · **Dates:** none, by the founder's decision
 
 ## Record (2026-10-10)
 

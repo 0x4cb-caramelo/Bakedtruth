@@ -255,8 +255,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`copy.ts`](app/features/leaderboard/copy.ts) | the words of the devnet leaderboard (spec 3.9 of Sprint -1; BR-29; D-m vocabulary; English per L-01): the table, the connected wallet's own line, the loading, e | 47 |
-| [`leaderboard.tsx`](app/features/leaderboard/leaderboard.tsx) | the devnet leaderboard at /leaderboard (Sprint 13 DoD; spec 3.9 of Sprint -1, prototype-lab/campaigns/js/screens/ranking.js): wallets by points from /api/v1/lea | 162 |
+| [`copy.ts`](app/features/leaderboard/copy.ts) | the words of the devnet leaderboard (spec 3.9 of Sprint -1; BR-29; D-m vocabulary; English per L-01): the table, the connected wallet's own line, the loading, e | 48 |
+| [`leaderboard.tsx`](app/features/leaderboard/leaderboard.tsx) | the devnet leaderboard at /leaderboard (Sprint 13 DoD; spec 3.9 of Sprint -1, prototype-lab/campaigns/js/screens/ranking.js): wallets by points from /api/v1/lea | 178 |
 | [`model.ts`](app/features/leaderboard/model.ts) | the leaderboard's values, as pure functions (Sprint 13): a wallet's hit rate (its points over its campaigns with a final YES or NO), and the connected wallet's  | 19 |
 | [`use-leaderboard.ts`](app/features/leaderboard/use-leaderboard.ts) | the leaderboard's data in React (Sprint 13): every ranked wallet from the read API's /api/v1/leaderboard, read in pages of 100 up to 1,000 wallets, once when th | 47 |
 

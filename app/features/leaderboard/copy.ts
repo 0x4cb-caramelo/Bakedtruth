@@ -31,6 +31,7 @@ export const BOARD = {
   you: "You",
   connect: "Connect a wallet to see where it stands.",
   youNone: "No points yet. They arrive when a campaign you entered ends on your side and its result is final.",
+  youBeyond: (n: number) => `Not among the first ${n.toLocaleString("en-US")} wallets read: fewer points, or none yet.`,
   youRank: (rank: number, points: string) => `#${rank} · ${points}`,
   youDetail: (points: number, decided: number, entered: number) =>
     `${points} of ${decided} decided ${decided === 1 ? "campaign" : "campaigns"} on the side that won; ${entered} entered.`,
