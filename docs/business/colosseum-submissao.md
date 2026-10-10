@@ -7,6 +7,9 @@
   estão em inglês e as explicações em português.
 - **Trilha:** Solana (dez prêmios de US$ 10 mil; FATO, `colosseum.com/worldsfair`, lido em 9/10/2026).
 
+**O retorno do revisor e a lista do que falta** estão em `docs/business/colosseum-revisor-e-melhorias.md`, de
+10/10/2026.
+
 **O que este rascunho não viu.** A primeira aba do formulário de verdade chegou depois e está na seção 5; a segunda,
 na seção 6; a terceira ("Team"), na seção 7. O formulário fica dentro do portal, atrás do login, e eu não o abri. Os
 campos da seção 1 são os que o Colosseum publica nas perguntas frequentes (`colosseum.com/hackathon`, lido em

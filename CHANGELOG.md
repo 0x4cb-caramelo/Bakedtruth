@@ -26,6 +26,14 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
   refeita: o programa está na devnet desde a noite de 9/10, e um ciclo inteiro rodou lá. No mesmo dia entraram a
   categoria, as respostas da segunda aba ("Media and code"), os roteiros dos dois vídeos e três arquivos de
   logotipo em `docs/business/colosseum/`.
+- **O que foi ao revisor da Superteam, o que voltou e as melhorias, `docs/business/colosseum-revisor-e-melhorias.md`**
+  (Lucas, 10/10/2026). As respostas das três abas do formulário e da tela de apoio da Anthropic; o retorno do
+  revisor (`revisor.superteam.com.br`): nota 61 de 100, dois bloqueios e cinco melhorias; dezoito melhorias com dono
+  e situação; os textos corrigidos, prontos para colar; e as seis perguntas do jurado com o que o plano responde. O
+  rascunho `colosseum-submissao.md` ganhou a terceira aba (seção 7) e o retorno (seção 8).
+- **O deck em PDF,** um slide por página, gerado da regra de impressão do próprio deck. Os arquivos ficam em
+  `docs/business/colosseum/`, fora do Git. A primeira versão saiu com os cartões que viram espelhados e foi
+  refeita no mesmo dia.
 - **Sprint 03: o programa lê o resultado sozinho, e o Anchor sai do repositório** (`programs/brot-markets`,
   9/10/2026). Os cinco tipos de campanha abrem, travam a entrada e resolvem on-chain:
   - **Os quatro leitores do `pred-provable` portados para o Pinocchio**, um arquivo cada, com o aviso MIT: a queima
@@ -392,10 +400,12 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
 
 - **Colosseum, prazo 12/10/2026:** a submissão voltou ao plano em 9/10/2026, e o BP v0.0.4 ainda diz que o hackathon
   saiu (Parte 4, seção 3.2). Para enviar faltam os campos reais do portal, a experiência e a localização da equipe, o
-  de acordo do Bernardo e do Ronaldo, a decisão sobre o repositório (privado: dar acesso ou abrir), os dois vídeos, as
-  abas "Media and code" e "Team" do formulário, e o `README.md`, que ainda descreve o programa antigo e é a
-  primeira página que um jurado abre. O programa chegou à devnet em 9/10/2026. Detalhe em
-  `docs/business/colosseum-submissao.md`.
+  de acordo do Bernardo e do Ronaldo, a decisão sobre o repositório (privado: dar acesso ou abrir) e o `README.md`,
+  que ainda descreve o programa antigo e é a primeira página que um jurado abre. O programa chegou à devnet em
+  9/10/2026. **Em 10/10/2026 o revisor da Superteam deu 61 de 100 e apontou dois bloqueios que desclassificam:** os
+  dois vídeos, que não foram gravados, e duas respostas do perfil em português. Faltam também um número real de
+  uso (não há usuário de fora, nem jeito de uma carteira de fora entrar numa campanha) e alinhar o deck ao
+  formulário. A lista inteira, com dono e situação: `docs/business/colosseum-revisor-e-melhorias.md`, seção 3.
 - **O R4, abertura mais barata nos primeiros meses,** não foi construído (Sprint 02).
 
 - **Autoria no Colosseum, prazo 12/10/2026:** o plano diz que a equipe se apresenta como uma pessoa, mas o git mostra
