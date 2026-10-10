@@ -308,9 +308,10 @@ jobs:
       - name: Install JS dependencies
         run: bun install --frozen-lockfile
 
+      # No package in the lockfile has an install script; --ignore-scripts keeps it that way.
       - name: Install the check's tools (Metro, the React Native 0.87.1 Babel preset, hermesc)
         working-directory: tests/react-native
-        run: npm ci --no-audit --no-fund
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Bundle both SDK halves for Android, compile with hermesc, replay the vectors on Hermes
         working-directory: tests/react-native

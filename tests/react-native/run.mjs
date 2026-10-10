@@ -6,7 +6,7 @@
  * Version: 0.0.1
  * Sprint:  05 (SDK and the devnet cycle): the React Native check (proposal section 3.2)
  *
- * `npm ci` here and a root `bun install` first (the SDK and `@solana/kit` resolve from the root).
+ * `npm ci --ignore-scripts` here and a root `bun install` first (the SDK and `@solana/kit` resolve from the root).
  * The JavaScript runs on the pinned Hermes v0.13.0 VM (hermes.mjs). `HERMES_EXACT_VM=<path>` adds a
  * run of the compiled bytecode itself on a VM of the shipping version, built from tag
  * `hermes-v250829098.0.17` (knowledge-base/tecnologia/sdk-react-native.md).
