@@ -576,5 +576,9 @@ Não enviar o deck como está. Ele conta outra história em quatro pontos, e é 
 | 06, crescimento | "MAINNET After an audit, a multisig and a cap." | Sem teto (decisão de 8/10/2026) |
 | 02, solução | "No human in the loop" | A equipe pode anular e devolver, nunca inverter. O BP propõe "No human picks the winner" (decisão 5, ainda aberta) |
 
-O deck é um HTML; o PDF sai por um navegador sem tela, como as capturas das outras páginas. Não foi gerado: mexer nos
-slides é decisão do Lucas, e dois dos quatro pontos dependem de resposta dele.
+**O PDF do deck como está, gerado em 10/10/2026** a pedido do Lucas ("consegue pegar o nosso pitch e transformar cada
+pagina em pdf?"): `docs/business/colosseum/brot-markets-pitch.pdf`, com 9 páginas de 16 por 9, texto selecionável e
+5,7 MB, e uma página por arquivo em `docs/business/colosseum/pitch-paginas/`. Sai da regra de impressão que o próprio
+deck já tinha, com o movimento desligado (`?motion=off`): o exemplo animado do slide de solução aparece parado, no
+estado inicial. Os arquivos ficam fora do Git: são derivados do HTML e mudam quando o deck mudar. Os quatro pontos da
+tabela continuam nele; mexer nos slides é decisão do Lucas, e dois dos quatro dependem de resposta dele.
