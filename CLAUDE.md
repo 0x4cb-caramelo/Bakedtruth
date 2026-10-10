@@ -161,11 +161,8 @@ and the site sprints (09 to 13) replace it. A generic dashboard look was rejecte
 (loaded via `app/CLAUDE.md`) says this Next.js version has breaking changes: read `app/node_modules/next/dist/docs/`
 before writing app code.
 
-**In-app chat** (`app/app/api/chat/route.ts`, `app/components/chat/chat.tsx`, `app/lib/chat.ts`): a read-only explainer
-that streams from OpenRouter (`OPENROUTER_API_KEY`, optional `OPENROUTER_MODEL`, server-only in `app/.env.local`). The
-market page feeds it a text summary through `useChatContext`. It cannot sign or trade. The per-IP rate limit is
-in-memory, so a multi-instance deploy needs a shared store. There is no AI in the new scope (2026-10-08): Sprint 09
-removes this route and `OPENROUTER_API_KEY`.
+**In-app chat: removed in Sprint 09** (D-q, no AI in the new scope). `app/app/api/chat/route.ts`, `app/components/chat/`
+and `app/lib/chat.ts` are gone, and `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` are no longer read anywhere.
 
 ## Gotchas
 

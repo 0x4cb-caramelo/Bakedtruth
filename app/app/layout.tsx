@@ -4,7 +4,6 @@ import "./globals.css";
 import { BRAND } from "@/lib/brand";
 import { CellField } from "@/components/cell-field";
 import { Mascot } from "@/components/mascot";
-import { ChatProvider } from "@/components/chat/chat";
 import { Providers } from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
 import { TapeProvider } from "@/components/tape-context";
@@ -25,8 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full">
         <Providers>
           <CellField />
-          <ChatProvider>
-            <TapeProvider>
+          <TapeProvider>
               <div className="relative z-10 flex min-h-screen flex-col">
                 <Ticker />
                 <SiteHeader />
@@ -46,7 +44,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 </footer>
               </div>
             </TapeProvider>
-          </ChatProvider>
           <Mascot />
         </Providers>
       </body>

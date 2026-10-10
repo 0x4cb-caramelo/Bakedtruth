@@ -1,6 +1,22 @@
 # Sprint -1 — Design system, the opening screen and phone layouts
 
-**Status:** planned · **Branch:** `sprint--1-design-system` · **Dates:** none, by the founder's decision
+**Status:** closed 2026-10-10 by the founder's approval of the design (the approved screens are in `prototype-lab/campaigns/`, served at `/dev0x/`). The code items of this sprint are not built in `app/` and move to Sprint 09 (see "Closure") · **Branch:** `sprint--1-design-system` · **Dates:** none, by the founder's decision
+
+## Closure (2026-10-10, founder's decisions)
+
+The founder answered every block and approved the design:
+
+- **Theme:** the dark theme is official and the default.
+- **Language (L-01):** English, to match the codebase.
+- **Campaign page (L-23):** shows the chance history and recent activity.
+- **Notices (L-03, L-24, P-9):** standard minimal warnings, with automatic notice ("permitir, com aviso automático").
+- **Layouts:** the components and responsive layouts already built in `/dev0x/` are approved, at desktop and phone width.
+
+The design is not rewritten. Items of the definition of done that are about the design's **code** are not built in
+`app/`, and move to Sprint 09 as its first items: `app/styles/tokens.css` with the colour variables, the theme script in
+`<head>` with the key `brot-theme`, Barlow Condensed and Inter served by the site, the primitives in `app/components/ui/`,
+the re-read of the conflicts and gaps against BP v0.0.4, and the section of `DESIGN-DIRECTION.md` that records the result.
+The founder's approval of the creation box at both widths is taken from the same review.
 
 | | |
 |---|---|
