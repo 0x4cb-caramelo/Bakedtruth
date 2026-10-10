@@ -2,8 +2,8 @@
  * Purpose: the devnet leaderboard at /leaderboard (Sprint 13 DoD; spec 3.9 of Sprint -1,
  *          prototype-lab/campaigns/js/screens/ranking.js): wallets by points from /api/v1/leaderboard (1 per campaign
  *          entered on the side that won, once final), with each wallet's hit rate and campaigns entered, the
- *          connected wallet's own line as "You", when the chain was read, and how points work. No volume or profit
- *          column. Loading, error and empty states; 50 rows at first, then "Show more".
+ *          connected wallet's own line as "You", when the chain was read, and how points work. No column for the size
+ *          of entries or what a wallet gained. Loading, error and empty states; 50 rows at first, then "Show more".
  * Version: 0.1.0
  * Sprint:  13 (site: ranking, notices and copy)
  */

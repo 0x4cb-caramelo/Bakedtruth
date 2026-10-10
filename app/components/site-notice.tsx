@@ -1,11 +1,12 @@
 /**
  * Purpose: the two notices every screen shows (Sprint 09, BR-47, P1 §4.6), in English per the founder's L-01 decision:
- *          the test-money notice and the not-audited notice. Static text, no client state.
- * Version: 0.1.0
+ *          the test-money notice and the not-audited notice (their words are copy-site.ts). Static text, no client state.
+ * Version: 0.1.1
  * Sprint:  09 (site shell, theme and wallet)
  */
-export const TEST_NOTICE = "We are in testing. Here you enter with test SOL, which has no real value.";
-export const AUDIT_NOTICE = "The program is not audited yet.";
+import { AUDIT_NOTICE, TEST_NOTICE } from "./copy-site";
+
+export { AUDIT_NOTICE, TEST_NOTICE };
 
 export function SiteNotice() {
   return (

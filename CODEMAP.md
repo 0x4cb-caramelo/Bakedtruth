@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **786** |
+| Arquivos mapeados | **789** |
 | Acima de 200 linhas | **39** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -134,10 +134,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
+| [`copy-site.ts`](app/components/copy-site.ts) | the words every screen shows above any campaign or entry (BR-47; P1 §4.6), in English per L-01: the test-money notice and the not-audited notice, while each is  | 12 |
 | [`mascot.tsx`](app/components/mascot.tsx) | Mounts the mascot once for the whole app. Each page decides where it may stand with | 31 |
 | [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 37 |
 | [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar (Sprint 09): the brand, the routes (Sprint 13 adds "How it works" and the fees, so both open from a phone too), the theme button and the wall | 68 |
-| [`site-notice.tsx`](app/components/site-notice.tsx) | the two notices every screen shows (Sprint 09, BR-47, P1 §4.6), in English per the founder's L-01 decision: the test-money notice and the not-audited notice. St | 17 |
+| [`site-notice.tsx`](app/components/site-notice.tsx) | the two notices every screen shows (Sprint 09, BR-47, P1 §4.6), in English per the founder's L-01 decision: the test-money notice and the not-audited notice (th | 18 |
 | [`toast.tsx`](app/components/toast.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 71 |
 | [`wallet-button.tsx`](app/components/wallet-button.tsx) | the site's wallet control (Sprint 09, S1): "Use Installed Wallet" connects only from that click, through the installed wallet the site registered (MWA on Androi | 58 |
 
@@ -191,7 +192,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`arrange.test.ts`](app/features/campaigns/arrange.test.ts) | the list's rules: the ranking order, the state, kind and search filters, the saved filter, the unlisted switch, the sorts, and the empty pot's chance (none) | 103 |
 | [`arrange.ts`](app/features/campaigns/arrange.ts) | what the list shows and in which order (Sprint 10): the five states and "saved", the five kinds, the search, the unlisted switch, and the sort. The default orde | 62 |
-| [`campaign-card.tsx`](app/features/campaigns/campaign-card.tsx) | one campaign's card in the list (Sprint 10): the kind, the sentence, the state, the pot in SOL, the chance per side (none for an empty pot), the estimated retur | 84 |
+| [`campaign-card.tsx`](app/features/campaigns/campaign-card.tsx) | one campaign's card in the list (Sprint 10): the kind, the sentence, the state, the pot in SOL, the chance per side (none for an empty pot), the estimated retur | 83 |
 | [`campaign-list.tsx`](app/features/campaigns/campaign-list.tsx) | the home route's campaign list (Sprint 10): the search, the state and kind filters, the sort, the unlisted switch, and the cards in the ranking order. The data  | 146 |
 | [`model.test.ts`](app/features/campaigns/model.test.ts) | the card values: the chance (none for an empty pot), the estimated return from the SDK's math, the 24-hour listing rule, and the sentence of a price campaign fr | 117 |
 | [`model.ts`](app/features/campaigns/model.ts) | a campaign's card values, from the read API's fields and the SDK's math (Sprint 10): the pot in lamports, the chance per side (none for an empty pot, L-05), the | 112 |
@@ -273,6 +274,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`my-entries.tsx`](app/features/my-entries/my-entries.tsx) | "My entries" at /my-entries (Sprint 12; route name confirmed with L-01): the connected wallet's totals, received (from its settlement events only) and waiting f | 116 |
 | [`received.ts`](app/features/my-entries/received.ts) | what a wallet received, summed from the program's settlement events and nothing else (Sprint 12 DoD: the sum on screen equals the wallet's `EntrySettled` and `C | 96 |
 | [`use-my-entries.ts`](app/features/my-entries/use-my-entries.ts) | "My entries" data in React: the read API's campaign list (which campaigns exist now), the wallet's history from the chain (its events, one page at a time), then | 100 |
+
+## `app/features/notices/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`registry.ts`](app/features/notices/registry.ts) | every mandatory notice that holds on devnet (BR-47; P1 §4.6; TP §3.6 "Notices and copy"; Sprint 13 DoD), each with the screens that must show it and the compone | 136 |
 
 ## `app/features/record/`
 
@@ -1380,6 +1387,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`fee-example.test.ts`](tests/site/fee-example.test.ts) | the fee page's worked example is the SDK's math, and it is P1 §1.2's case (Sprint 13 DoD; BR-32): 600 on YES and 400 on NO (here 6 and 4 SOL) give a fee of 40,  | 64 |
 | [`manifest.test.ts`](tests/site/manifest.test.ts) | the PWA is the manifest and its icons only (Sprint 13 DoD, S2): the manifest names the site, opens at "/" standalone in the dark theme's colour, and lists icons | 43 |
 | [`my-entries.test.ts`](tests/site/my-entries.test.ts) | the rows of "My entries" through a whole cycle, read the way the page reads them (the chain behind the recording RPC, the wallet's history): while settling, eac | 150 |
+| [`notices.test.ts`](tests/site/notices.test.ts) | every mandatory notice is on its screen (Sprint 13 DoD; BR-47, P1 §4.6): each notice of app/features/notices/registry.ts is drawn by the component it names, and | 136 |
 | [`page-format.test.ts`](tests/site/page-format.test.ts) | how the campaign page writes what it read: exact grouped integers, a value in its kind's units, an age, the visitor's local time (built with options a browser a | 37 |
 | [`powers.test.ts`](tests/site/powers.test.ts) | the powers table (BR-41, Sprint 13 DoD): content/powers.md is published on /record with who holds each key and the limit of each power (P4 §4.2), its four roles | 74 |
 | [`received.test.ts`](tests/site/received.test.ts) | what "my entries" says a wallet received equals the program's settlement events for that wallet, and the SOL that actually reached it (Sprint 12 DoD), on whole  | 172 |

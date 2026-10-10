@@ -2,9 +2,9 @@
  * Purpose: one campaign's card in the list (Sprint 10): the kind, the sentence, the state, the pot in SOL, the chance per
  *          side (none for an empty pot), the estimated return per side (labelled as an estimate), the two moments (entries
  *          close, deadline), the review clock, the save button, and the notice on burn, lock and stake campaigns (BR-26).
- *          There is no redemption here.
- * Version: 0.2.0 (Sprint 12: the state chip and line, state-line.ts)
- * Sprint:  10 (site: campaign list); 12
+ *          There is no redemption here. The creator notice is the campaign page's own words (Sprint 13: one text).
+ * Version: 0.2.1 (Sprint 13: the creator notice from campaign-page/copy.ts; 0.2.0, Sprint 12's state chip and line)
+ * Sprint:  10 (site: campaign list); 12; 13
  */
 import Link from "next/link";
 
@@ -13,11 +13,10 @@ import { StateChip } from "@/components/ui/state-chip";
 import { formatUtc } from "@/lib/brot";
 import { formatSol as formatSolFour } from "@/features/wallet/wallet-state";
 import type { Card } from "./model";
+import { CREATOR_NOTICE } from "@/features/campaign-page/copy";
 import { KIND_LABEL } from "./sentence";
 
 const sol = (lamports: bigint) => `${formatSolFour(lamports)} SOL`;
-
-const NOTICE = "The creator can control the result, and may have entered YES or NO.";
 
 export function CampaignCard({ card, saved, onToggle }: { card: Card; saved: boolean; onToggle: () => void }) {
   const hasChance = card.yesShare !== null;
@@ -77,7 +76,7 @@ export function CampaignCard({ card, saved, onToggle }: { card: Card; saved: boo
           </span>
         )}
       </div>
-      {card.kind !== "PriceTouch" && <p className="mt-2 text-xs text-dim">{NOTICE}</p>}
+      {card.kind !== "PriceTouch" && <p className="mt-2 text-xs text-dim">{CREATOR_NOTICE}</p>}
     </article>
   );
 }
