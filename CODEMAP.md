@@ -8,22 +8,15 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **625** |
-| Acima de 200 linhas | **45** ⚠️ |
-| Sem cabeçalho `Purpose:` | **73** ⚠️ |
+| Arquivos mapeados | **626** |
+| Acima de 200 linhas | **38** ⚠️ |
+| Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
 
 A regra diz "under 200 lines where practical". Estes passaram — vale checar se dá pra separar:
 
-- `app/components/market/trade-card.tsx` — 315 linhas
-- `app/components/primitives.tsx` — 291 linhas
-- `app/lib/hooks.ts` — 244 linhas
-- `app/lib/idl/pred_provable.ts` — 3189 linhas
-- `app/lib/instructions.ts` — 234 linhas
-- `app/lib/market.ts` — 211 linhas
 - `app/lib/mascot/engine.ts` — 302 linhas
-- `app/lib/metric.ts` — 691 linhas
 - `programs/brot-markets/src/error.rs` — 328 linhas
 - `programs/brot-markets/src/instructions/campaigns/open_campaign.rs` — 210 linhas
 - `programs/brot-markets/src/instructions/entries/join_campaign.rs` — 212 linhas
@@ -83,81 +76,97 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`eslint.config.mjs`](app/eslint.config.mjs) | Override default ignores of eslint-config-next | 19 |
-| [`next.config.ts`](app/next.config.ts) | the site's Next.js settings: the security headers and the Content-Security-Policy (Sprint 09, X2.5). The policy allows the page's own origin and the one RPC ori | 50 |
+| [`next.config.ts`](app/next.config.ts) | the site's Next.js settings: the security headers and the Content-Security-Policy (Sprint 09, X2.5). The policy allows the page's own origin, the one RPC origin | 58 |
 | [`postcss.config.mjs`](app/postcss.config.mjs) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 8 |
 
 ## `app/app/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`layout.tsx`](app/app/layout.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 53 |
-| [`page.tsx`](app/app/page.tsx) | HomeView reads the search params (query, category, tab), which needs a Suspense boundary | 13 |
+| [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09): the two fonts the site serves itself, the theme script in <head> before the stylesheet, the notice, the top bar, the page an | 48 |
+| [`page.tsx`](app/app/page.tsx) | the home route (Sprint 09 shell): the campaign list comes in Sprint 10. Until then it shows the read API's status, so the wiring to /api/v1 is visible | 20 |
 
-## `app/app/markets/[address]/`
+## `app/app/abrir/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`page.tsx`](app/app/markets/[address]/page.tsx) | `?side=no` comes from the No box on a market card | 33 |
+| [`page.tsx`](app/app/abrir/page.tsx) | The creation route (the creation box, Sprint 19). A shell for Sprint 09: the route exists and shows its title; the content comes in Sprint 19 | 14 |
+
+## `app/app/c/[id]/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`page.tsx`](app/app/c/[id]/page.tsx) | One campaign by its id (the campaign page and entry, Sprints 10 and 11). A shell for Sprint 09: the route exists and shows its title; the content comes in Sprin | 14 |
+
+## `app/app/leaderboard/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`page.tsx`](app/app/leaderboard/page.tsx) | The ranking (Sprint 13). A shell for Sprint 09: the route exists and shows its title; the content comes in Sprint 13 | 14 |
+
+## `app/app/my-entries/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`page.tsx`](app/app/my-entries/page.tsx) | The wallet's own entries (Sprint 12). A shell for Sprint 09: the route exists and shows its title; the content comes in Sprint 12 | 14 |
+
+## `app/app/record/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`page.tsx`](app/app/record/page.tsx) | The public record (Sprint 13). A shell for Sprint 09: the route exists and shows its title; the content comes in Sprint 13 | 14 |
 
 ## `app/components/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`activity-feed.tsx`](app/components/activity-feed.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 63 |
-| [`cell-field.tsx`](app/components/cell-field.tsx) | Background grid: cells light up under the pointer and fade out in steps. One fixed canvas, | 68 |
+| [`api-status.tsx`](app/components/api-status.tsx) | the home route's status line (Sprint 09): reads /api/v1/health once and says whether the read API answers and whether the snapshot is current. Entries stay clos | 40 |
 | [`mascot.tsx`](app/components/mascot.tsx) | Mounts the mascot once for the whole app. Each page decides where it may stand with | 31 |
-| [`price-chart.tsx`](app/components/price-chart.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 167 |
-| [`primitives.tsx`](app/components/primitives.tsx) | Building blocks shared by the home page and the market page, in the "Tape" direction: | 291 |
-| [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 27 |
-| [`site-header.tsx`](app/components/site-header.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 98 |
-| [`tape-context.tsx`](app/components/tape-context.tsx) | What the ticker shows: the markets the current page has already loaded. Pages publish their | 32 |
-| [`ticker.tsx`](app/components/ticker.tsx) | The tape across the top: cluster status, then the markets the page has loaded scrolling past, | 60 |
+| [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 37 |
+| [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar (Sprint 09): the brand, the five routes, the theme button and the wallet button. The theme follows the stored choice after the first paint (t | 65 |
+| [`site-notice.tsx`](app/components/site-notice.tsx) | the two notices every screen shows (Sprint 09, BR-47, P1 §4.6), in English per the founder's L-01 decision: the test-money notice and the not-audited notice. St | 17 |
 | [`toast.tsx`](app/components/toast.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 71 |
-| [`wallet-button.tsx`](app/components/wallet-button.tsx) | The wallet button reads window state, so it must not render on the server | 25 |
+| [`wallet-button.tsx`](app/components/wallet-button.tsx) | the site's wallet control (Sprint 09, S1): "Use Installed Wallet" connects only from that click, through the installed wallet the site registered (MWA on Androi | 74 |
 
-## `app/components/home/`
-
-| Arquivo | Núcleo | Linhas |
-|---|---|---:|
-| [`browse.tsx`](app/components/home/browse.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 185 |
-| [`featured.tsx`](app/components/home/featured.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 135 |
-| [`hero-meter.tsx`](app/components/home/hero-meter.tsx) | The hero's meter: the market with the most at stake, read live. A quantity goal shows the | 72 |
-| [`home-view.tsx`](app/components/home/home-view.tsx) | The market with the most at stake leads the page | 75 |
-| [`market-tile.tsx`](app/components/home/market-tile.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 91 |
-| [`sidebar.tsx`](app/components/home/sidebar.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 92 |
-
-## `app/components/market/`
+## `app/components/ui/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`chart-card.tsx`](app/components/market/chart-card.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 130 |
-| [`details.tsx`](app/components/market/details.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 142 |
-| [`market-view.tsx`](app/components/market/market-view.tsx) | A stable array, or publishing it would re-render this view in a loop | 176 |
-| [`position-card.tsx`](app/components/market/position-card.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 121 |
-| [`proof-card.tsx`](app/components/market/proof-card.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 176 |
-| [`trade-card.tsx`](app/components/market/trade-card.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 315 |
+| [`button.tsx`](app/components/ui/button.tsx) | the buttons of the design: the primary action with its orbiting edge, the secondary and quiet ones, and the icon button. Colour from the tokens only | 69 |
+| [`card.tsx`](app/components/ui/card.tsx) | the surface of a card or a panel: the panel colour, a 1px line and the card radius. Its contents set their own spacing | 21 |
+| [`cx.ts`](app/components/ui/cx.ts) | joins class names, dropping the falsy ones. The only helper the primitives share | 7 |
+| [`empty-state.tsx`](app/components/ui/empty-state.tsx) | the empty state: a title, a line of text and an optional action, centred in the space of a list or a page | 17 |
+| [`field.tsx`](app/components/ui/field.tsx) | the form controls: a labelled field with its help or error text, a text input, and a select. The error sets aria-invalid and the error colour; the text says wha | 50 |
+| [`kind-tile.tsx`](app/components/ui/kind-tile.tsx) | the campaign's kind as a letter tile on the kind's own colour, with its name beside it in the screens. The five kinds (P1 §4.2) map from the program's reader ki | 35 |
+| [`notice.tsx`](app/components/ui/notice.tsx) | the notice: a short message in one of three tones (info, warn, danger), with its icon and text, so colour is never the only signal. A close button is optional | 42 |
+| [`odds-button.tsx`](app/components/ui/odds-button.tsx) | the YES and NO buttons: the side's word on the left and its price in cents on the right, with aria-pressed for the selected side | 41 |
+| [`progress-bar.tsx`](app/components/ui/progress-bar.tsx) | the progress bar of the proof: a role=progressbar with its value, 6px on the proof and 3px on a card | 33 |
+| [`segmented.tsx`](app/components/ui/segmented.tsx) | the segmented control for filters: toggle buttons with aria-pressed, the pressed one on the pressed tokens | 43 |
+| [`skeleton.tsx`](app/components/ui/skeleton.tsx) | the loading block: a shimmering shape the size of the content it replaces. The shimmer stops when reduced motion is on | 19 |
+| [`split-bar.tsx`](app/components/ui/split-bar.tsx) | the pot as a bar: YES, then NO, then the prize as a neutral end cap that belongs to neither side, with a legend in text | 38 |
+| [`state-chip.tsx`](app/components/ui/state-chip.tsx) | the public state of a campaign as a chip: text and a dot, never colour alone (P1 §3.1). The states are the five of the public view, and contested | 42 |
+| [`tabs.tsx`](app/components/ui/tabs.tsx) | the category tabs: one active tab with a 2px accent underline, arrow keys move between them. Keeps role=tablist, aria-selected and roving focus | 62 |
+
+## `app/features/wallet/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`mwa-chain.test.ts`](app/features/wallet/mwa-chain.test.ts) | X2.1. The chain the wallet registers for (from the site's cluster setting) equals the chain for the cluster the read API reports in /api/v1/health. Registration | 54 |
+| [`register-mwa.ts`](app/features/wallet/register-mwa.ts) | the explicit Mobile Wallet Adapter registration (S1, proposal §3.4). Registers the MWA wallet once, for the chain of the site's cluster (never the RPC URL's), w | 46 |
+| [`use-sol-balance.ts`](app/features/wallet/use-sol-balance.ts) | the connected wallet's SOL balance in lamports, read from the site's connection. `null` while it loads or when nothing is connected. A failed read leaves `null` | 32 |
+| [`wallet-state.test.ts`](app/features/wallet/wallet-state.test.ts) | the wallet's view: disconnected, connected with a balance, no SOL (faucet on devnet only), the balance still loading, and the SOL formatting (four decimals, tru | 54 |
+| [`wallet-state.ts`](app/features/wallet/wallet-state.ts) | the wallet's view, as pure logic: disconnected; connected with its address and SOL balance; connected with no SOL, which offers the devnet faucet only on devnet | 36 |
 
 ## `app/lib/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
+| [`api-client.test.ts`](app/lib/api-client.test.ts) | the read API client with a fake fetch: the URLs and query it builds, the body on 200 and on health's 503, the named ApiError on other answers, the unreachable c | 89 |
+| [`api-client.ts`](app/lib/api-client.ts) | a read-only client for the read API (`services/api`, /api/v1): health, the campaign list and one campaign. Typed from the API's JSON; it imports no server code. | 117 |
 | [`brand.ts`](app/lib/brand.ts) | Product name and copy in one place. The name is provisional (see docs/product/DESIGN-DIRECTION.md): | 35 |
 | [`config.ts`](app/lib/config.ts) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 10 |
-| [`format.ts`](app/lib/format.ts) | Display formatting for base-unit amounts, prices and slot-based times. Framework-free | 74 |
-| [`history.ts`](app/lib/history.ts) | Price history and activity from the program's events: signatures for an address, the transactions, | 138 |
-| [`hooks.ts`](app/lib/hooks.ts) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 244 |
-| [`instructions.ts`](app/lib/instructions.ts) | Instruction builders with the exact account lists the program expects. The devnet smoke test | 234 |
-| [`market.ts`](app/lib/market.ts) | Framework-free client helpers for pred-provable: addresses, the program's integer math, event | 211 |
-| [`metric.ts`](app/lib/metric.ts) | Reads a market's KPI the way the program's resolver does (same owners, layouts and comparisons), | 691 |
-| [`program.ts`](app/lib/program.ts) | Synced from target/ by `bun run sync-idl` after `anchor build` | 19 |
-| [`tokens.ts`](app/lib/tokens.ts) | Token names from Metaplex metadata, so markets on real tokens read "$BONK" instead of an address | 47 |
-| [`view.ts`](app/lib/view.ts) | How the app reads a market account: kind, status, phase and price. Framework-free | 155 |
-
-## `app/lib/idl/`
-
-| Arquivo | Núcleo | Linhas |
-|---|---|---:|
-| [`pred_provable.ts`](app/lib/idl/pred_provable.ts) | Program IDL in camelCase format in order to be used in JS/TS | 3189 |
+| [`fonts.ts`](app/lib/fonts.ts) | the site's two fonts, served by the site itself: Barlow Condensed 700 for display and numbers, Inter 400, 500 and 600 for text. next/font downloads them at buil | 26 |
+| [`theme.ts`](app/lib/theme.ts) | the site's theme: the storage key, the script that sets data-theme before the first paint, and the reads and writes the theme button needs. Dark is the default  | 39 |
 
 ## `app/lib/mascot/`
 

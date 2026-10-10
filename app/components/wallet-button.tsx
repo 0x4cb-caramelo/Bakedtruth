@@ -1,24 +1,73 @@
+/**
+ * Purpose: the site's wallet control (Sprint 09, S1): "Use Installed Wallet" connects only from that click, through the
+ *          installed wallet the site registered (MWA on Android, or an installed browser wallet). Connected, it shows the
+ *          short address, the SOL balance, the faucet link when the wallet has no SOL on devnet, and Disconnect.
+ * Version: 0.1.0
+ * Sprint:  09 (site shell, theme and wallet)
+ */
 "use client";
 
-import dynamic from "next/dynamic";
+import { useEffect, useRef } from "react";
+import { WalletReadyState } from "@solana/wallet-adapter-base";
+import { useWallet } from "@solana/wallet-adapter-react";
 
-const LABELS = {
-  "change-wallet": "Change wallet",
-  connecting: "Connecting…",
-  "copy-address": "Copy address",
-  copied: "Copied",
-  disconnect: "Disconnect",
-  "has-wallet": "Connect",
-  "no-wallet": "Connect",
-} as const;
+import { CLUSTER } from "@/lib/config";
+import { useSolBalance } from "@/features/wallet/use-sol-balance";
+import { walletView, FAUCET_URL } from "@/features/wallet/wallet-state";
 
-// The wallet button reads window state, so it must not render on the server.
-export const WalletButton = dynamic(
-  async () => {
-    const { BaseWalletMultiButton } = await import("@solana/wallet-adapter-react-ui");
-    return function WalletButton() {
-      return <BaseWalletMultiButton labels={LABELS} />;
-    };
-  },
-  { ssr: false, loading: () => <div className="h-10 w-24 rounded-[0.625rem] bg-brand/40" /> },
-);
+export function WalletButton() {
+  const { wallets, wallet, select, connect, disconnect, connected, connecting, publicKey } = useWallet();
+  const wantConnect = useRef(false);
+  const lamports = useSolBalance();
+
+  // select() is asynchronous: connect once the chosen wallet is the selected one, never from the effect's own state.
+  useEffect(() => {
+    if (wantConnect.current && wallet && !connected && !connecting) {
+      wantConnect.current = false;
+      connect().catch(() => undefined);
+    }
+  }, [wallet, connected, connecting, connect]);
+
+  const installed = wallets.find((candidate) => candidate.readyState === WalletReadyState.Installed);
+  const useInstalled = () => {
+    if (!installed) return;
+    wantConnect.current = true;
+    select(installed.adapter.name);
+  };
+
+  if (!connected) {
+    return (
+      <button
+        type="button"
+        onClick={useInstalled}
+        disabled={!installed || connecting}
+        className="rounded border-2 border-line px-3 py-1 text-sm text-ink disabled:opacity-50"
+      >
+        {installed ? "Use Installed Wallet" : "No installed wallet found"}
+      </button>
+    );
+  }
+
+  const view = walletView({ address: publicKey?.toBase58() ?? null, lamports, cluster: CLUSTER });
+  if (view.kind !== "connected") return null;
+  return (
+    <div className="flex flex-wrap items-center gap-3 text-sm">
+      <span className="font-mono text-ink">{shorten(view.address)}</span>
+      <span className="text-dim">{view.sol === null ? "SOL …" : `${view.sol} SOL`}</span>
+      {view.noSol && view.faucetUrl && (
+        <a href={view.faucetUrl ?? FAUCET_URL} target="_blank" rel="noreferrer" className="text-brand underline">
+          Get devnet SOL
+        </a>
+      )}
+      <button
+        type="button"
+        onClick={() => void disconnect()}
+        className="rounded border-2 border-line px-3 py-1 text-ink"
+      >
+        Disconnect
+      </button>
+    </div>
+  );
+}
+
+const shorten = (address: string) => `${address.slice(0, 4)}…${address.slice(-4)}`;

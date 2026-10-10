@@ -1,38 +1,94 @@
 @import "tailwindcss";
+@import "../styles/tokens.css";
 
-/* Design tokens: direction C, "Tape" (docs/product/DESIGN-DIRECTION.md). Navy surfaces, hard 2px
-   edges and offset shadows, no rounded corners. Blue for chrome, crust amber for the brand and the
-   primary action, green and red only for YES and NO. */
+/* The light theme as a variant: light:bg-panel applies only when data-theme="light" is set on <html>. */
+@custom-variant light ([data-theme="light"] &);
+
+/* Tailwind names for the tokens of styles/tokens.css. Each is a reference, so one class serves both themes.
+   Components use these names only; no literal colour. */
 @theme {
-  --color-page: #0b111c;
-  --color-surface: #111a2a;
-  --color-raised: #18243a;
-  --color-line: #2a3a58;
-  --color-muted: #92a3c0;
-  --color-dim: #63748f;
-  --color-ink: #e8eefb;
-  --color-brand: #6aa8ff;
-  --color-brand-strong: #8bbcff;
-  --color-crust: #f2a94e;
-  --color-yes: #3ddc97;
-  --color-no: #ff6b8a;
-  --color-warn: #f2b33d;
-  --color-shade: #04070d;
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-field-line: var(--field-line);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-dim: var(--dim);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-cta-bg: var(--cta-bg);
+  --color-cta-hover: var(--cta-hover);
+  --color-crust: var(--crust);
+  --color-crust-ink: var(--crust-ink);
+  --color-warn: var(--warn);
+  --color-error: var(--error);
+  --color-yes-bg: var(--yes-bg);
+  --color-yes-fg: var(--yes-fg);
+  --color-no-bg: var(--no-bg);
+  --color-no-fg: var(--no-fg);
+  --color-track: var(--track);
+  --color-notice-bg: var(--notice-bg);
+  --color-danger-bg: var(--danger-bg);
+  --color-row-hover: var(--row-hover);
+  --color-pressed-bg: var(--pressed-bg);
+  --color-pressed-fg: var(--pressed-fg);
+  --color-st-open-bg: var(--st-open-bg);
+  --color-st-open-fg: var(--st-open-fg);
+  --color-st-closed-bg: var(--st-closed-bg);
+  --color-st-closed-fg: var(--st-closed-fg);
+  --color-st-review-bg: var(--st-review-bg);
+  --color-st-review-fg: var(--st-review-fg);
+  --color-st-paid-bg: var(--st-paid-bg);
+  --color-st-paid-fg: var(--st-paid-fg);
+  --color-st-void-bg: var(--st-void-bg);
+  --color-st-void-fg: var(--st-void-fg);
+  --color-k-price-bg: var(--k-price-bg);
+  --color-k-price-fg: var(--k-price-fg);
+  --color-k-burn-bg: var(--k-burn-bg);
+  --color-k-burn-fg: var(--k-burn-fg);
+  --color-k-lock-bg: var(--k-lock-bg);
+  --color-k-lock-fg: var(--k-lock-fg);
+  --color-k-pool-bg: var(--k-pool-bg);
+  --color-k-pool-fg: var(--k-pool-fg);
+  --color-k-stake-bg: var(--k-stake-bg);
+  --color-k-stake-fg: var(--k-stake-fg);
+  --color-yes-bar: var(--yes-bar);
+  --color-no-bar: var(--no-bar);
+  --color-prize-bar: var(--prize-bar);
+
+  /* Old direction-C names, kept as aliases until the old components are removed (Sprint 09). */
+  --color-page: var(--bg);
+  --color-surface: var(--panel);
+  --color-brand: var(--accent);
+  --color-brand-strong: var(--accent-soft);
+  --color-ink: var(--text);
+  --color-yes: var(--yes-fg);
+  --color-no: var(--no-fg);
 
   --radius-xs: 0px;
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-2xl: 0px;
-  --radius-3xl: 0px;
-  --radius-4xl: 0px;
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-lg);
+  --radius-2xl: var(--r-lg);
+  --radius-3xl: var(--r-lg);
+  --radius-4xl: var(--r-lg);
 
-  --shadow-hard: 4px 4px 0 var(--color-shade);
-  --shadow-hard-sm: 3px 3px 0 var(--color-shade);
+  --shadow-hard: none;
+  --shadow-hard-sm: none;
+
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-barlow), "Arial Narrow", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --animate-blink: blink 1s steps(2) infinite;
   --animate-tape: tape 70s linear infinite;
+  --animate-brot-spin: brot-spin 3.2s linear infinite;
+  --animate-shimmer: shimmer 1.4s linear infinite;
   @keyframes blink {
     50% {
       opacity: 0.25;
@@ -43,16 +99,16 @@
       transform: translateX(-50%);
     }
   }
-}
-
-@theme inline {
-  --font-sans: var(--font-grotesk);
-  --font-display: var(--font-jersey);
-  --font-mono: var(--font-geist-mono);
-}
-
-:root {
-  color-scheme: dark;
+  @keyframes shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+  @keyframes brot-spin {
+    to {
+      --spin: 360deg;
+    }
+  }
 }
 
 body {
@@ -73,7 +129,7 @@ html .wallet-adapter-button-trigger {
   border-radius: 0;
   padding: 0 1rem;
   background-color: var(--color-crust);
-  color: #1a0f02;
+  color: var(--say-fg);
   font-family: var(--font-jersey), system-ui, sans-serif;
   font-size: 1.25rem;
   font-weight: 400;
