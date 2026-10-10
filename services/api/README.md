@@ -11,16 +11,30 @@ every 15 s by default.
 | `/health`             | `status` (`starting`, `ok`, `stale`), `as_of_slot`, `taken_at`, `campaigns_total`, `last_refresh_error` (an error name, never a URL)                                                                                                                                                                                                                                                      |
 | `/campaigns`          | `campaigns` with `total`, `offset`, `limit`, `as_of_slot`, `chain_time`. Filters: `state` = `open`, `closed`, `in_review`, `paid`, `void`, `active` (open or closed), `resolved` (in review, paid or void); `limit` 1 to 100 (default 50); `offset`                                                                                                                                       |
 | `/campaigns/:address` | one campaign, or 404                                                                                                                                                                                                                                                                                                                                                                      |
-| `/leaderboard`        | devnet points (Sprint 13): `rows` (`rank`, `wallet`, `points`, `entered`, `decided`) of the wallets with points, with `total`, `offset`, `limit`, `complete`, `rule`, `both_sides_score`, `as_of_slot`, `chain_time`. `limit` 1 to 100 (default 50); `offset`. No `wallet` parameter: a page finds its own line, so no request ties a wallet to an IP. 503 until the history's first read |
+| `/leaderboard`        | devnet points (Sprint 13): `rows` (`rank`, `wallet`, `points`, `entered`) of the wallets with points, with `total`, `offset`, `limit`, `complete`, `rule`, `both_sides_score`, `as_of_slot`, `chain_time`. `limit` 1 to 100 (default 50); `offset`. No `wallet` parameter, and no success rate (the privacy review). 503 until the history's first read |
 
-Health also says `leaderboard_complete`: `null` with no history, `false` while transactions wait for a later refresh.
+Health also says `leaderboard_complete` (`null` with no history; `false` while transactions wait for a later refresh or
+after a failed one) and `leaderboard_skipped` (transactions that never read back after five tries).
 
 **The leaderboard's source (Sprint 13, until the indexer):** every signature of the program at `finalized`, paged back
 to the first, and each landed transaction read once and decoded by the SDK; only the events the points rule reads are
-kept, in memory. A refresh asks only for signatures newer than the last one read, and reads at most
-`API_HISTORY_PER_REFRESH` transactions (default 200), so a first start on a long history takes several refreshes. The
-rule is the SDK's `pointsTable`: 1 point per campaign entered on the side that won, once the result is final (the
-6-hour review ended without a contest, or the campaign settled). A restart reads the history again.
+kept, in memory, in the order the signatures were listed. It runs on its own loop, so it never holds the campaign
+snapshot, with a timeout on every call. A refresh asks only for signatures newer than the last one listed, remembers
+every signature it listed, and reads at most `API_HISTORY_PER_REFRESH` transactions (default 200); one that does not
+read back goes to the back of the queue and is skipped after five tries. A first start on a long history takes several
+refreshes. A restart reads the history again.
+
+The rule is the SDK's `pointsTable`: 1 point per campaign entered on the side that won, once the result is final (the
+6-hour review ended without a contest, or the campaign settled; a YES on a price campaign only once it settles, since
+its late entries are known then). Each `CampaignOpened` starts a new campaign at its address, since a closed
+campaign's id can be opened again.
+
+**Leaving the ranking** (the privacy review, TP §8.2). A wallet's owner asks on X. The team asks for a message signed
+by that wallet, for example `solana sign-offchain-message "Remove <address> from the Brot devnet leaderboard"`, and
+checks it with `solana verify-offchain-signature` before adding the address to the file named by
+`API_LEADERBOARD_HIDDEN`: a JSON array of base58 addresses, on the server, outside the repository, never committed and
+never served (a public list of who asked to leave would itself disclose them). The API reads it again on every refresh;
+a file that does not parse keeps the last good list. The chain itself cannot be changed; the ranking is Brot's view.
 
 Amounts are lamport strings, times Unix seconds, addresses base58. An unknown parameter or a bad value is a 400
 `{"error": {"code": "bad_query", "message": ...}}`. A request before the first snapshot is a 503.

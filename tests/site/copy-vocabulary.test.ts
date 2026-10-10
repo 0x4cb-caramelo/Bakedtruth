@@ -7,7 +7,8 @@
  *          the site never makes (a price, a return, a yield, an automatic payout, a time), checked in every source
  *          file of the site, and the BP-5 line held in exactly one copy entry.
  *          Filter: `bun test tests/ -t "copy uses the campaign vocabulary"`.
- * Version: 0.2.0 (Sprint 13: P1 §4.6, the promises, BP-5, the mascot's retired line)
+ * Version: 0.3.0 (Sprint 13: P1 §4.6, the promises, BP-5, the mascot's retired line; after the reviews, content/*.md
+ *          and the resolution post's template, and more ruled-out phrases)
  * Sprint:  11 (site: campaign page and entry); 13
  */
 import { describe, expect, test } from "bun:test";
@@ -20,6 +21,8 @@ const scan = (pattern: string) =>
 const FILES = [...scan("app/**/copy*.ts"), "app/lib/brand.ts"];
 /** Every source file of the site, its tests aside: a phrase ruled out is ruled out everywhere, not only in copy. */
 const SOURCES = [...scan("app/**/*.ts"), ...scan("app/**/*.tsx")].filter((f) => !f.endsWith(".test.ts"));
+/** Public text outside app/ (the copy and legal reviews): the content the site publishes and the resolution post. */
+const PUBLISHED = [...scan("content/**/*.md"), "scripts/team/resolution-post.template.txt"];
 
 /** The D6 copy row's old words, then their English equivalents (memory of 2026-10-08; the prototype's word list). */
 const FORBIDDEN: RegExp[] = [
@@ -74,6 +77,13 @@ const RULED_OUT: RegExp[] = [
   /\bprofits?\b/i,
   /\bAPY\b|\bAPR\b/,
   /\bpaid automatically\b/i,
+  /pago sozinho/i,
+  /\bpaid (out )?(by itself|on its own)\b/i,
+  /\bpays? as usual\b/i,
+  /\bwithin \d+ (hours?|minutes?)\b/i,
+  /\bfor a few minutes\b/i,
+  /\btraders?\b/i,
+  /\bhit rate\b/i,
 ];
 
 /** BP-5's recommendation (P-9, open): the line the founder may change, written once. */
@@ -84,7 +94,8 @@ const PRODUCT_WORDS = /\b(campaigns?|entry|entries|bakers?|creator|pot|YES|NO)\b
 describe("copy uses the campaign vocabulary", () => {
   test("the site has copy files, and none uses an old word", () => {
     expect(FILES.length).toBeGreaterThanOrEqual(8);
-    const hits = FILES.flatMap((file) => {
+    expect(PUBLISHED.length).toBeGreaterThanOrEqual(4);
+    const hits = [...FILES, ...PUBLISHED].flatMap((file) => {
       const text = readFileSync(file, "utf8").replace(/Brot Markets/g, "Brot");
       return FORBIDDEN.filter((word) => word.test(text)).map((word) => `${file}: ${word}`);
     });
@@ -98,7 +109,7 @@ describe("copy uses the campaign vocabulary", () => {
 
   test("no source file of the site says what P1 §4.6 replaces, or promises a return, a yield or a time", () => {
     expect(SOURCES.length).toBeGreaterThan(50);
-    const hits = SOURCES.flatMap((file) => {
+    const hits = [...SOURCES, ...PUBLISHED].flatMap((file) => {
       const text = readFileSync(file, "utf8");
       return RULED_OUT.filter((phrase) => phrase.test(text)).map((phrase) => `${file}: ${phrase}`);
     });

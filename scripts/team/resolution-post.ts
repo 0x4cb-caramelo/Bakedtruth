@@ -8,7 +8,8 @@
  *          link; the length as X counts it)
  * Sprint:  13 (site: ranking, notices and copy)
  *
- * Usage: bun run scripts/team/resolution-post.ts --campaign <id> [--site https://<the site>] --cluster devnet [--url ...]
+ * Usage: bun run scripts/team/resolution-post.ts --campaign <id> [--site https://<the site>] --cluster devnet
+ *        [--url ...]
  * Read-only: it signs nothing. `--site` adds the campaign page's link; without it the post links the explorer only.
  */
 import { readFileSync } from "node:fs";

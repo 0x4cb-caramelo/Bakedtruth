@@ -5,7 +5,7 @@
  *          as "You", when the chain was read, how points work, what the page keeps and sends, and how to leave the
  *          ranking. No column for the size of entries, what a wallet gained, or a success rate (the legal review).
  *          Loading, error and empty states; 50 rows at first, then "Show more".
- * Version: 0.2.0 (the Sprint 13 reviews: the hit rate removed; the leave line; "still reading" for You)
+ * Version: 0.2.0 (the Sprint 13 reviews: the success-rate column removed; the leave line; "still reading" for You)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 "use client";

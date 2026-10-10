@@ -1,7 +1,8 @@
 /**
  * Purpose: the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only),
- *          the port and host (loopback by default), the refresh interval, the CORS origin for the site, how many program
- *          transactions a refresh reads for the leaderboard, and the file of wallets left out of it (Sprint 13).
+ *          the port and host (loopback by default), the refresh interval, the CORS origin for the site, how many
+ *          program transactions a refresh reads for the leaderboard, and the file of wallets left out of it (Sprint
+ *          13).
  * Version: 0.2.0
  * Sprint:  08 (indexer and API, hackathon MVP)
  */

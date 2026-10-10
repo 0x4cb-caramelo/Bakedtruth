@@ -2,9 +2,9 @@
  * Purpose: every mandatory notice that holds on devnet (BR-47; P1 §4.6; TP §3.6 "Notices and copy"; Sprint 13 DoD),
  *          each with the screens that must show it and the component that draws it, so one test checks them all
  *          (tests/site/notices.test.ts) and the web smoke looks for them on the real pages. The words come from their
- *          copy files: this list adds none. P1 §4.6's "Pago sozinho, ao fim da janela de 6 horas" is not here: on
- *          devnet nothing pays out by itself yet, so the founder replaced it (2026-10-10) with the review rule and
- *          "Waiting for payout", which promise no time.
+ *          copy files: this list adds none. P1 §4.6's line on an automatic payout at the end of the 6-hour window is
+ *          not here: on devnet nothing pays out by itself yet, so the founder replaced it (2026-10-10) with the review
+ *          rule and "Waiting for payout", which promise no time.
  * Version: 0.2.0 (the Sprint 13 adversarial review: each notice names the screen that mounts it, never its copy file;
  *          the leaderboard's leave line)
  * Sprint:  13 (site: ranking, notices and copy)

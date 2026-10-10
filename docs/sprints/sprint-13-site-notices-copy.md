@@ -50,6 +50,36 @@
   smoke passed under Node (26 passed, 14 skipped by design) and again with the site built and served by Bun 1.4.2
   (`E2E_RUNTIME=bun`, `bun --bun next`): the X2.4 evidence on this machine. The server's own staging test (Sprint 09)
   stays deferred with the server work.
+- **The reviews (2026-10-10)**, saved in the session's scratchpad and summarised in the session log: copy (4 must, 15
+  should, 17 nits), legal-compliance (6 must, 8 before mainnet, 10 notes; a first draft for the lawyer, not a legal
+  opinion) and adversarial (nothing critical; 1 high, 7 medium). **Applied:**
+  - The fee page, How it works and the notice before signing now say the Economic Viability Rule (2026-10-09): a pot
+    splits only when its losing side can pay Brot's fee and the creator's 1%, otherwise every entry is refunded; the
+    bullet saying the creator's share can come from Brot's fee is gone (it cannot happen since that rule), and so is "no
+    other refunds" (an entry after a YES proof comes back whole).
+  - **The entry estimate:** in a paid campaign with 1 SOL on YES and 0.01 SOL on NO, the panel showed about 5 per 1
+    while finalize would refund 0.99. The SDK's `shownReturnBps` is what finalize would pay if entries closed now; the
+    panel, the review sheet and the cards show it, with a line when the other side is too small; the signed floor
+    stays the program's own estimate.
+  - The leaderboard: no success-rate column (a per-wallet rate is a profile, and a wallet on both sides showed 100%);
+    the page says what it keeps and how to leave the ranking, and the API applies a hide list kept on the server; a YES
+    price result counts only once settling (its late joins are tallied then); each opening of a reused campaign id
+    counts apart; events are kept in chain order, not by slot; the history reads on its own loop with timeouts, never
+    reads a transaction twice, skips one that never reads back after five tries, and says it is incomplete after a
+    failed listing; the table is computed once per change.
+  - "Pays as usual" is gone from the report link; an unlisting names one opening of a campaign id; a content file that
+    cannot be read no longer takes a campaign page down.
+  - The powers table names the discretion that moves money (the cause a team key records for an automatic void decides
+    who keeps the 10% opening fee), the ceilings, what is a team rule rather than a code limit, and the plan for mainnet
+    as a plan; a test maps every instruction of the program to a row.
+  - The resolution post explains a price NO and a target met late, carries one link, puts the devnet line before it,
+    fits 280 characters with a 20-digit id, and the script counts as X does.
+  - The labels "Open a campaign" and "Public record", the not-audited notice links to the record, the footer carries
+    BRAND.md's "nothing here is an offer", and the notices list names the screens that mount each notice.
+  - CI runs the site's own tests now (`bun run test` is `bun test tests/ app/`): the X2.1 test never ran in CI before.
+  **Deferred**, each with its reason and sprint: TP §7.4. **Found outside the sprint:** entering both sides of a paid
+  campaign nobody else joins takes its prize at no risk (TP §13, a founder question); brot.markets' live `/terms` and
+  `/privacy` (approved 2026-10-08) still describe USDC, automatic payouts within 55 hours and other team powers.
 
 | | |
 |---|---|
@@ -67,8 +97,9 @@ the site with both services on. The exit criteria X2 are met here.
 
 - [x] The leaderboard shows the points of `/api/v1/leaderboard`: 1 point per campaign entered on the right side (TP
       v0.0.1 Q7, answered a). It has no volume or profit column. **Done** (`/leaderboard`; the route in `services/api`;
-      `tests/sdk/points.test.ts`, `tests/api/leaderboard.test.ts`, the web smoke). Live on devnet once the founder
-      redeploys the read API. Open: whether a wallet on both sides scores (founder question 3).
+      `tests/sdk/points.test.ts`, `tests/api/leaderboard.test.ts`, `services/api/tests/`, the web smoke). No success
+      rate either (the legal review). Live on devnet once the founder redeploys the read API, after the conditions of
+      TP §8.2. Open: which edge cases score (founder question 3).
 - [x] **The fee page (BR-32):** a worked example net of the fee and the creator share, using P1 §1.2's case (600 on
       YES, 400 on NO: fee 40, creator 10, winners 950, 1.583 per 1; with the 450 prize, 1,400 and 2.333 per 1); the
       one-sided 1%; the opening's 90/10; the refund policy. **Done** at `/fees`, in SOL (the case divided by 100);
@@ -148,11 +179,15 @@ changes one string or one constant.
    `/api/v1/leaderboard` route in the read API from the program's events, **built**; (b) the browser reading the chain;
    (c) wait for Sprint 08. It goes live when the founder redeploys the read API.
 2. **L-09** (Product Brief v0.0.1 gap): what the screen says points are worth after devnet. Recommended and built:
-   "Points are a devnet game. They are not money, and nothing is promised for them after the beta."
-   (`POINTS_WORTH`, `app/features/leaderboard/copy.ts`).
-3. **A wallet with entries on both sides** (found while building): Q7 read literally scores it, so 0.01 SOL on both
-   sides of every campaign tops the board. Recommended: no point when a wallet entered both sides. Built as Q7 says;
-   `BOTH_SIDES_SCORE` in `packages/sdk/src/read/points.ts` switches it.
+   "Points only count on devnet. They are not money, and nothing is promised for them after the test phase."
+   (`POINTS_WORTH`, `app/features/leaderboard/copy.ts`; "game" dropped after the legal review). If the answer is
+   "never", say so plainly; if points may ever be worth something, the lawyer reads it first.
+3. **What scores** (found while building; the adversarial review ranks it high): Q7 read literally scores a wallet with
+   entries on both sides, so 0.01 SOL on both sides of every campaign tops the board; one-sided pots and pots too small
+   to split score too; and a creator's other wallets can score on a burn it forces. Recommended: no point for a wallet
+   on both sides, and none in a pot that is refunded. Built as Q7 says; `BOTH_SIDES_SCORE` in
+   `packages/sdk/src/read/points.ts` switches the first; answer before the API redeploy, since a later change rewrites
+   every rank.
 4. **L-24** (Product Brief v0.0.1 gap): the partner report's format, and what happens to a partner who does not post.
    Recommended: one text file per partner campaign with its result, entries and distinct wallets per side, SOL per
    side and whether it ended one-sided, never an address; a partner who does not post keeps its campaign (it is
@@ -165,9 +200,20 @@ changes one string or one constant.
    2 keep v0.0.2's (fewer than 10% of wallets back within 30 days is a bad sign, 20% to 35% is reasonable; more than
    40% of pots one-sided is a bad sign); test 3 is measured on devnet without a pass mark, and gets its threshold
    before mainnet, since paying with test SOL proves nothing (P2 §2.5). Nothing in the code depends on it.
-8. **From the privacy review** (TP §8.2): whether a wallet's owner may leave the public ranking (recommended: a hide
-   list like the unlisted one, written into the privacy policy of Sprint 17), and who holds the X account's login and
-   with which second factor.
+8. **From the privacy review** (TP §8.2): who holds the X account's login and with which second factor. The way to
+   leave the ranking is built (a signed request and a hide list on the server).
+9. **The live legal pages** (found by the legal review): brot.markets' `/terms` and `/privacy`, approved 2026-10-08,
+   still describe USDC, automatic payouts with a 55-hour worst case, team powers that differ from `/record`, "No
+   profiles" and the deletion of Brot's copy of a wallet's activity; the new site's footer links no privacy page.
+   Recommended: take `/terms` down until Sprint 17, correct `/privacy` (keeping the waitlist's deletion form), and link
+   it from the site's footer before the site is public. Deploying the landing is the founder's.
+10. **The success-rate column** (the approved prototype had it): dropped as a profile, after the legal review.
+    Recommended: keep it dropped.
+11. **"Your entry back plus your share of the rest"** (P1 §4.6's approved line) now says "when the losing side can pay
+    the fees": re-approve the qualified wording.
+12. **Prize harvesting** (found by the adversarial review, outside this sprint's code): one wallet entering both sides
+    of a paid campaign nobody else joins takes its prize at no risk (TP §13). Recommended: decide the rule before
+    mainnet (for example, a prize that pays out only in proportion to the losing side); nothing changes on devnet.
 
 - **Answered:** TP v0.0.1 Q7 (a: 1 point per campaign entered on the right side, for devnet); the payout wording on
   devnet (Sprint 12: "Waiting for payout", no time promised; the L-03 devnet wording; the "Result final" chip).

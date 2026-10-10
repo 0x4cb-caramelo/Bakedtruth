@@ -1252,10 +1252,12 @@ notice of §3.6 on burn, lock and stake campaigns.
 wallets can inflate the ranking; the brake is how much test SOL a wallet can get from the devnet faucet **[AC]**. The
 Seeker Genesis Token is an optional extra signal, not in the MVP (§3.7). **Built in Sprint 13 [F]:** the rule is the
 SDK's `pointsTable` (`packages/sdk/src/read/points.ts`): a point once the result is final (settling or settled, or the
-6-hour window ended without a contest, since the program refuses every team act from `review_ends_at` on); a void
-scores nothing; a join tallied as late never scores; a wallet with entries on both sides scores when either wins (Q7
-read literally; `BOTH_SIDES_SCORE`, a founder question). Until the indexer, `services/api` reads the program's own
-history in memory for it (`/api/v1/leaderboard`, §6).
+6-hour window ended without a contest, since the program refuses every team act from `review_ends_at` on; a YES on a
+price campaign only once settling, when its late joins are tallied); a void scores nothing; a join tallied as late never
+scores; each `CampaignOpened` starts a new campaign at its address, since a closed campaign's id can be opened again; a
+wallet with entries on both sides scores when either wins (Q7 read literally; `BOTH_SIDES_SCORE`, a founder question).
+Until the indexer, `services/api` reads the program's own history in memory for it (`/api/v1/leaderboard`, §6); wallets
+whose owner asked to leave the ranking are dropped before ranking (§8.2).
 
 *Display price* (D-e, D-f) **[FD]**. The indexer fetches CoinGecko `simple/price` for SOL in US$ every few minutes,
 server-side, and serves it at `/api/v1/price` with its source and time; Pyth SOL/USD is the fallback. It is for
@@ -1851,7 +1853,7 @@ exposes only `GET /healthz` and `POST /restart` (TP v0.0.1 §5, §12) **[DP]**.
 | `GET /api/v1/campaigns/:id/chance` | The history of the YES/NO split | 08 |
 | `GET /api/v1/activity` | Recent activity across campaigns (X1.4) | 08 |
 | `GET /api/v1/wallets/:address/entries` | One wallet's entries, results and payouts ("my entries"). Not built yet: Sprint 12's page reads the chain meanwhile | 08 |
-| `GET /api/v1/leaderboard` | Devnet points. **Built in Sprint 13 [F]** in `services/api` from the program's own history (`history.ts`, in memory, incremental by `until`) and the live accounts, until the indexer takes it over; paged; it takes no wallet parameter (§8.2) | 08; 13 |
+| `GET /api/v1/leaderboard` | Devnet points. **Built in Sprint 13 [F]** in `services/api` from the program's own history (`history.ts`: in memory, on its own loop, incremental by `until`, every call with a timeout) and the live accounts, until the indexer takes it over; paged; each row is a rank, a wallet, its points and the campaigns it entered; it takes no wallet parameter and drops the wallets on the hide list (§8.2) | 08; 13 |
 | `GET /api/v1/names` | Display names from `content/account-names.json` and the pinned Pyth feed list | 08 |
 | `GET /api/v1/price` | SOL in US$, with source and time | 08 |
 | `GET /api/v1/health` | `program_last_deploy_slot`, `schema_version`, `cluster`, `entries_allowed` | 08 |
@@ -1964,6 +1966,25 @@ share paid by `close_campaign` missing from "received", a refresh that could ski
 | A wallet that adds its own priority fee needs a little more than `claimFloor`; the copy says so | The claim fails without cost and is retried | None |
 | A wallet's address reaches the RPC operator through `getSignaturesForAddress` (the public devnet RPC now) | The operator can link the address to the visitor's IP; the relay must not log request parameters | 08 (the relay) |
 
+### 7.4 Deferred in Sprint 13
+
+The copy, legal and adversarial reviews of Sprint 13 (2026-10-10) found no critical issue in the sprint's own code;
+what they found was fixed in the sprint (`docs/sprints/sprint-13-site-notices-copy.md`, record). Deferred on purpose:
+
+| Finding | Risk while open | Sprint |
+|---|---|---|
+| The web smoke is not in CI (CI runs `bun run test`, which since Sprint 13 includes the site's own tests); the smoke runs locally, under Node and under Bun | A notice moved off its screen is caught only by a local run | 16 (add the smoke to CI with the program's artifact) |
+| A wallet entering both sides of every campaign scores every decided one (Q7 read literally, `BOTH_SIDES_SCORE`); one-sided and too-small pots score; a creator's other wallets can score on a burn it forces | The devnet leaderboard rewards entering everything; changing the rule after launch rewrites every rank | Founder question 3, before the API redeploy |
+| Anyone can send cheap transactions that name the program's address; each landed one is read by the history | Above about 13 a second, the leaderboard's history falls behind; on a paid RPC each costs credits | 08 (the indexer, with its own source) |
+| Health says "ok" while the snapshot is old, if a snapshot call hangs (it has no timeout; the history's calls do) | The home list freezes while entries stay open | 08 |
+| A closed campaign's id can be opened again (close returns the account to the System Program); the points, the unlisted list and the resolution post's link handle it, the program does not | A post's `/c/<id>` link can later show another campaign | 16 (a tombstone in `close_campaign`, with the audit scope) |
+| Whoever resolves a YES price campaign first picks the proof that sets the late-join cut-off, and a partial tally does not lock it | Payouts on a contested touch depend on who acted first | 16–17 (audit scope) |
+| The program's `min_return_bps` check uses the split formula even when the pot would not split; the site now shows the refund (`shownReturnBps`) | A floor that never binds in a lopsided pot | 16–17 (audit scope; a program change) |
+| "You" past the first 1,000 ranked wallets says only that the wallet is not among them | A wallet ranked past 1,000 cannot see its rank | 08 (a histogram from the indexer) |
+| `script-src 'unsafe-inline'` (§7.2) | As §7.2 | 16 |
+| The two-person review of `content/` is a team rule (no CODEOWNERS) | One person can publish a void note or an unlisting | 16 |
+| Once contests exist, the history would score a closed contested campaign by its first outcome (`CampaignFinalized` carries none) | Wrong points for contested campaigns | 14 (with the contest's events) |
+
 ## 8. Privacy and compliance baseline
 
 Joining or opening a campaign collects no personal data, and the KPIs are computed without it (K-04) **[FD]** (TP
@@ -2057,15 +2078,15 @@ to a channel. Cloudflare's part is C13, read from Cloudflare's own pages
 
 | Question | The leaderboard (`/leaderboard`, `/api/v1/leaderboard`) | "Report this campaign" (C-10) |
 |---|---|---|
-| 1. What data | Public wallet addresses, each with its points, the campaigns it entered and those decided. No amount, no name. The API holds in memory the program's events it needs (entries with their baker and amount, results) | Whatever a person writes to Brot on X: their X account and their words. The site sends nothing: a plain link, `rel="noopener noreferrer"`, so not even the page's address goes to X |
-| 2. Why | BR-29: the devnet beta's points (P2 §2.5, test 1) | C-10: abuse reports; the remedy is unlisting from the home page |
-| 3. Where | On-chain, public and permanent; a copy in the API's memory, never on disk; the visitor's browser while the page is open | On X, under X's terms. The site keeps only `content/unlisted.json`: a campaign's number, a public reason and a time, in Git |
+| 1. What data | Public wallet addresses, each with its points and the campaigns it entered. No amount, no name, no success rate (the legal review: a per-wallet rate is a profile). The API holds in memory the program's events it needs (entries with their baker and amount, results). Public personal data stays personal data (the legal review, LGPD art. 7 §3–§4: to confirm with the lawyer) | Whatever a person writes to Brot on X: their X account and their words. The site sends nothing: a plain link, `rel="noopener noreferrer"`, so not even the page's address goes to X |
+| 2. Why, and on what basis | BR-29: the devnet beta's points (P2 §2.5, test 1). The legal basis is the lawyer's (L0): legitimate interest is the working reading **[Q]** | C-10: abuse reports; the remedy is unlisting from the home page |
+| 3. Where | On-chain, public and permanent; a copy in the API's memory, never on disk; the visitor's browser while the page is open | On X, under X's terms. The site keeps only `content/unlisted.json`: a campaign's number and opening time, a public reason and a time, in Git |
 | 4. Who can access | Anyone | On X, the people who hold the Brot account's login **[AC: who, and with which second factor]**; `content/unlisted.json`, anyone |
-| 5. Control | None needed for public data. The request carries no wallet: the page reads the ranked list and finds the connected wallet's line itself, so no request ties a wallet to an IP address | X's own account controls. A reason that names a person (an email, a handle, a URL, a domain) fails the site's build (`personalDataIn`) |
+| 5. Control | The request to Brot's API carries no wallet: the page reads the ranked list and finds the connected wallet's line itself. The browser's own RPC reads (the balance, "My entries") do carry the wallet to the RPC provider, with the visitor's IP (§7.3) | X's own account controls. A reason that names a person (an email, a handle, a URL, a domain) fails the site's build (`personalDataIn`) |
 | 6. Retention | On-chain, forever; the API's copy until it restarts | X's retention; the unlisted list as long as Git keeps it, which is why it may hold no personal data |
-| 7. Logs | The API logs counts and an error's name only: never a wallet, an IP or a query. Cloudflare sees each request's IP and address, kept under Cloudflare's policy with no period written (C13); the address never holds a wallet | None by Brot. X logs under X's policy |
-| 8. Deletion and export | The chain cannot be changed; the ranking is a view of it. A wallet's owner who asks to leave the ranking has no switch today **[Q]**: a hide list like the unlisted one is the proposal, for the privacy policy of Sprint 17 | Deleted on X by whoever wrote it. Nothing personal is kept by Brot |
-| 9. Document or consent | The page says addresses are public and nothing about the visitor is stored; the review sheet says entries are public and permanent before a first entry. The privacy policy (L-21, C-08, Sprint 17) must name the ranking | The policy of Sprint 17 names X as the channel, as the waitlist's privacy page already does |
+| 7. Logs | The API logs counts and an error's name only: never a wallet, an IP or a query. Cloudflare sees each request's IP and address, kept under Cloudflare's policy with no period written (C13); the address never holds a wallet. Once a company exists, Marco Civil art. 15 may require access logs (C-14, the lawyer's) | None by Brot. X logs under X's policy |
+| 8. Deletion and export | The chain cannot be changed; the ranking is Brot's view of it. **A wallet's owner can leave it:** the request comes on X, the wallet signs a message to prove it, and the team adds the address to a hide list on the server (`API_LEADERBOARD_HIDDEN`, never public, applied before ranking; `services/api/README.md`) | Deleted on X by whoever wrote it. Nothing personal is kept by Brot |
+| 9. Document or consent | The page says what it keeps (in memory, never on disk), that no wallet is sent to Brot, who runs the ranking and how to leave it; the review sheet says, before a first entry, that entries are public and permanent and that a wallet that scores appears on the leaderboard. The privacy policy (L-21, C-08, Sprint 17) must name the ranking | The policy of Sprint 17 names X as the channel, as the waitlist's privacy page already does |
 
 **Cloudflare (C13), what was read.** Every request to the site and to the API through the tunnel passes Cloudflare
 with the visitor's IP address and the address requested; Cloudflare shows these to the account as "Customer Logs",
@@ -2073,8 +2094,16 @@ acts as processor, and writes no retention period for them; Logpush is now offer
 the free plan. Whether any log export is switched on, and how long the dashboard keeps requests, can only be read in
 the dashboard **[AC]**, the founder's. Browser RPC calls go to the RPC provider directly, not through Cloudflare (§7.3).
 
-**Verdicts.** Leaderboard: PASS_WITH_NOTES (the leave-the-ranking path, question 8). Report channel: PASS_WITH_NOTES
-(who holds the X account, question 4). Nothing blocks the merge; the two notes are founder items.
+**The live legal pages (found by the legal review).** `brot.markets/terms` and `/privacy` (from `docs/legal/`,
+approved 2026-10-08, not reviewed by a lawyer) still describe the USDC product, say "Payouts are automatic" with a
+55-hour worst case, list team powers that differ from `content/powers.md`, and promise "No profiles" and the deletion of
+Brot's copy of a wallet's activity. The new site's footer links no privacy page. **[Q]** before the new site is public:
+take `/terms` down until Sprint 17 or correct it, correct `/privacy` (keeping the waitlist's deletion form), and link
+it from every page's footer.
+
+**Verdicts.** Leaderboard: PASS with conditions before it goes public (the API redeploy): the live `/privacy` corrected
+and linked from the site, and who holds the X login recorded. Report channel: PASS with the same X-login condition.
+Nothing blocks the merge; the conditions are founder items.
 
 ## 9. Testing strategy
 
@@ -2318,6 +2347,7 @@ The business risks are in P4 §7. These are the plan's. Severities marked "(P4 �
 | Supply chain: the npm mirror, a compromised package | Medium | npmjs.org (T15); exact pins; the install-script block | Rotate and rebuild |
 | The shared server | Medium | Per-unit limits; nothing installed system-wide; notice to the other side | Stop the `brot-*` units; the standby continues |
 | The SOL price falls between receiving and paying costs | High (P4 §7) | Monthly conversion of what costs need (P-7, open) | The same revenue pays less |
+| Entering both sides takes a paid campaign's prize at no risk: one wallet with 0.01 SOL on each side of a campaign nobody else joins splits a viable pot and gets the whole prize back, for about 0.0012 SOL in fees (found by the Sprint 13 adversarial review; earlier reviews called it "colheita de prêmio") | High (mainnet economics) **[INF]** | Nothing in the program today; options for the founder: pay the prize only in proportion to the losing side, or cap what the prize adds per winner | The opener's US$450 goes to a hedger instead of back to the opener **[Q]** |
 | A credit below rent to an empty wallet | Low | The 0.01 SOL minimum entry (P-5); the reserve path; the daily retry | It stays reserved in the vault; the recipient can claim it from a funded wallet |
 | SOL/USD stale at opening time | Low | `max_price_age`; an alert | Paid openings wait; team keys still open |
 

@@ -4,8 +4,8 @@
  *          losing side is larger than Brot's fee plus the creator's share (the Economic Viability Rule, 2026-10-09,
  *          `splitIsViable`); otherwise every entry is refunded as a one-sided pot. `estimateReturnBps`, which the
  *          program checks `min_return_bps` against, applies the split formula whenever the other side holds anything,
- *          so in a lopsided pot it can show several times what finalize would refund. Display only: a join's floor stays
- *          on `estimateReturnBps`, as the program computes it.
+ *          so in a lopsided pot it can show several times what finalize would refund. Display only: a join's floor
+ *          stays on `estimateReturnBps`, as the program computes it.
  * Version: 0.1.0
  * Sprint:  13 (site: ranking, notices and copy)
  */

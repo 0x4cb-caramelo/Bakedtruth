@@ -297,7 +297,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`copy.ts`](app/features/report/copy.ts) | the words of "Report this campaign" (C-10; Sprint 13; D-m vocabulary; English per L-01): where a report goes, what the team can do about it (unlist the campaign | 23 |
+| [`copy.ts`](app/features/report/copy.ts) | the words of "Report this campaign" (C-10; Sprint 13; D-m vocabulary; English per L-01): where a report goes, what the team can do about it (unlist the campaign | 25 |
 | [`report-campaign.tsx`](app/features/report/report-campaign.tsx) | "Report this campaign" on every campaign page (C-10, Sprint 13 DoD), in every state: a plain link to where reports go (no X script, widget or API, K-10), what t | 34 |
 | [`unlisted.ts`](app/features/report/unlisted.ts) | the campaigns the team unlisted after a report (C-10; proposal §2.7), read on the server from content/unlisted.json: a list of `{ "id": "<the campaign's u64 id> | 48 |
 
@@ -993,7 +993,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`open.ts`](scripts/team/open.ts) | `user_open_campaign` with your own TEAM key, free (`opening_usd` 0): for the team or a launch partner, with no prize and no creator share (P-3; TP §3.4.10). Out | 92 |
 | [`pause.ts`](scripts/team/pause.ts) | `team_pause_entries` with your own team key: stops joins and openings at once, never payouts or refunds (TP §3.4.9). One team key is enough, to be fast; only th | 21 |
 | [`rehearse.ts`](scripts/team/rehearse.ts) | rehearse every team script on a local offline surfnet, inside a loopback-only network namespace: the admin sets the team and the creation parameters; a team key | 180 |
-| [`resolution-post.ts`](scripts/team/resolution-post.ts) | the text of a resolution post (BR-33; TP §3.6 "The share card"; Sprint 13 DoD), written from scripts/team/resolution-post.template.txt for a person to post on X | 135 |
+| [`resolution-post.ts`](scripts/team/resolution-post.ts) | the text of a resolution post (BR-33; TP §3.6 "The share card"; Sprint 13 DoD), written from scripts/team/resolution-post.template.txt for a person to post on X | 136 |
 | [`resume.ts`](scripts/team/resume.ts) | `admin_resume_entries` with the admin's key: ends a pause (`EntriesHalted` to `Normal`). The admin's act, not a team key's (TP §3.4.9); on mainnet it is the 2-o | 21 |
 | [`set-params.ts`](scripts/team/set-params.ts) | `admin_set_creation_params` with the admin's key: the new parameters from a reviewed JSON file (the format of deploy/devnet/init-params.json), each change shown | 43 |
 | [`set-team.ts`](scripts/team/set-team.ts) | `admin_set_team` with the admin's key: up to five team keys, one per person (Q12; Lucas, Ronaldo and Bernardo, founder answer 6, 2026-10-09), shown against the  | 35 |
@@ -1037,7 +1037,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`config.ts`](services/api/src/config.ts) | the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only), the port and host (loopback by default), the refresh i | 60 |
+| [`config.ts`](services/api/src/config.ts) | the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only), the port and host (loopback by default), the refresh i | 61 |
 | [`dto.ts`](services/api/src/dto.ts) | the JSON shape of a campaign for the site. Amounts are lamport strings, addresses base58, times Unix seconds (strings for the big integers). The state is the SD | 58 |
 | [`hidden.ts`](services/api/src/hidden.ts) | the wallets left out of the public leaderboard at their owner's request (Sprint 13, the privacy review, TP §8.2 question 8): a JSON array of base58 addresses in | 61 |
 | [`history.ts`](services/api/src/history.ts) | the program's own history, read for the leaderboard (Sprint 13) until Sprint 08's indexer exists: every signature of the program through `getSignaturesForAddres | 152 |
@@ -1385,7 +1385,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`amount.test.ts`](tests/site/amount.test.ts) | the amount a baker types becomes lamports exactly (no floating point), with a dot or a comma and at most nine decimals; anything else is refused, never guessed. | 54 |
 | [`campaign-load.test.ts`](tests/site/campaign-load.test.ts) | what the campaign page reads through the RPC, against the program in LiteSVM: the campaign at the route's u64 id (nothing at an unknown one), its public state a | 101 |
 | [`campaign-proof.test.ts`](tests/site/campaign-proof.test.ts) | the campaign page's proof (BR-23) for each kind, from the program's own campaign accounts and real captured bytes of the accounts they read: the value read now  | 120 |
-| [`copy-vocabulary.test.ts`](tests/site/copy-vocabulary.test.ts) | the site's words follow D-m (campaign, entry, baker, creator, pot, YES/NO) and never the D6 table's old copy (proposal 0.4 §5.2: "mercado", "aposta", "apostar", | 132 |
+| [`copy-vocabulary.test.ts`](tests/site/copy-vocabulary.test.ts) | the site's words follow D-m (campaign, entry, baker, creator, pot, YES/NO) and never the D6 table's old copy (proposal 0.4 §5.2: "mercado", "aposta", "apostar", | 143 |
 | [`cycle-run.ts`](tests/site/cycle-run.ts) | one campaign's life run end to end through the recording RPC (cycle.ts), stopping where a test needs it: in review (just resolved), settling (finalized, nothing | 97 |
 | [`cycle.ts`](tests/site/cycle.ts) | a campaign's whole life driven through the site tests' recording RPC (fake-chain.ts), so every transaction is in the RPC's history and a wallet's page can read  | 192 |
 | [`entry-estimate.test.ts`](tests/site/entry-estimate.test.ts) | the entry panel's estimate is the SDK's (BR-09; P1 §3.2): the number `checkJoin` gives for the pot with the baker's own amount added, which is the number `prepa | 144 |

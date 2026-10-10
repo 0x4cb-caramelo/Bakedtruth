@@ -56,6 +56,17 @@ dessa tag, na branch `sprint-13-site-notices-copy`.
     de resolução; e o cenário "site pages and notices" no smoke web, que passou inteiro com o site no Node e no Bun 1.4.2.
 - **A revisão de privacidade do ranking e do canal de denúncia** (gate 5; plano técnico, §8.2), com o que o Cloudflare
   registra de quem visita, lido nas páginas do Cloudflare (`knowledge-base/tecnologia/cloudflare-logs-visitantes.md`).
+- **As revisões da Sprint 13 aplicadas** (texto, jurídica e adversarial; nenhum achado crítico): a regra de
+  viabilidade na página de taxas, em "How it works" e no aviso antes de assinar; a estimativa do painel, da folha de
+  revisão e dos cartões passou a mostrar o que o programa pagaria (num pote pago com 1 SOL no SIM e 0,01 no NÃO, a tela
+  mostrava cerca de 5 por 1; o programa devolveria 0,99); o ranking sem taxa de acerto, com o caminho para sair dele
+  (pedido no X, mensagem assinada, lista no servidor); os pontos sem os furos do SIM de preço antes do tally, do id de
+  campanha reaberto e da ordem dentro do slot; o leitor do histórico em laço próprio e com prazo; a tabela de poderes
+  com a causa da anulação e os tetos; o post de resolução que cabe em 280 com id real; e o CI rodando os testes do
+  próprio site. O que ficou para depois está no plano técnico, §7.4.
+- **Para o fundador, achados fora da sprint:** as páginas `/terms` e `/privacy` no ar ainda falam em USDC e pagamento
+  automático em até 55 horas; e entrar nos dois lados de uma campanha paga em que ninguém mais entra leva o prêmio sem
+  risco (plano técnico, §13).
 
 - **Sprint 12: minhas entradas e os estados da campanha** (branch `sprint-12-site-my-entries-states`, 10/10/2026;
   `docs/sprints/sprint-12-site-my-entries-states.md`). A página `/c/[id]` mostra cada estado público: entradas
