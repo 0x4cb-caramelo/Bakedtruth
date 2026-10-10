@@ -12,7 +12,12 @@
 import { describe, expect, test } from "bun:test";
 import { AccountRole, generateKeyPairSigner, getBase58Decoder, getBase58Encoder, type Instruction } from "@solana/kit";
 
-import { decodeTransactionEvents, uniqueEvents, type RpcTransaction } from "@brot/sdk/read";
+import {
+  decodeTransactionEvents,
+  uniqueEvents,
+  type RpcCompiledInstruction,
+  type RpcTransaction,
+} from "@brot/sdk/read";
 
 import { initConfig, newId, openPriceCampaign } from "../brot/flows";
 import * as I from "../brot/instructions";
@@ -97,7 +102,8 @@ describe("decoder rejects foreign, failed and duplicate events", () => {
     expect(sent.ok).toBe(false);
     expect(sent.logs.join("\n")).toContain(`custom program error: 0x${(6016).toString(16)}`);
     expect(decodeTransactionEvents(sent.tx)).toEqual([]);
-    const ix = tx.meta!.innerInstructions![0].instructions[decodeTransactionEvents(tx)[0].key.innerIndex];
+    const inner = tx.meta!.innerInstructions![0].instructions;
+    const ix = inner[decodeTransactionEvents(tx)[0].key.innerIndex] as RpcCompiledInstruction;
     const keys = tx.transaction.message.accountKeys;
     const other = keys.indexOf(P.SYSTEM_PROGRAM_ID);
     const notAuthority = keys.indexOf(P.BTC_USD_ACCOUNT);

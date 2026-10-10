@@ -6,7 +6,7 @@
  * Sprint:  05 (SDK)
  *
  * The IDL carries each event as a type but not its discriminator, so the table below is written by
- * hand; tests/sdk/events.test.ts reads every `impl Event for X { const DISCRIMINATOR: u8 = n }` in
+ * hand; tests/sdk/contract-events.test.ts reads every `impl Event for X { const DISCRIMINATOR: u8 = n }` in
  * the program's source and compares, and checks each decoder's size against the Rust `zero_copy!`.
  * Discriminators are positional in the program: appended, never reused.
  */
@@ -69,6 +69,9 @@ export const EVENTS: readonly Entry<EventName>[] = [
 ];
 
 const BY_DISCRIMINATOR: ReadonlyMap<number, Entry<EventName>> = new Map(EVENTS.map((e) => [e.discriminator, e]));
+
+/** The largest event's inner-instruction data, tag and discriminator included. */
+export const MAX_EVENT_DATA = 2 + Math.max(...EVENTS.map((e) => e.decoder.fixedSize));
 
 /**
  * The event in an inner instruction's data: `[0xFF, discriminator, payload]`, the payload exactly the

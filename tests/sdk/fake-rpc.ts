@@ -10,7 +10,7 @@ import { getBase64Decoder, type Address } from "@solana/kit";
 
 import { accountKeysOf, type RpcTransaction } from "@brot/sdk/read";
 import type { World } from "../brot/setup";
-import { simulationHandlers } from "./fake-simulate";
+import { simulationHandlers, type InnerShape } from "./fake-simulate";
 
 /** JSON with bigints written as bare integers (what Kit's bigint-aware parser expects of a node). */
 function stringify(value: unknown): string {
@@ -20,8 +20,11 @@ function stringify(value: unknown): string {
 
 export type FakeRpc = { url: string; record(tx: RpcTransaction): void; close(): void };
 
-/** Starts the endpoint; `record` adds a transaction for `getSignaturesForAddress` and `getTransaction`. */
-export function startFakeRpc(w: World): FakeRpc {
+/**
+ * Starts the endpoint; `record` adds a transaction for `getSignaturesForAddress` and `getTransaction`.
+ * `innerShape` is how the simulation writes inner instructions: as a node does (default), or compiled.
+ */
+export function startFakeRpc(w: World, innerShape: InnerShape = "node"): FakeRpc {
   const recorded: RpcTransaction[] = [];
   const account = (at: Address) => {
     const a = w.client.svm.getAccount(at);
@@ -36,22 +39,23 @@ export function startFakeRpc(w: World): FakeRpc {
     };
   };
   const handlers: Record<string, (params: any[]) => unknown> = {
-    ...(simulationHandlers(w) as unknown as Record<string, (params: any[]) => unknown>),
+    ...(simulationHandlers(w, innerShape) as unknown as Record<string, (params: any[]) => unknown>),
     getAccountInfo: ([at]) => ({ context: { slot: w.client.svm.getClock().slot }, value: account(at) }),
     getMultipleAccounts: ([list]) => ({ context: { slot: w.client.svm.getClock().slot }, value: list.map(account) }),
     getMinimumBalanceForRentExemption: ([size]) => w.client.svm.minimumBalanceForRentExemption(BigInt(size)),
-    getSignaturesForAddress: ([at]) =>
-      recorded
-        .filter((tx) => accountKeysOf(tx).includes(at))
-        .reverse()
-        .map((tx) => ({
-          signature: tx.transaction.signatures[0],
-          slot: BigInt(tx.slot),
-          err: tx.meta?.err ?? null,
-          memo: null,
-          blockTime: tx.blockTime ?? null,
-          confirmationStatus: "confirmed",
-        })),
+    getSignaturesForAddress: ([at, config]) => {
+      // Newest first, `limit` per page, after `before`, as a node pages them.
+      const list = recorded.filter((tx) => accountKeysOf(tx).includes(at)).reverse();
+      const from = config?.before ? list.findIndex((tx) => tx.transaction.signatures[0] === config.before) + 1 : 0;
+      return list.slice(from, from + Number(config?.limit ?? 1_000)).map((tx) => ({
+        signature: tx.transaction.signatures[0],
+        slot: BigInt(tx.slot),
+        err: tx.meta?.err ?? null,
+        memo: null,
+        blockTime: tx.blockTime ?? null,
+        confirmationStatus: "confirmed",
+      }));
+    },
     getTransaction: ([signature]) => {
       const tx = recorded.find((t) => t.transaction.signatures[0] === signature);
       return tx

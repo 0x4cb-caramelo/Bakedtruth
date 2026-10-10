@@ -3,8 +3,12 @@
  *          state, unsigned, with the latest blockhash, and the SDK reports the program's refusal by name
  *          and message, the logs, the compute units, and the events the program would emit, decoded by
  *          the same rules as a landed transaction.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Sprint:  05 (SDK)
+ *
+ * A node writes the simulation's inner instructions with addresses, parsed where it can (the System
+ * Program's) and partially decoded otherwise (this program's); the decoder reads either shape. A custom
+ * error is named as this program's only when the instruction that failed is this program's.
  */
 import {
   compileTransaction,
@@ -15,6 +19,7 @@ import {
   type TransactionMessageWithLifetime,
 } from "@solana/kit";
 
+import { PROGRAM_ID } from "../read/constants";
 import { customErrorCode, errorMessage, errorName, type BrotErrorName } from "../read/errors";
 import { decodeTransactionEvents, type DecodedEvent, type RpcTransaction } from "../read/decoder";
 import type { SolanaRpc } from "../read/rpc";
@@ -32,8 +37,24 @@ export type Simulation = {
   err: unknown;
   logs: readonly string[];
   unitsConsumed: bigint | null;
+  /** Keyed by the signature "simulation": never mix them with landed events. */
   events: DecodedEvent[];
 };
+
+type Compiled = ReturnType<ReturnType<typeof getCompiledTransactionMessageDecoder>["decode"]>;
+
+/**
+ * The custom code of `err` when the top-level instruction that failed is this program's; else `null`. Kit's
+ * RPC client parses every integer as a bigint, so the instruction's index arrives as one.
+ */
+function brotErrorCode(err: unknown, compiled: Compiled): number | null {
+  if (err === null || typeof err !== "object" || !("instructions" in compiled)) return null;
+  const raw = (err as { InstructionError?: readonly unknown[] }).InstructionError?.[0];
+  const index = typeof raw === "bigint" ? Number(raw) : raw;
+  const failed = typeof index === "number" ? compiled.instructions[index] : undefined;
+  if (!failed || compiled.staticAccounts[failed.programAddressIndex] !== PROGRAM_ID) return null;
+  return customErrorCode(err);
+}
 
 /** Runs `message` on the cluster without signatures and with its latest blockhash. */
 export async function simulate(rpc: SolanaRpc, message: ReadyMessage): Promise<Simulation> {
@@ -48,13 +69,13 @@ export async function simulate(rpc: SolanaRpc, message: ReadyMessage): Promise<S
       commitment: "confirmed",
     })
     .send();
-  const code = value.err === null ? null : customErrorCode(value.err);
-  const keys = getCompiledTransactionMessageDecoder().decode(transaction.messageBytes).staticAccounts;
-  const shaped = {
+  const compiled = getCompiledTransactionMessageDecoder().decode(transaction.messageBytes);
+  const code = brotErrorCode(value.err, compiled);
+  const landed: RpcTransaction = {
     slot: context.slot,
-    transaction: { signatures: ["simulation"], message: { accountKeys: keys } },
+    transaction: { signatures: ["simulation"], message: { accountKeys: compiled.staticAccounts } },
     meta: { err: value.err, innerInstructions: value.innerInstructions ?? [] },
-  } as unknown as RpcTransaction;
+  };
   return {
     ok: value.err === null,
     errorCode: code,
@@ -63,6 +84,6 @@ export async function simulate(rpc: SolanaRpc, message: ReadyMessage): Promise<S
     err: value.err,
     logs: value.logs ?? [],
     unitsConsumed: value.unitsConsumed ?? null,
-    events: decodeTransactionEvents(shaped),
+    events: decodeTransactionEvents(landed),
   };
 }

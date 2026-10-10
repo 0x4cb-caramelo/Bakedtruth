@@ -1,7 +1,8 @@
 /**
- * Purpose: the program's events out of a transaction as the RPC returns it (`getTransaction`, JSON
- *          encoding), under the four decoder rules every consumer follows (TP 3.4.14; proposal 2.3).
- * Version: 0.1.0
+ * Purpose: the program's events out of a transaction as the RPC returns it (`getTransaction` with JSON
+ *          encoding, or `simulateTransaction`), under the four decoder rules every consumer follows
+ *          (TP 3.4.14; proposal 2.3).
+ * Version: 0.1.1
  * Sprint:  05 (SDK)
  *
  * 1. A transaction whose `meta.err` is not null is skipped whole (so is one without `meta`).
@@ -11,16 +12,21 @@
  *    in a successful transaction such an instruction came from the program's own `emit`. Log lines,
  *    which any program can write, and top-level instructions are never read.
  * 3. Inner-instruction account indexes resolve through the static keys, then `loadedAddresses`
- *    (writable, then readonly), so a transaction that uses address lookup tables decodes.
+ *    (writable, then readonly), so a transaction that uses address lookup tables decodes. An inner
+ *    instruction the node wrote with addresses instead of indexes (`simulateTransaction` does, for a
+ *    program it cannot parse) is read by its addresses.
  * 4. Each event is keyed by (signature, top-level instruction index, inner instruction index): one
  *    top-level instruction, such as a multisig's execute, can hold two of this program's events.
+ *
+ * Data longer than the largest event is refused before it is decoded: base58 decoding costs the square
+ * of the length, and the strings come from third-party RPCs (zone Z5).
  */
 import { getBase58Encoder, type Address } from "@solana/kit";
 
 import { EVENT_AUTHORITY, PROGRAM_ID } from "./constants";
-import { decodeEventData, type BrotEvent } from "./events";
+import { decodeEventData, MAX_EVENT_DATA, type BrotEvent } from "./events";
 
-/** A compiled instruction as the RPC's JSON encoding writes it. */
+/** A compiled instruction as the RPC's JSON encoding writes it: account indexes. */
 export type RpcCompiledInstruction = {
   readonly programIdIndex: number;
   readonly accounts: readonly number[];
@@ -28,6 +34,20 @@ export type RpcCompiledInstruction = {
   readonly data: string;
   readonly stackHeight?: number | null;
 };
+
+/** An instruction written with addresses, as a node writes one it cannot parse (`simulateTransaction`). */
+export type RpcPartiallyDecodedInstruction = {
+  readonly programId: string;
+  readonly accounts: readonly string[];
+  /** Base58 of the instruction data. */
+  readonly data: string;
+  readonly stackHeight?: number | null;
+};
+
+/** An instruction the node parsed into JSON (the System Program's, say): never this program's. */
+export type RpcParsedInstruction = { readonly programId: string; readonly parsed: unknown };
+
+export type RpcInnerInstruction = RpcCompiledInstruction | RpcPartiallyDecodedInstruction | RpcParsedInstruction;
 
 /** The part of `getTransaction` (encoding `json`, `maxSupportedTransactionVersion: 0`) the decoder reads. */
 export type RpcTransaction = {
@@ -42,12 +62,15 @@ export type RpcTransaction = {
     readonly innerInstructions?:
       | readonly {
           readonly index: number;
-          readonly instructions: readonly RpcCompiledInstruction[];
+          readonly instructions: readonly RpcInnerInstruction[];
         }[]
       | null;
     readonly loadedAddresses?: { readonly writable: readonly string[]; readonly readonly: readonly string[] } | null;
   } | null;
 };
+
+/** The longest base58 string the largest event's data can be, plus one character for the rounding. */
+export const MAX_EVENT_BASE58 = Math.ceil((MAX_EVENT_DATA * 8) / Math.log2(58)) + 1;
 
 /** Where an event sits in the chain: the decoder's rule 4. */
 export type EventKey = { signature: string; ixIndex: number; innerIndex: number };
@@ -61,10 +84,23 @@ export function accountKeysOf(tx: RpcTransaction): readonly string[] {
   return [...tx.transaction.message.accountKeys, ...(loaded?.writable ?? []), ...(loaded?.readonly ?? [])];
 }
 
+/** The program and the one account of `ix`, as addresses, whichever way the node wrote them. */
+function addressesOf(ix: RpcInnerInstruction, keys: readonly string[]): { program: unknown; accounts: unknown[] } {
+  if ("programIdIndex" in ix) {
+    const accounts = Array.isArray(ix.accounts) ? ix.accounts.map((i) => keys[i]) : [];
+    return { program: keys[ix.programIdIndex], accounts };
+  }
+  const accounts = "accounts" in ix && Array.isArray(ix.accounts) ? ix.accounts : [];
+  return { program: ix.programId, accounts };
+}
+
 /** The event an inner instruction carries, if it is one of this program's (rule 2); else `null`. */
-export function innerInstructionEvent(ix: RpcCompiledInstruction, keys: readonly string[]): BrotEvent | null {
-  if (keys[ix.programIdIndex] !== PROGRAM_ID) return null;
-  if (ix.accounts.length !== 1 || keys[ix.accounts[0]] !== EVENT_AUTHORITY) return null;
+export function innerInstructionEvent(ix: RpcInnerInstruction, keys: readonly string[]): BrotEvent | null {
+  if (typeof ix !== "object" || ix === null || !("data" in ix)) return null;
+  if (typeof ix.data !== "string" || ix.data.length > MAX_EVENT_BASE58) return null;
+  const { program, accounts } = addressesOf(ix, keys);
+  if (program !== PROGRAM_ID) return null;
+  if (accounts.length !== 1 || accounts[0] !== EVENT_AUTHORITY) return null;
   let data: Uint8Array;
   try {
     data = new Uint8Array(getBase58Encoder().encode(ix.data));
