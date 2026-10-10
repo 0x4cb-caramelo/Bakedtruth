@@ -1,6 +1,6 @@
 # Sprint 07 — Standby keeper and watchdog
 
-**Status:** planned · **Branch:** `sprint-07-standby-watchdog` · **Dates:** none, by the founder's decision
+**Status:** in progress, **not closed** (opened 2026-10-10 from `origin/main` at `c3ba1ff`) · **Branch:** `sprint-07-standby-watchdog` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -124,4 +124,20 @@ notes, the README with the rotation of each secret, `CODEMAP.md`.
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+Written 2026-10-10, during the sprint. **Not closed:** most of the Definition of done is open (see the list above).
+
+- **Done in the repository:** the standby mode with its send gate in `send.ts` (refused while the primary answers,
+  tested before the rest); the watchdog and the takeover timeline (alert at the first miss, restarts at 10, 15 and 20
+  minutes, takeover at 25); `POST /restart` with HMAC-SHA256, 60 s window, constant-time compare; the feed watcher for
+  price campaigns; the second read of price campaigns with the review queue; the alerts, on the journal only; the
+  systemd units and the runbooks, not installed. `bun test services/keeper`: 59 tests.
+- **Done on this machine:** two real processes (primary and standby) against an unreachable RPC: the primary's
+  `/healthz` and `POST /restart` answer; the standby with its primary down emits the alert chain and takes over.
+- **Not done:** VM 2, the second RPC company, the email provider (all founder decisions, D4); the devnet drill with both
+  machines; the alerts not yet wired (listed in the session log); the proof-transaction second read; the server's changes (the flag's
+  `ReadWritePaths`, the tunnel route, the HMAC secret, the path unit). No server action was taken in this session.
+- **Decisions taken without the founder:** recorded in `session-log/2026-10-10-sprint-07-standby-e-watchdog.md`
+  (restart spacing, no automatic hand-back, journal-only alerts, the two-provider second read, the 0.5 SOL floor).
+- **Retrospective (so far):** the gate is the rule that matters most, so it sits at the send and not in the loop. A
+  second read that compares two providers is weaker than the one the proposal describes, and the sprint should say so
+  rather than claim the stronger check.

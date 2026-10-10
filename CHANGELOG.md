@@ -22,6 +22,14 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Added
 
+- **O keeper em modo standby** (`services/keeper`, Sprint 07, 10/10/2026): `KEEPER_MODE=standby` não envia enquanto o
+  primário responde; a regra está no envio, e não só no laço. O watchdog sonda o primário a cada 5 min, pede reinício
+  assinado até 3 vezes e assume depois. A observação contínua de campanhas de preço e a segunda leitura (com fila de
+  revisão) estão prontas. Os alertas saem só no diário até o fundador escolher o provedor de e-mail (D4). O primário
+  ganha `POST /restart` com HMAC, ativo só com o segredo configurado. As unidades e os runbooks estão no repositório,
+  sem instalação. A Sprint 07 segue aberta: a segunda VM, a RPC B, o e-mail e o teste de queda em devnet não foram feitos
+  (`session-log/2026-10-10-sprint-07-standby-e-watchdog.md`).
+
 - **O keeper, o caminho feliz do MVP** (`services/keeper`, 10/10/2026): a cada 60 s lista as campanhas abertas do
   programa no devnet, simula `resolve_campaign` em cada uma e envia só o que o programa aceita. Lê a URL do RPC de
   uma variável de ambiente (Helius, plano gratuito por enquanto). `GET /healthz` só em `127.0.0.1:4210`. Ainda não

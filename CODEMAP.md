@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **605** |
+| Arquivos mapeados | **620** |
 | Acima de 200 linhas | **45** ⚠️ |
 | Sem cabeçalho `Purpose:` | **77** ⚠️ |
 
@@ -864,21 +864,36 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`campaigns.ts`](services/keeper/src/campaigns.ts) | the keeper's view of the chain: every campaign account of the program that is open right now. One `getProgramAccounts` filtered by the campaign's size; each acc | 35 |
-| [`config.ts`](services/keeper/src/config.ts) | the keeper's settings, read from its environment only: the RPC URL (a secret, so the log shows its origin and never the path or the query), the keeper's keypair | 59 |
+| [`alert.ts`](services/keeper/src/alert.ts) | the keeper's alerts. Each alert is one JSON line on the journal, de-duplicated per (kind, key) within a window, so a stuck condition does not flood the log. Ema | 65 |
+| [`campaigns.ts`](services/keeper/src/campaigns.ts) | the keeper's view of the chain: every campaign account of the program that has a given status. One `getProgramAccounts` filtered by the campaign's size; each ac | 38 |
+| [`config.ts`](services/keeper/src/config.ts) | the keeper's settings, read from its environment only: the RPC URL (a secret, so the log shows its origin and never the path or the query), the keeper's keypair | 116 |
 | [`cycle.ts`](services/keeper/src/cycle.ts) | one keeper cycle: read the open campaigns, try the resolve task on each, and report the counts and the keeper's SOL balance. A failure on one campaign is logged | 51 |
-| [`health.ts`](services/keeper/src/health.ts) | GET /healthz on a loopback address only: the keeper's last full cycle (open campaigns, what it tried, its SOL balance), the cycle count and the last cycle's err | 27 |
+| [`health.ts`](services/keeper/src/health.ts) | GET /healthz on a loopback address only: the keeper's last full cycle (open campaigns, what it tried, its SOL balance), the cycle count and the last cycle's err | 37 |
 | [`log.ts`](services/keeper/src/log.ts) | one JSON line per event on stdout, with a time stamp. The RPC URL and the keypair never reach it: the caller passes only fields it has checked (an origin, a pub | 10 |
-| [`main.ts`](services/keeper/src/main.ts) | the keeper's entry point. Reads its settings and keypair, serves /healthz on loopback, and runs one cycle every KEEPER_CYCLE_MS (60 s by default). A cycle that  | 59 |
+| [`main.ts`](services/keeper/src/main.ts) | the keeper's entry point. Reads its settings and keypair, serves /healthz on loopback (and POST /restart on the primary, when its secret is set), and runs one c | 84 |
 | [`resolve.ts`](services/keeper/src/resolve.ts) | the keeper's one task in the MVP: for an open campaign, offer `resolve_campaign` with the campaign's own metric account (the program's reader decides), simulate | 51 |
-| [`send.ts`](services/keeper/src/send.ts) | the keeper's transaction path: a message with a fresh blockhash, signed by the keeper, sent without preflight (the simulation already ran), rebroadcast as the s | 64 |
+| [`restart.ts`](services/keeper/src/restart.ts) | POST /restart of the primary keeper. A request is accepted only when its HMAC-SHA256 over `${timestamp}\n${body}` matches (constant-time compare) and its timest | 68 |
+| [`review-queue.ts`](services/keeper/src/review-queue.ts) | the review queue, one JSON line per entry, appended to a file the keeper owns. A second-read mismatch lands here so that a person looks at it (T22). Entries car | 28 |
+| [`second-read.ts`](services/keeper/src/second-read.ts) | the second read of a PRICE campaign (proposal §2.11, Sprint 07): the sponsored or proof price account is read through the primary's RPC and through RPC B, each  | 77 |
+| [`secret.ts`](services/keeper/src/secret.ts) | loads the HMAC secret of POST /restart from the file named by KEEPER_RESTART_SECRET_FILE (a systemd credential, root-owned, 0600). The file is read once at star | 14 |
+| [`send.ts`](services/keeper/src/send.ts) | the keeper's transaction path: a message with a fresh blockhash, signed by the keeper, sent without preflight (the simulation already ran), rebroadcast as the s | 72 |
 | [`signer.ts`](services/keeper/src/signer.ts) | the keeper's signer, loaded from a keypair file named by KEEPER_KEYPAIR (the standard 64-byte JSON array). The file lives outside the repository; the keeper nev | 22 |
+| [`standby-loop.ts`](services/keeper/src/standby-loop.ts) | the standby's three loops: the watchdog (every 5 minutes, probes the primary and takes over by the rules in standby.ts), the continuous feed watcher for open pr | 109 |
+| [`standby.ts`](services/keeper/src/standby.ts) | the standby's rules, as pure functions with no I/O. The gate: a standby may send only while it has taken over AND the primary does not answer; while the primary | 82 |
+| [`watchdog.ts`](services/keeper/src/watchdog.ts) | the watchdog's I/O. Each tick it probes the primary's GET /healthz (10 s timeout), feeds the answer to the pure rules in standby.ts, and performs what they deci | 80 |
+| [`watcher.ts`](services/keeper/src/watcher.ts) | the standby's continuous feed watcher. Every interval it lists the open campaigns, keeps the price ones (their sponsored feed moves between the primary's 60 s c | 75 |
 
 ## `services/keeper/tests/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`keeper.test.ts`](services/keeper/tests/keeper.test.ts) | the keeper's unit tests: its settings and their refusals, the send-or-skip rule, the signer's input check, the campaign listing (a non-campaign account is skipp | 117 |
+| [`alert.test.ts`](services/keeper/tests/alert.test.ts) | the alerter's rules: a repeat of the same (kind, key) inside the window is suppressed, a new key or a later time emits again, each emitted line is one JSON obje | 69 |
+| [`keeper.test.ts`](services/keeper/tests/keeper.test.ts) | the keeper's unit tests: its settings and their refusals, the send-or-skip rule, the signer's input check, the campaign listing (a non-campaign account is skipp | 128 |
+| [`restart.test.ts`](services/keeper/tests/restart.test.ts) | POST /restart's refusals and its one acceptance: an unsigned, wrongly signed, stale, future or re-bodied request is refused with 401 and writes nothing; a valid | 172 |
+| [`second-read.test.ts`](services/keeper/tests/second-read.test.ts) | the second read's rules and the review queue's line: a match, a real difference, a missing account, a difference that a retry at RPC B clears (publish landing b | 130 |
+| [`standby.test.ts`](services/keeper/tests/standby.test.ts) | the standby's rules: the send gate (a standby refuses to send while the primary is alive), the takeover timeline (restarts, then takeover, then no automatic han | 86 |
+| [`watchdog.test.ts`](services/keeper/tests/watchdog.test.ts) | the standby's rule at the send itself (a standby refuses to send while the primary answers, checked in signAndSend before any RPC call), the watchdog's probe an | 152 |
+| [`watcher.test.ts`](services/keeper/tests/watcher.test.ts) | the feed watcher's rules: only price campaigns are resolved, nothing is sent while the standby gate is closed, an error is reported and the next tick still runs | 150 |
 
 ## `services/landing/`
 
