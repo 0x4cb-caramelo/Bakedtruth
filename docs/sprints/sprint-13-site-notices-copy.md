@@ -141,15 +141,36 @@ program: a person posts. Web Push, wallet alerts or any other notification (L-16
 
 ## Founder decisions that block the sprint
 
-- L-09 (Product Brief v0.0.1 gap): what the screen says points are worth after devnet.
-- L-24 (Product Brief v0.0.1 gap): the format of the partner report, and what happens to a partner who does not post.
-- **[Q]** Where the report link leads: the same public channel as L-13, or another. The store requires the flag for
-  the app (C-10); the site has it first.
-- BP-5 and BP-11 (P-9, open): "no human picks the winner", and Baked in writing with Cacetinho as the spoken name.
-  Both are built as recommended and switchable.
-- **[Q]** The thresholds of the three demand tests (P2 §2.5), written before the devnet beta: tests 1 and 2 have
-  v0.0.2's, test 3 has none (TP §14.2).
-- **Answered:** TP v0.0.1 Q7 (a: 1 point per campaign entered on the right side, for devnet).
+Asked on 2026-10-10, at the start, in one list. Each is built as recommended and switchable in one place, so an answer
+changes one string or one constant.
+
+1. **Where the leaderboard's data comes from** (the sprint's choice, recommended to the founder): (a) a
+   `/api/v1/leaderboard` route in the read API from the program's events, **built**; (b) the browser reading the chain;
+   (c) wait for Sprint 08. It goes live when the founder redeploys the read API.
+2. **L-09** (Product Brief v0.0.1 gap): what the screen says points are worth after devnet. Recommended and built:
+   "Points are a devnet game. They are not money, and nothing is promised for them after the beta."
+   (`POINTS_WORTH`, `app/features/leaderboard/copy.ts`).
+3. **A wallet with entries on both sides** (found while building): Q7 read literally scores it, so 0.01 SOL on both
+   sides of every campaign tops the board. Recommended: no point when a wallet entered both sides. Built as Q7 says;
+   `BOTH_SIDES_SCORE` in `packages/sdk/src/read/points.ts` switches it.
+4. **L-24** (Product Brief v0.0.1 gap): the partner report's format, and what happens to a partner who does not post.
+   Recommended: one text file per partner campaign with its result, entries and distinct wallets per side, SOL per
+   side and whether it ended one-sided, never an address; a partner who does not post keeps its campaign (it is
+   on-chain) but loses the 72-hour highlight and is not invited again. **Waiting:** the report is not built.
+5. **[Q] Where the report link leads:** the same public channel as L-13, or another. Recommended and built: the same X
+   account, https://x.com/brotmarkets (`REPORT_CAMPAIGN.url`).
+6. **BP-5 and BP-11** (P-9, open): "No human picks the winner." (`PRINCIPLE`) and Baked in writing with Cacetinho as
+   the spoken name (`MASCOT_NAME`), both in `app/features/how/copy.ts`. Built as recommended.
+7. **[Q] The thresholds of the three demand tests** (P2 §2.5), written before the devnet beta. Recommended: tests 1 and
+   2 keep v0.0.2's (fewer than 10% of wallets back within 30 days is a bad sign, 20% to 35% is reasonable; more than
+   40% of pots one-sided is a bad sign); test 3 is measured on devnet without a pass mark, and gets its threshold
+   before mainnet, since paying with test SOL proves nothing (P2 §2.5). Nothing in the code depends on it.
+8. **From the privacy review** (TP §8.2): whether a wallet's owner may leave the public ranking (recommended: a hide
+   list like the unlisted one, written into the privacy policy of Sprint 17), and who holds the X account's login and
+   with which second factor.
+
+- **Answered:** TP v0.0.1 Q7 (a: 1 point per campaign entered on the right side, for devnet); the payout wording on
+  devnet (Sprint 12: "Waiting for payout", no time promised; the L-03 devnet wording; the "Result final" chip).
 
 ## Agents and skills
 
