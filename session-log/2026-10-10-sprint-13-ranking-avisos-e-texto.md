@@ -50,8 +50,9 @@
   um script que pode ser rodado de novo.
 - **O post de resolução** é texto para uma pessoa postar: sem API do X, sem chave, e o tamanho é contado como o X conta
   (cada link vale 23).
-- **X2.4:** o smoke web inteiro passou com o site construído e servido pelo próprio Bun 1.4.2 nesta máquina. O teste no
-  servidor (Sprint 09) segue adiado com o resto do trabalho de servidor.
+- **X2.4:** o smoke web inteiro passou com o site construído e servido pelo próprio Bun 1.4.2 nesta máquina, no código
+  final (28 passaram, 16 pulados por desenho; o mesmo no Node). O teste no servidor (Sprint 09) segue adiado com o resto
+  do trabalho de servidor.
 - **O `'unsafe-inline'` da CSP fica para a Sprint 16:** este Next escreve scripts próprios na página; um nonce exige
   renderizar cada página por pedido, mudança de execução do site que combina com a sprint de endurecimento.
 
@@ -86,6 +87,11 @@ sprint. O que mais pesou, e o que foi feito:
 - **Achados fora da sprint, para o fundador:** as páginas `/terms` e `/privacy` no ar em brot.markets (aprovadas em
   8/10) ainda falam em USDC, pagamento automático em até 55 horas e outros poderes da equipe; e entrar nos dois lados
   de uma campanha paga em que ninguém mais entra leva o prêmio sem risco (registrado no plano técnico, §13).
+- **O coordenador aprovou com ressalvas, sem bloqueio.** As ressalvas foram aplicadas: frases que ficaram velhas depois
+  das correções ("resolve e paga", "nenhum pedido liga carteira a IP" sem dizer que o RPC do navegador liga), o relatório
+  jurídico guardado para o advogado em `docs/legal/2026-10-10-sprint-13-legal-review.md`, o smoke no Bun refeito no
+  código final, uma RPC separada opcional para o histórico (`API_HISTORY_RPC_URL`), linhas repetidas entre páginas do
+  ranking, e o prazo de resposta a quem pede para sair do ranking virou pergunta ao fundador.
 - **Ficou para depois, com motivo e sprint:** plano técnico, §7.4 (o smoke web no CI, o spam de transações, a idade do
   retrato no health, a lápide de campanha fechada no programa, o piso do programa num pote que não divide, entre outros).
 

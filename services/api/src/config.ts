@@ -18,6 +18,8 @@ export type ApiConfig = {
   historyPerRefresh: number;
   /** The file listing wallets left out of the leaderboard at their owner's request, outside the repository. */
   hiddenFile: string | null;
+  /** The RPC the leaderboard's history reads through, when it should not share the snapshot's (a secret too). */
+  historyRpcUrl: string | null;
 };
 
 type Env = Record<string, string | undefined>;
@@ -42,7 +44,20 @@ export function loadApiConfig(env: Env = process.env): ApiConfig {
     cluster: cluster(env.API_CLUSTER),
     historyPerRefresh: positive(env.API_HISTORY_PER_REFRESH, 200, "API_HISTORY_PER_REFRESH"),
     hiddenFile: env.API_LEADERBOARD_HIDDEN?.trim() || null,
+    historyRpcUrl: url(env.API_HISTORY_RPC_URL, "API_HISTORY_RPC_URL"),
   };
+}
+
+/** An optional URL: unset or empty is null; anything else must parse. */
+function url(raw: string | undefined, name: string): string | null {
+  const text = raw?.trim();
+  if (!text) return null;
+  try {
+    new URL(text);
+  } catch {
+    throw new Error(`${name} is not a URL`);
+  }
+  return text;
 }
 
 function cluster(raw: string | undefined): "devnet" | "local" {

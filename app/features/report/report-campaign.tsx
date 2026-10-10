@@ -1,8 +1,9 @@
 /**
  * Purpose: "Report this campaign" on every campaign page (C-10, Sprint 13 DoD), in every state: a plain link to where
  *          reports go (no X script, widget or API, K-10), what the team can do (unlist it from the home page; the
- *          campaign stays on-chain, resolves and pays), and, for a campaign the team unlisted, that fact and its reason.
- * Version: 0.1.0
+ *          campaign stays on-chain with its entries, result and payouts unchanged), and, for a campaign the team
+ *          unlisted, that fact and its reason.
+ * Version: 0.1.1
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { REPORT_CAMPAIGN } from "./copy";

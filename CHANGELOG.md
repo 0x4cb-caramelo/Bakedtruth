@@ -42,8 +42,8 @@ dessa tag, na branch `sprint-13-site-notices-copy`.
   - **`/how-it-works`**, com os seis passos, aberto pela barra do topo também no celular, e a frase do BP-5 ("No human
     picks the winner.") como recomendada.
   - **"Report this campaign" em toda página de campanha**, link simples para https://x.com/brotmarkets; o remédio é
-    tirar a campanha da página inicial (`content/unlisted.json`, revisado por duas pessoas); ela continua na rede,
-    resolve e paga.
+    tirar a campanha da página inicial (`content/unlisted.json`, revisado por duas pessoas); ela continua na rede, com as
+    entradas, o resultado e os pagamentos iguais.
   - **Os avisos obrigatórios** numa lista com a tela de cada um, e um teste que renderiza as telas. O teste de texto
     passou a barrar as frases da coluna "Em vez de" da P1 §4.6 e as promessas (retorno, rendimento, pagamento
     automático) em todo arquivo do site.
@@ -63,7 +63,8 @@ dessa tag, na branch `sprint-13-site-notices-copy`.
   (pedido no X, mensagem assinada, lista no servidor); os pontos sem os furos do SIM de preço antes do tally, do id de
   campanha reaberto e da ordem dentro do slot; o leitor do histórico em laço próprio e com prazo; a tabela de poderes
   com a causa da anulação e os tetos; o post de resolução que cabe em 280 com id real; e o CI rodando os testes do
-  próprio site. O que ficou para depois está no plano técnico, §7.4.
+  próprio site. O que ficou para depois está no plano técnico, §7.4. O relatório jurídico ficou guardado para o
+  advogado (`docs/legal/2026-10-10-sprint-13-legal-review.md`), e o coordenador aprovou com ressalvas, aplicadas.
 - **Para o fundador, achados fora da sprint:** as páginas `/terms` e `/privacy` no ar ainda falam em USDC e pagamento
   automático em até 55 horas; e entrar nos dois lados de uma campanha paga em que ninguém mais entra leva o prêmio sem
   risco (plano técnico, §13).

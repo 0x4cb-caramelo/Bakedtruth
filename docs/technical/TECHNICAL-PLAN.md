@@ -6,8 +6,9 @@ v0.0.4, merged into `main` with PR #35 on 2026-10-08; v0.1.1 aligns it with what
 (`docs/sprints/sprint-02-pot-core.md`, "TP to align"); v0.1.2 aligns it with what Sprint 03 built and to the founder's
 answers of 2026-10-09 (`docs/sprints/sprint-03-readers-resolution.md`, "Record and retrospective";
 `session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`); v0.1.3 aligns it with Sprint 04 (§3.4.18) and
-v0.1.4 with Sprint 05 (§3.4.19); v0.1.5 records what Sprint 13 built (§3.5 points, §3.6 routes, §6, §7.2, §7.3) and its
-privacy review (§8.2) · **Date:** 2026-10-10 · **Supersedes:** v0.0.1 of 2026-10-05,
+v0.1.4 with Sprint 05 (§3.4.19); v0.1.5 records what Sprint 13 built (§3.5 points, §3.6 routes, §6, §7.2, §7.3), what
+its reviews deferred (§7.4), its privacy review (§8.2), a new economic risk (§13) and C13 (§14.4) · **Date:**
+2026-10-10 · **Supersedes:** v0.0.1 of 2026-10-05,
 written in Portuguese, approved by the founder ("docs aprovados, podemos dar início"). Its last text, with §8.1, is in
 git history at commit `2089b81` (`git show 2089b81:docs/technical/TECHNICAL-PLAN.md`), the last commit that changed it;
 `0b40554`, the `main` before v0.1.0, holds the same text; tag `sprint-01` holds it before §8.1 was added
@@ -81,8 +82,8 @@ creator's 1%, as you decided.
 **What it rests on.** Your decisions of 2026-10-08: SOL only (D-a). The US$500 opening, 90% prize and 10% Brot (D-b),
 charged at the Pyth price read on-chain, with CoinGecko only for display (D-e, D-f). The team and the 20 to 30 launch
 partners open free and keep no 1% (D-c, D-d, P-3). The creator's 1% comes from the pot, and from Brot's fee only so
-that winners never get back less than they put in (D-g, P-2); there is none on a void, in a one-sided pot or on the
-prize (P-1). On a void or a one-sided pot the prize returns to whoever opened, and the 10% follows the cause (P-4). A
+that winners never get back less than they put in (D-g, P-2; since the Economic Viability Rule (2026-10-09, §3.4.18) a pot that cannot pay both is refunded instead, so the share never comes from the fee); there is none on a void, in a one-sided pot
+or on the prize (P-1). On a void or a one-sided pot the prize returns to whoever opened, and the 10% follows the cause (P-4). A
 0.01 SOL minimum entry (P-5). No cap (D-h). No list of accepted accounts (D-i), except that a price campaign may name
 only a feed on the program's own compiled list (founder answer 1, 2026-10-09; the narrowing applies to the price kind
 only, the other kinds are unchanged). No free text (D-j). The minimum
@@ -1977,10 +1978,11 @@ what they found was fixed in the sprint (`docs/sprints/sprint-13-site-notices-co
 | A wallet entering both sides of every campaign scores every decided one (Q7 read literally, `BOTH_SIDES_SCORE`); one-sided and too-small pots score; a creator's other wallets can score on a burn it forces | The devnet leaderboard rewards entering everything; changing the rule after launch rewrites every rank | Founder question 3, before the API redeploy |
 | Anyone can send cheap transactions that name the program's address; each landed one is read by the history | Above about 13 a second, the leaderboard's history falls behind; on a paid RPC each costs credits | 08 (the indexer, with its own source) |
 | Health says "ok" while the snapshot is old, if a snapshot call hangs (it has no timeout; the history's calls do) | The home list freezes while entries stay open | 08 |
-| A closed campaign's id can be opened again (close returns the account to the System Program); the points, the unlisted list and the resolution post's link handle it, the program does not | A post's `/c/<id>` link can later show another campaign | 16 (a tombstone in `close_campaign`, with the audit scope) |
+| A closed campaign's id can be opened again (close returns the account to the System Program); the points and the unlisted list handle it, the resolution post's link and the program do not | A post's `/c/<id>` link can later show another campaign | 16 (a tombstone in `close_campaign`, with the audit scope) |
 | Whoever resolves a YES price campaign first picks the proof that sets the late-join cut-off, and a partial tally does not lock it | Payouts on a contested touch depend on who acted first | 16–17 (audit scope) |
 | The program's `min_return_bps` check uses the split formula even when the pot would not split; the site now shows the refund (`shownReturnBps`) | A floor that never binds in a lopsided pot | 16–17 (audit scope; a program change) |
-| "You" past the first 1,000 ranked wallets says only that the wallet is not among them | A wallet ranked past 1,000 cannot see its rank | 08 (a histogram from the indexer) |
+| "You" past the first 1,000 ranked wallets says only that the wallet is not among them; the page reads the table in pages, at different moments, so a row can be skipped until the next read (a repeated one is kept once) | A wallet ranked past 1,000 cannot see its rank | 08 (a histogram, or one cached file, from the indexer) |
+| The snapshot and the history share one RPC unless `API_HISTORY_RPC_URL` is set; on the public devnet RPC, a 429 that reaches the snapshot turns health "stale", which hides the entry panel | Entries pause on the site while the history catches up | At the API redeploy: a keyed RPC for the API, and a separate one for the history (`API_HISTORY_RPC_URL`) |
 | `script-src 'unsafe-inline'` (§7.2) | As §7.2 | 16 |
 | The two-person review of `content/` is a team rule (no CODEOWNERS) | One person can publish a void note or an unlisting | 16 |
 | Once contests exist, the history would score a closed contested campaign by its first outcome (`CampaignFinalized` carries none) | Wrong points for contested campaigns | 14 (with the contest's events) |
@@ -1996,7 +1998,7 @@ v0.0.1's fourth column, the X username shown on the suggestions page, leaves wit
 | 1. What data | A public address and the entries, openings and payouts linked to it: pseudonymous, but linkable to a person | IP and country | The MWA `auth_token`, the pending-entry snapshot and the opening `id` |
 | 2. Why | "My entries", activity, ranking, the creator flag | Limiting abuse; the country switch, if on | Surviving process death while the wallet signs (A-9) |
 | 3. Where | On-chain, public and permanent; a copy in SQLite | In memory only; never on disk | On the device only |
-| 4. Who can access | Anyone | The process only | The app on that device |
+| 4. Who can access | Anyone; the hide list, the API process and whoever administers the server | The process only | The app on that device |
 | 5. Control | None: it is public | No person reads it | Android's app sandbox |
 | 6. Retention | On-chain, forever | Minutes | Until the transaction is confirmed or expires; the `auth_token` as long as the wallet allows [E1] |
 | 7. Logs | Services log signatures, campaigns and wallets; never an IP or an email (proposal §2.11) | Cloudflare's logs follow Cloudflare's account (C13 **[AC]**) | None sent |
@@ -2080,10 +2082,10 @@ to a channel. Cloudflare's part is C13, read from Cloudflare's own pages
 |---|---|---|
 | 1. What data | Public wallet addresses, each with its points and the campaigns it entered. No amount, no name, no success rate (the legal review: a per-wallet rate is a profile). The API holds in memory the program's events it needs (entries with their baker and amount, results). Public personal data stays personal data (the legal review, LGPD art. 7 §3–§4: to confirm with the lawyer) | Whatever a person writes to Brot on X: their X account and their words. The site sends nothing: a plain link, `rel="noopener noreferrer"`, so not even the page's address goes to X |
 | 2. Why, and on what basis | BR-29: the devnet beta's points (P2 §2.5, test 1). The legal basis is the lawyer's (L0): legitimate interest is the working reading **[Q]** | C-10: abuse reports; the remedy is unlisting from the home page |
-| 3. Where | On-chain, public and permanent; a copy in the API's memory, never on disk; the visitor's browser while the page is open | On X, under X's terms. The site keeps only `content/unlisted.json`: a campaign's number and opening time, a public reason and a time, in Git |
+| 3. Where | On-chain, public and permanent; a copy in the API's memory, never on disk; the visitor's browser while the page is open. The hide list (question 8) is a file of wallet addresses on the server's disk, outside the repository | On X, under X's terms. The site keeps only `content/unlisted.json`: a campaign's number and opening time, a public reason and a time, in Git |
 | 4. Who can access | Anyone | On X, the people who hold the Brot account's login **[AC: who, and with which second factor]**; `content/unlisted.json`, anyone |
 | 5. Control | The request to Brot's API carries no wallet: the page reads the ranked list and finds the connected wallet's line itself. The browser's own RPC reads (the balance, "My entries") do carry the wallet to the RPC provider, with the visitor's IP (§7.3) | X's own account controls. A reason that names a person (an email, a handle, a URL, a domain) fails the site's build (`personalDataIn`) |
-| 6. Retention | On-chain, forever; the API's copy until it restarts | X's retention; the unlisted list as long as Git keeps it, which is why it may hold no personal data |
+| 6. Retention | On-chain, forever; the API's copy until it restarts; an address on the hide list until its owner asks to come back | X's retention; the unlisted list as long as Git keeps it, which is why it may hold no personal data |
 | 7. Logs | The API logs counts and an error's name only: never a wallet, an IP or a query. Cloudflare sees each request's IP and address, kept under Cloudflare's policy with no period written (C13); the address never holds a wallet. Once a company exists, Marco Civil art. 15 may require access logs (C-14, the lawyer's) | None by Brot. X logs under X's policy |
 | 8. Deletion and export | The chain cannot be changed; the ranking is Brot's view of it. **A wallet's owner can leave it:** the request comes on X, the wallet signs a message to prove it, and the team adds the address to a hide list on the server (`API_LEADERBOARD_HIDDEN`, never public, applied before ranking; `services/api/README.md`) | Deleted on X by whoever wrote it. Nothing personal is kept by Brot |
 | 9. Document or consent | The page says what it keeps (in memory, never on disk), that no wallet is sent to Brot, who runs the ranking and how to leave it; the review sheet says, before a first entry, that entries are public and permanent and that a wallet that scores appears on the leaderboard. The privacy policy (L-21, C-08, Sprint 17) must name the ranking | The policy of Sprint 17 names X as the channel, as the waitlist's privacy page already does |
@@ -2424,7 +2426,7 @@ L-08 (test USDC), L-17 (the suggestions page) and L-19 (the cap's value) fall aw
 |---|---|---|
 | D-a to D-t | The founder's decisions of 2026-10-08 | Proposal §5.1 and BP v0.0.4; not reopened **[FD]** |
 | P-1 | The 1% on a void, in a one-sided pot and on the prize | None in all three ("ok para recomendacao") **[FD]** |
-| P-2 | The exact reading of D-g | From the pot while winners stay whole; only the shortfall from Brot's fee (§3.4.16); the literal reading survives as a test oracle **[FD]** |
+| P-2 | The exact reading of D-g | From the pot while winners stay whole; only the shortfall from Brot's fee (§3.4.16); the literal reading survives as a test oracle **[FD]**. Since the Economic Viability Rule (2026-10-09, §3.4.18) a pot that cannot pay both is refunded, so the shortfall branch never runs |
 | P-3 | Does the team keep the 1% and pay the US$500? Do partners keep the 1%? | No, no and no: "porque nos ja cobramos taxa"; "parceiros nao ficam com 1%". Every team-key opening: no payment, `creator_share_bps = 0`, no `partner` argument **[FD]** |
 | P-4 | The US$450 prize and the 10% in a one-sided pot and on a void | The prize returns to whoever opened; the 10% follows the cause (`VoidReason`), held in the vault until the outcome (T23) **[FD]** |
 | P-5 | Minimum entry | 0.01 SOL **[FD]** |
@@ -2563,7 +2565,7 @@ Android app comes from D-n, which BP v0.0.4 records in P1 §2.2 and places after
 |---|---|---|---|---|---|
 | BR-01 | Any wallet opens a campaign for US$500 in SOL, inside the rules | P1 §4.1; D-b | `user_open_campaign`; the creation box | §3.4.10, §3.4.16, §3.6 | 02–03; -1 and 19 |
 | BR-02 | Creation rules in the program: five kinds, the account checked by its reader, no free text, 3–90 days, fixed fees; no list | P1 §4.2; P4 §4.3; D-i, D-k | The opening checks; A-10, A-11 | §3.4.8, §3.4.10 | 02–03 |
-| BR-03 | The creator's 1% of entries, from the pot while winners stay whole, the shortfall from Brot's fee; none for the team or launch partners | P1 §3.4; D-g; P-2, P-3 (decided) | `creator_share()`; `settle_creator_share`; I11–I13 | §3.4.5, §3.4.13, §3.4.16 | 04 |
+| BR-03 | The creator's 1% of entries, from the pot while winners stay whole, the shortfall from Brot's fee (never reached since the Economic Viability Rule, §3.4.18: a pot that cannot pay both is refunded); none for the team or launch partners | P1 §3.4; D-g; P-2, P-3 (decided) | `creator_share()`; `settle_creator_share`; I11–I13 | §3.4.5, §3.4.13, §3.4.16 | 04 |
 | BR-04 | The opening: 90% prize, 10% to Brot, held in the campaign vault and collected at the outcome (T23); priced by Pyth, shown with CoinGecko (D-f, decided); treasury per P-7 (open) | P1 §4.1; P4 §4.7; D-b, D-e, D-f | Opening conversion; `sweep_fees`; refill and conversion runbook | §3.4.4, §3.4.10, §3.4.16, §12 | 02; 04; 06; 18 |
 | BR-05 | YES/NO; five public states; at most 90 days | P1 §3.1, §3.6 | State machine; `math/schedule.rs`; SDK `view` | §3.4.2, §3.6 | 02–05 |
 | BR-06 | Entries close at 5% of the duration (24 h–7 d) or at an irreversible fact; early resolution | P1 §3.6, §4.1 | `schedule.rs`; `outcome_knowable` | §3.4.8, §3.4.10 | 02–03 |

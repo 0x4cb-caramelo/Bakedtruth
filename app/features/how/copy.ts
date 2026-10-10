@@ -18,7 +18,7 @@ export const MASCOT_NAME = "Baked";
 export const HOW = {
   kicker: "How it works",
   title: "A question the chain answers",
-  lead: "An On-Chain Campaign is a YES/NO question about one Solana account. Bakers put SOL on YES or NO. When the time comes, the program reads the account, and the side that was right splits the pot.",
+  lead: "An On-Chain Campaign is a YES/NO question about one Solana account. Bakers join YES or NO with SOL. When the time comes, the program reads the account, and the side that was right splits the pot.",
   stepsTitle: "Six steps, from opening to payout",
   steps: [
     [

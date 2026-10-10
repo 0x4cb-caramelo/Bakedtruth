@@ -1,6 +1,6 @@
 # Sprint 13 — Site: ranking, notices and copy (closes the devnet MVP)
 
-**Status:** built, PR open; the items that need the founder or a real device are marked waiting below · **Branch:**
+**Status:** built and reviewed, PR #63 open; the items that need the founder, a real device or Sprint 19 are marked waiting below · **Branch:**
 `sprint-13-site-notices-copy`, cut from `origin/main` at `sprint-12` (`107fec2`) · **Dates:** none, by the founder's decision
 
 ## Record (2026-10-10)
@@ -17,7 +17,8 @@
   (settling or settled, or the 6-hour window ended without a contest: the program refuses every team act from
   `review_ends_at` on, and on devnet nobody finalizes automatically); a void scores nothing; a join tallied as late
   never scores. `/leaderboard` reads the list in pages and finds the connected wallet's line in the browser: the
-  request carries no wallet, so no request ties a wallet to an IP address. **It goes live on devnet when the founder
+  request carries no wallet, so no request to Brot's API ties a wallet to an IP address (the browser's own RPC reads
+  still carry it to the RPC provider, TP §7.3). **It goes live on devnet when the founder
   redeploys the read API** (a server step, not done here); until then the page says it could not load.
 - **The fee page** (`/fees`): P1 §1.2's case in SOL (6 and 4 SOL; the BP's 600 and 400 divided by 100, so every ratio
   is the same) through the SDK's finalize math: fee 0.4, creator 0.1, winners 9.5, 1.583 per 1; with a 4.5 SOL prize,
@@ -28,7 +29,9 @@
   key; one team key), and each power with the limit in the program's code, the upgrade authority's included. The page
   checks each role against the chain in the visitor's browser and says when the table is out of date.
 - **Notices and copy.** `app/features/notices/registry.ts` lists each mandatory notice that holds on devnet with its
-  screen; `tests/site/notices.test.ts` renders the screens. P1 §4.6's "Pago sozinho, ao fim da janela de 6 horas" is
+  screen; `tests/site/notices.test.ts` renders the screens where it can (the campaign header, the state panel, How it
+  works, the leaderboard, the entry notices) and checks the rest by the component that mounts them; the web smoke
+  checks them on the built site. P1 §4.6's "Pago sozinho, ao fim da janela de 6 horas" is
   replaced on devnet by the founder's wording (the review rule and "Waiting for payout", no time promised). The copy
   test now forbids P1 §4.6's "Em vez de" phrases and the promises (a return, a yield, a profit, an automatic payout)
   in every source file of the site, and holds BP-5's line in one copy entry. The card's creator notice used other words
@@ -37,8 +40,8 @@
   picks the winner.") and BP-11's written name ("Baked") are built as recommended, one string each.
 - **"Report this campaign"** on every campaign page, in every state: a plain link to the same X account as L-13 (the
   founder's [Q], built as recommended, one constant). The remedy is real: `content/unlisted.json`, changed by a commit
-  with two people's review, hides a campaign from the home page; its page says so, and it stays on-chain, resolves and
-  pays. A malformed entry, or a reason that names a person, fails the build.
+  with two people's review, hides a campaign from the home page; its page says so, and it stays on-chain with its
+  entries, result and payouts unchanged. A malformed entry, or a reason that names a person, fails the build.
 - **The PWA, manifest only:** `app/app/manifest.ts` (Next's convention for `app/manifest.ts`), icons drawn by
   `scripts/pwa-icons.ts` from the mascot on the dark theme's colour, an apple-icon; no service worker.
 - **`scripts/team/resolution-post.ts`** writes the post from `scripts/team/resolution-post.template.txt`, read-only:
@@ -46,11 +49,12 @@
   a campaign with no result, uses no X API, and prints the length as X counts it; a person posts it.
 - **Two Sprint 12 findings deferred here are fixed** (TP §7.3): `personalDataIn` refuses a bare domain and the "@x" and
   "[@x]" forms; the site finds `content/` or fails the build.
-- **The web smoke** gained "site pages and notices" (`tests/e2e/site-pages.e2e.ts`, desktop and 412 px). The whole
-  smoke passed under Node (26 passed, 14 skipped by design) and again with the site built and served by Bun 1.4.2
-  (`E2E_RUNTIME=bun`, `bun --bun next`): the X2.4 evidence on this machine. The server's own staging test (Sprint 09)
-  stays deferred with the server work.
-- **The reviews (2026-10-10)**, saved in the session's scratchpad and summarised in the session log: copy (4 must, 15
+- **The web smoke** gained "site pages and notices" (`tests/e2e/site-pages.e2e.ts`, desktop and 412 px). On the final
+  code the whole smoke passed under Node (28 passed, 16 skipped by design) and again with the site built and served by
+  Bun 1.4.2 (`E2E_RUNTIME=bun`, `bun --bun next`; 28 passed, 16 skipped): the X2.4 evidence, on the development
+  machine. The server's own staging test (Sprint 09) stays deferred with the server work.
+- **The reviews (2026-10-10)**, summarised here and in the session log; the legal one is kept for the lawyer at
+  `docs/legal/2026-10-10-sprint-13-legal-review.md` (with its before-mainnet items and questions): copy (4 must, 15
   should, 17 nits), legal-compliance (6 must, 8 before mainnet, 10 notes; a first draft for the lawyer, not a legal
   opinion) and adversarial (nothing critical; 1 high, 7 medium). **Applied:**
   - The fee page, How it works and the notice before signing now say the Economic Viability Rule (2026-10-09): a pot
@@ -122,7 +126,8 @@ the site with both services on. The exit criteria X2 are met here.
 - [x] The mascot's quips are reviewed; "No oracle. Just me, reading." is gone (design direction, conflict 7). **Done:**
       the site never carried that line; the five quips of `app/lib/brand.ts` are under the copy test now.
 - [x] **The report link (C-10):** every campaign page has a "report this campaign" link. The remedy is unlisting
-      (proposal §2.7); the campaign stays on-chain, resolves and pays. **Done** (`app/features/report/`,
+      (proposal §2.7); the campaign stays on-chain, resolves and pays. **Done**, worded for devnet ("its entries,
+      result and payouts do not change": nothing pays by itself there yet) (`app/features/report/`,
       `content/unlisted.json`); where it leads is the founder's [Q], built as recommended (question 5).
 - [x] **The PWA, manifest only (S2):** `app/manifest.ts` and its icons. No service worker (proposal §3.3). **Done** as
       `app/app/manifest.ts` (`tests/site/manifest.test.ts`, the web smoke).
@@ -146,17 +151,25 @@ the site with both services on. The exit criteria X2 are met here.
       no `OPENROUTER_API_KEY`); X2.4 (the E2E smoke passes under Bun 1.4.2, or the site runs on Node 22 with the reason
       recorded); X2.5 (CSP and headers). **Met but X2.2:** X2.1, the test passes (`app/features/wallet/mwa-chain.test.ts`,
       "X2.1: the wallet's chain equals the API's cluster"); X2.3, no chat route and no `OPENROUTER` in `app/`; X2.4, the
-      whole web smoke passes with the site built and served by Bun 1.4.2 on this machine (the server's staging stays
-      with the deferred server work); X2.5, the headers and the CSP are checked on the built site in the web smoke.
+      whole web smoke passes with the site built and served by Bun 1.4.2 on the development machine (28 passed, 16
+      skipped by design, on the final code), not yet in staging, which stays with the deferred server work; X2.5, the headers and the CSP are checked on the built site in the web smoke.
       **X2.2 waits** for Phantom and Solflare on real Android and iOS devices, and for `/abrir` (Sprint 19); Sprint
       11's Phantom entry stays "reported, not verified".
 - [x] The `privacy-audit` skill answers the nine questions for the leaderboard (wallet addresses ranked in public) and
       for the report channel, before closure (gate 5), with what Cloudflare logs about visitors read and recorded (TP
-      §14.4 C13 [AC]). **Done:** TP §8.2 (two verdicts PASS_WITH_NOTES, with founder items) and
+      §14.4 C13 [AC]). **Done:** TP §8.2 (both PASS with conditions before going public: the live `/privacy`
+      corrected and linked, and who holds the X login; founder items 8 and 9) and
       `knowledge-base/tecnologia/cloudflare-logs-visitantes.md`; what the account's dashboard keeps is the founder's to
       read.
-- [ ] The `release-check` skill passes.
-- [ ] Common closure (`docs/SPRINTS.md`, section 4).
+- [x] The `release-check` skill passes. **RELEASE_WITH_NOTES** (2026-10-10): tests pass but the 3 CPI-proxy tests that
+      only CI can run; the site builds and the web smoke loads every route on the built site, under Node and Bun; the
+      secret scan is clean; the privacy audit passes with conditions before the leaderboard is public; CHANGELOG, code
+      map, sprint doc and session log are current; the OS self-test is coherent (its three standing warnings); the
+      coordinator approved with caveats, applied. Notes: the conditions of TP §8.2 and founder items 3, 8 and 9 come
+      before the API redeploy that makes the leaderboard public.
+- [ ] Common closure (`docs/SPRINTS.md`, section 4). **Done but the merge:** the standard checks (CI on PR #63), the
+      secret scan, the code map, CHANGELOG and session log, the coordinator review and three adversarial-style reviews
+      (copy, legal, adversarial), the record and retrospective below. Merge and tag are the founder's.
 
 ## Deliverables
 
@@ -200,11 +213,14 @@ changes one string or one constant.
    2 keep v0.0.2's (fewer than 10% of wallets back within 30 days is a bad sign, 20% to 35% is reasonable; more than
    40% of pots one-sided is a bad sign); test 3 is measured on devnet without a pass mark, and gets its threshold
    before mainnet, since paying with test SOL proves nothing (P2 §2.5). Nothing in the code depends on it.
-8. **From the privacy review** (TP §8.2): who holds the X account's login and with which second factor. The way to
-   leave the ranking is built (a signed request and a hide list on the server).
+8. **From the privacy review** (TP §8.2): who holds the X account's login and with which second factor; and how fast
+   the team answers a request to leave the ranking (the legal review proposes 15 days; the page promises no time until
+   you decide). The way to leave is built (a signed request and a hide list on the server).
 9. **The live legal pages** (found by the legal review): brot.markets' `/terms` and `/privacy`, approved 2026-10-08,
    still describe USDC, automatic payouts with a 55-hour worst case, team powers that differ from `/record`, "No
-   profiles" and the deletion of Brot's copy of a wallet's activity; the new site's footer links no privacy page.
+   profiles", the deletion of Brot's copy of a wallet's activity, and that the browser keeps only the theme (the new site
+   also keeps the wallet's name, saved campaigns and the entry retry guard); the new site's footer links no privacy
+   page.
    Recommended: take `/terms` down until Sprint 17, correct `/privacy` (keeping the waitlist's deletion form), and link
    it from the site's footer before the site is public. Deploying the landing is the founder's.
 10. **The success-rate column** (the approved prototype had it): dropped as a profile, after the legal review.
@@ -274,4 +290,19 @@ The full devnet cycle through the site. The wallet in-app browser checklists, sc
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+The record is at the top of this file (2026-10-10). Retrospective:
+
+- **What worked:** the pure pieces first (the points rule, the fee example through the SDK's finalize math, the notices
+  list), each with its test before any page; the three reviews in parallel, then the coordinator. The reviews paid for
+  themselves: the viability rule was missing from the copy and from the estimate (a screen showing about 5 per 1 where
+  the program would refund 0.99), the leaderboard carried a profile, and the points had three correctness holes (late
+  joins before the tally, a reused campaign id, events reordered within a slot) that the unit tests could not see
+  because their fixtures were too tidy; the whole-cycle test on LiteSVM caught the last one.
+- **What did not:** the leaderboard's data source has no indexer behind it, so the API reads the program's history
+  itself, in memory, and the page goes live only with a server step that is the founder's; the full devnet cycle
+  through the site waits for `/abrir` (Sprint 19), and X2.2 for real phones. An early edit of the post script did not
+  apply (the formatter had reflowed the line) and went unnoticed until two reviewers found it: re-read after a scripted
+  edit.
+- **Carried:** founder items 1 to 12 (above); TP §7.4's deferrals (the web smoke in CI, the indexer for the history, a
+  tombstone for closed campaigns and the program's floor in a lopsided pot for the audit scope); the partner report
+  (L-24 and Sprint 08); the live `/terms` and `/privacy`; prize harvesting before mainnet (TP §13).

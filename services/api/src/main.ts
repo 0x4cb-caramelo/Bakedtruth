@@ -19,7 +19,10 @@ import { createStore } from "./store";
 const config = loadApiConfig();
 const rpc = rpcFor(config.rpcUrl);
 const store = createStore(rpc);
-const history = createHistory(rpc, { perRefresh: config.historyPerRefresh });
+// The history can read through its own RPC (API_HISTORY_RPC_URL), so its bursts never spend the snapshot's rate limit.
+const history = createHistory(config.historyRpcUrl ? rpcFor(config.historyRpcUrl) : rpc, {
+  perRefresh: config.historyPerRefresh,
+});
 const hidden = createHidden(config.hiddenFile);
 const handle = createHandler(store, { corsOrigin: config.corsOrigin, cluster: config.cluster, history, hidden });
 

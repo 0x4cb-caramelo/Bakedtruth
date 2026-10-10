@@ -15,10 +15,7 @@
         },
         "reason": {
           "type": "string",
-          "enum": [
-            "TeamHouseFailure",
-            "TeamOutsideCause"
-          ],
+          "enum": ["TeamHouseFailure", "TeamOutsideCause"],
           "description": "The VoidReason sent on-chain: the opening fee is refunded on a house failure, kept otherwise"
         },
         "file": {
@@ -48,16 +45,7 @@
           "description": "The SHA-256 of exactly the file's bytes; a void's equals the campaign's void_note_hash on-chain"
         }
       },
-      "required": [
-        "kind",
-        "campaign",
-        "reason",
-        "file",
-        "teamKey",
-        "writtenAt",
-        "text",
-        "sha256"
-      ],
+      "required": ["kind", "campaign", "reason", "file", "teamKey", "writtenAt", "text", "sha256"],
       "additionalProperties": false
     },
     {
@@ -99,15 +87,7 @@
           "description": "The SHA-256 of exactly the file's bytes; a void's equals the campaign's void_note_hash on-chain"
         }
       },
-      "required": [
-        "kind",
-        "corrects",
-        "file",
-        "teamKey",
-        "writtenAt",
-        "text",
-        "sha256"
-      ],
+      "required": ["kind", "corrects", "file", "teamKey", "writtenAt", "text", "sha256"],
       "additionalProperties": false
     }
   ],

@@ -52,6 +52,7 @@ export const BOARD = {
       ? "A wallet with entries on both sides of a campaign scores when either side wins."
       : "A wallet with entries on both sides of a campaign does not score for it.",
     "A voided campaign scores nothing: no side won.",
+    "One person can hold many wallets, so the ranking says nothing about who is behind them.",
     POINTS_WORTH,
   ],
   public:

@@ -41,7 +41,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `scripts/sync-selfhosted.js` — 349 linhas
 - `scripts/test/hooks.test.js` — 278 linhas
 - `scripts/tokenomics-model.ts` — 584 linhas
-- `services/api/tests/api.test.ts` — 204 linhas
+- `services/api/tests/api.test.ts` — 206 linhas
 - `services/landing/tests/pages.test.mjs` — 214 linhas
 - `tests/brot/codama-spike.test.ts` — 219 linhas
 - `tests/brot/events.test.ts` — 211 linhas
@@ -255,10 +255,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`copy.ts`](app/features/leaderboard/copy.ts) | the words of the devnet leaderboard (spec 3.9 of Sprint -1; BR-29; D-m vocabulary; English per L-01): the table, the connected wallet's own line, the loading, e | 63 |
+| [`copy.ts`](app/features/leaderboard/copy.ts) | the words of the devnet leaderboard (spec 3.9 of Sprint -1; BR-29; D-m vocabulary; English per L-01): the table, the connected wallet's own line, the loading, e | 64 |
 | [`leaderboard.tsx`](app/features/leaderboard/leaderboard.tsx) | the devnet leaderboard at /leaderboard (Sprint 13 DoD; spec 3.9 of Sprint -1, prototype-lab/campaigns/js/screens/ranking.js): wallets by points from /api/v1/lea | 193 |
 | [`model.ts`](app/features/leaderboard/model.ts) | the leaderboard's values, as pure functions (Sprint 13): the connected wallet's own line, found in the list the page read, so the read API is never told which w | 14 |
-| [`use-leaderboard.ts`](app/features/leaderboard/use-leaderboard.ts) | the leaderboard's data in React (Sprint 13): every ranked wallet from the read API's /api/v1/leaderboard, read in pages of 100 up to 1,000 wallets, once when th | 47 |
+| [`use-leaderboard.ts`](app/features/leaderboard/use-leaderboard.ts) | the leaderboard's data in React (Sprint 13): every ranked wallet from the read API's /api/v1/leaderboard, read in pages of 100 up to 1,000 wallets, once when th | 51 |
 
 ## `app/features/my-entries/`
 
@@ -298,7 +298,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`copy.ts`](app/features/report/copy.ts) | the words of "Report this campaign" (C-10; Sprint 13; D-m vocabulary; English per L-01): where a report goes, what the team can do about it (unlist the campaign | 25 |
-| [`report-campaign.tsx`](app/features/report/report-campaign.tsx) | "Report this campaign" on every campaign page (C-10, Sprint 13 DoD), in every state: a plain link to where reports go (no X script, widget or API, K-10), what t | 34 |
+| [`report-campaign.tsx`](app/features/report/report-campaign.tsx) | "Report this campaign" on every campaign page (C-10, Sprint 13 DoD), in every state: a plain link to where reports go (no X script, widget or API, K-10), what t | 35 |
 | [`unlisted.ts`](app/features/report/unlisted.ts) | the campaigns the team unlisted after a report (C-10; proposal §2.7), read on the server from content/unlisted.json: a list of `{ "id": "<the campaign's u64 id> | 48 |
 
 ## `app/features/wallet/`
@@ -1037,12 +1037,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`config.ts`](services/api/src/config.ts) | the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only), the port and host (loopback by default), the refresh i | 61 |
+| [`config.ts`](services/api/src/config.ts) | the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only), the port and host (loopback by default), the refresh i | 76 |
 | [`dto.ts`](services/api/src/dto.ts) | the JSON shape of a campaign for the site. Amounts are lamport strings, addresses base58, times Unix seconds (strings for the big integers). The state is the SD | 58 |
 | [`hidden.ts`](services/api/src/hidden.ts) | the wallets left out of the public leaderboard at their owner's request (Sprint 13, the privacy review, TP §8.2 question 8): a JSON array of base58 addresses in | 61 |
 | [`history.ts`](services/api/src/history.ts) | the program's own history, read for the leaderboard (Sprint 13) until Sprint 08's indexer exists: every signature of the program through `getSignaturesForAddres | 152 |
 | [`leaderboard.ts`](services/api/src/leaderboard.ts) | `GET /api/v1/leaderboard` (TP §6; Sprint 13, BR-29): devnet points from the program's events (history.ts) and the live campaign accounts (the snapshot), through | 78 |
-| [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, reads the program's new history and the hide list | 72 |
+| [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, reads the program's new history and the hide list | 75 |
 | [`query.ts`](services/api/src/query.ts) | validates the list's query string. An unknown parameter, a bad state, or a limit or offset out of range is a 400 with a named code; nothing is guessed. The stat | 49 |
 | [`routes.ts`](services/api/src/routes.ts) | the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged), /api/v1/campaigns/:address and, since Sprint 13, /api/v1/leaderb | 107 |
 | [`snapshot.ts`](services/api/src/snapshot.ts) | one read of the chain: every campaign account of the program, decoded by the SDK (a wrong owner, tag or version is skipped), with its public state computed from | 46 |
@@ -1052,7 +1052,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`api.test.ts`](services/api/tests/api.test.ts) | the read API's contract with fake data and no cluster: the list's filters and paging, the 400 and 404 answers, the detail route, CORS, the method refusal, the h | 204 |
+| [`api.test.ts`](services/api/tests/api.test.ts) | the read API's contract with fake data and no cluster: the list's filters and paging, the 400 and 404 answers, the detail route, CORS, the method refusal, the h | 206 |
 | [`history.test.ts`](services/api/tests/history.test.ts) | the leaderboard's history reader against a scripted RPC (Sprint 13, the adversarial review's cases): a node that ignores `until` costs a re-listing but never a  | 129 |
 | [`leaderboard.test.ts`](services/api/tests/leaderboard.test.ts) | the leaderboard route's contract with fake data and no cluster (Sprint 13): 503 until the program's history has been read (or with no history at all), what heal | 158 |
 

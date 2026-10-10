@@ -6,11 +6,11 @@ every 15 s by default.
 
 ## Endpoints (`/api/v1`, GET only)
 
-| Path                  | Returns                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/health`             | `status` (`starting`, `ok`, `stale`), `as_of_slot`, `taken_at`, `campaigns_total`, `last_refresh_error` (an error name, never a URL)                                                                                                                                                                                                                                                      |
-| `/campaigns`          | `campaigns` with `total`, `offset`, `limit`, `as_of_slot`, `chain_time`. Filters: `state` = `open`, `closed`, `in_review`, `paid`, `void`, `active` (open or closed), `resolved` (in review, paid or void); `limit` 1 to 100 (default 50); `offset`                                                                                                                                       |
-| `/campaigns/:address` | one campaign, or 404                                                                                                                                                                                                                                                                                                                                                                      |
+| Path                  | Returns                                                                                                                                                                                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/health`             | `status` (`starting`, `ok`, `stale`), `as_of_slot`, `taken_at`, `campaigns_total`, `last_refresh_error` (an error name, never a URL)                                                                                                                                                                                                                    |
+| `/campaigns`          | `campaigns` with `total`, `offset`, `limit`, `as_of_slot`, `chain_time`. Filters: `state` = `open`, `closed`, `in_review`, `paid`, `void`, `active` (open or closed), `resolved` (in review, paid or void); `limit` 1 to 100 (default 50); `offset`                                                                                                     |
+| `/campaigns/:address` | one campaign, or 404                                                                                                                                                                                                                                                                                                                                    |
 | `/leaderboard`        | devnet points (Sprint 13): `rows` (`rank`, `wallet`, `points`, `entered`) of the wallets with points, with `total`, `offset`, `limit`, `complete`, `rule`, `both_sides_score`, `as_of_slot`, `chain_time`. `limit` 1 to 100 (default 50); `offset`. No `wallet` parameter, and no success rate (the privacy review). 503 until the history's first read |
 
 Health also says `leaderboard_complete` (`null` with no history; `false` while transactions wait for a later refresh or
@@ -22,7 +22,9 @@ kept, in memory, in the order the signatures were listed. It runs on its own loo
 snapshot, with a timeout on every call. A refresh asks only for signatures newer than the last one listed, remembers
 every signature it listed, and reads at most `API_HISTORY_PER_REFRESH` transactions (default 200); one that does not
 read back goes to the back of the queue and is skipped after five tries. A first start on a long history takes several
-refreshes. A restart reads the history again.
+refreshes. A restart reads the history again. Set `API_HISTORY_RPC_URL` to read the history through another RPC (or
+another key), so its bursts never spend the snapshot's rate limit: the public devnet RPC answers 429 under load, and a
+429 on the snapshot turns health "stale", which hides the entry panel.
 
 The rule is the SDK's `pointsTable`: 1 point per campaign entered on the side that won, once the result is final (the
 6-hour review ended without a contest, or the campaign settled; a YES on a price campaign only once it settles, since
