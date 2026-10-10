@@ -21,7 +21,9 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
   descrição curta e longa, redes e ferramentas, entrada no mercado, validação de demanda, distribuição e trabalho
   anterior. Lista o que falta (a experiência e a localização da equipe, os dois vídeos, o logotipo no formato do
   portal) e o que depende do fundador. O formulário do portal não foi visto; nada foi enviado. O prazo é 12/10/2026,
-  23h59 do Pacífico (3h59 de 13/10 em Brasília).
+  23h59 do Pacífico (3h59 de 13/10 em Brasília). Em 10/10/2026 a primeira aba do formulário ("Project details")
+  ganhou a segunda versão das respostas, mais longas e na ordem das perguntas, e a seção sobre o que existe foi
+  refeita: o programa está na devnet desde a noite de 9/10, e um ciclo inteiro rodou lá.
 - **Sprint 03: o programa lê o resultado sozinho, e o Anchor sai do repositório** (`programs/brot-markets`,
   9/10/2026). Os cinco tipos de campanha abrem, travam a entrada e resolvem on-chain:
   - **Os quatro leitores do `pred-provable` portados para o Pinocchio**, um arquivo cada, com o aviso MIT: a queima
@@ -388,8 +390,10 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
 
 - **Colosseum, prazo 12/10/2026:** a submissão voltou ao plano em 9/10/2026, e o BP v0.0.4 ainda diz que o hackathon
   saiu (Parte 4, seção 3.2). Para enviar faltam os campos reais do portal, a experiência e a localização da equipe, o
-  de acordo do Bernardo e do Ronaldo, a decisão sobre o repositório (privado: dar acesso ou abrir), os dois vídeos e
-  saber se o programa novo chega à devnet (pedidos 41 e 43). Detalhe em `docs/business/colosseum-submissao.md`.
+  de acordo do Bernardo e do Ronaldo, a decisão sobre o repositório (privado: dar acesso ou abrir), os dois vídeos, as
+  abas "Media and code" e "Team" do formulário, e o `README.md`, que ainda descreve o programa antigo e é a
+  primeira página que um jurado abre. O programa chegou à devnet em 9/10/2026. Detalhe em
+  `docs/business/colosseum-submissao.md`.
 - **O R4, abertura mais barata nos primeiros meses,** não foi construído (Sprint 02).
 
 - **Autoria no Colosseum, prazo 12/10/2026:** o plano diz que a equipe se apresenta como uma pessoa, mas o git mostra

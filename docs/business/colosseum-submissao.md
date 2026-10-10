@@ -37,6 +37,10 @@ account"), e cada pessoa só pode estar em uma submissão.
 
 ## 2. As respostas propostas
 
+Escritas em 9/10/2026, antes de o programa ir para a devnet e antes de a primeira aba do formulário chegar. Onde
+divergem das seções 3 e 5, valem as seções 3 e 5: em especial, "The program is not deployed", na validação de
+demanda, deixou de ser verdade.
+
 ### 2.1 Nome
 
 > Brot Markets
@@ -184,21 +188,26 @@ mostra; o repositório dele não foi conferido.
 
 ## 3. O que existe hoje, para a descrição e para a demonstração
 
-Conferido em 9/10/2026, na `main` e nos pedidos abertos.
+Conferido em 10/10/2026, de madrugada, na `main` (f48237b) e na devnet. Na noite de 9 para 10/10 o Ronaldo mesclou os
+pedidos 41, 44, 45 e 43 e publicou o programa; a versão de 9/10 desta seção dizia que nada disso tinha acontecido.
 
 | Parte | Situação |
 |---|---|
-| Programa `brot-markets` (id `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN`): configuração, equipe e pausa; abertura paga, cobrada em SOL pelo preço SOL/USD da Pyth; entrada em SOL; os cinco leitores; a trava de entrada; `resolve_campaign`, que qualquer carteira dispara e que recusa ser chamada de dentro de outro programa | Na `main` (Sprints 02 e 03) |
-| Testes do programa: 255 em Rust e 262 em TypeScript, sobre contas reais capturadas da rede principal, e um cenário num fork da rede principal | Na `main` |
-| Liquidação, pagamento, taxas, parte do criador e invariantes | Em revisão, pedido 41 (Sprint 04) |
-| A biblioteca do cliente e o ciclo na devnet, "preparado, não publicado": ensaiado num cluster local, sem deploy | Rascunho, pedido 43 (Sprint 05) |
-| Programa novo na devnet | **Não publicado** |
+| Programa `brot-markets`: abertura paga em SOL pelo preço SOL/USD da Pyth, entrada, os cinco leitores, a trava de entrada, a resolução, a janela da equipe (confirma ou anula, nunca inverte), a liquidação, o pagamento, a taxa e a parte do criador | Na `main` (Sprints 02 a 05) |
+| Programa na devnet | **Publicado** em 9/10/2026, 23h27 de Brasília, no id novo `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o` (o id antigo, `6G2d…uVN`, foi abandonado). Li a conta na rede em 10/10: existe, é executável, e tinha 54 transações, 52 com sucesso |
+| Ciclo inteiro na devnet, por script | Rodou: abertura paga de US$ 500 (4,5617 SOL a 109,61), entradas no SIM e no NÃO, resultado lido de um token queimado, confirmação da equipe, pagamento, parte do criador e taxa. As assinaturas estão em `session-log/2026-10-09-sprint-05-respostas-do-deploy-e-leituras-devnet.md`, na `main` |
+| Campanhas abertas na devnet para o site | Três, da equipe: BTC/USD, SOL/USD e uma queima |
+| Tipos na devnet | Preço e queima rodam. Meteora e pool de staking só foram testados com contas reais da rede principal: não há pool na devnet. Stake de validador está construído e desligado em toda compilação, até haver um SIM registrado na devnet |
+| Testes | 436 em Rust e 307 em TypeScript, como registrado no fechamento da Sprint 04; a Sprint 05 acrescentou os da biblioteca. **Não rodei os testes nesta sessão**; o número vem dos registros de sprint |
+| Biblioteca do cliente (`@brot/sdk`) | Na `main`: refaz 24.000 contas geradas pelo programa, sem divergência |
+| Serviço que resolve e paga sozinho | Não existe ainda (Sprint 06). Na devnet, quem aciona é um script |
 | Telas das campanhas | Protótipo, pedido 36; o aplicativo no repositório ainda mostra o programa antigo |
+| `README.md` na raiz | **Ainda descreve o `pred-provable`,** o programa antigo, com Anchor e USDC. É a primeira página que um jurado abre |
 | `brot.markets` (lista de espera), `docs.brot.markets` e o deck em `brot.markets/pitch` | No ar |
 
-**O que isso quer dizer para o vídeo de demonstração.** Hoje dá para mostrar o programa resolvendo nos testes e no
-fork da rede principal, e o site. Um ciclo de verdade na devnet (abrir, entrar, resolver, pagar) depende de mesclar os
-pedidos 41 e 43 e de publicar o programa, que são decisões do fundador listadas no pedido 43.
+**O que isso quer dizer para o vídeo de demonstração.** Dá para mostrar um ciclo de verdade na devnet, pelo terminal,
+com as transações abertas num explorador. Não dá para mostrar um site em que alguém entra numa campanha: as telas não
+existem.
 
 ## 4. O que depende do Lucas
 
@@ -208,7 +217,8 @@ pedidos 41 e 43 e de publicar o programa, que são decisões do fundador listada
 4. De quem é cada uma das quatro identidades do Git.
 5. Repositório: acesso ao Colosseum ou abertura.
 6. Se o deck e o roteiro são alinhados ao BP v0.0.4 antes de gravar.
-7. Se a devnet sai até 12/10 (as decisões do pedido 43) ou se a demonstração mostra os testes e o fork.
+7. Resolvido em 9/10/2026: o programa está na devnet (seção 3). Falta decidir se o `README.md` é reescrito antes de
+   dar acesso ao repositório.
 8. Quem grava os dois vídeos e quando.
 9. O número da lista de espera, se for para citar.
 10. Se inscreve também a trilha lateral do Superteam Brasil, de cerca de US$ 5 mil, com prazo às 23h59 de Brasília do
@@ -217,32 +227,42 @@ pedidos 41 e 43 e de publicar o programa, que são decisões do fundador listada
 ## 5. O formulário real, parte 1: "Project details"
 
 Em 9/10/2026 o Lucas colou a primeira aba do portal, com os campos e os limites, e pediu "as melhores possíveis
-respostas para ser [considerado] e avaliado por uma AI, baseado em nosso pitch, em especial". As respostas abaixo
-substituem as da seção 2 onde tratam do mesmo campo. Faltam as abas "Media and code" e "Team".
+respostas para ser [considerado] e avaliado por uma AI, baseado em nosso pitch, em especial". Em 10/10/2026 pediu
+"respostas melhores, mais longas e bem pensadas", na ordem das perguntas. Esta é a segunda versão; a primeira está no
+commit 05e33bd. As respostas substituem as da seção 2 onde tratam do mesmo campo. Faltam as abas "Media and code" e
+"Team".
+
+**O que mudou da primeira para a segunda versão.**
+
+- **O programa está na devnet,** e um ciclo inteiro rodou lá (seção 3). A primeira versão dizia "abre, recebe entradas
+  e resolve"; esta diz o que rodou e dá o endereço, que qualquer revisor confere.
+- **Cada resposta usa quase todo o limite.** A contagem trata cada quebra de linha como dois caracteres.
+- **Os cinco tipos têm o estado de cada um,** no campo de tecnologias, que não tem limite: dois rodam na devnet, dois
+  esperam uma pool de teste, um está desligado.
+- **A janela da equipe aparece.** As respostas dizem "sem voto, sem juiz"; a equipe pode anular um resultado e devolver
+  tudo, e nunca inverter. Quem lê o código acha isso, então a resposta diz antes.
+- **"517 testes" virou "mais de 740",** pelos registros de sprint. Não rodei os testes nesta sessão.
 
 **Como foram escritas.** A história é a do deck (o problema de quem decide, o caso de US$ 7 milhões, "Proof >
-Promises", os três números do mercado), e as regras são as do programa e do BP v0.0.4 (tudo em SOL). O deck no ar
-ainda diz USDC; quem comparar o vídeo com o formulário vê a diferença. Cada resposta responde à pergunta na primeira
-frase, traz número com fonte e diz o que ainda não existe, porque um revisor automático compara os campos entre si e
-com o repositório.
+Promises", os números do mercado), e as regras são as do programa e do BP v0.0.4 (tudo em SOL). O deck no ar ainda diz
+USDC, semente e teto. Cada resposta responde à pergunta na primeira frase, traz número com fonte e diz o que ainda não
+existe, porque um revisor automático compara os campos entre si e com o repositório.
 
-**Campos que só o Lucas preenche.**
+**A conferir pelo Lucas antes de colar.**
 
-- **"What category best describes your product?"** As opções da lista não vieram na colagem. Se houver uma de
-  mercados de previsão, é ela. Se não, "Consumer": o Melee, o precedente mais próximo, foi premiado nessa categoria
-  no Breakout (FATO, registro do Colosseum, em `knowledge-base/market/pumpfun-model-for-open-markets.md`).
-- **"Where is your team primarily based?"** O país onde moram. Não está nos arquivos.
-- **"Team Telegram contact".** Não está nos arquivos.
-- **As quatro identidades do Git,** nos colchetes da penúltima resposta.
-- **"Accelerator application".** Marcar inclui a candidatura à aceleradora (US$ 250 mil de pré-seed, pelo regulamento)
-  e deve abrir mais perguntas. É decisão dos sócios.
+- **As identidades do Git** na penúltima resposta são leitura minha, e não fato confirmado: `lglucas` é o usuário do
+  Git nesta máquina e `0x4cb-caramelo` é a conta que publica daqui; o `README.md` diz que o `pred-provable` é do
+  Ronaldo e o hospeda em `0xcf07`; `0xcf02` assina o primeiro commit dele e as Sprints 04 e 05.
+- **Ninguém de fora.** A resposta diz "No". Se alguém de fora desenhou o mascote ou o deck, ela muda.
 - **Outras ferramentas de IA,** se a equipe usou alguma além do Claude Code (imagens do mascote, o deck). A pergunta
   pede todas.
 
-**O aviso no topo da página:** "Você ainda não está inscrito no Colosseum 2026 pela Superteam Brasil. Inscreva-se em
-hackathon.superteam.com.br". A inscrição pela Superteam Brasil é um passo à parte, ainda não feito.
+Os campos seguem a ordem do formulário.
 
-**"Is your project a mobile-focused dApp?" é "No"** porque o app Android está no plano e não foi construído.
+**Accelerator application (o botão no topo)**
+
+Decisão dos sócios. Marcar inclui a candidatura à aceleradora (US$ 250 mil de pré-seed, pelo regulamento) e deve abrir
+mais perguntas.
 
 **Project name**
 
@@ -250,10 +270,10 @@ hackathon.superteam.com.br". A inscrição pela Superteam Brasil é um passo à 
 Brot Markets
 ```
 
-**Brief description** (403 de 500 caracteres, contando cada quebra de linha como dois)
+**Brief description** (491 de 500 caracteres)
 
 ```text
-Prediction markets the chain resolves. Brot Markets turns on-chain milestones into growth campaigns: a project opens a YES/NO campaign on a goal Solana can measure (a token burn, locked liquidity, staked SOL, a price), its community takes sides with SOL, and at the deadline the program reads the target account and settles. No vote, no judge, no opinion oracle. Winners split the pot. Proof > Promises.
+Brot Markets is a permissionless prediction market on Solana where the chain itself decides the result. A project opens a YES/NO campaign on a milestone Solana can measure (a token burn, liquidity locked on Meteora, staked SOL, a Pyth price) and funds the prize. Its community takes sides with SOL. At the deadline the program reads the target account and the winners split the pot. No vote, no judge, no opinion oracle: anyone can re-read the same account. Live on devnet. Proof > Promises.
 ```
 
 **Project website**
@@ -262,65 +282,95 @@ Prediction markets the chain resolves. Brot Markets turns on-chain milestones in
 https://brot.markets
 ```
 
-**What are you building, and who is it for?** (946 de 1000 caracteres, contando cada quebra de linha como dois)
+**What are you building, and who is it for?** (996 de 1000 caracteres)
 
 ```text
-We are building permissionless prediction markets whose result is read from a Solana account, never decided by a person. Each one is an On-Chain Campaign.
+We are building prediction markets with nobody in the middle: the program reads the outcome from a Solana account. No person, token vote or AI model reports it. Each market is an On-Chain Campaign.
 
 Who it is for:
-1. On-chain projects, our customer. A project opens a campaign on its own milestone (burn 100M tokens by Nov 30, lock liquidity on Meteora) for US$500 in SOL; 90% becomes the prize. A promise that lived in a post nobody checks becomes a public campaign its community follows.
-2. Their communities and any Solana wallet: join YES or NO with SOL, no sign-up; winners split the pot.
+1. On-chain projects, our paying customer. A team that promised its holders something measurable (burn 100M tokens by Nov 30, lock liquidity on Meteora, reach a stake target) opens a campaign on it for US$500 in SOL, and 90% becomes the prize for its community. A promise that lived in a post nobody checks becomes a public countdown the chain settles.
+2. Their communities, and any Solana wallet: join YES or NO with SOL, no sign-up; winners split the pot, paid straight to the wallet.
 
-How it works: five campaign types, each with its own on-chain reader (Pyth price, token supply, Meteora locked liquidity, stake pool size, validator stake). Anyone can trigger the resolution; nobody can choose the result. Brot earns 10% of the losing side only; the creator earns 1%.
+Brot keeps 10% of the losing side; the creator earns 1% of entries, a reason to promote it.
 
-Built so far: the program opens, takes entries and resolves all five types, with 517 automated tests.
+Working today on devnet: a full cycle ran end to end. A US$500 opening paid in SOL at the Pyth price, YES and NO entries, the result read from a burned mint, then winners, creator and fee paid.
 ```
 
-**Why did you decide to build this, and why build it now?** (913 de 1000 caracteres, contando cada quebra de linha como dois)
+**Why did you decide to build this, and why build it now?** (995 de 1000 caracteres)
 
 ```text
-Why: in every prediction market, someone stands between the event and your payout. In March 2025 one US$7M Polymarket market settled on an event that never happened, with no refunds. Polymarket disputes go to a token vote and take 4 to 6 days; World, inside Phantom, uses a company key; PNP asks two language models. We asked which markets need nobody: the ones whose answer is already on-chain. That limit is also the product. What a chain can prove (burns, locked liquidity, stake) is exactly what crypto projects promise their holders and nobody enforces. So we built the market as a growth tool for those projects.
+Why: in every prediction market someone stands between the event and your payout. In March 2025 a US$7M Polymarket market settled on an event that never happened, with no refunds. Disputes there go to a token vote that takes 4 to 6 days; World writes results with a company key; PNP asks two language models. We asked the opposite question: which markets need nobody? Those whose answer already sits in an on-chain account. That limit became the product. What a chain can prove (a burn, locked liquidity, stake, a price) is what crypto projects promise their holders, and nobody holds them to it. So the project is our customer, not our topic: it funds a campaign on its own promise, and the chain shows whether it delivered.
 
-Why now: prediction markets moved US$21.7B in 30 days (DefiRate), and on Solana the category has barely started: World in Phantom grew from US$1.1M a month in June to US$15.4M in September 2026, 13x in three months (DefiLlama). We found no live market on a token burn or on locked liquidity.
+Why now: the category is large and new, US$21.7B in 30 days (DefiRate), and on Solana it has barely started: World in Phantom went from US$1.1M a month in June to US$15.4M in September 2026 (DefiLlama). We found no live market on a token burn or on locked liquidity.
 ```
 
 **What technologies are you using or integrating with to build your product?**
 
+Sem limite na tela; 2365 caracteres.
+
 ```text
-On-chain: Solana program in Rust on Pinocchio (no Anchor), built with cargo build-sbf. It reads third-party accounts directly, checking owner and layout first: Pyth pull oracle price accounts, SPL Token mints, Meteora DAMM v2 pools, SPL Stake Pool accounts, vote accounts and the epoch-stake syscall.
-Client: Shank IDL, Codama-generated TypeScript client, @solana/kit.
-Testing: Mollusk, LiteSVM, Surfpool (mainnet fork), fixtures captured from mainnet accounts.
-Web: Next.js, Tailwind CSS, Solana wallet-adapter, Bun, Node.js, Cloudflare.
-CI: GitHub Actions (build, tests, clippy, IDL drift, secret scan).
-AI tools: Claude Code (Anthropic) for writing code, tests and code review, directed by the team; every pull request is merged by a founder.
+On-chain program: Rust on Pinocchio (Anza), no Anchor, built with cargo build-sbf in CI. It holds a closed set of five account readers, one file each, and each checks the owner and the layout of an account before reading a byte:
+- Pyth pull oracle (the upgraded receiver): campaign prices, and the SOL/USD price that turns the US$500 opening fee into lamports.
+- SPL Token mint: supply after a burn.
+- Meteora DAMM v2 pool: permanently locked liquidity.
+- SPL Stake Pool: the pool's size at an epoch.
+- Vote account plus the sol_get_epoch_stake syscall: a validator's stake.
+Every instruction emits one event by self-CPI, and clippy denies unchecked arithmetic and truncating casts in the crate.
+
+Client: Shank IDL, a Codama-generated TypeScript client, @solana/kit and zod. Our SDK (@brot/sdk) has a read half and a transaction half and mirrors the program's fee and payout math: it replays 24,000 vectors produced by the Rust code with zero mismatches, on Bun and on Hermes (React Native), so the web app and the planned Android app share one library.
+
+Testing: Mollusk and LiteSVM on real mainnet account bytes captured as fixtures (SHA-256 pinned), Surfpool for a mainnet-fork scenario, and a mutation script showing that every hand-written account check has a test that fails without it. More than 740 automated tests (436 in Rust, over 300 in TypeScript).
+
+CI and deploy: GitHub Actions (build, tests, clippy, rustfmt, IDL drift, secret scan, a Metro and Hermes bundle job). The devnet binary is CI's artifact, verified by SHA-256 and deployed on the upgradeable loader. Program on devnet: 5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o.
+
+Status by campaign type on devnet: price and burn campaigns are open and a full cycle has settled; the Meteora and stake-pool types are tested on mainnet bytes and wait for a devnet pool; the validator-stake type is built and stays switched off until a YES is recorded on devnet.
+
+Web: Next.js (App Router), Tailwind CSS, Solana wallet-adapter and Bun; the landing site and the docs run on plain Node with no dependencies, behind Cloudflare.
+
+AI tools: Claude Code (Anthropic) wrote much of the code, tests and documentation under our direction and ran adversarial reviews (a security red team and a coordinator pass) before sprints were merged. Every pull request was merged on a team member's decision.
 ```
 
 **Which chains does your product use?**
 
-```text
-Solana
-```
+Só `Solana`.
 
-**How does your product use these chains?** (477 de 500 caracteres, contando cada quebra de linha como dois)
+**How does your product use these chains?** (480 de 500 caracteres)
 
 ```text
-Solana is the product, not a settlement layer under it. A Solana program holds each campaign's pot in SOL in program-owned accounts and resolves by reading other Solana accounts directly: a Pyth price account, an SPL mint's supply, a Meteora DAMM v2 pool, a stake pool, a validator's stake. The US$500 opening fee is charged in SOL at the on-chain Pyth SOL/USD price. Entries, payouts and fees are in SOL, wallet to program, with no custody and no opinion oracle. Devnet today.
+Solana is the product, not a settlement layer under it. One Solana program holds each campaign's pot in SOL in a program-owned vault and settles by reading other Solana accounts directly: a Pyth price, an SPL mint's supply, a Meteora DAMM v2 pool, a stake pool, a validator's epoch stake. The US$500 opening fee is charged in SOL at the on-chain Pyth SOL/USD price. Entries, payouts and fees are SOL, wallet to program. Live on devnet: 5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o
 ```
+
+**What category best describes your product?**
+
+As opções da lista não vieram em nenhuma das duas colagens. Se houver uma de mercados de previsão, é ela. Se não,
+"Consumer": o Melee, o precedente mais próximo, foi premiado nessa categoria no Breakout (FATO, registro do Colosseum,
+em `knowledge-base/market/pumpfun-model-for-open-markets.md`).
 
 **Is your project a mobile-focused dApp?**
 
+`No`. O app Android está no plano e não foi construído.
+
+**Where is your team primarily based?**
+
+O país onde os sócios moram. Não está nos arquivos.
+
+**Please share a team Telegram contact**
+
+Não está nos arquivos.
+
+**Did anyone not listed on the team here do meaningful work on this project?** (573 de 600 caracteres)
+
 ```text
-No
+No. Every product decision, review and merge was made by the team members listed. Three notes so the history reads correctly. (1) Git shows four author identities for two people: 0xcf02 and 0xcf07 are Ronaldo Pereira (CTO); lglucas and 0x4cb-caramelo are Lucas Galvão. (2) Much of the code, tests and documentation was written with an AI coding assistant (Claude Code), directed and reviewed by us; it appears as co-author in commits. (3) The repository was set up with AI Dev OS v0.5.6, a pre-existing process kit (working rules and CI scripts) that holds no product code.
 ```
 
-**Did anyone not listed on the team here do meaningful work on this project?** (519 de 600 caracteres, contando cada quebra de linha como dois)
+**Is there anything else judges should know about your project that isn't captured above?** (497 de 500 caracteres)
+
+A primeira colagem mostrava o limite de 500; a segunda não mostrou o contador deste campo.
 
 ```text
-No. Product decisions, code review and every merge were made by the three team members listed. Two clarifications. The git history shows four author identities: [0xcf02 and 0xcf07 are ___; lglucas and 0x4cb-caramelo are ___]. And much of the code and documentation was written with an AI coding assistant (Claude Code), directed and reviewed by the team; it appears as co-author in commits. The repository was set up with AI Dev OS v0.5.6, a pre-existing process kit (working rules and CI scripts) with no product code.
+Everything was built inside the hackathon window: first commit on 1 Oct 2026. It began that day as pred-provable, an Anchor program by our CTO (sponsor-priced YES tokens). On 3 Oct we redefined it as pot-based campaigns and rewrote it on Pinocchio; four readers were ported and checked against the old program on the same mainnet accounts (62 cases). Limits: devnet only, unaudited, no real money. The team can void a result (full refund), never flip it. Mainnet waits for an audit and a multisig.
 ```
 
-**Is there anything else judges should know about your project that isn't captured above?** (493 de 500 caracteres, contando cada quebra de linha como dois)
-
-```text
-All code dates from 1 Oct 2026, inside the hackathon window. The project began that day as pred-provable, an Anchor program by our CTO built on sponsor-priced YES tokens. On 3 Oct we redefined it as pot-based campaigns and rewrote the program on Pinocchio. Four account readers were ported and checked against the old program on the same mainnet accounts (62 cases) before it was removed. Today: devnet only, unaudited, no real money. Mainnet opens only after an external audit and a multisig.
-```
+**O aviso no topo da página:** "Você ainda não está inscrito no Colosseum 2026 pela Superteam Brasil. Inscreva-se em
+hackathon.superteam.com.br". A inscrição pela Superteam Brasil é um passo à parte, ainda não feito.

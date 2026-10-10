@@ -52,3 +52,37 @@ para isso vamos abrir um novo branch específico."
 - Alinhar o deck e o roteiro ao BP v0.0.4 antes de gravar os vídeos.
 - A devnet até 12/10, ou a demonstração só com os testes e o fork.
 - A linha do BP v0.0.4 que diz que o hackathon saiu do plano, quando a submissão for confirmada.
+
+## 10/10/2026, de madrugada: a segunda versão das respostas da primeira aba
+
+**O que o Lucas pediu.** "você poderia me dar respostas melhores, mais longas e bem pensadas, e me dar as respostas na
+mesma ordem que eu te entreguei as perguntas?"
+
+**O que mudou no chão antes de escrever.** Ao reler o estado do código, a main tinha andado: na noite de 9 para
+10/10 o Ronaldo mesclou os pedidos 41, 44, 45 e 43 e publicou o programa na devnet, num id novo (5Rx8…n8o). A
+primeira versão das respostas, de horas antes, dizia que o programa abria, recebia entradas e resolvia, com 517
+testes, e que estava "Devnet today" sem estar. Conferi a conta na rede, só leitura: existe, é executável, 54
+transações.
+
+**As escolhas da segunda versão.**
+
+- **Usar quase todo o limite de cada campo,** contando cada quebra de linha como dois caracteres, para não estourar
+  se o portal contar assim.
+- **Dizer o que rodou, com o endereço,** em vez de adjetivo. Um revisor automático confere um endereço; não confere
+  "robusto".
+- **O estado de cada tipo de campanha vai no campo de tecnologias,** o único sem limite: preço e queima rodam na
+  devnet; Meteora e pool de staking só têm teste com contas da rede principal; stake de validador está desligado.
+  Escrever "cinco tipos funcionando" seria desmentido pelo próprio repositório.
+- **A janela da equipe entra na última resposta.** O texto diz "no vote, no judge"; a equipe pode anular e devolver,
+  nunca inverter. É a frase que o BP propõe ("no human picks the winner") dita antes que alguém a ache no código.
+- **Tirei "quem acerta nunca recebe menos do que pôs".** No pote de um lado só, a partir da segunda carteira há 1% de
+  taxa; o roteiro do pitch já evita essa frase pelo mesmo motivo.
+- **Os testes viraram "mais de 740"** (436 em Rust e 307 em TypeScript, do registro da Sprint 04). Não rodei os testes.
+- **As identidades do Git foram preenchidas como leitura minha,** marcada para o Lucas confirmar: o usuário do Git e
+  a conta que publica nesta máquina, e o README, que atribui o pred-provable ao Ronaldo.
+
+**Achado novo.** O README da raiz ainda descreve o pred-provable, com Anchor e USDC. É a primeira página que um jurado
+abre, e contradiz o formulário. Entrou na lista do que falta.
+
+**Em aberto.** As abas "Media and code" e "Team"; a categoria (a lista de opções não veio); país, Telegram, a marca
+da aceleradora; a confirmação das identidades do Git e de que ninguém de fora trabalhou no projeto.
