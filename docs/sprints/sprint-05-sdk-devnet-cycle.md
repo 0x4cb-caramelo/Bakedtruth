@@ -75,7 +75,7 @@ read, the window passes, the winners and the creator are paid.
 - [ ] **Checked on devnet and recorded:** a `StakeAtLeast` YES (or the kind stays closed); the SOL/USD account's age
       against `max_price_age`; an epoch turn; the real settle batch with self-CPI events and its compute cost (T3,
       C7); the rent of `Campaign` and `Entry`; the clock drift (C12).
-- [ ] Whether the public devnet deployment carries the drill constants or the real ones is decided and recorded [AC].
+- [x] Whether the public devnet deployment carries the drill constants or the real ones is decided and recorded [AC].
 - [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
 ## Deliverables
@@ -93,9 +93,16 @@ read API schemas (08). The site (09). The Android app (20).
 
 ## Founder decisions that block the sprint
 
-- **Open (Q12's remainder):** which of Lucas and Ronaldo holds the devnet upgrade key on deploy day.
-- **Open (from Sprint 00's review, a founder action):** the program-address keypair backed up outside
-  `target/deploy/`, before the deploy.
+- **Answered on 2026-10-09, evening (Ronaldo; text pasted into the session, written by another assistant from his
+  answers; `session-log/2026-10-09-sprint-05-respostas-do-deploy-e-leituras-devnet.md`):** Ronaldo holds the devnet
+  upgrade key (Q12's remainder); the id `6G2d…uVN` stays on devnet if its ProgramData is clean (it was, read-only, on
+  2026-10-09 at 22:00 BRT), and mainnet gets a fresh id kept private; the real constants on devnet, not the drill
+  ones; `main` treated as protected; read-only devnet checks allowed; PR #41 to be merged (not done: the session's
+  safety check stopped the merge, which needs his confirmation in his own words).
+- **Still open, blocking the deploy:** the program-address keypair of `6G2d…uVN` (not on the development machine; the
+  id was declared in Lucas's commit `ae8b837`), backed up outside `target/deploy/`; the path of Ronaldo's upgrade key;
+  the public keys of the admin, the fee recipient and the team (the answer says "already prepared", but no file in the
+  repository holds them); devnet SOL for the deploy and the smoke.
 - **Answered:** Q10 falls away: devnet SOL comes from the faucet, and there is no test USDC.
 
 ## Agents and skills
@@ -204,6 +211,7 @@ the second vector generator), so the binary CI builds on `main` after PR #41 mer
 | Test helpers on the SDK | `tests/helpers.ts` does not exist; the row maps to `tests/brot/setup.ts`, which decodes every event of every LiteSVM transaction through the SDK (the fields cross-checked for the 7 events the kit lays out; for Sprint 04's other 11, the discriminator and the size, against the Rust source), and `tests/brot/flows.ts`, which builds with the SDK. No script or test imports `app/lib` |
 | Team scripts | `scripts/team/`, rehearsed (`bun run team:rehearse`, exit 0): every act simulated unsigned; the void's on-chain note hash equals the SHA-256 of the saved record, written as `.pending` until the ledger confirms |
 | Whole debit | The smoke's preview: payment, `max_lamports`, both rents from the cluster, the network fee; the creator's debit equal to it |
+| Drill or real constants | Decided by Ronaldo on 2026-10-09: the real constants on the public devnet; recorded in `session-log/2026-10-09-sprint-05-respostas-do-deploy-e-leituras-devnet.md` |
 
 **Open rows, and why**
 
@@ -215,14 +223,22 @@ the second vector generator), so the binary CI builds on `main` after PR #41 mer
 - **Seed:** rewritten in SOL on the SDK and rehearsed locally (exit 0); the devnet run waits on the deploy, like the
   smoke.
 - **Deploy, smoke and retries on devnet:** prepared (`deploy/devnet/README.md`) and rehearsed on the local cluster, not
-  run: the founder has not chosen the deploy path. The deploy need not wait for this sprint's merge: CI's `main` build
-  after PR #41 carries the tested binary, and `scripts/deploy/binding.ts` refuses a checkout whose program differs.
-- **The devnet checks:** three are read-only (the SOL/USD account's age, the rents, the clock drift) and could run
-  before any deploy; they wait on the founder's go-ahead to touch a cluster, which this session did not have. The epoch
-  turn, the settle batch and a `StakeAtLeast` YES wait on the deploy.
-- **Drill or real constants on devnet:** recommended real for this sprint (CI's default artifact; the smoke completes
-  with them). Sprint 06's definition of done asks for the drill constants for X1.1, which takes a drill build with its
-  own artifact, then an upgrade or a second program: to decide with Sprint 06.
+  run. The founder chose the path on 2026-10-09 (above); the deploy still waits on PR #41's merge (its branch now has
+  `main` merged in, `dadd513`, CI green), the program keypair, the keys and devnet SOL. The deploy need not wait for
+  this sprint's merge: CI's `main` build after PR #41 carries the tested binary, and `scripts/deploy/binding.ts`
+  refuses a checkout whose program differs.
+- **The devnet checks:** the three read-only ones ran on 2026-10-09, 22:00 to 22:06 BRT, with Ronaldo's go-ahead,
+  sending nothing (`knowledge-base/tecnologia/devnet-o-que-so-o-cluster-mostra.md`, section 5): the program id, its
+  ProgramData and the config are absent (the id is not blocked); the rents are 3,251,200 lamports for `Campaign`,
+  1,239,520 for `Entry`, 1,137,920 for `Join` and 2,682,240 for `GlobalConfig` (5,080 per byte); the SOL/USD account
+  updated every 61 to 63 s and was at most 64 s old against `max_price_age` 120, at 2 to 3 bps against 50; the Clock
+  sysvar ran 0.2 to 1.7 s behind this machine's NTP clock (median 1.1 s, whole seconds). Five minutes, not the week
+  Sprint 02 asked for. The epoch turn, the settle batch and a `StakeAtLeast` YES wait on the deploy, so the row stays
+  open.
+- **Drill or real constants on devnet:** decided on 2026-10-09: the real ones (Ronaldo: "Use `real` values for
+  Devnet, not drill"), CI's default artifact, with which the smoke completes. Sprint 06's definition of done asks for
+  the drill constants for X1.1, which takes a drill build with its own artifact, then an upgrade or a second program:
+  to decide with Sprint 06.
 - **Common closure:** the checks, the secret scan, the codemap, the changelog and the session log are done; the three
   reviews below are done and their fixes made; the merge and the tag are the founder's.
 

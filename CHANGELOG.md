@@ -43,7 +43,14 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
     código do programa; os fluxos comuns são montados pelos construtores do SDK.
   - **O deploy no devnet está preparado e ensaiado, não feito** (`deploy/devnet/README.md`): o artefato do CI pelo id
     da execução, o `SHA256SUMS` primeiro, o keypair do programa só do backup e só no id declarado, só o loader v3, e
-    a inicialização e o time na mesma sessão. Espera o fundador escolher o caminho e quem segura a chave.
+    a inicialização e o time na mesma sessão. O Ronaldo respondeu as decisões do deploy em 9/10 à noite (ele segura a
+    chave de upgrade; o id fica no devnet; valores reais, não os de treino); o deploy ainda espera a mescla do PR #41,
+    o keypair do programa, as chaves públicas do admin, do recebedor e do time, e SOL de teste.
+  - **As leituras só de leitura no devnet** (9/10/2026, 22h, com a autorização do Ronaldo; nada enviado;
+    `knowledge-base/tecnologia/devnet-o-que-so-o-cluster-mostra.md`, seção 5): o id do programa, o ProgramData dele e
+    a config estão livres; os aluguéis (`Campaign` 3.251.200 lamports, `Entry` 1.239.520, `Join` 1.137.920); a conta
+    SOL/USD atualizou a cada 61 a 63 segundos e chegou a 64 segundos de idade, contra os 120 do `max_price_age`; o
+    relógio do devnet ficou dentro de cerca de um segundo da hora de parede.
   - **`smoke:devnet` e `seed:devnet` reescritos em SOL sobre o SDK** (o ciclo completo do smoke passa num cluster
     local, com todo valor igual ao do SDK e as duas tentativas repetidas recusadas); **`scripts/team/`**, um comando
     por ato da equipe, cada pessoa com a própria chave; o texto de cada anulação em `content/void-log/`.

@@ -11,6 +11,11 @@ SHA256SUMS, keypair backup).
 
 ## Decisions that gate deploy day (founder)
 
+Answered by Ronaldo on 2026-10-09 (`session-log/2026-10-09-sprint-05-respostas-do-deploy-e-leituras-devnet.md`): 1 as
+planned, after PR #41 merges; 2 Ronaldo; 3 the id stays on devnet (its ProgramData was absent on 2026-10-09, 22:00 BRT),
+mainnet gets a fresh private id, and the keypair's backup is still to be found; 4 the real constants; 5 still to be
+collected (no file in the repository holds them); 6 treated as protected, with no GitHub setting changed.
+
 1. **The deploy path.** As planned: the holder of the upgrade key downloads CI's artifact by run id and deploys it
    from their own machine. Anything built on a laptop or on the server is what the security gates forbid, and the
    script has no way to take it.

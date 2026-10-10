@@ -1,8 +1,9 @@
 # O que só um cluster de verdade mostra — Sprint 05
 
 Nota de 9 de outubro de 2026, entregável da Sprint 05 ("a note on what only a real cluster could check"). Separa o que
-foi conferido nesta máquina, e como, do que só o devnet (ou um validador Agave) pode mostrar. Nada aqui foi medido no
-devnet: o deploy espera a escolha do fundador (`deploy/devnet/README.md`).
+foi conferido nesta máquina, e como, do que só o devnet (ou um validador Agave) pode mostrar. As seções 1 a 4 não
+mediram nada no devnet. A seção 5 traz as leituras só de leitura feitas no devnet na noite de 9/10, com a autorização
+do Ronaldo; nenhuma transação foi enviada.
 
 ## 1. Fatos
 
@@ -76,9 +77,79 @@ autorização do fundador para tocar um cluster, que esta sessão não tinha. Os
 
 ## 4. O que não foi feito
 
-- Nada foi enviado ao devnet nem à mainnet; nenhum RPC público foi usado.
+- Nada foi enviado ao devnet nem à mainnet. O RPC público do devnet só foi lido, na noite de 9/10 (seção 5).
 - O `solana-test-validator` não rodou (1.1).
-- O deploy, a inicialização, o smoke e o seed no devnet esperam o fundador (`deploy/devnet/README.md`).
+- O deploy, a inicialização, o smoke e o seed no devnet esperam o que a seção 5.6 lista.
+
+## 5. As leituras no devnet, 9/10/2026, das 22h00 às 22h06 (horário de Brasília)
+
+Só leitura, com a autorização do Ronaldo para as leituras que não escrevem nada ("read-only devnet checks (dry run,
+SOL/USD price age, rents, clock drift)"). Um script avulso, fora do repositório, chamou `getGenesisHash`,
+`getAccountInfo`, `getMinimumBalanceForRentExemption`, `getEpochInfo`, `getRecentPerformanceSamples` e `getBalance` em
+`https://api.devnet.solana.com`, e decodificou a conta de preço com o `readPriceUpdate` do SDK. O nó respondeu o genesis
+`EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG` (o do devnet) e `solana-core` 4.4.0-beta.0.
+
+### 5.1 Os endereços do programa estão livres
+
+| Endereço | Conta | Na leitura |
+|---|---|---|
+| O programa | `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN` | não existe |
+| O ProgramData dele | `Du61i6KnNVrTLnU5n2Nn9JcxQKzdyxM3owSqqVrkns6h` | não existe |
+| A config | `FSFeeWWVwNKL8LWSNGejM6ZLKSw79WaP1GwmpZcxLFqw` | não existe |
+| A autoridade de eventos | `E5CgcK5xs4YfPdBLnCWTAA9ruStbTqLjEzTxtVaRuB5o` | não existe |
+
+Ninguém tinha bloqueado o id (1.3) até essa hora. Qualquer pessoa ainda pode bloqueá-lo antes do deploy: o ensaio a
+seco lê os mesmos endereços de novo no dia, e para se algum mudou.
+
+### 5.2 Os aluguéis
+
+| Conta | Bytes | Lamports |
+|---|---|---|
+| `GlobalConfig` | 400 | 2.682.240 |
+| `Campaign` | 512 | 3.251.200 |
+| `Entry` | 116 | 1.239.520 |
+| `Join` | 96 | 1.137.920 |
+| Cofre e cofre de taxas | 0 | 650.240 cada |
+
+Todos dão 5.080 lamports por byte, com os 128 de cabeçalho, como na Sprint 02. Os dois aluguéis de uma abertura
+(`Campaign` e cofre) somam 3.901.440, o número que a prévia da abertura usa. A primeira entrada de um padeiro paga
+`Entry` e `Join`, 2.377.440 lamports; cada nova entrada da mesma pessoa, mais um `Join`.
+
+### 5.3 A conta SOL/USD contra `max_price_age`
+
+A conta patrocinada `7AviUf9nL62mcxNbQGKm4nKDQnPjswo6c5MX4D57HmyE` (dona `rec2HH…`, verificação completa, feed
+`ef0d8b…`), lida 46 vezes, cerca de uma a cada seis segundos, de 01h00m42s a 01h05m42s UTC:
+
+- **Atualizou a cada 61 a 63 segundos**, com uma atualização a mais 11 segundos depois de outra.
+- **Idade máxima vista: 64 segundos**, medida contra o `unix_timestamp` do sysvar Clock. O `max_price_age` de
+  `deploy/devnet/init-params.json` é 120: folga de 56 segundos nessa janela.
+- **Confiança de 2 a 3 pontos-base**, contra o limite de 50. Preço entre US$ 109,24 e US$ 109,35.
+
+Cinco minutos não são a semana de leituras que a Sprint 02 pediu antes dos valores da mainnet; essa semana continua
+com a Sprint 06.
+
+### 5.4 O relógio
+
+O `unix_timestamp` do sysvar Clock menos o relógio desta máquina (sincronizado por NTP, conferido no `timedatectl`),
+nas mesmas 46 leituras: de −1,7 a −0,2 segundo, mediana −1,1. O sysvar guarda segundos inteiros, o que sozinho já o
+atrasa até um segundo, e a meia ida e volta do RPC (de 150 a 620 ms) entra na conta. Leitura: o relógio do devnet anda
+dentro de cerca de um segundo da hora de parede. Na Sprint 01, uma leitura isolada deu um segundo à frente.
+
+### 5.5 A época, o slot e a carteira do smoke
+
+Época 1179, no slot 39.888 de 432.000 às 01h00m42s UTC: faltavam 392.112 slots para a virada. Os dez últimos
+intervalos de desempenho deram slots de 236 a 241 ms, então a virada cai por volta das 3h UTC de 11/10, perto da
+meia-noite de 10 para 11/10 no horário de Brasília [INF: estimativa pelo slot médio]. A carteira que o smoke usa por
+padrão (`G5chPqqGEaPUCivPYD5pTTcE5bMYmi5hb79Lnud1SVNM`, `DEVNET_WALLET`) tinha 1,93 SOL no devnet.
+
+### 5.6 O que o deploy e o smoke ainda esperam
+
+- A mescla do PR #41 na `main`, de onde sai o artefato do CI.
+- O keypair do programa `6G2d…uVN`, que não está nesta máquina (o id foi declarado no commit `ae8b837`, de 5/10).
+- O arquivo da chave de upgrade do Ronaldo, e as chaves públicas do admin, do recebedor das taxas e do time.
+- SOL de teste. O deploy pede cerca de 1,62 SOL a quem paga: 0,80 do buffer (devolvido no fim), 0,80 do ProgramData,
+  o programa e até 0,01 de taxas, para um binário do tamanho do da Sprint 04 (158.072 bytes) a 5.080 lamports por byte.
+  O smoke pede cerca de 4,7 SOL.
 
 ## Fontes
 
