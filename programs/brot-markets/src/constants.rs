@@ -1,6 +1,6 @@
 //! Purpose: seeds, program ids, code ceilings and the duration and window constants compiled
 //!          into the program, with the devnet-only drill values behind the `drill` feature.
-//! Version: 0.0.3
+//! Version: 0.0.4 (the event authority of the new program id; its bump is 254, as before)
 //! Sprint: 02 (pot core on Pinocchio); Sprint 03 adds the readers' programs and rules
 //!
 //! Values marked [AC] were chosen by the team where the sources give none (TP section 3.4.1,
@@ -29,7 +29,7 @@ pub const JOIN_SEED: &[u8] = b"join";
 pub const EVENT_AUTHORITY_SEED: &[u8] = b"__event_authority";
 
 /// The event authority of this program id, derived once and checked by a host test.
-pub const EVENT_AUTHORITY: Address = address!("E5CgcK5xs4YfPdBLnCWTAA9ruStbTqLjEzTxtVaRuB5o");
+pub const EVENT_AUTHORITY: Address = address!("CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx");
 /// Its canonical bump.
 pub const EVENT_AUTHORITY_BUMP: u8 = 254;
 

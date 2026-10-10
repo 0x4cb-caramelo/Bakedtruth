@@ -30,7 +30,8 @@ creator, pot, YES/NO; never "market" or "bet" outside the brand.
   (`docs/technical/SYSTEM-ARCHITECTURE-PROPOSAL.md`, approved 2026-10-08). In what order: `docs/SPRINTS.md` and
   `docs/sprints/`, rewritten the same day. The founder's answers in
   `docs/business/ideacao-perguntas-e-respostas.md` outrank the README and the old code.
-- The program is `programs/brot-markets` (id `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN`), on Pinocchio.
+- The program is `programs/brot-markets` (id `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o` since 2026-10-09; it
+  replaced `6G2d…uVN`, whose keypair was not at hand for the devnet deploy), on Pinocchio.
   Sprint 02 built the config, the team and the pause, the paid opening and the SOL entry; Sprint 03 the five readers,
   the opening of all five kinds, the join lock and `resolve_campaign`. Each instruction emits one event by self-CPI.
   Its client library is `packages/sdk` (`@brot/sdk`, Sprint 05): `read` and `tx` entry points over the Codama client

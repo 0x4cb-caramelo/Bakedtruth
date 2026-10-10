@@ -47,8 +47,10 @@ founder reads the summary below and section 14.2.
   Product Brief predates BP v0.0.4 (it still has USDC, the cap, team-only opening and the sponsor request) and is
   revised later; its rule and flow numbers are not current rules.
 - "The program" = `programs/brot-markets`, crate `brot_markets`, program id
-  `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN` [F]. US$ values of SOL use US$109.27 per SOL (CoinGecko,
-  2026-10-08 15:29 UTC, D-e) [E80]. They are display examples: the program charges at the Pyth price.
+  `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o` [F] since 2026-10-09; it replaced `6G2d…uVN`, whose keypair was
+  not at hand for the devnet deploy, and mainnet gets its own id, kept private until its deploy. US$ values of SOL
+  use US$109.27 per SOL (CoinGecko, 2026-10-08 15:29 UTC, D-e) [E80]. They are display examples: the program charges
+  at the Pyth price.
 
 **Vocabulary (D-m).** Brot Markets runs **On-Chain Campaigns** ("campaigns"). A campaign asks one YES/NO question that
 an on-chain account answers. A **baker** is a wallet that joins it; what it puts in is an **entry**; the **creator**
@@ -902,7 +904,7 @@ One event per instruction, plus `CampaignFinalized` on the three paths that fina
 (`team_confirm_result`, `team_void_campaign`, `admin_decide_contest`). Events are defined in `events.rs` and emitted by
 a hand-written self-CPI signed by an event-authority PDA, from Sprint 02 (T4: one event round-tripped in npm `litesvm`
 1.5.0 on day one, whose `innerInstructions()` shows it at stack height 2) [F]. The authority is the PDA
-`["__event_authority"]`, `E5CgcK5xs4YfPdBLnCWTAA9ruStbTqLjEzTxtVaRuB5o`, bump 254, a constant checked by a test [F]
+`["__event_authority"]`, `CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx`, bump 254, a constant checked by a test [F]
 (`constants.rs`). Every instruction ends its accounts with `event_authority` and the program: the runtime finds the
 callee of a CPI among the caller's accounts, and without the program the self-CPI fails with `MissingAccount` [F]. The
 inner instruction carries `[0xFF, event discriminator, event bytes]`; `0xFF` is reserved for it, and the program writes

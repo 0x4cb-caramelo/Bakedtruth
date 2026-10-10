@@ -16,9 +16,17 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
 
 ### Changed
 
-- **Sprint 05 em revisão, empilhada sobre a Sprint 04** (branch `sprint-05-sdk-devnet-cycle`, aberta da cabeça do PR
-  #41, ainda não mesclado; `docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and retrospective"). O programa não
-  mudou. O que entrou:
+- **Novo id do programa: `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o`** (9/10/2026, decisão do Ronaldo). O keypair
+  do id anterior, `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN`, não estava na máquina de quem faz o deploy no
+  devnet; o id foi declarado no commit `ae8b837`, de 5/10, e ninguém sabia por onde o keypair tinha andado desde
+  então. O novo keypair foi gerado na máquina do Ronaldo, fora de qualquer repositório. Mudam o `declare_id!`, a
+  autoridade de eventos (`CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx`, bump 254 como antes), o IDL e o cliente
+  Codama regenerados (`bun run idl`), e as constantes do kit de testes. O id antigo fica abandonado; nunca foi
+  publicado em cluster nenhum. A mainnet terá um id próprio, mantido em segredo até o deploy.
+- **Sprint 05 em revisão** (branch `sprint-05-sdk-devnet-cycle`, PR #43, aberta da cabeça do PR #41, que foi mesclado
+  na `main` em 9/10; `docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and retrospective"). O programa não mudou
+  nesta sprint; mudou fora dela, pelos PRs #44 (`CampaignFinalized`) e #45 (o id novo), que a branch traz da `main`. O
+  que entrou:
   - **O SDK, `@brot/sdk`** (antes `@brot-markets/sdk`), a biblioteca única de site, app, serviços, scripts e testes,
     com três entradas: `read` (endereços, decodificação de contas e eventos, a matemática do dinheiro, as regras de
     abertura e de entrada na ordem do programa, a cotação da abertura com o débito inteiro, o estado público pelo

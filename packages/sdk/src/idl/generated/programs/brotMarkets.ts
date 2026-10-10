@@ -137,7 +137,7 @@ import {
 } from "../instructions";
 
 export const BROT_MARKETS_PROGRAM_ADDRESS =
-  "6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN" as Address<"6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN">;
+  "5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o" as Address<"5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o">;
 
 export enum BrotMarketsAccount {
   Campaign,
@@ -247,7 +247,7 @@ export function identifyBrotMarketsInstruction(
   });
 }
 
-export type ParsedBrotMarketsInstruction<TProgram extends string = "6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN"> =
+export type ParsedBrotMarketsInstruction<TProgram extends string = "5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o"> =
   | ({
       instructionType: BrotMarketsInstruction.AdminInitializeConfig;
     } & ParsedAdminInitializeConfigInstruction<TProgram>)

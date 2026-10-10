@@ -1,7 +1,7 @@
 /**
  * Purpose: checks the test kit itself, without the program binary: addresses, layout sizes against
  *          the Rust structs, the codec, and the instruction shapes of the frozen contract.
- * Version: 0.0.3
+ * Version: 0.0.4 (ProgramData and config of the new program id)
  * Sprint:  02 (pot core on Pinocchio); the Sprint 03 sizes and `resolve_campaign`; Sprint 04's three events of a
  *          team-finalized campaign
  */
@@ -20,8 +20,8 @@ describe("test kit", () => {
     expect(await P.eventAuthorityPda()).toBe(P.EVENT_AUTHORITY);
     expect(await P.sponsoredPriceAccount(P.SOL_USD_FEED_ID)).toBe(P.SOL_USD_ACCOUNT);
     expect(await P.sponsoredPriceAccount(P.BTC_USD_FEED_ID)).toBe(P.BTC_USD_ACCOUNT);
-    expect(String(await P.programDataPda())).toBe("Du61i6KnNVrTLnU5n2Nn9JcxQKzdyxM3owSqqVrkns6h");
-    expect(String(await P.configPda())).toBe("FSFeeWWVwNKL8LWSNGejM6ZLKSw79WaP1GwmpZcxLFqw");
+    expect(String(await P.programDataPda())).toBe("8Vy9jyzijx41ntzQHniZFUBA4jFvuwueFtNXUtGvUYGK");
+    expect(String(await P.configPda())).toBe("GKM8TyXJXMcHqceY3F3AZnoUQAq15LLftkMzGLqH13bn");
   });
 
   test("layouts have the sizes of the Rust structs (programs/brot-markets/tests/layout.rs)", () => {

@@ -2,7 +2,7 @@
  * Purpose: the Codama spike (T9): renders a Kit client from the Shank IDL of brot-markets into
  *          packages/sdk/src/idl/generated. T9, decided in Sprint 05: the generated client is the SDK's
  *          codec and builder layer (`@brot/sdk/tx` wraps its builders; `read` its decoders).
- * Version: 0.0.1
+ * Version: 0.0.2 (the event authority of the new program id)
  * Sprint:  02 (pot core on Pinocchio), lane F
  *
  * Run by `bun run idl` after shank-cli. Two defaults are added with Codama's own visitor, as an
@@ -25,7 +25,7 @@ export const IDL_PATH = "packages/sdk/src/idl/brot_markets.json";
 export const PACKAGE_FOLDER = "packages/sdk/src/idl";
 export const GENERATED_FOLDER = "generated";
 /** PDA `["__event_authority"]` of the program, bump 254 (constants.rs). */
-const EVENT_AUTHORITY = "E5CgcK5xs4YfPdBLnCWTAA9ruStbTqLjEzTxtVaRuB5o";
+const EVENT_AUTHORITY = "CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx";
 
 /** Renders the Kit client of the IDL at `idlPath` into `packageFolder/generated`. */
 export async function renderCodamaClient(idlPath = IDL_PATH, packageFolder = PACKAGE_FOLDER) {
