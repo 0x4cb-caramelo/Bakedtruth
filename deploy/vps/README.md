@@ -20,6 +20,12 @@ The URL (for Helius, its API key) never goes into a file in the repository or in
 `KEEPER_DRY_RUN=1` simulates and logs and sends nothing. Set it to `0` only when the keeper's address is funded and
 the change is wanted; then restart the unit. Check with `curl -s http://127.0.0.1:4210/healthz`.
 
+## Cycle length
+
+`KEEPER_CYCLE_MS=15000` on the server (the code default is 60000). The devnet price account updates every 62 to
+64 s, and the price proof must be at most 60 s old: a 60 s cycle often reads it just too late (`ProofStale`). See
+`session-log/2026-10-10-sprint-06-proof-e-modo-real.md`.
+
 ## Stopping
 
 `sudo systemctl stop brot-keeper` (or `disable --now` to keep it off after a reboot). The other units (`brot-landing`,
