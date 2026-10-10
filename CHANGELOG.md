@@ -22,6 +22,32 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Added
 
+- **A página da campanha e a entrada pelo site** (Sprint 11, 10/10/2026): `/c/[id]` mostra a frase, a regra de cada
+  tipo, a prova lida agora pelo leitor do SDK (com "se lido agora"), os campos de preço (preço, confiança, idade máxima
+  da campanha, o aviso sem preço fresco e o da margem de 1%), o pote, as entradas recentes e o histórico da chance (L-23,
+  lidos dos eventos na rede), o painel de reconferência com comandos nos bytes que o leitor lê e o `recheck` do SDK, e o
+  aviso do criador com a entrada da carteira dele. O painel de entrada: SIM ou NÃO, o valor exato em lamports, a
+  estimativa que é a do `checkJoin` do SDK (P1 §3.2 reproduzida: 3,10 e 3,067), os avisos antes da assinatura (o L-03 do
+  fundador), a revisão com o resumo determinístico do SDK (A-3), a carteira, o acompanhamento por consulta sem
+  WebSocket, a guarda de nova tentativa (A-9) e uma mensagem por falha. 38 testes em `tests/site`.
+- **O smoke web** (`bun run e2e`, Playwright 1.63.0 fixado): o site com uma carteira de teste injetada contra o
+  programa em LiteSVM, em desktop e 412 px; 10 passaram. Achou e corrigiu dois erros: "Use Installed Wallet" não
+  conectava depois de recarregar a página (código da Sprint 09), e a guarda dava como feita uma entrada que falhou
+  quando outra entrada da mesma carteira mudava o total.
+- **Revisões da sprint aplicadas:** a de texto ("est." em todo número estimado, o piso que não soa como promessa, uma
+  saída para cada falha, regras por tipo iguais às do programa) e a de segurança do que o baker assina: o registro da
+  guarda fica também na memória da página e pertence a uma tentativa; nenhuma tentativa nova enquanto outra está em
+  aberto ("Check again"); status só confirmado; erro atribuído ao programa só quando a instrução dele falhou; prazo e
+  validade medidos em blocos; o build recusa uma URL de RPC com chave; o registro da guarda sai do navegador um dia
+  depois de resolvido. O interruptor de entradas (K-11) ainda usa a saúde da API no lugar do `entries_allowed`.
+- **A lista do relay `/rpc` tirada do rastro do cliente** (`docs/technical/relay-allowlist.md`): 11 métodos, nenhum
+  WebSocket. O relay em si é da Sprint 08.
+- Em aberto: A-8 (pausa da assinatura durante atualização do programa) espera o fundador dizer de onde ler o
+  ProgramData até o relay existir; a assinatura no devnet com carteira real não foi verificada (a preparação e a
+  simulação no devnet foram).
+
+### Added
+
 - **O texto do aviso de dinheiro preso (L-03) aprovado pelo fundador** (10/10/2026): "Your entry stays locked until the
   campaign ends. You cannot take it out before then. Payouts go to your wallet automatically after the result is read."
   Ele aparece na Sprint 11, antes da assinatura.

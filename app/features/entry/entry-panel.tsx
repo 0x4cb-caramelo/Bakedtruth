@@ -4,25 +4,25 @@
  *          counted (the SDK's number), the rents, the notices a baker reads before signing, and one button that fits
  *          the wallet: connect, devnet faucet, paused, waiting for a fresh price, or "Review entry". Nothing here signs:
  *          the review and the signature are use-entry-flow.ts's, behind the SDK's preparation (A-3).
- * Version: 0.1.0
+ * Version: 0.2.0 (Sprint 11 review: the button in entry-action.tsx; "Check again"; a link's side labelled too)
  * Sprint:  11 (site: campaign page and entry)
  */
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 
-import { Button } from "@/components/ui/button";
 import { OperatingLevel, formatUtc } from "@/lib/brot";
 import { CLUSTER } from "@/lib/config";
 import { useInstalledWallet } from "@/features/wallet/use-installed-wallet";
 import { useSolBalance } from "@/features/wallet/use-sol-balance";
-import { FAUCET_URL, walletView } from "@/features/wallet/wallet-state";
+import { walletView } from "@/features/wallet/wallet-state";
 import type { PageData } from "@/features/campaign-page/load";
 import type { Proof } from "@/features/campaign-page/proof";
 import { LAMPORTS_PER_SOL, parseSol, sol4, solText } from "./amount";
 import { AmountField } from "./amount-field";
 import { PANEL } from "./copy";
+import { EntryAction } from "./entry-action";
 import { EstimateBlock } from "./entry-estimate";
 import { EntryNotices } from "./entry-notices";
 import { EntrySheet } from "./entry-sheet";
@@ -46,13 +46,17 @@ export function EntryPanel({
   proof,
   sentence,
   prefill,
-  onLanded,
+  onChange,
+  onBusy,
 }: {
   data: PageData;
   proof: Proof;
   sentence: string;
   prefill: Prefill;
-  onLanded: () => void;
+  /** The chain changed for this wallet (an entry landed, failed or was found): the page reads it again. */
+  onChange: () => void;
+  /** An entry is under way: the page keeps this panel and its sheet until it is settled. */
+  onBusy?: (busy: boolean) => void;
 }) {
   const { publicKey, connected } = useWallet();
   const wallet = publicKey?.toBase58() ?? null;
@@ -62,13 +66,15 @@ export function EntryPanel({
   const rents = useRents();
   const [side, setSide] = useState<EntrySide>(prefill.side ?? "yes");
   const [text, setText] = useState(prefill.amount ? solText(prefill.amount) : "1");
-  const [fromLink, setFromLink] = useState(prefill.amount !== undefined);
+  const [fromLink, setFromLink] = useState(prefill.amount !== undefined || prefill.side !== undefined);
   const amountRef = useRef<HTMLInputElement>(null);
   const flow = useEntryFlow({
     campaign: data.address,
     wallet,
-    onLanded: () => (setLandings((n) => n + 1), onLanded()),
+    onChange: () => (setLandings((n) => n + 1), onChange()),
   });
+  const busy = flow.state.step !== "idle";
+  useEffect(() => onBusy?.(busy), [busy, onBusy]);
 
   const c = data.campaign;
   const inputs = data.metric
@@ -112,6 +118,7 @@ export function EntryPanel({
     fromLink,
     firstEntry: !data.mine,
     large,
+    persists: flow.persists,
   };
   const review = () =>
     wallet && amount !== null && flow.review({ campaign: data.address, baker: wallet, side, amount });
@@ -126,7 +133,7 @@ export function EntryPanel({
         {PANEL.title}
         <span className="font-sans text-xs font-normal text-muted">{PANEL.closes(formatUtc(c.entriesCloseAt))}</span>
       </h2>
-      <SidePicker value={side} views={views} onChange={setSide} />
+      <SidePicker value={side} views={views} onChange={(next) => (setSide(next), setFromLink(false))} />
       <AmountField
         text={text}
         onText={onText}
@@ -156,39 +163,28 @@ export function EntryPanel({
         large={large}
       />
       {noSol || short ? <p className="m-0 rounded-sm bg-notice-bg px-3 py-2 text-xs">{PANEL.noSol}</p> : null}
-      {paused ? (
-        <Button wide disabled>
-          {PANEL.paused}
-        </Button>
-      ) : stale ? (
-        <Button wide disabled>
-          {PANEL.waitingPrice}
-        </Button>
-      ) : !connected ? (
-        <Button wide disabled={!connect.installed || connect.connecting} onClick={connect.connectInstalled}>
-          {connect.connecting ? PANEL.connecting : connect.installed ? PANEL.connect : PANEL.noWallet}
-        </Button>
-      ) : (noSol || short) && CLUSTER === "devnet" ? (
-        <a
-          href={FAUCET_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="block rounded-sm bg-cta-bg px-4 py-2.5 text-center text-sm font-semibold text-on-accent hover:bg-cta-hover"
-        >
-          {PANEL.faucet}
-        </a>
-      ) : (
-        <Button wide disabled={!estimate?.ok || short || flow.state.step === "preparing"} onClick={review}>
-          {flow.state.step === "preparing" ? PANEL.preparing : PANEL.review}
-        </Button>
-      )}
+      <EntryAction
+        paused={paused}
+        stale={stale}
+        connected={connected}
+        wallet={connect}
+        short={noSol || short}
+        canReview={estimate?.ok === true}
+        preparing={flow.state.step === "preparing"}
+        onReview={review}
+      />
       <EntrySheet
         state={flow.state}
         facts={facts}
         context={context}
         onSign={flow.sign}
-        onAgain={() => (flow.state.step === "failed" ? flow.review(flow.state.choice) : flow.reset())}
+        onAgain={() =>
+          flow.state.step === "failed" && wallet ? flow.review({ ...flow.state.choice, baker: wallet }) : flow.reset()
+        }
         onAmount={() => (flow.reset(), amountRef.current?.focus())}
+        onCheck={() =>
+          flow.state.step === "failed" && flow.state.resume ? flow.resume(flow.state.resume) : flow.reset()
+        }
         onClose={flow.reset}
       />
     </section>

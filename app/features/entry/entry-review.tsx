@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { formatSol, PROGRAM_ID, shortAddress } from "@/lib/brot";
 import { CLUSTER, explorerAddress } from "@/lib/config";
 import { sol4 } from "./amount";
-import { SHEET } from "./copy";
+import { PANEL, SHEET } from "./copy";
 import { EntryNotices } from "./entry-notices";
 import { perOne } from "./estimate";
 import type { EntryChoice, ReadyJoin } from "./submit";
@@ -27,6 +27,8 @@ export type ReviewFacts = {
   oneSidedFeeBps: number;
   fromLink: boolean;
   firstEntry: boolean;
+  /** This browser keeps the retry guard's record across a reload (localStorage works). */
+  persists: boolean;
   large: { mine: string; small: string } | null;
 };
 
@@ -63,17 +65,13 @@ export function EntryReview({
   const back = (choice.amount * ready.check.estimateBps) / 10_000n;
   return (
     <div className="space-y-4">
-      {refreshed ? (
-        <p className="m-0 rounded-sm bg-notice-bg px-3 py-2 text-xs">
-          Prepared again: the network moved on while this was open. Check it again before you sign.
-        </p>
-      ) : null}
+      {refreshed ? <p className="m-0 rounded-sm bg-notice-bg px-3 py-2 text-xs">{SHEET.refreshed}</p> : null}
       <p className="m-0 text-sm">
         <b>{facts.sentence}</b>
         <small className="block text-xs text-muted">{SHEET.campaign(facts.campaignId)}</small>
       </p>
       <dl className="m-0">
-        <Row label={SHEET.sideAmount} note={facts.fromLink ? "This amount came from the link you opened." : undefined}>
+        <Row label={SHEET.sideAmount} note={facts.fromLink ? PANEL.fromLink : undefined}>
           <b>{S}</b> {formatSol(choice.amount)} SOL
         </Row>
         <Row label={SHEET.estimate}>
@@ -84,13 +82,16 @@ export function EntryReview({
         <Row label={SHEET.floor} note={SHEET.floorNote(ready.minReturnBps.toLocaleString("en-US"))}>
           {SHEET.floorValue(perOne(BigInt(ready.minReturnBps)))}
         </Row>
-        <Row label="Your entry so far" note={SHEET.guard(formatSol(ready.expectedEntryTotal))}>
+        <Row
+          label={SHEET.soFar}
+          note={`${ready.expectedEntryTotal > 0n ? `${SHEET.addsTo(formatSol(ready.expectedEntryTotal))} ` : ""}${SHEET.guard(formatSol(ready.expectedEntryTotal))}`}
+        >
           {formatSol(ready.expectedEntryTotal)} SOL
         </Row>
         <Row label={SHEET.rents} note={SHEET.rentsNote}>
           {formatSol(ready.debit.rents)} SOL
         </Row>
-        <Row label={SHEET.fee}>at most {formatSol(ready.debit.networkFee)} SOL</Row>
+        <Row label={SHEET.fee}>{SHEET.feeValue(formatSol(ready.debit.networkFee))}</Row>
         <Row label={SHEET.total}>
           <b>{formatSol(ready.debit.total)} SOL</b>
         </Row>
@@ -116,6 +117,7 @@ export function EntryReview({
       />
       <ul className="m-0 list-disc space-y-1 pl-5 text-xs text-muted">
         {facts.firstEntry ? <li>{SHEET.public}</li> : null}
+        {facts.persists ? null : <li>{SHEET.notKept}</li>}
         <li>{SHEET.walletDiffers}</li>
       </ul>
       <div className="flex flex-wrap justify-end gap-2">

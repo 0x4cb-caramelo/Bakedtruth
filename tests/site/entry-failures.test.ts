@@ -20,6 +20,7 @@ import {
   nothingSent,
   type FailureKey,
 } from "../../app/features/entry/failures";
+import { programOf } from "../../app/features/entry/landed";
 import { prepareEntry } from "../../app/features/entry/submit";
 import { openedCampaign } from "../brot/flows";
 import { openingWorld } from "../brot/opening";
@@ -46,6 +47,8 @@ const KEYS: FailureKey[] = [
   "priceTooClose",
   "alreadyLanded",
   "notLanded",
+  "stillChecking",
+  "walletChanged",
 ];
 
 describe("each entry failure has its own message", () => {
@@ -89,18 +92,31 @@ describe("each entry failure has its own message", () => {
     expect(fromRefusal("EntryTotalMismatch", true).key).toBe("alreadyLanded");
   });
 
-  test("a landed transaction's error is read by its code", () => {
-    expect(fromChainError({ InstructionError: [0n, { Custom: 6067n }] })).toMatchObject({
+  test("a landed transaction's error is named only when the program's own instruction failed", () => {
+    const brot = P.PROGRAM_ID;
+    expect(fromChainError({ InstructionError: [0n, { Custom: 6067n }] }, false, brot)).toMatchObject({
       key: "returnBelowMinimum",
       name: "ReturnBelowMinimum",
     });
-    expect(fromChainError({ InstructionError: [0, { Custom: 6063 }] }).key).toBe("entriesClosed");
-    expect(fromChainError({ InstructionError: [0, { Custom: 1 }] }).key).toBe("notEnoughSol");
+    expect(fromChainError({ InstructionError: [0, { Custom: 6063 }] }, false, brot).key).toBe("entriesClosed");
+    expect(fromChainError({ InstructionError: [0, { Custom: 1 }] }, false, brot).key).toBe("notEnoughSol");
     expect(fromChainError("InsufficientFundsForFee").key).toBe("notEnoughSol");
-    expect(fromChainError({ InstructionError: [1, { Custom: 42 }] })).toMatchObject({
+    // A wallet's own instruction (Lighthouse, say) failing with a code in the same range is not the program's refusal.
+    const other = "L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95";
+    expect(fromChainError({ InstructionError: [1, { Custom: 6066 }] }, true, other)).toMatchObject({
       key: "transactionFailed",
       name: null,
     });
+    expect(fromChainError({ InstructionError: [0, { Custom: 6066 }] }, true, null).key).toBe("transactionFailed");
+    // The failing instruction's program comes from the landed transaction itself.
+    const tx = {
+      transaction: {
+        message: { accountKeys: [other, brot], instructions: [{ programIdIndex: 1 }, { programIdIndex: 0 }] },
+      },
+    };
+    expect(programOf(tx, { InstructionError: [0, { Custom: 6067 }] })).toBe(brot);
+    expect(programOf(tx, { InstructionError: [1n, { Custom: 6067 }] })).toBe(other);
+    expect(programOf(tx, "BlockhashNotFound")).toBeNull();
   });
 
   test("the wallet's refusal, the network, and anything else", () => {
@@ -111,9 +127,18 @@ describe("each entry failure has its own message", () => {
     expect(fromError(new TypeError("Failed to fetch")).key).toBe("networkDown");
     expect(fromError(new Error("HTTP error (429): Too Many Requests")).key).toBe("networkDown");
     expect(fromError(new Error("the wallet session closed")).key).toBe("transactionFailed");
-    // Only a refusal in the wallet proves nothing was sent; any other error is watched until it expires.
+    // Only a refusal in the wallet, or a preflight that refused to send, proves nothing was sent.
     expect(nothingSent(fromError(wrapped))).toBe(true);
     expect(nothingSent(fromError(new Error("timeout")))).toBe(false);
+    expect(nothingSent(fromError(new Error("the request was cancelled because the tab closed")))).toBe(false);
+    const preflight = new Error(
+      "Transaction simulation failed: Error processing Instruction 0: custom program error: 0x17b3",
+    );
+    expect(fromError(preflight)).toMatchObject({ key: "returnBelowMinimum", notSent: true });
+    const elsewhere = new Error(
+      "Transaction simulation failed: Error processing Instruction 1: custom program error: 0x17b3",
+    );
+    expect(fromError(elsewhere)).toMatchObject({ key: "transactionFailed", notSent: true });
   });
 
   test("too little SOL, as the cluster reports it when the program's simulation runs", async () => {

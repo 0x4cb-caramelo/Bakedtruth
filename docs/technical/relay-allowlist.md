@@ -28,14 +28,14 @@ Sprint 09.
 |---|---|---|
 | `getAccountInfo` | Page, SDK preparation, guard, recheck | The program's accounts (`Campaign`, `GlobalConfig`, `Entry`, owner `5Rx8…n8o`); the Clock sysvar; a metric account whose owner is one of the five readers' programs (Pyth receiver `rec2HH…`, SPL Token, Meteora DAMM v2, SPL Stake Pool, Vote); an `Entry` that does not exist yet answers `null`. Encoding `base64`, commitment `confirmed` |
 | `getMultipleAccounts` | Page | The same accounts, up to three per call (campaign and config; then metric, the wallet's entry, the creator's entry) |
-| `getLatestBlockhash` | SDK preparation | Commitment `confirmed`; its `lastValidBlockHeight` is what the retry guard saves |
+| `getLatestBlockhash` | SDK preparation | Commitment `confirmed`; its `lastValidBlockHeight` is what the retry guard saves first |
 | `simulateTransaction` | SDK preparation | One transaction whose top-level instructions are the program's (`user_join_campaign`); `sigVerify: false`, `replaceRecentBlockhash: true`, `innerInstructions: true`, encoding `base64` |
 | `getMinimumBalanceForRentExemption` | SDK preparation | The sizes of a `Join` (96 bytes) and an `Entry` (116 bytes) |
-| `sendTransaction` | Wallet adapter, and the trace's stand-in wallet | Only when a wallet lacks `signAndSendTransaction`: the adapter then sends the signed bytes through this RPC. The same program rule as `simulateTransaction`, plus known wallet-assertion programs such as Lighthouse (its id is to be confirmed, [E69]). A wallet with `signAndSendTransaction` (MWA's `sign_and_send_transactions`) sends through its own RPC, which the relay cannot gate |
-| `getSignatureStatuses` | Guard | One signature per call, the one the wallet returned |
-| `getBlockHeight` | Guard | Commitment `finalized`: past the saved `lastValidBlockHeight`, a join can no longer land |
+| `sendTransaction` | Wallet adapter, and the trace's stand-in wallet | Only when a wallet lacks `signAndSendTransaction`: the adapter then sends the signed bytes through this RPC. Top-level instructions of the program, ComputeBudget, and known wallet-assertion programs: Lighthouse `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95` (recorded in Sprint 03, `knowledge-base/tecnologia/lighthouse.md`). A wallet with `signAndSendTransaction` (MWA's `sign_and_send_transactions`) sends through its own RPC, which the relay cannot gate |
+| `getSignatureStatuses` | Guard | One signature per call, the one the wallet returned; once with `searchTransactionHistory: true`, before the guard declares an attempt unlanded |
+| `getBlockHeight` | Guard | Three commitments, each needed: `finalized` (past the deadline, a join can no longer land), `processed` (when the wallet answers, the deadline grows to that height plus 150) and `confirmed` (before signing, a blockhash with under 60 blocks left is prepared again). A relay that pins one commitment breaks the other two |
 | `getSignaturesForAddress` | Activity, recheck | A campaign account of the program; `limit` 20 for the activity; the SDK's recheck pages up to 1,000 at a time and stops at 10,000 |
-| `getTransaction` | Activity, recheck | Signatures the previous call returned; encoding `json`, `maxSupportedTransactionVersion: 0`, commitment `confirmed` |
+| `getTransaction` | Activity, recheck, guard | Signatures the previous call returned, and the guard's own signature when it failed (to read which program's instruction failed); encoding `json`, `maxSupportedTransactionVersion: 0`, commitment `confirmed` |
 | `getBalance` | Wallet adapter | The connected wallet's own address |
 
 ## Not on the list
@@ -45,6 +45,10 @@ Every `*Subscribe` method (no WebSocket), `getProgramAccounts` (the read API lis
 it for the keeper), and batches (one method per request).
 
 ## For the relay (Sprint 08)
+
+- **Never cache** what the retry guard decides on: signature statuses, the block height and the wallet's `Entry`. A
+  stale answer there would tell a baker an entry did not land, or let the page offer a retry too early (Sprint 11
+  security review). The short-TTL cache is for the campaign, the config and the metric accounts.
 
 - Account reads are allowed by owner, as the proposal says (D-i: no list of accounts): the relay returns an account only
   when its owner is the program, a reader's program, or a sysvar the client reads (Clock), and `null` when it does not

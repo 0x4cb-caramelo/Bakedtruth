@@ -17,9 +17,9 @@ export const pct = (bps: number): string => `${(bps / 100).toLocaleString("en-US
 export const NOTICES = {
   estimate:
     "Estimate, not a promise: it is net of Brot's fee and the creator's share, and it changes with every entry until entries close.",
-  largeEntry: "Your entry is counted: the more you put in, the lower your side's return.",
+  largeEntry: "Your own entry counts in the pot: the more you put on a side, the lower that side's return per 1.",
   largeEntryNumbers: (small: string, mine: string) =>
-    `About ${small} per 1 for a minimum entry, ${mine} per 1 with yours.`,
+    `Est. ${small} per 1 for a minimum entry, ${mine} per 1 with yours.`,
   fee: (feeBps: number, creatorShareBps: number) =>
     `Brot keeps ${pct(feeBps)} of the losing side. ${creatorShareBps > 0 ? `The creator gets ${pct(creatorShareBps)} of the entries.` : "This campaign has no creator share."}`,
   oneSided: (oneSidedFeeBps: number) =>
@@ -42,13 +42,14 @@ export const PANEL = {
   minimumHelp: (min: string) => `Minimum ${min} SOL.`,
   amountInvalid: "Write the amount in SOL, like 0.5.",
   belowMinimum: (min: string) => `The minimum entry for this campaign is ${min} SOL.`,
-  fromLink: "This amount came from the link you opened. Check it before you sign.",
+  fromLink: "This came from the link you opened. Check the side and the amount before you sign.",
   enterAmount: "Enter an amount to see the estimate.",
-  ifWins: (side: string, back: string, amount: string) => `If ${side} wins: about ${back} SOL for ${amount} SOL`,
+  ifWins: (side: string, back: string, amount: string) =>
+    `If ${side} wins: est. ${back} SOL back on your ${amount} SOL`,
   ifLoses: (other: string) => `If ${other} wins: 0 SOL back.`,
-  onesided: (other: string, back: string) => `If ${other} stays empty: about ${back} SOL back`,
+  onesided: (other: string, back: string) => `If ${other} stays empty: est. ${back} SOL back`,
   onesidedSub: (first: boolean, other: string, oneSidedFeeBps: number) =>
-    `${first ? "No fee: you would be the first wallet." : `A ${pct(oneSidedFeeBps)} fee; the first wallet pays none.`} If someone joins ${other}, the winning side splits the losing side.`,
+    `${first ? "No fee: you would be the first wallet." : `A ${pct(oneSidedFeeBps)} fee; the first wallet pays none.`} If someone joins ${other}, the winners split the pot.`,
   rentFirst: (rent: string) =>
     `First entry here: + ${rent} SOL for the accounts it opens, returned when the campaign settles.`,
   rentAgain: (rent: string) => `+ ${rent} SOL for this entry's record, returned when the campaign settles.`,
@@ -70,14 +71,20 @@ export const SHEET = {
   sideAmount: "Side · amount",
   estimate: "Estimated return now",
   estimateValue: (perOne: string, back: string, side: string) =>
-    `est. ${perOne} per 1 · about ${back} SOL if ${side} wins`,
-  estimateOnesided: (back: string, other: string) => `about ${back} SOL back if ${other} stays empty`,
-  floor: "You accept at least",
+    `est. ${perOne} per 1 · est. ${back} SOL back if ${side} wins`,
+  estimateOnesided: (back: string, other: string) => `est. ${back} SOL back if ${other} stays empty`,
+  floor: "Lowest estimate you accept",
   floorValue: (perOne: string) => `${perOne} per 1`,
   floorNote: (bps: string) =>
-    `min_return_bps ${bps}: if other entries go in first and the estimate falls below this, the program refuses the entry.`,
+    `min_return_bps ${bps}: if other entries go in first and the estimate falls below this, the program refuses the entry. Later entries can still lower it.`,
   guard: (total: string) =>
-    `expected_entry_total ${total} SOL: the entry this wallet holds now. A repeated transaction is refused, so an entry cannot go in twice.`,
+    `expected_entry_total ${total} SOL: this entry goes in only if your entry is still ${total} SOL when it lands, so this transaction cannot go in twice.`,
+  addsTo: (total: string) => `This entry adds to the ${total} SOL you already have in this campaign.`,
+  notKept:
+    'This browser does not keep data for this page. If it closes before your wallet answers, check "Your entry" here before you try again.',
+  soFar: "Your entry so far",
+  refreshed: "Prepared again: the network moved on while this was open. Check it again before you sign.",
+  feeValue: (fee: string) => `at most ${fee} SOL`,
   rents: "Account rents",
   rentsNote: "Returned when the campaign settles",
   fee: "Network fee",
@@ -91,6 +98,7 @@ export const SHEET = {
 } as const;
 
 export const STEPS = {
+  title: "Signing your entry",
   wallet: "Approve in your wallet.",
   confirming: "Sent. Confirming on devnet…",
   checking: "Checking whether your entry landed…",
@@ -103,8 +111,10 @@ export const STEPS = {
 export const DONE = {
   title: "You're in",
   text: (side: string, amount: string) => `${side} ${amount} SOL is in the pot.`,
-  paidOut: "Paid automatically to your wallet when the campaign settles. There is no claim button.",
+  paidOut:
+    "Paid automatically to your wallet after the result is read and its 6-hour review ends. There is no claim button.",
   transaction: "Transaction",
   landedNoSignature: "Your entry account shows the entry. The wallet did not return its signature.",
+  holdsNow: (yes: string, no: string) => `Your entry now holds YES ${yes} SOL and NO ${no} SOL.`,
   close: "Done",
 } as const;

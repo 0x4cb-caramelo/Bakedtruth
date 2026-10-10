@@ -1,11 +1,11 @@
 /**
  * Purpose: an entry from the panel to the chain, without React. `prepareEntry` is the SDK's A-3 preparation for the
  *          connected wallet's address (re-read, checked, built, summarised from the bytes, simulated), passing the
- *          retry guard's saved total when there is one. `handToWallet` saves the guard's record first, gives the wallet
- *          the very message bytes the summary read, and watches the result by polling (watch.ts). The wallet signs
- *          and sends (`sendTransaction`, which maps to MWA's `sign_and_send_transactions`, TP §3.6 S1 rule 4); the site
- *          never holds a key.
- * Version: 0.1.0
+ *          retry guard's saved total when there is one. `handToWallet` saves the guard's record for this attempt first,
+ *          gives the wallet the very message bytes the summary read, and watches the result by polling (watch.ts). The
+ *          wallet signs and sends (`sendTransaction`, which maps to MWA's `sign_and_send_transactions`, TP §3.6 S1 rule
+ *          4); the site never holds a key.
+ * Version: 0.2.0 (Sprint 11 review: records per attempt, a deadline raised for a late answer, errors by program)
  * Sprint:  11 (site: campaign page and entry)
  */
 import { address, createNoopSigner } from "@solana/kit";
@@ -15,11 +15,22 @@ import { prepareJoin, type PreparedJoin } from "@brot/sdk/tx";
 
 import { sideOf, type EntrySide } from "./estimate";
 import { fromChainError, fromError, nothingSent, notLanded, type Failure } from "./failures";
-import { clearPending, savePending, type KeyValueStore, type PendingEntry } from "./retry-guard";
-import { watchPending, WatchStopped, type WatchOptions } from "./watch";
+import { failedProgram } from "./landed";
+import {
+  clearAttempt,
+  newAttempt,
+  savePending,
+  updateAttempt,
+  type KeyValueStore,
+  type PendingEntry,
+} from "./retry-guard";
+import { watchPending, WatchStopped, type Sides, type WatchOptions } from "./watch";
 
 export type ReadyJoin = Extract<PreparedJoin, { ok: true }>;
 export type EntryChoice = { campaign: string; baker: string; side: EntrySide; amount: bigint };
+
+/** A blockhash lives this many blocks: a wallet that signs a newer one can land up to this far past its answer. */
+export const BLOCKHASH_LIFE = 150n;
 
 /** A-3 for this entry. `expectedEntryTotal`: the retry guard's saved total, when a record is kept. */
 export function prepareEntry(a: EntryChoice & { rpc: SolanaRpc; expectedEntryTotal?: bigint }): Promise<PreparedJoin> {
@@ -38,21 +49,29 @@ export function prepareEntry(a: EntryChoice & { rpc: SolanaRpc; expectedEntryTot
 export const walletTransaction = (ready: ReadyJoin): VersionedTransaction =>
   new VersionedTransaction(VersionedMessage.deserialize(new Uint8Array(ready.transaction.messageBytes)));
 
-/** The guard's record of a prepared entry, before the wallet sees it. */
-export function pendingOf(ready: ReadyJoin, choice: EntryChoice): PendingEntry {
+/** The `lastValidBlockHeight` of the blockhash the SDK prepared with (never a durable nonce). */
+export function lastValidOf(ready: ReadyJoin): bigint {
   const lifetime = ready.message.lifetimeConstraint;
-  // The SDK prepares every join with the cluster's latest blockhash (tx/message.ts), never a durable nonce.
   if (!("lastValidBlockHeight" in lifetime)) throw new Error("a join without a blockhash lifetime cannot be guarded");
+  return lifetime.lastValidBlockHeight;
+}
+
+/** A new attempt's record, before the wallet sees it. `previous`: the record this attempt replaces, if any. */
+export function pendingOf(ready: ReadyJoin, choice: EntryChoice, previous: PendingEntry | null = null): PendingEntry {
+  const lastValid = lastValidOf(ready).toString();
   return {
-    v: 1,
+    v: 2,
+    attempt: newAttempt(),
     campaign: choice.campaign,
     baker: choice.baker,
     side: choice.side,
     amount: choice.amount.toString(),
     expectedEntryTotal: ready.expectedEntryTotal.toString(),
-    lastValidBlockHeight: lifetime.lastValidBlockHeight.toString(),
+    lastValidBlockHeight: lastValid,
+    deadline: lastValid,
     signature: null,
     state: "handed",
+    handedBefore: previous !== null && (previous.handedBefore || previous.state !== "refused"),
     savedAt: Date.now(),
   };
 }
@@ -60,22 +79,35 @@ export function pendingOf(ready: ReadyJoin, choice: EntryChoice): PendingEntry {
 /** The wallet adapter's `sendTransaction`, bound to the site's connection: resolves to the signature. */
 export type SendToWallet = (transaction: VersionedTransaction) => Promise<string>;
 
+export type Cost = "nothing" | "fee" | "unknown";
 export type Outcome =
-  | { kind: "landed"; signature: string | null }
-  | { kind: "failed"; failure: Failure; signature: string | null; onChain: boolean }
-  /** The watch stopped (network or page): the record is kept and the watch resumes on the next visit. */
+  | { kind: "landed"; signature: string | null; sides: Sides }
+  | { kind: "failed"; failure: Failure; signature: string | null; cost: Cost }
+  /** The watch stopped (network or page): the record is kept, and the watch resumes from it. */
   | { kind: "stopped"; record: PendingEntry };
 
 export type Stage = "wallet" | "confirming" | "checking";
 
-/** Saves the record, hands the transaction to the wallet, and watches it until it is decided. */
+/** When the wallet answers (or fails without proof that nothing was sent), the deadline grows to the blockhash life. */
+async function raiseDeadline(rpc: SolanaRpc, record: PendingEntry): Promise<PendingEntry> {
+  const height = await rpc
+    .getBlockHeight({ commitment: "processed" })
+    .send()
+    .catch(() => null);
+  if (height === null) return record;
+  const deadline =
+    height + BLOCKHASH_LIFE > BigInt(record.deadline) ? height + BLOCKHASH_LIFE : BigInt(record.deadline);
+  return { ...record, deadline: deadline.toString() };
+}
+
+/** Saves this attempt's record, hands the transaction to the wallet, and watches it until it is decided. */
 export async function handToWallet(a: {
   rpc: SolanaRpc;
   ready: ReadyJoin;
   pending: PendingEntry;
   send: SendToWallet;
   store: KeyValueStore | null;
-  /** This attempt passed a saved total from an earlier one: a changed entry then means the earlier one landed. */
+  /** An earlier attempt may have landed: a changed entry then means it did. */
   retry?: boolean;
   onStage?: (stage: Stage) => void;
   watch?: WatchOptions;
@@ -85,18 +117,19 @@ export async function handToWallet(a: {
   a.onStage?.("wallet");
   try {
     record = { ...record, signature: await a.send(walletTransaction(a.ready)) };
-    savePending(a.store, record);
     a.onStage?.("confirming");
   } catch (error) {
     const failure = fromError(error);
     if (nothingSent(failure)) {
-      savePending(a.store, { ...record, state: "refused" });
-      return { kind: "failed", failure, signature: null, onChain: false };
+      updateAttempt(a.store, { ...record, state: "refused" });
+      return { kind: "failed", failure, signature: null, cost: "nothing" };
     }
     // No answer that proves nothing was sent: the wallet may have sent it. Watch until it lands or expires.
     a.onStage?.("checking");
   }
-  return settle(a.rpc, record, a.store, a.retry ?? false, a.watch);
+  record = await raiseDeadline(a.rpc, record);
+  updateAttempt(a.store, record);
+  return settle(a.rpc, record, a.store, (a.retry ?? false) || record.handedBefore, a.watch);
 }
 
 /** Watches a record until it is decided, and keeps or clears it by the guard's rule; also resumes one after a reload. */
@@ -115,14 +148,22 @@ export async function settle(
     throw error;
   }
   if (watched.verdict === "landed") {
-    clearPending(store, record.campaign, record.baker);
-    return { kind: "landed", signature: record.signature };
+    clearAttempt(store, record);
+    return { kind: "landed", signature: record.signature, sides: watched.sides };
   }
   if (watched.verdict === "failed") {
-    clearPending(store, record.campaign, record.baker);
-    return { kind: "failed", failure: fromChainError(watched.err, retry), signature: record.signature, onChain: true };
+    const program = record.signature ? await failedProgram(rpc, record.signature, watched.err) : null;
+    clearAttempt(store, record);
+    const failure = fromChainError(watched.err, retry, program);
+    return { kind: "failed", failure, signature: record.signature, cost: "fee" };
   }
-  // Expired unlanded: keep the saved total, so the next attempt still cannot add a second entry.
-  savePending(store, { ...record, state: "expired" });
-  return { kind: "failed", failure: notLanded(), signature: record.signature, onChain: false };
+  // Expired unlanded: keep the saved total, so the next attempt still cannot add a second entry. Without a signature,
+  // a transaction that reached the chain and failed would have cost its fee: the cost is then not known.
+  updateAttempt(store, { ...record, state: "expired" });
+  return {
+    kind: "failed",
+    failure: notLanded(),
+    signature: record.signature,
+    cost: record.signature ? "nothing" : "unknown",
+  };
 }

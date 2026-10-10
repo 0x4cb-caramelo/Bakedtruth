@@ -19,19 +19,19 @@ export type FailureContext = {
 };
 
 /** "again": review again; "amount": change the amount; "close": nothing to retry; "faucet": get devnet SOL. */
-export type WayOut = "again" | "amount" | "close" | "faucet" | "wait";
+export type WayOut = "again" | "amount" | "close" | "faucet" | "wait" | "check";
 
 export type FailureCopy = { title: string; text: string; way: WayOut };
 
 const TEXT: Record<FailureKey, (c: FailureContext) => FailureCopy> = {
   entriesClosed: () => ({
     title: "Entries closed",
-    text: "This campaign stopped taking entries before yours went in.",
+    text: "This campaign stopped taking entries before yours went in. The page shows where the campaign stands now.",
     way: "close",
   }),
   outcomeKnown: () => ({
     title: "The answer is already known",
-    text: "The account already shows the result, so entries are locked.",
+    text: "The account already shows the result, so entries are locked. The program records it next; follow it on this page.",
     way: "close",
   }),
   noFreshPrice: (c) => ({
@@ -46,7 +46,7 @@ const TEXT: Record<FailureKey, (c: FailureContext) => FailureCopy> = {
   }),
   paused: () => ({
     title: "Entries are paused",
-    text: "The team paused entries. Payouts and refunds continue.",
+    text: "The team paused entries. Payouts and refunds continue. Try again when entries resume.",
     way: "close",
   }),
   belowMinimum: (c) => ({
@@ -63,8 +63,8 @@ const TEXT: Record<FailureKey, (c: FailureContext) => FailureCopy> = {
   }),
   entryChanged: () => ({
     title: "Your entry changed since this page read it",
-    text: "Another entry from this wallet went in after the page read it. The page read it again: check and review again.",
-    way: "again",
+    text: 'Another entry from this wallet went in after the page read it, so this one was refused. "Your entry" on this page shows what it holds now.',
+    way: "close",
   }),
   alreadyLanded: () => ({
     title: "Your earlier entry already landed",
@@ -96,6 +96,16 @@ const TEXT: Record<FailureKey, (c: FailureContext) => FailureCopy> = {
     text: "Your wallet gave no answer, and the transaction expired without landing. You can try again.",
     way: "again",
   }),
+  stillChecking: () => ({
+    title: "Still checking your entry",
+    text: "The network stopped answering while this page checked whether your entry landed. It may still land. Check again; nothing new can be signed here until this one is settled.",
+    way: "check",
+  }),
+  walletChanged: () => ({
+    title: "Your wallet changed",
+    text: "The connected wallet is not the one this entry was prepared for. Review it again with the wallet you want to use.",
+    way: "again",
+  }),
 };
 
 export const failureCopy = (key: FailureKey, context: FailureContext = {}): FailureCopy => TEXT[key](context);
@@ -104,6 +114,7 @@ export const failureCopy = (key: FailureKey, context: FailureContext = {}): Fail
 export const COST = {
   nothing: "Nothing was charged.",
   fee: "No SOL moved except the network fee.",
+  unknown: "If the transaction reached the chain and failed, only its network fee moved.",
 } as const;
 
 export const programLine = (code: number, name: string, message: string) => `Program error ${code} ${name}: ${message}`;
@@ -114,4 +125,5 @@ export const ACTIONS: Record<WayOut, string> = {
   close: "Close",
   faucet: "Get devnet SOL",
   wait: "Try again",
+  check: "Check again",
 };

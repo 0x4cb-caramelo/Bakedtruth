@@ -57,6 +57,7 @@ export function CampaignPage({ idParam, prefill }: { idParam: string; prefill: P
   const allowed = useEntriesAllowed();
   const phone = usePhone();
   const [round, setRound] = useState(0);
+  const [busy, setBusy] = useState(false);
   const landed = useCallback(() => (setRound((n) => n + 1), reload()), [reload]);
 
   if (state.status === "loading") {
@@ -77,7 +78,8 @@ export function CampaignPage({ idParam, prefill }: { idParam: string; prefill: P
   const { data } = state;
   const proof = proofOf(data.campaign, data.metric, data.chain);
   const title = sentence(data);
-  const taking = data.view.state === "Open" && allowed === true;
+  // While an entry is under way the panel stays, so its result shows even if entries close meanwhile.
+  const taking = (data.view.state === "Open" && allowed === true) || busy;
   const blocks = {
     head: <CampaignHeader key="head" data={data} proof={proof} sentence={title} />,
     proof: <ProofPanel key="proof" data={data} proof={proof} />,
@@ -85,7 +87,15 @@ export function CampaignPage({ idParam, prefill }: { idParam: string; prefill: P
     activity: <ActivityPanel key="activity" campaign={data.address} round={round} />,
     recheck: <RecheckPanel key="recheck" data={data} proof={proof} />,
     panel: taking ? (
-      <EntryPanel key="panel" data={data} proof={proof} sentence={title} prefill={prefill} onLanded={landed} />
+      <EntryPanel
+        key="panel"
+        data={data}
+        proof={proof}
+        sentence={title}
+        prefill={prefill}
+        onChange={landed}
+        onBusy={setBusy}
+      />
     ) : (
       <StateCard key="panel" data={data} entriesTaken={allowed !== false} />
     ),

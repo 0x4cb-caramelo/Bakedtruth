@@ -97,7 +97,7 @@ export function RecheckPanel({ data, proof }: { data: PageData; proof: Proof }) 
       </dl>
       <div className="mt-3 space-y-2">
         <Segmented
-          label="Command"
+          label={RECHECK.command}
           items={commands.map((x) => ({ id: x.label, label: x.label }))}
           value={tab}
           onChange={setTab}

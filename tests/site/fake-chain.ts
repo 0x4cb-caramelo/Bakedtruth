@@ -50,7 +50,16 @@ function land(w: World, wire: string) {
   const result = w.client.svm.sendTransaction(tx as never);
   const failed = isFailedTransaction(result as never);
   const meta = (failed ? (result as unknown as { meta(): Meta }).meta() : result) as unknown as Meta;
-  const keys = getCompiledTransactionMessageDecoder().decode(tx.messageBytes).staticAccounts;
+  const compiled = getCompiledTransactionMessageDecoder().decode(tx.messageBytes);
+  const keys = compiled.staticAccounts;
+  // As `getTransaction` (JSON) writes them: each instruction's program by index, so a failure can be placed.
+  type Compiled = { programAddressIndex: number; accountIndices?: readonly number[]; data?: Uint8Array };
+  const listed = ("instructions" in compiled ? compiled.instructions : []) as readonly Compiled[];
+  const instructions = listed.map((ix) => ({
+    programIdIndex: ix.programAddressIndex,
+    accounts: [...(ix.accountIndices ?? [])],
+    data: getBase58Decoder().decode(ix.data ?? new Uint8Array()),
+  }));
   const innerInstructions = meta
     .innerInstructions()
     .map((list, index) => ({
@@ -67,9 +76,9 @@ function land(w: World, wire: string) {
   const view: RpcTransaction = {
     slot: clock.slot,
     blockTime: clock.unixTimestamp,
-    transaction: { signatures: [signature], message: { accountKeys: keys } },
+    transaction: { signatures: [signature], message: { accountKeys: keys, instructions } },
     meta: { err, innerInstructions },
-  };
+  } as RpcTransaction;
   return { signature, err, view };
 }
 

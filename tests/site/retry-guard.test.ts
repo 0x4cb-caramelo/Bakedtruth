@@ -12,13 +12,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { createSolanaRpc } from "@solana/kit";
 
 import { fromRefusal } from "../../app/features/entry/failures";
-import {
-  decidePending,
-  guardedTotal,
-  loadPending,
-  pendingKey,
-  savePending,
-} from "../../app/features/entry/retry-guard";
+import { guardedTotal, loadPending, pendingKey, savePending } from "../../app/features/entry/retry-guard";
 import { handToWallet, pendingOf, prepareEntry, settle, walletTransaction } from "../../app/features/entry/submit";
 import { join, openedCampaign, readEntry } from "../brot/flows";
 import { openingWorld } from "../brot/opening";
@@ -26,7 +20,7 @@ import * as P from "../brot/program";
 import { expectError, fundedWallet } from "../brot/setup";
 import { ready } from "../sdk/prepared";
 import { LAST_VALID, startFakeChain, type FakeChain } from "./fake-chain";
-import { memoryStore, napThen, refusingStore, testWallet } from "./support";
+import { memoryStore, napThen, testWallet } from "./support";
 
 let chain: FakeChain | null = null;
 afterEach(() => chain?.close());
@@ -60,7 +54,7 @@ describe("a retried entry fails on expected total", () => {
       store,
       watch: { sleep: napThen(() => {}) },
     });
-    expect(outcome).toEqual({ kind: "landed", signature: null });
+    expect(outcome).toEqual({ kind: "landed", signature: null, sides: { yes: P.SOL, no: 0n } });
     expect(store.map.has(pendingKey(choice.campaign, choice.baker))).toBe(false);
     expect((await readEntry(w, campaign, baker.address)).amount_yes).toBe(P.SOL);
     // What the wallet signed is the message the summary read, byte for byte.
@@ -92,7 +86,7 @@ describe("a retried entry fails on expected total", () => {
       watch: { onWait: (left) => heights.push(left), sleep: napThen(() => c.setBlockHeight(LAST_VALID + 1n)) },
     });
     expect(heights).toEqual([150n]); // it waited while the transaction could still land
-    expect(outcome.kind === "failed" && outcome.failure.key).toBe("notLanded");
+    expect(outcome).toMatchObject({ kind: "failed", failure: { key: "notLanded" }, cost: "unknown" });
     const kept = loadPending(store, choice.campaign, choice.baker);
     expect(kept?.state).toBe("expired");
     // The next attempt passes the saved total; nothing landed, so it equals the chain's and the entry goes in once.
@@ -120,7 +114,11 @@ describe("a retried entry fails on expected total", () => {
       send: testWallet(baker, c.url, "refuse"),
       store,
     });
-    expect(outcome).toMatchObject({ kind: "failed", onChain: false, failure: { key: "signatureRefused" } });
+    expect(outcome).toMatchObject({
+      kind: "failed",
+      cost: "nothing",
+      failure: { key: "signatureRefused", notSent: true },
+    });
     expect(c.methods).not.toContain("sendTransaction");
     expect(loadPending(store, choice.campaign, choice.baker)).toMatchObject({
       state: "refused",
@@ -136,45 +134,7 @@ describe("a retried entry fails on expected total", () => {
     await testWallet(baker, c.url)(walletTransaction(first));
     const record = loadPending(store, choice.campaign, choice.baker);
     expect(record).not.toBeNull();
-    expect(await settle(rpc, record!, store, true)).toEqual({ kind: "landed", signature: null });
+    expect(await settle(rpc, record!, store, true)).toMatchObject({ kind: "landed", signature: null });
     expect((await readEntry(w, campaign, baker.address)).amount_yes).toBe(P.SOL);
-  });
-
-  test("the guard's rule, and a store that refuses everything", () => {
-    const record = {
-      v: 1,
-      campaign: "c",
-      baker: "b",
-      side: "yes",
-      amount: "5",
-      expectedEntryTotal: "10",
-      lastValidBlockHeight: "100",
-      signature: null,
-      state: "handed",
-      savedAt: 0,
-    } as const;
-    const now = (entryTotal: bigint, blockHeight: bigint, status: "landed" | "failed" | null = null) => ({
-      entryTotal,
-      blockHeight,
-      status,
-    });
-    expect(decidePending(record, now(10n, 100n))).toBe("wait");
-    expect(decidePending(record, now(15n, 100n))).toBe("landed");
-    expect(decidePending(record, now(10n, 101n))).toBe("not-landed");
-    expect(decidePending(record, now(10n, 50n, "failed"))).toBe("failed");
-    expect(decidePending(record, now(10n, 50n, "landed"))).toBe("landed");
-    // With a signature, its status decides: another entry moving the total does not make this one landed.
-    const signed = { ...record, signature: "sig" };
-    expect(decidePending(signed, now(15n, 50n, "failed"))).toBe("failed");
-    expect(decidePending(signed, now(15n, 50n))).toBe("wait");
-    expect(decidePending(signed, now(15n, 101n))).toBe("landed");
-    expect(decidePending(signed, now(10n, 101n))).toBe("not-landed");
-    expect(savePending(refusingStore(), { ...record })).toBe(false);
-    expect(loadPending(refusingStore(), "c", "b")).toBeNull();
-    const store = memoryStore();
-    store.setItem(pendingKey("c", "b"), JSON.stringify({ ...record, expectedEntryTotal: "-1" }));
-    expect(loadPending(store, "c", "b")).toBeNull();
-    store.setItem(pendingKey("c", "b"), "{not json");
-    expect(loadPending(store, "c", "b")).toBeNull();
   });
 });

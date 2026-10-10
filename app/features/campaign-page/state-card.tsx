@@ -26,7 +26,12 @@ export function StateCard({ data, entriesTaken }: { data: PageData; entriesTaken
             view.closedBecause === "outcomeKnowable" ? STATE.knowable : STATE.closedText(utc(c.deadlineAt)),
           ]
         : view.state === "InReview"
-          ? [STATE.review, STATE.reviewText(word(c.outcome), utc(c.reviewEndsAt))]
+          ? [
+              STATE.review,
+              c.outcome === Outcome.Void
+                ? STATE.reviewVoid(utc(c.reviewEndsAt))
+                : STATE.reviewText(word(c.outcome), utc(c.reviewEndsAt)),
+            ]
           : view.state === "Paid"
             ? [STATE.paid, STATE.paidText(word(c.outcome))]
             : [STATE.void, STATE.voidText];

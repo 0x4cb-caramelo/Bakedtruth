@@ -10,6 +10,8 @@
 
 import { useState } from "react";
 
+import { ACTIVITY } from "./copy";
+
 const W = 600;
 const H = 170;
 const PAD = { left: 40, right: 64, top: 12, bottom: 22 };
@@ -36,7 +38,7 @@ export function ChanceChart({ points, label }: { points: readonly number[]; labe
       <svg
         viewBox={`0 0 ${W} ${H}`}
         role="img"
-        aria-label={`${label}: ${points.map((p, i) => `after entry ${i + 1}, ${p}%`).join("; ")}`}
+        aria-label={`${label}: ${points.map((p, i) => ACTIVITY.point(i + 1, p)).join("; ")}`}
         tabIndex={0}
         className="block h-auto w-full touch-none focus-visible:outline-2 focus-visible:outline-accent"
         onPointerMove={(e) => setAt(nearest(e.clientX, e.currentTarget.getBoundingClientRect()))}
@@ -68,18 +70,18 @@ export function ChanceChart({ points, label }: { points: readonly number[]; labe
         ) : null}
         <circle cx={x(shown)} cy={y(points[shown])} r={4} fill="var(--yes-bar)" stroke="var(--panel)" strokeWidth={2} />
         <text x={x(last) + 8} y={y(points[last]) + 4} fontSize={12} fontWeight={600} fill="var(--text)">
-          YES {points[last]}%
+          {ACTIVITY.endLabel(points[last])}
         </text>
         <text x={PAD.left} y={H - 6} fontSize={11} fill="var(--muted)">
-          entry 1
+          {ACTIVITY.firstEntry}
         </text>
         <text x={W - PAD.right} y={H - 6} textAnchor="end" fontSize={11} fill="var(--muted)">
-          entry {points.length}
+          {ACTIVITY.lastEntry(points.length)}
         </text>
       </svg>
       <figcaption aria-live="polite" className="mt-1 text-xs text-muted">
-        <b className="text-text">YES {points[shown]}%</b> · NO {Math.round((100 - points[shown]) * 10) / 10}% · after
-        entry {shown + 1}
+        <b className="text-text">{ACTIVITY.endLabel(points[shown])}</b> · NO{" "}
+        {Math.round((100 - points[shown]) * 10) / 10}%{ACTIVITY.readout(shown + 1)}
       </figcaption>
     </figure>
   );

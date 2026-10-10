@@ -3,7 +3,7 @@
  *          transaction the wallet never answered for, with the blocks left before it expires), the receipt, and each
  *          failure with what happened, what it cost, the program's own message from the SDK's error map, and its way
  *          out (review again, change the amount, the devnet faucet, or close).
- * Version: 0.1.0
+ * Version: 0.2.0 (Sprint 11 review: "Check again" for a stopped watch; the entry's sides when no signature came back)
  * Sprint:  11 (site: campaign page and entry)
  */
 "use client";
@@ -78,7 +78,9 @@ export function Receipt({ state, onClose }: { state: Done; onClose: () => void }
           </a>
         </p>
       ) : (
-        <p className="m-0 text-muted">{DONE.landedNoSignature}</p>
+        <p className="m-0 text-muted">
+          {DONE.landedNoSignature} {DONE.holdsNow(sol4(state.sides.yes), sol4(state.sides.no))}
+        </p>
       )}
       <p className="m-0 text-xs text-muted">{DONE.paidOut}</p>
       <div className="flex justify-end">
@@ -93,26 +95,42 @@ export function FailureView({
   context,
   onAgain,
   onAmount,
+  onCheck,
   onClose,
 }: {
   state: Failed;
   context: FailureContext;
   onAgain: () => void;
   onAmount: () => void;
+  onCheck: () => void;
   onClose: () => void;
 }) {
   const copy = failureCopy(state.failure.key, context);
   const { code, name, programMessage } = state.failure;
-  const act = copy.way === "amount" ? onAmount : copy.way === "again" || copy.way === "wait" ? onAgain : null;
+  const act =
+    copy.way === "amount"
+      ? onAmount
+      : copy.way === "check"
+        ? onCheck
+        : copy.way === "again" || copy.way === "wait"
+          ? onAgain
+          : null;
+  // A stopped watch says itself what it does not know; an expired attempt with no signature may have cost its fee.
+  const cost =
+    state.cost === "fee"
+      ? COST.fee
+      : state.cost === "nothing"
+        ? COST.nothing
+        : copy.way === "check"
+          ? null
+          : COST.unknown;
   return (
     <div className="space-y-3 text-sm">
       <p className="m-0 flex items-start gap-2 rounded-sm bg-danger-bg px-3 py-2 text-error">
         <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
         <span>{copy.text}</span>
       </p>
-      {state.cost !== "unknown" ? (
-        <p className="m-0 text-muted">{state.cost === "fee" ? COST.fee : COST.nothing}</p>
-      ) : null}
+      {cost ? <p className="m-0 text-muted">{cost}</p> : null}
       {code !== null && name && programMessage ? (
         <p className="m-0 font-mono text-[11px] text-muted">{programLine(code, name, programMessage)}</p>
       ) : null}

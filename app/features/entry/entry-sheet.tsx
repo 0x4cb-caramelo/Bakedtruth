@@ -22,6 +22,7 @@ export function EntrySheet({
   onSign,
   onAgain,
   onAmount,
+  onCheck,
   onClose,
 }: {
   state: FlowState;
@@ -30,6 +31,7 @@ export function EntrySheet({
   onSign: () => void;
   onAgain: () => void;
   onAmount: () => void;
+  onCheck: () => void;
   onClose: () => void;
 }) {
   const open = state.step === "review" || state.step === "signing" || state.step === "done" || state.step === "failed";
@@ -39,7 +41,7 @@ export function EntrySheet({
       : state.step === "signing"
         ? state.stage === "checking"
           ? STEPS.checking
-          : "Signing your entry"
+          : STEPS.title
         : state.step === "done"
           ? DONE.title
           : state.step === "failed"
@@ -67,6 +69,7 @@ export function EntrySheet({
           context={{ ...context, floor }}
           onAgain={onAgain}
           onAmount={onAmount}
+          onCheck={onCheck}
           onClose={onClose}
         />
       ) : null}

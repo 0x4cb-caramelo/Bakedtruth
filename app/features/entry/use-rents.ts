@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { ACCOUNT_LEN, rentExemptMinimum } from "@brot/sdk/read";
 
 import { rpc } from "@/lib/rpc";
-import type { KeyValueStore } from "./retry-guard";
+import { pruneSettled, type KeyValueStore } from "./retry-guard";
 
 export type Rents = { join: bigint; entry: bigint };
 
@@ -39,10 +39,13 @@ export function useRents(): Rents | null {
 /** The base fee of one signature: what a join's network fee is, with no priority fee set (the SDK sets none). */
 export const BASE_FEE = 5_000n;
 
-/** The browser's localStorage, or `null` where reading it throws (private modes, blocked storage). */
+/** The browser's localStorage, or `null` where reading it throws (private modes, blocked storage); settled records
+ * older than a day are deleted first. */
 export function browserStore(): KeyValueStore | null {
   try {
-    return typeof window === "undefined" ? null : window.localStorage;
+    if (typeof window === "undefined") return null;
+    pruneSettled(window.localStorage, Date.now());
+    return window.localStorage;
   } catch {
     return null;
   }

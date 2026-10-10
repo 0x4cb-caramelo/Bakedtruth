@@ -20,10 +20,11 @@ export const KIND_NAME: Record<KindName, string> = {
 export const CREATOR_NOTICE = "Whoever opened this campaign can control the result and may have an entry on YES or NO.";
 export const creatorHasEntry = (sides: string) => `The creator's wallet has an entry: ${sides}.`;
 
-const TAIL =
-  "If the account cannot be read, the campaign is voided. A target met after the deadline still resolves NO.";
+const UNREADABLE = "If the account cannot be read, the campaign is voided.";
+/** Burn and lock (TP §3.4.6): a read after the deadline records NO, even when the target was met by then. */
+const BEFORE = "YES counts only if the program reads it before the deadline; read later, it resolves NO.";
 const EPOCH =
-  "Entries lock when that epoch starts. If Brot's service misses its reading, the campaign is voided and every entry refunded.";
+  "Entries close when that epoch starts, or earlier on the campaign's schedule. If Brot's service misses its reading, the campaign is voided and every entry refunded.";
 
 /** The rule in plain words, from the kind's template (spec 3.5): names come only from the pinned lists (A-11). */
 export function ruleText(a: {
@@ -35,13 +36,13 @@ export function ruleText(a: {
   epoch: string;
 }): string {
   const rules: Record<KindName, string> = {
-    price: `YES if Pyth's ${a.name} price touches ${a.target} ${a.below ? "or less" : "or more"} at any moment before ${a.deadline}; a touch resolves YES at once and locks entries. It counts once a signed Pyth price showing it is posted on-chain within 60 seconds of publication, so a touch of a few seconds may not count. NO if the deadline passes without one. If the price feed stops updating before the deadline, the campaign is voided and every entry is refunded.`,
-    burn: `YES if the total supply of the mint ${a.name} is at or below ${a.target} before ${a.deadline}. Its mint authority is revoked, so the supply cannot grow back; entries lock the moment the target is reached. NO if the deadline passes first.`,
-    lock: `YES if the Meteora pool ${a.name} has at least ${a.target} of liquidity locked for good before ${a.deadline}. Locked liquidity only grows; entries lock the moment the target is reached. NO otherwise.`,
+    price: `YES if Pyth's ${a.name} price reaches ${a.target} ${a.below ? "or less" : "or more"}, with its whole confidence band past it, at any moment before ${a.deadline}; that resolves YES at once and locks entries. It counts once a signed Pyth price showing it is posted on-chain within 60 seconds of publication, so a touch of a few seconds may not count. NO if the deadline passes without one; a touch after it does not count. If the price feed stops updating before the deadline, the campaign is voided and every entry is refunded.`,
+    burn: `YES if the total supply of the mint ${a.name} is at or below ${a.target} before ${a.deadline}. Its mint authority is revoked, so the supply cannot grow back; entries lock the moment the target is reached. ${BEFORE}`,
+    lock: `YES if the Meteora pool ${a.name} has at least ${a.target} of liquidity locked for good before ${a.deadline}. Locked liquidity only grows; entries lock the moment the target is reached. ${BEFORE}`,
     pool: `YES if the stake pool ${a.name} records at least ${a.target} at the start of epoch ${a.epoch}. NO if less. ${EPOCH}`,
     stake: `YES if the vote account ${a.name} has at least ${a.target} of active stake in epoch ${a.epoch}. NO if less. ${EPOCH}`,
   };
-  return `${rules[a.kind]} ${TAIL}`;
+  return `${rules[a.kind]} ${UNREADABLE}`;
 }
 
 export const PAGE = {
@@ -72,7 +73,8 @@ export const PROOF = {
   deadline: "Deadline",
   deadlinePassed: "Deadline passed",
   resolution: "Resolution",
-  resolutionText: "Read on-chain by Brot's scheduled service once the answer is known or the deadline passes.",
+  resolutionText:
+    "The program reads the account. Brot's scheduled service triggers it once the answer is known or the deadline passes; any wallet can.",
   missing: "The account can't be read now: it does not exist.",
   problem: (name: string) => `The account can't be read the way the program reads it (${name}).`,
   recorded: "Recorded by the program",
@@ -104,6 +106,7 @@ export const RECHECK = {
   slot: "Chain slot when read",
   exponent: "Exponent · confidence",
   anyRpc: "Any RPC works. The public devnet endpoint is rate-limited.",
+  command: "Command",
   copy: "Copy",
   copied: "Copied.",
   copyBlocked: "The browser blocked copying: select the text and copy it.",
@@ -135,6 +138,11 @@ export const ACTIVITY = {
   title: "Recent entries",
   hint: (n: number) => `From the campaign's last ${n} transactions, read on-chain`,
   history: "YES chance after each entry",
+  point: (n: number, pct: number) => `after entry ${n}, ${pct}%`,
+  firstEntry: "entry 1",
+  lastEntry: (n: number) => `entry ${n}`,
+  endLabel: (pct: number) => `YES ${pct}%`,
+  readout: (n: number) => ` · after entry ${n}`,
   none: "No entries yet.",
   failed: "The recent entries could not be read now.",
   row: (side: string, sol: string) => `${side} ${sol} SOL`,
@@ -143,11 +151,13 @@ export const ACTIVITY = {
 
 export const STATE = {
   closed: "Entries closed",
-  closedText: (deadline: string) => `Waiting for the deadline: ${deadline}. Then the chain is read.`,
-  knowable: "The answer is already on-chain: entries are locked until the program records it.",
+  closedText: (deadline: string) =>
+    `The program reads the account when the answer is on-chain, or at the deadline (${deadline}) at the latest.`,
+  knowable: "The answer is already on-chain, so entries are closed. The program records it next.",
   review: "In review",
   reviewText: (side: string, ends: string) =>
-    `The program read ${side}. Paid automatically after ${ends}, unless the team voids it.`,
+    `The program read ${side}. Paid automatically once the 6-hour review ends (${ends}), or sooner if the team confirms; the team can also void it.`,
+  reviewVoid: (ends: string) => `Voided. Every entry is refunded in full once the 6-hour review ends (${ends}).`,
   paid: "Paid",
   paidText: (side: string) => `Result: ${side}. Paid automatically to the wallets that entered ${side}.`,
   void: "Voided",

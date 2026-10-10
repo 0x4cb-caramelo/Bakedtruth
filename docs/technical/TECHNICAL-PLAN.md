@@ -1265,7 +1265,8 @@ from a browser or the app to a paid provider.
   only if one of the five readers accepts its owner. Methods: `getLatestBlockhash`, `getBlockHeight`,
   `getSignatureStatuses`, `getRecentPrioritizationFees`, balances. The final allowlist comes from a trace of the real
   client in Sprint 11; the new client polls signature status instead of opening a WebSocket, which today's client does
-  (`app/lib/hooks.ts:228`) **[F]**.
+  (`app/lib/hooks.ts:228`) **[F]**. The trace, taken on 2026-10-10 from the site's tests and its web smoke, is
+  `docs/technical/relay-allowlist.md`: eleven methods, no WebSocket **[F]**.
 - **Transactions:** `sendTransaction` and `simulateTransaction` accept only `brot_markets`, ComputeBudget and known
   wallet-assertion programs such as Lighthouse (program id **[AC]** [E69]). The System Program appears only as the
   program's own CPI. A join or opening is refused when `CF-IPCountry` is on the `GEO_BLOCK` list (K-11).
@@ -1919,6 +1920,17 @@ for Pinocchio and SOL, with the sprint that inherits each.
 | The upstream chat route, with a server key and a bypassable limit | With a key set, a free general-purpose model paid by the company | 09: removed (D-q); until then, no key anywhere |
 | Download the artifact by run id; keep the program-address keypair outside `target/` | Deploying the wrong artifact, or losing the program address | 05 |
 | A backup copy of the program-address keypair, today only in `target/deploy/` | Losing the address of the deployed program | The founder, before Sprint 05 |
+
+### 7.2 Deferred in Sprint 11
+
+The red-team review of what a baker signs (Sprint 11, 2026-10-10) was acted on in the sprint
+(`docs/sprints/sprint-11-site-campaign-entry.md`, record). These findings were deferred on purpose:
+
+| Finding | Risk while open | Sprint |
+|---|---|---|
+| `script-src 'unsafe-inline'` in the CSP (`app/next.config.ts`); a nonce through `proxy.ts`, or a hash of the theme script | A future injection on the signing page runs with no CSP backstop; none was found today | 13 or 16 |
+| Compare a landed join with the summary the baker read (`signAndSendTransaction` hides the signed bytes) | A wallet that changes the join's parameters goes unseen; the program's `min_return_bps` and `expected_entry_total` still bound the outcome | 16 |
+| A web-smoke wallet that changes the bytes (Lighthouse assertions, a priority fee, a new blockhash) | The guard's handling of a modified transaction is tested only in code review | 16 |
 
 ## 8. Privacy and compliance baseline
 
