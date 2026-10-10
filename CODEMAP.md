@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **791** |
+| Arquivos mapeados | **792** |
 | Acima de 200 linhas | **39** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -249,7 +249,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`copy.ts`](app/features/how/copy.ts) | the words of "How it works" (spec 3.2 and 3.15 of Sprint -1; D-m vocabulary; English per L-01): the six steps of a campaign from opening to payout, what chance  | 77 |
-| [`how-page.tsx`](app/features/how/how-page.tsx) | "How it works" (spec 3.2 and 3.15 of Sprint -1, prototype-lab/campaigns/js/screens/how.js): the six steps as one ordered path that reads the same on a phone (th | 75 |
+| [`how-page.tsx`](app/features/how/how-page.tsx) | "How it works" (spec 3.2 and 3.15 of Sprint -1, prototype-lab/campaigns/js/screens/how.js): the six steps as one ordered path that reads the same on a phone (th | 76 |
 
 ## `app/features/leaderboard/`
 
@@ -1289,12 +1289,13 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`chain.ts`](tests/e2e/chain.ts) | the web smoke's chain (Sprint 11, `bun run e2e`): the program in LiteSVM (CI's binary in target/deploy) with the founder's config, a team key and a paying creat | 63 |
+| [`chain.ts`](tests/e2e/chain.ts) | the web smoke's chain (Sprint 11, `bun run e2e`): the program in LiteSVM (CI's binary in target/deploy) with the founder's config, a team key and a paying creat | 85 |
 | [`control-states.ts`](tests/e2e/control-states.ts) | the web smoke's control routes for Sprint 12 ("campaign states"): a campaign written in any public state (tests/site/state-world.ts); a whole cycle with the smo | 97 |
 | [`control.ts`](tests/e2e/control.ts) | the web smoke's control endpoint (loopback, test only): what the Playwright runner asks of the chain. Sign the bytes the injected wallet was handed with the tes | 164 |
 | [`helpers.ts`](tests/e2e/helpers.ts) | what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page opened with the injected wallet and the runner's answer f | 75 |
 | [`playwright.config.ts`](tests/e2e/playwright.config.ts) | the web smoke's Playwright configuration (Sprint 11; @playwright/test 1.63.0, pinned in package.json, whose Chromium is build 1243): the site built against the  | 27 |
-| [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 60 |
+| [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 65 |
+| [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 124 |
 | [`smoke.e2e.ts`](tests/e2e/smoke.e2e.ts) | the web smoke (Sprint 11 DoD; `bun run e2e`): the built site in Chromium at desktop width and at 412 CSS px, with an injected Wallet Standard test wallet, again | 198 |
 | [`states.e2e.ts`](tests/e2e/states.e2e.ts) | "campaign states" in the web smoke (Sprint 12 DoD; `bun run e2e -- --grep "campaign states"`): the built site in Chromium against the program in LiteSVM. Every  | 79 |
 | [`upgrade.e2e.ts`](tests/e2e/upgrade.e2e.ts) | A-8 in the web smoke (the founder's answer of 2026-10-10): the program is upgraded while a page built for its previous deploy is open (the site was built agains | 92 |

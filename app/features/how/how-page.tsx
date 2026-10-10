@@ -26,6 +26,7 @@ export function HowPage() {
         <ol
           className="m-0 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3"
           data-perch="how-steps"
+          data-perch-x="0.92"
           data-perch-pose="point"
         >
           {HOW.steps.map(([title, text], i) => (
