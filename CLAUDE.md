@@ -9,8 +9,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The code it grew from is `pred-provable`, "Provable KPI Markets": a sponsor sold YES outcome tokens below face value
 as a bounty on an on-chain goal, and anyone resolved the market by reading the target account on-chain. What carried
 over is its way of resolving: typed reads of on-chain accounts, with no opinion oracle. Sprint 03 ported its readers
-and removed it, with the Anchor toolchain. The README still describes the old economics and stays as the record of the
-upstream program. It is no longer the source of truth for the product; the next section says what is.
+and removed it, with the Anchor toolchain. The README describes Brot Markets since 2026-10-10, in the brand's voice;
+the upstream program's own documents at the root (`ECONOMICS.md`, `RESOLVERS.md`, `NAMING.md`, `PRIVACY_PLAN.md`,
+`OPTIMIZATION.md`) stay as its record. Neither is the source of truth for the product; the next section says what is.
 
 Bun workspace (root, `app/`, `packages/*`, `services/*`), one program (`programs/brot-markets`, on Pinocchio) and a
 test-only program that is never deployed (`tests/programs/cpi-proxy`), Next.js frontend (`app/`).

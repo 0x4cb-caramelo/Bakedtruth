@@ -35,6 +35,17 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Changed
 
+- **O `README.md` passa a descrever o Brot Markets, em inglês** (10/10/2026, a pedido do Lucas: "reescrever o readme
+  ... elementos degen e memeiro, misturando com a seriedade que o documento exige ... nossa autoria, nossa marca").
+  Sai a descrição do `pred-provable`. Entram: o que é uma campanha, um exemplo com a conta fechada, os cinco tipos de
+  leitura e o estado de cada um no devnet, o que as chaves da equipe e do admin podem fazer e o que ainda não está
+  resolvido (programa atualizável por uma chave só, sem auditoria), o que está pronto e o que falta, como rodar, a
+  origem no programa do Ronaldo e a equipe. Cada regra e número foi lido do código na `main` (`c3ba1ff`). O tom segue
+  a voz do Baked: as piadas miram promessas, roteiros e oráculos, nenhuma convida a pôr dinheiro, e a palavra "bet"
+  não aparece. O `CLAUDE.md` deixa de dizer que o README descreve o programa antigo. **Ficam com o fundador:** os
+  nomes do Bernardo e do Ronaldo aparecem com cargo antes do de acordo escrito dos dois; a `LICENSE` segue em nome só
+  do Ronaldo; o contato para falhas é o `@brotmarkets` no X, por falta de email do domínio; o `docs.brot.markets` não
+  foi ligado, porque as páginas esperam aprovação; a tabela de estado tem data (10/10/2026) e envelhece.
 - **A regra de viabilidade fica como está no código** (9/10/2026, à noite, Ronaldo): a taxa da Brot sai do lado
   perdedor e a parte do criador é calculada sobre o pote inteiro; as palavras anteriores ("taxas cobradas sobre o
   principal do lado vencedor") deixam de valer. Era a pergunta que a Sprint 04 deixou aberta antes da mescla

@@ -1,252 +1,286 @@
-# pred-provable
+<p align="center">
+  <img src="docs/product/poses/small/14-pao-inteiro.png" alt="The Brot loaf" width="150" />
+</p>
 
-> **This repository is being rebuilt as Brot Markets**, a pot-based prediction market. What follows describes the
-> upstream program it started from (`pred-provable`, by Ronaldo Pereira), which stays in `programs/pred-provable`,
-> frozen, until its readers are ported to `programs/brot-markets`. For the product being built, read
-> `docs/business/BUSINESS-PLAN.md`, `docs/product/PRODUCT-BRIEF.md`, `docs/technical/TECHNICAL-PLAN.md` and
-> `docs/SPRINTS.md`.
+<h1 align="center">brot.markets</h1>
 
-[![CI](https://github.com/0xcf07/pred-provable/actions/workflows/ci.yml/badge.svg)](https://github.com/0xcf07/pred-provable/actions/workflows/ci.yml)
+<p align="center">
+  <strong>On-Chain Campaigns the chain answers.</strong><br />
+  Join YES or NO with SOL. Winners split the pot. No vote, no judge.<br />
+  <em>Proof &gt; Promises.</em>
+</p>
 
-**Provable KPI Markets on Solana.** Resolution is a read, not a judgement.
+<p align="center">
+  <a href="https://github.com/0x4cb-caramelo/Bakedtruth/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/0x4cb-caramelo/Bakedtruth/actions/workflows/ci.yml/badge.svg" /></a>
+  <img alt="Network: Solana devnet" src="https://img.shields.io/badge/network-Solana%20devnet-eea546?style=flat-square&labelColor=10151c" />
+  <img alt="Audit: not yet" src="https://img.shields.io/badge/audit-not%20yet-eea546?style=flat-square&labelColor=10151c" />
+  <img alt="Oracle: the chain" src="https://img.shields.io/badge/oracle-the%20chain-eea546?style=flat-square&labelColor=10151c" />
+  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-eea546?style=flat-square&labelColor=10151c" />
+</p>
 
-A sponsor posts a bounty on an on-chain goal by selling YES outcome tokens below their payout. Doers buy YES and then
-go move the metric. When the goal is met, anyone can resolve the market by reading the target account on-chain, and each
-YES token redeems for its full face value in USDC. There are no oracles, no indexers, no committee and no dispute
-window: the transaction that sees the goal met settles the market.
+> **gm.** This is devnet. Test SOL only, no real money. The program is **not audited**. Still baking.
 
-Markets on cheap-to-move metrics turn into bounties for manipulation. This protocol leans into that: moving the metric
-is the product. To keep it honest, every resolver reads state that flash capital cannot fake.
+## What this is
 
-## Resolvers
+Brot Markets runs **On-Chain Campaigns** on Solana: a YES/NO question that an on-chain account answers.
 
-| Kind | Reads | YES when | Why it can't be faked |
+A project that promised its holders something measurable ("we burn 100M tokens by Nov 30", "we lock the liquidity on
+Meteora") opens a campaign on it and funds the prize. Its community takes sides with SOL. At the deadline the program
+reads the target account, and the winning side splits the pot. Nobody reports the result: no committee, no token vote,
+no AI model, no "source: trust me bro".
+
+It is the prediction-market mechanic pointed at one job: a milestone becomes a campaign that proves itself.
+
+### The degen summary
+
+- Roadmaps are promises. Accounts are proof. We only read accounts.
+- One pot per campaign, all in SOL. No order book, no outcome tokens, no early exit, no cap.
+- The oracle is the chain. It has no Discord and it does not take DMs.
+- Devnet, unaudited, test money. Anyone telling you otherwise is not us.
+
+## How a campaign works
+
+> _"One pot. No order book."_ — Baked
+
+1. **Open.** Any wallet opens a campaign for US$500 in SOL, priced at the Pyth SOL/USD feed. 90% goes into the pot as
+   the prize and 10% is Brot's opening fee. The team and launch partners open free. A campaign runs from 3 to 90 days.
+2. **Join.** Bakers join YES or NO with SOL, from 0.01 SOL. No sign-up: a wallet is enough.
+3. **Lock.** The program refuses new entries once the outcome is knowable on-chain. There is no sniping an answer that
+   is already sitting in the account, and an entry that lands after the YES proof is refunded whole.
+4. **Resolve.** Any wallet can call `resolve_campaign`. The caller chooses nothing: the program reads the account and
+   records YES, NO or Void. A YES can be recorded as soon as the fact is on-chain, a NO only after the deadline. A
+   six-hour review window opens.
+5. **Settle.** After the window anyone can crank the settlement. Winners are paid straight to their wallets. There is
+   no claim button.
+
+Brot keeps 10% of the losing side. The creator earns 1% of the entries, paid out of the losing side and never out of a
+winner's own entry.
+
+```text
+EXAMPLE · NOT A LIVE CAMPAIGN
+
+"Does $LOAF burn 100M tokens by Nov 30?"      opened for US$500; say SOL is at $200, so 2.5 SOL
+                                              2.25 SOL prize  +  0.25 SOL opening fee
+
+YES side    30.00 SOL
+NO side     70.00 SOL
+Answer      YES, read from the mint's supply
+
+Brot         7.00 SOL    10% of the losing side
+Creator      1.00 SOL    1% of the 100 SOL of entries
+Winners     94.25 SOL    30 + 70 - 7 - 1 + 2.25, split by what each put in
+
+A baker with 3 SOL on YES holds 10% of the winning side and receives 9.425 SOL.
+```
+
+When it does not go to plan:
+
+- **Only one side showed up.** Everyone gets their entry back. Each entry after the first baker's pays a 1% fee, the
+  prize returns to whoever opened, and there is no creator share.
+- **Void.** The account could not be read after the deadline, the Pyth feed went stale, or the team voided the campaign
+  inside the review window. Every entry is refunded whole and the prize returns to whoever opened.
+
+## What the chain can answer
+
+> _"I only believe accounts."_ — Baked
+
+Five kinds. The list is closed on purpose: one reader per file, and no generic "read anything" reader.
+
+| Kind | The question | What the program reads | On devnet today |
 | --- | --- | --- | --- |
-| `SupplyAtMost` | SPL Token mint | `supply <= threshold` by `deadline_slot` | Mint authority must be revoked, so supply only goes down |
-| `Immutable` | Loader-v3 ProgramData | Upgrade authority revoked by `deadline_slot` | Revoking an upgrade authority is one-way |
-| `StakeAtLeast { epoch }` | Vote account, via `sol_get_epoch_stake` (SIMD-0133) | Stake in `epoch` `>= threshold` | Stake is fixed per epoch and needs an epoch to activate |
-| `MintAuthorityRevoked` | SPL Token mint | Mint authority revoked by `deadline_slot` | A revoked mint authority can never be set again |
-| `FreezeAuthorityRevoked` | SPL Token mint | Freeze authority revoked by `deadline_slot` | A revoked freeze authority can never be set again |
-| `LockedAtLeast` | The lock account for the mint: the associated token account of the program's `["lock"]` PDA | Balance `>= threshold` by `deadline_slot` | The program never signs for the lock owner, so tokens sent there (e.g. LP) can't be moved, burned or closed. The incinerator would not do: SPL Token lets anyone burn from, or close, its accounts |
-| `StakePoolTvlAtLeast { epoch }` | SPL stake pool (JitoSOL, bSOL, ...): `last_epoch_total_lamports` | The pool's total at the start of `epoch` `>= threshold` lamports | The pool writes it once per epoch, and deposits and withdrawals revert until then: capital has to sit in the pool across an epoch boundary |
-| `DammV2LockedAtLeast { shift }` | Meteora DAMM v2 pool: `permanent_lock_liquidity` | Permanently locked liquidity `>= threshold << shift` by `deadline_slot` | Written by one instruction that only adds to it, and locked principal cannot repay a flash loan |
-| `MetadataImmutable` | The mint's Metaplex Token Metadata account | `is_mutable == false` by `deadline_slot` | The flag can only be flipped to false, and the Token Metadata program is not upgradeable |
+| `PriceTouch` | Does the price touch X by the deadline? | A Pyth price account, from the upgraded receiver only | Running |
+| `SupplyAtMost` | Is the supply at or below X by the deadline? (the burn) | An SPL mint with no mint authority | Running |
+| `DammV2LockedAtLeast` | Is at least X of liquidity permanently locked? | A Meteora DAMM v2 pool | Tested on mainnet account bytes; there is no devnet pool to read |
+| `StakePoolTvlAtLeast` | Does the stake pool hold at least X in epoch N? | An SPL stake pool | Tested on mainnet account bytes |
+| `StakeAtLeast` | Does the validator have at least X staked in epoch N? | The epoch stake of a vote account | Switched off until a YES is recorded on devnet |
 
-The set is a closed enum on purpose: each variant checks the owner and layout of the account it reads, and the account
-is locked into the market at creation. Pool reserves, TVL read from a live balance and volume counters are left out on
-purpose: they either move inside one transaction or no longer update. The reasoning, every verified layout and the
-roadmap are in [RESOLVERS.md](RESOLVERS.md).
+What it will not answer: elections, football, "is this a good project", holder counts, a dashboard's TVL, or anything a
+human would have to type in. If no Solana account holds the answer, there is no campaign.
 
-## Outcome tokens
+Every third-party layout (Pyth, SPL mints, stake pools, DAMM v2, vote accounts) is tested against real mainnet account
+bytes kept in `tests/fixtures`, with a SHA-256 per file.
 
-Each market has a YES mint and a NO mint (classic SPL Token, 6 decimals like USDC, minted only by the market PDA, no
-freeze authority) and a USDC vault: a token account owned by the market PDA at the address `["vault", market]`. The
-sponsor sets a YES price `p` in basis points and deposits a USDC budget. Every sale is fully backed:
+## Can it be rigged?
 
-| | Pays | Receives |
-| --- | --- | --- |
-| Buyer | `p` per YES (rounded up) | 1 YES token |
-| Sponsor's budget | the rest, `1 - p` | 1 NO, booked on the market as `sponsor_no` |
+> _"It's a read. Not a vote."_ — Baked
 
-So every YES is backed 1:1 by USDC in the vault (one USDC base unit per outcome-token base unit). If YES wins, YES
-holders redeem 1:1 and the sponsor's bounty is `1 - p` per token. If NO wins, `withdraw_budget` pays the sponsor its NO
-1:1, so it gets everything back, including what buyers paid. Doers know their payout before they buy, and the tokens
-trade like any SPL token: no position accounts, no pro-rata dilution.
+Fair question. This is the part with no jokes in it.
 
-Invariants while a market is open, checked after every operation by a randomized test:
-`YES supply = NO supply + sponsor_no` and `vault = budget + YES supply`.
+- **The creator** controls one thing: whether it keeps its promise. YES wins only if it does.
+- **The wallet that resolves** chooses nothing, and `resolve_campaign` refuses to run inside another program's call.
+- **The facts** are the kind that cannot be undone: a burn on a mint with no mint authority, liquidity that is
+  permanently locked, a price touch proven by a fully verified Pyth update.
+- **Entries stop** once the outcome is knowable, so nobody joins a campaign that is already decided.
+- **Balances are bookkept** in the campaign account and never read from a vault's balance. Sending lamports to a vault
+  changes nothing.
+- **Every instruction emits one event**, numbered in sequence per campaign, so anyone can replay what happened.
 
-### What the sponsor can and cannot do
+What our keys can do, all of it:
 
-- **It cannot pull the budget back while the sale is open.** Once a YES is sold, the unspent budget stays locked until
-  `cutoff_slot` or resolution. The sponsor's NO is a balance on the market, not tokens in its wallet, so it cannot buy
-  its own YES and burn it against that NO to recover the budget early. Buying out its own sale costs the sponsor the
-  sale price, locked until resolution.
-- **It cannot halt the sale.** `buy_yes` touches no account the sponsor controls, so closing or handing away a token
-  account changes nothing, and buyers only pay rent for their own YES account.
-- **It can cancel a sale that has sold nothing**, by withdrawing the budget before the first purchase.
-- It cannot trade its NO before resolution. That is the price of the two guarantees above.
+- **A team key** (up to five, one per person) can, inside the six-hour review window, confirm the result early or void
+  the campaign. A void refunds everyone, records its reason and emits an event. A team key cannot turn a YES into a
+  NO, or a NO into a YES.
+- **A team key** can also pause new entries and new campaigns. The pause never stops a payout, and only the admin
+  lifts it.
+- **The admin key** changes fees and creation parameters, inside ceilings compiled into the program: at most 10% of
+  the losing side for Brot and at most 1% of the entries for the creator. Campaigns already open keep the values they
+  started with.
+- **The admin key** also names the team keys and the wallet that receives Brot's fees, and hands the admin role over
+  in two steps.
 
-Doers should still buy YES before doing the work. Sold YES is always fully backed; the remaining budget is first come,
-first served (when the pool prices YES above `p`, arbitrageurs may buy it first).
+What is not solved yet:
 
-The sponsor's budget caps the subsidized sale, not the market. Anyone can deposit USDC to mint unsubsidized YES/NO pairs
-at 1:1 and burn them back before resolution. A pair is worth its collateral whichever side wins, so minting carries no
-outcome risk: speculators and market makers keep the side they believe in and sell the other on any SPL market. That is
-also how anyone other than the sponsor takes the NO side.
+- The program is upgradeable, and on devnet one key holds the upgrade authority. That is fine for test money and not
+  fine for real money. The multisig comes before mainnet.
+- Nothing here has been audited. Everything above is our claim and our tests, not a third party's.
 
-Collateral is pinned to USDC by `USDC_MINT` (exported in the IDL): Circle's devnet USDC
-(`4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`, from [faucet.circle.com](https://faucet.circle.com)) by default, or
-mainnet USDC when built with `--features mainnet`. The minimum budget, YES purchase, pair mint and first pool deposit is
-1 USDC.
+## What is baked and what is still dough
 
-## Guarded pool
+> _"Still baking."_ — Baked
 
-Each market can have a constant-product pool of YES against NO, owned by the program. It applies the same check as the
-sale: trading stops at `cutoff_slot`, the moment a goal is visibly met, or when the measured stake epoch starts. An
-external AMM cannot read the metric, so once a goal is met the first transaction would buy every underpriced YES from
-its liquidity providers. Here that transaction reverts. Providers can always withdraw, including after resolution.
-Swaps pay a 1% fee to providers, and reserves are tracked in the market account, so tokens sent to the pool by hand
-cannot move its price.
+As of 10 October 2026.
 
-With `mint_pair` and `burn_pair`, every trade is a single transaction:
-
-| Trade | Instructions |
+| Piece | State |
 | --- | --- |
-| Buy YES with USDC | `mint_pair(x)` + `swap(NO in, x)` |
-| Buy NO with USDC | `mint_pair(x)` + `swap(YES in, x)` |
-| Sell YES for USDC | `swap(YES in, s)` + `burn_pair(q - s)`, with the split `s` computed client-side |
-| Seed at YES price `p` | `mint_pair(L)` + `add_liquidity(L, L * p / (1 - p))`: YES costs `pool_no / (pool_yes + pool_no)` |
+| Program, `programs/brot-markets` (Rust, Pinocchio) | **Baked.** On devnet. The full cycle (open, join, resolve, settle) has run end to end, with the team's own wallets |
+| SDK, `packages/sdk` (`@brot/sdk`) | **Baked.** `read`, `tx` and `schemas` over the Codama client generated from the Shank IDL |
+| Keeper, `services/keeper` | **In the oven.** Runs on our server, watching devnet, and is built to resolve a campaign when its reader allows. It has not had a real campaign to resolve yet. Settlement tasks, the standby and the watchdog come next |
+| Indexer and API | **Dough.** Not started |
+| Site | `brot.markets` is a coming-soon page with a waitlist. The campaign screens exist as a prototype with mock data. Entries are made by script: there is no YES/NO button yet |
+| `app/` | The front end of the program this repository grew from. It leaves when the new site arrives |
+| Android app | **Dough.** Planned for the Solana dApp Store |
+| Audits | None yet. Two are planned before mainnet |
+| Mainnet | Not before the audits and their fixes |
 
-YES and NO are still standard SPL tokens, so anyone can list them on Raydium or Meteora. Those pools are unguarded:
-their creators cannot pause them, so their liquidity providers carry the risk of being sniped.
+No outside users yet. We say so because someone will check.
 
-## Market lifecycle
+Devnet program id:
+[`5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o`](https://explorer.solana.com/address/5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o?cluster=devnet).
+The order of the work is in [`docs/SPRINTS.md`](docs/SPRINTS.md), and what changed is in [`CHANGELOG.md`](CHANGELOG.md).
 
-1. `create_market`: the sponsor locks the target, threshold, schedule and YES price, creates the outcome mints and the
-   USDC vault, and deposits the budget.
-2. `buy_yes`: buy YES at the fixed price before `cutoff_slot`, while the budget lasts. The matching NO is booked to the
-   sponsor. Purchases revert once the goal is visibly met (anti-sniping).
-3. `mint_pair` / `burn_pair`: anyone, until resolution. Deposit USDC for the same number of YES and NO tokens, or
-   burn equal YES and NO to get the USDC back. Never touches the sponsor's budget.
-4. `add_liquidity` / `swap` / `remove_liquidity`: the guarded pool. Adding and swapping stop with the sale; removing
-   is always open.
-5. `resolve`: permissionless, top-level only (no CPI) and final in one instruction. Every goal except the
-   epoch-measured ones (stake, stake pool TVL) resolves YES as soon as it is met; past `deadline_slot` the market
-   resolves NO.
-6. `redeem`: burn the winning token for USDC, 1:1. The emptied token account is closed and its rent refunded.
-7. `withdraw_budget`: pays the sponsor what it is owed now, and can be called again later: the unspent budget once the
-   sale is closed (cutoff passed or market resolved) or before anything was sold, and its NO 1:1 once NO wins.
+## Run it
 
-## Events
-
-Every instruction logs one Anchor event: `MarketCreated`, `YesBought`, `PairMinted`, `PairBurned`, `LiquidityAdded`,
-`LiquidityRemoved`, `Swapped` (with the reserves after the trade, so YES price = `pool_no / (pool_yes + pool_no)`),
-`Resolved`, `Redeemed` and `SponsorWithdrew`. An activity feed or price history is `getSignaturesForAddress(market)`
-plus `decodeEvents(tx.meta.logMessages)`, with no indexer.
-
-## Client library
-
-[`app/lib/market.ts`](app/lib/market.ts) is framework-free and imported by the test suite, so the tests check the
-exact math and addresses the app uses:
-
-- addresses: `marketPda`, `yesMintPda`, `noMintPda`, `vaultPda`, `lpMintPda`, `poolAccounts`, `ataAddress`,
-  `lockOwner`, `lockAta`, `metadataPda`, `programDataPda`, plus the program constants read from the IDL;
-- sale: `salePrice` (rounded up like the program) and `maxSaleAmount` (the largest `buy_yes` the remaining budget
-  covers, exact);
-- pool: `swapQuote`, `buyQuote` (mint_pair + swap), `sellQuote` (swap + burn_pair split), `addLiquidityQuote`,
-  `removeLiquidityQuote`, `seedNoForPrice`, `poolYesPriceBps`;
-- `decodeEvents`: typed, camelCase like `program.account.*`;
-- `createAtaIdempotentIx`: prepend it to `redeem`, `burn_pair` and `withdraw_budget` when the user may not have a USDC
-  account yet (they take an existing one), and to a `LockedAtLeast` `create_market` for the lock account.
-
-Losing tokens are worthless after resolution; the app can burn them and close the account for its rent with plain SPL
-Token instructions.
-
-## Stack
-
-| Layer | Tooling |
-| --- | --- |
-| Program | Anchor 1.1.2, Solana CLI 3.1.10, Rust 1.89 |
-| Tests | `bun test` + LiteSVM (`@solana/kit-plugin-litesvm`), `anchor-litesvm` for Rust |
-| Client | `@anchor-lang/core`, `@solana/web3.js` |
-| App | Next.js (App Router), Tailwind CSS, Solana wallet-adapter |
-| Package manager | Bun workspaces |
-
-## Getting started
-
-Prerequisites: Rust, Solana CLI 3.1.x, Anchor CLI 1.1.2 (`avm install 1.1.2`) and Bun.
+You need Bun 1.4.2, Rust 1.89 (pinned by `rust-toolchain.toml`), the Solana CLI 3.1.x and, for the IDL, shank-cli 0.4.9.
 
 ```bash
 bun install
-bun run build:program   # anchor build + copy the IDL into app/lib/idl
+bun run build:program        # cargo build-sbf into target/deploy, then the IDL
+bun run test                 # TypeScript suites on LiteSVM, in-process, no validator
+bun run test:rust            # host tests and Mollusk
+bun test services/keeper     # the keeper, no cluster needed
+bun run lint
 ```
 
-Run the tests:
+The suites load the program binary, so build before testing after any program change. The SDK's own tests
+(`tests/sdk/`) need no binary.
 
-```bash
-NO_DNA=1 anchor test    # TypeScript suite on LiteSVM (no validator needed)
-bun run test:rust       # Rust suite with anchor-litesvm
+To watch a whole campaign cycle, run `bun run smoke:devnet`. It acts on a local cluster by default and touches devnet
+only with `-- --cluster devnet`. The deploy procedure is in [`deploy/devnet/README.md`](deploy/devnet/README.md).
+
+CI builds the program and runs all of the above. It fails when the committed IDL or the code map is stale, and when a
+branch adds something shaped like a credential.
+
+## Repository map
+
+```text
+programs/brot-markets/   the program: state, checks, readers, instructions, math, events
+packages/sdk/            @brot/sdk: read, tx, schemas, the Shank IDL and the Codama client
+services/keeper/         the bot that resolves campaigns
+services/landing/        brot.markets: coming-soon page, waitlist, terms, privacy and the deck
+tests/                   LiteSVM suites, SDK contract tests and the mainnet fixtures
+scripts/                 IDL build, devnet smoke and seed, deploy and team commands
+deploy/                  the devnet deploy procedure and the server files
+docs/                    business plan, technical plan, sprints, legal and product
+knowledge-base/          research, with sources
+session-log/             why each decision was made
+prototype-lab/           the design directions and the campaign screens
+app/                     the old front end, on its way out
 ```
 
-Deploy to devnet and run the smoke test (the whole USDC lifecycle, with the client stack the app uses):
+[`CODEMAP.md`](CODEMAP.md) lists every code file with one line on what it does.
 
-```bash
-bun run deploy:devnet   # ~2.9 SOL: 2.82 SOL of program rent (the upload buffer's SOL is reused for it)
-bun run smoke:devnet    # ~0.15 SOL and 4 devnet USDC; returns every USDC base unit at the end
-```
+## Under the crust
 
-`bun run seed:devnet` then adds demo markets for the app: a burn goal partway there with a pool, a renounce goal, a
-lock goal and one that resolved NO (~0.06 SOL and 8 USDC).
+House rules for the program. They are checked by CI, not by good intentions.
 
-The scripts use the keypair at `~/.config/solana/pred-provable-devnet.json` (`DEVNET_WALLET` overrides it,
-`DEVNET_RPC_URL` the RPC). To rehearse without devnet funds, fork devnet with
-[Surfpool](https://surfpool.run) (`surfpool start --network devnet`), deploy to it, give the wallet USDC with the
-`surfnet_setTokenAccount` cheatcode, and run with `DEVNET_RPC_URL=http://127.0.0.1:8899`.
+- **Pinocchio, no Anchor.** Every check Anchor used to make is written by hand, has its own error code and its own
+  negative test. A mutation script removes each check and shows its tests fail.
+- **One instruction per file, one reader per file,** under 200 lines each.
+- **Checked math only.** Clippy denies unchecked arithmetic and truncating casts in the crate.
+- **Owner first.** The owner of an account is checked before a single byte of it is read.
+- **The money math is pure,** and the SDK replays its 24,000 test vectors, so the client and the program agree to the
+  lamport.
+- **Layouts are pinned.** Fixed little-endian accounts with a tag and a version. Enums are appended, never reordered.
+  Error codes are appended, never reused.
 
-Run the app:
+The full design is in [`docs/technical/TECHNICAL-PLAN.md`](docs/technical/TECHNICAL-PLAN.md).
 
-```bash
-cp app/.env.example app/.env.local
-bun run dev
-```
+## Where this came from
 
-## Repository layout
+It started as `pred-provable`, "Provable KPI Markets", an Anchor program by Ronaldo Pereira in which a sponsor sold
+discounted YES tokens as a bounty on an on-chain goal. In October 2026 we redefined the product as pot-based campaigns
+and rewrote the program on Pinocchio. What carried over is the best idea in it: **resolution is a read, not a
+judgement.** Its readers were ported and the old program left the workspace, with the Anchor toolchain.
 
-```
-programs/pred-provable/   Anchor program
-  src/resolver.rs         typed metric readers
-  src/instructions/       create_market, buy_yes, mint_pair, burn_pair, add_liquidity, swap,
-                          remove_liquidity, resolve, redeem, withdraw_budget
-  src/outcome.rs          market-signed minting and transfers of outcome and LP tokens, USDC vault deposits and payouts
-  src/events.rs           events for clients
-  tests/                  Rust tests (anchor-litesvm)
-tests/                    TypeScript tests (bun test + LiteSVM)
-scripts/devnet-smoke.ts   devnet smoke test
-app/                      Next.js frontend
-  lib/market.ts           client library: addresses, quotes, events (shared with the tests)
-```
+`ECONOMICS.md`, `RESOLVERS.md`, `NAMING.md`, `PRIVACY_PLAN.md` and `OPTIMIZATION.md` at the root describe that earlier
+program. They stay as its record and are not the product.
 
-## Known limits
+The repository also carries the AI Dev Operating System by Lucas Galvão (`.claude/`, `WIZARD.md`, `START-HERE.md`): the
+rules, review agents and session logs we work under. We ship with Claude Code. Humans make the product decisions and
+press merge.
 
-- **Resolve in time.** A goal met but not resolved by `deadline_slot` resolves NO, and a `StakeAtLeast` market must be
-  resolved during its target epoch. A `StakePoolTvlAtLeast` market must be resolved while the pool still shows its
-  epoch's snapshot, that is until the pool's first balance update of the next epoch. YES holders should resolve in the
-  same transaction as the action that meets the goal.
-- **`resolve` rejects CPI**, so a multisig vault (for example Squads) cannot call it directly. Anyone else can.
-- **`StakeAtLeast` YES is untested.** LiteSVM cannot inject stake (it reports 0), so the tests cover validation, the
-  trading halt and the NO paths.
-- **`StakeAtLeast` can only see validators in the filtered epoch snapshot.** On Agave 4.x the epoch stakes behind
-  `sol_get_epoch_stake` drop vote accounts with no BLS key, too little balance, or outside the top 2000 by stake
-  (read from `bank.rs`; the live effect is inferred from `getVoteAccounts`, nothing has called the syscall). Such a
-  validator reads 0, so its market can only resolve NO. Check `epochVoteAccount` before opening one.
-- **`StakePoolTvlAtLeast` needs the pool's own balance update.** The first `UpdateStakePoolBalance` of an epoch is
-  permissionless but takes many transactions on a large pool; if nobody runs it during the target epoch the market is
-  NO. Set `cutoff_slot` well before the epoch boundary: late in the previous epoch the pool's total is mostly known,
-  and the sale would otherwise stay open until the boundary.
-- **`DammV2LockedAtLeast` counts liquidity units, not dollars.** Value per unit depends on the pool's price range,
-  which its creator picks, so check the locked amounts the app shows before buying. It counts any locked position,
-  including the creator's own.
-- **`MetadataImmutable` freezes the on-chain name, symbol, URI, fee and creator list only.** The update authority can
-  still be handed over, and the JSON behind the URI can still change. Coins created by pump.fun's newer `create_v2`
-  have no Metaplex account at all, so they cannot have this market.
-- **Locks must go to the lock account.** Tokens sent to the incinerator, or anywhere else, do not count for a
-  `LockedAtLeast` market, and a mint with a live freeze authority can freeze the lock account.
-- **Third-party layouts are pinned, not guaranteed.** The stake pool, DAMM v2 and Token Metadata readers fix owner,
-  length and offsets and fail closed, but the first two programs are upgradeable. `scripts/capture-fixtures.ts`
-  re-captures the accounts the tests decode; run it after an upstream upgrade.
-- **Rent is not reclaimable for market accounts.** On devnet, creating a market costs the sponsor about 0.0057 SOL
-  (market account, two mints, vault) and seeding a pool costs the first provider about 0.0040 SOL (LP mint, two pool
-  accounts). Classic SPL Token mints cannot be closed, and closing the rest would need every winner to redeem first.
-- **Tokens or USDC sent by hand** to the vault or the pool's accounts are not tracked and stay there.
-- **`deadline_slot` has no upper bound.** The app should warn about markets whose deadline is far away.
+## The bakers
 
+| Who | What |
+| --- | --- |
+| Bernardo Nery | Head Baker · CEO |
+| Lucas Galvão | Chief Oven Officer · COO and CLO |
+| Ronaldo Pereira | Chief Toasting Officer · CTO |
+| Baked | Mascot. Grumpy. Believes only accounts |
 
-## Status
+[brot.markets](https://brot.markets/) · [@brotmarkets on X](https://x.com/brotmarkets)
 
-Hackathon MVP, deployed on devnet at `F9KfegHTBzeHmkhUxgvpTzYD8xvwRmV3sue2BVXiKoE2`, where the smoke test passes. Not
-audited; do not use with real funds.
+## FAQ, asked the way you would ask it
+
+**wen mainnet?**
+After two audits and their fixes. Not a day earlier.
+
+**wen site?**
+In the oven. Today an entry is a script, not a button.
+
+**who decides who wins?**
+An account. `resolve_campaign` reads it. Nobody types the answer in.
+
+**can the devs rug the result?**
+They can void a campaign inside the review window, which refunds everyone. They cannot pick a winner. They also hold
+the upgrade key on devnet, which is one of the reasons this is still devnet. See [Can it be rigged?](#can-it-be-rigged)
+
+**can I open a campaign about the election, my ex, or the vibes?**
+No. If no Solana account holds the answer, there is no campaign.
+
+**why bread?**
+_Brot_ is German for bread. Also, good dough needs proof. So do promises.
+
+**why is the loaf angry?**
+He has read too many roadmaps.
+
+**is this financial advice?**
+It is a loaf of bread. No.
+
+## Fine print
+
+Brot Markets is in a test phase on Solana devnet, with test tokens. The program is not audited. Nothing in this
+repository is an offer or an invitation to put in real money, and availability by country has not been decided.
+
+[Terms](https://brot.markets/terms) · [Privacy](https://brot.markets/privacy)
+
+Found a hole in the program? Tell us before you tell the timeline: [@brotmarkets](https://x.com/brotmarkets).
 
 ## License
 
-[MIT](LICENSE) © Ronaldo Pereira
+MIT. See [`LICENSE`](LICENSE).
+
+<p align="center">
+  <img src="docs/product/poses/small/e02-cetico.png" alt="Baked, the Brot Markets mascot, looking skeptical" width="120" /><br />
+  <sub><em>"Prove it."</em></sub>
+</p>
