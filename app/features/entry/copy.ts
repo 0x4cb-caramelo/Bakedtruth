@@ -112,7 +112,7 @@ export const DONE = {
   title: "You're in",
   text: (side: string, amount: string) => `${side} ${amount} SOL is in the pot.`,
   paidOut:
-    "Paid automatically to your wallet after the result is read and its 6-hour review ends. There is no claim button.",
+    "Your payout goes to your wallet after the result is read and its 6-hour review ends. On devnet that is not automatic yet, and no time is promised. You do not need to claim it.",
   transaction: "Transaction",
   landedNoSignature: "Your entry account shows the entry. The wallet did not return its signature.",
   holdsNow: (yes: string, no: string) => `Your entry now holds YES ${yes} SOL and NO ${no} SOL.`,

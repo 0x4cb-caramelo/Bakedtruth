@@ -18,7 +18,7 @@ import { rpc } from "@/lib/rpc";
 import { ClaimButton } from "@/features/claim/claim-button";
 import { sol4 } from "@/features/entry/amount";
 import { readEntrySettlement } from "@/features/my-entries/history";
-import { exactSol, OPENER, YOURS } from "./copy-states";
+import { exactSol, OPENER, WAITING, YOURS } from "./copy-states";
 import type { PageData } from "./load";
 import { openerViewOf, pageStateOf, yourPayoutOf, type StateView, type YourPayout } from "./states";
 
@@ -114,6 +114,7 @@ function OpenerLines({ data, onChange }: { data: PageData; onChange: () => void 
         <p className="m-0 tabular-nums">
           {OPENER.prize(exactSol(view.prizeBack))}
           {view.openingFeeBack > 0n ? ` · ${OPENER.openingFee(exactSol(view.openingFeeBack))}` : ""}
+          {view.prizeSent ? ` · ${OPENER.sent}` : ` · ${WAITING}`}
         </p>
       ) : null}
     </div>

@@ -48,7 +48,8 @@ function ReviewClock({ state }: { state: Extract<StateView, { kind: "review" }> 
   );
 }
 
-function Report() {
+/** L-13: where a wrong result is reported, a plain link (no X script, K-10). Also on a settled campaign's page. */
+export function Report() {
   return (
     <p className="m-0 border-t border-line pt-3 text-xs text-muted">
       {REPORT.text}{" "}
@@ -129,9 +130,10 @@ function Body({ data, proof, state, note }: { data: PageData; proof: Proof; stat
             <>
               <Line>{STATES.oneSided}</Line>
               {paidOpening ? <Line>{STATES.prizeBack}</Line> : null}
+              {paidOpening ? <Line>{STATES.feeKeptOneSided}</Line> : null}
             </>
           ) : (
-            <Line>{STATES.split(state.result)}</Line>
+            <Line>{STATES.split(state.result, !c.creatorIsTeam && c.creatorShareBps > 0)}</Line>
           )}
           {state.empty ? null : <Line>{state.allPaid ? STATES.allPaid : STATES.waiting}</Line>}
         </>

@@ -25,7 +25,7 @@ import { PotPanel } from "./pot-panel";
 import { proofOf } from "./proof";
 import { ProofPanel } from "./proof-panel";
 import { RecheckPanel } from "./recheck-panel";
-import { StatePanel } from "./state-panel";
+import { Report, StatePanel } from "./state-panel";
 import { useCampaignPage, useEntriesAllowed } from "./use-campaign-page";
 import { noteFor, type VoidNote } from "./void-note";
 
@@ -73,7 +73,9 @@ export function CampaignPage({ idParam, prefill, notes }: { idParam: string; pre
   }
   if (state.status === "missing") {
     return state.closed ? (
-      <EmptyState title={PAGE.closedAccount}>{PAGE.closedAccountText}</EmptyState>
+      <EmptyState title={PAGE.closedAccount} action={<Report />}>
+        {PAGE.closedAccountText}
+      </EmptyState>
     ) : (
       <EmptyState title={PAGE.notFound}>{PAGE.notFoundText(idParam)}</EmptyState>
     );

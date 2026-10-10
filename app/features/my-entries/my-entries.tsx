@@ -78,12 +78,13 @@ export function MyEntries() {
   return (
     <div className="space-y-4">
       {head}
-      {state.failed ? <p className="m-0 text-xs text-warn">{MINE.failed}</p> : null}
+      {state.failed ? <p className="m-0 text-xs text-warn">{MINE.staleRead}</p> : null}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Total label={MINE.received} lamports={summary.received} testId="received-total" />
         <Total label={MINE.waiting} lamports={summary.waiting} testId="waiting-total" />
       </div>
       <p className="m-0 text-xs text-muted">{MINE.receivedNote}</p>
+      <p className="m-0 text-xs text-muted">{MINE.waitingNote}</p>
       {state.apiDown ? <p className="m-0 text-xs text-warn">{MINE.apiDown}</p> : null}
       {history.unread.length > 0 ? (
         <p className="m-0 text-xs text-warn">{MINE.unreadable(history.unread.length)}</p>

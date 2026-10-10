@@ -17,7 +17,7 @@ export const CARD_STATE = {
   review: (result: string, at: string) => `Result read: ${result} · review ends ${at}`,
   contested: "Contested · payout paused",
   paid: (result: string, waiting: boolean) => `Result: ${result} · ${waiting ? "waiting for payout" : "paid out"}`,
-  void: (waiting: boolean) => `Voided · every entry refunded in full${waiting ? " · waiting for payout" : ""}`,
+  void: (waiting: boolean) => `Voided · every entry gets its full amount back${waiting ? " · waiting for payout" : ""}`,
 } as const;
 
 const resultWord = (outcome: string) => (outcome === "Yes" ? "YES" : outcome === "No" ? "NO" : "voided");

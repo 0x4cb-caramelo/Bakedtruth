@@ -49,7 +49,7 @@ export const PAGE = {
   back: "All campaigns",
   notFound: "No campaign at this address",
   notFoundText: (id: string) => `Nothing of this program lives at campaign id ${id}. The link may be wrong.`,
-  closedAccount: "This campaign is closed",
+  closedAccount: "This campaign is settled",
   closedAccountText:
     "Every payout went out and the program closed the campaign's account. Its history stays on-chain; what your wallet received is in My entries.",
   loadFailed: "Can't reach Solana right now",

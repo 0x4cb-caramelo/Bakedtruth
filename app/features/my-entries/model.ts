@@ -97,6 +97,15 @@ function rowOf(read: CampaignRead, wallet: string, events: DecodedEvent[], chain
   };
 }
 
+/** What the program still owes this wallet in one row: its entry, its 1% (due or reserved), the prize not yet sent. */
+function waitingIn(r: Row): bigint {
+  const entry = r.payout.kind === "owed" ? r.payout.amount : 0n;
+  const share = r.opener?.share;
+  const shareOwed = share && (share.status === "due" || share.status === "reserved") ? share.amount : 0n;
+  const prize = r.opener && !r.opener.prizeSent ? r.opener.prizeBack + r.opener.openingFeeBack : 0n;
+  return entry + shareOwed + prize;
+}
+
 /** The wallet's rows, newest activity first, with the totals received and waiting. */
 export function myEntries(wallet: string, data: MyEntriesData, events: DecodedEvent[]): Summary {
   const involved = new Set(events.map((e) => (e.data as { campaign?: string }).campaign).filter(Boolean) as string[]);
@@ -110,6 +119,6 @@ export function myEntries(wallet: string, data: MyEntriesData, events: DecodedEv
         ? 1
         : 2;
   rows.sort((a, b) => order(a) - order(b));
-  const waiting = rows.reduce((sum, r) => sum + (r.payout.kind === "owed" ? r.payout.amount : 0n), 0n);
+  const waiting = rows.reduce((sum, r) => sum + waitingIn(r), 0n);
   return { rows, received: receivedBy(wallet, events).total, waiting };
 }

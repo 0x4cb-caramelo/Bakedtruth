@@ -11,7 +11,7 @@ export const CLAIM = {
   preparing: "Checking it can be received…",
   wallet: "Confirm in your wallet…",
   confirming: "Receiving…",
-  done: (sol: string) => `Received: ${sol} SOL is in your wallet.`,
+  done: (sol: string) => `${sol} SOL received, now in your wallet.`,
   connect: "Connect the creator's wallet to receive it.",
   again: "Try again",
   signs: "Your wallet signs and pays the network fee. The program sends the amount only to the creator's wallet.",
@@ -25,11 +25,11 @@ export const CLAIM_FAILURE: Record<ClaimFailure, string> = {
   WalletBelowMinimum: "This wallet needs more SOL first.",
   programUpgraded: "Brot's program was just updated. Nothing was signed; the page reloads to load the new version.",
   versionUnknown:
-    "The site could not check which version of Brot's program is live, so it signs nothing now. Try again.",
+    "The site could not check which version of Brot's program is live, so it asks your wallet to sign nothing now. Try again.",
   simulationFailed: "The network refused it in a test run, so nothing was sent. Try again in a moment.",
   refusedInWallet: "You declined it in your wallet. Nothing was sent.",
   walletNoAnswer:
-    "The wallet did not answer. If it sent the transaction, the page shows the share as received after a reload; trying again can never pay it twice.",
+    "The wallet did not answer. If it sent the transaction, the page shows the share as received after a reload; trying again cannot pay it twice.",
   failedOnChain: "It reached the network and failed, costing the network fee. Reload the page to see what is left.",
   notLanded: "It did not reach the network in time. Nothing was received; try again.",
   network: "Can't reach Solana right now. Try again.",

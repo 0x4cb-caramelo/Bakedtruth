@@ -98,7 +98,8 @@ describe("every public state renders", () => {
 
   test("contested: the payout paused and the new deadline", async () => {
     const html = text(panel(await pageIn("contested")));
-    for (const words of [STATES.contested, STATES.contestedText, "New deadline"]) expect(html).toContain(words);
+    for (const words of [STATES.contested, STATES.contestedText, "The check is set to end"])
+      expect(html).toContain(words);
   });
 
   test("paid: a split waiting for payout, a one-sided pot paid out, and a pot nobody entered", async () => {

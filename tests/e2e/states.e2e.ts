@@ -33,7 +33,7 @@ test.describe("campaign states", () => {
       ["review", "In review", /Result read: YES[\s\S]*left/],
       ["contested", "Contested", /Payout is paused/],
       ["split-waiting", "Result: YES", /Waiting for payout/],
-      ["one-sided", "Result: NO", /less 1% \(rounded up to the lamport\)/],
+      ["one-sided", "Result: NO", /less 1%, rounded up to the lamport/],
       ["empty", "Result: NO", /Nobody entered this campaign/],
       ["void-stale", "Voided", /price feed stopped updating before the deadline/],
       ["void-house", "Voided", /the 10% opening fee goes back too/i],
@@ -66,7 +66,7 @@ test.describe("campaign states", () => {
     const mine = page.locator("section[aria-labelledby='mine-title']");
     await expect(mine).toContainText("Kept in the vault for you");
     await mine.getByRole("button", { name: `Receive ${exactSol(BigInt(creator.reserved))} SOL` }).click();
-    await expect(mine).toContainText(`Received: ${exactSol(BigInt(creator.reserved))} SOL is in your wallet.`);
+    await expect(mine).toContainText(`${exactSol(BigInt(creator.reserved))} SOL received, now in your wallet.`);
 
     const { received } = await control<{ received: string }>("/received");
     expect(BigInt(received)).toBe(BigInt(baker.expected) + BigInt(creator.reserved));

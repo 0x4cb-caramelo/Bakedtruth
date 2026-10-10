@@ -188,4 +188,16 @@ The five-campaign rehearsal on devnet, by hand, through every screen: `deploy/de
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+The record is at the top of this file (2026-10-10). Retrospective:
+
+- **What worked:** the money first, as pure modules tested against the program: the SDK's mirror of what a stored
+  campaign owes, and whole cycles through the recording RPC compared with the events and with the SOL that reached each
+  wallet. A test of the reserve path showed the claim's real floor (the fee payer must stay rent-exempt) before any
+  screen existed. The shared state injection let the render test and the web smoke check the same campaigns.
+- **What did not:** the DoD assumed the indexer's wallet route and a keeper that settles and retries; neither exists on
+  devnet, so the history is read from the chain and the copy promises nothing the keeper does not do. The void cannot
+  be forced on devnet except by a stake pool nobody updates; the stale-feed void and the contested state are checked
+  only in tests.
+- **Carried:** the five-campaign rehearsal (the founder's); the indexer's wallet route (Sprint 08), which will replace
+  the chain reads and remove the 50-transaction pages; the keeper's settlement and daily retry (a server task); the
+  founder's answers on the empty-campaign copy and the L-03 notice; Sprint 11's Phantom entry.
