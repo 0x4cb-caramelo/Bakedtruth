@@ -1,7 +1,7 @@
 /**
  * Purpose: the site's Next.js settings: the security headers and the Content-Security-Policy (Sprint 09, X2.5). The
- *          policy allows the page's own origin and the one RPC origin the browser reads from (NEXT_PUBLIC_RPC_URL);
- *          nothing else. No third-party script and no framing by another origin.
+ *          policy allows the page's own origin, the one RPC origin the browser reads from (NEXT_PUBLIC_RPC_URL), and the
+ *          read API (NEXT_PUBLIC_API_URL); nothing else. No third-party script and no framing by another origin.
  * Version: 0.2.0
  * Sprint:  09 (site shell, theme and wallet)
  */
@@ -15,6 +15,14 @@ const rpcOrigin = (() => {
   }
 })();
 const wsOrigin = rpcOrigin.replace(/^http/, "ws");
+// The read API (Sprint 08) is the site's only other origin; its address is public configuration, never a secret.
+const apiOrigin = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4220").origin;
+  } catch {
+    return "http://127.0.0.1:4220";
+  }
+})();
 
 const csp = [
   "default-src 'self'",
@@ -22,7 +30,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  `connect-src 'self' ${rpcOrigin} ${wsOrigin}`,
+  `connect-src 'self' ${rpcOrigin} ${wsOrigin} ${apiOrigin}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

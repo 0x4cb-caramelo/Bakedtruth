@@ -8,6 +8,27 @@
 - **Waitlist:** kept active as a separate route for now. **Pitch decks** at `/pitch` and `/pitch2`: kept as they are, by link only.
 - **Sprint -1** is closed; its code items arrive here (see that sprint's "Closure").
 
+## Record (2026-10-10, second increment)
+
+- **Done:** the Sprint -1 code items (`app/styles/tokens.css` with the approved dark and light values, the head theme
+  script with the key `brot-theme`, Barlow Condensed and Inter through `next/font`, the primitives in `app/components/ui/`);
+  the routes `/`, `/abrir`, `/c/[id]`, `/my-entries`, `/leaderboard` and `/record` as shells; the notices on every
+  screen, in English; `app/features/wallet/` with the explicit MWA registration once for the site's cluster
+  (`@solana-mobile/wallet-standard-mobile` 0.6.0, published 2026-08-17; 0.7.0 is under two weeks old and was not used),
+  the wallet states and the X2.1 test; `app/lib/api-client.ts` reading `/api/v1` with `entriesAllowed` (true only when
+  health is `ok`); the header's "Use Installed Wallet" button; the old direction-C components, the old `markets` route and
+  the old program client (`app/lib` Anchor modules, `@anchor-lang/core`, `buffer`) removed. `bun run lint` and
+  `bun run build` pass. Checked on a running build: the theme script and the status line are in the page; the CSP allows
+  the API origin; the five shell routes return 200.
+- **Not verified here:** the wallet connection itself (needs a browser wallet or the Android emulator with the fake
+  wallet); the API call from a real browser; the phone widths.
+- **Decisions taken for the founder to confirm:** the route names `/my-entries`, `/leaderboard` and `/record` (English, after
+  L-01), and `/abrir` kept as the sprint doc names it; the no-SOL floor of 0.005 SOL in the wallet states.
+- **Still open:** the app does not import `@brot/sdk` yet (the DoD asks for `read` and `tx`); `.env.example` at the root is
+  still the OS template; the server parts (`brot-web.service`, the Bun staging test, the tunnel routes) change the
+  shared server and need a separate go-ahead; the device and emulator tests; the campaign, entry, creation and ranking
+  screens (Sprints 10 to 13 and 19).
+
 ## Record (2026-10-10, first increment)
 
 - **Done:** the inherited chat is deleted (`app/app/api/chat/`, `app/components/chat/`, `app/lib/chat.ts`), with its
