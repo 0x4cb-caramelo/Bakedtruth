@@ -1,0 +1,44 @@
+# Purpose: runs the Brot Markets keeper (MVP happy path, devnet) on 127.0.0.1:4210. Restarts on failure.
+# Install: copy to /etc/systemd/system/, then `systemctl daemon-reload && systemctl enable --now brot-keeper`.
+# The process is the unprivileged service user, opens no public port and writes nothing to disk.
+# The release lives in /srv/brot-markets/keeper/current (a link to releases/<commit>); settings and the keypair
+# are root-owned files readable by group brot (/etc/brot-markets/keeper.env, keeper-devnet.json).
+
+[Unit]
+Description=Brot Markets keeper (devnet, MVP happy path)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=brot
+Group=brot
+WorkingDirectory=/srv/brot-markets/keeper/current/services/keeper
+EnvironmentFile=/etc/brot-markets/keeper.env
+Environment=HOME=/var/lib/brot-markets
+ExecStart=/var/lib/brot-markets/bun/bun src/main.ts
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+# Limits: this server is shared with other projects.
+MemoryMax=256M
+CPUQuota=50%
+TasksMax=64
+
+# Sandboxing. The keeper writes nothing: its only output is the journal.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target
