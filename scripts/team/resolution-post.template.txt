@@ -1,0 +1,6 @@
+Campaign {{id}}: {{sentence}}
+Read on-chain: {{result}}. {{read}}
+{{status}}
+Check it: {{explorer}}
+{{page}}
+Devnet, test SOL. Not audited yet.
