@@ -1,14 +1,14 @@
 //! Purpose: `Entry` (`["entry", campaign, baker]`): one baker's entry in one campaign, both
 //!          sides, created on the baker's first join and closed by `settle_entry` (Sprint 04).
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio)
+//! Version: 0.0.3
+//! Sprint: 02 (pot core on Pinocchio); `join_count` in 04 (the reserved bytes)
 
 use pinocchio::{account::RefMut, error::ProgramError, AccountView, Address};
 use shank::ShankAccount;
 
 use crate::{
     constants::ENTRY_SEED,
-    layout::{LeU64, Pubkey},
+    layout::{LeU32, LeU64, Pubkey},
     state::{AccountState, AccountTag},
     zero_copy,
 };
@@ -29,11 +29,24 @@ pub struct Entry {
     pub amount_yes: LeU64,
     #[idl_type("u64")]
     pub amount_no: LeU64,
+    /// How many `Join` accounts this baker has in this campaign: the next join's `index` (founder
+    /// decision, 2026-10-09: one account per join, no cap).
+    #[idl_type("u32")]
+    pub join_count: LeU32,
+    /// How many of those joins `tally_late_joins` has read and closed; the entry is tallied when all are.
+    #[idl_type("u32")]
+    pub joins_tallied: LeU32,
+    /// This baker's late amounts on each side (joined at or after the proof's publish time), summed by
+    /// `tally_late_joins`. They come back whole, so the payout works from `amount − late`.
+    #[idl_type("u64")]
+    pub late_yes: LeU64,
+    #[idl_type("u64")]
+    pub late_no: LeU64,
     #[padding]
-    pub _reserved: [u8; 16],
+    pub _reserved: [u8; 8],
 }
 
-zero_copy!(Entry = 100);
+zero_copy!(Entry = 116);
 
 impl AccountState for Entry {
     const TAG: AccountTag = AccountTag::Entry;

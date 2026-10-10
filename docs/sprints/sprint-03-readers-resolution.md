@@ -395,9 +395,11 @@ Lane R measured both clusters on 2026-10-09 through the public RPCs (`scripts/de
 | Who writes the sponsored accounts | three fee payers on SOL/USD in the window (45, 11 and 4 of 60) | one fee payer (29 of 60), plus 30 reads through Lighthouse `L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95` | Anyone with a signed Hermes update can push to the sponsored account (founder question 1 stays open: it is about which feeds, not who writes) |
 
 The devnet heartbeat (62 to 65 s) is also the number behind the `StaleFeed` floor from the reviews: 600 s is nine
-times the longest gap seen. Lane R's unfinished items when the session's limit hit (the push-oracle and receiver
-source read at a pinned commit; shard-0 accounts of unsponsored feeds and who paid for them) are in its notes under
-`knowledge-base/tecnologia/` as far as it got, with the limits of each run.
+times the longest gap seen. The shard-0 scan of unsponsored feeds was finished: on mainnet, 183 shard-0 accounts, 120
+of them outside Pyth's list, 78 created by one non-Pyth payer and 102 without an update in the window measured
+(`knowledge-base/tecnologia/pyth-feeds-patrocinados.md`, section 1). The source read of the push oracle and the
+receiver at a pinned commit was not finished in Sprint 03; Sprint 04 does it (its note section, "Sprint 04: the push
+oracle's update rule").
 
 ### Deviations from the plan, and why
 

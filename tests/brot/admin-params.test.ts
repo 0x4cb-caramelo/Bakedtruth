@@ -19,7 +19,7 @@ import {
   openPriceCampaign,
   readCampaign,
   readConfig,
-  SOL_PRICE,
+  SOL_CHARGED,
 } from "./flows";
 import * as I from "./instructions";
 import * as P from "./program";
@@ -88,7 +88,7 @@ describe("creation params apply to future campaigns only", () => {
     expectError((await open()).sent, "OpeningUsdBelowFee");
 
     const fresh = await opened({ openingUsd: 600n });
-    const paid = openingLamports(600n, SOL_PRICE);
+    const paid = openingLamports(600n, SOL_CHARGED);
     const prize = (paid * 9_500n) / 10_000n;
     const c = readCampaign(w, fresh.campaign);
     const opening = [c.opening_usd, c.opening_paid_lamports, c.prize_lamports, c.opening_fee_lamports];
@@ -96,13 +96,23 @@ describe("creation params apply to future campaigns only", () => {
     expect(accountData(w, old.campaign)).toEqual(before);
   });
 
-  test("the minimum entry is read at every join, an open campaign's included", async () => {
+  test("an open campaign keeps the minimum it opened with: a later config change does not move it", async () => {
+    // Question 5 (lane G): the join reads the campaign's own `min_entry_lamports`, copied at opening.
     const { w, old, setParams } = await withOpenCampaign();
     const baker = await fundedWallet(w);
     await setParams({ min_entry_lamports: 50_000_000n });
-    const small = { side: P.Side.Yes, amount: 20_000_000n };
-    expectError(await join(w, baker, old.campaign, small), "EntryBelowMinimum");
-    expectOk(await join(w, baker, old.campaign, { side: P.Side.Yes, amount: 50_000_000n }));
+    const opened = 10_000_000n; // 0.01 SOL, the minimum the campaign was opened with
+    expectError(await join(w, baker, old.campaign, { side: P.Side.Yes, amount: opened - 1n }), "BelowCampaignMinEntry");
+    expectOk(await join(w, baker, old.campaign, { side: P.Side.Yes, amount: 20_000_000n }));
+  });
+
+  test("the campaign keeps the minimum entry it opened with (question 5)", async () => {
+    const { w, setParams, open } = await withOpenCampaign();
+    await setParams({ min_entry_lamports: 50_000_000n });
+    const fresh = await open();
+    expectOk(fresh.sent);
+    await setParams({ min_entry_lamports: 20_000_000n });
+    expect(readCampaign(w, fresh.campaign).min_entry_lamports).toBe(50_000_000n);
   });
 
   test("a lower max_open_campaigns stops new openings only", async () => {
@@ -120,9 +130,11 @@ describe("creation params apply to future campaigns only", () => {
     setPriceAccount(w.client, P.SOL_USD_ACCOUNT, "pyth-sol-usd-devnet", { publishTime: START_TIME - 100n });
     await setParams({ max_price_age: 90 });
     expectError((await open()).sent, "SolUsdStale");
-    // The account is derived from the configured feed, never trusted as passed.
-    await setParams({ sol_usd_feed_id: P.BTC_USD_FEED_ID });
-    expectError((await open()).sent, "SolUsdAccountMismatch");
+    // The opening prices with the compiled SOL/USD id (founder answer 3): the config's field is unused,
+    // so changing it changes nothing, and the same stale SOL/USD account is still refused.
+    // `setParams` takes the whole set from the defaults, so the 90 s bound is restated here.
+    await setParams({ max_price_age: 90, sol_usd_feed_id: P.BTC_USD_FEED_ID });
+    expectError((await open()).sent, "SolUsdStale");
     // Back to the founder's values (version 3), then the same values again (version 4): every call
     // counts, so a preview signed under version 3 is refused.
     await setParams({});

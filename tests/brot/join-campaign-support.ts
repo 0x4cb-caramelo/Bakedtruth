@@ -24,7 +24,10 @@ import { layoutSize } from "./layouts";
 import * as P from "./program";
 import { setClock } from "./readers";
 import { balance, createWorld, expectError, fundedWallet, now, PRICE_OFFSETS, send, type World } from "./setup";
-import { ENTRY } from "./structs";
+import { ENTRY, JOIN } from "./structs";
+
+/** The rent of one `Join` account, paid by the baker of each join (amendment 2026-10-09). */
+export const JOIN_LEN = layoutSize(JOIN);
 
 /** P-5: 0.01 SOL, the config's `min_entry_lamports`. */
 export const MIN_ENTRY = DEFAULT_PARAMS.min_entry_lamports;

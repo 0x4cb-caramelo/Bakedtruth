@@ -1,12 +1,13 @@
 //! Purpose: the effects of `resolve_campaign`: the result group the reader's decision writes into
 //!          the `Campaign`, and the `CampaignResolved` event built from what was stored, so the
 //!          event and the account can never disagree (TP sections 3.4.6, 3.4.7, 3.4.14).
-//! Version: 0.0.3
-//! Sprint: 03 (readers and resolution), lane D
+//! Version: 0.0.4
+//! Sprint: 03 (readers and resolution), lane D; `publish_time` written in 04 (lane D)
 //!
 //! Every new value is computed with checked math before the first field is written, so a refusal
-//! leaves the campaign as it was. Only the result group and `event_seq` change: the pot, the fees,
-//! `contest_ends_at` (Sprint 04) and the settlement snapshot are left alone.
+//! leaves the campaign as it was. The result group, `publish_time` (the YES proof's, for a price
+//! campaign; zero for the other kinds) and `event_seq` change: the pot, the fees, `contest_ends_at`
+//! and the settlement snapshot are left alone.
 
 use pinocchio::{error::ProgramError, Address};
 
@@ -18,7 +19,7 @@ use crate::{
     readers::{ChainTime, Decision},
     state::{
         campaign::Campaign,
-        enums::{Outcome, Status},
+        enums::{Outcome, ReaderKind, Status},
     },
 };
 
@@ -50,8 +51,19 @@ pub fn write(
     campaign.observed_value = LeI128::new(decision.reading.observed);
     campaign.resolved_at = LeI64::new(now);
     campaign.review_ends_at = LeI64::new(review_ends_at);
+    campaign.publish_time = LeI64::new(stored_publish_time(campaign.kind, decision));
     campaign.event_seq = LeU64::new(next_seq);
     Ok(resolved_event(key, campaign, decision, time, seq))
+}
+
+/// The publish time stored at resolution: the YES proof's for a price campaign, zero for the others
+/// (the late refund compares each join with it; `tally_late_joins` reads it).
+pub fn stored_publish_time(kind: u8, decision: &Decision) -> i64 {
+    if kind == ReaderKind::PriceTouch as u8 {
+        decision.reading.publish_time
+    } else {
+        0
+    }
 }
 
 /// `CampaignResolved` read back from the stored result, with `seq` the number this event takes
@@ -80,4 +92,20 @@ fn resolved_event(
         slot: LeU64::new(time.slot),
         epoch: LeU64::new(time.epoch),
     }
+}
+
+/// Moves the cut-off back to an earlier valid YES proof (decision of 2026-10-09, closure review): only the publish
+/// time changes; the outcome and the review window stay as resolved. The caller checks that the proof is an earlier
+/// YES price result and that no tally has started. Returns the event the move leaves (the next `seq`).
+pub fn move_cutoff(
+    key: &Address,
+    campaign: &mut Campaign,
+    decision: &Decision,
+    time: &ChainTime,
+) -> Result<CampaignResolved, ProgramError> {
+    let seq = campaign.event_seq.get();
+    let next_seq = seq.checked_add(1).ok_or(BrotError::MathOverflow)?;
+    campaign.publish_time = LeI64::new(decision.reading.publish_time);
+    campaign.event_seq = LeU64::new(next_seq);
+    Ok(resolved_event(key, campaign, decision, time, seq))
 }

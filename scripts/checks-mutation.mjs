@@ -23,7 +23,7 @@ import { junitCases, unxml } from "./bun-junit.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // checks.rs and its submodules: each `// X0.9 <id>` marker is in exactly one of them.
-const SOURCES = ["checks.rs", "checks/top_level.rs"].map((file) => join(ROOT, "programs/brot-markets/src", file));
+const SOURCES = ["checks.rs", "checks/top_level.rs", "checks/upgrade.rs"].map((file) => join(ROOT, "programs/brot-markets/src", file));
 const DEPLOY = join(ROOT, "target/deploy");
 const SO = join(DEPLOY, "brot_markets.so");
 const SAVED = join(ROOT, "target/checks-mutation/brot_markets.so");

@@ -11,6 +11,8 @@ pub mod campaign;
 pub mod config;
 pub mod entry;
 pub mod enums;
+pub mod join;
+pub mod transitions;
 
 use pinocchio::{
     account::{Ref, RefMut},
@@ -28,6 +30,8 @@ pub enum AccountTag {
     GlobalConfig = 1,
     Campaign = 2,
     Entry = 3,
+    /// Tag 4 is reserved for `ReferralLink` (Sprint 14).
+    Join = 5,
 }
 
 /// The layout version every Sprint 02 account is written with.

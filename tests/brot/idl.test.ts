@@ -15,6 +15,7 @@ import { EVENTS } from "./events";
 import { DEFAULT_PARAMS } from "./flows";
 import { camelLayout, enumVariants, IDL, idlLayout } from "./idl";
 import * as I from "./instructions";
+import * as IS from "./instructions-settlement";
 import { layoutSize, type Layout } from "./layouts";
 import * as P from "./program";
 import * as S from "./structs";
@@ -55,6 +56,77 @@ const BUILDERS: Record<string, Builder> = {
     build: async (who) => I.joinCampaignIx(who, await P.campaignPda(CAMPAIGN_ID), metric, { side: 0, amount: 1n }),
   },
   ResolveCampaign: { args: null, build: async () => I.resolveCampaignIx(await P.campaignPda(CAMPAIGN_ID), metric) },
+  TeamConfirmResult: {
+    args: null,
+    build: async (who) => IS.teamConfirmResultIx(who, await P.configPda(), await P.campaignPda(CAMPAIGN_ID)),
+  },
+  TeamVoidCampaign: {
+    args: S.TEAM_VOID_CAMPAIGN_ARGS,
+    build: async (who) =>
+      IS.teamVoidCampaignIx(who, await P.configPda(), await P.campaignPda(CAMPAIGN_ID), {
+        reason: 1,
+        noteHash: new Uint8Array(32),
+      }),
+  },
+  TeamOpenContest: {
+    args: null,
+    build: async (who) => IS.teamOpenContestIx(who, await P.configPda(), await P.campaignPda(CAMPAIGN_ID)),
+  },
+  FinalizeCampaign: {
+    args: null,
+    build: async () => IS.finalizeCampaignIx(await P.campaignPda(CAMPAIGN_ID), await P.configPda()),
+  },
+  SettleEntry: {
+    args: null,
+    build: async (who) => {
+      const campaign = await P.campaignPda(CAMPAIGN_ID);
+      return IS.settleEntryIx(
+        await P.entryPda(campaign, who.address),
+        campaign,
+        await P.vaultPda(campaign),
+        who.address,
+      );
+    },
+  },
+  SettleCreatorShare: {
+    args: null,
+    build: async (who) => {
+      const campaign = await P.campaignPda(CAMPAIGN_ID);
+      return IS.settleCreatorShareIx(campaign, await P.vaultPda(campaign), who.address);
+    },
+  },
+  CollectFee: {
+    args: null,
+    build: async () => {
+      const campaign = await P.campaignPda(CAMPAIGN_ID);
+      return IS.collectFeeIx(campaign, await P.vaultPda(campaign), await P.feeVaultPda());
+    },
+  },
+  SettlePrize: {
+    args: null,
+    build: async (who) => {
+      const campaign = await P.campaignPda(CAMPAIGN_ID);
+      return IS.settlePrizeIx(campaign, await P.vaultPda(campaign), who.address);
+    },
+  },
+  CloseCampaign: {
+    args: null,
+    build: async (who) => {
+      const campaign = await P.campaignPda(CAMPAIGN_ID);
+      return IS.closeCampaignIx(campaign, await P.vaultPda(campaign), who.address, await P.feeVaultPda());
+    },
+  },
+  TallyLateJoins: {
+    args: null,
+    build: async (who) => {
+      const campaign = await P.campaignPda(CAMPAIGN_ID);
+      return IS.tallyLateJoinsIx(who.address, campaign, await P.entryPda(campaign, who.address), []);
+    },
+  },
+  SweepFees: {
+    args: null,
+    build: async (who) => IS.sweepFeesIx(await P.configPda(), await P.feeVaultPda(), who.address),
+  },
 };
 
 /** The address each named slot must hold; signing slots hold the signer. */
@@ -75,6 +147,12 @@ async function expectedAddresses(who: Address): Promise<Record<string, Address>>
     metricAccount: metric,
     proofAccount: metric,
     solUsdPrice: P.SOL_USD_ACCOUNT,
+    // Sprint 04: the payee slots of the settlement instructions are the test wallet, which is also the
+    // stored baker, creator, rent payer and fee recipient in these fixtures.
+    recipient: who,
+    join: await P.joinPda(campaign, who, 0),
+    rentPayer: who,
+    feeRecipient: who,
   };
 }
 
@@ -92,10 +170,11 @@ describe("idl matches the test kit", () => {
   });
 
   test("accounts have the hand-written layouts", () => {
-    expect(IDL.accounts.map((a) => a.name).sort()).toEqual(["Campaign", "Entry", "GlobalConfig"]);
+    expect(IDL.accounts.map((a) => a.name).sort()).toEqual(["Campaign", "Entry", "GlobalConfig", "Join"]);
     expect(idlLayout("GlobalConfig")).toEqual(camelLayout(S.GLOBAL_CONFIG));
     expect(idlLayout("Campaign")).toEqual(camelLayout(S.CAMPAIGN));
     expect(idlLayout("Entry")).toEqual(camelLayout(S.ENTRY));
+    expect(idlLayout("Join")).toEqual(camelLayout(S.JOIN));
     expect(idlLayout("CreationParams")).toEqual(camelLayout(S.CREATION_PARAMS));
   });
 

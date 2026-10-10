@@ -135,6 +135,15 @@ build.
 - **The SDK takes the program address from the IDL (`idl.address`).** Answered in Sprint 02: the Shank IDL carries it
   in `metadata.address`, and `tests/brot/idl.test.ts` checks it against the program id; keep it as the single source.
 
+From Sprint 03 and its record, "Carried to Sprints 04 and 05" (`docs/sprints/sprint-03-readers-resolution.md`).
+
+- **The devnet YES of `StakeAtLeast`**, and the reviewed change that turns the `stake-at-least` build feature on. Until
+  then the kind stays closed in every build, and no key can open it.
+- **The SDK's preview of the opening**: the 1% minimum distance, the far bound, the epoch's latest start and the
+  params version, so a creator sees a refusal before signing. The feed list (Sprint 04) is part of the preview.
+- **`smoke:devnet` and `seed:devnet` rewritten for the new program** (they still drive the frozen program's devnet
+  deployment through `app/lib` until Sprint 09).
+
 From Sprint 02's reviews (`docs/sprints/sprint-02-pot-core.md`, "Reviews"; 2026-10-08).
 
 - **Measure before setting mainnet values:** a week of devnet SOL/USD age, confidence and cadence, and of

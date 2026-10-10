@@ -61,18 +61,18 @@ describe("resolve refuses a cpi", () => {
 });
 
 describe("resolve refuses", () => {
-  test("CampaignNotOpen: a campaign already in review", async () => {
+  test("CutoffNotMovable: a campaign already in review", async () => {
     const w = await resolveWorld();
     const mint = await anyAddress();
     setRawAccount(w.client, mint, mintBytes({ supply: 900_000n, mintAuthority: null }), P.SPL_TOKEN_PROGRAM_ID);
     const c = await campaignOn(w, P.ReaderKind.SupplyAtMost, mint, 1_000_000n, { status: P.Status.InReview });
-    await expectRefused(w, c, resolveIx(c), "CampaignNotOpen");
+    await expectRefused(w, c, resolveIx(c), "CutoffNotMovable");
   });
 
-  test("CampaignNotOpen: a second resolve of the same campaign", async () => {
+  test("CutoffNotMovable: a second resolve of the same campaign", async () => {
     const { w, c } = await resolvable();
     expectOk(await resolve(w, c));
-    await expectRefused(w, c, resolveIx(c), "CampaignNotOpen");
+    await expectRefused(w, c, resolveIx(c), "CutoffNotMovable");
   });
 
   test("MetricAccountMismatch: another account in the metric slot", async () => {

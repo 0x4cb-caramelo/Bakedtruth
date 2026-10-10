@@ -151,7 +151,17 @@ export type Row = {
 };
 
 /** What `resolve_campaign` writes; every other field of the campaign must be as it was. */
-const RESULT = ["status", "outcome", "void_reason", "met_late", "observed_value", "resolved_at", "review_ends_at"];
+// The proof time is part of the result: the late refund is measured against it (amendment 2026-10-09).
+const RESULT = [
+  "status",
+  "outcome",
+  "void_reason",
+  "met_late",
+  "observed_value",
+  "resolved_at",
+  "review_ends_at",
+  "publish_time",
+];
 
 /**
  * Resolves `c` (offering `proof`) and checks the record against `row`: `InReview`, the outcome, the

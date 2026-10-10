@@ -6,20 +6,31 @@
  * @see https://github.com/codama-idl/codama
  */
 
+export * from "./campaignClosed";
+export * from "./campaignFinalized";
 export * from "./campaignOpened";
 export * from "./campaignResolved";
+export * from "./campaignVoided";
 export * from "./configChange";
 export * from "./configChanged";
 export * from "./configInitialized";
+export * from "./contestOpened";
 export * from "./contestStage";
 export * from "./creationParams";
+export * from "./creatorShareSettled";
 export * from "./direction";
 export * from "./entriesPaused";
 export * from "./entriesResumed";
 export * from "./entryAdded";
+export * from "./entrySettled";
+export * from "./feeCollected";
+export * from "./feesSwept";
+export * from "./lateTallied";
 export * from "./operatingLevel";
 export * from "./outcome";
+export * from "./prizeSettled";
 export * from "./readerKind";
+export * from "./resultConfirmed";
 export * from "./settleMode";
 export * from "./side";
 export * from "./status";

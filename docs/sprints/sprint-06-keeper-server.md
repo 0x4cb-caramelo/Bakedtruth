@@ -132,6 +132,14 @@ proposal §2.5.
 - **The receiver charges zero lamports per update** on both clusters (Sprint 01). Posting costs the transaction fee
   and the account's rent.
 
+From Sprint 03 and its record, "Carried to Sprints 04 and 05", and the founder's answers of 2026-10-09.
+
+- **The keeper's proof task** is the only way a short touch gets proved on mainnet (D4, TP §3.4.8). Its design follows
+  the Sprint 03 proof window (60 s, the slot bound).
+- **Question 1, follow-up:** more Pyth feeds join the compiled list (Sprint 04) from this sprint on, and only once our
+  own keeper keeps the feed's sponsored account updated. A feed joins the list only then; the list stays
+  append-only, and the change is a reviewed code change.
+
 ## Risks
 
 - Bun 1.4.2 may not run on the server's CPU or kernel (TP C8). Reduces: the check comes first; SQLite sits behind a

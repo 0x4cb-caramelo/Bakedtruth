@@ -137,6 +137,13 @@ export type Campaign = {
   creatorShareFromFee: bigint;
   paidOutTotal: bigint;
   epoch: bigint;
+  minEntryLamports: bigint;
+  publishTime: bigint;
+  lateYes: bigint;
+  lateNo: bigint;
+  entriesUntallied: number;
+  oneSidedFees: bigint;
+  creatorShareReserved: bigint;
   reserved: ReadonlyUint8Array;
 };
 
@@ -197,6 +204,13 @@ export type CampaignArgs = {
   creatorShareFromFee: number | bigint;
   paidOutTotal: number | bigint;
   epoch: number | bigint;
+  minEntryLamports: number | bigint;
+  publishTime: number | bigint;
+  lateYes: number | bigint;
+  lateNo: number | bigint;
+  entriesUntallied: number;
+  oneSidedFees: number | bigint;
+  creatorShareReserved: number | bigint;
   reserved: ReadonlyUint8Array;
 };
 
@@ -259,7 +273,14 @@ export function getCampaignEncoder(): FixedSizeEncoder<CampaignArgs> {
     ["creatorShareFromFee", getU64Encoder()],
     ["paidOutTotal", getU64Encoder()],
     ["epoch", getU64Encoder()],
-    ["reserved", fixEncoderSize(getBytesEncoder(), 56)],
+    ["minEntryLamports", getU64Encoder()],
+    ["publishTime", getI64Encoder()],
+    ["lateYes", getU64Encoder()],
+    ["lateNo", getU64Encoder()],
+    ["entriesUntallied", getU32Encoder()],
+    ["oneSidedFees", getU64Encoder()],
+    ["creatorShareReserved", getU64Encoder()],
+    ["reserved", fixEncoderSize(getBytesEncoder(), 4)],
   ]);
 }
 
@@ -322,7 +343,14 @@ export function getCampaignDecoder(): FixedSizeDecoder<Campaign> {
     ["creatorShareFromFee", getU64Decoder()],
     ["paidOutTotal", getU64Decoder()],
     ["epoch", getU64Decoder()],
-    ["reserved", fixDecoderSize(getBytesDecoder(), 56)],
+    ["minEntryLamports", getU64Decoder()],
+    ["publishTime", getI64Decoder()],
+    ["lateYes", getU64Decoder()],
+    ["lateNo", getU64Decoder()],
+    ["entriesUntallied", getU32Decoder()],
+    ["oneSidedFees", getU64Decoder()],
+    ["creatorShareReserved", getU64Decoder()],
+    ["reserved", fixDecoderSize(getBytesDecoder(), 4)],
   ]);
 }
 

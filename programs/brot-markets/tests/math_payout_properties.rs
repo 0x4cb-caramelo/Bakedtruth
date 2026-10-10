@@ -8,7 +8,7 @@ mod common;
 
 use brot_markets::math::payout::split_payout;
 use common::{
-    add, div, literal_reading, mul,
+    add, div, mul,
     pots::{random_pot, settle},
     sub, w, Rng, CASES,
 };
@@ -33,20 +33,13 @@ fn the_creator_share_keeps_every_winner_whole_and_the_books_closed() {
         assert_eq!(add(add(brot, creator), w(pool)), whole, "{at}");
         // I13 and the share's bound.
         assert!(share.from_fee <= fee && creator <= c, "{at}");
-        // D-g's condition first: the creator gets less than C only when the winners are at
-        // exactly their entries and Brot has given up its whole fee.
+        // Decision of 2026-10-09: the share comes from the losing side and Brot's fee only, never the prize. The
+        // creator gets less than C only when the losing side, less the fee, cannot cover it: then the creator has
+        // taken the whole losing side and the pot keeps V + R.
         if creator < c {
-            assert!(pool == v && share.from_fee == fee, "{at}");
-        }
-        // Against the literal reading: equal when the 1% fits in P − fee + R; otherwise P-2
-        // pays the creator at least as much and the winners no more (and never below V).
-        let (literal_creator, literal_pool) = literal_reading(v, p, r, fee, pot.share_bps);
-        if c > add(sub(w(p), w(fee)), w(r)) {
-            let between = creator >= literal_creator && w(pool) <= literal_pool;
-            assert!(between, "{at}");
             fired = fired.checked_add(1).unwrap();
-        } else {
-            assert_eq!((creator, w(pool)), (literal_creator, literal_pool), "{at}");
+            assert!(share.from_fee == fee && creator == w(p), "{at}");
+            assert_eq!(w(pool), add(w(v), w(r)), "{at}");
         }
     }
     let enough = CASES.checked_div(50).unwrap();

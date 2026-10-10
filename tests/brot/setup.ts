@@ -112,6 +112,7 @@ export function setPriceAccount(
     verification?: number;
     owner?: Address;
     postedSlot?: bigint;
+    feedId?: Uint8Array;
   } = {},
 ) {
   const data = new Uint8Array(readFileSync(`tests/fixtures/${fixture}.bin`));
@@ -122,6 +123,7 @@ export function setPriceAccount(
   if (change.exponent !== undefined) view.setInt32(PRICE_OFFSETS.exponent, change.exponent, true);
   if (change.verification !== undefined) data[PRICE_OFFSETS.verification] = change.verification;
   if (change.postedSlot !== undefined) view.setBigUint64(PRICE_OFFSETS.postedSlot, change.postedSlot, true);
+  if (change.feedId !== undefined) data.set(change.feedId, PRICE_OFFSETS.feedId);
   const programAddress = change.owner ?? P.PYTH_RECEIVER_ID;
   client.svm.setAccount({ address, data, executable: false, lamports: lamports(P.SOL), programAddress, space: 134n });
   return data;

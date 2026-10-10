@@ -1,9 +1,10 @@
 //! Purpose: the end of `user_open_campaign`: every field an opening writes into the new
 //!          `Campaign`, and the `CampaignOpened` event built from what was stored, so the event
 //!          and the account can never disagree.
-//! Version: 0.0.4
+//! Version: 0.0.5
 //! Sprint: 02 (pot core on Pinocchio), lane D; 03 (the epoch, the price-only fields zero for the
-//!         other kinds, and the event moved here from the handler), lane F
+//!         other kinds, and the event moved here from the handler), lane F; 04 (the minimum entry
+//!         copied at opening, founder answer 5), lane H
 
 use pinocchio::{AccountView, Address, ProgramResult};
 
@@ -60,6 +61,9 @@ pub fn write(c: &mut Campaign, o: &Opening) {
     };
     c.fee_bps = o.params.fee_bps;
     c.one_sided_fee_bps = o.params.one_sided_fee_bps;
+    // Founder answer 5: the campaign keeps the smallest entry it opened with; a later change of the
+    // config does not reach it.
+    c.min_entry_lamports = o.params.min_entry_lamports;
     // The feed and the direction are zero (`Above`) for the other kinds: `rules` refused any
     // other value (D-j), so they are copied as passed.
     c.feed_id = o.args.feed_id;

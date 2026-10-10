@@ -222,7 +222,96 @@ pub enum BrotError {
         "The creation parameters changed since the client read them (`expected_params_version`)"
     )]
     CreationParamsChanged = 6090,
-    // New codes are appended here, numbered from 6091, never reusing a number.
+    // Lane A (numbers from 6091).
+    #[error("The team key acts only while the campaign is InReview")]
+    TeamKeyOutsideReview = 6091,
+    #[error("The review window is closed, or the act is outside it")]
+    OutsideReviewWindow = 6092,
+    #[error("A team key may confirm an automatic void, never turn it into YES or NO")]
+    AutomaticVoidNotInvertible = 6093,
+    #[error("A team key cannot void with this reason")]
+    VoidReasonNotForTeam = 6094,
+    #[error("A contest opens only inside the review window")]
+    ContestOutsideReview = 6095,
+    #[error("Contests are disabled until Sprint 14: a contest would freeze the pot")]
+    ContestExitDisabled = 6096,
+    #[error("A team key voids only an automatic void; it never voids a YES or NO result")]
+    TeamVoidNotAutomatic = 6097,
+    // Lane B (numbers from 6101).
+    #[error("A money invariant (I1 to I15) does not hold")]
+    InvariantViolated = 6101,
+    #[error("The snapshot's totals disagree with each other")]
+    SnapshotInconsistent = 6102,
+    // Lane C (numbers from 6106).
+    #[error("The campaign is not finalized yet")]
+    NotFinalized = 6106,
+    #[error("This payout was already made")]
+    AlreadySettled = 6107,
+    #[error("The entry's stored baker is not the recipient")]
+    WrongBaker = 6108,
+    #[error("No creator share is due: team, one-sided, void or refund")]
+    CreatorShareNotDue = 6109,
+    #[error("The recipient is not the stored creator")]
+    WrongCreator = 6110,
+    #[error("The wallet is still below its rent-exempt minimum; the reserved credit cannot be claimed yet")]
+    ReserveNotClaimable = 6111,
+    #[error("A payout would exceed the snapshot's distributable amount")]
+    PayoutExceedsSnapshot = 6112,
+    #[error("The entry belongs to another campaign")]
+    EntryNotOnCampaign = 6113,
+    #[error("The entry's joins are not all tallied yet: the late totals are not known")]
+    NotTallied = 6114,
+    #[error(
+        "The campaign has no YES proof publish time, so its late entries cannot be told apart"
+    )]
+    NoProofTime = 6115,
+    #[error("The campaign is not InReview, so it cannot be finalized")]
+    CampaignNotInReview = 6116,
+    #[error("The review window has not ended yet")]
+    ReviewNotEnded = 6117,
+    // Lane D (numbers from 6121).
+    #[error("The campaign's fee, prize and creator share are not all settled")]
+    CampaignNotSettled = 6121,
+    #[error("The fee recipient is the fee vault itself")]
+    FeeRecipientIsFeeVault = 6122,
+    #[error("The fee vault holds nothing above its rent-exempt minimum")]
+    NothingToSweep = 6123,
+    #[error("The campaign is already closed")]
+    AlreadyClosed = 6124,
+    #[error("The opening fee and the held 10% were already collected")]
+    FeeAlreadyCollected = 6125,
+    #[error("The prize was already returned to the opener")]
+    PrizeAlreadySettled = 6126,
+    #[error("The account still holds lamports, so it cannot be closed")]
+    AccountNotEmpty = 6127,
+    #[error("The rent payer is not the one stored at opening")]
+    RentPayerNotStored = 6128,
+    #[error("The fee recipient is not the one GlobalConfig stores")]
+    FeeRecipientMismatch = 6129,
+    #[error(
+        "The running total of one-sided fees is not recorded, so the fee cannot be collected yet"
+    )]
+    OneSidedFeesNotRecorded = 6130,
+    // Lane G (numbers from 6131).
+    #[error("The sponsored price is within the join margin of the target")]
+    JoinBufferRefused = 6131,
+    #[error("The entry is below the minimum this campaign opened with")]
+    BelowCampaignMinEntry = 6132,
+    #[error("The join accounts passed do not match the entry's joins, in order")]
+    JoinAccountsMismatch = 6133,
+    #[error("The campaign is not InReview with its publish time recorded, so its joins cannot be tallied")]
+    TallyNotReady = 6134,
+    #[error("Every join of this entry is already tallied")]
+    EntryAlreadyTallied = 6135,
+    // Lane H (numbers from 6141).
+    #[error("The price feed is not on the compiled feed list")]
+    FeedNotOnList = 6141,
+    // Lane shared (numbers from 6146).
+    #[error("The transition is not in the table of TP 3.4.2")]
+    IllegalTransition = 6146,
+    #[error("The proof does not move the cut-off back: not earlier, not a YES price result, or a tally has started")]
+    CutoffNotMovable = 6147,
+    // New codes are appended here, from 6147, never reusing a number.
 }
 
 impl From<BrotError> for ProgramError {

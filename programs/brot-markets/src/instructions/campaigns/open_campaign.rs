@@ -1,14 +1,14 @@
 //! Purpose: `user_open_campaign`: any wallet opens a campaign of any open kind paying US$500 in
 //!          SOL at the Pyth SOL/USD price, 90% bookkept as the prize and 10% held as the opening
 //!          fee; a team key opens free with no creator share (TP section 3.4.10).
-//! Version: 0.0.4
+//! Version: 0.0.5
 //! Sprint: 02 (pot core on Pinocchio), lane D; 03 (the other four kinds, the canonical arguments,
-//!         the terms the creator saw and row 7's own codes), lane F
+//!         the terms the creator saw and row 7's own codes), lane F; 04 (feed list, paid valve), lane H
 //!
 //! The checks run in this order, each refusal with its own error (X0.7): (1) row 9, the arguments
 //! are exactly their size and none is text; (2) row 1, the kind names a reader and opens in this
 //! build (`rules`); (3) the canonical arguments, the direction byte and no feed, direction or
-//! epoch the kind does not use (`rules`); (4) the slots (TP section 3.4.17); (5) row 8, the
+//! epoch the kind does not use, and a price feed on the compiled list (`rules`); (4) the slots (TP section 3.4.17); (5) row 8, the
 //! pause and the valve; (6) the terms the creator saw, `params_version` (`rules`); (7) row 5,
 //! 3 to 90 days for every kind, with the clock read once; (8) rows 2 to 4, and the epoch kinds'
 //! part of row 5, in the kind's reader; (9) row 7, the payment (`payment`); (10) row 10, the
@@ -89,6 +89,7 @@ pub fn user_open_campaign(
     let kind = rules::opening_kind(args.kind)?;
     let epoch = args.epoch.get();
     let direction = rules::canonical_direction(kind, args.direction, &args.feed_id, epoch)?;
+    rules::require_listed_feed(kind, &args.feed_id)?;
 
     // The slots. The metric and SOL/USD slots are only read, and may hold the same account: a
     // campaign on SOL/USD itself passes it twice.
@@ -106,10 +107,13 @@ pub fn user_open_campaign(
     if OperatingLevel::try_from(config.operating_level)? == OperatingLevel::EntriesHalted {
         return Err(BrotError::OpenWhilePaused.into());
     }
-    let open_campaigns = config.open_campaigns.get();
-    if open_campaigns >= config.params.max_open_campaigns.get() {
-        return Err(BrotError::TooManyOpenCampaigns.into());
-    }
+    // The valve counts paid openings only; a team key's free opening is outside it (founder answer 4).
+    let counts = rules::counts_toward_limit(args.opening_usd.get());
+    rules::within_valve(
+        counts,
+        config.open_campaigns.get(),
+        config.params.max_open_campaigns.get(),
+    )?;
     // The terms the creator saw: no parameter changed since the client's preview.
     let expected = args.expected_params_version.get();
     rules::terms_unchanged(expected, config.params_version.get())?;
@@ -156,10 +160,18 @@ pub fn user_open_campaign(
 
     // All of the payment into the vault, bookkept below as prize and opening fee (I14).
     if payment.paid > 0 {
+        let vault_before = vault.lamports();
         crate::vault::deposit(creator, vault, payment.paid)?;
+        // The vault moves by exactly what the opening books: the rent is not in the payment (I14, TP 3.4.10).
+        crate::math::invariant::vault_change_matches(
+            vault_before,
+            vault.lamports(),
+            payment.paid,
+            0,
+        )?;
     }
 
-    // Row 6 and every other field, then the count of open campaigns (I7).
+    // Row 6 and every other field, then the count of open campaigns (I7), for a counted opening only.
     let mut opened = state::init::<Campaign>(campaign)?;
     let opening = record::Opening {
         args,
@@ -177,10 +189,14 @@ pub fn user_open_campaign(
         payment,
     };
     record::write(&mut opened, &opening);
-    let open_campaigns = open_campaigns
-        .checked_add(1)
-        .ok_or(BrotError::MathOverflow)?;
-    config.open_campaigns.set(open_campaigns);
+    if counts {
+        let open_campaigns = config
+            .open_campaigns
+            .get()
+            .checked_add(1)
+            .ok_or(BrotError::MathOverflow)?;
+        config.open_campaigns.set(open_campaigns);
+    }
 
     // The event with `seq` 0, then the campaign's next sequence number (X0.4).
     record::announce(

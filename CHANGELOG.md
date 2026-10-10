@@ -14,6 +14,16 @@ na `main` pelo PR #40 em 9/10/2026, com a tag `sprint-03` (`docs/sprints/sprint-
 mesclou os PRs #37 e #40 foi o Ronaldo, com a liberdade que o Lucas lhe deu; ele também respondeu as perguntas ao
 fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`).
 
+### Changed
+
+- **Sprint 04 fechada para revisão, com PR aberto e não mesclado** (`docs/sprints/sprint-04-settlement-invariants.md`, "Closure status"). O programa ganhou liquidação, pagamento, taxas, parte do criador, a apuração tardia (`Join` por entrada, `tally_late_joins`), a regra de viabilidade (um pote só divide se o lado perdedor pagar as taxas) e o corte de revisão por prova anterior. Teste aleatório com semente fixa: 1.200 operações, 35.288 checagens de I1 a I15, sem falha. Medido: liquidação de 2.926 a 3.180 CU por entrada, 12 entradas por transação. Ficou em aberto: a redação da regra de viabilidade (taxa sobre o lado perdedor, não sobre o principal do lado vencedor), a cobertura dos caminhos de time (`confirm`, `void`) no teste aleatório e a conferência das linhas da definição de pronto sem teste. Plano técnico na v0.1.3 (§3.4.18).
+- **Sprint 04 em curso, na branch `sprint-04-settlement-invariants`** (ainda sem PR). Feito até aqui: o arquivo
+  `checks.rs` e o `state/campaign.rs` foram divididos sem mudança de comportamento; as pendências de documentação da
+  Sprint 03 foram copiadas para as Sprints 04, 05 e 06; a decisão sobre `Contested` foi registrada (entra por
+  `team_open_contest`; nada sai antes da Sprint 14); a leitura do código do push oracle da Pyth foi feita num commit
+  fixado; e o plano técnico foi para a v0.1.2, alinhado ao que a Sprint 03 construiu e às respostas do fundador de
+  9/10/2026.
+
 ### Added
 
 - **Sprint 03: o programa lê o resultado sozinho, e o Anchor sai do repositório** (`programs/brot-markets`,

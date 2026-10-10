@@ -1,0 +1,175 @@
+/**
+ * Purpose: generates tests/brot/slot-matrix.gen.ts, the slot matrix of Sprint 04 (T-lane F), from the
+ *          frozen Shank IDL: every signer unsigned, every writable slot read-only, a stranger, an
+ *          account of each program type, and every writable pair aliased, each with its BrotError.
+ * Version: 0.0.1
+ * Sprint:  04 (settlement and invariants), lane F. Regenerate: `bun scripts/slot-matrix.ts`.
+ *          The CI step `bun scripts/slot-matrix-check.ts` fails when the committed file is stale.
+ */
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import * as prettier from "prettier";
+
+import {
+  DISABLED,
+  DISTINCT,
+  GAP,
+  overrideOf,
+  SPEC,
+  strangerError,
+  swapError,
+  TYPES,
+  typeOf,
+  type Slot,
+} from "./slot-matrix-spec";
+
+const ROOT = join(fileURLToPath(import.meta.url), "..", "..");
+export const IDL_PATH = join(ROOT, "packages/sdk/src/idl/brot_markets.json");
+export const OUT_PATH = join(ROOT, "tests/brot/slot-matrix.gen.ts");
+
+export type Category = "unsigned" | "readonly" | "stranger" | "type" | "alias";
+export type Case = {
+  ix: string;
+  i: number;
+  name: string;
+  cat: Category;
+  src?: string;
+  with?: number;
+  expect: string;
+};
+export type Gap = Omit<Case, "expect"> & { reason: string };
+
+type IdlAccount = { name: string; isMut: boolean; isSigner: boolean };
+
+/** The matrix cases, the gaps and the accepted strangers, in IDL order; plus the generated file's text (prettier-formatted). */
+export async function buildMatrix() {
+  const idl = JSON.parse(readFileSync(IDL_PATH, "utf8")) as {
+    instructions: { name: string; accounts: IdlAccount[] }[];
+  };
+  const cases: Case[] = [];
+  const gaps: Gap[] = [];
+  let accepted = 0;
+  const push = (c: Case) => {
+    const expect = DISABLED[c.ix] ?? c.expect;
+    if (expect === GAP) gaps.push({ ...c, reason: gapReason(c) });
+    else cases.push({ ...c, expect });
+  };
+  for (const ix of idl.instructions) {
+    const spec = SPEC[ix.name];
+    if (!spec) throw new Error(`no slot spec for ${ix.name}`);
+    const acc = ix.accounts;
+    acc.forEach((a, i) => {
+      if ((a.isSigner || a.isMut) && !spec[a.name]) throw new Error(`${ix.name}.${a.name}: no slot kind`);
+    });
+    const slotOf = (i: number): Slot => spec[acc[i].name];
+    const writable = acc.map((a, i) => (a.isMut ? i : -1)).filter((i) => i >= 0);
+    const at = (i: number) => ({ ix: ix.name, i, name: acc[i].name });
+    acc.forEach((a, i) => {
+      if (a.isSigner) push({ ...at(i), cat: "unsigned", expect: "MissingSignature" });
+    });
+    for (const i of writable) push({ ...at(i), cat: "readonly", expect: "NotWritable" });
+    for (const i of writable) {
+      const stranger = strangerError(slotOf(i));
+      if (stranger === "accept") accepted++;
+      else push({ ...at(i), cat: "stranger", expect: overrideOf(`${ix.name}|stranger|${acc[i].name}`, stranger) });
+      for (const src of TYPES) {
+        if (typeOf(slotOf(i)) === src) continue;
+        push({
+          ...at(i),
+          cat: "type",
+          src,
+          expect: overrideOf(`${ix.name}|type|${acc[i].name}|${src}`, swapError(slotOf(i), src)),
+        });
+      }
+    }
+    // Every writable pair: the later slot (j) is given the earlier slot's (a) account.
+    const pairs = DISTINCT[ix.name] ?? [];
+    for (const [n, a] of writable.entries()) {
+      for (const j of writable.slice(n + 1)) {
+        const named = pairs.some((p) => p.includes(acc[a].name) && p.includes(acc[j].name));
+        const expect = acc[j].isSigner
+          ? "MissingSignature"
+          : named
+            ? "DuplicateAccount"
+            : swapError(slotOf(j), typeOf(slotOf(a)));
+        push({
+          ...at(j),
+          cat: "alias",
+          with: a,
+          expect: overrideOf(`${ix.name}|alias|${acc[j].name}|with${a}`, expect),
+        });
+      }
+    }
+  }
+  const text = await prettier.format(render(cases, gaps, accepted), { parser: "typescript", printWidth: 120 });
+  return { cases, gaps, accepted, text };
+}
+
+function gapReason(c: Case): string {
+  return `no error named for a stored destination (${c.name}) that is not the stored key; see the report`;
+}
+
+const counts = (cases: Case[]) => {
+  const byIx: Record<string, number> = {};
+  for (const c of cases) byIx[c.ix] = (byIx[c.ix] ?? 0) + 1;
+  return byIx;
+};
+
+function render(cases: Case[], gaps: Gap[], accepted: number): string {
+  const line = (c: Case) => {
+    const src = c.src ? `, src: "${c.src}"` : "";
+    const w = c.with !== undefined ? `, with: ${c.with}` : "";
+    return `  { ix: "${c.ix}", i: ${c.i}, name: "${c.name}", cat: "${c.cat}"${src}${w}, expect: "${c.expect}" },`;
+  };
+  const gapLine = (g: Gap) =>
+    `  { ix: "${g.ix}", i: ${g.i}, name: "${g.name}", cat: "${g.cat}", reason: ${JSON.stringify(g.reason)} },`;
+  const perIx = Object.entries(counts(cases))
+    .map(([k, v]) => `  ${k}: ${v},`)
+    .join("\n");
+  return [
+    "// Generated by scripts/slot-matrix.ts from packages/sdk/src/idl/brot_markets.json. Do not edit by hand:",
+    "// run `bun scripts/slot-matrix.ts`. Sprint 04, lane F (slot matrix). CI checks it with slot-matrix-check.ts.",
+    "/**",
+    " * Purpose: every slot case of the matrix: each signer unsigned (MissingSignature), each writable slot",
+    " *          read-only (NotWritable), a stranger, an account of each other type, and each writable pair",
+    " *          aliased; `expect` is the BrotError name the case must get. `i` is the account's IDL index.",
+    " * Version: 0.0.1",
+    " * Sprint:  04 (lane F)",
+    " */",
+    'export type SlotCategory = "unsigned" | "readonly" | "stranger" | "type" | "alias";',
+    "export type SlotCase = {",
+    "  ix: string;",
+    "  i: number;",
+    "  name: string;",
+    "  cat: SlotCategory;",
+    "  src?: string;",
+    "  with?: number;",
+    "  expect: string;",
+    "};",
+    "",
+    "export const SLOT_MATRIX: readonly SlotCase[] = [",
+    ...cases.map(line),
+    "];",
+    "",
+    "/** Refusals with no named error yet: listed, not run. Each one is a question for the integrator. */",
+    "export const SLOT_MATRIX_GAPS = [",
+    ...gaps.map(gapLine),
+    "];",
+    "",
+    `/** Strangers a valid payer accepts (the creator of an opening, a baker's wallet): not refusals. */`,
+    `export const SLOT_MATRIX_ACCEPTED = ${accepted};`,
+    "",
+    "/** Cases per instruction (the count the test reports). */",
+    "export const SLOT_MATRIX_COUNTS: Record<string, number> = {",
+    perIx,
+    "};",
+    "",
+  ].join("\n");
+}
+
+if (import.meta.main) {
+  const { cases, gaps, accepted, text } = await buildMatrix();
+  writeFileSync(OUT_PATH, text);
+  console.log(`slot matrix: ${cases.length} cases, ${gaps.length} gaps, ${accepted} accepted strangers -> ${OUT_PATH}`);
+}

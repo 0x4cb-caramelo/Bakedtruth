@@ -86,13 +86,14 @@ fn worked_example_a_join_estimates() {
 fn worked_example_b_keeps_every_winner_whole() {
     let (v, p) = (600 * SOL, SOL);
     let (fee, cut, pool) = settle(v, p, PRIZE_A);
-    assert_eq!((fee, cut), (100_000_000, share(5_018_239_224, 100_000_000)));
-    // The creator gets 5,118,239,224, less than C (6,010,000,000); Brot keeps no house fee.
-    assert_eq!(add(w(cut.from_pot), w(cut.from_fee)), 5_118_239_224);
+    // Decision of 2026-10-09: the share comes from the losing side less the fee (0.9 SOL), then Brot's fee; the
+    // prize is never a source. The creator gets 1 SOL (less than C, 6,010,000,000); Brot keeps no house fee.
+    assert_eq!((fee, cut), (100_000_000, share(900_000_000, 100_000_000)));
+    assert_eq!(add(w(cut.from_pot), w(cut.from_fee)), SOL.into());
     assert_eq!(sub(w(fee), w(cut.from_fee)), 0);
-    // distributable is exactly V, so every winner gets back exactly its entry (I11).
-    assert_eq!(pool, v);
-    assert_eq!(split_payout(SOL, pool, v), Ok(SOL));
+    // The distributable pot holds the prize too: V + P − fee − from_pot + R = 604,118,239,224.
+    assert_eq!(pool, 604_118_239_224);
+    assert_eq!(split_payout(SOL, pool, v), Ok(1_006_863_732));
     // The literal reading, as an oracle: the creator 100,000,000, the winners 605,018,239,224.
     let literal = literal_reading(v, p, PRIZE_A, fee, 100);
     assert_eq!(literal, (100_000_000, 605_018_239_224));
@@ -127,7 +128,7 @@ fn the_proposal_table_under_both_readings_of_d_g() {
         ((600, 400, 450), (10, 40, 1_400), (10, 1_400)),
         ((990, 10, 0), (10, 0, 990), (1, 999)),
         ((98_900, 1_100, 0), (1_000, 100, 98_900), (110, 99_890)),
-        ((98_900, 1_100, 450), (1_000, 110, 99_340), (1_000, 99_340)),
+        ((98_900, 1_100, 450), (1_000, 100, 99_350), (1_000, 99_340)),
     ];
     let in_sol = |amount: u64| amount.checked_mul(SOL).unwrap();
     let sol = |amount: u64| w(in_sol(amount));

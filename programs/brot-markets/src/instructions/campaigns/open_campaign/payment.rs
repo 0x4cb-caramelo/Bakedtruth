@@ -1,10 +1,12 @@
 //! Purpose: row 7 of TP section 3.4.10, what an opening pays: US$ at the sponsored Pyth SOL/USD
-//!          price of the config's feed, fresh by time and by slot and tight, at most the signed
+//!          price of the compiled feed (`SOL_USD_FEED_ID`) at its charged low end, `price − conf`, fresh by time
+//!          and by slot and tight, at most the signed
 //!          `max_lamports`, split 90/10; or nothing, for a team key that passes no `opening_usd`.
-//! Version: 0.0.3
-//! Sprint: 02 (pot core on Pinocchio), lane D; 03 (row 7's own codes and the slot bound), lane F
+//! Version: 0.0.4
+//! Sprint: 02 (pot core on Pinocchio), lane D; 03 (row 7's own codes and the slot bound), lane F;
+//!         04 (the charge at p − conf, the SOL/USD feed id as a constant), lane H
 //!
-//! Every value is recomputed here from the config and the price account; nothing the signer
+//! Every value is recomputed here from the config, the compiled feed and the price account; nothing the signer
 //! passes is trusted but `opening_usd` and `max_lamports`, which only bound what they pay. Every
 //! refusal of the SOL/USD account carries a row 7 code (Sprint 02 review): the reader's own codes
 //! (6001 to 6004) stay with the campaign's metric account, so a refusal names the account at fault.
@@ -12,6 +14,7 @@
 use pinocchio::{error::ProgramError, AccountView};
 
 use crate::{
+    constants::SOL_USD_FEED_ID,
     error::BrotError,
     math::opening::{opening_paid_lamports, split_opening},
     readers::{
@@ -38,7 +41,7 @@ pub struct Payment {
 /// other signer), and the SOL/USD slot is then neither checked nor read, so a stale feed never
 /// stops the team. Any other amount pays like any wallet, a team key included (the [AC] reading
 /// of how the team adds a prize): at least `opening_fee_usd`, at the price of the sponsored
-/// account of `sol_usd_feed_id` (derived, never trusted as passed), at most `max_lamports`. The
+/// account of `SOL_USD_FEED_ID` (derived, never trusted as passed), at most `max_lamports`. The
 /// price is fresh within `max_price_age` by the clock's time and, through `posted_within`, by its
 /// slot too (Sprint 03), so a cluster clock that lags cannot keep an old price fresh.
 pub fn charge(
@@ -59,7 +62,7 @@ pub fn charge(
     if opening_usd < params.opening_fee_usd.get() {
         return Err(BrotError::OpeningUsdBelowFee.into());
     }
-    let feed_id = &params.sol_usd_feed_id;
+    let feed_id = &SOL_USD_FEED_ID;
     let expected = sponsored_account(feed_id).map_err(|_| BrotError::SolUsdAccountMismatch)?;
     if *sol_usd_price.address() != expected {
         return Err(BrotError::SolUsdAccountMismatch.into());
@@ -72,7 +75,8 @@ pub fn charge(
     if !posted_within(&reading, time.slot, max_age) {
         return Err(BrotError::SolUsdStale.into());
     }
-    let paid = opening_paid_lamports(opening_usd, reading.price, reading.exponent)?;
+    let charged = charged_price(&reading)?;
+    let paid = opening_paid_lamports(opening_usd, charged, reading.exponent)?;
     if paid > max_lamports {
         return Err(BrotError::OpeningAboveMaxLamports.into());
     }
@@ -82,10 +86,25 @@ pub fn charge(
         paid,
         prize: split.prize,
         fee: split.fee,
-        price: reading.price,
+        price: charged,
         exponent: reading.exponent,
         publish_time: reading.publish_time,
     })
+}
+
+/// The price a paid opening is charged at: the low end of the band, `price − conf` (founder
+/// answer 2). The band is at most `max_price_conf_bps` wide, so the difference is positive unless
+/// the price itself is not; a result of zero or less is `SolUsdPriceNonPositive`.
+pub fn charged_price(reading: &PriceReading) -> Result<i64, BrotError> {
+    let conf = i64::try_from(reading.conf).map_err(|_| BrotError::MathOverflow)?;
+    let low = reading
+        .price
+        .checked_sub(conf)
+        .ok_or(BrotError::MathOverflow)?;
+    if low <= 0 {
+        return Err(BrotError::SolUsdPriceNonPositive);
+    }
+    Ok(low)
 }
 
 /// The SOL/USD account read like any price account, owner and bytes from the same account, with

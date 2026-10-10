@@ -58,6 +58,7 @@ export type UserJoinCampaignInstruction<
   TAccountVault extends string | AccountMeta<string> = string,
   TAccountEntry extends string | AccountMeta<string> = string,
   TAccountMetricAccount extends string | AccountMeta<string> = string,
+  TAccountJoin extends string | AccountMeta<string> = string,
   TAccountSystemProgram extends string | AccountMeta<string> = "11111111111111111111111111111111",
   TAccountEventAuthority extends string | AccountMeta<string> = "E5CgcK5xs4YfPdBLnCWTAA9ruStbTqLjEzTxtVaRuB5o",
   TAccountProgram extends string | AccountMeta<string> = "6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN",
@@ -74,6 +75,7 @@ export type UserJoinCampaignInstruction<
       TAccountVault extends string ? WritableAccount<TAccountVault> : TAccountVault,
       TAccountEntry extends string ? WritableAccount<TAccountEntry> : TAccountEntry,
       TAccountMetricAccount extends string ? ReadonlyAccount<TAccountMetricAccount> : TAccountMetricAccount,
+      TAccountJoin extends string ? WritableAccount<TAccountJoin> : TAccountJoin,
       TAccountSystemProgram extends string ? ReadonlyAccount<TAccountSystemProgram> : TAccountSystemProgram,
       TAccountEventAuthority extends string ? ReadonlyAccount<TAccountEventAuthority> : TAccountEventAuthority,
       TAccountProgram extends string ? ReadonlyAccount<TAccountProgram> : TAccountProgram,
@@ -133,6 +135,7 @@ export type UserJoinCampaignInput<
   TAccountVault extends InstructionAccountInput = InstructionAccountInput,
   TAccountEntry extends InstructionAccountInput = InstructionAccountInput,
   TAccountMetricAccount extends InstructionAccountInput = InstructionAccountInput,
+  TAccountJoin extends InstructionAccountInput = InstructionAccountInput,
   TAccountSystemProgram extends InstructionAccountInput = InstructionAccountInput,
   TAccountEventAuthority extends InstructionAccountInput = InstructionAccountInput,
   TAccountProgram extends InstructionAccountInput = InstructionAccountInput,
@@ -149,6 +152,8 @@ export type UserJoinCampaignInput<
   entry: TAccountEntry;
   /** Campaign.metric_account, read by the join lock */
   metricAccount: TAccountMetricAccount;
+  /** Join, PDA ["join", campaign, baker, index], created: one per join */
+  join: TAccountJoin;
   /** System Program */
   systemProgram?: TAccountSystemProgram;
   /** PDA ["__event_authority"] */
@@ -168,6 +173,7 @@ export function getUserJoinCampaignInstruction<
   TAccountVault extends InstructionAccountInput,
   TAccountEntry extends InstructionAccountInput,
   TAccountMetricAccount extends InstructionAccountInput,
+  TAccountJoin extends InstructionAccountInput,
   TAccountSystemProgram extends InstructionAccountInput,
   TAccountEventAuthority extends InstructionAccountInput,
   TAccountProgram extends InstructionAccountInput,
@@ -180,6 +186,7 @@ export function getUserJoinCampaignInstruction<
     TAccountVault,
     TAccountEntry,
     TAccountMetricAccount,
+    TAccountJoin,
     TAccountSystemProgram,
     TAccountEventAuthority,
     TAccountProgram
@@ -193,6 +200,7 @@ export function getUserJoinCampaignInstruction<
   ResolvedInstructionAccountMeta<TAccountVault, InstructionAccountInputAddress<TAccountVault>>,
   ResolvedInstructionAccountMeta<TAccountEntry, InstructionAccountInputAddress<TAccountEntry>>,
   ResolvedInstructionAccountMeta<TAccountMetricAccount, InstructionAccountInputAddress<TAccountMetricAccount>>,
+  ResolvedInstructionAccountMeta<TAccountJoin, InstructionAccountInputAddress<TAccountJoin>>,
   ResolvedInstructionAccountMeta<TAccountSystemProgram, InstructionAccountInputAddress<TAccountSystemProgram>>,
   ResolvedInstructionAccountMeta<TAccountEventAuthority, InstructionAccountInputAddress<TAccountEventAuthority>>,
   ResolvedInstructionAccountMeta<TAccountProgram, InstructionAccountInputAddress<TAccountProgram>>
@@ -211,6 +219,7 @@ export function getUserJoinCampaignInstruction<
     vault: { value: input.vault ?? null, isSigner: false, isWritable: true },
     entry: { value: input.entry ?? null, isSigner: false, isWritable: true },
     metricAccount: { value: input.metricAccount ?? null, isSigner: false, isWritable: false },
+    join: { value: input.join ?? null, isSigner: false, isWritable: true },
     systemProgram: { value: input.systemProgram ?? null, isSigner: false, isWritable: false },
     eventAuthority: { value: input.eventAuthority ?? null, isSigner: false, isWritable: false },
     program: { value: input.program ?? null, isSigner: false, isWritable: false },
@@ -241,6 +250,7 @@ export function getUserJoinCampaignInstruction<
       getAccountMeta("vault", accounts.vault),
       getAccountMeta("entry", accounts.entry),
       getAccountMeta("metricAccount", accounts.metricAccount),
+      getAccountMeta("join", accounts.join),
       getAccountMeta("systemProgram", accounts.systemProgram),
       getAccountMeta("eventAuthority", accounts.eventAuthority),
       getAccountMeta("program", accounts.program),
@@ -255,6 +265,7 @@ export function getUserJoinCampaignInstruction<
     ResolvedInstructionAccountMeta<TAccountVault, InstructionAccountInputAddress<TAccountVault>>,
     ResolvedInstructionAccountMeta<TAccountEntry, InstructionAccountInputAddress<TAccountEntry>>,
     ResolvedInstructionAccountMeta<TAccountMetricAccount, InstructionAccountInputAddress<TAccountMetricAccount>>,
+    ResolvedInstructionAccountMeta<TAccountJoin, InstructionAccountInputAddress<TAccountJoin>>,
     ResolvedInstructionAccountMeta<TAccountSystemProgram, InstructionAccountInputAddress<TAccountSystemProgram>>,
     ResolvedInstructionAccountMeta<TAccountEventAuthority, InstructionAccountInputAddress<TAccountEventAuthority>>,
     ResolvedInstructionAccountMeta<TAccountProgram, InstructionAccountInputAddress<TAccountProgram>>
@@ -279,12 +290,14 @@ export type ParsedUserJoinCampaignInstruction<
     entry: TAccountMetas[4];
     /** Campaign.metric_account, read by the join lock */
     metricAccount: TAccountMetas[5];
+    /** Join, PDA ["join", campaign, baker, index], created: one per join */
+    join: TAccountMetas[6];
     /** System Program */
-    systemProgram: TAccountMetas[6];
+    systemProgram: TAccountMetas[7];
     /** PDA ["__event_authority"] */
-    eventAuthority: TAccountMetas[7];
+    eventAuthority: TAccountMetas[8];
     /** This program */
-    program: TAccountMetas[8];
+    program: TAccountMetas[9];
   };
   data: UserJoinCampaignInstructionData;
 };
@@ -292,10 +305,10 @@ export type ParsedUserJoinCampaignInstruction<
 export function parseUserJoinCampaignInstruction<TProgram extends string, TAccountMetas extends readonly AccountMeta[]>(
   instruction: Instruction<TProgram> & InstructionWithAccounts<TAccountMetas> & InstructionWithData<ReadonlyUint8Array>,
 ): ParsedUserJoinCampaignInstruction<TProgram, TAccountMetas> {
-  if (instruction.accounts.length < 9) {
+  if (instruction.accounts.length < 10) {
     throw new SolanaError(SOLANA_ERROR__PROGRAM_CLIENTS__INSUFFICIENT_ACCOUNT_METAS, {
       actualAccountMetas: instruction.accounts.length,
-      expectedAccountMetas: 9,
+      expectedAccountMetas: 10,
     });
   }
   let accountIndex = 0;
@@ -313,6 +326,7 @@ export function parseUserJoinCampaignInstruction<TProgram extends string, TAccou
       vault: getNextAccount(),
       entry: getNextAccount(),
       metricAccount: getNextAccount(),
+      join: getNextAccount(),
       systemProgram: getNextAccount(),
       eventAuthority: getNextAccount(),
       program: getNextAccount(),

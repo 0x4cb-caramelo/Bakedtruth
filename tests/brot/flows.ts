@@ -59,6 +59,10 @@ export async function setTeam(w: World, admin: KeyPairSigner, count = 2) {
 export const BTC_PRICE = 8_521_233_806_870n;
 /** SOL/USD in the captured devnet account: 119.21844516 US$ (exponent −8). */
 export const SOL_PRICE = 11_921_844_516n;
+/** The captured SOL/USD confidence: 0.00655484 US$. */
+export const SOL_CONF = 655_484n;
+/** The price a paid opening is charged at, `price − conf` (founder answer 2, 2026-10-09). */
+export const SOL_CHARGED = SOL_PRICE - SOL_CONF;
 
 let nextId = 1n;
 /** A fresh campaign id; real clients draw it at random (T17). */
@@ -92,9 +96,19 @@ export async function openedCampaign(w: World, creator: KeyPairSigner, over: Par
 }
 
 /** Joins `campaign` (whose metric account is read from it) with `amount` lamports on `side`. */
+/** The index of this baker's next Join in the campaign: the entry's `join_count`, or 0 before the entry exists. */
+export async function nextJoinIndex(w: World, campaign: Address, baker: Address): Promise<number> {
+  const entry = await P.entryPda(campaign, baker);
+  // An address funded in advance holds lamports but no data: no entry, no joins yet.
+  const account = w.client.svm.getAccount(entry);
+  if (!account.exists || account.data.length === 0) return 0;
+  return Number(decode(ENTRY, accountData(w, entry)).join_count);
+}
+
 export async function join(w: World, baker: KeyPairSigner, campaign: Address, a: I.JoinArgs) {
   const metric = readCampaign(w, campaign).metric_account as Address;
-  return send(w, [await I.joinCampaignIx(baker, campaign, metric, a)]);
+  const joinIndex = a.joinIndex ?? (await nextJoinIndex(w, campaign, baker.address));
+  return send(w, [await I.joinCampaignIx(baker, campaign, metric, { ...a, joinIndex })]);
 }
 
 export const readConfig = async (w: World) => decode(GLOBAL_CONFIG, accountData(w, await P.configPda()));

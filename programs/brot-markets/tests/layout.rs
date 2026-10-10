@@ -36,7 +36,7 @@ fn account_sizes_are_the_measured_ones() {
     // TP section 3.4.1 (T19): the sizes the rent is computed from.
     assert_eq!(GlobalConfig::LEN, 400);
     assert_eq!(Campaign::LEN, 512);
-    assert_eq!(Entry::LEN, 100);
+    assert_eq!(Entry::LEN, 116);
     assert_eq!(CreationParams::LEN, 70);
 }
 

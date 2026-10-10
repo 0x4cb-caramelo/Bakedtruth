@@ -20,16 +20,19 @@ use pinocchio::{
 use pinocchio_system::create_account_with_minimum_balance_signed as create_or_top_up;
 
 use crate::{
-    constants::{BPF_LOADER_UPGRADEABLE_ID, EVENT_AUTHORITY},
+    constants::EVENT_AUTHORITY,
     error::BrotError,
     state::{AccountTag, LAYOUT_VERSION},
 };
 
+mod close;
+mod paying;
 mod top_level;
+mod upgrade;
+pub use close::close_account;
+pub use paying::{paying_vault, vault_of};
 pub use top_level::top_level;
-
-/// `UpgradeableLoaderState::ProgramData`, the bincode enum tag a ProgramData account starts with.
-const PROGRAM_DATA_TAG: u32 = 3;
+pub use upgrade::upgrade_authority;
 
 /// `Ok` when `holds`, else `error`: the one shape every check below returns.
 pub(crate) fn require(holds: bool, error: BrotError) -> ProgramResult {
@@ -119,38 +122,6 @@ pub fn system_program(account: &AccountView) -> ProgramResult {
     // X0.9 system_program
     let is_system = *account.address() == pinocchio_system::ID;
     require(is_system, BrotError::WrongSystemProgram)
-}
-
-/// Initialisation only: `program_data` is this program's ProgramData account (loader-owned, at the
-/// PDA of `program_id`, with an upgrade authority set; `WrongProgramData` otherwise) and that
-/// authority is `authority` (`UpgradeAuthorityMismatch`). The caller checks that it signed.
-pub fn upgrade_authority(
-    program_data: &AccountView,
-    program_id: &Address,
-    authority: &AccountView,
-) -> ProgramResult {
-    // X0.9 upgrade_authority
-    let loader = &BPF_LOADER_UPGRADEABLE_ID;
-    require(program_data.owned_by(loader), BrotError::WrongProgramData)?;
-    let (expected, _) = Address::try_find_program_address(&[program_id.as_ref()], loader)
-        .ok_or(BrotError::WrongProgramData)?;
-    let at_pda = *program_data.address() == expected;
-    require(at_pda, BrotError::WrongProgramData)?;
-    let data = program_data.try_borrow()?;
-    let recorded = recorded_upgrade_authority(&data).ok_or(BrotError::WrongProgramData)?;
-    // X0.9 upgrade_authority_key
-    let matches = recorded == authority.address().as_array();
-    require(matches, BrotError::UpgradeAuthorityMismatch)
-}
-
-/// The authority a ProgramData records (bincode: `u32` tag 3, `u64` slot, `Option<Pubkey>`);
-/// `None` for another state, an immutable program or fewer than those 45 bytes.
-fn recorded_upgrade_authority(data: &[u8]) -> Option<&[u8; 32]> {
-    let state = u32::from_le_bytes(data.get(..4)?.try_into().ok()?);
-    if state != PROGRAM_DATA_TAG || data.get(12) != Some(&1) {
-        return None;
-    }
-    data.get(13..45)?.try_into().ok()
 }
 
 /// Creates a program-owned PDA with `space` bytes and its rent-exempt minimum, paid by `payer`,

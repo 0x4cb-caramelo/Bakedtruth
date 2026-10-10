@@ -11,7 +11,7 @@ import { describe, expect, test } from "bun:test";
 import { generateKeyPairSigner, type Address } from "@solana/kit";
 
 import type { BrotErrorName } from "./errors";
-import { readCampaign, SOL_PRICE } from "./flows";
+import { readCampaign, SOL_CHARGED } from "./flows";
 import type * as I from "./instructions";
 import { FREE, openingWorld, otherKind, tryOpen, type OpeningWorld } from "./opening";
 import * as P from "./program";
@@ -166,7 +166,7 @@ describe("opens the other four kinds", () => {
       expect(openedEvent(opened.sent)).toMatchObject(stored);
       expect(readCampaign(w, opened.campaign)).toMatchObject(stored);
     }
-    const charged = { opening_usd: 500n, opening_price: SOL_PRICE, creator_share_bps: 100, creator_is_team: false };
+    const charged = { opening_usd: 500n, opening_price: SOL_CHARGED, creator_share_bps: 100, creator_is_team: false };
     expect(readCampaign(w, paid.campaign)).toMatchObject(charged);
   });
 

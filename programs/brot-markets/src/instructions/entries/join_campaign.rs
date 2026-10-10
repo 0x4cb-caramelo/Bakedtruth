@@ -1,9 +1,11 @@
 //! Purpose: `user_join_campaign`: a baker joins YES or NO with at least `min_entry_lamports` while
 //!          the outcome is not knowable; the entry moves from the baker's wallet into the vault
 //!          by System Program transfer, and the pot is bookkept, never read from the vault.
-//! Version: 0.0.3
+//! Version: 0.0.5
 //! Sprint: 02 (pot core on Pinocchio), accounts and arguments frozen at its opening, body by
-//!         lane E; 03 (readers and resolution) adds the join lock (BR-06), lane E
+//!         lane E; 03 (readers and resolution) adds the join lock (BR-06), lane E; 04 (lane G)
+//!         reads the campaign's own minimum (question 5) and the proximity buffer (question 7).
+//!         The `Join` record (`join_record.rs`) is created at slot 6 with the entry's join count as its index.
 //!
 //! Order: the arguments, the slots and the loads, as `checks.rs` orders them; then the
 //! campaign's rules: the metric account's address, `Open`, the entry close, the join lock (the
@@ -20,6 +22,8 @@ use shank::ShankType;
 use super::{
     entry_account::{create_entry, load_entry},
     join_lock::require_outcome_open,
+    join_record::{check_join_slot, open_join, JoinFields},
+    join_rules,
 };
 use crate::{
     checks,
@@ -64,7 +68,8 @@ pub fn user_join_campaign(
     data: &[u8],
 ) -> ProgramResult {
     let args = args::<JoinCampaignArgs>(data)?;
-    let [baker, config, campaign, vault, entry, metric_account, system_program, event_authority, program, ..] =
+    // The Join account sits at slot 6 (amendment 2026-10-09): one record per join, created here.
+    let [baker, config, campaign, vault, entry, metric_account, join, system_program, event_authority, program, ..] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -80,14 +85,14 @@ pub fn user_join_campaign(
     checks::distinct(campaign, vault)?;
     checks::distinct(entry, vault)?;
     checks::distinct(entry, campaign)?;
+    check_join_slot(join, &[&*baker, &*vault, &*entry, &*campaign])?;
     checks::system_program(system_program)?;
     checks::event_accounts(event_authority, program, program_id)?;
 
-    // The config is only read: the pause and the minimum, copied out at once.
-    let (paused, min_entry_lamports) = {
+    // The config is only read for the pause; the minimum is the campaign's own (question 5).
+    let paused = {
         let config = GlobalConfig::load(config, program_id)?;
-        let paused = config.operating_level != OperatingLevel::Normal as u8;
-        (paused, config.params.min_entry_lamports.get())
+        config.operating_level != OperatingLevel::Normal as u8
     };
     let campaign_key = *campaign.address();
     let baker_key = *baker.address();
@@ -115,9 +120,7 @@ pub fn user_join_campaign(
     if paused {
         return Err(BrotError::JoinWhilePaused.into());
     }
-    if amount < min_entry_lamports {
-        return Err(BrotError::EntryBelowMinimum.into());
-    }
+    join_rules::require_min_entry(amount, campaign.min_entry_lamports.get())?;
 
     let expected_total = args.expected_entry_total.get();
     let mut entry = if entry.owned_by(program_id) {
@@ -126,6 +129,9 @@ pub fn user_join_campaign(
         let created = create_entry(baker, entry, &campaign_key, expected_total, program_id)?;
         let entries_open = add_u32(campaign.entries_open.get(), 1)?;
         campaign.entries_open.set(entries_open);
+        // A new entry is untallied until its joins are tallied after the proof (`tally_late_joins`).
+        let untallied = add_u32(campaign.entries_untallied.get(), 1)?;
+        campaign.entries_untallied.set(untallied);
         created
     };
 
@@ -164,7 +170,16 @@ pub fn user_join_campaign(
     };
     let seq = campaign.event_seq.get();
     let next_seq = add(seq, 1)?;
+    let fields = JoinFields {
+        side: args.side,
+        joined_at: time.unix_timestamp,
+        amount,
+    };
+    open_join(baker, join, &campaign_key, &mut entry, fields, program_id)?;
+    let vault_before = vault.lamports();
     vault::deposit(baker, vault, amount)?;
+    // The vault moves by exactly the entry this join books (TP 3.4.13; a lamport sent by hand is in vault_before).
+    crate::math::invariant::vault_change_matches(vault_before, vault.lamports(), amount, 0)?;
     entry.amount_yes.set(entry_yes);
     entry.amount_no.set(entry_no);
     campaign.pool_yes.set(pool_yes);

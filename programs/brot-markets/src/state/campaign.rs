@@ -1,24 +1,20 @@
 //! Purpose: `Campaign` (`["campaign", id]`): everything about one campaign, and the loaders that
 //!          check it. Its vault (`["vault", campaign]`) is data-less and its bump lives here.
 //! Version: 0.0.3
-//! Sprint: 02 (pot core on Pinocchio); `epoch` taken from the reserve in 03
+//! Sprint: 02 (pot core on Pinocchio); `epoch` taken from the reserve in 03; settlement fields in 04 (lane C)
 //!
 //! Balances are bookkept in fields, never read from the vault, where anyone can send lamports
 //! (I15). `resolve_campaign` writes the result group (03); the settlement group is Sprint 04's.
 
-use pinocchio::{
-    account::{Ref, RefMut},
-    error::ProgramError,
-    AccountView, Address,
-};
 use shank::ShankAccount;
 
 use crate::{
-    constants::CAMPAIGN_SEED,
     layout::{LeI128, LeI32, LeI64, LeU16, LeU32, LeU64, Pubkey},
     state::{AccountState, AccountTag},
     zero_copy,
 };
+
+mod loaders;
 
 #[derive(ShankAccount)]
 #[repr(C)]
@@ -149,8 +145,30 @@ pub struct Campaign {
     /// Epoch kinds only (Sprint 03): the epoch whose stake or pool snapshot is read; else zero.
     #[idl_type("u64")]
     pub epoch: LeU64,
+    /// The minimum entry this campaign opened with, copied from the config (question 5, 2026-10-09).
+    #[idl_type("u64")]
+    pub min_entry_lamports: LeU64,
+    /// The YES proof's publish time, written by `resolve_campaign` (0 until then); the late refund compares
+    /// each join with it (amendment 2026-10-09, founder decisions 1 and 2).
+    #[idl_type("i64")]
+    pub publish_time: LeI64,
+    /// The late totals of each side, summed by `tally_late_joins`, and the entries not tallied yet: the
+    /// snapshot refuses to finalize while `entries_untallied` is not zero (`NotTallied`).
+    #[idl_type("u64")]
+    pub late_yes: LeU64,
+    #[idl_type("u64")]
+    pub late_no: LeU64,
+    #[idl_type("u32")]
+    pub entries_untallied: LeU32,
+    /// Lane C (settlement): the one-sided fees taken per entry at settlement, summed for `collect_fee`.
+    #[idl_type("u64")]
+    pub one_sided_fees: LeU64,
+    /// Lane C: the creator share credited to an empty wallet below rent, held in the vault until the
+    /// creator claims it (`settle_creator_share`); zero when nothing is reserved.
+    #[idl_type("u64")]
+    pub creator_share_reserved: LeU64,
     #[padding]
-    pub _reserved: [u8; 56],
+    pub _reserved: [u8; 4],
 }
 
 zero_copy!(Campaign = 512);
@@ -163,38 +181,4 @@ impl AccountState for Campaign {
     fn bump(&self) -> u8 {
         self.bump
     }
-}
-
-impl Campaign {
-    /// Loads a campaign for reading; the address is re-derived from `id` and compared.
-    pub fn load<'a>(
-        account: &'a AccountView,
-        id: u64,
-        program_id: &Address,
-    ) -> Result<Ref<'a, Self>, ProgramError> {
-        crate::state::load(account, &[CAMPAIGN_SEED, &id.to_le_bytes()], program_id)
-    }
-
-    /// Loads a campaign for writing; the address is re-derived from its stored id and compared.
-    pub fn load_mut<'a>(
-        account: &'a mut AccountView,
-        program_id: &Address,
-    ) -> Result<RefMut<'a, Self>, ProgramError> {
-        // Slot and owner first: no byte is read from an account the program does not own.
-        crate::checks::writable(account)?;
-        crate::checks::owned_by(account, program_id)?;
-        let id = stored_id(account)?;
-        crate::state::load_mut(account, &[CAMPAIGN_SEED, &id.to_le_bytes()], program_id)
-    }
-}
-
-/// The stored `id` of a campaign the program owns; trusted once `load_mut` re-derives the address.
-fn stored_id(account: &AccountView) -> Result<u64, ProgramError> {
-    let data = account.try_borrow()?;
-    crate::checks::len(&data, <Campaign as crate::layout::ZeroCopy>::LEN)?;
-    let bytes = data
-        .get(16..24)
-        .and_then(|slice| <[u8; 8]>::try_from(slice).ok())
-        .ok_or(crate::error::BrotError::WrongLength)?;
-    Ok(u64::from_le_bytes(bytes))
 }

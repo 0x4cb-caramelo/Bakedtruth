@@ -46,10 +46,14 @@ fn above_winners(losing: u64, fee: u64, prize: u64) -> Result<u128, BrotError> {
 }
 
 /// The P-2 reading of D-g: from the pot what keeps every winner whole, the rest from the fee.
+///
+/// Decision of 2026-10-09 (closure review): the share comes only from the losing side and Brot's fee, never from
+/// the prize, so a creator with a second wallet cannot take the prize. `prize` stays in the signature for the
+/// callers; it does not enter the share.
 pub fn creator_share(
     winning: u64,
     losing: u64,
-    prize: u64,
+    _prize: u64,
     fee: u64,
     creator_share_bps: u16,
 ) -> Result<CreatorShare, BrotError> {
@@ -58,7 +62,10 @@ pub fn creator_share(
         .checked_add(u128::from(losing))
         .ok_or(BrotError::MathOverflow)?;
     let share = bps_floor_wide(base, creator_share_bps)?;
-    let from_pot = share.min(above_winners(losing, fee, prize)?);
+    let losing_kept = u128::from(losing)
+        .checked_sub(u128::from(fee))
+        .ok_or(BrotError::MathOverflow)?;
+    let from_pot = share.min(losing_kept);
     let from_fee = share
         .checked_sub(from_pot)
         .ok_or(BrotError::MathOverflow)?
@@ -141,4 +148,23 @@ pub fn estimate_return_bps(pot: &JoinedPot) -> Result<u64, BrotError> {
         split_payout(pot.amount, pool, pot.side_after)?
     };
     mul_div_floor(returned, BPS_DENOMINATOR, pot.amount)
+}
+
+/// What a `OneSided` entry gets back: `entry − its one-sided fee`, whatever the outcome (P1 section
+/// 3.5). The fee is the one `fees::one_sided_fee` charges; a payout that would be negative is
+/// `MathOverflow`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct OneSidedRefund {
+    pub payout: u64,
+    pub fee: u64,
+}
+
+pub fn one_sided_refund(
+    entry: u64,
+    one_sided_fee_bps: u16,
+    is_first: bool,
+) -> Result<OneSidedRefund, BrotError> {
+    let fee = one_sided_fee(entry, one_sided_fee_bps, is_first)?;
+    let payout = entry.checked_sub(fee).ok_or(BrotError::MathOverflow)?;
+    Ok(OneSidedRefund { payout, fee })
 }

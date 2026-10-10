@@ -95,7 +95,14 @@ export const CAMPAIGN: Layout = [
   ["creator_share_from_fee", "u64"],
   ["paid_out_total", "u64"],
   ["epoch", "u64"],
-  ["_reserved", { bytes: 56 }],
+  ["min_entry_lamports", "u64"],
+  ["publish_time", "i64"],
+  ["late_yes", "u64"],
+  ["late_no", "u64"],
+  ["entries_untallied", "u32"],
+  ["one_sided_fees", "u64"],
+  ["creator_share_reserved", "u64"],
+  ["_reserved", { bytes: 4 }],
 ];
 
 export const ENTRY: Layout = [
@@ -107,7 +114,24 @@ export const ENTRY: Layout = [
   ["baker", "pubkey"],
   ["amount_yes", "u64"],
   ["amount_no", "u64"],
-  ["_reserved", { bytes: 16 }],
+  ["join_count", "u32"],
+  ["joins_tallied", "u32"],
+  ["late_yes", "u64"],
+  ["late_no", "u64"],
+  ["_reserved", { bytes: 8 }],
+];
+
+export const JOIN: Layout = [
+  ["tag", "u8"],
+  ["version", "u8"],
+  ["bump", "u8"],
+  ["side", "u8"],
+  ["campaign", "pubkey"],
+  ["baker", "pubkey"],
+  ["index", "u32"],
+  ["joined_at", "i64"],
+  ["amount", "u64"],
+  ["_reserved", { bytes: 8 }],
 ];
 
 // --- Instruction arguments (after the one-byte discriminator) ---------------------------------
@@ -120,6 +144,10 @@ export const INITIALIZE_CONFIG_ARGS: Layout = [
 export const SET_TEAM_ARGS: Layout = [
   ["team_len", "u8"],
   ["team", { pubkeys: 5 }],
+];
+export const TEAM_VOID_CAMPAIGN_ARGS: Layout = [
+  ["reason", "u8"],
+  ["note_hash", { bytes: 32 }],
 ];
 export const SET_FEE_RECIPIENT_ARGS: Layout = [["fee_recipient", "pubkey"]];
 export const TRANSFER_ADMIN_ARGS: Layout = [["new_admin", "pubkey"]];
