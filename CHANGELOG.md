@@ -40,12 +40,16 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
   JSON Schema gerado (`content/void-log/record.schema.json`), checado no CI.
 - **No devnet nada paga sozinho ainda:** pela decisão do fundador, a tela diz "Waiting for payout" e não promete hora;
   isso substitui "Pago sozinho, ao fim da janela de 6 horas" no devnet. O cartão da lista deixou de dizer "pays <hora>".
-- **O ensaio dos cinco campanhas no devnet** (`deploy/devnet/rehearsal-sprint-12.md`), com dois scripts novos:
+- **O ensaio das cinco campanhas no devnet** (`deploy/devnet/rehearsal-sprint-12.md`), com dois scripts novos:
   `scripts/rehearsal/open-paid.ts` (abertura paga por carteira fora da equipe) e `scripts/rehearsal/settle.ts` (a
   liquidação passo a passo). As escritas no devnet são do fundador.
 - Testes: ciclos inteiros no LiteSVM conferidos contra os eventos e contra o SOL que chegou a cada carteira; um caso por
   estado; o caminho da reserva de ponta a ponta; o formato do void log; os scripts do ensaio; e o cenário "campaign
   states" no smoke web (14 passaram).
+- **As revisões da sprint aplicadas:** a de texto (nenhuma tela promete pagamento automático ou hora, nem o recibo da
+  Sprint 11; a equipe só confirma um resultado, nunca anula um SIM ou NÃO) e a de segurança (a parte reservada que o
+  fechamento paga conta como recebida; o histórico não esconde lacuna; a estimativa antes do tally). O aviso L-03 e o
+  chip "Paid" esperam o fundador.
 
 ### Changed
 

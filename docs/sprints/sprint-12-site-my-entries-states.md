@@ -43,6 +43,18 @@
   wording: until the keeper settles, the screen says "Waiting for payout" and promises no time. **On devnet this
   replaces "Pago sozinho, ao fim da janela de 6 horas"** (P1 §4.6) in the DoD and the security gate below. For the same
   reason the reserved credit does not say "the keeper retries daily": the deployed keeper only resolves.
+- **Reviews (2026-10-10):** the copy review (31 findings, 7 must-fix) was applied: the review rule no longer says the
+  team can void a result (it can void only an automatic void, never a YES or NO); no line promises an automatic
+  payout or a time, Sprint 11's receipt ("Paid automatically") included; "met late" says what the program knows; the
+  one-sided pot says Brot keeps the 10%; a team campaign's split names no creator share; the prize's status shows on
+  the campaign page; a settled campaign is "Settled", not "Closed"; "Waiting for payout" on "My entries" also counts the
+  creator's 1% and an unsent prize. The adversarial review found no critical or high issue; its medium findings were
+  fixed: a reserved share paid by `close_campaign` (which emits no `CreatorShareSettled`) now counts as received, read
+  from the campaign's `CampaignFinalized`; a refresh pages back until it meets what was read, so a burst of transactions
+  cannot leave a hidden gap; "if this result stands" is an estimate while a join is untallied. Its low findings too:
+  "entered" and "closed" only from the program's own events, a void note made LF before its hash (and
+  `content/void-log/*.md -text`), a test that the wallet gets the summarised bytes, the floor from the SDK's
+  `claimFloor`. Deferred: TP §7.3. The L-03 notice and the "Paid" chip are the founder's, so they were not changed.
 - **Waiting:** the five-campaign rehearsal (the founder's devnet writes); the founder's approval of the empty-campaign
   copy ([Q] below) and of a devnet wording for the L-03 lock notice, which still promises automatic payouts; Sprint 11's
   Phantom entry (still "reported, not verified" until its signature or the wallet's devnet address is sent).
@@ -105,7 +117,9 @@ in the same place.
 - [x] The sum of "received" on screen matches the `EntrySettled` and `CreatorShareSettled` events for that wallet.
       Checked on whole cycles in LiteSVM and in the web smoke, against the events and the SOL that reached each wallet.
 - [x] `cd app && bun run lint && bun run build` passes.
-- [ ] Common closure (`docs/SPRINTS.md`, section 4).
+- [ ] Common closure (`docs/SPRINTS.md`, section 4). **Done but the merge:** checks, secret scan, code map, CHANGELOG
+      and session log; the copy, security and coordinator reviews ran (record above). Merge and tag wait for the
+      founder.
 
 ## Deliverables
 
@@ -129,9 +143,10 @@ MVP (L-16; proposal §3.9). A team dashboard. The two-stage dispute's instructio
   says "Waiting for payout" and promises no time. It replaces "Pago sozinho, ao fim da janela de 6 horas" on devnet.
 - **[Q], waiting for approval:** the copy for a campaign that ends with no entry. The BP has no written rule for it
   (P1 §3.5, "A campanha sem nenhuma entrada não tem regra escrita"); the screen shows what Sprint 04's program does (the
-  prize back to whoever opened, the 10% kept, even on a house-failure void). Draft, in `copy-states.ts`: "Nobody entered
-  this campaign, so there is nothing to pay out. The prize goes back to whoever opened it, and Brot keeps the 10%
-  opening fee."
+  prize back to whoever opened, the 10% kept, even on a house-failure void). Draft after the copy review, in
+  `copy-states.ts`: "Nobody entered this campaign, so there are no entries to pay. The prize goes back to whoever
+  opened it, and Brot keeps the 10% opening fee, as it does whenever nobody enters." On a void with no entry: "With no
+  entry at all, Brot keeps the 10% opening fee, whatever the cause of the void."
 - **New, waiting:** the L-03 lock notice (approved in Sprint 11) ends "Payouts go to your wallet automatically after the
   result is read", which devnet does not do yet. Any change to it is the founder's.
 - **Answered:** TP v0.0.1 Q2 (b, the recipient may call the settle instruction; with SOL only the below-rent case

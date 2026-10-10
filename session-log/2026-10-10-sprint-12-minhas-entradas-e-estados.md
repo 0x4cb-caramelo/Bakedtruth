@@ -55,11 +55,32 @@
 - Dois scripts novos, testados contra o programa no LiteSVM (não em surfnet nem no devnet): `scripts/rehearsal/open-paid.ts`
   e `scripts/rehearsal/settle.ts`. Nada foi enviado ao devnet por esta sessão.
 
+## As revisões
+
+- **Texto (31 achados, 7 obrigatórios), aplicados:** a regra da revisão dizia que a equipe pode anular o resultado,
+  o que é falso (só anula um anulamento automático, nunca um SIM ou NÃO); o recibo da entrada da Sprint 11 dizia
+  "Paid automatically"; "met late" afirmava quando a meta foi atingida, o que o programa não sabe; o pote de um lado
+  não dizia que a Brot fica com os 10%; o rascunho da campanha sem entrada se contradizia ("nada a pagar" e "o prêmio
+  volta"). Ficaram para o fundador: o aviso L-03 (aprovado) e o chip "Paid" enquanto o pagamento espera, que é nome
+  de estado do BP.
+- **Segurança (nenhum crítico ou alto), aplicada:** a parte reservada que o `close_campaign` paga junto com o aluguel
+  não aparecia como recebida, porque o programa não emite `CreatorShareSettled` nesse caso (agora o site lê o
+  `CampaignFinalized` da própria campanha; o certo é o programa emitir o evento na próxima atualização); uma rajada de
+  mais de 50 transações entre duas atualizações deixava uma lacuna escondida no histórico (agora a atualização volta
+  até encontrar o que já leu); "If this result stands" era exato antes do tally das entradas atrasadas (agora é
+  estimativa). Os baixos também: "entrou" e "fechada" só por evento do programa, o texto do anulamento em LF antes do
+  hash, o teste dos bytes entregues à carteira, o piso pelo `claimFloor`. O que ficou para depois está no plano
+  técnico, §7.3.
+
 ## O que continua aberto (do fundador)
 
-1. A aprovação do texto da campanha sem nenhuma entrada ([Q]).
+1. A aprovação do texto da campanha sem nenhuma entrada ([Q]), no rascunho revisado: "Nobody entered this campaign, so
+   there are no entries to pay. The prize goes back to whoever opened it, and Brot keeps the 10% opening fee, as it
+   does whenever nobody enters." Com uma consequência a confirmar: num anulamento por falha da casa sem nenhuma
+   entrada, a Brot também fica com os 10% (é o que o programa faz).
 2. O aviso L-03, aprovado na Sprint 11, termina com "Payouts go to your wallet automatically after the result is read",
    o que o devnet ainda não faz. Mudar o texto é decisão do fundador.
 3. A entrada com a Phantom da Sprint 11 segue "relatada, não verificada" até chegar a assinatura ou o endereço da
    carteira no devnet.
 4. O ensaio das cinco campanhas (as escritas no devnet são dele).
+5. O chip "Paid" aparece enquanto o pagamento ainda espera; é nome de estado do BP (BR-05).
