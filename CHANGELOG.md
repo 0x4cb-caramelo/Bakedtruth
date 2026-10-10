@@ -20,7 +20,42 @@ nos caminhos da equipe pelo PR #44 e o id novo do programa pelo PR #45; já em 1
 A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir da `origin/main` (`6b5e3ec`), na branch
 `sprint-06-keeper-server`. Nada de código entrou ainda: a primeira tarefa é a checagem do Bun 1.4.2 no servidor.
 
+Em 10/10/2026 a Sprint 12 entrou na `main` pelo PR #61 (tag `sprint-12`, `107fec2`), e a Sprint 13 foi aberta a partir
+dessa tag, na branch `sprint-13-site-notices-copy`.
+
 ### Added
+
+- **Sprint 13: o ranking, os avisos e o texto, que fecham o MVP no devnet** (branch `sprint-13-site-notices-copy`,
+  10/10/2026; `docs/sprints/sprint-13-site-notices-copy.md`).
+  - **`/leaderboard`, o ranking de pontos do devnet:** 1 ponto por campanha em que a carteira entrou no lado que
+    venceu, quando o resultado fica final (a janela de 6 horas acabou sem contestação, ou a campanha está liquidando);
+    anulação e entrada tardia não pontuam; o tamanho da entrada nunca conta. A regra está no SDK (`pointsTable`). Os
+    números vêm da rota nova `/api/v1/leaderboard` da API de leitura, que lê o histórico do próprio programa. A página
+    não manda a carteira de quem visita: acha a linha dela no navegador. **No devnet, a página só funciona depois que o
+    fundador reimplantar a API no servidor.**
+  - **`/fees`, a página de taxas:** o exemplo da P1 §1.2 em SOL, calculado pela conta do programa no SDK (6 e 4 SOL:
+    taxa 0,4, criador 0,1, vencedores 9,5, 1,583 por 1; com prêmio de 4,5 SOL, 14 e 2,333), o pote de um lado só, a
+    anulação, o 90/10 da abertura e a política de devolução.
+  - **A tabela de quem pode o quê em `/record`** (`content/powers.md`): cada chave por papel e endereço, nunca por
+    pessoa, e o limite de cada poder no código, inclusive que no devnet a chave de upgrade troca o programa a qualquer
+    hora. A página confere as chaves na rede e avisa quando a tabela ficou velha.
+  - **`/how-it-works`**, com os seis passos, aberto pela barra do topo também no celular, e a frase do BP-5 ("No human
+    picks the winner.") como recomendada.
+  - **"Report this campaign" em toda página de campanha**, link simples para https://x.com/brotmarkets; o remédio é
+    tirar a campanha da página inicial (`content/unlisted.json`, revisado por duas pessoas); ela continua na rede,
+    resolve e paga.
+  - **Os avisos obrigatórios** numa lista com a tela de cada um, e um teste que renderiza as telas. O teste de texto
+    passou a barrar as frases da coluna "Em vez de" da P1 §4.6 e as promessas (retorno, rendimento, pagamento
+    automático) em todo arquivo do site.
+  - **O PWA só com manifesto e ícones,** sem service worker.
+  - **`scripts/team/resolution-post.ts`:** o texto do post de resolução, a partir de um modelo, para uma pessoa postar;
+    sem API do X.
+  - **O balão do mascote não corta mais na borda da tela.**
+  - Testes: a regra dos pontos; a rota do ranking em ciclos inteiros no LiteSVM; o exemplo de taxas contra a conta do
+    SDK; cada aviso na sua tela; a tabela de poderes; o link de denúncia e a lista de despublicadas; o manifesto; o post
+    de resolução; e o cenário "site pages and notices" no smoke web, que passou inteiro com o site no Node e no Bun 1.4.2.
+- **A revisão de privacidade do ranking e do canal de denúncia** (gate 5; plano técnico, §8.2), com o que o Cloudflare
+  registra de quem visita, lido nas páginas do Cloudflare (`knowledge-base/tecnologia/cloudflare-logs-visitantes.md`).
 
 - **Sprint 12: minhas entradas e os estados da campanha** (branch `sprint-12-site-my-entries-states`, 10/10/2026;
   `docs/sprints/sprint-12-site-my-entries-states.md`). A página `/c/[id]` mostra cada estado público: entradas
@@ -58,6 +93,13 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
   chip "Paid" esperam o fundador.
 
 ### Changed
+
+- **Sprint 13:** o cartão da lista usava outra redação do aviso do criador; agora usa a da página. O filtro de dado
+  pessoal do void log recusa também domínio solto e "@x" / "[@x]", e o site falha o build se não achar `content/`
+  (os dois achados que a Sprint 12 deixou para esta). Os dois avisos de toda tela foram para um arquivo de texto
+  (`app/components/copy-site.ts`), que o teste de vocabulário lê. O plano técnico foi para a v0.1.5.
+- **Sprint 12 mesclada** (PR #61, tag `sprint-12`, 10/10/2026); o ensaio das cinco campanhas no devnet segue com o
+  fundador.
 
 - **Sprint 11 fechada e mesclada** (branch `sprint-11-site-campaign-entry`, PR #60, 10/10/2026, a pedido do Ronaldo,
   com a tag `sprint-11`; `docs/sprints/sprint-11-site-campaign-entry.md`). O Ronaldo relatou o teste com a Phantom no
