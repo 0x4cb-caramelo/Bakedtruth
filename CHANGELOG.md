@@ -46,6 +46,12 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 - Testes: ciclos inteiros no LiteSVM conferidos contra os eventos e contra o SOL que chegou a cada carteira; um caso por
   estado; o caminho da reserva de ponta a ponta; o formato do void log; os scripts do ensaio; e o cenário "campaign
   states" no smoke web (14 passaram).
+- **As respostas do fundador às quatro perguntas da Sprint 12** (10/10/2026): 1a, o texto da campanha sem nenhuma
+  entrada aprovado como estava (e a consequência: num anulamento por falha da casa sem entrada, a Brot fica com os
+  10%, como o programa faz); 2a, o aviso L-03 no devnet passa a dizer "Payouts go to your wallet after the result is
+  read; on devnet that is not automatic yet, and no time is promised."; 3a, o chip diz "Result final" enquanto o
+  pagamento espera e "Paid" depois que as entradas foram pagas. A assinatura da Phantom da Sprint 11 não está à mão:
+  a entrada segue relatada, não verificada, sem travar nada. O ensaio no devnet fica com o fundador.
 - **As revisões da sprint aplicadas:** a de texto (nenhuma tela promete pagamento automático ou hora, nem o recibo da
   Sprint 11; a equipe só confirma um resultado, nunca anula um SIM ou NÃO) e a de segurança (a parte reservada que o
   fechamento paga conta como recebida; o histórico não esconde lacuna; a estimativa antes do tally). O aviso L-03 e o

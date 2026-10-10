@@ -63,7 +63,7 @@ export const STATES = {
     "Every entry is refunded: only one side had entries, or the losing side was too small to cover the fees. The first baker gets the whole entry back; every other entry gets back less 1%, rounded up to the lamport.",
   feeKeptOneSided: "Brot keeps the 10% opening fee.",
   prizeBack: "The prize goes back to whoever opened the campaign.",
-  /** [Q] Draft for the founder's approval: a campaign that ends with no entry (P1 §3.5 has no written rule). */
+  /** A campaign that ends with no entry (P1 §3.5 has no written rule): approved by the founder, 2026-10-10 (answer 1a). */
   empty: "Nobody entered this campaign, so there are no entries to pay.",
   emptyPaid:
     "The prize goes back to whoever opened it, and Brot keeps the 10% opening fee, as it does whenever nobody enters.",

@@ -1,6 +1,6 @@
 # Sprint 12 — Site: my entries and campaign states
 
-**Status:** built, PR #61 open with CI green, waiting for the founder's devnet rehearsal and four answers (the empty-campaign copy, the L-03 notice, the "Paid" chip, Sprint 11's Phantom signature) (2026-10-10) · **Branch:** `sprint-12-site-my-entries-states`, cut from `origin/main` at `sprint-11` · **Dates:** none, by the founder's decision
+**Status:** built; the founder's answers applied (2026-10-10: 1a, 2a, 3a; the Phantom signature stays open without blocking); PR #61 with CI green; the devnet rehearsal is the founder's, run after the merge · **Branch:** `sprint-12-site-my-entries-states`, cut from `origin/main` at `sprint-11` · **Dates:** none, by the founder's decision
 
 ## Record (2026-10-10)
 
@@ -58,7 +58,13 @@
   The coordinator review approved with caveats (no blocker); its documentation findings were applied before the PR's
   last commit (the relay's limits, the plan's closing rule, the recipe's stale lines, the four open questions named
   alike everywhere).
-- **Waiting:** the five-campaign rehearsal (the founder's devnet writes); the founder's approval of the empty-campaign
+- **The founder's answers to the four questions (2026-10-10):** 1a, the empty-campaign copy approved as drafted, with
+  its consequence (a void with no entry keeps the 10% even on a house failure, as the program does); 2a, the L-03 lock
+  notice's devnet wording, "…Payouts go to your wallet after the result is read; on devnet that is not automatic yet,
+  and no time is promised."; 3a, the chip says "Result final" until the entries are paid out, and "Paid" after; 4, the
+  Phantom signature is not at hand: Sprint 11's entry stays "reported, not verified" and blocks nothing; 5, the founder
+  runs the rehearsal scripts. All three changes are applied and tested (the web smoke passed, 14 of 14).
+- **Waiting (before the 2026-10-10 answers):** the five-campaign rehearsal (the founder's devnet writes); the founder's approval of the empty-campaign
   copy ([Q] below) and of a devnet wording for the L-03 lock notice, which still promises automatic payouts; whether the
   "Paid" chip should wait until the payouts went out; Sprint 11's Phantom entry (still "reported, not verified" until
   its signature or the wallet's devnet address is sent).
@@ -145,16 +151,18 @@ MVP (L-16; proposal §3.9). A team dashboard. The two-stage dispute's instructio
 - **Answered 2026-10-10, L-01:** the routes are `/my-entries` and `/record`.
 - **Answered 2026-10-10, the payout wording on devnet:** until the keeper settles (a separate server task), the screen
   says "Waiting for payout" and promises no time. It replaces "Pago sozinho, ao fim da janela de 6 horas" on devnet.
-- **[Q], waiting for approval:** the copy for a campaign that ends with no entry. The BP has no written rule for it
+- **[Q], answered 2026-10-10 (1a, approved as drafted):** the copy for a campaign that ends with no entry. The BP has no written rule for it
   (P1 §3.5, "A campanha sem nenhuma entrada não tem regra escrita"); the screen shows what Sprint 04's program does (the
   prize back to whoever opened, the 10% kept, even on a house-failure void). Draft after the copy review, in
   `copy-states.ts`: "Nobody entered this campaign, so there are no entries to pay. The prize goes back to whoever
   opened it, and Brot keeps the 10% opening fee, as it does whenever nobody enters." On a void with no entry: "With no
   entry at all, Brot keeps the 10% opening fee, whatever the cause of the void."
-- **New, waiting:** the L-03 lock notice (approved in Sprint 11) ends "Payouts go to your wallet automatically after the
-  result is read", which devnet does not do yet. Any change to it is the founder's.
-- **New, waiting:** the "Paid" chip (one of BR-05's five public states) shows while payouts still wait. The page's own
-  title says "Result: YES" and "Waiting for payout"; whether the chip should change is the founder's.
+- **Answered 2026-10-10 (2a):** the L-03 lock notice (approved in Sprint 11) ended "Payouts go to your wallet
+  automatically after the result is read", which devnet does not do yet. Its devnet wording: "Payouts go to your wallet
+  after the result is read; on devnet that is not automatic yet, and no time is promised." The original may come back
+  when the keeper settles, by a new founder decision.
+- **Answered 2026-10-10 (3a):** the chip of a Paid campaign says "Result final" while payouts still wait, and "Paid"
+  once its entries are paid out. The public state (BR-05) is unchanged; only its label waits.
 - **Answered:** TP v0.0.1 Q2 (b, the recipient may call the settle instruction; with SOL only the below-rent case
   remains); Q1 (B, any wallet may trigger resolution and payout, choosing nothing); P-1; P-4; D7 (b).
 

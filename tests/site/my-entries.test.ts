@@ -67,7 +67,7 @@ describe("my entries rows", () => {
       const owed = entryOwed(c, decodeEntry(rawOf(w, await entryAddress(campaign, b.address)))).amount;
       const summary = await view(b.address);
       expect(summary.rows.map((r) => r.campaign)).toEqual([campaign]);
-      expect(summary.rows[0]).toMatchObject({ state: "paid", payout: { kind: "owed", amount: owed }, pending: true });
+      expect(summary.rows[0]).toMatchObject({ state: "final", payout: { kind: "owed", amount: owed }, pending: true });
       expect(summary.waiting).toBe(owed);
       expect(summary.received).toBe(0n);
     }

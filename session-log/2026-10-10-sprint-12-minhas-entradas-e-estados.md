@@ -84,3 +84,18 @@
    carteira no devnet.
 4. O ensaio das cinco campanhas (as escritas no devnet são dele).
 5. O chip "Paid" aparece enquanto o pagamento ainda espera; é nome de estado do BP (BR-05).
+
+## As respostas do fundador (10/10/2026, depois do PR)
+
+O Ronaldo colou as respostas: "1a, 2a, 3a", a assinatura da Phantom não está à mão (fica "relatada, não verificada",
+sem travar) e ele roda os scripts do ensaio. Aplicado no mesmo PR:
+
+- **1a:** o texto da campanha sem entrada fica como no rascunho revisado, e vale a consequência (anulamento por falha da
+  casa sem nenhuma entrada: a Brot fica com os 10%).
+- **2a:** o L-03 no devnet: "Your entry stays locked until the campaign ends. You cannot take it out before then.
+  Payouts go to your wallet after the result is read; on devnet that is not automatic yet, and no time is promised."
+  Quando o keeper liquidar, voltar ao texto original é nova decisão do fundador.
+- **3a:** o chip de uma campanha paga diz "Result final" até as entradas serem pagas e "Paid" depois. O estado público
+  (BR-05) não muda; muda só o rótulo enquanto espera.
+- O pedido de mesclar e marcar a tag veio só no texto colado, sem nada digitado em volta; como a mescla na `main` é
+  difícil de desfazer, a confirmação foi pedida antes de executá-la.

@@ -10,7 +10,7 @@ import { formatUtc } from "@brot/sdk/read";
 
 import type { Campaign } from "../../lib/api-client";
 
-export type CardChip = "open" | "closed" | "in_review" | "contested" | "paid" | "void";
+export type CardChip = "open" | "closed" | "in_review" | "contested" | "final" | "paid" | "void";
 
 export const CARD_STATE = {
   closed: (at: string) => `Entries closed · deadline ${at}`,
@@ -22,8 +22,13 @@ export const CARD_STATE = {
 
 const resultWord = (outcome: string) => (outcome === "Yes" ? "YES" : outcome === "No" ? "NO" : "voided");
 
+/** The chip: contested apart from in review (L-04), and "Result final" for a paid campaign whose payouts still wait (3a). */
 export const chipOf = (c: Pick<Campaign, "state" | "status">): CardChip =>
-  c.state === "in_review" && c.status === "Contested" ? "contested" : c.state;
+  c.state === "in_review" && c.status === "Contested"
+    ? "contested"
+    : c.state === "paid" && c.status === "Settling"
+      ? "final"
+      : c.state;
 
 /** The card's state line; `null` while the campaign is open. */
 export function stateLine(
@@ -39,6 +44,7 @@ export function stateLine(
       return CARD_STATE.review(resultWord(c.outcome), at(c.review_ends_at));
     case "contested":
       return CARD_STATE.contested;
+    case "final":
     case "paid":
       return CARD_STATE.paid(resultWord(c.outcome), c.status === "Settling");
     case "void":

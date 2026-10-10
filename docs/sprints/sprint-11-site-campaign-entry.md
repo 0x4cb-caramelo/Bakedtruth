@@ -156,7 +156,9 @@ every fee, and signs. It is the first entry made through the site, and a retry c
 
 - **Answered 2026-10-10, L-03 (the lock notice), approved by the founder, in English:** "Your entry stays locked until the
   campaign ends. You cannot take it out before then. Payouts go to your wallet automatically after the result is read."
-  The entry panel shows this text before signing (BR-12). Any change to the text is a founder decision.
+  The entry panel shows this text before signing (BR-12). Any change to the text is a founder decision. **Changed for
+  devnet by the founder's answer 2a in Sprint 12 (2026-10-10):** its last sentence reads "Payouts go to your wallet
+  after the result is read; on devnet that is not automatic yet, and no time is promised."
 - From Sprint -1: the chance chart and activity (L-23), answered yes.
 - **Answered 2026-10-10 (A-8):** the client reads ProgramData's last-deploy slot from the public devnet RPC now,
   inside the SDK, until Sprint 08's `/rpc` exists (option a).

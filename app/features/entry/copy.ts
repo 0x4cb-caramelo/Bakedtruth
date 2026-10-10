@@ -1,15 +1,20 @@
 /**
  * Purpose: the entry panel's words (BR-12, BR-27; D-m vocabulary): the panel, the five notices a baker reads before
  *          signing (the estimate, a large entry, the lock, the fee, devnet), the sheet "Check before you sign", and the
- *          signing steps. The lock notice is the founder's L-03 text, verbatim (2026-10-10); changing it is the
- *          founder's decision. English, per L-01. Failures have their own file (copy-failures.ts).
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ *          signing steps. The lock notice is the founder's L-03 text, verbatim (2026-10-10), with the devnet wording
+ *          the founder approved the same day in Sprint 12 (no automatic payout, no time promised, until the keeper
+ *          settles); changing it is the founder's decision. English, per L-01. Failures have their own file
+ *          (copy-failures.ts).
+ * Version: 0.2.0 (Sprint 12: L-03's devnet wording)
+ * Sprint:  11 (site: campaign page and entry); 12
  */
 
-/** L-03, approved by the founder on 2026-10-10. Do not edit without a new founder decision. */
+/**
+ * L-03, approved by the founder on 2026-10-10; its last sentence in the devnet wording the founder approved in Sprint 12
+ * (2026-10-10, answer 2a). Do not edit without a new founder decision.
+ */
 export const LOCK_NOTICE =
-  "Your entry stays locked until the campaign ends. You cannot take it out before then. Payouts go to your wallet automatically after the result is read.";
+  "Your entry stays locked until the campaign ends. You cannot take it out before then. Payouts go to your wallet after the result is read; on devnet that is not automatic yet, and no time is promised.";
 
 /** Basis points as a short percentage: 1,000 → "10%", 150 → "1.5%". */
 export const pct = (bps: number): string => `${(bps / 100).toLocaleString("en-US", { maximumFractionDigits: 2 })}%`;

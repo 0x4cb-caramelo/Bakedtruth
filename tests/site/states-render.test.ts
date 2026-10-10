@@ -16,7 +16,9 @@ import { createSolanaRpc, type Address } from "@solana/kit";
 import { entryOwed, VoidReason } from "@brot/sdk/read";
 
 import { exactSol, REPORT, STATES, VOID_REASON, WAITING } from "../../app/features/campaign-page/copy-states";
+import { stateChip } from "../../app/features/campaign-page/format";
 import { loadCampaignPage, type PageData } from "../../app/features/campaign-page/load";
+import { chipOf } from "../../app/features/campaigns/state-line";
 import { proofOf } from "../../app/features/campaign-page/proof";
 import { injectEntry } from "../brot/campaigns";
 import { openingWorld, type OpeningWorld } from "../brot/opening";
@@ -31,6 +33,7 @@ let render: Render;
 let renderDisconnected: Render;
 let StatePanel: unknown;
 let PayoutPanel: unknown;
+let StateChip: unknown;
 let w: OpeningWorld;
 let chain: FakeChain;
 
@@ -53,6 +56,7 @@ beforeAll(async () => {
     );
   StatePanel = (await import(site("features/campaign-page/state-panel.tsx"))).StatePanel;
   PayoutPanel = (await import(site("features/campaign-page/payout-panel.tsx"))).PayoutPanel;
+  StateChip = (await import(site("components/ui/state-chip.tsx"))).StateChip;
   w = await openingWorld();
   chain = startFakeChain(w);
 });
@@ -177,5 +181,14 @@ describe("every public state renders", () => {
       render(PayoutPanel, { data: await read(id, baker.address), wallet: baker.address, round: 0, onChange: () => {} }),
     );
     expect(tallied).toMatch(/If this result stands: \d/);
+  });
+
+  test("the chip says Paid only once the entries are paid out, and Result final before (founder's answer 3a)", async () => {
+    expect(stateChip((await pageIn("split-waiting")).view)).toBe("final");
+    expect(stateChip((await pageIn("one-sided")).view)).toBe("paid");
+    expect(stateChip((await pageIn("void-stale")).view)).toBe("void");
+    expect(chipOf({ state: "paid", status: "Settling" })).toBe("final");
+    expect(chipOf({ state: "paid", status: "Settled" })).toBe("paid");
+    expect(text(render(StateChip, { state: "final" }))).toBe("Result final");
   });
 });
