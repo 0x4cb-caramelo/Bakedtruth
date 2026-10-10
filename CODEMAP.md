@@ -9,7 +9,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 | | |
 |---|---|
 | Arquivos mapeados | **410** |
-| Acima de 200 linhas | **48** ⚠️ |
+| Acima de 200 linhas | **49** ⚠️ |
 | Sem cabeçalho `Purpose:` | **80** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -51,6 +51,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `scripts/sync-selfhosted.js` — 349 linhas
 - `scripts/test/hooks.test.js` — 278 linhas
 - `scripts/tokenomics-model.ts` — 584 linhas
+- `services/landing/tests/pages.test.mjs` — 202 linhas
 - `tests/brot/codama-spike.test.ts` — 219 linhas
 - `tests/brot/events.test.ts` — 211 linhas
 - `tests/brot/idl.test.ts` — 231 linhas
@@ -717,7 +718,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`docs.test.mjs`](services/landing/tests/docs.test.mjs) | tests docs.brot.markets: each generated page says what its text in docs/wiki says, every page is in the menu, every link and file a page points at exists, and t | 135 |
 | [`leads.test.mjs`](services/landing/tests/leads.test.mjs) | tests the waitlist store and the request limiter of the "coming soon" site (node --test) | 113 |
-| [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 199 |
+| [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 202 |
 | [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 193 |
 | [`two.test.mjs`](services/landing/tests/two.test.mjs) | tests /2, the home page in the pitch deck's look: it says exactly what the home page says (only the look may differ), the mascot perches and moods are the same, | 53 |
 

@@ -150,7 +150,10 @@ test("the deck at /pitch keeps what the founder decided on 2026-10-08, after the
     .replace(/<!--[\s\S]*?-->/g, "")
     .replace(/<style[\s\S]*?<\/style>/g, "")
     .replace(/<[^>]+>/g, " ");
-  assert.match(text, /Permissionless prediction markets, settled by\s+on-chain data\./);
+  assert.match(
+    text,
+    /Permissionless prediction markets that turn\s+on-chain\s+milestones into growth campaigns, settled by\s+the chain itself\./,
+  );
   assert.equal([...text.matchAll(/PROOF &gt; PROMISES/g)].length, 1, "the motto is only on the last slide");
   assert.match(text, /one market settled on an event that never happened/);
   assert.ok(!/not to scale/i.test(text), "the market slide has no 'not to scale'");
