@@ -8,7 +8,7 @@
 - **Trilha:** Solana (dez prêmios de US$ 10 mil; FATO, `colosseum.com/worldsfair`, lido em 9/10/2026).
 
 **O que este rascunho não viu.** A primeira aba do formulário de verdade chegou depois e está na seção 5; a segunda,
-na seção 6; a terceira ("Team") ainda não. O formulário fica dentro do portal, atrás do login, e eu não o abri. Os
+na seção 6; a terceira ("Team"), na seção 7. O formulário fica dentro do portal, atrás do login, e eu não o abri. Os
 campos da seção 1 são os que o Colosseum publica nas perguntas frequentes (`colosseum.com/hackathon`, lido em
 9/10/2026). O portal pode ter outros nomes, outros campos e limites de caracteres. Quando o Lucas colar os campos
 reais, as respostas são ajustadas campo por campo.
@@ -582,3 +582,43 @@ pagina em pdf?"): `docs/business/colosseum/brot-markets-pitch.pdf`, com 9 págin
 deck já tinha, com o movimento desligado (`?motion=off`): o exemplo animado do slide de solução aparece parado, no
 estado inicial. Os arquivos ficam fora do Git: são derivados do HTML e mudam quando o deck mudar. Os quatro pontos da
 tabela continuam nele; mexer nos slides é decisão do Lucas, e dois dos quatro dependem de resposta dele.
+
+## 7. O formulário real, parte 3: "Team" (o perfil do Lucas)
+
+Em 10/10/2026 o Lucas colou a terceira aba. Ela pede o perfil de quem envia: idade, cidade, formação, trabalhos
+anteriores, participação na empresa. Quase nada disso está nos arquivos, e nada foi inventado. **As respostas pessoais
+(idade, gênero, cidade, participação) não devem ser gravadas neste repositório:** os jurados vão ter acesso de leitura
+a ele.
+
+**O que dá para preencher com o que os arquivos dizem.**
+
+| Campo | Resposta | De onde vem |
+|---|---|---|
+| Full name | Lucas Lopes Galvão | Já estava no formulário |
+| Role / title (público) | `Co-founder, COO and CLO` | Slide de equipe ("COO and CLO"); o plano o chama de fundador |
+| LinkedIn URL | `https://www.linkedin.com/in/lucasgalvao/` | O endereço do slide de equipe |
+| GitHub URL | `https://github.com/lglucas` | O usuário do Git nesta máquina; a conta existe. A confirmar que é a pessoal dele |
+| Are you looking for a cofounder? | `No` | São três sócios |
+| Are you a technical founder? | `No`, a decidir por ele | O CTO é o Ronaldo. O histórico tem 110 commits nas duas identidades que parecem ser dele, feitos com assistente de IA; isso cabe no texto de experiência, e não nesta caixa |
+
+**O que só ele sabe:** idade, gênero, país, cidade, se estuda, o X pessoal, a formação, onde trabalhou, a participação
+na empresa (que ainda não existe; o plano não registra a divisão entre os sócios), se é dedicação integral, o maior
+feito fora do projeto e a vez em que foi ao extremo por algo.
+
+**Dois achados.**
+
+- **Na lista da equipe, o cargo do Bernardo está "CO".** O slide diz CEO.
+- **`complian.cc` responde "Account Suspended"** (lido em 10/10/2026). O slide de equipe, o PDF do deck e o roteiro do
+  vídeo citam a Complian.cc; um jurado que abrir o endereço vê uma página de hospedagem suspensa.
+
+**"You could be working on anything right now — why choose this?"** (rascunho, 983 de 1000 caracteres)
+
+Rascunho montado só com o que os arquivos registram dele: a regra do oráculo conferível (4/10/2026), a ideia de o
+projeto abrir a pergunta sobre a própria promessa, e o papel de advogado da equipe, que é dedução do cargo. O motivo
+pessoal é dele; o texto é ponto de partida, e não resposta pronta.
+
+```text
+Because it is a market I can defend line by line. Every prediction market has to answer one question: who says what happened? Today the answer is a token vote, a company key or an AI model, and that is where results get disputed and manipulated. When we started Brot I set one rule and refused to trade it away: we only use an oracle the chain itself can verify. The rule threw out most markets, and what it left is the part I find most useful: the promises crypto projects make to their holders (a burn, locked liquidity, staked SOL) that nobody holds them to. Let a project open a market on its own promise and it becomes marketing that proves itself.
+
+I am the lawyer on a three-person team, so I also know what this product must not become, and I would rather build inside a narrow rule we can keep than a broad one we cannot. In ten days we took that rule from the first commit to a program that opened, resolved and paid a real campaign on devnet. That pace is why I am here.
+```
