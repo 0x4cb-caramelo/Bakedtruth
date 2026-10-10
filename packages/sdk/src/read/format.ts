@@ -3,7 +3,7 @@
  *          (no floating point), Unix seconds as a UTC date, basis points as a percentage, a price target
  *          scaled by its feed's exponent, US cents, a long address shortened. Pure: the same input always
  *          prints the same text, on every runtime, and no input makes it throw.
- * Version: 0.1.1
+ * Version: 0.1.2 (the example address is the new program id)
  * Sprint:  05 (SDK)
  */
 
@@ -49,5 +49,5 @@ export function formatScaled(value: bigint, exponent: number): string {
 /** US cents as dollars: `11803n` → `"US$118.03"`. */
 export const formatUsdCents = (cents: bigint): string => `US$${formatScaled(cents, -2)}`;
 
-/** `6G2d…uVN` for a base58 address. */
+/** `5Rx8…n8o` for a base58 address. */
 export const shortAddress = (address: string): string => `${address.slice(0, 4)}…${address.slice(-4)}`;

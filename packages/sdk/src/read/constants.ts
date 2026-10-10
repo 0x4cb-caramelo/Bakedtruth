@@ -2,7 +2,7 @@
  * Purpose: the program's address and the constants compiled into it that a client needs: seeds, other
  *          programs, code ceilings, price and reader bounds, account sizes, and the enums. Mirrors
  *          programs/brot-markets/src/constants.rs; tests/sdk/contract-source.test.ts compares the two.
- * Version: 0.1.0
+ * Version: 0.1.1 (the event authority of the new program id 5Rx8…n8o)
  * Sprint:  05 (SDK)
  *
  * The program address is read from the IDL, which shank-cli writes from `declare_id!` (Sprint 00's
@@ -42,7 +42,7 @@ export const SEEDS = {
 } as const;
 
 /** The PDA that signs the program's self-CPI events, and its bump (constants.rs, checked by a test). */
-export const EVENT_AUTHORITY = address("E5CgcK5xs4YfPdBLnCWTAA9ruStbTqLjEzTxtVaRuB5o");
+export const EVENT_AUTHORITY = address("CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx");
 export const EVENT_AUTHORITY_BUMP = 254;
 /** The first byte of an event's inner instruction data; no instruction uses it. */
 export const EVENT_IX_TAG = 0xff;

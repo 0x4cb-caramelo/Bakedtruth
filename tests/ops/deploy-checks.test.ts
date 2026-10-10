@@ -2,7 +2,7 @@
  * Purpose: the pure checks of the devnet deploy (scripts/deploy/checks.ts), each refusal with its own case:
  *          SHA256SUMS parsing, the artifact folder against its sums, the program keypair's location and
  *          address, and the deploy command held to `solana program deploy` on loader v3. No cluster, no build.
- * Version: 0.1.0
+ * Version: 0.1.1 (the declared id is the new program id)
  * Sprint:  05 (SDK and the devnet cycle), lane OPS
  */
 import { describe, expect, test } from "bun:test";
@@ -21,7 +21,7 @@ import {
 } from "../../scripts/deploy/checks";
 
 const HASH = "a".repeat(64);
-const DECLARED = "6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN";
+const DECLARED = "5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o";
 
 function artifact(files: Record<string, string>, sums?: string) {
   const dir = mkdtempSync(join(tmpdir(), "brot-artifact-test-"));
