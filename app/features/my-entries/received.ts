@@ -4,7 +4,7 @@
  *          payout, refund or zero), as a creator (the 1%, paid or claimed from a reserve), and as whoever opened (the
  *          prize, and the opening fee refunded on a house-failure void, from `PrizeSettled`). Each event counts once.
  *          Also what the wallet put in, by side, from its `EntryAdded` events, for an entry the program has closed.
- * Version: 0.1.0
+ * Version: 0.2.0 (the security review: a share paid by the close)
  * Sprint:  12 (site: my entries and campaign states)
  *
  * An entry's rent comes back with its payout but is not in `EntrySettled.amount`: it was the wallet's own deposit,
@@ -24,16 +24,32 @@ export type Received = {
   openingFee: bigint;
   /** Whether a settlement of this wallet's entry was seen (a zero payout included). */
   entrySettled: boolean;
+  /** The creator share was paid by the campaign's close (close-share.ts), not by `settle_creator_share`. */
+  shareAtClose: boolean;
 };
 
-export const NOTHING: Received = { asBaker: 0n, asCreator: 0n, prize: 0n, openingFee: 0n, entrySettled: false };
+export const NOTHING: Received = {
+  asBaker: 0n,
+  asCreator: 0n,
+  prize: 0n,
+  openingFee: 0n,
+  entrySettled: false,
+  shareAtClose: false,
+};
 
 export const totalOf = (r: Received): bigint => r.asBaker + r.asCreator + r.prize + r.openingFee;
 
 export type ReceivedSummary = { byCampaign: Map<string, Received>; total: bigint };
 
-/** What `wallet` received, by campaign and in all, from `events` (any order; duplicates dropped). */
-export function receivedBy(wallet: string, events: readonly DecodedEvent[]): ReceivedSummary {
+/**
+ * What `wallet` received, by campaign and in all, from `events` (any order; duplicates dropped), and the creator
+ * shares its campaigns' closes paid it (`sharesPaidAtClose`, read from those campaigns' own events).
+ */
+export function receivedBy(
+  wallet: string,
+  events: readonly DecodedEvent[],
+  paidAtClose: ReadonlyMap<string, bigint> = new Map(),
+): ReceivedSummary {
   const byCampaign = new Map<string, Received>();
   const add = (campaign: string, change: Partial<Received>) => {
     const was = byCampaign.get(campaign) ?? NOTHING;
@@ -43,8 +59,10 @@ export function receivedBy(wallet: string, events: readonly DecodedEvent[]): Rec
       prize: was.prize + (change.prize ?? 0n),
       openingFee: was.openingFee + (change.openingFee ?? 0n),
       entrySettled: was.entrySettled || (change.entrySettled ?? false),
+      shareAtClose: was.shareAtClose || (change.shareAtClose ?? false),
     });
   };
+  for (const [campaign, share] of paidAtClose) add(campaign, { asCreator: share, shareAtClose: true });
   for (const event of uniqueEvents(events)) {
     if (!namesWallet(event, wallet)) continue;
     if (event.name === "EntrySettled") add(event.data.campaign, { asBaker: event.data.amount, entrySettled: true });

@@ -8,6 +8,7 @@
  * Sprint:  12 (site: my entries and campaign states)
  */
 import {
+  AccountRole,
   appendTransactionMessageInstructions,
   createSolanaRpc,
   createTransactionMessage,
@@ -171,4 +172,20 @@ export async function settleVia(
   await landVia(chain, keeper, [await buildSettlePrize({ campaign, recipient: c.creator })]);
   await landVia(chain, keeper, [await buildCollectFee({ campaign })]);
   return { creatorShare: shared, close: () => buildCloseCampaign({ campaign, rentPayer: c.rentPayer }) };
+}
+
+/** A plain System Program transfer of `lamports` from `from` to `to`: a stranger's transaction that names `to`. */
+export function transferIx(from: KeyPairSigner, to: Address, lamports: bigint): Instruction {
+  const data = new Uint8Array(12);
+  const view = new DataView(data.buffer);
+  view.setUint32(0, 2, true); // SystemInstruction::Transfer
+  view.setBigUint64(4, lamports, true);
+  return {
+    programAddress: "11111111111111111111111111111111" as Address,
+    accounts: [
+      { address: from.address, role: AccountRole.WRITABLE_SIGNER, signer: from },
+      { address: to, role: AccountRole.WRITABLE },
+    ],
+    data,
+  } as Instruction;
 }

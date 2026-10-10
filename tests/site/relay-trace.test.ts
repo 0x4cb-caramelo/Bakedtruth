@@ -16,7 +16,7 @@ import { recheck, Side } from "@brot/sdk/read";
 
 import { readActivity } from "../../app/features/campaign-page/activity";
 import { campaignClosed, loadCampaignPage } from "../../app/features/campaign-page/load";
-import { lastValidOf, prepareReceive, watchClaim } from "../../app/features/claim/claim";
+import { claimTransaction, lastValidOf, prepareReceive, watchClaim } from "../../app/features/claim/claim";
 import { readEntrySettlement, readWalletHistory } from "../../app/features/my-entries/history";
 import { loadMyEntries } from "../../app/features/my-entries/load";
 import { handToWallet, pendingOf, prepareEntry } from "../../app/features/entry/submit";
@@ -96,6 +96,10 @@ describe("the client's rpc trace", () => {
     w.client.svm.airdrop(w.creator.address, lamports(P.SOL));
     const prepared = await prepareReceive({ rpc, wallet: w.creator.address, campaign: run.campaign, deploySlot: 0n });
     if (!prepared.ok) throw new Error(`claim not prepared: ${prepared.failure}`);
+    // The wallet is handed exactly the bytes the SDK summarised (security review L3).
+    expect(new Uint8Array(claimTransaction(prepared.ready).message.serialize())).toEqual(
+      new Uint8Array(prepared.ready.transaction.messageBytes),
+    );
     const signed = await signTransaction([w.creator.keyPair], prepared.ready.transaction);
     const sig = await rpc.sendTransaction(getBase64EncodedWireTransaction(signed), { encoding: "base64" }).send();
     expect(await watchClaim(rpc, sig, lastValidOf(prepared.ready))).toBe("landed");

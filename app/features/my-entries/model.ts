@@ -49,8 +49,14 @@ function titleOf(read: CampaignRead, opened: Opened | undefined): string {
   });
 }
 
-function rowOf(read: CampaignRead, wallet: string, events: DecodedEvent[], chainTime: MyEntriesData["chain"]): Row {
-  const received = receivedBy(wallet, events).byCampaign.get(read.address) ?? NOTHING;
+function rowOf(
+  read: CampaignRead,
+  wallet: string,
+  events: DecodedEvent[],
+  chainTime: MyEntriesData["chain"],
+  paidAtClose: ReadonlyMap<string, bigint>,
+): Row {
+  const received = receivedBy(wallet, events, paidAtClose).byCampaign.get(read.address) ?? NOTHING;
   const put = putBy(wallet, events).get(read.address);
   const opened = events.find((e): e is Opened => e.name === "CampaignOpened" && e.data.campaign === read.address);
   const entry = read.entry && read.entry.amountYes + read.entry.amountNo > 0n ? read.entry : null;
@@ -107,11 +113,16 @@ function waitingIn(r: Row): bigint {
 }
 
 /** The wallet's rows, newest activity first, with the totals received and waiting. */
-export function myEntries(wallet: string, data: MyEntriesData, events: DecodedEvent[]): Summary {
+export function myEntries(
+  wallet: string,
+  data: MyEntriesData,
+  events: DecodedEvent[],
+  paidAtClose: ReadonlyMap<string, bigint> = new Map(),
+): Summary {
   const involved = new Set(events.map((e) => (e.data as { campaign?: string }).campaign).filter(Boolean) as string[]);
   const rows = data.campaigns
     .filter((r) => r.entry || involved.has(r.address) || r.campaign?.creator === wallet)
-    .map((r) => rowOf(r, wallet, events, data.chain));
+    .map((r) => rowOf(r, wallet, events, data.chain, paidAtClose));
   const order = (r: Row) =>
     r.pending
       ? 0
@@ -120,5 +131,5 @@ export function myEntries(wallet: string, data: MyEntriesData, events: DecodedEv
         : 2;
   rows.sort((a, b) => order(a) - order(b));
   const waiting = rows.reduce((sum, r) => sum + waitingIn(r), 0n);
-  return { rows, received: receivedBy(wallet, events).total, waiting };
+  return { rows, received: receivedBy(wallet, events, paidAtClose).total, waiting };
 }

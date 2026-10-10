@@ -104,7 +104,8 @@ export function pageStateOf(c: Campaign, view: PublicView, chain: ChainTime): St
 export type YourPayout =
   | { kind: "none" }
   | { kind: "estimate"; ifYes: bigint | null; ifNo: bigint | null }
-  | { kind: "ifConfirmed"; amount: bigint; result: Result }
+  /** `estimate` while a join is untallied: the tally may still mark it late, refunded whole (a YES on price). */
+  | { kind: "ifConfirmed"; amount: bigint; result: Result; estimate: boolean }
   | { kind: "owed"; amount: bigint }
   | { kind: "received"; amount: bigint }
   /** The Entry is closed but its settlement could not be read back now. */
@@ -124,8 +125,11 @@ export function yourPayoutOf(a: {
   if (!mine) return a.entered ? { kind: "settledUnread" } : { kind: "none" };
   if (state.kind === "paid" || state.kind === "void") return { kind: "owed", amount: entryOwed(c, mine).amount };
   const verdict = storedVerdict(c);
-  if (verdict)
-    return { kind: "ifConfirmed", amount: entryIfFinalized(c, mine, verdict).amount, result: resultOf(c.outcome) };
+  if (verdict) {
+    const amount = entryIfFinalized(c, mine, verdict).amount;
+    const estimate = c.entriesUntallied > 0 || mine.joinsTallied < mine.joinCount;
+    return { kind: "ifConfirmed", amount, result: resultOf(c.outcome), estimate };
+  }
   return {
     kind: "estimate",
     ifYes: mine.amountYes > 0n ? entryIfFinalized(c, mine, { kind: "Yes" }).amount : null,

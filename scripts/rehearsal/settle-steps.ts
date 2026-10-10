@@ -166,6 +166,11 @@ export async function runStep(ctx: TeamContext, campaign: Address, step: Step) {
     case "close":
       if (c.status !== Status.Settled) return due("close runs once every entry is paid");
       console.log("after the close the campaign page shows it as closed; its history stays on-chain");
+      if (c.creatorShareReserved > 0n) {
+        console.log(
+          `warning: the close pays the reserved creator share (${formatSol(c.creatorShareReserved)} SOL) with the rents`,
+        );
+      }
       return act(ctx, "close_campaign", [await B.buildCloseCampaign({ campaign, rentPayer: c.rentPayer })]);
     case "sweep": {
       const config = decodeGlobalConfig((await account(ctx.rpc, await configAddress()))!);

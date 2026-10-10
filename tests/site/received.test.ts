@@ -11,13 +11,17 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { createSolanaRpc, type KeyPairSigner } from "@solana/kit";
 
-import { decodeTransactionEvents, Side, type RpcTransaction } from "@brot/sdk/read";
+import { decodeCampaign, decodeTransactionEvents, Side, type RpcTransaction } from "@brot/sdk/read";
+import { buildCloseCampaign } from "@brot/sdk/tx";
 
+import { sharesPaidAtClose } from "../../app/features/my-entries/close-share";
 import { readWalletHistory } from "../../app/features/my-entries/history";
 import { putBy, receivedBy, totalOf } from "../../app/features/my-entries/received";
 import { openingWorld, type OpeningWorld } from "../brot/opening";
+import { landVia } from "./cycle";
 import { runCycle, SOL, type Bet, type Cycle } from "./cycle-run";
 import type { FakeChain } from "./fake-chain";
+import { rawOf } from "./support";
 
 let run: Cycle | null = null;
 afterEach(() => run?.chain.close());
@@ -136,5 +140,32 @@ describe("received on screen matches settlement events", () => {
     while (paged.before) paged = await readWalletHistory(rpc, w.creator.address, paged, { limit: 1 });
     expect(paged.events.map((e) => e.name)).toEqual(whole.events.map((e) => e.name));
     expect(receivedBy(w.creator.address, paged.events).total).toBe(receivedBy(w.creator.address, whole.events).total);
+  });
+
+  test("a reserved creator share paid by the campaign's close counts as received (security review M1)", async () => {
+    const w = await openingWorld();
+    run = await runCycle(
+      w,
+      ([ana, bruno]) => [
+        { who: ana, side: Side.Yes, amount: 10_000_000n },
+        { who: bruno, side: Side.No, amount: 10_000_000n },
+      ],
+      { how: "no", stopAt: "closed", emptyCreator: true },
+    );
+    const rpc = createSolanaRpc(run.chain.url);
+    const reserved = decodeCampaign(rawOf(w, run.campaign)).creatorShareReserved;
+    expect(reserved).toBeGreaterThan(0n);
+    const close = await buildCloseCampaign({ campaign: run.campaign, rentPayer: w.creator.address });
+    const sig = await landVia(run.chain, run.keeper, [close]);
+    const tx = await rpc.getTransaction(sig as never, { encoding: "json", maxSupportedTransactionVersion: 0 }).send();
+    const closed = decodeTransactionEvents(tx as unknown as RpcTransaction).find((e) => e.name === "CampaignClosed")!;
+    const history = await readWalletHistory(rpc, w.creator.address);
+    const atClose = await sharesPaidAtClose(rpc, w.creator.address, history.events);
+    expect(atClose.get(run.campaign)).toBe(reserved);
+    const got = receivedBy(w.creator.address, history.events, atClose);
+    expect(got.byCampaign.get(run.campaign)).toMatchObject({ asCreator: reserved, shareAtClose: true });
+    // The SOL that reached the creator: the reserve and the rents the event names.
+    const rents = closed.name === "CampaignClosed" ? closed.data.rentReturned : 0n;
+    expect(run.delta(w.creator.address)).toBe(reserved + rents);
   });
 });

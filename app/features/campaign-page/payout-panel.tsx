@@ -13,7 +13,7 @@
 import { useEffect, useState } from "react";
 import { Receipt } from "lucide-react";
 
-import { rentExemptMinimum } from "@/lib/brot";
+import { rentExemptMinimum, tx } from "@/lib/brot";
 import { rpc } from "@/lib/rpc";
 import { ClaimButton } from "@/features/claim/claim-button";
 import { sol4 } from "@/features/entry/amount";
@@ -52,7 +52,11 @@ function PayoutLine({ payout }: { payout: YourPayout }) {
         </>
       );
     case "ifConfirmed":
-      return <p className="m-0 tabular-nums">{YOURS.ifConfirmed(exactSol(payout.amount))}</p>;
+      return (
+        <p className="m-0 tabular-nums">
+          {(payout.estimate ? YOURS.ifConfirmedEst : YOURS.ifConfirmed)(exactSol(payout.amount))}
+        </p>
+      );
     case "owed":
       return (
         <>
@@ -78,9 +82,9 @@ function useClaimFloor(needed: boolean): bigint | null {
   useEffect(() => {
     if (!needed) return;
     let live = true;
-    // The wallet pays one signature's fee and must stay at the minimum after it (the SDK's claimFloor).
+    // The wallet pays one signature's fee (5,000 lamports, no priority fee) and must stay at the minimum after it.
     rentExemptMinimum(rpc, 0)
-      .then((rent) => live && setFloor(rent + 5_000n))
+      .then((rent) => live && setFloor(tx.claimFloor(rent, 5_000n)))
       .catch(() => undefined);
     return () => {
       live = false;

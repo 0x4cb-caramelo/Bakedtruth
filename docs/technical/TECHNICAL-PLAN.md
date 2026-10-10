@@ -1940,6 +1940,22 @@ The red-team review of what a baker signs (Sprint 11, 2026-10-10) was acted on i
 | A-8 reads ProgramData through the public devnet RPC, not through `/rpc` (the founder's answer, 2026-10-10) | An RPC that lies about the slot can pause signing (a false mismatch) or hide an upgrade from the page (a false match), as it can lie about every account the page reads; the program's own checks still bound what a join does | 08 (the relay) |
 | The site bakes the program's deploy slot in at build time | After a program upgrade the site pauses signing until it is built again; nothing is signed against the new program by a page built for the old one | Each upgrade (`deploy/devnet/README.md`) |
 
+### 7.3 Deferred in Sprint 12
+
+The adversarial review of Sprint 12 (2026-10-10) found no critical or high issue; its three medium findings (a reserved
+share paid by `close_campaign` missing from "received", a refresh that could skip a burst of transactions, and an exact
+"if this result stands" before late joins are tallied) and four low ones were fixed in the sprint
+(`docs/sprints/sprint-12-site-my-entries-states.md`, record). Deferred on purpose:
+
+| Finding | Risk while open | Sprint |
+|---|---|---|
+| `close_campaign` pays a still-reserved creator share with the rents but emits no `CreatorShareSettled`; the site infers it from the campaign's `CampaignFinalized` (the last 100 transactions) | A campaign whose finalize lies further back shows the share as not received (less, never more) | The next program upgrade (emit the event from the close) |
+| The SDK's preparations take `deploySlot` as optional (`prepareJoin`, `prepareOpenCampaign`, `prepareClaim`); the site always passes it | A new client that leaves it out signs without A-8's pause | 20 (before the app uses the SDK) |
+| `personalDataIn` misses bare domains and some handle forms (`"@x"`, `[@x]`) | A team note could name a person by a link the filter misses; two reviewers read every record | 13 |
+| The site finds `content/void-log/` from its working directory (`app/`) | On another host or a standalone build the record and the notes would be empty without an error | 13 (file tracing, or fail the build) |
+| A wallet that adds its own priority fee needs a little more than `claimFloor`; the copy says so | The claim fails without cost and is retried | None |
+| A wallet's address reaches the RPC operator through `getSignaturesForAddress` (the public devnet RPC now) | The operator can link the address to the visitor's IP; the relay must not log request parameters | 08 (the relay) |
+
 ## 8. Privacy and compliance baseline
 
 Joining or opening a campaign collects no personal data, and the KPIs are computed without it (K-04) **[FD]** (TP

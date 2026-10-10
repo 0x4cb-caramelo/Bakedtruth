@@ -32,6 +32,8 @@ import {
   type SolanaRpc,
 } from "@brot/sdk/read";
 
+import { eventsIn } from "../my-entries/events-in";
+
 export type PageData = {
   address: Address;
   campaign: Campaign;
@@ -68,14 +70,19 @@ const decodeOrNull = <T>(decode: () => T): T | null => {
 };
 
 /**
- * Whether the campaign at `id` existed and was closed: no account now, but its address has history. `close_campaign`
- * runs only after every payout, so a closed campaign has paid out; what it paid lives in its events.
+ * Whether the campaign at `id` existed and was closed: no account now, and its address's recent history holds the
+ * program's own `CampaignClosed` for it (a stranger's transfer to the address proves nothing). `close_campaign` runs
+ * only after every payout, so a closed campaign has paid out; what it paid lives in its events.
  */
 export async function campaignClosed(rpc: SolanaRpc, id: bigint): Promise<boolean> {
-  const page = await rpc
-    .getSignaturesForAddress(await campaignAddress(id), { limit: 1, commitment: "confirmed" })
-    .send();
-  return page.length > 0;
+  const at = await campaignAddress(id);
+  const sigs = await rpc.getSignaturesForAddress(at, { limit: 10, commitment: "confirmed" }).send();
+  for (const s of sigs) {
+    if (s.err !== null) continue;
+    const events = await eventsIn(rpc, s.signature as string);
+    if (events?.some((e) => e.name === "CampaignClosed" && e.data.campaign === at)) return true;
+  }
+  return false;
 }
 
 /** Reads the page's accounts; `null` when no campaign of this program lives at the id's address. */

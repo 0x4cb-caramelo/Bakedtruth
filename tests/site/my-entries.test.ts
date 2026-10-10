@@ -10,17 +10,19 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { createSolanaRpc } from "@solana/kit";
 
-import { decodeCampaign, decodeEntry, entryAddress, entryOwed, Side } from "@brot/sdk/read";
+import { campaignAddress, decodeCampaign, decodeEntry, entryAddress, entryOwed, Side } from "@brot/sdk/read";
+import { buildSettleEntry } from "@brot/sdk/tx";
 
-import { readWalletHistory } from "../../app/features/my-entries/history";
+import { campaignClosed } from "../../app/features/campaign-page/load";
+import { readEntrySettlement, readWalletHistory } from "../../app/features/my-entries/history";
 import { loadMyEntries } from "../../app/features/my-entries/load";
 import { myEntries } from "../../app/features/my-entries/model";
 import { openingWorld } from "../brot/opening";
 import { injectCampaign } from "../brot/campaigns";
 import { newId } from "../brot/flows";
 import * as P from "../brot/program";
-import { now } from "../brot/setup";
-import { landVia, settleVia } from "./cycle";
+import { fundedWallet, now } from "../brot/setup";
+import { landVia, settleVia, transferIx } from "./cycle";
 import { runCycle, SOL, type Cycle } from "./cycle-run";
 import { rawOf } from "./support";
 
@@ -98,5 +100,50 @@ describe("my entries rows", () => {
     const after = await view(w.creator.address);
     expect(after.rows[0]).toMatchObject({ state: "closedAccount", id: run.id.toString() });
     expect(after.received).toBe(c.creatorShare);
+  });
+
+  test("a refresh after a burst of transactions pages back until it meets what was read (security review M2)", async () => {
+    const w = await openingWorld();
+    run = await runCycle(
+      w,
+      ([ana, bruno]) => [
+        { who: ana, side: Side.Yes, amount: SOL / 2n },
+        { who: bruno, side: Side.No, amount: SOL / 4n },
+      ],
+      { how: "no", stopAt: "settling" },
+    );
+    const { chain, campaign, keeper } = run;
+    const [ana] = run.bakers;
+    const rpc = createSolanaRpc(chain.url);
+    const first = await readWalletHistory(rpc, ana.address, undefined, { limit: 5 });
+    expect(first.before).toBeNull(); // the join and the tally: the whole history
+    await landVia(chain, keeper, [await buildSettleEntry({ campaign, baker: ana.address })]);
+    for (let n = 1n; n <= 12n; n++) await landVia(chain, keeper, [transferIx(keeper, ana.address, n)]);
+    const refreshed = await readWalletHistory(rpc, ana.address, first, { limit: 5, newest: true });
+    expect(refreshed.events.some((e) => e.name === "EntrySettled")).toBe(true);
+    expect(refreshed.before).toBeNull();
+    // Past the bound, the coverage says where it ends instead of claiming the whole history.
+    const small = await readWalletHistory(rpc, ana.address, undefined, { limit: 1 });
+    for (let n = 13n; n <= 25n; n++) await landVia(chain, keeper, [transferIx(keeper, ana.address, n)]);
+    const cut = await readWalletHistory(rpc, ana.address, small, { limit: 1, newest: true });
+    expect(cut.before).not.toBeNull();
+    expect(cut.before).not.toBe(small.before);
+  });
+
+  test("a stranger's transfer to an address proves no entry and no closed campaign (security review L1)", async () => {
+    const w = await openingWorld();
+    run = await runCycle(w, ([ana]) => [{ who: ana, side: Side.Yes, amount: SOL / 2n }], {
+      how: "no",
+      stopAt: "review",
+    });
+    const { chain, campaign, keeper } = run;
+    const rpc = createSolanaRpc(chain.url);
+    const stranger = await fundedWallet(w);
+    await landVia(chain, keeper, [transferIx(keeper, await entryAddress(campaign, stranger.address), 1_000_000n)]);
+    expect(await readEntrySettlement(rpc, campaign, stranger.address)).toEqual({ event: null, touched: false });
+    expect((await readEntrySettlement(rpc, campaign, run.bakers[0].address)).touched).toBe(true);
+    const never = newId();
+    await landVia(chain, keeper, [transferIx(keeper, await campaignAddress(never), 2_000_000n)]);
+    expect(await campaignClosed(rpc, never)).toBe(false);
   });
 });

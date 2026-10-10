@@ -3,7 +3,7 @@
  *          the void is saved to content/void-log/<campaign>-<UTC time>.md, and the SHA-256 of exactly the saved
  *          bytes goes on-chain with the reason. A team key may use `TeamHouseFailure` (the 10% opening fee goes
  *          back to the opener) or `TeamOutsideCause` (Brot keeps it).
- * Version: 0.1.2 (Sprint 12: the personal-data rule from the record's format)
+ * Version: 0.1.3 (Sprint 12: the personal-data rule from the record's format; line endings made LF before hashing)
  * Sprint:  05 (SDK and the devnet cycle), lane OPS
  *
  * The program lets a team key void only an AUTOMATIC void (a campaign `resolve_campaign` voided: missed window,
@@ -32,10 +32,13 @@ import { act, contextFromCli, requireRole, runCli, type TeamContext } from "./co
 export type TeamVoidReason = "TeamHouseFailure" | "TeamOutsideCause";
 const REASONS: TeamVoidReason[] = ["TeamHouseFailure", "TeamOutsideCause"];
 
-/** The record's bytes: a short header the reader can check against the chain, then the team's text. */
+/**
+ * The record's bytes: a short header the reader can check against the chain, then the team's text with its line
+ * endings made `\n` first, so the bytes hashed on-chain are the bytes Git keeps (Sprint 12 review, L2).
+ */
 export function voidRecord(campaign: Address, reason: TeamVoidReason, signer: Address, at: string, text: string) {
   const header = `# Void of campaign ${campaign}\n\n- Reason: ${reason}\n- Team key: ${signer}\n- Written (UTC): ${at}\n\n`;
-  return new TextEncoder().encode(`${header}${text.trimEnd()}\n`);
+  return new TextEncoder().encode(`${header}${text.replace(/\r\n?/g, "\n").trimEnd()}\n`);
 }
 
 /** The rule moved to the record's public format (Sprint 12), shared with the site and CI's check. */

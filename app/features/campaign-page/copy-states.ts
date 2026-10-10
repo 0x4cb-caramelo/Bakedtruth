@@ -85,6 +85,8 @@ export const YOURS = {
   ifWins: (side: string, sol: string) => `If ${side} wins: est. ${sol} SOL`,
   estimateNote: "Estimates change until entries close and the result is final.",
   ifConfirmed: (sol: string) => `If this result stands: ${sol} SOL`,
+  ifConfirmedEst: (sol: string) =>
+    `If this result stands: est. ${sol} SOL, until every join is tallied (a join after a YES proof comes back whole).`,
   owed: (sol: string) => `${WAITING}: ${sol} SOL`,
   received: (sol: string) => `Received: ${sol} SOL`,
   lost: "Your side lost: nothing comes from the pot.",
@@ -103,7 +105,9 @@ export const OPENER = {
   >,
   reserved:
     "The program kept it in the campaign's vault: sending it to your empty wallet would have left the account below Solana's minimum balance. It can only ever go to this wallet.",
-  reservedHow: (floor: string) => `Add at least ${floor} SOL to this wallet, then receive it here.`,
+  reservedHow: (floor: string) =>
+    `This wallet needs at least ${floor} SOL in it to receive it (it pays the network fee and must keep Solana's minimum balance); add a little more if your wallet adds a priority fee.`,
+  atClose: (sol: string) => `Your creator share, ${sol} SOL, was sent with the campaign's close.`,
   prize: (sol: string) => `The prize returns to you: ${sol} SOL`,
   openingFee: (sol: string) => `The opening fee returns to you too: ${sol} SOL`,
 } as const;

@@ -35,4 +35,5 @@ export const CLAIM_FAILURE: Record<ClaimFailure, string> = {
   network: "Can't reach Solana right now. Try again.",
 };
 
-export const floorText = (sol: string) => `Add at least ${sol} SOL to this wallet first, then press Receive.`;
+export const floorText = (sol: string) =>
+  `This wallet needs at least ${sol} SOL in it first (it pays the network fee and must keep Solana's minimum balance); add a little more if your wallet adds a priority fee, then press Receive.`;

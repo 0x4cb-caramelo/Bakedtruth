@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api-client";
 import { rpc } from "@/lib/rpc";
 import { EMPTY_HISTORY, readWalletHistory, type History } from "./history";
+import { sharesPaidAtClose } from "./close-share";
 import { loadMyEntries } from "./load";
 import { myEntries, type Summary } from "./model";
 
@@ -59,10 +60,11 @@ export function useMyEntries(wallet: string | null) {
       const campaigns = await listed();
       const named = read.events.map((e) => (e.data as { campaign?: string }).campaign).filter(Boolean) as string[];
       const data = await loadMyEntries(rpc, wallet, [...(campaigns ?? []), ...named]);
+      const paidAtClose = await sharesPaidAtClose(rpc, wallet, read.events);
       if (!live) return;
       history.current = { wallet, value: read };
       setOlder(false);
-      const summary = myEntries(wallet, data, read.events);
+      const summary = myEntries(wallet, data, read.events, paidAtClose);
       setResult({
         wallet,
         value: { status: "ready", summary, history: read, apiDown: campaigns === null, failed: false },

@@ -58,6 +58,8 @@ beforeAll(async () => {
 });
 afterAll(() => chain.close());
 
+const SOL_HALF = 500_000_000n;
+
 /** A campaign in state `name`, read back as the page reads it. */
 const pageIn = async (name: StateName, extra: Record<string, unknown> = {}) =>
   read((await injectState(w, name, extra)).id);
@@ -149,5 +151,31 @@ describe("every public state renders", () => {
     const asCreator = text(renderDisconnected(PayoutPanel, creator));
     expect(asCreator).toContain("Kept in the vault for you");
     expect(asCreator).toContain("Connect the creator's wallet to receive it.");
+  });
+
+  test("in review, an entry with a join not yet tallied shows an estimate, not an exact amount (security review M3)", async () => {
+    const baker = await fundedWallet(w);
+    const { id, campaign } = await injectState(w, "review");
+    await injectEntry(w.client, {
+      campaign: campaign as Address,
+      baker: baker.address,
+      amountYes: SOL_HALF,
+      joinCount: 1,
+    });
+    const data = await read(id, baker.address);
+    const html = text(render(PayoutPanel, { data, wallet: baker.address, round: 0, onChange: () => {} }));
+    expect(html).toContain("If this result stands: est.");
+    expect(html).toContain("until every join is tallied");
+    await injectEntry(w.client, {
+      campaign: campaign as Address,
+      baker: baker.address,
+      amountYes: SOL_HALF,
+      joinCount: 1,
+      joinsTallied: 1,
+    });
+    const tallied = text(
+      render(PayoutPanel, { data: await read(id, baker.address), wallet: baker.address, round: 0, onChange: () => {} }),
+    );
+    expect(tallied).toMatch(/If this result stands: \d/);
   });
 });

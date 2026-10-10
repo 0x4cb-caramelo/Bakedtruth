@@ -31,7 +31,7 @@ function payoutText(p: YourPayout): string | null {
         .filter(Boolean)
         .join(" · ");
     case "ifConfirmed":
-      return YOURS.ifConfirmed(exactSol(p.amount));
+      return (p.estimate ? YOURS.ifConfirmedEst : YOURS.ifConfirmed)(exactSol(p.amount));
     case "owed":
       return YOURS.owed(exactSol(p.amount));
     case "received":
@@ -75,6 +75,9 @@ export function EntryRow({ row, onChange }: { row: Row; onChange: () => void }) 
       {sides ? <p className="m-0 text-sm">{MINE.youEntered(sides)}</p> : null}
       {payout ? <p className="m-0 text-sm tabular-nums">{payout}</p> : null}
       {row.state === "closedAccount" ? <p className="m-0 text-xs text-muted">{MINE.closedText}</p> : null}
+      {row.received.shareAtClose ? (
+        <p className="m-0 text-sm tabular-nums">{OPENER.atClose(exactSol(row.received.asCreator))}</p>
+      ) : null}
       {share && share.status !== "none" ? (
         <p className="m-0 text-sm tabular-nums">
           {OPENER.share(exactSol(share.amount))} · {OPENER.status[share.status]}
