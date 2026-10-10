@@ -27,6 +27,10 @@ export type CycleOptions = {
   stopAt: "review" | "settling" | "closed";
   /** The creator's wallet is emptied before settlement, so a small share is reserved instead of paid. */
   emptyCreator?: boolean;
+  /** The web smoke's: its running chain, and its test wallet as the creator or among the bakers. */
+  chain?: FakeChain;
+  creator?: KeyPairSigner;
+  bakers?: KeyPairSigner[];
 };
 
 export type Cycle = {
@@ -46,10 +50,11 @@ export async function runCycle(
   bets: (bakers: KeyPairSigner[]) => Bet[],
   options: CycleOptions,
 ): Promise<Cycle> {
-  const chain = startFakeChain(w);
+  const chain = options.chain ?? startFakeChain(w);
   const keeper = await fundedWallet(w);
-  const bakers = [await fundedWallet(w), await fundedWallet(w), await fundedWallet(w)];
-  const { id, campaign } = await openVia(w, chain, w.creator);
+  const bakers = options.bakers ?? [await fundedWallet(w), await fundedWallet(w), await fundedWallet(w)];
+  const creator = options.creator ?? w.creator;
+  const { id, campaign } = await openVia(w, chain, creator);
   const placed = bets(bakers);
   for (const bet of placed) await joinVia(w, chain, bet.who, campaign, bet.side, bet.amount);
   await resolveVia(w, chain, keeper, campaign, options.how);
@@ -74,7 +79,7 @@ export async function runCycle(
   }
   if (options.emptyCreator) {
     w.client.svm.setAccount({
-      address: w.creator.address,
+      address: creator.address,
       data: new Uint8Array(0),
       executable: false,
       lamports: lamports(0n),
@@ -82,7 +87,7 @@ export async function runCycle(
       space: 0n,
     });
   }
-  for (const a of [...bakers.map((b) => b.address), w.creator.address]) before.set(a, balance(w, a));
+  for (const a of [...bakers.map((b) => b.address), creator.address]) before.set(a, balance(w, a));
   for (const a of joined) deposits.set(a, balance(w, await entryAddress(campaign, a)));
   if (options.stopAt === "settling") return result;
   const settled = await settleVia(w, chain, keeper, campaign, joined);

@@ -27,7 +27,14 @@ const health = Bun.serve({
   port: PORTS.api,
   fetch(request) {
     const headers = { "content-type": "application/json", "access-control-allow-origin": "*" };
-    if (new URL(request.url).pathname !== "/api/v1/health") return new Response("{}", { status: 404, headers });
+    const path = new URL(request.url).pathname;
+    // "My entries" asks which campaigns exist; an empty list makes it read the wallet's history alone (Sprint 12).
+    if (path === "/api/v1/campaigns") {
+      const chainTime = w.client.svm.getClock().unixTimestamp.toString();
+      const list = { campaigns: [], total: 0, limit: 100, offset: 0, as_of_slot: "0", chain_time: chainTime };
+      return new Response(JSON.stringify(list), { headers });
+    }
+    if (path !== "/api/v1/health") return new Response("{}", { status: 404, headers });
     const body = {
       status: "ok",
       cluster: "local",
