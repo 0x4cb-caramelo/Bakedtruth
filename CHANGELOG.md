@@ -17,6 +17,13 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
 nos caminhos da equipe pelo PR #44 e o id novo do programa pelo PR #45; já em 10/10, a Sprint 05 pelo PR #43 (tag
 `sprint-05`). O programa roda no devnet desde a noite de 9/10.
 
+### Added
+
+- **A prévia das telas de campanha em `brot.markets/dev0x/`** (10/10/2026, pedido do Ronaldo): as telas da Sprint -1
+  (`prototype-lab/campaigns/`, dados de mentira) para o time clicar antes da Sprint 06. Sem listagem: `noindex` no
+  cabeçalho, nada aponta para lá, o `robots.txt` não muda. A CSP deixa o script de tema do protótipo por hash.
+  `/dev0x` leva a `/dev0x/`. Testes em `services/landing/tests/dev0x.test.mjs`.
+
 ### Changed
 
 - **A regra de viabilidade fica como está no código** (9/10/2026, à noite, Ronaldo): a taxa da Brot sai do lado

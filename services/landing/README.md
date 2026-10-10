@@ -14,6 +14,7 @@ Não tem dependências. Roda com o Node que já existe no servidor (22 ou mais n
 | `lib/leads.mjs` | Validação do email e o arquivo da lista |
 | `lib/rate-limit.mjs` | Limite de pedidos por endereço, só em memória |
 | `lib/static.mjs` | Serve `public/`, sem deixar sair da pasta |
+| `lib/campaigns.mjs` | Serve a prévia das telas de campanha em `/dev0x/`, a partir de `prototype-lab/campaigns/` (uma cópia só) e com a CSP do protótipo |
 | `public/` | Página inicial, privacidade, 404, fontes e imagens |
 | `public/terms.html`, `public/privacy.html` | Termos e privacidade, gerados de `docs/legal/*.md` por `scripts/build-legal.mjs`. Edite o texto lá e rode o script; os testes falham se página e texto divergirem |
 | `public/2/` | A página inicial com o visual do deck (opção A, 9/10/2026), em `/2`, fora dos buscadores: o mesmo conteúdo de `index.html`, palavra por palavra (`tests/two.test.mjs` compara), com `base.css` e `home.css` próprios e as fontes de `public/pitch/`. Mudou o texto da página inicial? Mude aqui também |
@@ -73,6 +74,19 @@ As nove perguntas de privacidade respondidas estão em `docs/technical/TECHNICAL
   diz como abrir uma delas de novo. Os endereços antigos (`/pitch2` a `/pitch9`) redirecionam para `/pitch/`.
 - **Editar um slide:** cada `<section class="slide">` de `public/pitch/index.html` é um slide, num quadro de
   1920 × 1080, com os estilos na própria marcação, como o fundador desenhou.
+
+## A prévia das telas em `/dev0x/`
+
+- **Para o time, sem link.** As telas de campanha (`prototype-lab/campaigns/`, dados de mentira, nada se conecta
+  à carteira nem à rede) saem em `/dev0x/`. A página manda `noindex, nofollow, noarchive`, a página inicial não aponta
+  para ela e o `robots.txt` não a cita. `/dev0x` leva a `/dev0x/` (302), porque os caminhos do protótipo são relativos.
+- **CSP própria.** Só o que o protótipo usa: os arquivos da própria origem, o script inline de tema por hash (o
+  `tests/dev0x.test.mjs` recalcula o hash do `index.html`) e estilos inline só nos atributos `style` que o código
+  escreve. Pode ser emoldurada pela própria origem (`frame-ancestors 'self'`), porque a lista de estados e o cartão
+  de compartilhar se emolduram; de outra origem, não.
+- **Dados de mentira, conferidos.** O protótipo não tem e-mail nem nome de pessoa; as carteiras são `Demo…`, e as demais
+  contas são rotuladas no próprio mock como feeds de preço. Nomes de projetos reais (validador, tokens) precisam de
+  confirmação do Ronaldo antes de uma versão pública, e a equipe só aparece com acordo por escrito (BP, P-9).
 
 ## Publicar no servidor
 
