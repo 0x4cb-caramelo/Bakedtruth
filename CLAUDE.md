@@ -49,7 +49,7 @@ creator, pot, YES/NO; never "market" or "bet" outside the brand.
   sources: `knowledge-base/tecnologia/pyth-leitor-de-preco.md`. Read it before touching the price reader.
   Joining reads only a feed's sponsored account; a YES proof may be any fully verified account of the feed; a NO is
   recorded only 60 s after the deadline; `StaleFeed` voids a campaign whose sponsored account was not updated after
-  the deadline and is older than `deadline − max_age` (`readers/price_touch/proof.rs`).
+  the deadline and is older than `deadline − max(max_age, 600 s)` (`STALE_FEED_MIN_SECONDS`, `readers/price_touch/proof.rs`).
 - Program code follows the house rules: one instruction and one reader per file, under 200 lines, a `Purpose:`
   header, checked math (clippy denies unchecked arithmetic and truncating casts in that crate), the owner of an
   account checked before any of its bytes is read, and Anchor's `init-if-needed` restated for Pinocchio: never

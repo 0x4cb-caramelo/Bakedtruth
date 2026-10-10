@@ -592,7 +592,11 @@ that already holds SOL is above that minimum.
 - **The creator share can be smaller.** 1% of a small pot (two 0.01 SOL entries give 200,000 lamports) is below the
   minimum, and the creator's wallet may be empty. The credit then fails; the share stays in the vault, bookkept, with
   no deadline. The keeper drops it from its batch by simulation and retries daily, and the creator can fund the wallet
-  and call `settle_creator_share` from it (Q2, adapted to SOL). P1 §3.10 asks the TP to handle this case.
+  and call `settle_creator_share` from it (Q2, adapted to SOL). P1 §3.10 asks the TP to handle this case. **Built in
+  Sprint 12 [F]:** the site's "Receive", on the SDK's `prepareClaim` (A-3, A-8 first), only for a reserved share. The
+  creator signs and pays the network fee, and the cluster refuses a fee payer left below the rent-exempt minimum, so the
+  wallet needs that minimum plus the fee (`claimFloor`), more than the program's own check (`claimable`). The keeper's
+  daily retry is not built (the deployed keeper only resolves), so the screen promises none.
 - **Consequence for closing.** `close_campaign` waits for the share. In Sprint 04 the team chooses between keeping the
   wait, as the proposal does, and letting `close_campaign` pay a reserved share together with the rent when the creator
   is the rent payer, a credit that always clears the minimum **[AC]**.
@@ -1351,9 +1355,9 @@ system of Sprint -1; it replaces the provisional `services/landing` on `127.0.0.
 | `/c/[id]` | Campaign page: the generated sentence and rule, live value, pot and YES/NO split, entry panel, re-check panel, share button. `id` is the client-drawn u64 (§3.4.1) | 11 |
 | `/c/[id]/opengraph-image` | The share card (below) | 10 |
 | `/abrir` | The creation box (below) | Design in -1; built in 19 |
-| "My entries" | A wallet's entries, results and payouts. Its path, like those of the ranking, register and fee pages, is named with the site language (L-01) | 12 |
+| "My entries" | A wallet's entries, results and payouts. Its path, like those of the ranking, register and fee pages, is named with the site language (L-01). **Built at `/my-entries` in Sprint 12 [F]:** read from the chain (the wallet's own transactions, decoded by the SDK; the open `Entry` accounts) until `GET /api/v1/wallets/:address/entries` exists | 12 |
 | Ranking | Points on devnet (§3.5) | 13 |
-| Register and powers | Who can do what, from `content/powers.md` (BR-41), and the void log from `content/void-log/` (BR-45) | 12–13 |
+| Register and powers | Who can do what, from `content/powers.md` (BR-41), and the void log from `content/void-log/` (BR-45). **The void log is at `/record` since Sprint 12 [F]**, read on the server; its record format is `@brot/sdk/schemas` `VoidLogRecord`, with a JSON Schema at `content/void-log/record.schema.json` checked in CI | 12–13 |
 | Fees | A worked example net of fee and creator share; the refund policy (BR-32) | 13 |
 | Incident page | Who pauses, who speaks, where it is published (BR-42) | 16 |
 | Cloak and SODAX | Their own pages, never the signing page (BR-46); each waits for P-8. The Cloak page serves undisclosed sponsors (BR-17) | Cloak 15; SODAX 17 |
@@ -1838,7 +1842,7 @@ exposes only `GET /healthz` and `POST /restart` (TP v0.0.1 §5, §12) **[DP]**.
 | `GET /api/v1/campaigns/:id/activity` | Entries, settlements and events of one campaign | 08 |
 | `GET /api/v1/campaigns/:id/chance` | The history of the YES/NO split | 08 |
 | `GET /api/v1/activity` | Recent activity across campaigns (X1.4) | 08 |
-| `GET /api/v1/wallets/:address/entries` | One wallet's entries, results and payouts ("my entries") | 08 |
+| `GET /api/v1/wallets/:address/entries` | One wallet's entries, results and payouts ("my entries"). Not built yet: Sprint 12's page reads the chain meanwhile | 08 |
 | `GET /api/v1/leaderboard` | Devnet points | 08 |
 | `GET /api/v1/names` | Display names from `content/account-names.json` and the pinned Pyth feed list | 08 |
 | `GET /api/v1/price` | SOL in US$, with source and time | 08 |
