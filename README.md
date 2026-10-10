@@ -144,8 +144,8 @@ As of 10 October 2026.
 | --- | --- |
 | Program, `programs/brot-markets` (Rust, Pinocchio) | **Baked.** On devnet. The full cycle (open, join, resolve, settle) has run end to end, with the team's own wallets |
 | SDK, `packages/sdk` (`@brot/sdk`) | **Baked.** `read`, `tx` and `schemas` over the Codama client generated from the Shank IDL |
-| Keeper, `services/keeper` | **In the oven.** Runs on our server, watching devnet, and is built to resolve a campaign when its reader allows. It has not had a real campaign to resolve yet. Settlement tasks, the standby and the watchdog come next |
-| Indexer and API | **Dough.** Not started |
+| Keeper, `services/keeper` | **In the oven.** Runs on our server, watching devnet, and is built to resolve a campaign when its reader allows. It has not had a real campaign to resolve yet. The standby and the watchdog are written, with no second machine running them. Settlement tasks come next |
+| Indexer and API | **Dough.** Next in line |
 | Site | `brot.markets` is a coming-soon page with a waitlist. The campaign screens exist as a prototype with mock data. Entries are made by script: there is no YES/NO button yet |
 | `app/` | The front end of the program this repository grew from. It leaves when the new site arrives |
 | Android app | **Dough.** Planned for the Solana dApp Store |
