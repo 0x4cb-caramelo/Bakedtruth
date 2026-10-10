@@ -1,6 +1,9 @@
 # Sprint 13 — Site: ranking, notices and copy (closes the devnet MVP)
 
-**Status:** built and reviewed, PR #63 open; the items that need the founder, a real device or Sprint 19 are marked waiting below · **Branch:**
+**Status:** merged (PR #63, 2026-10-10) and tagged `sprint-13` on `2dc5cb1`; the founder answered the twelve
+questions the same evening (1a to 12a, below), and answer 3a's code went in a follow-up pull request
+(`sprint-13-founder-answers`); the items that need Sprint 08, Sprint 19, a real device or the founder's deploys are
+marked waiting below · **Branch:**
 `sprint-13-site-notices-copy`, cut from `origin/main` at `sprint-12` (`107fec2`) · **Dates:** none, by the founder's decision
 
 ## Record (2026-10-10)
@@ -84,6 +87,16 @@
   **Deferred**, each with its reason and sprint: TP §7.4. **Found outside the sprint:** entering both sides of a paid
   campaign nobody else joins takes its prize at no risk (TP §13, a founder question); brot.markets' live `/terms` and
   `/privacy` (approved 2026-10-08) still describe USDC, automatic payouts within 55 hours and other team powers.
+- **After the merge: the founder's answers (2026-10-10).** All twelve as recommended, 1a to 12a; who holds the X login
+  came with them (the CTO, with an authenticator app as the second factor). Answer 3a changed code, in a follow-up pull
+  request from `main` at `sprint-13`: no point for a wallet with entries on both sides (`BOTH_SIDES_SCORE` is false),
+  none in a pot refunded as one-sided (finalize's `OneSided`, or for a final result still in its account the mode
+  finalize would store, which the read API computes through the SDK's `snapshotOf`), and none for the wallet that
+  opened a burn, lock or stake campaign (`creatorCanControl`); the creator's other wallets cannot be told apart
+  on-chain, and the page now says so, with the 15 days of answer 8a. Tested on the rule
+  (`tests/sdk/points-3a.test.ts`), on the route (`services/api/tests/leaderboard-pot.test.ts`) and on whole cycles in
+  LiteSVM, a one-sided pot included (`tests/api/leaderboard.test.ts`). The other answers confirm what was built, or
+  are recorded for later sprints (below).
 
 | | |
 |---|---|
@@ -103,7 +116,8 @@ the site with both services on. The exit criteria X2 are met here.
       v0.0.1 Q7, answered a). It has no volume or profit column. **Done** (`/leaderboard`; the route in `services/api`;
       `tests/sdk/points.test.ts`, `tests/api/leaderboard.test.ts`, `services/api/tests/`, the web smoke). No success
       rate either (the legal review). Live on devnet once the founder redeploys the read API, after the conditions of
-      TP §8.2. Open: which edge cases score (founder question 3).
+      TP §8.2. What scores is the founder's answer 3a (no point on both sides, in a refunded pot, or for the creator's
+      own wallet on a burn, lock or stake campaign), applied after the merge.
 - [x] **The fee page (BR-32):** a worked example net of the fee and the creator share, using P1 §1.2's case (600 on
       YES, 400 on NO: fee 40, creator 10, winners 950, 1.583 per 1; with the 450 prize, 1,400 and 2.333 per 1); the
       one-sided 1%; the opening's 90/10; the refund policy. **Done** at `/fees`, in SOL (the case divided by 100);
@@ -122,18 +136,19 @@ the site with both services on. The exit criteria X2 are met here.
       de" phrases and the promises in every source file of the site.
 - [x] "Nenhuma pessoa escolhe o vencedor" replaces the "no human in the loop" line, as BP-5's recommendation (P-9,
       open); the line lives in one `copy.ts` entry, so the founder's answer changes one string. **Done:** "No human picks
-      the winner." in `app/features/how/copy.ts` (`PRINCIPLE`); the founder's answer is question 6.
+      the winner." in `app/features/how/copy.ts` (`PRINCIPLE`), approved by the founder (answer 6a).
 - [x] The mascot's quips are reviewed; "No oracle. Just me, reading." is gone (design direction, conflict 7). **Done:**
       the site never carried that line; the five quips of `app/lib/brand.ts` are under the copy test now.
 - [x] **The report link (C-10):** every campaign page has a "report this campaign" link. The remedy is unlisting
       (proposal §2.7); the campaign stays on-chain, resolves and pays. **Done**, worded for devnet ("its entries,
       result and payouts do not change": nothing pays by itself there yet) (`app/features/report/`,
-      `content/unlisted.json`); where it leads is the founder's [Q], built as recommended (question 5).
+      `content/unlisted.json`); where it leads is the founder's [Q], answered 5a: the X account, as built.
 - [x] **The PWA, manifest only (S2):** `app/manifest.ts` and its icons. No service worker (proposal §3.3). **Done** as
       `app/app/manifest.ts` (`tests/site/manifest.test.ts`, the web smoke).
 - [ ] The partner report, without addresses, is generated for an example campaign (BR-30; built in Sprint 08).
-      **Waiting for the founder:** its format and what happens to a partner who does not post are L-24 (question 4);
-      Sprint 08 did not build it. The events reader built for the leaderboard is what it would count from.
+      **Waiting for Sprint 08:** L-24 is answered (4a: one text file per partner campaign, never an address; a partner
+      who does not post keeps its campaign but loses the 72-hour highlight and is not invited again); Sprint 08 did not
+      build the report. The events reader built for the leaderboard is what it would count from.
 - [x] `scripts/team/resolution-post.ts` writes a resolution post from a template; a person posts it; no X API (BR-33).
       **Done** (`tests/ops/resolution-post.test.ts`).
 - [x] The suggestions page is not built: BP v0.0.4 removed it (P1 §4.1, "quem tem uma ideia abre").
@@ -158,7 +173,8 @@ the site with both services on. The exit criteria X2 are met here.
 - [x] The `privacy-audit` skill answers the nine questions for the leaderboard (wallet addresses ranked in public) and
       for the report channel, before closure (gate 5), with what Cloudflare logs about visitors read and recorded (TP
       §14.4 C13 [AC]). **Done:** TP §8.2 (both PASS with conditions before going public: the live `/privacy`
-      corrected and linked, and who holds the X login; founder items 8 and 9) and
+      corrected and linked, and who holds the X login; founder items 8 and 9, answered 8a and 9a: the X login is
+      recorded, the corrected `/privacy` is still to be deployed) and
       `knowledge-base/tecnologia/cloudflare-logs-visitantes.md`; what the account's dashboard keeps is the founder's to
       read.
 - [x] The `release-check` skill passes. **RELEASE_WITH_NOTES** (2026-10-10): tests pass but the 3 CPI-proxy tests that
@@ -166,10 +182,12 @@ the site with both services on. The exit criteria X2 are met here.
       secret scan is clean; the privacy audit passes with conditions before the leaderboard is public; CHANGELOG, code
       map, sprint doc and session log are current; the OS self-test is coherent (its three standing warnings); the
       coordinator approved with caveats, applied. Notes: the conditions of TP §8.2 and founder items 3, 8 and 9 come
-      before the API redeploy that makes the leaderboard public.
-- [ ] Common closure (`docs/SPRINTS.md`, section 4). **Done but the merge:** the standard checks (CI on PR #63), the
-      secret scan, the code map, CHANGELOG and session log, the coordinator review and three adversarial-style reviews
-      (copy, legal, adversarial), the record and retrospective below. Merge and tag are the founder's.
+      before the API redeploy that makes the leaderboard public; 3 and 8 are answered and applied, and 9a's corrected
+      `/privacy` is what remains.
+- [x] Common closure (`docs/SPRINTS.md`, section 4). **Done:** the standard checks (CI on PR #63), the secret scan,
+      the code map, CHANGELOG and session log, the coordinator review and three adversarial-style reviews (copy, legal,
+      adversarial), the record and retrospective below; merged on 2026-10-10 (PR #63) and tagged `sprint-13` on
+      `2dc5cb1` once `main`'s CI passed.
 
 ## Deliverables
 
@@ -185,53 +203,51 @@ program: a person posts. Web Push, wallet alerts or any other notification (L-16
 
 ## Founder decisions that block the sprint
 
-Asked on 2026-10-10, at the start, in one list. Each is built as recommended and switchable in one place, so an answer
-changes one string or one constant.
+Asked on 2026-10-10, at the start, in one list, each built as recommended and switchable in one place. **Answered the
+same evening, after the merge: 1a to 12a, every one as recommended.** Only 3a changed code (a follow-up pull request,
+from `main` at `sprint-13`); 8a added the 15 days to the leaderboard page.
 
-1. **Where the leaderboard's data comes from** (the sprint's choice, recommended to the founder): (a) a
-   `/api/v1/leaderboard` route in the read API from the program's events, **built**; (b) the browser reading the chain;
-   (c) wait for Sprint 08. It goes live when the founder redeploys the read API.
-2. **L-09** (Product Brief v0.0.1 gap): what the screen says points are worth after devnet. Recommended and built:
-   "Points only count on devnet. They are not money, and nothing is promised for them after the test phase."
-   (`POINTS_WORTH`, `app/features/leaderboard/copy.ts`; "game" dropped after the legal review). If the answer is
-   "never", say so plainly; if points may ever be worth something, the lawyer reads it first.
-3. **What scores** (found while building; the adversarial review ranks it high): Q7 read literally scores a wallet with
-   entries on both sides, so 0.01 SOL on both sides of every campaign tops the board; one-sided pots and pots too small
-   to split score too; and a creator's other wallets can score on a burn it forces. Recommended: no point for a wallet
-   on both sides, and none in a pot that is refunded. Built as Q7 says; `BOTH_SIDES_SCORE` in
-   `packages/sdk/src/read/points.ts` switches the first; answer before the API redeploy, since a later change rewrites
-   every rank.
-4. **L-24** (Product Brief v0.0.1 gap): the partner report's format, and what happens to a partner who does not post.
-   Recommended: one text file per partner campaign with its result, entries and distinct wallets per side, SOL per
-   side and whether it ended one-sided, never an address; a partner who does not post keeps its campaign (it is
-   on-chain) but loses the 72-hour highlight and is not invited again. **Waiting:** the report is not built.
-5. **[Q] Where the report link leads:** the same public channel as L-13, or another. Recommended and built: the same X
-   account, https://x.com/brotmarkets (`REPORT_CAMPAIGN.url`).
-6. **BP-5 and BP-11** (P-9, open): "No human picks the winner." (`PRINCIPLE`) and Baked in writing with Cacetinho as
-   the spoken name (`MASCOT_NAME`), both in `app/features/how/copy.ts`. Built as recommended.
-7. **[Q] The thresholds of the three demand tests** (P2 §2.5), written before the devnet beta. Recommended: tests 1 and
-   2 keep v0.0.2's (fewer than 10% of wallets back within 30 days is a bad sign, 20% to 35% is reasonable; more than
-   40% of pots one-sided is a bad sign); test 3 is measured on devnet without a pass mark, and gets its threshold
-   before mainnet, since paying with test SOL proves nothing (P2 §2.5). Nothing in the code depends on it.
-8. **From the privacy review** (TP §8.2): who holds the X account's login and with which second factor; and how fast
-   the team answers a request to leave the ranking (the legal review proposes 15 days; the page promises no time until
-   you decide). The way to leave is built (a signed request and a hide list on the server).
-9. **The live legal pages** (found by the legal review): brot.markets' `/terms` and `/privacy`, approved 2026-10-08,
-   still describe USDC, automatic payouts with a 55-hour worst case, team powers that differ from `/record`, "No
-   profiles", the deletion of Brot's copy of a wallet's activity, and that the browser keeps only the theme (the new site
-   also keeps the wallet's name, saved campaigns and the entry retry guard); the new site's footer links no privacy
-   page.
-   Recommended: take `/terms` down until Sprint 17, correct `/privacy` (keeping the waitlist's deletion form), and link
-   it from the site's footer before the site is public. Deploying the landing is the founder's.
-10. **The success-rate column** (the approved prototype had it): dropped as a profile, after the legal review.
-    Recommended: keep it dropped.
-11. **"Your entry back plus your share of the rest"** (P1 §4.6's approved line) now says "when the losing side can pay
-    the fees": re-approve the qualified wording.
-12. **Prize harvesting** (found by the adversarial review, outside this sprint's code): one wallet entering both sides
-    of a paid campaign nobody else joins takes its prize at no risk (TP §13). Recommended: decide the rule before
-    mainnet (for example, a prize that pays out only in proportion to the losing side); nothing changes on devnet.
+1. **Where the leaderboard's data comes from: (a)**, a `/api/v1/leaderboard` route in the read API from the program's
+   events, as built; not (b) the browser reading the chain, nor (c) waiting for Sprint 08. It goes live when the
+   founder redeploys the read API.
+2. **L-09, what the screen says points are worth after devnet: (a)**, "Points only count on devnet. They are not money,
+   and nothing is promised for them after the test phase." (`POINTS_WORTH`, `app/features/leaderboard/copy.ts`), as
+   built. Should points ever be worth something, the lawyer reads the wording first.
+3. **What scores: (a), none of the three cases Q7 read literally scored.** No point for a wallet with entries on both
+   sides of a campaign (0.01 SOL on both sides of every campaign topped the board); none in a pot refunded as
+   one-sided, with one side empty or a losing side too small to pay the fees; none for the wallet that opened a burn,
+   lock or stake campaign, whose result its creator can control. The creator's other wallets cannot be told apart
+   on-chain and still score; the page says so. Applied before the API redeploy, so no published rank is rewritten
+   (`packages/sdk/src/read/points.ts`, `services/api/src/leaderboard.ts`).
+4. **L-24, the partner report: (a)**, one text file per partner campaign with its result, entries and distinct wallets
+   per side, SOL per side and whether it ended one-sided, never an address; a partner who does not post keeps its
+   campaign (it is on-chain) but loses the 72-hour highlight and is not invited again. **Waiting:** the report is
+   Sprint 08's, not built.
+5. **[Q] Where the report link leads: (a)**, the same X account as L-13, https://x.com/brotmarkets
+   (`REPORT_CAMPAIGN.url`), as built; not an email address (there is none) nor a form on the site (personal data).
+6. **BP-5 and BP-11 (P-9): (a)**, "No human picks the winner." (`PRINCIPLE`) and Baked in writing, with Cacetinho
+   only spoken (`MASCOT_NAME`), both in `app/features/how/copy.ts`, as built.
+7. **[Q] The thresholds of the three demand tests (P2 §2.5): (a)**, tests 1 and 2 keep v0.0.2's (fewer than 10% of
+   wallets back within 30 days is a bad sign, 20% to 35% is reasonable; more than 40% of pots one-sided is a bad
+   sign); test 3 is measured on devnet without a pass mark and gets its threshold before mainnet, since paying with
+   test SOL proves nothing (P2 §2.5). Nothing in the code depends on it.
+8. **From the privacy review (TP §8.2): (a)**, a request to leave the ranking is answered within 15 days (the legal
+   review's proposal; the lawyer confirms the period before mainnet), and the page says so (`BOARD.leave`). The X
+   account's login is held by the CTO, with an authenticator app as the second factor.
+9. **The live legal pages: (a)**, take brot.markets' `/terms` down until Sprint 17, correct `/privacy` (keeping the
+   waitlist's deletion form), and link it from the site's footer before the site is public. The text is prepared in
+   the repository; deploying the landing is the founder's. **Waiting:** not done yet. The pages still describe USDC,
+   automatic payouts with a 55-hour worst case, team powers that differ from `/record`, "No profiles", the deletion of
+   Brot's copy of a wallet's activity, and a browser that keeps only the theme.
+10. **The success-rate column** (the approved prototype had it): **(a)**, kept dropped, as a profile.
+11. **"Your entry back plus your share of the rest, when the losing side can pay the fees"** (P1 §4.6's approved line,
+    qualified by the viability rule): **(a)**, re-approved.
+12. **Prize harvesting** (the adversarial review; one wallet entering both sides of a paid campaign nobody else joins
+    takes its prize at no risk, TP §13): **(a)**, the rule is decided before mainnet, for example a prize that pays
+    out only in proportion to the losing side; nothing changes on devnet. It is a program change, inside the audit
+    scope (TP §14.2).
 
-- **Answered:** TP v0.0.1 Q7 (a: 1 point per campaign entered on the right side, for devnet); the payout wording on
+- **Answered earlier:** TP v0.0.1 Q7 (a: 1 point per campaign entered on the right side, for devnet); the payout wording on
   devnet (Sprint 12: "Waiting for payout", no time promised; the L-03 devnet wording; the "Result final" chip).
 
 ## Agents and skills
@@ -303,6 +319,7 @@ The record is at the top of this file (2026-10-10). Retrospective:
   through the site waits for `/abrir` (Sprint 19), and X2.2 for real phones. An early edit of the post script did not
   apply (the formatter had reflowed the line) and went unnoticed until two reviewers found it: re-read after a scripted
   edit.
-- **Carried:** founder items 1 to 12 (above); TP §7.4's deferrals (the web smoke in CI, the indexer for the history, a
-  tombstone for closed campaigns and the program's floor in a lopsided pot for the audit scope); the partner report
-  (L-24 and Sprint 08); the live `/terms` and `/privacy`; prize harvesting before mainnet (TP §13).
+- **Carried:** TP §7.4's deferrals (the web smoke in CI, the indexer for the history, a tombstone for closed campaigns
+  and the program's floor in a lopsided pot for the audit scope); the partner report (L-24 answered, Sprint 08); the
+  live `/terms` and `/privacy` (answer 9a, the founder deploys); prize harvesting's rule before mainnet (answer 12a, TP
+  §13). The twelve founder items are answered.

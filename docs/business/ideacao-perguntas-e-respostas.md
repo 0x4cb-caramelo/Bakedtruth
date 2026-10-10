@@ -9,6 +9,31 @@ Quando uma resposta posterior muda uma anterior, vale a posterior. A seção 1 t
 
 ## 1. Estado consolidado (vale este)
 
+### Decisões de 10 de outubro de 2026, sobre as perguntas da Sprint 13 — prevalecem sobre tudo abaixo
+
+Dadas pelo Ronaldo, depois da mescla do PR #63: "Yes, 1a to 12a all as recommended". A lista, com as opções, está em
+`docs/sprints/sprint-13-site-notices-copy.md` ("Founder decisions"); o porquê, em
+`session-log/2026-10-10-respostas-do-fundador-e-mescla-da-sprint-13.md`.
+
+- **Pontos do devnet:** vêm da rota `/api/v1/leaderboard`, a partir dos eventos do programa; não são dinheiro, e nada
+  é prometido por eles depois da fase de testes (L-09). Não pontuam a carteira com entradas nos dois lados de uma
+  campanha, o pote devolvido (um lado vazio, ou um lado perdedor pequeno demais para pagar as taxas) e a carteira de
+  quem abriu uma campanha de queima, trava ou stake.
+- **O relatório do parceiro (L-24):** um arquivo de texto por campanha de parceiro, sem endereço nenhum; o parceiro que
+  não posta mantém a campanha, mas perde o destaque de 72 horas e o próximo convite.
+- **"Report this campaign"** leva à conta do X (https://x.com/brotmarkets).
+- **BP-5 e BP-11:** "No human picks the winner."; o mascote é Baked por escrito, e Cacetinho só falado.
+- **Testes de demanda:** os limites da v0.0.2 para os testes 1 e 2; o teste 3 é medido no devnet e ganha a marca antes
+  da mainnet.
+- **O login da conta do X:** "I (the CTO) hold the X account login, secured with an Authenticator app for 2FA". Um
+  pedido para sair do ranking é respondido em até 15 dias, prazo que o advogado confirma antes da mainnet.
+- **As páginas `/terms` e `/privacy` no ar:** a `/terms` sai do ar até a Sprint 17; a `/privacy` é corrigida e linkada
+  no rodapé do site antes de ele ser público.
+- **A taxa de acerto por carteira** continua fora do ranking.
+- **"Your entry back plus your share of the rest", com "when the losing side can pay the fees"**: aprovada de novo.
+- **A colheita de prêmio** (uma carteira nos dois lados de uma campanha paga em que ninguém mais entra leva o prêmio):
+  a regra se decide antes da mainnet; nada muda no devnet.
+
 ### Decisões de 9 de outubro de 2026, sobre as perguntas das Sprints 02 a 04 — prevalecem sobre tudo abaixo
 
 Dadas pelo Ronaldo em sessão de trabalho com o assistente, em resposta às perguntas que a Sprint 03 deixou ao fundador
