@@ -1,7 +1,7 @@
 /**
  * Purpose: open one short-lived BTC/USD price campaign on devnet for the keeper's real-resolve test (Sprint 06):
- *          target 1.2% above the sponsored price (past its confidence band, at the 1% minimum distance), two-day
- *          deadline. Free only for a team key (TEAM_KEYPAIR); any other wallet pays the opening fee in SOL.
+ *          target 1.2% above the sponsored price (past its confidence band, at the 1% minimum distance), four-day
+ *          deadline (the devnet build needs 3 to 90 days; DurationTooShort is 0x17a3). Free only for a team key (TEAM_KEYPAIR); any other wallet pays the opening fee in SOL.
  * Version: 0.1.0
  * Sprint:  06 (server and primary keeper), the real-resolve test
  *
@@ -29,7 +29,7 @@ async function main() {
       kind: ReaderKind.PriceTouch,
       feedId: hex,
       target,
-      deadlineAt: now + 2n * DAY,
+      deadlineAt: now + 4n * DAY,
       id: randomCampaignId(),
       openingUsd: 0n,
       maxLamports: 0n,

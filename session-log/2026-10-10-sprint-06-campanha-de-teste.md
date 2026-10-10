@@ -21,7 +21,7 @@ O fundador pediu uma campanha curta no devnet, com alvo quase no preço atual, a
 ## O que foi feito
 
 - `scripts/devnet-open-test.ts`: abre uma campanha de preço do BTC/USD, alvo 1,2% acima da faixa de confiança
-  (acima do mínimo de 1%), prazo de dois dias. Exige `TEAM_KEYPAIR` (chave de equipe) e `-- --cluster devnet`. Sem a chave,
+  (acima do mínimo de 1%), prazo de quatro dias (o mínimo do programa no devnet é de três dias; `DurationTooShort`, 0x17a3, recusou dois). Exige `TEAM_KEYPAIR` (chave de equipe) e `-- --cluster devnet`. Sem a chave,
   recusa e não envia nada (conferido).
 - Nenhuma campanha foi aberta; nenhuma transação foi enviada.
 
