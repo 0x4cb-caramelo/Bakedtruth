@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **778** |
+| Arquivos mapeados | **783** |
 | Acima de 200 linhas | **39** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -127,7 +127,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`page.tsx`](app/app/record/page.tsx) | the public record at /record (Sprint 12; the route name confirmed by the founder with L-01): the team's voids and corrections from content/void-log/, read on th | 18 |
+| [`page.tsx`](app/app/record/page.tsx) | the public record at /record (Sprint 12; the route name confirmed by the founder with L-01): since Sprint 13, first who can do what (content/powers.md, BR-41) w | 25 |
 
 ## `app/components/`
 
@@ -277,8 +277,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`copy.ts`](app/features/record/copy.ts) | the words of the public record (Sprint 12; BR-45; English per L-01, route `/record` confirmed by the founder): what the record holds, how to check a record agai | 32 |
+| [`copy.ts`](app/features/record/copy.ts) | the words of the public record (Sprint 12; BR-45; English per L-01, route `/record` confirmed by the founder): what the record holds, how to check a record agai | 47 |
+| [`live-keys.tsx`](app/features/record/live-keys.tsx) | the powers table's keys checked against the chain in the visitor's browser (BR-41; "anyone can re-check"): the program's upgrade authority from its ProgramData  | 84 |
+| [`load-powers.ts`](app/features/record/load-powers.ts) | the powers table (BR-41), read on the server when the site is built from content/powers.md and parsed into blocks (markdown.ts). Its keys table must name the fo | 31 |
 | [`load-void-log.ts`](app/features/record/load-void-log.ts) | the void log read on the server (the site's build and its server render; never in the browser): every record in content/void-log/ (not the README, the JSON Sche | 33 |
+| [`markdown.ts`](app/features/record/markdown.ts) | the few Markdown blocks content/powers.md uses, parsed without a library (Sprint 13): headings, paragraphs, pipe tables (a header, a separator, rows) and inline | 55 |
+| [`powers-view.tsx`](app/features/record/powers-view.tsx) | the powers table on /record (BR-41, Sprint 13 DoD): content/powers.md drawn on the server, block by block (headings, paragraphs, tables, inline code), with ever | 88 |
 | [`record-list.tsx`](app/features/record/record-list.tsx) | the public record (Sprint 12 DoD: voids and decisions, with reasons, from content/void-log/; BR-45), drawn on the server from the void log: each void with its c | 85 |
 
 ## `app/features/report/`
@@ -1374,6 +1378,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`fee-example.test.ts`](tests/site/fee-example.test.ts) | the fee page's worked example is the SDK's math, and it is P1 §1.2's case (Sprint 13 DoD; BR-32): 600 on YES and 400 on NO (here 6 and 4 SOL) give a fee of 40,  | 64 |
 | [`my-entries.test.ts`](tests/site/my-entries.test.ts) | the rows of "My entries" through a whole cycle, read the way the page reads them (the chain behind the recording RPC, the wallet's history): while settling, eac | 150 |
 | [`page-format.test.ts`](tests/site/page-format.test.ts) | how the campaign page writes what it read: exact grouped integers, a value in its kind's units, an age, the visitor's local time (built with options a browser a | 37 |
+| [`powers.test.ts`](tests/site/powers.test.ts) | the powers table (BR-41, Sprint 13 DoD): content/powers.md is published on /record with who holds each key and the limit of each power (P4 §4.2), its four roles | 74 |
 | [`received.test.ts`](tests/site/received.test.ts) | what "my entries" says a wallet received equals the program's settlement events for that wallet, and the SOL that actually reached it (Sprint 12 DoD), on whole  | 172 |
 | [`recheck-commands.test.ts`](tests/site/recheck-commands.test.ts) | the re-check panel's commands fetch the bytes the program's readers read (BR-23): on real captured accounts, the byte range each command asks for decodes to the | 79 |
 | [`relay-trace.test.ts`](tests/site/relay-trace.test.ts) | the relay's allowlist is taken from a trace of the real client (Sprint 11 DoD; proposal §2.6): the campaign page's reads, the entry's preparation, the hand-off  | 111 |
