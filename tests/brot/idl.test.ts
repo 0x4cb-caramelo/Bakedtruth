@@ -9,7 +9,7 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { generateKeyPairSigner, isSignerRole, isWritableRole, type Address, type Instruction } from "@solana/kit";
 
-import { BROT_MARKETS_PROGRAM_ID } from "../../packages/sdk/src";
+import { PROGRAM_ID as BROT_MARKETS_PROGRAM_ID } from "@brot/sdk/read";
 import { BrotError } from "./errors";
 import { EVENTS } from "./events";
 import { DEFAULT_PARAMS } from "./flows";

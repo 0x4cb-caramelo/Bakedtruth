@@ -1,6 +1,6 @@
 # Sprint 04 — Window, settlement, payout, fees, creator share and invariants
 
-**Status:** planned · **Branch:** `sprint-04-settlement-invariants` · **Dates:** none, by the founder's decision
+**Status:** done, merged into `main` with PR #41 on 2026-10-09; tagged `sprint-04` · **Branch:** `sprint-04-settlement-invariants` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -243,7 +243,8 @@ shows it. Everything not listed as verified below is open, and goes to the owner
   Sprint 14. `share` succeeds only 4 times. The team paths need their own targeted draws.
 - **The viability rule's wording.** The founder's decision says the fees are "charged on the winning side's principal";
   the code and the Technical Plan charge the house fee on the losing side, and the share on the whole pot. The two
-  readings give different results for some pots. Open for the founder before the merge.
+  readings give different results for some pots. Answered on 2026-10-09 by Ronaldo: the code's reading is the rule
+  (the house fee on the losing side, the share on the whole pot).
 - **Worked examples changed.** V 990 / P 10 and V 98,900 / P 1,100, with or without the prize, now resolve one-sided,
   not split. The sprint's worked-example list above describes the earlier split values; the tests carry the new ones.
 - **Reviewer items not closed.** The payout invariant in `bookkeeping.rs` is still a tautology and should be a real

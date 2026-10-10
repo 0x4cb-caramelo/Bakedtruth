@@ -1,221 +1,126 @@
-// Shared setup for the devnet scripts: connection, deployer, Anchor client, sending, and the raw SPL
-// Token instructions the scripts need to set up test tokens.
-//
-// DEVNET_WALLET (default ~/.config/solana/pred-provable-devnet.json) is the payer and sponsor;
-// DEVNET_RPC_URL overrides the RPC (point it at a Surfpool fork to rehearse).
+/**
+ * Purpose: the session the devnet scripts (smoke, seed) share: the cluster they write to, the payer, a team key,
+ *          wallets, funding and fresh prices. `--cluster local` (the default) starts its own offline surfnet in a
+ *          loopback-only namespace, with the program installed, the config initialized and a team set, so a run
+ *          touches no live cluster; `--cluster devnet` needs the deployed, initialized program and is refused
+ *          without that flag.
+ * Version: 0.2.0
+ * Sprint:  05 (SDK and the devnet cycle), lane OPS; replaces the pred-provable/USDC/Anchor helpers
+ *
+ * Environment (TP §11): DEVNET_RPC_URL (default devnet's public RPC), DEVNET_WALLET (the payer's keypair file,
+ * default ~/.config/solana/pred-provable-devnet.json), TEAM_KEYPAIR (your own team key). Keys stay on the machine.
+ */
+import { address, generateKeyPairSigner, type KeyPairSigner } from "@solana/kit";
 
-import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
-import { homedir } from "node:os";
-import { AnchorProvider, Program, Wallet, type Idl } from "@anchor-lang/core";
-import {
-  Connection,
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-  TransactionInstruction,
-  type Signer,
-} from "@solana/web3.js";
+import { configAddress, decodeGlobalConfig, isTeamKey, type GlobalConfig } from "@brot/sdk/read";
 
-import idl from "../app/lib/idl/pred_provable.json";
-import type { PredProvable } from "../app/lib/idl/pred_provable";
-import * as lib from "../app/lib/market";
+import { initializeConfig, readInitParams, setTeam } from "./deploy/initialize";
+import { clusterArgs, openCluster, type ClusterName } from "./validator/clusters";
+import { isolateOrExit } from "./validator/isolate";
+import { derivedSigner, keypairFromEnv } from "./validator/keys";
+import { account, airdrop, expectOk, send, type Rpc } from "./validator/rpc";
+import { transferIx } from "./validator/spl-token";
+import { refreshPrices, SOL, startLocalWorld } from "./validator/world";
 
-export const RPC_URL = process.env.DEVNET_RPC_URL ?? "https://api.devnet.solana.com";
-const WALLET = process.env.DEVNET_WALLET ?? `${homedir()}/.config/solana/pred-provable-devnet.json`;
-export const USDC = 1_000_000n;
+export { SOL };
+export const DEFAULT_WALLET = "~/.config/solana/pred-provable-devnet.json";
 
-export const connection = new Connection(RPC_URL, "confirmed");
-export const deployer = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(WALLET, "utf8"))));
-/** A keypair derived from the deployer's secret: the same on every run, so its funds are never lost. */
-export const derived = (role: string) =>
-  Keypair.fromSeed(createHash("sha256").update(deployer.secretKey).update(role).digest());
-export const provider = new AnchorProvider(connection, new Wallet(deployer), { commitment: "confirmed" });
-export const program = new Program<PredProvable>(idl as Idl, provider);
-
-// --- Small utilities ------------------------------------------------------------------------
-
-export function check(condition: unknown, message: string): asserts condition {
-  if (!condition) throw new Error(`check failed: ${message}`);
-}
-
-export function expectEqual(actual: bigint, expected: bigint, what: string) {
-  check(actual === expected, `${what}: expected ${expected}, got ${actual}`);
-}
-
-export const explorer = (sig: string) => `https://explorer.solana.com/tx/${sig}?cluster=devnet`;
-export const fmt = (base: bigint) => `${Number(base) / 1e6}`;
-
-/** Sends one transaction (deployer pays) and returns its signature and decoded program events. */
-export async function send(label: string, ixs: TransactionInstruction[], signers: Signer[] = []) {
-  const sig = await provider.sendAndConfirm(new Transaction().add(...ixs), signers);
-  const tx = await connection.getTransaction(sig, { commitment: "confirmed", maxSupportedTransactionVersion: 0 });
-  const events = lib.decodeEvents(tx?.meta?.logMessages ?? []);
-  console.log(`  ✓ ${label}  [${events.map((e) => e.name).join(", ") || "no events"}]\n    ${explorer(sig)}`);
-  return { sig, events };
-}
-
-/** Asserts that `ixs` fail in simulation with `error` in the logs (nothing is sent). */
-export async function expectFailure(label: string, ixs: TransactionInstruction[], signers: Signer[], error: string) {
-  const tx = new Transaction().add(...ixs);
-  tx.feePayer = deployer.publicKey;
-  tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-  tx.sign(deployer, ...signers);
-  const sim = await connection.simulateTransaction(tx);
-  const logs = sim.value.logs?.join("\n") ?? "";
-  check(sim.value.err && logs.includes(error), `${label}: expected ${error}, got ${JSON.stringify(sim.value.err)}`);
-  console.log(`  ✓ ${label} fails with ${error}`);
-}
-
-export async function tokenAmount(account: PublicKey) {
-  const info = await connection.getAccountInfo(account);
-  return info ? info.data.readBigUInt64LE(64) : 0n;
-}
-
-export async function mintSupply(mint: PublicKey) {
-  const info = await connection.getAccountInfo(mint);
-  check(info, `mint ${mint.toBase58()} exists`);
-  return info.data.readBigUInt64LE(36);
-}
-
-export const usdcOf = (owner: PublicKey) => tokenAmount(lib.ataAddress(owner, lib.USDC_MINT));
-
-// --- Raw SPL Token instructions (layouts from spl-token) ------------------------------------
-
-const splIx = (keys: [PublicKey, boolean, boolean][], data: Buffer) =>
-  new TransactionInstruction({
-    programId: lib.TOKEN_PROGRAM_ID,
-    keys: keys.map(([pubkey, isSigner, isWritable]) => ({ pubkey, isSigner, isWritable })),
-    data,
-  });
-
-const withAmount = (tag: number, amount: bigint, extra: number[] = []) => {
-  const data = Buffer.alloc(9 + extra.length);
-  data[0] = tag;
-  data.writeBigUInt64LE(amount, 1);
-  extra.forEach((byte, i) => (data[9 + i] = byte));
-  return data;
+export type Session = {
+  rpc: Rpc;
+  cluster: ClusterName;
+  /** Pays the network fees of the steps nobody in particular signs (resolve, settle, close). */
+  payer: KeyPairSigner;
+  /** A key in `GlobalConfig.team`: yours on devnet, a fresh one locally. */
+  team: KeyPairSigner;
+  config: () => Promise<GlobalConfig>;
+  /** A wallet for `role`: fresh locally; derived from DEVNET_WALLET on devnet, so a rerun reuses it. */
+  wallet: (role: string) => Promise<KeyPairSigner>;
+  /** Tops `address` up to at least `lamports`. */
+  fund: (address: string, lamports: bigint) => Promise<void>;
+  /** Locally, stamps the price accounts with the cluster's time; on devnet the push oracle does. */
+  freshPrices: () => Promise<void>;
+  stop: () => void;
 };
 
-/** InitializeMint2, 6 decimals, with an optional freeze authority. */
-export const initializeMintIx = (mint: PublicKey, authority: PublicKey, freezeAuthority?: PublicKey) =>
-  splIx(
-    [[mint, false, true]],
-    Buffer.concat([
-      Buffer.from([20, 6]),
-      authority.toBuffer(),
-      freezeAuthority ? Buffer.concat([Buffer.from([1]), freezeAuthority.toBuffer()]) : Buffer.from([0]),
-    ]),
-  );
-export const mintToIx = (mint: PublicKey, to: PublicKey, authority: PublicKey, amount: bigint) =>
-  splIx(
-    [
-      [mint, false, true],
-      [to, false, true],
-      [authority, true, false],
-    ],
-    withAmount(7, amount),
-  );
-/** SetAuthority(MintTokens, None): nobody can ever mint again. */
-export const revokeMintAuthorityIx = (mint: PublicKey, authority: PublicKey) =>
-  splIx(
-    [
-      [mint, false, true],
-      [authority, true, false],
-    ],
-    Buffer.from([6, 0, 0]),
-  );
-export const burnIx = (account: PublicKey, mint: PublicKey, owner: PublicKey, amount: bigint) =>
-  splIx(
-    [
-      [account, false, true],
-      [mint, false, true],
-      [owner, true, false],
-    ],
-    withAmount(8, amount),
-  );
-export const closeAccountIx = (account: PublicKey, owner: PublicKey) =>
-  splIx(
-    [
-      [account, false, true],
-      [owner, false, true],
-      [owner, true, false],
-    ],
-    Buffer.from([9]),
-  );
-export const usdcTransferIx = (from: PublicKey, to: PublicKey, amount: bigint) =>
-  splIx(
-    [
-      [lib.ataAddress(from, lib.USDC_MINT), false, true],
-      [lib.USDC_MINT, false, false],
-      [lib.ataAddress(to, lib.USDC_MINT), false, true],
-      [from, true, false],
-    ],
-    withAmount(12, amount, [lib.USDC_DECIMALS]),
-  );
-export const transferIx = (from: PublicKey, to: PublicKey, owner: PublicKey, amount: bigint) =>
-  splIx(
-    [
-      [from, false, true],
-      [to, false, true],
-      [owner, true, false],
-    ],
-    withAmount(3, amount),
-  );
+const readConfig = async (rpc: Rpc) => {
+  const found = await account(rpc, await configAddress());
+  if (!found) throw new Error("no initialized config on this cluster: deploy first (deploy/devnet/README.md)");
+  return decodeGlobalConfig(found);
+};
 
-/** Creates and initializes a 6-decimal SPL mint at `mint` (which must sign) with `authority`. */
-export async function createMintIxs(mint: PublicKey, authority: PublicKey, freezeAuthority?: PublicKey) {
-  return [
-    SystemProgram.createAccount({
-      fromPubkey: deployer.publicKey,
-      newAccountPubkey: mint,
-      lamports: await connection.getMinimumBalanceForRentExemption(82),
-      space: 82,
-      programId: lib.TOKEN_PROGRAM_ID,
-    }),
-    initializeMintIx(mint, authority, freezeAuthority),
-  ];
+/** A local session: offline surfnet, program at its id, config from deploy/devnet/init-params.json, one team key. */
+async function localSession(): Promise<Session> {
+  const world = await startLocalWorld();
+  const { rpc } = world;
+  const [payer, team, admin] = await Promise.all([
+    generateKeyPairSigner(),
+    generateKeyPairSigner(),
+    generateKeyPairSigner(),
+  ]);
+  for (const s of [payer, team, admin]) await airdrop(rpc, s.address, 1_000n * SOL);
+  const params = readInitParams("deploy/devnet/init-params.json");
+  const plan = { authority: world.upgradeAuthority, admin: admin.address, feeRecipient: admin.address, params };
+  await initializeConfig(rpc, world.upgradeAuthority, plan);
+  await setTeam(rpc, admin, admin, [team.address]);
+  return {
+    rpc,
+    cluster: "local",
+    payer,
+    team,
+    config: () => readConfig(rpc),
+    wallet: () => generateKeyPairSigner(),
+    fund: async (to, lamports) => airdrop(rpc, to, lamports),
+    freshPrices: async () => void (await refreshPrices(rpc)),
+    stop: () => world.surfnet.stop(),
+  };
 }
 
-export const TOKEN_METADATA_PROGRAM_ID = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
+/** A devnet session: the program must be deployed and initialized, and TEAM_KEYPAIR must be a team key. */
+async function devnetSession(url: string): Promise<Session> {
+  const rpc = await openCluster(url, "devnet");
+  const walletPath = process.env.DEVNET_WALLET ?? DEFAULT_WALLET;
+  const payer = await keypairFromEnv("DEVNET_WALLET", DEFAULT_WALLET);
+  const team = await keypairFromEnv("TEAM_KEYPAIR");
+  const config = await readConfig(rpc);
+  if (!isTeamKey(config, team.address)) throw new Error(`TEAM_KEYPAIR ${team.address} is not a team key on devnet`);
+  return {
+    rpc,
+    cluster: "devnet",
+    payer,
+    team,
+    config: () => readConfig(rpc),
+    wallet: (role) => derivedSigner(walletPath, role),
+    fund: async (to, lamports) => {
+      const have = (await account(rpc, to))?.lamports ?? 0n;
+      if (have >= lamports) return;
+      expectOk(await send(rpc, payer, [transferIx(payer, address(to), lamports - have)]), `fund ${to}`);
+    },
+    freshPrices: async () => {},
+    stop: () => {},
+  };
+}
 
 /**
- * Metaplex CreateMetadataAccountV3 (name and symbol, no creators or collection), signed by the
- * mint authority. The deployer pays and stays update authority.
+ * Opens the session the command line asks for. `scriptPath` is the calling script (`import.meta.path`): a local
+ * session re-runs it inside the loopback-only namespace before anything starts.
  */
-export function createMetadataIx(mint: PublicKey, mintAuthority: PublicKey, name: string, symbol: string) {
-  const metadata = PublicKey.findProgramAddressSync(
-    [Buffer.from("metadata"), TOKEN_METADATA_PROGRAM_ID.toBuffer(), mint.toBuffer()],
-    TOKEN_METADATA_PROGRAM_ID,
-  )[0];
-  const text = (value: string) => {
-    const bytes = Buffer.from(value);
-    const out = Buffer.alloc(4 + bytes.length);
-    out.writeUInt32LE(bytes.length);
-    bytes.copy(out, 4);
-    return out;
-  };
-  const data = Buffer.concat([
-    Buffer.from([33]), // CreateMetadataAccountV3
-    text(name),
-    text(symbol),
-    text(""), // uri
-    Buffer.from([0, 0]), // seller fee basis points
-    Buffer.from([0, 0, 0]), // creators, collection, uses: None
-    Buffer.from([1]), // is_mutable
-    Buffer.from([0]), // collection_details: None
-  ]);
-  return new TransactionInstruction({
-    programId: TOKEN_METADATA_PROGRAM_ID,
-    keys: [
-      { pubkey: metadata, isSigner: false, isWritable: true },
-      { pubkey: mint, isSigner: false, isWritable: false },
-      { pubkey: mintAuthority, isSigner: true, isWritable: false },
-      { pubkey: deployer.publicKey, isSigner: true, isWritable: true },
-      { pubkey: deployer.publicKey, isSigner: true, isWritable: false },
-      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
-    ],
-    data,
-  });
+export async function openSession(scriptPath: string): Promise<Session> {
+  const { url, cluster } = clusterArgs();
+  if (cluster === "local") {
+    isolateOrExit(scriptPath);
+    return localSession();
+  }
+  return devnetSession(url);
 }
+
+/** One step's line in the log. */
+export const step = (label: string) => console.log(`\n▸ ${label}`);
+
+/** Fails the run unless `condition` holds; a smoke run exits 0 only if every check passed. */
+export function check(condition: unknown, message: string): asserts condition {
+  if (!condition) throw new Error(`check failed: ${message}`);
+  console.log(`  ✓ ${message}`);
+}
+
+/** Lamports as SOL, for the log. */
+export const sol = (lamports: bigint) => `${(Number(lamports) / 1e9).toFixed(9)} SOL`;

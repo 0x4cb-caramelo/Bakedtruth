@@ -5,7 +5,7 @@
  * Version: 0.0.1
  * Sprint:  02 (pot core on Pinocchio), lane F
  */
-import { BROT_MARKETS_IDL } from "../../packages/sdk/src";
+import { BROT_MARKETS_IDL } from "@brot/sdk/read";
 import { sizeOf, type FieldType, type Layout } from "./layouts";
 
 type IdlType = string | { array: [IdlType, number] } | { defined: string };

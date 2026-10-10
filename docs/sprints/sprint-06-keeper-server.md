@@ -24,7 +24,9 @@ another's keys.
 - [ ] `services/keeper/src` has `loop.ts`, `tasks/`, `health.ts`, `signer.ts`, `rpc.ts` and `landing.ts` (TP §3.2). The
       keeper keeps no state: it re-reads the chain each cycle, decides with the SDK's `read` half, builds with `tx`, and
       simulates before sending.
-- [ ] **Its tasks** (proposal §1.7): resolve; `finalize_campaign` after `review_ends_at`; `settle_entry` in simulated
+- [ ] **Its tasks** (proposal §1.7): resolve; `tally_late_joins` for every baker of a campaign with entries (the
+      program refuses confirm and finalize with `NotTallied` until then, TP §3.4.19); `finalize_campaign` after
+      `review_ends_at`; `settle_entry` in simulated
       batches, then `settle_creator_share`; a daily retry of reserved credits; then `collect_fee`, `settle_prize`,
       `close_campaign` and `sweep_fees`. Each is idempotent. The keeper never creates an account for anyone.
 - [ ] **Batched reads:** every open campaign's metric account, 100 per `getMultipleAccounts`. **Price per feed, not
@@ -139,6 +141,23 @@ From Sprint 03 and its record, "Carried to Sprints 04 and 05", and the founder's
 - **Question 1, follow-up:** more Pyth feeds join the compiled list (Sprint 04) from this sprint on, and only once our
   own keeper keeps the feed's sponsored account updated. A feed joins the list only then; the list stays
   append-only, and the change is a reviewed code change.
+
+From Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and retrospective").
+
+- **The negative run on Agave's runtime.** Sprint 05 ran it on Surfpool `--offline` (LiteSVM), since
+  `solana-test-validator` 3.1.10 needs AVX2 and the development machine lacks it. A CI job on GitHub's runners runs it
+  on `solana-test-validator`, with the admin, resolve and settlement refusal suites too; the states the run writes by
+  `surfnet_setAccount` come from `--account` preloads or real instructions instead.
+- **A week of devnet price and clock data** (from Sprint 02's reviews, not done in Sprint 05): SOL/USD age, confidence
+  and cadence, and `unix_timestamp` against wall time, in `knowledge-base/`, before mainnet values are set.
+- **A runbook line for a Pyth migration** (from Sprint 02's reviews, not written in Sprint 05): the receiver, the push
+  oracle and the shard are compiled constants, so a move by Pyth stops every price opening until an upgrade.
+- **Drill or real constants on devnet.** This sprint's X1.1 asks for the drill constants; Sprint 05 deployed the real
+  ones (`5Rx8…n8o`, Ronaldo's decision of 2026-10-09). A drill build needs its own artifact, then an upgrade or a second
+  program.
+- **The epoch turn on devnet** (the one devnet check Sprint 05 left): a `StakePoolTvlAtLeast` campaign opened on the
+  deployed program before an epoch turn and resolved after it. It needs a stake pool on devnet (`seed:devnet` takes
+  `--stake-pool`); devnet's epochs last about 28 hours at 235 ms slots.
 
 ## Risks
 

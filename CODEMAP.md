@@ -8,9 +8,9 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **411** |
-| Acima de 200 linhas | **49** ⚠️ |
-| Sem cabeçalho `Purpose:` | **80** ⚠️ |
+| Arquivos mapeados | **547** |
+| Acima de 200 linhas | **45** ⚠️ |
+| Sem cabeçalho `Purpose:` | **77** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
 
@@ -42,9 +42,6 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `prototype-lab/shared/mock-data.js` — 290 linhas
 - `scripts/codemap.js` — 223 linhas
 - `scripts/devnet-clock-probe.ts` — 201 linhas
-- `scripts/devnet-seed.ts` — 246 linhas
-- `scripts/devnet-smoke.ts` — 273 linhas
-- `scripts/devnet.ts` — 222 linhas
 - `scripts/os-self-test.js` — 406 linhas
 - `scripts/pyth-sponsored-feeds.ts` — 201 linhas
 - `scripts/slot-matrix-spec.ts` — 272 linhas
@@ -62,11 +59,16 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `tests/brot/join-campaign-support.ts` — 203 linhas
 - `tests/brot/layout-v1.test.ts` — 245 linhas
 - `tests/brot/resolve-support.ts` — 205 linhas
-- `tests/brot/setup.ts` — 203 linhas
 - `tests/brot/slot-matrix-fixtures.ts` — 267 linhas
 - `tests/brot/slot-matrix.gen.ts` — 428 linhas
 
 ---
+
+## `(raiz)`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`.dependency-cruiser.cjs`](.dependency-cruiser.cjs) | the import rules of the SDK and its consumers (proposal 2.3 and 3.2; TP 3.2, 10): the read half never imports the transaction half; the SDK imports no Node buil | 91 |
 
 ## `.claude/hooks/`
 
@@ -177,11 +179,96 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`engine.ts`](app/lib/mascot/engine.ts) | Baked, the mascot, as a page resident. It does not follow the cursor freely: it hops to the | 302 |
 | [`perches.ts`](app/lib/mascot/perches.ts) | Where the mascot may stand. A page declares perches as data attributes on any element: | 65 |
 
-## `packages/sdk/src/`
+## `packages/sdk/src/read/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`index.ts`](packages/sdk/src/index.ts) | public entry of the Brot Markets client library, shared by the site, the services, the scripts and the tests. Must stay free of React and Next imports | 21 |
+| [`accounts.ts`](packages/sdk/src/read/accounts.ts) | the program's own accounts decoded from their bytes (Codama's codecs, from the Shank IDL), after the checks the program makes before it reads a field: the owner | 70 |
+| [`bytes.ts`](packages/sdk/src/read/bytes.ts) | small byte helpers the SDK shares, written without `Buffer`, `TextEncoder` or any Node or DOM API, so they run the same in a browser, in Bun and under React Nat | 39 |
+| [`constants.ts`](packages/sdk/src/read/constants.ts) | the program's address and the constants compiled into it that a client needs: seeds, other programs, code ceilings, price and reader bounds, account sizes, and  | 115 |
+| [`decoder.ts`](packages/sdk/src/read/decoder.ts) | the program's events out of a transaction as the RPC returns it (`getTransaction` with JSON encoding, or `simulateTransaction`), under the four decoder rules ev | 153 |
+| [`events.ts`](packages/sdk/src/read/events.ts) | the program's events: each name with its discriminator and the Codama decoder of its payload, and the decoding of one event's inner-instruction data `[0xFF, dis | 99 |
+| [`feeds.ts`](packages/sdk/src/read/feeds.ts) | the compiled lists of Pyth feeds a price campaign may name, one per cluster, as programs/brot-markets/src/feeds.rs compiles them (founder answer 1, 2026-10-09;  | 113 |
+| [`format.ts`](packages/sdk/src/read/format.ts) | exact, deterministic display of the program's units: lamports as SOL with all nine decimals (no floating point), Unix seconds as a UTC date, basis points as a p | 54 |
+| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 35 |
+| [`knowable.ts`](packages/sdk/src/read/knowable.ts) | the join lock (BR-06) as the program applies it, for a client that wants to know whether a join can still go in: `outcomeKnowable` per kind (the price band reac | 66 |
+| [`pdas.ts`](packages/sdk/src/read/pdas.ts) | every program-derived address a client needs: the config, the fee vault, a campaign and its vault, an entry, a join, the event authority, the program's ProgramD | 68 |
+| [`quote.ts`](packages/sdk/src/read/quote.ts) | what an opening pays (row 7 of TP 3.4.10): US$ at the sponsored Pyth SOL/USD price charged at `price − conf`, the 90/10 split, the `max_lamports` the creator si | 146 |
+| [`recheck.ts`](packages/sdk/src/read/recheck.ts) | `recheck(campaign, rpcUrl)` (BR-23, "Anyone can re-check. Same account, same answer"): through any RPC the caller chooses, read the campaign, then the very acco | 158 |
+| [`rpc.ts`](packages/sdk/src/read/rpc.ts) | the reads the SDK makes through any Solana RPC (Kit's `createSolanaRpc`, no paid key, A-5): an account's owner and bytes, several at once, the cluster's clock f | 72 |
+| [`view.ts`](packages/sdk/src/read/view.ts) | a campaign's public state (BR-05; TP 3.4.2): Open, Closed, In review, Paid or Void, computed by one function from what the program recorded and the CHAIN's time | 82 |
+
+## `packages/sdk/src/read/chain/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`accounts.ts`](packages/sdk/src/read/chain/accounts.ts) | the other programs' accounts the four non-price kinds read, parsed the way the program parses them, owner first: a classic SPL Token mint (`SupplyAtMost`), a Me | 119 |
+| [`cursor.ts`](packages/sdk/src/read/chain/cursor.ts) | bounds-checked little-endian reads over raw account bytes, for the SDK's readers of other programs' accounts. An account shorter than its layout is `ReaderBadLa | 66 |
+| [`epoch.ts`](packages/sdk/src/read/chain/epoch.ts) | the epoch kinds' opening rule (row 5's part for `StakePoolTvlAtLeast` and `StakeAtLeast`): the measured epoch has not started, and its latest plausible start is | 72 |
+| [`price-rules.ts`](packages/sdk/src/read/chain/price-rules.ts) | the price rules the opening, the join lock and the proof share: freshness by time and by slot, the confidence bound, the two touch tests, row 3's minimum distan | 91 |
+| [`price-update.ts`](packages/sdk/src/read/chain/price-update.ts) | a Pyth `PriceUpdateV2` account read the way the program reads it: owner first (the upgraded receiver `rec2HH…` only), exactly 134 bytes, the discriminator, Full | 62 |
+
+## `packages/sdk/src/read/errors/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`codes.ts`](packages/sdk/src/read/errors/codes.ts) | the program's custom error codes by name (programs/brot-markets/src/error.rs), so a client names the exact refusal. Codes are appended there and here, never reu | 157 |
+| [`index.ts`](packages/sdk/src/read/errors/index.ts) | one message per program error code, read from the IDL, and the refusal the SDK throws when its mirror of a program rule refuses (math, creation checks), carryin | 79 |
+
+## `packages/sdk/src/read/math/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`fees.ts`](packages/sdk/src/read/math/fees.ts) | Brot's fee on the losing side and the one-sided fee per entry, both rounded up. Mirrors programs/brot-markets/src/math/fees.rs (P1 sections 3.3 and 3.5; TP 3.4. | 26 |
+| [`index.ts`](packages/sdk/src/read/math/index.ts) | the money and schedule math of the program as pure TypeScript, for previews, estimates and checks: the opening conversion and split, the fees, the creator share | 47 |
+| [`integers.ts`](packages/sdk/src/read/math/integers.ts) | the Rust integer types the program's math uses, as bigint bounds, and the checks that make bigint arithmetic fail where the program's checked arithmetic fails | 87 |
+| [`opening.ts`](packages/sdk/src/read/math/opening.ts) | the price of a paid opening in lamports at the Pyth SOL/USD price, and its split into the prize and Brot's opening fee. Mirrors programs/brot-markets/src/math/o | 52 |
+| [`payout.ts`](packages/sdk/src/read/math/payout.ts) | the creator share, what winners split, a winner's payout, the return estimate a join checks against `min_return_bps`, and a one-sided refund. Mirrors programs/b | 111 |
+| [`rounding.ts`](packages/sdk/src/read/math/rounding.ts) | the multiply-divide and basis-point shares every money formula uses, rounded down or up, with the program's refusals: the one place a rounding direction is writ | 53 |
+| [`schedule.ts`](packages/sdk/src/read/math/schedule.ts) | when entries close and which durations a campaign may have, for the real build and for the devnet drill build. Mirrors programs/brot-markets/src/math/schedule.r | 74 |
+| [`settle.ts`](packages/sdk/src/read/math/settle.ts) | what one entry is paid under its campaign's snapshot, the late-entry split, and the reserve path of a credit below rent. Mirrors programs/brot-markets/src/instr | 94 |
+| [`snapshot.ts`](packages/sdk/src/read/math/snapshot.ts) | the settlement snapshot: a campaign's totals and verdict turned into what finalize stores (the mode, the house fee, the creator share, `distributable`, what Bro | 136 |
+| [`void.ts`](packages/sdk/src/read/math/void.ts) | what a void, and a pot with no entry, returns to whoever opened and what Brot keeps. Mirrors programs/brot-markets/src/math/void.rs (TP 3.4.7, P-4, founder answ | 50 |
+
+## `packages/sdk/src/read/validate/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`join.ts`](packages/sdk/src/read/validate/join.ts) | `checkJoin`, the SDK's mirror of `user_join_campaign`'s rules for the preview: from the campaign, the config, the baker's entry, the metric account and the chai | 79 |
+| [`kinds.ts`](packages/sdk/src/read/validate/kinds.ts) | rows 2 and 3 of TP 3.4.10 (and the epoch kinds' part of row 5) for each of the five kinds: the metric account fits the kind and the target is neither met nor to | 107 |
+| [`open-campaign.ts`](packages/sdk/src/read/validate/open-campaign.ts) | `validateOpenCampaign`, the SDK's mirror of `user_open_campaign`'s rules (TP 3.4.10) for the preview: from the arguments, the config, the chain's clock and the  | 123 |
+| [`open-rules.ts`](packages/sdk/src/read/validate/open-rules.ts) | the opening's rules that read no account, in the program's order: the argument sizes (row 9), row 1 (the kind names a reader and opens in this build), the canon | 85 |
+| [`rows.ts`](packages/sdk/src/read/validate/rows.ts) | which row of the opening's checks (TP 3.4.10) each refusal belongs to, so a preview can say "row 7: the price moved past your maximum" next to the program's own | 55 |
+
+## `packages/sdk/src/schemas/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`index.ts`](packages/sdk/src/schemas/index.ts) | `@brot/sdk/schemas`, the zod 4 schemas the site, the app and the services share: the opening's input today, the read API's from Sprint 08. A separate entry poin | 9 |
+| [`open-campaign.ts`](packages/sdk/src/schemas/open-campaign.ts) | the zod schema of an opening's input (TP Appendix B, written here as Sprint 05 must), shared by the SDK, the site, the app and the preview: what a creator may c | 117 |
+
+## `packages/sdk/src/tx/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`index.ts`](packages/sdk/src/tx/index.ts) | `@brot/sdk/tx`, the transaction half of the SDK: every instruction builder, and (A-3) the path a baker's or creator's transaction takes before the wallet signs  | 22 |
+| [`message.ts`](packages/sdk/src/tx/message.ts) | the transaction message a prepared instruction is simulated and signed in: one instruction, the signer paying, the cluster's latest blockhash. The network fee a | 31 |
+| [`prepare-open.ts`](packages/sdk/src/tx/prepare-open.ts) | A-3 for an opening: re-read the config, the SOL/USD price account, the metric account, the campaign's address and the chain's clock; quote the payment and its ` | 186 |
+| [`prepare.ts`](packages/sdk/src/tx/prepare.ts) | A-3 for a join: re-read the campaign, the config, the baker's entry, the metric account and the chain's clock through the RPC; check them with the SDK's mirror  | 121 |
+| [`simulate.ts`](packages/sdk/src/tx/simulate.ts) | simulate a transaction before the wallet signs it (A-3): the cluster runs it on its current state, unsigned, with the latest blockhash, and the SDK reports the  | 90 |
+| [`summary-brot.ts`](packages/sdk/src/tx/summary-brot.ts) | the summary of this program's own instructions (A-3). The structure is checked against the IDL first: the exact data size, the exact account count, each slot's  | 163 |
+| [`summary-budget.ts`](packages/sdk/src/tx/summary-budget.ts) | the summary's reading of compute-budget instructions (Sprint 05 review, H1): the unit limit and the unit price decoded, the priority fee they allow bounded and  | 87 |
+| [`summary-other.ts`](packages/sdk/src/tx/summary-other.ts) | what the summary says for the instructions that move no money out of a signer's wallet (the admin, team and settlement instructions), each with the values it si | 122 |
+| [`summary.ts`](packages/sdk/src/tx/summary.ts) | the deterministic summary of a transaction before the wallet signs it (A-3). `summarizeMessage` reads the very bytes the wallet signs: the compiled message, dec | 173 |
+
+## `packages/sdk/src/tx/builders/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`admin.ts`](packages/sdk/src/tx/builders/admin.ts) | the admin and team-configuration instructions, built by the Codama client from the Shank IDL with every program address derived here: initialisation, the team k | 98 |
+| [`campaign.ts`](packages/sdk/src/tx/builders/campaign.ts) | the instructions of a campaign's open life, built by the Codama client with every program address derived here: opening (`user_open_campaign`), joining (`user_j | 136 |
+| [`review.ts`](packages/sdk/src/tx/builders/review.ts) | the team's acts inside a campaign's review window, built by the Codama client: confirm the result, void it with a reason and the hash of its public note, open a | 55 |
+| [`settlement.ts`](packages/sdk/src/tx/builders/settlement.ts) | the permissionless settlement instructions, built by the Codama client with every program address derived here: finalize, the late-join tally, an entry's payout | 104 |
 
 ## `programs/brot-markets/src/`
 
@@ -399,6 +486,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`math_snapshot_modes.rs`](programs/brot-markets/tests/math_snapshot_modes.rs) | the `OneSided` and no-entry snapshots: the one-sided pot of Ana, Bruno and Carla (100, 198, 297 back, 5 to Brot), the one-sided baker with and without the prize | 123 |
 | [`math_snapshot_split.rs`](programs/brot-markets/tests/math_snapshot_split.rs) | the `Split` snapshot on the sprint file's worked examples (V 600 / P 400 with and without a 450 prize), a team campaign, the late refunds, and the Economic Viab | 155 |
 | [`math_snapshot_void.rs`](programs/brot-markets/tests/math_snapshot_void.rs) | the `Refund` snapshot of a void, per class: every entry back whole (late ones too), the prize to the opener, and the 10% opening fee back to the opener on a hou | 114 |
+| [`math_vectors_snapshot.rs`](programs/brot-markets/tests/math_vectors_snapshot.rs) | the second set of committed math vectors (X0.3, Sprint 05): the finalize snapshot (every mode, the viability rule at its threshold, voids of both classes, team  | 52 |
 | [`math_vectors.rs`](programs/brot-markets/tests/math_vectors.rs) | the committed math vectors (X0.3, the Rust half): 12,000 rows from a fixed seed over the house fee, the creator share, the distributable pot, the split payout,  | 169 |
 | [`open_campaign_payment.rs`](programs/brot-markets/tests/open_campaign_payment.rs) | row 7 of TP section 3.4.10 on the host up to the conversion, each refusal with its own error (X0.7): who must pay, the US$ floor, the SOL/USD account derived fr | 189 |
 | [`open_campaign_rows.rs`](programs/brot-markets/tests/open_campaign_rows.rs) | rows 1, 2 and 4 of TP section 3.4.10 on the host, each refusal with its own error (X0.7): `readers::validate_at_creation` over runtime-shaped accounts holding t | 157 |
@@ -483,6 +571,14 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`accounts.rs`](programs/brot-markets/tests/settle_d_support/accounts.rs) | the host accounts of lane D's handler tests: a campaign that is finalized, its vault and the fee vault at their real PDAs, the config, and a `run` that calls a  | 123 |
+
+## `programs/brot-markets/tests/vectors_support/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`mod.rs`](programs/brot-markets/tests/vectors_support/mod.rs) | what the snapshot vector generator shares: the seeded generator, the amounts and rates it draws (zeros, values near `u64::MAX`, rates above 100%), and the print | 81 |
+| [`other_rows.rs`](programs/brot-markets/tests/vectors_support/other_rows.rs) | the `entry`, `estimate` and `schedule` rows of the snapshot vectors: what one entry is paid under each mode (late parts included), the join's return estimate, a | 134 |
+| [`snapshot_rows.rs`](programs/brot-markets/tests/vectors_support/snapshot_rows.rs) | the `snapshot` rows of the snapshot vectors: random pots under the four verdicts, one in three of the YES and NO rows (about a sixth of all) placed within a few | 103 |
 
 ## `prototype-lab/prototype-a/`
 
@@ -588,14 +684,15 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party programs actually write instead of a layout someone typed f | 182 |
 | [`checks-mutation.mjs`](scripts/checks-mutation.mjs) | the X0.9 evidence for the checks module: removes each check of programs/brot-markets/src/checks.rs and its submodules (checks/top_level.rs) in turn, rebuilds th | 199 |
 | [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns | 74 |
-| [`codama-spike.ts`](scripts/codama-spike.ts) | the Codama spike (T9): renders a Kit client from the Shank IDL of brot-markets into packages/sdk/src/idl/generated. Sprint 05 decides whether the SDK adopts it; | 61 |
+| [`codama-spike.ts`](scripts/codama-spike.ts) | the Codama spike (T9): renders a Kit client from the Shank IDL of brot-markets into packages/sdk/src/idl/generated. T9, decided in Sprint 05: the generated clie | 61 |
 | [`codemap.js`](scripts/codemap.js) | let an AI locate the right file without reading every file. Pairs with the 200-line limit in .claude/rules/code-style.md — small files plus a one-line index mea | 223 |
 | [`detach-os.ps1`](scripts/detach-os.ps1) | detach-os.ps1 — desconecta seu projeto do repositório AI Dev Operating System | 161 |
 | [`detach-os.sh`](scripts/detach-os.sh) | detach-os.sh — desconecta seu projeto do repositório AI Dev Operating System | 157 |
 | [`devnet-clock-probe.ts`](scripts/devnet-clock-probe.ts) | measure a cluster's clock against wall time (slot length, the confirmed-to-finalized gap, the drift of the Clock sysvar and, under Alpenglow, of the leader's na | 201 |
-| [`devnet-seed.ts`](scripts/devnet-seed.ts) | Seeds devnet with demo markets for the app, on named tokens (Metaplex metadata) so they read like | 246 |
-| [`devnet-smoke.ts`](scripts/devnet-smoke.ts) | Devnet smoke test: the full USDC lifecycle against the deployed program, with the client stack | 273 |
-| [`devnet.ts`](scripts/devnet.ts) | Shared setup for the devnet scripts: connection, deployer, Anchor client, sending, and the raw SPL | 222 |
+| [`devnet-seed.ts`](scripts/devnet-seed.ts) | seed a cluster with example campaigns opened free by a team key (Sprint 05 DoD), one per kind that can open there: a price campaign above and one below (targets | 137 |
+| [`devnet-settle-batch.ts`](scripts/devnet-settle-batch.ts) | the real settle batch on a cluster (Sprint 05 DoD, "the real settle batch with self-CPI events and its compute cost", T3, C7): a free team burn campaign, twelve | 153 |
+| [`devnet-smoke.ts`](scripts/devnet-smoke.ts) | the full cycle in SOL (Sprint 05 DoD, X0.2 and X0.5): a wallet outside the team opens a burn campaign and pays US$500 at the Pyth price after previewing the who | 76 |
+| [`devnet.ts`](scripts/devnet.ts) | the session the devnet scripts (smoke, seed) share: the cluster they write to, the payer, a team key, wallets, funding and fresh prices. `--cluster local` (the  | 127 |
 | [`extract-external-links.sh`](scripts/extract-external-links.sh) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 16 |
 | [`init-project.ps1`](scripts/init-project.ps1) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 34 |
 | [`init-project.sh`](scripts/init-project.sh) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 25 |
@@ -609,12 +706,27 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`release-v0.2.0.ps1`](scripts/release-v0.2.0.ps1) | Release helper for AI Dev Operating System v0.2.0 | 11 |
 | [`release-v0.2.0.sh`](scripts/release-v0.2.0.sh) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 16 |
 | [`run-tests.js`](scripts/run-tests.js) | give `npm test` a file list that does not depend on the shell. npm runs scripts through cmd.exe on Windows, which does not expand globs, and Node only learned t | 33 |
+| [`sdk-portability.ts`](scripts/sdk-portability.ts) | the SDK's portability lint (proposal 3.2; Sprint 05 DoD "a lint rule fails if it does"): every identifier in packages/sdk/src (the generated Codama client aside | 59 |
 | [`sensor-wiring.js`](scripts/sensor-wiring.js) | verify the repo has a standard test entry point, a linter with its config, a lockfile, a feedback hook, a git pre-commit, and a CI that actually runs them. The  | 121 |
 | [`slot-matrix-check.ts`](scripts/slot-matrix-check.ts) | the CI step of the slot matrix: regenerates the matrix in memory and fails when the committed tests/brot/slot-matrix.gen.ts is stale (or missing) | 18 |
 | [`slot-matrix-spec.ts`](scripts/slot-matrix-spec.ts) | the expectations of the slot matrix: what each account slot of each instruction is, and which BrotError a refused mutation gets, from the checks order of checks | 272 |
 | [`slot-matrix.ts`](scripts/slot-matrix.ts) | generates tests/brot/slot-matrix.gen.ts, the slot matrix of Sprint 04 (T-lane F), from the frozen Shank IDL: every signer unsigned, every writable slot read-onl | 176 |
 | [`sync-selfhosted.js`](scripts/sync-selfhosted.js) | keep a local, navigable mirror of the full self-hosted catalogue so the WIZARD (stage 4.2) can offer self-hosted alternatives without a network call | 349 |
 | [`tokenomics-model.ts`](scripts/tokenomics-model.ts) | Quantitative model behind ECONOMICS.md: protocol fees, revenue split, staker yield, the token unlock curve and the | 584 |
+
+## `scripts/deploy/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`artifact.ts`](scripts/deploy/artifact.ts) | fetch the program CI built, by run id and never by name (Sprint 00's carried item): the run must be a completed, successful run of the CI workflow on `main` (th | 76 |
+| [`binding.ts`](scripts/deploy/binding.ts) | what binds a deploy to what was reviewed (Sprint 05 deploy review, F1). The CI run built the commit the operator names (`--expect-commit`); this checkout contai | 71 |
+| [`checks.ts`](scripts/deploy/checks.ts) | the pure checks of the devnet deploy (TP §10, §12; Sprint 05 DoD "Deploy from CI's artifact"): the artifact's SHA256SUMS parsed and every file checked against i | 136 |
+| [`devnet-deploy.ts`](scripts/deploy/devnet-deploy.ts) | the first deploy of brot-markets to devnet from CI's artifact, and its initialization in the same session (TP §10, §12; deploy/devnet/README.md): the artifact b | 156 |
+| [`finish.ts`](scripts/deploy/finish.ts) | the deploy's second half, shared by the first run and a resume (`devnet-deploy.ts --resume`): the program at the declared id read back (loader v3, the expected  | 83 |
+| [`initialize.ts`](scripts/deploy/initialize.ts) | the two writes the deploy makes in the same session as the deploy itself (TP §3.4.3, §7; Sprint 05): `admin_initialize_config`, signed by the program's upgrade  | 142 |
+| [`preflight.ts`](scripts/deploy/preflight.ts) | what the deploy checks on the cluster and on this machine before it plans anything (Sprint 05 deploy review, F4, F5, F8, F11): how the program id, its ProgramDa | 122 |
+| [`rehearse-funded.ts`](scripts/deploy/rehearse-funded.ts) | rehearse what a stranger's lamports do to a deploy (Sprint 05 deploy review, F4), on the offline surfnet, with the real `solana program deploy` at throwaway ids | 89 |
+| [`rehearse.ts`](scripts/deploy/rehearse.ts) | rehearse every step of the devnet deploy on a local offline surfnet, inside a loopback-only network namespace: the artifact check (and its refusal of a changed  | 181 |
 
 ## `scripts/surfpool/`
 
@@ -628,6 +740,21 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`rpc.ts`](scripts/surfpool/rpc.ts) | talk to a surfnet over JSON-RPC: plain calls and Surfpool's `surfnet_*` cheatcodes, the clock, account bytes, and a transaction sent, landed and read back with  | 153 |
 | [`surfnet.ts`](scripts/surfpool/surfnet.ts) | start and stop a Surfpool surfnet for the scripts in this folder: a mainnet fork on 127.0.0.1 with both ports in 4200-4299, run from its own temporary directory | 153 |
 
+## `scripts/team/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`common.ts`](scripts/team/common.ts) | what the team scripts share (Sprint 05 DoD, `scripts/team/`): your own key from TEAM_KEYPAIR (each person uses theirs; nobody shares one), the cluster named on  | 86 |
+| [`confirm.ts`](scripts/team/confirm.ts) | `team_confirm_result` with your own team key: ends a campaign's review window now; the snapshot runs at once and payouts can start (TP §3.4.7). Only inside the  | 35 |
+| [`contest.ts`](scripts/team/contest.ts) | `team_open_contest`, SIMULATED ONLY: the program refuses it with `ContestExitDisabled` until Sprint 14 (decision of 2026-10-09: a contest would freeze the pot w | 31 |
+| [`open.ts`](scripts/team/open.ts) | `user_open_campaign` with your own TEAM key, free (`opening_usd` 0): for the team or a launch partner, with no prize and no creator share (P-3; TP §3.4.10). Out | 92 |
+| [`pause.ts`](scripts/team/pause.ts) | `team_pause_entries` with your own team key: stops joins and openings at once, never payouts or refunds (TP §3.4.9). One team key is enough, to be fast; only th | 21 |
+| [`rehearse.ts`](scripts/team/rehearse.ts) | rehearse every team script on a local offline surfnet, inside a loopback-only network namespace: the admin sets the team and the creation parameters; a team key | 180 |
+| [`resume.ts`](scripts/team/resume.ts) | `admin_resume_entries` with the admin's key: ends a pause (`EntriesHalted` to `Normal`). The admin's act, not a team key's (TP §3.4.9); on mainnet it is the 2-o | 21 |
+| [`set-params.ts`](scripts/team/set-params.ts) | `admin_set_creation_params` with the admin's key: the new parameters from a reviewed JSON file (the format of deploy/devnet/init-params.json), each change shown | 43 |
+| [`set-team.ts`](scripts/team/set-team.ts) | `admin_set_team` with the admin's key: up to five team keys, one per person (Q12; Lucas, Ronaldo and Bernardo, founder answer 6, 2026-10-09), shown against the  | 35 |
+| [`void.ts`](scripts/team/void.ts) | `team_void_campaign(reason, note_hash)` with your own team key (TP §3.4.7, BR-45): the public text of the void is saved to content/void-log/<campaign>-<UTC time | 109 |
+
 ## `scripts/test/`
 
 | Arquivo | Núcleo | Linhas |
@@ -638,6 +765,29 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`pre-commit.test.js`](scripts/test/pre-commit.test.js) | prove the hook stops a staged credential in a real git repository, and gets out of the way everywhere else | 95 |
 | [`sensor-wiring.test.js`](scripts/test/sensor-wiring.test.js) | pin the two severities — a missing sensor is an error in the OS repo and a warning in a derived project — and the "exists but never gates" class | 140 |
 | [`sync-selfhosted.test.js`](scripts/test/sync-selfhosted.test.js) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 146 |
+
+## `scripts/validator/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`clusters.ts`](scripts/validator/clusters.ts) | which cluster an RPC really is, by its genesis hash, so an ops script never writes to a cluster other than the one its operator named: mainnet is refused outrig | 51 |
+| [`cycle-open.ts`](scripts/validator/cycle-open.ts) | the first half of the smoke cycle (Sprint 05, X0.2 and X0.5): a burn campaign's mint (classic SPL Token, authority revoked), the opening preview with the whole  | 160 |
+| [`cycle-settle.ts`](scripts/validator/cycle-settle.ts) | the second half of the smoke cycle (Sprint 05, X0.2): resolve a burn campaign YES, tally each baker's joins, end the window with a team confirmation, then settl | 181 |
+| [`isolate.ts`](scripts/validator/isolate.ts) | run a rehearsal script inside a network namespace that has only loopback (`unshare -rn`), so the local cluster and the script can talk on 127.0.0.1 and nothing  | 32 |
+| [`keys.ts`](scripts/validator/keys.ts) | keypairs for the ops scripts: read a Solana CLI keypair file (64-byte JSON array) into a Kit signer, check that a key file is fit to sign with, write a throwawa | 101 |
+| [`negative-baselines-settle.ts`](scripts/validator/negative-baselines-settle.ts) | the slot matrix's baselines of the review window and of settlement on the surfnet: the team's confirm, void and contest, finalize, the late-join tally, each pay | 157 |
+| [`negative-baselines.ts`](scripts/validator/negative-baselines.ts) | the slot matrix's baselines on one surfnet, in an order that keeps each one's state: one valid instruction per instruction of the config, the pause, the opening | 131 |
+| [`negative-extra.ts`](scripts/validator/negative-extra.ts) | the last three refusals of the negative run, each needing a state the others must not see: the valve (`TooManyOpenCampaigns`, the creation parameters changed th | 72 |
+| [`negative-join.ts`](scripts/validator/negative-join.ts) | the refusals of `user_join_campaign` on a local validator, one case per error, as the LiteSVM suites test them (tests/brot/join-campaign-refuses.test.ts, join-c | 90 |
+| [`negative-open.ts`](scripts/validator/negative-open.ts) | the refusals of `user_open_campaign` on a local validator, one case per error, as the LiteSVM suites test them (tests/brot/open-campaign-refuses*.test.ts, open- | 179 |
+| [`negative-price.ts`](scripts/validator/negative-price.ts) | rewrite a sponsored Pyth account on the surfnet with one field changed, from the captured devnet bytes (the .bin files are never edited): price, confidence, exp | 56 |
+| [`negative-run.ts`](scripts/validator/negative-run.ts) | the slot matrix and one paid opening on a local validator (Sprint 05 DoD: "the negative tests, the slot tests and one paid opening run once on a real validator" | 146 |
+| [`negative-world.ts`](scripts/validator/negative-world.ts) | run the test kit's account injectors and the slot matrix's mutations against a surfnet, unchanged: a recording stand-in for the three synchronous LiteSVM calls  | 107 |
+| [`rpc.ts`](scripts/validator/rpc.ts) | talk to a cluster over JSON-RPC for the ops scripts: the cluster guard (a non-local URL is refused unless the caller names the cluster on purpose; the genesis h | 186 |
+| [`simulate.ts`](scripts/validator/simulate.ts) | simulate a transaction before sending it, so an ops script shows what the program would answer (its custom error by name, the logs, the compute units) without w | 53 |
+| [`spl-token.ts`](scripts/validator/spl-token.ts) | the few System Program and classic SPL Token instructions the ops scripts need to make a burn campaign's mint (`SupplyAtMost`): create an account, transfer SOL, | 115 |
+| [`surfnet.ts`](scripts/validator/surfnet.ts) | start and stop a local OFFLINE Surfpool surfnet for the ops rehearsals: no datasource (`--offline`), bound to 127.0.0.1 on two free ports in 4200-4299, run from | 95 |
+| [`world.ts`](scripts/validator/world.ts) | a local cluster ready for the ops rehearsals: an offline surfnet, the brot-markets binary installed at the id the program declares with an upgrade authority hel | 114 |
 
 ## `services/landing/`
 
@@ -747,10 +897,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`close-sweep.test.ts`](tests/brot/close-sweep.test.ts) | close_campaign and sweep_fees on the binary: the rent of the campaign and its vault goes back to the stored rent payer, the vault's surplus goes to the fee vaul | 86 |
 | [`codama-spike.test.ts`](tests/brot/codama-spike.test.ts) | the Codama spike (T9): the Kit client rendered from the Shank IDL (packages/sdk/src/idl/generated) against the hand-written kit. Without the program: every inst | 219 |
 | [`cutoff-reproof.test.ts`](tests/brot/cutoff-reproof.test.ts) | the earlier-proof re-proof (decision of 2026-10-09): a campaign already in review moves its cut-off back to an earlier valid YES price proof, and to no later on | 43 |
-| [`errors.ts`](tests/brot/errors.ts) | the program's custom error codes by name, so tests assert the exact refusal (X0.7). Mirrors programs/brot-markets/src/error.rs; a code appended there is appende | 152 |
+| [`errors.ts`](tests/brot/errors.ts) | the program's custom error codes by name, so tests assert the exact refusal (X0.7). The map moved to the SDK in Sprint 05 (packages/sdk/src/read/errors/codes.ts | 9 |
 | [`events.test.ts`](tests/brot/events.test.ts) | the events round-trip (T4, X0.4): every instruction of Sprint 02 emits exactly one event by self-CPI, decoded from its inner instruction; campaign events carry  | 211 |
 | [`events.ts`](tests/brot/events.ts) | the program's events as layouts: an inner instruction to the program whose data is [0xFF, discriminator, payload], signed by the event authority (T4). Mirrors e | 137 |
-| [`flows.ts`](tests/brot/flows.ts) | the common paths every test file starts from: a config initialised with the founder's values, a team, a paid or free price campaign opened on BTC/USD, an entry | 124 |
+| [`flows.ts`](tests/brot/flows.ts) | the common paths every test file starts from: a config initialised with the founder's values, a team, a paid or free price campaign opened on BTC/USD, an entry | 144 |
 | [`idl.test.ts`](tests/brot/idl.test.ts) | the drift check (X0.6): the hand-written test kit (struct layouts, events, instruction builders, error codes) against the Shank IDL that `bun run idl` writes fr | 231 |
 | [`idl.ts`](tests/brot/idl.ts) | the Shank IDL (packages/sdk/src/idl/brot_markets.json) in the test kit's terms: struct fields as layouts.ts types, enums as one byte, names as Shank writes them | 127 |
 | [`instructions-settlement.ts`](tests/brot/instructions-settlement.ts) | builders for the ten instructions of Sprint 04, with the accounts in the frozen order of programs/brot-markets/src/instructions/interface.rs. The bodies are lan | 81 |
@@ -771,7 +921,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`join-campaign-lock.test.ts`](tests/brot/join-campaign-lock.test.ts) | the join lock (BR-06): once the reader of the campaign's kind knows the outcome, a join is refused with `OutcomeKnowable` and nothing moves; inside the proximit | 189 |
 | [`join-campaign-pot.test.ts`](tests/brot/join-campaign-pot.test.ts) | the pot is the books, never the vault's balance: SOL sent by hand to a vault moves no pool, no prize, no first baker and no estimate (I15, first half); and the  | 88 |
 | [`join-campaign-price.test.ts`](tests/brot/join-campaign-price.test.ts) | the price split at the join (TP section 3.4.8): joining a price campaign reads only the sponsored account the campaign locked at opening, fully verified, of its | 102 |
-| [`join-campaign-refuses.test.ts`](tests/brot/join-campaign-refuses.test.ts) | every refusal of `user_join_campaign` on the campaign's rules, each with its own error (X0.7): not Open, entries closed, the pause, the minimum, the signed tota | 158 |
+| [`join-campaign-refuses.test.ts`](tests/brot/join-campaign-refuses.test.ts) | every refusal of `user_join_campaign` on the campaign's rules, each with its own error (X0.7): not Open, entries closed, the pause, the minimum, the signed tota | 162 |
 | [`join-campaign-slots.test.ts`](tests/brot/join-campaign-slots.test.ts) | the slot checks of `user_join_campaign` in the order of checks.rs, each with its own error: signer and writable flags, the three pairs that must differ, the Sys | 69 |
 | [`join-campaign-support.ts`](tests/brot/join-campaign-support.ts) | what the join tests share: a world with a paid price campaign, its sponsored price kept fresh across clock moves, a refused join that moves nothing, SOL sent by | 203 |
 | [`join-campaign-wallets.test.ts`](tests/brot/join-campaign-wallets.test.ts) | two wallets: A cannot change, close or redirect B's Entry, whichever slot of a join it puts that Entry in, and cannot join as B without B's signature (A-1) | 58 |
@@ -798,7 +948,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`resolve-campaign.test.ts`](tests/brot/resolve-campaign.test.ts) | the resolution table of TP section 3.4.6 as test cases, one per row and kind: `Yes` before the deadline, `No` after it, `met_late`, `Void` for `MissedWindow`, ` | 161 |
 | [`resolve-refuses.test.ts`](tests/brot/resolve-refuses.test.ts) | what `resolve_campaign` refuses, each with its exact error and nothing written: a call forwarded by another program (`checks::top_level`, `bun test tests/ -t "r | 143 |
 | [`resolve-support.ts`](tests/brot/resolve-support.ts) | what the resolution tests share: a world at a mainnet-like slot and epoch, a campaign of each kind written into it with its metric account (a synthetic mint, th | 205 |
-| [`setup.ts`](tests/brot/setup.ts) | a LiteSVM world for the program's tests: the binary loaded, the clock set next to the captured Pyth prices, the upgrade authority recorded, funded wallets, and  | 203 |
+| [`sent-events.ts`](tests/brot/sent-events.ts) | the events of a transaction the kit sent, decoded by the SDK (`@brot/sdk/read`), the way an indexer reads them: the LiteSVM result put in the RPC's `getTransact | 66 |
+| [`setup.ts`](tests/brot/setup.ts) | a LiteSVM world for the program's tests: the binary loaded, the clock set next to the captured Pyth prices, the upgrade authority recorded, funded wallets, and  | 192 |
 | [`slot-matrix-fixtures.ts`](tests/brot/slot-matrix-fixtures.ts) | one valid instruction per Brot Markets instruction, in a world of its own, the baseline each slot case mutates. Every baseline must succeed before its cases mea | 267 |
 | [`slot-matrix-mutate.ts`](tests/brot/slot-matrix-mutate.ts) | the mutations of the slot matrix: one slot of a valid instruction changed (unsigned, read-only, a stranger, an account of another type, or an alias of an earlie | 75 |
 | [`slot-matrix.gen.ts`](tests/brot/slot-matrix.gen.ts) | every slot case of the matrix: each signer unsigned (MissingSignature), each writable slot read-only (NotWritable), a stranger, an account of each other type, a | 428 |
@@ -808,11 +959,72 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`team-window.test.ts`](tests/brot/team-window.test.ts) | the team's acts in the review window, on the binary: confirm, void (an automatic void only: a team key never voids a YES or NO, decision of 2026-10-09), and con | 185 |
 | [`void-refund.test.ts`](tests/brot/void-refund.test.ts) | a void on the binary: the prize goes back to the stored creator, the opening fee goes with it on a house failure and stays with Brot on an outside cause, and th | 82 |
 
+## `tests/ops/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`deploy-checks.test.ts`](tests/ops/deploy-checks.test.ts) | the pure checks of the devnet deploy (scripts/deploy/checks.ts), each refusal with its own case: SHA256SUMS parsing, the artifact folder against its sums, the p | 99 |
+| [`deploy-preflight.test.ts`](tests/ops/deploy-preflight.test.ts) | the deploy's preflight and bindings (Sprint 05 deploy review, F1, F4, F6, F7, F8, F9, F11), each refusal with its own case: a key file in any Git work tree or r | 120 |
+
 ## `tests/programs/cpi-proxy/src/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`lib.rs`](tests/programs/cpi-proxy/src/lib.rs) | a test-only program that forwards one instruction by CPI, so a test can show that `resolve_campaign` refuses to run below the top level (`checks::top_level`). N | 49 |
+
+## `tests/react-native/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`bundle.mjs`](tests/react-native/bundle.mjs) | one entry bundled as a React Native 0.87.1 Android release build makes it: Metro with `platform android`, `dev false`, `minify false` and the `default` transfor | 78 |
+| [`hermes.mjs`](tests/react-native/hermes.mjs) | the Hermes VM the React Native check runs JavaScript on: Hermes v0.13.0's Linux CLI, the newest Hermes release that publishes a runnable VM, downloaded once, ch | 73 |
+| [`metro.config.cjs`](tests/react-native/metro.config.cjs) | the Metro configuration of the React Native check: React Native 0.87.1's own defaults (`@react-native/metro-config`), so the SDK resolves and transforms as it w | 48 |
+| [`run.mjs`](tests/react-native/run.mjs) | the React Native check, end to end (Sprint 05, proposal section 3.2): bundles `@brot/sdk/read`, `@brot/sdk/tx` and the math-vector replay with Metro for Android | 143 |
+
+## `tests/react-native/entries/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`digest-shim.js`](tests/react-native/entries/digest-shim.js) | a minimal `crypto.subtle.digest("SHA-256")` for the Hermes CLI, which has no `crypto` at all, so the check can show that PDA derivation is the one thing the SDK | 25 |
+| [`outcome.js`](tests/react-native/entries/outcome.js) | an SDK call's result written the way the Rust vector generators print a `Result`: the value through a formatter, or `ERR:<Name>` for a `BrotRefusal`. Anything e | 22 |
+| [`read.js`](tests/react-native/entries/read.js) | the read half under Hermes: every export of `@brot/sdk/read` loaded as an app loads it on first use, the runtime's globals reported, and the config PDA derived  | 37 |
+| [`rows-math.js`](tests/react-native/entries/rows-math.js) | the four kinds of tests/vectors/math-vectors.csv (programs/brot-markets/tests/math_vectors.rs), each row's inputs passed to `@brot/sdk/read`'s math and its resu | 46 |
+| [`rows-snapshot.js`](tests/react-native/entries/rows-snapshot.js) | the four kinds of tests/vectors/snapshot-vectors.csv (programs/brot-markets/tests/ math_vectors_snapshot.rs and vectors_support/): the finalize `snapshot`, one  | 97 |
+| [`tx.js`](tests/react-native/entries/tx.js) | the transaction half under Hermes: every export of `@brot/sdk/tx` loaded as an app loads it on first use; the random campaign id refused with no `crypto.getRand | 33 |
+| [`vector-rows.js`](tests/react-native/entries/vector-rows.js) | replays one line of either Rust vector file through `@brot/sdk/read`'s math: splits it into kind, inputs and expected output, and hands the inputs to the kind's | 31 |
+| [`vectors.js`](tests/react-native/entries/vectors.js) | the entry the Hermes VM runs: every row of the Rust math vectors replayed through the SDK's math (X0.3, the React Native half), with a count per file and per ki | 42 |
+
+## `tests/sdk/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`boundaries.test.ts`](tests/sdk/boundaries.test.ts) | every import rule of `.dependency-cruiser.cjs` fires (Sprint 05 review): the SDK is copied into a temporary folder with the configuration, one violation of each | 64 |
+| [`builders.test.ts`](tests/sdk/builders.test.ts) | every builder of `@brot/sdk/tx` against the test kit's hand-written builder of the same instruction (which tests/brot/idl.test.ts checks against the IDL and eve | 110 |
+| [`contract-events.test.ts`](tests/sdk/contract-events.test.ts) | the SDK's event table and addresses against the program: each event's discriminator and size as events.rs and events/*.rs declare them, the event decoder's refu | 103 |
+| [`contract-source.test.ts`](tests/sdk/contract-source.test.ts) | the SDK's hand-written copies of the program's contract, checked against the program's own source so they cannot drift: the error codes (and one IDL message per | 166 |
+| [`decoder-shapes.test.ts`](tests/sdk/decoder-shapes.test.ts) | the decoder reads an inner instruction whichever way the node wrote it (Sprint 05 review, M1 and L6): compiled with indexes (`getTransaction`, `json`), partiall | 139 |
+| [`decoder.test.ts`](tests/sdk/decoder.test.ts) | the decoder rules (TP 3.4.14; proposal 2.3) on transactions sent in LiteSVM and read back in the RPC's shape: a failed transaction is skipped; only this program | 168 |
+| [`fake-rpc.ts`](tests/sdk/fake-rpc.ts) | a JSON-RPC endpoint on 127.0.0.1 backed by a LiteSVM world, so SDK functions that take an RPC URL (`recheck`, the A-3 preparation) run against the program's rea | 84 |
+| [`fake-simulate.ts`](tests/sdk/fake-simulate.ts) | the two RPC methods the A-3 preparation needs beyond reads, answered by a LiteSVM world: `getLatestBlockhash`, and `simulateTransaction` of an unsigned transact | 84 |
+| [`join-parity.test.ts`](tests/sdk/join-parity.test.ts) | `checkJoin` against `user_join_campaign` (Sprint 05 closure review: a baker's money path had no parity harness). Each case of the program's join tests that the  | 131 |
+| [`math-vectors.test.ts`](tests/sdk/math-vectors.test.ts) | X0.3, the TypeScript half, first file: every vector the program's Rust math wrote into tests/vectors/math-vectors.csv (programs/brot-markets/tests/math_vectors. | 56 |
+| [`open-parity.ts`](tests/sdk/open-parity.ts) | the parity harness of A-10 / X0.7 (SDK half): one opening fed to both `validateOpenCampaign` (from the world's accounts and clock, read before anything is sent) | 124 |
+| [`prepare-guards.test.ts`](tests/sdk/prepare-guards.test.ts) | the guards of the A-3 preparation (Sprint 05 review): a retried join that already landed is refused instead of doubled (A-9, M2); the slippage is bounded (L3);  | 109 |
+| [`prepare.test.ts`](tests/sdk/prepare.test.ts) | A-3 end to end against the program's state (LiteSVM behind a local RPC endpoint): a join and a paid opening are re-read, checked, built, summarised from the byt | 138 |
+| [`prepared.ts`](tests/sdk/prepared.ts) | `ready(prepared)` for the SDK tests: the prepared transaction when `prepareJoin` or `prepareOpenCampaign` says ready, or a failure that names the stage that sto | 18 |
+| [`recheck.test.ts`](tests/sdk/recheck.test.ts) | BR-23: `recheck(campaign, rpcUrl)` re-reads, through an RPC endpoint the caller chooses (here a local one backed by the LiteSVM world), the account and field th | 126 |
+| [`rpc-shape.ts`](tests/sdk/rpc-shape.ts) | a transaction sent in LiteSVM, returned in the shape the RPC's `getTransaction` (encoding `json`, `maxSupportedTransactionVersion: 0`) gives it, so the SDK's de | 107 |
+| [`schemas.test.ts`](tests/sdk/schemas.test.ts) | the opening's zod schema (TP Appendix B): one valid input per kind parses and converts to the SDK's `OpenArgs` the builders take; text, extra keys, numbers wher | 75 |
+| [`snapshot-vectors.test.ts`](tests/sdk/snapshot-vectors.test.ts) | X0.3, the TypeScript half, second file: every vector of tests/vectors/snapshot-vectors.csv (programs/brot-markets/tests/math_vectors_snapshot.rs: the finalize s | 114 |
+| [`summary-budget.test.ts`](tests/sdk/summary-budget.test.ts) | the summary bounds what a compute budget can cost (Sprint 05 review, H1): the unit limit and price decoded, `ceil(price × limit / 10^6)` counted in what the sig | 83 |
+| [`summary-message.test.ts`](tests/sdk/summary-message.test.ts) | the summary of the bytes a wallet signs (Sprint 05 review, M5) and of what they say (M3, L1, L10): `summarizeMessage` decodes the compiled message itself, so an | 192 |
+| [`summary-shape.test.ts`](tests/sdk/summary-shape.test.ts) | the summary trusts this program's instructions only as the IDL shapes them (Sprint 05 review, L11): every instruction the SDK builds, all 22 kinds, is trusted;  | 116 |
+| [`validate-open-extra.test.ts`](tests/sdk/validate-open-extra.test.ts) | A-10 / X0.7, SDK half: the cases of the program's own tests the first parity files left out (Sprint 05 closure review), each fed to `validateOpenCampaign` and t | 91 |
+| [`validate-open-kinds.test.ts`](tests/sdk/validate-open-kinds.test.ts) | A-10 / X0.7, SDK half, for the four kinds other than the price kind: each case tests/brot/open-campaign-kinds.test.ts feeds to the program (row 1's closed `Stak | 120 |
+| [`validate-open-payment.test.ts`](tests/sdk/validate-open-payment.test.ts) | A-10 / X0.7, SDK half, for rows 7, 8 and 10: each case tests/brot/open-campaign-refuses-payment.test.ts and open-campaign-retry.test.ts feed to the program is f | 100 |
+| [`validate-open-price.test.ts`](tests/sdk/validate-open-price.test.ts) | A-10 / X0.7, SDK half, for the price kind and the rules every kind shares: each case that tests/brot/open-campaign-refuses.test.ts feeds to the program is fed t | 109 |
+| [`vectors.ts`](tests/sdk/vectors.ts) | what the two vector replays share: reading a vector file, running an SDK function the way the Rust generators print a `Result` (`ERR:<BrotError>` for a refusal) | 58 |
+| [`view.test.ts`](tests/sdk/view.test.ts) | A-7 and BR-05: `publicState` gives each of the five public states (and its details) from the campaign and the CHAIN's time alone; chain times decades from the m | 103 |
 
 ---
 

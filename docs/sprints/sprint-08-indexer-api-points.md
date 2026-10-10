@@ -30,8 +30,8 @@ only path from a client to a paid RPC account, and it relays only what Brot's cl
       on-chain `Campaign` accounts and vault balances (X1.3).
 - [ ] **`/api/v1`,** read-only (TP §6): the campaign list and each campaign, its activity and its history, the recent
       activity across campaigns (`/api/v1/activity`), a wallet's entries, the leaderboard, `/names`, `/price` and
-      `/health`, under the D6 names. DTOs are the SDK `read` half's
-      zod schemas, with contract tests. Every response carries `chain_time`; lists carry `as_of_slot`; `/health`
+      `/health`, under the D6 names. DTOs are zod schemas in the SDK's own `schemas` entry point
+      (`@brot/sdk/schemas`; `read` and `tx` never import zod, a lint rule since Sprint 05), with contract tests. Every response carries `chain_time`; lists carry `as_of_slot`; `/health`
       returns `program_last_deploy_slot`, `schema_version`, `cluster` and `entries_allowed`.
 - [ ] Amounts are lamport strings, addresses base58, times Unix seconds in UTC. An unknown query parameter returns 400.
       An error returns `{ "error": { "code", "message" } }`, never a stack trace.
@@ -127,6 +127,18 @@ bun run smoke:devnet -- --entries 20 --assert-activity-within 90                
 bunx autocannon@<pinned> -d 30 -c 20 -j http://127.0.0.1:4201/api/v1/campaigns | jq '.latency.p99'
 systemd-analyze security brot-indexer.service brot-rpc.service
 ```
+
+## Carried over
+
+From Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and retrospective").
+
+- **`CampaignFinalized` from the team's finalizing paths: done on 2026-10-09** (PR #44, merged): `team_confirm_result`
+  and `team_void_campaign` emit their own event, then `CampaignFinalized` with the next seq, built by the same
+  `snapshot::finalized_event` as `finalize_campaign`. The indexer can follow events for every finalized campaign; the
+  smoke expects the two events (`scripts/validator/cycle-settle.ts`).
+- **The import rules reach the services.** `read-services-import-read-only` cannot fire before `services/indexer`
+  exists; when it does, plant a violation in `tests/sdk/boundaries.test.ts`, and add dependency-cruiser `reachable`
+  rules, since the rules see direct imports only.
 
 ## Risks
 

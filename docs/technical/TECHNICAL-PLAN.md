@@ -1,11 +1,12 @@
 # Brot Markets — Technical Plan
 
-**Version:** 0.1.3 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
+**Version:** 0.1.4 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
 todo em ingles") from the architecture proposal 0.4 the founder approved that day ("sim para todos") and from BP
 v0.0.4, merged into `main` with PR #35 on 2026-10-08; v0.1.1 aligns it with what Sprint 02 built and measured
 (`docs/sprints/sprint-02-pot-core.md`, "TP to align"); v0.1.2 aligns it with what Sprint 03 built and to the founder's
 answers of 2026-10-09 (`docs/sprints/sprint-03-readers-resolution.md`, "Record and retrospective";
-`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`) · **Date:** 2026-10-09 · **Supersedes:** v0.0.1 of 2026-10-05,
+`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`); v0.1.3 aligns it with Sprint 04 (§3.4.18) and
+v0.1.4 with Sprint 05 (§3.4.19) · **Date:** 2026-10-09 · **Supersedes:** v0.0.1 of 2026-10-05,
 written in Portuguese, approved by the founder ("docs aprovados, podemos dar início"). Its last text, with §8.1, is in
 git history at commit `2089b81` (`git show 2089b81:docs/technical/TECHNICAL-PLAN.md`), the last commit that changed it;
 `0b40554`, the `main` before v0.1.0, holds the same text; tag `sprint-01` holds it before §8.1 was added
@@ -124,15 +125,15 @@ What the repository pins today stays, unless a decision of 2026-10-08 changes it
 | Account checks | One `checks` module: owner, signer, writable, tag, PDA, length, account creation and closing; one negative test per check | **[DP]** proposal §2.1, T24 |
 | Events | Hand-written self-CPI from Sprint 02 (T4): one event round-tripped in npm `litesvm` 1.5.0 on day one **[F]**. Every instruction ends with the `event_authority` and `program` accounts (§3.4.14) [E48] | **[DP]** |
 | IDL | `shank` 0.4.9 attributes and `shank-cli` 0.4.9, exact pins; `bun run idl` refuses another CLI version **[F]** (`programs/brot-markets/Cargo.toml`, `ci.yml`) [E81]. shank-cli reads errors only from an enum that derives `thiserror::Error`, hence `thiserror` 2.0.21; the `shank` crate is not `no_std`, so the program links `std` **[F]** (Sprint 02) | **[DP]** T9 |
-| Client generation | `codama` 1.11.0; `@codama/nodes-from-anchor` 1.5.6 (reads Shank's IDL **[F]**, Sprint 02 spike; that IDL carries no events and no PDA seeds); `@codama/renderers-js` 2.5.0 (needs Kit ≥ 8.3, renders events) [E50]. Fallback: hand-written codecs with a byte-for-byte test against the Rust serializer | **[DP]** T9: spike done in 02 (the generated client is committed in `packages/sdk/src/idl/generated`, not exported); the decision stays Sprint 05's |
+| Client generation | `codama` 1.11.0; `@codama/nodes-from-anchor` 1.5.6 (reads Shank's IDL **[F]**, Sprint 02 spike; that IDL carries no events and no PDA seeds); `@codama/renderers-js` 2.5.0 (needs Kit ≥ 8.3, renders events) [E50]. Fallback: hand-written codecs with a byte-for-byte test against the Rust serializer | **[DP]** T9 decided in Sprint 05: the Codama client is the SDK's codec and builder layer; the event table and the PDA seeds stay hand-written and are checked against the program's source (§3.4.19) |
 | Price data | The hand-written `PriceUpdateV2` reader, upgraded receiver (`rec2HH…`) only, no Pyth crate; also used for SOL/USD at opening | **[F]** `readers/price_touch.rs`; SOL/USD **[DP]** |
 | Epoch stake | The `sol_get_epoch_stake` syscall, through `solana-epoch-stake =3.0.0` or a Pinocchio binding **[AC]** in Sprint 02 | **[F]** pin in `programs/pred-provable/Cargo.toml:31` |
 | Rust tests | `mollusk-svm` 0.14.0 for the `checks` module **[F]** (`programs/brot-markets/Cargo.toml`): 0.15 and 0.16 build on Agave 4.3, whose crates declare Rust 1.97.1, above the pinned 1.89. The `litesvm` crate 0.17 resolves the same Agave 4.3, so Sprint 03 uses the newest version that builds under 1.89 (0.16 **[AC]**) or records a Rust bump first; `set_epoch_stake` since 0.15.0 **[AC]** [E49] | **[DP]**; Mollusk **[F]** |
 | Integration tests | Surfpool 1.6.0, binary checked by SHA-256 [E49] | **[DP]** Sprint 03 (carried from Sprint 01) |
-| TypeScript tests | `@solana/kit` ~8.3.0 today; 8.4.0 once a frozen install and the typecheck pass (8.4.0 first shipped with unpublished sub-packages); `litesvm` (npm) 1.5.0; `@solana/kit-plugin-litesvm` 0.19.0 | **[F]** `package.json`, `CLAUDE.md`; the bump **[DP]** Sprint 05 |
-| Off-chain runtime | Bun 1.4.2, exact version, binary checksum verified at deploy; services on `Bun.serve`, no web framework; `zod` 4.x the one schema library | **[FD]** D-p; zod **[DP]** |
+| TypeScript tests | `@solana/kit` ~8.4.0 since Sprint 05 (its 27 sub-packages published at 8.4.0; a clean frozen install, the typecheck and every test passed on it); `litesvm` (npm) 1.5.0; `@solana/kit-plugin-litesvm` 0.19.0 | **[F]** `package.json` (Sprint 05) |
+| Off-chain runtime | Bun 1.4.2, exact version, binary checksum verified at deploy; services on `Bun.serve`, no web framework; `zod` 4.x the one schema library, pinned at 4.6.5 in `packages/sdk` (Sprint 05) | **[FD]** D-p; zod **[DP]**, pin **[F]** |
 | Store | SQLite through `bun:sqlite`, WAL mode, behind a small adapter | **[DP]** |
-| SDK boundary | `@brot/sdk/read` and `@brot/sdk/tx`, split enforced by `dependency-cruiser` (pinned in Sprint 05) | **[DP]** proposal §2.3 |
+| SDK boundary | `@brot/sdk/read` and `@brot/sdk/tx`, split enforced by `dependency-cruiser` 18.4.0 (`.dependency-cruiser.cjs`, `bun run lint:sdk`) | **[DP]** proposal §2.3; **[F]** Sprint 05 |
 | Website | Next.js 16.3.8, React 19.2.8, Tailwind v4; `@solana/wallet-adapter-react` 0.15.40; `@solana-mobile/wallet-standard-mobile` 0.6.0 with an explicit `registerMwa`; `@solana/web3.js` 1.99.0 while wallet-adapter needs it | **[F]** `app/package.json`; MWA registration **[DP]** |
 | Website runtime | Bun 1.4.2 if the staging test passes (build, `next start`, the E2E smoke); Node 22 as the site's fallback only | **[FD]** D-p |
 | Share card | `next/og` (`ImageResponse`), self-hosted fonts; the route convention checked in `app/node_modules/next/dist/docs/` first **[AC]** | **[DP]** |
@@ -291,10 +292,12 @@ that already carries a tag (proposal §2.1). If `readers/price_touch.rs` passes 
 
 **The SDK [DP].** `packages/sdk` replaces `app/lib` as the shared library in Sprint 05 and imports nothing from React,
 Next.js, the DOM or Node built-ins (it must also run under React Native, §3.7). It has two entry points: `read` (PDAs,
-codecs, math, public state, event decoders, API schemas) and `tx` (transaction builders, simulation, the deterministic
-summary). The indexer and the relay import only `read`; a `dependency-cruiser` rule enforces it. This plan calls the
-package `@brot/sdk`, as the proposal does; today it is named `@brot-markets/sdk` [F] (`packages/sdk/package.json`), and
-Sprint 05 aligns the name **[AC]**.
+codecs, math, public state, event decoders) and `tx` (transaction builders, simulation, the deterministic summary),
+and a third, `schemas` (zod: the opening's input now, the read API's in Sprint 08), which `read` and `tx` never import:
+zod 4's ESM build does not bundle under React Native's default Babel preset (§3.4.19). The indexer and the relay import
+only `read`; `dependency-cruiser` rules enforce all of it. This plan calls the
+package `@brot/sdk`, as the proposal does; Sprint 05 renamed `packages/sdk` from `@brot-markets/sdk` to `@brot/sdk`, so
+the code and the documents use one name [F] (§3.4.19).
 
 **Build [DP].** `bun run build:program` runs `cargo build-sbf`, then the Shank IDL and the Codama client (or the
 hand-written codecs, T9), and syncs both into `packages/sdk`; CI's stale-IDL check compares them with its own build.
@@ -1593,9 +1596,9 @@ the code does.
 - **Economic Viability Rule (decision of 2026-10-09).** A pot splits only when the losing side is larger than the fees
   that would come out of it (the house fee plus the creator share on V + P). Otherwise it resolves one-sided: entries
   come back net of their one-sided fees and the prize returns to whoever opened. Worked examples: V 990 / P 10 and
-  V 98,900 / P 1,100 are one-sided, with or without the prize; V 990 / P 13 splits, and V 990 / P 12 does not. Open
-  point for the founder: the decision's words say "fees charged on the winning side's principal", while the code
-  charges the house fee on the losing side (see the sprint file).
+  V 98,900 / P 1,100 are one-sided, with or without the prize; V 990 / P 13 splits, and V 990 / P 12 does not. The
+  founder confirmed this reading on 2026-10-09 (Ronaldo): the house fee on the losing side, the creator share on the
+  whole pot; the earlier words "fees charged on the winning side's principal" no longer apply.
 - **Prize flag.** `settle_prize` sets `prize_settled` on every settlement, Split included (it pays nothing for a
   Split); `close_campaign` needs the fee, prize and creator-share flags, and finalize sets the share flag when no share
   is due.
@@ -1609,6 +1612,98 @@ the code does.
   compute units per entry; a transaction holds 12 entries (1,152 bytes of the 1,232 allowed); one campaign account
   takes about 3,850 settlements per block under the 12,000,000 compute units of the account write limit (C7). The
   opening costs 19,466 compute units when free and 25,022 when paid. `brot_markets.so` is 158,072 bytes.
+
+### 3.4.19 Sprint 05 alignment (v0.1.4, 2026-10-09)
+
+What Sprint 05 built for the SDK, after three reviews (`docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and
+retrospective"; session log `2026-10-09-sprint-05-sdk-e-ciclo-devnet.md`). Where this section and the text above
+disagree, this section is what the code does.
+
+- **The package.** `packages/sdk` is `@brot/sdk` (renamed from `@brot-markets/sdk`), ESM with an `exports` map: `read`,
+  `tx`, `schemas` and `idl`. The repository root links it as a workspace dependency, so tests and scripts import it as
+  any client does.
+- **T9, decided.** The Codama client generated from the Shank IDL is the SDK's codec and builder layer. The IDL carries
+  neither the events' discriminators nor the PDA seeds; both are written in the SDK and checked against the program's
+  source by `tests/sdk/contract-*.test.ts`. Error messages come from the IDL, not from the Codama errors module, which
+  reads `process.env` and blanks them in production bundles. The 22 builders give the same bytes and slots as the test
+  kit's hand-written ones.
+- **`read`.** The money math as a TypeScript mirror of `math/` and `settlement/rules.rs`; the opening's rules
+  (`validateOpenCampaign`) and the join's (`checkJoin`) in the program's order, each returning the program's error,
+  each fed the program's own refused cases with the same verdict (`checkJoin`'s estimate equals the program's to the
+  basis point); the opening quote (`price − conf`, a `max_lamports` 1% above the charge by default) and the whole
+  debit, with the two rents and the network fee on top; `publicState` from the Clock sysvar; `recheck`, which finds a
+  price resolution's event newest first, a page at a time (up to 10,000 signatures), skips malformed answers, and says
+  `consistent` when a later read moved the only way its field can; the event decoder of §3.4.14, which reads inner
+  instructions by index (`getTransaction`) or by address (`simulateTransaction`) and refuses data longer than the
+  largest event before decoding it; one message per error code.
+- **`tx` (A-3).** `prepareJoin` and `prepareOpenCampaign` re-read the accounts, check them in the program's order (the
+  opening prices after it validates), build, summarise the compiled bytes the wallet signs, and simulate; `ok` only
+  when all of it passed, and the result carries the unsigned transaction the summary describes. `summarizeMessage`
+  accepts legacy and v0 messages without lookup tables, names the fee payer (refused if it is not the signer named)
+  and counts the base fee and the priority fee. It trusts this program's instructions only as the IDL shapes them
+  (exact data size, account count and roles, the fee payer allowed in any slot) and compute-unit limits and prices,
+  the priority fee `ceil(price × limit / 10^6)` bounded (1,400,000 units when no limit is set) and capped at 0.001 SOL
+  unless the caller sets another cap; anything else is untrusted. It names the campaign a join points at, an opening's
+  target in the feed's units, its creator, the SOL price below which its payment is refused, its terms and every value
+  an admin act signs. A join signs a `min_return_bps` 1% below its estimate by default (at most 20%), and a retry passes
+  the saved `expectedEntryTotal`, so a join that already landed is refused rather than doubled (A-9). The simulation
+  names a custom error only when the instruction that failed is this program's.
+- **`schemas`.** The opening's input (Appendix B) in zod 4.6.5, with `deadlineAt` for every kind, as the program
+  requires. It is its own entry point: zod 4's ESM build does not bundle under React Native 0.87.1's Babel preset.
+- **The vectors (X0.3).** `tests/vectors/math-vectors.csv` (Sprint 04) and `tests/vectors/snapshot-vectors.csv` (new:
+  the finalize snapshot, about a sixth of its rows at the viability threshold, the entry payout, the join estimate,
+  the schedule), 24,000 rows, replayed with 0 mismatches in Bun and on Hermes.
+- **The boundaries.** `bun run lint:sdk`: dependency-cruiser 18.4.0 (`read` and `schemas` never import `tx`; `read`
+  and `tx` never import `schemas` or zod; no Node built-in, React, Next.js, React Native, web3.js v1 or Anchor in the
+  SDK; the indexer and the relay import no `tx`), the SDK's ES2022-only typecheck, and `scripts/sdk-portability.ts`,
+  which refuses any name declared only by Node, Bun or the DOM. `tests/sdk/boundaries.test.ts` plants one violation of
+  each rule in a copy of the SDK and fails unless every rule fires.
+- **React Native.** `tests/react-native/` bundles both halves with Metro 0.87.1 for Android as React Native 0.87.1
+  bundles a release, compiles them with that version's hermesc (Hermes 1.0.0) and replays the vectors on Hermes v0.13.0's
+  VM, pinned by SHA-256; CI runs it as "Mobile bundle" from Sprint 05's pull request on. The bytecode itself ran once,
+  by hand, on a 1.0.0 VM built from its tag. The app must add `crypto.subtle.digest` (SHA-256, for every PDA) and
+  `crypto.getRandomValues` (the campaign id) (`knowledge-base/tecnologia/sdk-react-native.md`).
+- **The test kit uses the SDK.** Every transaction a LiteSVM test sends has its events decoded by the SDK: the fields
+  are cross-checked for the 7 events the kit lays out by hand, and Sprint 04's other 11 by discriminator and size
+  against the Rust source. The common flows are built by the SDK's builders.
+- **Settlement order.** Every campaign with entries needs one `tally_late_joins` per baker after `resolve_campaign` and
+  before `team_confirm_result` or `finalize_campaign`, whatever its kind and outcome (`NotTallied`, §3.4.18); the
+  keeper of Sprint 06 follows the same order.
+- **The devnet deploy ran on 2026-10-09** [F]: program `5Rx8…n8o` from CI run 38014319993 (`main` at `c20e79a`, sha256
+  `cf235937…a3a8`), the real constants, Ronaldo's devnet key as upgrade authority, admin and fee recipient; the smoke
+  passed on devnet after it. The first two attempts died writing the buffer on the public RPC ("Max retries exceeded",
+  then 429s): the deploy re-signs unconfirmed writes for 50 rounds with a small priority fee, and the run that landed
+  used a keyed RPC. The procedure (`deploy/devnet/README.md`, `scripts/deploy/`): CI's artifact by run id,
+  bound to the commit the operator reviewed (`--expect-commit`), from a checkout that contains it with the program,
+  its build inputs and its IDL unchanged, the artifact's IDL byte for byte the checkout's, `SHA256SUMS` first and the
+  binary's hash typed again at `--execute`; key files outside any Git work tree, mode 600; the program keypair only from
+  its backup and only at the declared id; loader v3 only; a preflight of the program id, its ProgramData and the config
+  address and of the balances each key needs; then `admin_initialize_config` and `admin_set_team` in the same session,
+  the admin proven by its key or typed; an idempotent `--resume` for a deploy whose initialization did not land. The
+  founder's answers (Q12: Ronaldo holds the devnet upgrade key; a new id; the real values) are in
+  `docs/sprints/sprint-05-sdk-devnet-cycle.md`.
+- **The scripts.** `smoke:devnet` and `seed:devnet` run in SOL on the SDK, locally by default and on devnet only with
+  `--cluster devnet`; `scripts/team/` holds one command per team act, each simulated unsigned and sent only with
+  `--yes`; a void's text, free of emails, handles and URLs, is saved in `content/void-log/` with its SHA-256 on-chain.
+  No script imports `app/lib` any more.
+- **The local cluster.** `solana-test-validator` 3.1.10 needs AVX2; on the development machine the rehearsals and the
+  negative run (the 373 slot cases, 50 rule refusals, a paid opening equal to the SDK) run on Surfpool 1.5.0
+  `--offline` in a loopback-only network namespace. Surfpool is LiteSVM-based: a run on Agave's runtime is carried to
+  Sprint 06 (`knowledge-base/tecnologia/devnet-o-que-so-o-cluster-mostra.md`).
+- **Loader v3 stays.** Agave's current feature set declares Loader-v4's enabling gate as
+  `LoaderV4WasAbandoned11111111111111111111111` and holds no gate that stops new loader-v3 deployments [F] (read on
+  2026-10-09, `anza-xyz/agave`, `feature-set/src/lib.rs`, branch `master`).
+- **Open: anyone can make a program id undeployable on a cluster.** Lamports sent to the ProgramData address of an id
+  not yet deployed make `solana program deploy` fail for good ("Create Account ... already in use"), and no key can move
+  them out [F] on the local cluster (Surfpool, on LiteSVM); the same on devnet [INF], since LiteSVM runs Agave's loader
+  code. The first id, `6G2d…uVN`, was replaced on 2026-10-09 by `5Rx8…n8o` (PR #45; its keypair was not on the
+  deploy machine). The dry run names the case; the remedy is a new id. For mainnet, a fresh id kept unpublished until its deploy (Sprint 18).
+- **Closed: the team's finalizing paths emit `CampaignFinalized`** (PR #44, merged 2026-10-09). As §3.4.3 and §3.4.14
+  say, `team_confirm_result` and `team_void_campaign` emit their event, then `CampaignFinalized` with the next seq,
+  built by `snapshot::finalized_event`, the builder `finalize_campaign` uses [F]. Cost on LiteSVM: confirm 3,539 to
+  4,785 CU, void 2,456 to 3,701.
+- **Open: the deploy-slot check (A-8) belongs in the SDK.** Planned for the site in Sprint 11, it guards every client
+  that signs, so `prepare*` should refuse when ProgramData's last-deploy slot differs from the one expected (A-6).
 
 ## 4. Data model
 
@@ -1959,9 +2054,10 @@ A `-t` filter that matches no test exits non-zero, so a forgotten test fails lou
 
 ## 10. CI/CD
 
-**Today** **[F]** (`.github/workflows/ci.yml`, after Sprint 03). Three jobs on Ubuntu 24.04, with actions pinned by
+**Today** **[F]** (`.github/workflows/ci.yml`, after Sprint 05). Four jobs on Ubuntu 24.04, with actions pinned by
 hash. *Program:* Rust from `rust-toolchain.toml`, Solana CLI 3.1.10, shank-cli 0.4.9 installed with `cargo install --locked` and cached by version, Bun from
-`package.json`; `bun install --frozen-lockfile`; `cargo fmt --check` and Prettier; `cargo metadata --locked`;
+`package.json`; `bun install --frozen-lockfile`; `cargo fmt --check`, Prettier and `bun run lint:sdk` (inside `bun run
+lint`); `cargo metadata --locked`;
 `bun run build:program` after deleting the committed outputs, which runs `cargo build-sbf` for brot-markets and for the
 test-only `cpi-proxy`, then `bun run idl` (the Shank IDL and the Codama client). CI has no Anchor: the Anchor CLI and
 `pred-provable` left the workspace in Sprint 03. The stale-IDL check through `git status` covers `packages/sdk/src/idl`
@@ -1970,8 +2066,10 @@ directory; three clippy lines, the last one for brot-markets
 with the `mainnet` feature; `tsc --noEmit`; `bun run test`; `bun run test:rust`, whose Mollusk checks run the
 brot-markets binary; the step "Mainnet build carries the real values",
 `cargo test --locked -p brot-markets --features no-entrypoint,mainnet` (T12); and, on `main` only, a `programs-<sha>`
-artifact with both binaries, the IDLs and `SHA256SUMS`. *Repo:* `codemap.js --check`, `os-self-test.js`, the landing's
-tests and the secret scan over the branch. *App:* lint and build.
+artifact with `brot_markets.so`, its IDL (`brot_markets.json`, the committed one) and `SHA256SUMS`. *Repo:*
+`codemap.js --check`, `os-self-test.js`, the landing's tests and the secret scan over the branch. *App:* lint and
+build. *Mobile bundle* (added in Sprint 05; green on its pull request, PR #43, run 38009888067): Node 24.21.0,
+`npm ci --ignore-scripts` in `tests/react-native`, then `node run.mjs`.
 
 **What changes** **[DP]** (proposal §2.1, §2.3, §6).
 
@@ -1980,8 +2078,8 @@ tests and the secret scan over the branch. *App:* lint and build.
 | Build | `cargo build-sbf` replaces `anchor build`; then the Shank IDL and the Codama client (or the hand-written codecs, T9), synced into `packages/sdk` | 02 (done for brot-markets, with the spike's client), 03 (Anchor leaves), 05 (T9) |
 | Toolchain | The Anchor CLI install and the `pred-provable` clippy line leave with the frozen program | 03 |
 | IDL check | Over the Shank output and the generated client, instead of `target/idl`, `target/types` and `app/lib/idl` | 02 (added beside the old paths), 03–05 |
-| New checks | `dependency-cruiser` read/tx rule; the Rust-generated math vectors; JSON Schema of `content/`; a check that the mainnet build carries the real window and duration (T12, done in 02) | 02–05 |
-| Mobile bundle | A job that bundles both SDK halves for Android and runs the math vectors in the app's runner | 05 |
+| New checks | `dependency-cruiser` read/tx rule and the SDK's portability check (`bun run lint:sdk`, inside `bun run lint`, done in 05); the Rust-generated math vectors (done in 04 and 05); JSON Schema of `content/`; a check that the mainnet build carries the real window and duration (T12, done in 02) | 02–05 |
+| Mobile bundle | The "Mobile bundle" job (done in 05: green on PR #43, run 38009888067): both SDK halves bundled by Metro 0.87.1 for Android as React Native 0.87.1 bundles a release, compiled with that version's hermesc, and the 24,000 math vectors replayed on a Hermes VM pinned by SHA-256 (`tests/react-native/run.mjs`) | 05 |
 | Services | `bun test services/` | 06–08 |
 | Web | The Playwright smoke at desktop and Android widths | 11 |
 | Lockfile | `bun install --frozen-lockfile` resolving from npmjs.org (T15) | 02, at its opening, before the Codama spike (done, `7d770ce`) |
@@ -2163,7 +2261,7 @@ The business risks are in P4 §7. These are the plan's. Severities marked "(P4 �
 | `.github/workflows/ci.yml` | §10 | 02–05; 16 |
 | `services/landing/public/` | The D6 copy is done (commit `c82be03`, Sprint 02): title, meta tags, H1, lead, form label, example and principles, and the privacy line, per D-m; the footer's legal notice (L0's text) and the founder's deck at `/pitch` were left as they were. Still to do: `/pitch2`'s 3.5% fee line, against the decided 10% of the losing side (`services/landing/pitch2-notes.md`); the deck's mainnet slide ("After an audit, a multisig and a cap") | D6 copy: done in 02. The rest: next, per the BP index ("O que vem depois", item 3) |
 | `app/.env.example`, root `.env.example` | The OpenRouter variables leave (D-q). The root file is the operating system's generic template (AI, Supabase, Stripe keys) **[F]**; it does not describe this project | 09 |
-| `package.json` (root) | Name, description and `deploy:devnet` still describe the frozen program **[F]** | 03, when `pred-provable` leaves |
+| `package.json` (root) | Done: the name (`brot-markets`) and the description describe Brot Markets, and `deploy:devnet` runs the brot-markets deploy from CI's artifact (`scripts/deploy/devnet-deploy.ts`, Sprint 05) **[F]** | 03; 05 (done) |
 
 ### 14.2 Founder questions
 
@@ -2261,7 +2359,7 @@ L-08 (test USDC), L-17 (the suggestions page) and L-19 (the cap's value) fall aw
 | T6 | Running the tunnel without Docker or root | Done 2026-10-05: a single `cloudflared` binary in `/srv/brot-markets/bin`, as a systemd unit **[F]**. Whether the visitor's country reaches the server is C9 | 06 |
 | T7 | The multisig product, with a public wait for upgrades | Choose and test | 16 |
 | T8 | A second oracle for disputes on price campaigns (L-14) | The feed-history table is its reference | 14 |
-| T9 | SDK stack | Shank and Codama spike in Sprint 02; decide in 05; hand-written codecs with byte tests as fallback | 02; 05 |
+| T9 | SDK stack | Decided in Sprint 05: the Codama client generated from the Shank IDL is the codec and builder layer; the event table and the PDA seeds are written by hand and checked against the program's source (§3.4.19) | 02; 05 (done) |
 | T10 | `expected_entry_total` on the join | Adopt | 02 |
 | T11 | A neutral `fee_bps` in `GlobalConfig` | Adopt | 02 |
 | T12 | Devnet-only drill constants behind a cargo feature | Adopt, with a CI check that the mainnet artifact carries the real values | 02–04 |
@@ -2306,6 +2404,14 @@ Closed in Sprint 02 (`docs/sprints/sprint-02-pot-core.md`; the two session logs 
   120 on devnet; `max_price_conf_bps` 1 to 100, 50 on devnet; `campaign_max_age` 30 to 300 s, 120 on devnet.
 - **C44.** Decided as Sprint 02 built it **[FD]** (§14.2).
 
+Closed in Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`; `session-log/2026-10-09-sprint-05-sdk-e-ciclo-devnet.md`):
+- **C25.** The SDK under React Native: Metro 0.87.1 bundles both halves for Android with React Native 0.87.1's preset,
+  its hermesc (Hermes 1.0.0) compiles them, and the 24,000 vectors replay with no mismatch; `bigint` is native; the app
+  must add `crypto.subtle.digest` and `crypto.getRandomValues` (`knowledge-base/tecnologia/sdk-react-native.md`) [F].
+- **C26.** `@solana/kit` `~8.4.0`: all 27 sub-packages published, a clean frozen install, the typecheck and the tests
+  pass [F].
+- **C41.** One name, `@brot/sdk`, in the code and the documents [F].
+
 | # | What to verify | Sprint |
 |---|---|---|
 | C4 | Whether Surfpool simulates epoch stake | 03 |
@@ -2324,8 +2430,6 @@ Closed in Sprint 02 (`docs/sprints/sprint-02-pot-core.md`; the two session logs 
 | C22 | The Lighthouse program id, for the relay's allowlist | 03 |
 | C23 | Alpenglow on devnet: dates, the Clock timestamp, slot length | Before 03 retests deadlines |
 | C24 | Self-CPI compute cost inside a settle batch (one event alone, measured in LiteSVM in Sprint 02: 70 CU for the event frame plus 946 the runtime charges the caller per CPI) | 04 |
-| C25 | The SDK under React Native: polyfills, `bigint`, Metro (with C33) | 05 |
-| C26 | `@solana/kit` 8.4.0 with a frozen install and typecheck; `CLAUDE.md` pins `~8.3.0` because 8.4.0 shipped with unpublished sub-packages | 05 |
 | C27 | The Cloudflare notification for unknown tunnel connectors | 06 |
 | C28 | The Cloudflare Cache Rule needed to cache `/api/v1` JSON | 08 |
 | C29 | The `next/og` route convention in this Next.js version | 10 |
@@ -2339,7 +2443,6 @@ Closed in Sprint 02 (`docs/sprints/sprint-02-pot-core.md`; the two session logs 
 | C38 | Pinocchio's Zellic audit report, to link [E73] | 16 |
 | C39 | Helius and other plan limits, which are per plan [E40] | 06; 18 |
 | C40 | Who controls the Pyth receiver's upgrade authority on mainnet | 16 |
-| C41 | The SDK package name: `@brot/sdk` in this plan, `@brot-markets/sdk` in `packages/sdk/package.json` **[F]** (§3.2) | 05 |
 | C45 | The minimum distance between the target and the current value, per kind (check 3, §3.4.10) | 03 |
 | C46 | How the epoch kinds meet the 3-to-90-day rule and the entry close, with no `deadline_at` in the proposal's sketch (§3.4.8) | 03 |
 | C47 | The exact `StaleFeed` test, and the slot bound on a YES proof (§3.4.6, §3.4.8) | 03 |

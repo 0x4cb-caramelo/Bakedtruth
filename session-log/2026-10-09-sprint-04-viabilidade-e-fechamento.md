@@ -10,6 +10,9 @@
      vencedor". O programa cobra a taxa da Brot sobre o lado perdedor (como sempre foi), e a parte do criador sobre o
      pote inteiro. Com a redação do fundador, a conta mudaria para os casos de V 990 / P 10 e V 98.900 / P 1.100.
      Até a resposta, vale o que está no código; a Sprint 04 registra a dúvida em "Closure status".
+   - **Respondida na noite de 9/10 pelo Ronaldo:** a leitura do código é a regra (a taxa da Brot sobre o lado perdedor,
+     a parte do criador sobre o pote inteiro); registro em
+     `session-log/2026-10-09-sprint-05-respostas-do-deploy-e-leituras-devnet.md`.
    - Fronteira testada: com V 990, um lado perdedor de 12 é de um lado só (taxas de 2 + 10 = 12, não é maior);
      de 13 divide.
 2. **Corte da revisão (decisão 1).** Uma campanha em revisão move o corte só para trás, para uma prova SIM de preço

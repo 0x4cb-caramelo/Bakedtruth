@@ -12,10 +12,17 @@ A Sprint 02, o núcleo do pote em Pinocchio, foi mesclada na `main` pelo PR #35 
 `sprint-02-pot-core`) e ganhou a tag `sprint-02` em 9/10/2026. A Sprint 03, os leitores e a resolução, foi mesclada
 na `main` pelo PR #40 em 9/10/2026, com a tag `sprint-03` (`docs/sprints/sprint-03-readers-resolution.md`). Quem
 mesclou os PRs #37 e #40 foi o Ronaldo, com a liberdade que o Lucas lhe deu; ele também respondeu as perguntas ao
-fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`).
+fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`). Na noite de
+9/10/2026 entraram na `main`, a pedido do Ronaldo: a Sprint 04 pelo PR #41 (tag `sprint-04`), o `CampaignFinalized`
+nos caminhos da equipe pelo PR #44 e o id novo do programa pelo PR #45; já em 10/10, a Sprint 05 pelo PR #43 (tag
+`sprint-05`). O programa roda no devnet desde a noite de 9/10.
 
 ### Changed
 
+- **A regra de viabilidade fica como está no código** (9/10/2026, à noite, Ronaldo): a taxa da Brot sai do lado
+  perdedor e a parte do criador é calculada sobre o pote inteiro; as palavras anteriores ("taxas cobradas sobre o
+  principal do lado vencedor") deixam de valer. Era a pergunta que a Sprint 04 deixou aberta antes da mescla
+  (`docs/business/ideacao-perguntas-e-respostas.md`, seção 1).
 - **Novo id do programa: `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o`** (9/10/2026, decisão do Ronaldo). O keypair
   do id anterior, `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN`, não estava na máquina de quem faz o deploy no
   devnet; o id foi declarado no commit `ae8b837`, de 5/10, e ninguém sabia por onde o keypair tinha andado desde
@@ -23,7 +30,70 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
   autoridade de eventos (`CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx`, bump 254 como antes), o IDL e o cliente
   Codama regenerados (`bun run idl`), e as constantes do kit de testes. O id antigo fica abandonado; nunca foi
   publicado em cluster nenhum. A mainnet terá um id próprio, mantido em segredo até o deploy.
-
+- **Sprint 05 fechada e mesclada** (branch `sprint-05-sdk-devnet-cycle`, PR #43, tag `sprint-05`, aberta da cabeça do
+  PR #41, que foi mesclado na `main` em 9/10; `docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and retrospective"). O programa não mudou
+  nesta sprint; mudou fora dela, pelos PRs #44 (`CampaignFinalized`) e #45 (o id novo), que a branch traz da `main`. O
+  que entrou:
+  - **O SDK, `@brot/sdk`** (antes `@brot-markets/sdk`), a biblioteca única de site, app, serviços, scripts e testes,
+    com três entradas: `read` (endereços, decodificação de contas e eventos, a matemática do dinheiro, as regras de
+    abertura e de entrada na ordem do programa, a cotação da abertura com o débito inteiro, o estado público pelo
+    relógio da rede, `recheck`, uma mensagem por código de erro), `tx` (os 22 construtores, a simulação, o resumo
+    determinístico e a preparação de uma entrada e de uma abertura antes da assinatura) e `schemas` (zod 4.6.5).
+  - **T9 decidido:** o cliente gerado pelo Codama a partir do IDL do Shank é a camada de codecs e construtores.
+  - **Conferido contra o programa:** os 24.000 vetores do Rust (12.000 da Sprint 04 e 12.000 novos, do snapshot com a
+    regra de viabilidade, do pagamento por entrada, da estimativa e do calendário) passam sem nenhuma diferença; 37
+    códigos de recusa da abertura dão o mesmo erro no SDK e no programa; os 22 construtores dão os mesmos bytes que o
+    kit de testes; o decodificador recusa evento forjado, transação que falhou e duplicata, e lê evento em chamada
+    aninhada e em tabela de endereços.
+  - **React Native:** o SDK empacota com o Metro para Android e roda no Hermes, com os vetores sem diferença; o app vai
+    precisar de `crypto.subtle.digest` e `crypto.getRandomValues`
+    (`knowledge-base/tecnologia/sdk-react-native.md`). Novo trabalho de CI, "Mobile bundle", verde no PR #43 (os
+    24.000 vetores sem diferença no Hermes).
+  - **Regras de fronteira** (`bun run lint:sdk`, dentro de `bun run lint`): `read` não importa `tx`; nada de Node,
+    React, Next, React Native, web3.js v1, Anchor nem zod em `read` e `tx`, que também não importam `schemas`; nenhum
+    global de Node, Bun ou DOM. Um teste planta uma violação de cada regra numa cópia do SDK e exige que todas disparem.
+  - **Dependências:** `@solana/kit` 8.4.0, zod 4.6.5 e dependency-cruiser 18.4.0, fixados.
+  - **O kit de testes usa o SDK:** todo evento de todo teste passa pelo decodificador do SDK; os 7 eventos que o kit
+    descreve à mão têm os campos conferidos, e os outros 11, da Sprint 04, o discriminador e o tamanho contra o
+    código do programa; os fluxos comuns são montados pelos construtores do SDK.
+  - **O programa está no devnet** (9/10/2026, 23h27; `deploy/devnet/README.md`):
+    `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o`, do artefato do CI da `main` em `c20e79a` (execução 38014319993),
+    com o `SHA256SUMS` e o IDL conferidos, o keypair só no id declarado, só o loader v3, e a inicialização e o time na
+    mesma sessão. A chave de upgrade, o admin e o recebedor das taxas são a chave de devnet do Ronaldo, que respondeu as
+    decisões do deploy na mesma noite; valores reais, não os de treino. Duas tentativas morreram escrevendo o buffer no
+    RPC público; o deploy passou a reassinar por 50 rodadas, com uma taxa de prioridade pequena, e a terceira passou por
+    um RPC com chave, mantida fora do repositório. **O smoke passou no devnet** logo depois: abertura paga, as duas
+    entradas, a resolução, a confirmação da equipe com os dois eventos, os pagamentos, a taxa, o fechamento e a
+    varredura, cada lamport igual ao do SDK, e as duas tentativas repetidas recusadas.
+  - **O lote real de liquidação no devnet** (`bun run settle-batch:devnet`, script novo): doze `settle_entry` numa
+    transação, doze eventos por self-CPI, cada pagamento igual ao do SDK; 33.630 CU (2.802 por entrada) e 1.152 dos
+    1.232 bytes. **O seed** abriu três campanhas de exemplo da equipe, grátis, que ficam abertas para o site (BTC/USD
+    acima, SOL/USD abaixo, uma queima). A virada de época no devnet vai para a Sprint 06.
+  - **As leituras só de leitura no devnet** (9/10/2026, 22h, com a autorização do Ronaldo; nada enviado;
+    `knowledge-base/tecnologia/devnet-o-que-so-o-cluster-mostra.md`, seção 5): o id do programa, o ProgramData dele e
+    a config estão livres; os aluguéis (`Campaign` 3.251.200 lamports, `Entry` 1.239.520, `Join` 1.137.920); a conta
+    SOL/USD atualizou a cada 61 a 63 segundos e chegou a 64 segundos de idade, contra os 120 do `max_price_age`; o
+    relógio do devnet ficou dentro de cerca de um segundo da hora de parede.
+  - **`smoke:devnet` e `seed:devnet` reescritos em SOL sobre o SDK** (o ciclo completo do smoke passa num cluster
+    local, com todo valor igual ao do SDK e as duas tentativas repetidas recusadas); **`scripts/team/`**, um comando
+    por ato da equipe, cada pessoa com a própria chave; o texto de cada anulação em `content/void-log/`.
+  - **Os testes negativos num cluster local:** os 373 casos da matriz de slots, 50 recusas de regra e uma abertura
+    paga igual à cotação do SDK, no Surfpool offline isolado da rede (o `solana-test-validator` precisa de AVX2, que
+    esta máquina não tem).
+  - **Três revisões (segurança do SDK, coordenação do registro, segurança do deploy), e o que mudou por causa delas:**
+    o resumo antes da assinatura lê os bytes que a carteira assina, limita e põe teto na taxa de prioridade, só confia
+    nas instruções do programa no formato do IDL e diz em palavras a campanha, o alvo na unidade do feed, quem cria, o
+    preço abaixo do qual a abertura é recusada e os termos; uma entrada repetida com o total salvo é recusada em vez de
+    dobrar; a simulação lê o formato que um nó de verdade devolve (antes não via evento nenhum); o `recheck` pagina e
+    aguenta resposta malformada; os casos de recusa que faltavam passam nos dois lados, e as recusas da entrada também.
+    O deploy ficou amarrado ao commit revisado e ao hash do binário, confere os endereços e os saldos antes de agir,
+    retoma uma inicialização que não terminou, e recusa chave dentro de qualquer repositório Git; os scripts da equipe
+    simulam sem assinar; o registro de anulação só vale depois que a rede confirma.
+  - **Achados em aberto:** a confirmação e a anulação pela equipe não emitem o `CampaignFinalized` que o plano promete
+    (correção do programa, antes do indexador); e qualquer pessoa pode impedir para sempre o deploy de um id de
+    programa num cluster mandando cerca de 0,001 SOL ao endereço do ProgramData desse id (ensaiado no cluster local; o
+    id do programa é público). O loader v3 continua sendo o caminho: o Agave abandonou o loader v4.
+  - Plano técnico na v0.1.4 (§3.4.19).
 - **Sprint 04 fechada para revisão, com PR aberto e não mesclado** (`docs/sprints/sprint-04-settlement-invariants.md`, "Closure status"). O programa ganhou liquidação, pagamento, taxas, parte do criador, a apuração tardia (`Join` por entrada, `tally_late_joins`), a regra de viabilidade (um pote só divide se o lado perdedor pagar as taxas) e o corte de revisão por prova anterior. Teste aleatório com semente fixa: 1.200 operações, 35.288 checagens de I1 a I15, sem falha. Medido: liquidação de 2.926 a 3.180 CU por entrada, 12 entradas por transação. Ficou em aberto: a redação da regra de viabilidade (taxa sobre o lado perdedor, não sobre o principal do lado vencedor), a cobertura dos caminhos de time (`confirm`, `void`) no teste aleatório e a conferência das linhas da definição de pronto sem teste. Plano técnico na v0.1.3 (§3.4.18).
 - **Sprint 04 em curso, na branch `sprint-04-settlement-invariants`** (ainda sem PR). Feito até aqui: o arquivo
   `checks.rs` e o `state/campaign.rs` foram divididos sem mudança de comportamento; as pendências de documentação da
@@ -371,6 +441,11 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
   `tests/brot/team-window-events.test.ts` (os dois eventos, em ordem, com os campos do snapshot gravado), e o kit de
   testes passa a ler os três eventos. Quando isto entrar, os eventos que o smoke da Sprint 05 espera mudam
   (`scripts/validator/cycle-settle.ts`, na branch dela): a confirmação da equipe passa a emitir dois.
+- **O gancho de pre-commit volta a rodar** (9/10/2026, pedido do Ronaldo). O `.husky/pre-commit` estava no Git sem
+  permissão de execução desde a derivação do OS (2/10), e o Git o ignorava em silêncio ("hook was ignored because it's
+  not set as executable"): commits feitos fora do Claude Code não passavam pela varredura de segredos. Agora ele é
+  executável (modo 100755) e roda `scripts/pre-commit.js`: a varredura de segredos nos arquivos em stage; o lint do
+  Biome só se o Biome estiver instalado, e não está neste repositório.
 - **Sprint 03, o que as revisões acharam e foi corrigido antes do pull request** (9/10/2026; quatro revisores:
   segurança, advogado do diabo, independente e produto; nenhum achou como tirar SOL de ninguém):
   - **a anulação por feed parado ganha um piso de 600 segundos** (`STALE_FEED_MIN_SECONDS` [AC]): a conta
