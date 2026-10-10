@@ -578,7 +578,7 @@ Não enviar o deck como está. Ele conta outra história em quatro pontos, e é 
 
 **O PDF do deck como está, gerado em 10/10/2026** a pedido do Lucas ("consegue pegar o nosso pitch e transformar cada
 pagina em pdf?"): `docs/business/colosseum/brot-markets-pitch.pdf`, com 9 páginas de 16 por 9, texto selecionável e
-5,7 MB, e uma página por arquivo em `docs/business/colosseum/pitch-paginas/`. Sai da regra de impressão que o próprio
+4,1 MB (refeito no mesmo dia: a primeira versão imprimia o verso dos cartões que viram; seção 8), e uma página por arquivo em `docs/business/colosseum/pitch-paginas/`. Sai da regra de impressão que o próprio
 deck já tinha, com o movimento desligado (`?motion=off`): o exemplo animado do slide de solução aparece parado, no
 estado inicial. Os arquivos ficam fora do Git: são derivados do HTML e mudam quando o deck mudar. Os quatro pontos da
 tabela continuam nele; mexer nos slides é decisão do Lucas, e dois dos quatro dependem de resposta dele.
@@ -621,4 +621,90 @@ pessoal é dele; o texto é ponto de partida, e não resposta pronta.
 Because it is a market I can defend line by line. Every prediction market has to answer one question: who says what happened? Today the answer is a token vote, a company key or an AI model, and that is where results get disputed and manipulated. When we started Brot I set one rule and refused to trade it away: we only use an oracle the chain itself can verify. The rule threw out most markets, and what it left is the part I find most useful: the promises crypto projects make to their holders (a burn, locked liquidity, staked SOL) that nobody holds them to. Let a project open a market on its own promise and it becomes marketing that proves itself.
 
 I am the lawyer on a three-person team, so I also know what this product must not become, and I would rather build inside a narrow rule we can keep than a broad one we cannot. In ten days we took that rule from the first commit to a program that opened, resolved and paid a real campaign on devnet. That pace is why I am here.
+```
+
+## 8. O retorno do revisor da Superteam (10/10/2026)
+
+O Lucas rodou `revisor.superteam.com.br` e colou o retorno: nota 61 de 100, dois bloqueios e cinco melhorias.
+O revisor diz que a nota não é probabilidade. O que foi tratado e o que ficou:
+
+| Ponto do revisor | Situação |
+|---|---|
+| Os dois vídeos apontam para o mesmo endereço, que não é do projeto (bloqueia) | Não gravados. Os roteiros estão na seção 6 |
+| Duas respostas do perfil em português (bloqueia; §12(a)) | Uma traduzida abaixo. A outra ("extreme lengths") não veio na colagem |
+| Lista de tecnologias longa e cortada | O campo corta o texto: a resposta de 2.365 caracteres da seção 5 não cabe. Lista de seis abaixo |
+| Falta um número real de uso | Não há usuário de fora. Contado na rede em 10/10: 54 transações, 2 campanhas liquidadas, 3 abertas sem entrada, tudo da equipe. Não existe tela nem script para uma carteira de fora entrar numa campanha |
+| Repositório privado perde os pontos de código aberto (§8(e)) | Decisão do Lucas. A varredura do histórico inteiro da `main` (211 commits) com os padrões do projeto não achou credencial; os padrões não cobrem arquivo de chave da Solana nem endereço de RPC com chave. O repositório guarda o plano, as notas jurídicas e 58 registros de sessão, com nomes |
+| Quem controla o resultado pode manipular a campanha | Resposta nova abaixo, com o que o programa faz de fato |
+| "Live product link" sem protocolo (`brot.markets/dev0x`) | O endereço precisa de `https://`. A página é um protótipo com dados de mentira; como "produto no ar", o endereço honesto é o do programa no Explorer (seção 6) |
+| Cartão espelhado no slide 3 do deck | **Erro meu.** O PDF de 10/10 imprimia o verso dos cartões que viram (o exemplo do slide de solução e as fotos do slide de equipe) por cima da frente. Eu tinha conferido uma renderização, e não o PDF. Gerado de novo com os versos escondidos e conferido no próprio arquivo, página por página |
+
+**Tecnologias** (lista de até seis)
+
+```text
+Rust, Pinocchio, Pyth, Meteora DAMM v2, SPL Stake Pool, Claude Code
+```
+
+O revisor sugere "Next.js" no sexto lugar. Troquei por "Claude Code" por dois motivos: o campo pede as ferramentas de IA pelo
+nome, e o Next.js ainda não faz parte do produto novo (o site das campanhas não existe). As duas listas têm seis itens.
+
+**What are you building, and who is it for?** (989 de 1000 caracteres; substitui a da seção 5)
+
+```text
+We are building prediction markets with nobody in the middle: the program reads the outcome from a Solana account. No person, token vote or AI model reports it. Each market is an On-Chain Campaign.
+
+Who it is for:
+1. On-chain projects, our customer. A team that promised its holders something measurable (burn 100M tokens by Nov 30, lock liquidity on Meteora) opens a campaign on it for US$500 in SOL; 90% becomes the prize.
+2. Their communities and any Solana wallet: join YES or NO with SOL, no sign-up; winners split the pot.
+
+Can the creator rig it? It controls only whether it keeps its promise, and YES wins only if it does. The program reads facts that cannot be faked or undone (a burn on a mint with no mint authority, permanently locked liquidity) and stops entries once the outcome is knowable. If the account cannot be read or the Pyth price is stale, the campaign is voided and everyone is refunded.
+
+Brot keeps 10% of the losing side; the creator earns 1% of entries.
+```
+
+A frase nova não diz que o criador não influencia: ele decide se cumpre a própria promessa, e o plano registra que
+quem aposta contra corre esse risco. O que o programa garante está no código: a autoridade de emissão revogada na
+abertura, a trava de entrada e a anulação com devolução (`readers/spl_mint.rs`, `StaleFeed`).
+
+**Brief description, com o número real** (490 de 500; só se o Lucas quiser)
+
+```text
+Brot Markets is a permissionless prediction market on Solana where the chain itself decides the result. On devnet: 54 transactions and 2 campaigns settled end to end, run by the team so far. A project opens a YES/NO campaign on a milestone Solana can measure (a token burn, locked liquidity, staked SOL, a price) and funds the prize. Its community takes sides with SOL. At the deadline the program reads the target account and the winners split the pot. No vote, no judge. Proof > Promises.
+```
+
+O número é verdadeiro e diz de quem é. Atualizar a contagem antes de enviar. Não é o que o revisor pede (usuários de
+fora): para isso falta um jeito de uma carteira de fora entrar.
+
+**Access instructions:** acrescentar este parágrafo, que carrega o estado de cada tipo que saiu do campo de tecnologias
+
+```text
+What runs on devnet today: price and burn campaigns. The Meteora and stake-pool types are tested on mainnet account bytes only (there is no devnet pool to read), and the validator-stake type stays switched off until a YES is recorded on devnet. Entries are made by script: the site where a wallet clicks YES or NO is not built yet.
+```
+
+**What's the most impressive thing you've built or accomplished outside of this project?**
+
+A frase dele, só traduzida (93 de 500):
+
+```text
+My startup accelerator, and a tokenization company with which we were tokenizing a ruby mine.
+```
+
+Uma versão mais forte, com colchetes para o que só ele sabe:
+
+```text
+I founded Aceleradora ECO, a startup accelerator [CITY, since YEAR: N startups accelerated, one result you are proud of]. I also co-founded a tokenization company and led the work to tokenize a ruby mine [how far it got: the legal structure, the asset value, what happened next]. Both taught me the same thing Brot is built on: a promise about an asset is worth what can be verified about it.
+```
+
+**Where have you worked or built before?** (o revisor marcou como fraca; rascunho com colchetes, limite de 1000)
+
+```text
+I am a lawyer and I run my own firm, Lopes Galvão Advogados [since YEAR; your practice areas, and what you have done for crypto or fintech clients]. That is why Brot's rules were written with the regulatory questions on the table from day one, and why I hold the legal seat (CLO) as well as operations.
+
+I founded Complian.cc [one line: what it does and who uses it].
+
+I founded Aceleradora ECO, a startup accelerator [N startups, since YEAR]. It is where I learned to take a product from idea to first customer [if true: and it is our network for the first launch partners].
+
+Before Brot I worked on tokenizing a real asset, a ruby mine [your role and how far it got], so I have seen how hard it is to prove an off-chain fact on-chain. Brot is the opposite bet: only facts the chain already holds.
+
+On Brot I own the product rules, the terms and privacy policy, the site and the pitch, and I ship with an AI coding assistant: about 110 of the repository's commits are mine.
 ```
