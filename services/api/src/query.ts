@@ -38,7 +38,7 @@ export function parseListQuery(url: URL): ListQuery {
   };
 }
 
-function integer(url: URL, name: string, fallback: number, min: number, max: number): number {
+export function integer(url: URL, name: string, fallback: number, min: number, max: number): number {
   const raw = url.searchParams.get(name);
   if (raw === null) return fallback;
   if (!/^\d+$/.test(raw)) throw new BadQuery(`${name} must be a whole number`);

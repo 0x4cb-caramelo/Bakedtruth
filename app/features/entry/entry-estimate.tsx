@@ -1,10 +1,11 @@
 /**
  * Purpose: the live estimate under the amount (BR-09), in a polite live region: what the entry returns if its side
  *          wins, net of Brot's fee and the creator's share, with the entry itself counted; the refund while the other
- *          side is empty; the program's refusal in the panel's words when the entry would be refused. The numbers are
- *          estimate.ts's, which are the SDK's `checkJoin` estimate.
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ *          side is empty, or too small to pay the fees (Sprint 13: the pot would not split); the program's refusal in the
+ *          panel's words when the entry would be refused. The numbers are estimate.ts's: what finalize would pay if
+ *          entries closed now.
+ * Version: 0.2.0 (Sprint 13: the too-small case)
+ * Sprint:  11 (site: campaign page and entry); 13
  */
 "use client";
 
@@ -67,6 +68,9 @@ function body(
       <p className="m-0 mt-1 text-xs text-muted tabular-nums">
         {PANEL.perOne(perOne(e.bps))}. {PANEL.ifLoses(other(side))}
       </p>
+      {e.mode === "toosmall" ? (
+        <p className="m-0 mt-1 text-xs text-warn">{PANEL.tooSmall(other(side), oneSidedFeeBps)}</p>
+      ) : null}
     </>
   );
 }

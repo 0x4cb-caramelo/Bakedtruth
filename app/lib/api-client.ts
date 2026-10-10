@@ -1,9 +1,10 @@
 /**
- * Purpose: a read-only client for the read API (`services/api`, /api/v1): health, the campaign list and one campaign.
- *          Typed from the API's JSON; it imports no server code. Each call returns the body or throws an ApiError with
- *          the API's own code. The base URL comes from NEXT_PUBLIC_API_URL; nothing secret is sent or kept.
- * Version: 0.1.0
- * Sprint:  09 (site shell, theme and wallet)
+ * Purpose: a read-only client for the read API (`services/api`, /api/v1): health, the campaign list, one campaign and,
+ *          since Sprint 13, the devnet leaderboard. Typed from the API's JSON; it imports no server code. Each call
+ *          returns the body or throws an ApiError with the API's own code. The base URL comes from NEXT_PUBLIC_API_URL;
+ *          nothing secret is sent or kept.
+ * Version: 0.2.0 (Sprint 13: the leaderboard)
+ * Sprint:  09 (site shell, theme and wallet); 13
  */
 
 export type Health = {
@@ -57,6 +58,21 @@ export type CampaignList = {
 };
 
 export type ListQuery = { state?: ListState; limit?: number; offset?: number };
+
+/** One wallet's line of the devnet leaderboard (Sprint 13): its rank, points and the campaigns it entered. */
+export type PointsLine = { rank: number | null; wallet: string; points: number; entered: number };
+
+export type Leaderboard = {
+  as_of_slot: string;
+  chain_time: string;
+  /** False while some of the program's transactions wait for a later read. */
+  complete: boolean;
+  rule: string;
+  total: number;
+  offset: number;
+  limit: number;
+  rows: PointsLine[];
+};
 
 export class ApiError extends Error {
   constructor(
@@ -112,6 +128,15 @@ export function createApiClient(options: { base: string; fetch?: FetchLike }) {
     async getCampaign(address: string): Promise<Campaign> {
       const { status, body } = await read<{ campaign: Campaign }>(`/api/v1/campaigns/${encodeURIComponent(address)}`);
       if (status === 200) return (body as { campaign: Campaign }).campaign;
+      return fail(status, body);
+    },
+    /** The ranked wallets, a page at a time. It sends no wallet: the page finds its own line in the list. */
+    async getLeaderboard(query: { limit?: number; offset?: number } = {}): Promise<Leaderboard> {
+      const params = new URLSearchParams();
+      if (query.limit !== undefined) params.set("limit", String(query.limit));
+      if (query.offset !== undefined) params.set("offset", String(query.offset));
+      const { status, body } = await read<Leaderboard>("/api/v1/leaderboard", params);
+      if (status === 200) return body;
       return fail(status, body);
     },
   };

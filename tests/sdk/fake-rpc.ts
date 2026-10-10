@@ -3,7 +3,7 @@
  *          URL (`recheck`, the A-3 preparation) run against the program's real state in a test: account
  *          reads, the Clock sysvar, rent, signatures by address and transactions recorded in the RPC's
  *          shape, the latest blockhash and simulation (./fake-simulate.ts). Integers are written as JSON numbers without precision loss, as a node writes them.
- * Version: 0.1.0
+ * Version: 0.1.1 (Sprint 13: `until`, for the read API's incremental history)
  * Sprint:  05 (SDK)
  */
 import { getBase64Decoder, type Address } from "@solana/kit";
@@ -44,10 +44,12 @@ export function startFakeRpc(w: World, innerShape: InnerShape = "node"): FakeRpc
     getMultipleAccounts: ([list]) => ({ context: { slot: w.client.svm.getClock().slot }, value: list.map(account) }),
     getMinimumBalanceForRentExemption: ([size]) => w.client.svm.minimumBalanceForRentExemption(BigInt(size)),
     getSignaturesForAddress: ([at, config]) => {
-      // Newest first, `limit` per page, after `before`, as a node pages them.
+      // Newest first, `limit` per page, after `before` and down to `until` (exclusive), as a node pages them.
       const list = recorded.filter((tx) => accountKeysOf(tx).includes(at)).reverse();
-      const from = config?.before ? list.findIndex((tx) => tx.transaction.signatures[0] === config.before) + 1 : 0;
-      return list.slice(from, from + Number(config?.limit ?? 1_000)).map((tx) => ({
+      const at_ = (sig: string) => list.findIndex((tx) => tx.transaction.signatures[0] === sig);
+      const from = config?.before ? at_(config.before) + 1 : 0;
+      const stop = config?.until && at_(config.until) >= 0 ? at_(config.until) : list.length;
+      return list.slice(from, Math.min(stop, from + Number(config?.limit ?? 1_000))).map((tx) => ({
         signature: tx.transaction.signatures[0],
         slot: BigInt(tx.slot),
         err: tx.meta?.err ?? null,

@@ -72,7 +72,7 @@ Surfpool 1.6.0 (CI downloads it pinned by SHA-256; a local 1.5.0 runs the same s
 bun install
 bun run build:program      # cargo build-sbf (brot-markets and the test-only cpi-proxy, into target/deploy); bun run idl
 bun run idl                # brot-markets: Shank IDL from the source into packages/sdk/src/idl, then the Codama client into idl/generated
-bun run test               # bun test tests/  (TypeScript, LiteSVM, in-process; no validator)
+bun run test               # bun test tests/ app/  (TypeScript, LiteSVM, in-process; no validator; the site's own tests too)
 bun run test:rust          # cargo test -p brot-markets --features no-entrypoint (host and Mollusk; needs the binary)
 cargo test --locked -p brot-markets --features no-entrypoint,mainnet   # the mainnet values, never the drill ones (T12)
 bun run lint               # prettier --check on tests/, scripts/ and packages/, then lint:sdk

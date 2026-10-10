@@ -1,15 +1,21 @@
 /**
  * Purpose: the web smoke's chain (Sprint 11, `bun run e2e`): the program in LiteSVM (CI's binary in target/deploy) with
  *          the founder's config, a team key and a paying creator, behind the site tests' recording JSON-RPC endpoint
- *          (with CORS, so the browser can call it); a stand-in for the read API's health (entries taken, K-11); and a
- *          loopback control endpoint (control.ts) for the Playwright runner. Started by tests/e2e/run.ts.
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ *          (with CORS, so the browser can call it); a stand-in for the read API's health (entries taken, K-11); since
+ *          Sprint 13 the read API's own leaderboard route (services/api, over this chain's history); and a loopback
+ *          control endpoint (control.ts) for the Playwright runner. Started by tests/e2e/run.ts.
+ * Version: 0.2.0 (Sprint 13: /api/v1/leaderboard)
+ * Sprint:  11 (site: campaign page and entry); 13
  *
  * Why LiteSVM and not Surfpool: the same program binary runs here with the captured Pyth accounts already fresh, in
  * process, with no network namespace; the smoke checks the site's wiring, and the program's behaviour on a real
  * validator is Sprint 05's devnet cycle. Ports (loopback only): RPC 4241, health 4242, control 4243.
  */
+import { createSolanaRpc } from "@solana/kit";
+
+import { createHistory } from "../../services/api/src/history";
+import { createHandler } from "../../services/api/src/routes";
+import type { Snapshot } from "../../services/api/src/snapshot";
 import { openingWorld } from "../brot/opening";
 import { fundedWallet } from "../brot/setup";
 import { startFakeChain } from "../site/fake-chain";
@@ -21,13 +27,29 @@ const w = await openingWorld();
 const chain = startFakeChain(w, { port: PORTS.rpc, cors: true });
 const wallet = await fundedWallet(w, 100n);
 let campaigns = 0;
+// The leaderboard is the read API's own route over this chain's history. The snapshot holds no live account, so a
+// campaign scores once it is finalized (its events say so), as every cycle the smoke runs to its close is.
+const history = createHistory(createSolanaRpc(chain.url), { perRefresh: 10_000 });
+const snapshot = (): Snapshot => {
+  const clock = w.client.svm.getClock();
+  const time = { slot: clock.slot, epoch: clock.epoch, unixTimestamp: clock.unixTimestamp };
+  return { takenAt: new Date().toISOString(), asOfSlot: clock.slot, chain: time, rows: [] };
+};
+const leaderboard = createHandler(
+  { current: snapshot, lastError: () => null, refresh: async () => {} },
+  { corsOrigin: "*", cluster: "local", history },
+);
 
 const health = Bun.serve({
   hostname: "127.0.0.1",
   port: PORTS.api,
-  fetch(request) {
+  async fetch(request) {
     const headers = { "content-type": "application/json", "access-control-allow-origin": "*" };
     const path = new URL(request.url).pathname;
+    if (path === "/api/v1/leaderboard") {
+      await history.refresh();
+      return leaderboard(request);
+    }
     // "My entries" asks which campaigns exist; an empty list makes it read the wallet's history alone (Sprint 12).
     if (path === "/api/v1/campaigns") {
       const chainTime = w.client.svm.getClock().unixTimestamp.toString();

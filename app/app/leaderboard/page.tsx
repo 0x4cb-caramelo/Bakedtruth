@@ -1,13 +1,19 @@
 /**
- * Purpose: The ranking (Sprint 13). A shell for Sprint 09: the route exists and shows its title; the content comes in Sprint 13.
- * Version: 0.1.0
- * Sprint:  09 (site shell, theme and wallet)
+ * Purpose: the devnet leaderboard at /leaderboard (Sprint 13; BR-29): wallets by points from the read API's
+ *          /api/v1/leaderboard, read in the browser. The route existed as a shell since Sprint 09.
+ * Version: 0.2.0
+ * Sprint:  09 (site shell, theme and wallet); 13 (content)
  */
+import type { Metadata } from "next";
+
+import { LeaderboardPage } from "@/features/leaderboard/leaderboard";
+
+export const metadata: Metadata = { title: "Leaderboard · Brot Markets" };
+
 export default function Page() {
   return (
-    <section className="py-10">
-      <h1 className="text-3xl font-bold text-ink">Leaderboard</h1>
-      <p className="mt-3 text-dim">The ranking arrives in Sprint 13.</p>
+    <section className="py-2">
+      <LeaderboardPage />
     </section>
   );
 }

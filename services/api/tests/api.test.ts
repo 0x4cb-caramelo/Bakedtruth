@@ -1,7 +1,8 @@
 /**
  * Purpose: the read API's contract with fake data and no cluster: the list's filters and paging, the 400 and 404
  *          answers, the detail route, CORS, the method refusal, the health states, the store's refresh failure (the
- *          last good snapshot is kept, and only an error name is shown), and the config's refusals.
+ *          last good snapshot is kept, and only an error name is shown), and the config's refusals and defaults (since
+ *          Sprint 13 the leaderboard's settings too).
  * Version: 0.1.0
  * Sprint:  08 (indexer and API, hackathon MVP)
  */
@@ -187,7 +188,7 @@ describe("config", () => {
     );
   });
 
-  test("defaults: loopback 4220, 15 s refresh, any origin (read-only), devnet", () => {
+  test("defaults: loopback 4220, 15 s refresh, any origin (read-only), devnet, 200 history reads a refresh", () => {
     const c = loadApiConfig({ API_RPC_URL: "https://rpc.example.test" });
     expect(c).toEqual({
       rpcUrl: "https://rpc.example.test",
@@ -196,6 +197,9 @@ describe("config", () => {
       refreshMs: 15_000,
       corsOrigin: "*",
       cluster: "devnet",
+      historyPerRefresh: 200,
+      hiddenFile: null,
+      historyRpcUrl: null,
     });
   });
 });

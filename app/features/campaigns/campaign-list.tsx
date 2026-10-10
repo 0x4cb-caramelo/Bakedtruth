@@ -1,9 +1,10 @@
 /**
  * Purpose: the home route's campaign list (Sprint 10): the search, the state and kind filters, the sort, the unlisted
  *          switch, and the cards in the ranking order. The data comes from the read API through useCampaigns; the saved
- *          list is this browser's own (saved.ts). The filters are the page's own state, not the URL's.
- * Version: 0.1.0
- * Sprint:  10 (site: campaign list)
+ *          list is this browser's own (saved.ts). The filters are the page's own state, not the URL's. Since Sprint 13 a
+ *          campaign the team unlisted after a report counts as unlisted (C-10).
+ * Version: 0.2.0
+ * Sprint:  10 (site: campaign list); 13
  */
 "use client";
 
@@ -36,7 +37,11 @@ const SORTS: { id: Sort; label: string }[] = [
 const NO_SAVED = new Set<string>();
 const serverSaved = () => NO_SAVED;
 
-export function CampaignList() {
+/**
+ * `unlisted`: the campaigns the team unlisted after a report (C-10), each by its id and opening time, since a closed
+ * campaign's id can carry a new campaign later; they show only with "Show unlisted".
+ */
+export function CampaignList({ unlisted = [] }: { unlisted?: readonly { id: string; opensAt: string }[] }) {
   const loaded = useCampaigns();
   const saved = useSyncExternalStore(subscribeSaved, getSaved, serverSaved);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
@@ -59,8 +64,12 @@ export function CampaignList() {
     );
   }
 
-  const kinds = [...new Set(loaded.cards.map((c) => c.kind))];
-  const shown = arrange(loaded.cards, filters, saved);
+  const hidden = new Set(unlisted.map((u) => `${u.id}@${u.opensAt}`));
+  const cards = loaded.cards.map((card) =>
+    hidden.has(`${card.id}@${card.opensAt ?? ""}`) ? { ...card, listed: false } : card,
+  );
+  const kinds = [...new Set(cards.map((c) => c.kind))];
+  const shown = arrange(cards, filters, saved);
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">

@@ -25,6 +25,7 @@ const card = (over: Partial<Card> & { address: string }): Card => ({
   entries: 0,
   group: 2,
   listed: true,
+  opensAt: null,
   entriesCloseAt: null,
   deadlineAt: null,
   reviewEndsAt: null,
