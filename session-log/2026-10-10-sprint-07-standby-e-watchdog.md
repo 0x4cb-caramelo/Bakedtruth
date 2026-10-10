@@ -59,6 +59,14 @@ configurado; a porta de envio é aberta por padrão; o alerta `keeper_sol_low` �
 5. **Piso de SOL de 0,5** (`KEEPER_SOL_FLOOR_LAMPORTS`). Valor de trabalho; o fundador confirma.
 6. **Segredo do `/restart` com pelo menos 32 caracteres**, lido de um arquivo no início. Nunca no ambiente.
 
+## Decisões do fundador (mesmo dia, modo de hackathon)
+
+- **D4 adiada para depois do hackathon:** sem segunda VM, sem RPC em outra empresa agora, e o e-mail também fica para
+  depois; os alertas vão para o diário. Os itens de redundância estão marcados como "Deferred to Post-Hackathon" no
+  documento da sprint.
+- **Autorizado pelo fundador:** `ReadWritePaths=/run/brot-markets` no `brot-keeper.service`, o segredo HMAC e a rota do
+  túnel; o merge do PR #48 na `main`; e a implantação do primário no servidor, com o keeper único em execução.
+
 ## Pendências para o fundador
 
 1. Provedor de e-mail e caixas de entrada (bloqueia os alertas por e-mail).
