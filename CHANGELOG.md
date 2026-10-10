@@ -22,6 +22,13 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
 
 ### Added
 
+- **Sprint -1 fechada** pela aprovação do fundador: tema escuro oficial, inglês, avisos mínimos e os layouts de `/dev0x/`.
+  Os itens de código da sprint vão para a Sprint 09.
+- **Sprint 09, primeiro incremento:** o chat embutido foi removido (D-q), e o site envia cabeçalhos de segurança e uma
+  Content-Security-Policy (X2.5). O restante da sprint segue aberto.
+
+### Added
+
 - **A API de leitura para o site** (`services/api`, Sprint 08 no mínimo, 10/10/2026): `/api/v1/campaigns` lista as
   campanhas por estado (ativas, resolvidas) com paginação, `/api/v1/campaigns/:address` mostra uma, e `/api/v1/health`
   diz se o snapshot está em dia. Lê a cadeia a cada 15 s e serve da memória. Ainda sem endereço público: aguarda a

@@ -1,6 +1,26 @@
 # Sprint 09 — Site: shell, theme and wallet
 
-**Status:** planned · **Branch:** `sprint-09-site-shell` · **Dates:** none, by the founder's decision
+**Status:** in progress (opened 2026-10-10 from `origin/main`) · **Branch:** `sprint-09-site-shell` · **Dates:** none, by the founder's decision
+
+## Founder decisions of 2026-10-10 (blocks answered)
+
+- **L-01:** English. **Dark theme** official and default. **Notices:** standard minimal warnings.
+- **Waitlist:** kept active as a separate route for now. **Pitch decks** at `/pitch` and `/pitch2`: kept as they are, by link only.
+- **Sprint -1** is closed; its code items arrive here (see that sprint's "Closure").
+
+## Record (2026-10-10, first increment)
+
+- **Done:** the inherited chat is deleted (`app/app/api/chat/`, `app/components/chat/`, `app/lib/chat.ts`), with its
+  provider and its context call; `OPENROUTER_*` are gone from `app/.env.example`, the root `.env.example` and CLAUDE.md
+  (X2.3); `app/next.config.ts` sends the security headers and a Content-Security-Policy (X2.5), checked on a running
+  build: the page answers with `frame-ancestors`/`X-Frame-Options: DENY`, and `POST /api/chat` answers 404.
+  `cd app && bun run lint && bun run build` pass.
+- **Not done (still in this sprint's definition of done):** the SDK migration (the app still uses `app/lib`, the old
+  program's Anchor client, and `@anchor-lang/core`); the routes `/c/[id]`, `/abrir`, my entries, leaderboard and the
+  public record; explicit MWA registration and its test; the wallet's states; the copy notices on every screen; the
+  Sprint -1 code items; the `features/` layout; the Bun staging test; `brot-web.service`, its deploy and the tunnel
+  routes (these change the server and need a separate go-ahead); the waitlist and the pitch decks' routes; the emulator and
+  device tests.
 
 | | |
 |---|---|
