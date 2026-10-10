@@ -117,6 +117,19 @@ recomendado (1a a 12a).
 
 ### Changed
 
+- **As páginas legais, pela resposta 9a do fundador** (10/10/2026; branch `fix/legal-pages-9a`): os termos saem do ar
+  até a Sprint 17, porque descreviam o produto anterior (USDC, pagamento automático em até 55 horas, outros poderes da
+  equipe). O `/terms` deixa de ser gerado e responde 404, e nenhuma página da landing nem do docs.brot.markets aponta
+  mais para ele. A privacidade foi corrigida para o produto de hoje: campanhas em vez de mercados, o ranking do devnet
+  (o que mostra, que é calculado em memória, como sair dele e o prazo de 15 dias), o que o site novo guarda no
+  navegador, o serviço de RPC que vê a carteira e o IP, e o X como canal. A frase de propósito da lista de espera ficou
+  como as pessoas consentiram, e o formulário para sair dela continua. O rodapé do site novo passou a linkar a
+  privacidade, e a frase antes da primeira entrada diz que uma carteira do lado vencedor "pode" aparecer no ranking.
+  Uma revisão jurídica do texto achou duas promessas antigas que não eram verdade: o IP "por um minuto" ficava na
+  memória até o serviço reiniciar (agora o servidor varre os endereços vencidos a cada 10 segundos) e o "sem cópia de
+  backup" não estava conferido (a página agora diz que o provedor pode guardar backups do servidor por um tempo
+  limitado). **Fica com o fundador:** publicar a landing antes de a API do ranking ir ao ar e, como a própria página
+  promete, avisar a mudança no X; e conferir no painel da Hostinger se os backups do servidor estão ligados.
 - **A regra de pontos do ranking, pela resposta 3a do fundador** (10/10/2026, depois da mescla da Sprint 13; branch
   `sprint-13-founder-answers`): deixam de pontuar a carteira com entradas nos dois lados de uma campanha
   (`BOTH_SIDES_SCORE` agora é falso), o pote devolvido por ter um lado só ou um lado perdedor pequeno demais para pagar

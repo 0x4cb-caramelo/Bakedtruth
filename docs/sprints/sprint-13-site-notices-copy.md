@@ -186,7 +186,7 @@ the site with both services on. The exit criteria X2 are met here.
       map, sprint doc and session log are current; the OS self-test is coherent (its three standing warnings); the
       coordinator approved with caveats, applied. Notes: the conditions of TP §8.2 and founder items 3, 8 and 9 come
       before the API redeploy that makes the leaderboard public; 3 and 8 are answered and applied, and 9a's corrected
-      `/privacy` is what remains.
+      `/privacy` is prepared and waits for the founder's deploy of the landing.
 - [x] Common closure (`docs/SPRINTS.md`, section 4). **Done:** the standard checks (CI on PR #63), the secret scan,
       the code map, CHANGELOG and session log, the coordinator review and three adversarial-style reviews (copy, legal,
       adversarial), the record and retrospective below; merged on 2026-10-10 (PR #63) and tagged `sprint-13` on
@@ -239,9 +239,11 @@ from `main` at `sprint-13`); 8a added the 15 days to the leaderboard page.
    account's login is held by the CTO, with an authenticator app as the second factor.
 9. **The live legal pages: (a)**, take brot.markets' `/terms` down until Sprint 17, correct `/privacy` (keeping the
    waitlist's deletion form), and link it from the site's footer before the site is public. The text is prepared in
-   the repository; deploying the landing is the founder's. **Waiting:** not done yet. The pages still describe USDC,
-   automatic payouts with a 55-hour worst case, team powers that differ from `/record`, "No profiles", the deletion of
-   Brot's copy of a wallet's activity, and a browser that keeps only the theme.
+   the repository; deploying the landing is the founder's. **Prepared** (branch `fix/legal-pages-9a`, 2026-10-10):
+   `/terms` is no longer built or linked, here or on docs.brot.markets, and answers 404; `/privacy` describes the
+   campaign product (the leaderboard and how to leave it, what the new site keeps in the browser, the RPC service, X),
+   with the waitlist's purpose sentence as consented; the new site's footer links it. **Waiting:** the founder's deploy
+   of the landing, and the post on X the page promises when it changes.
 10. **The success-rate column** (the approved prototype had it): **(a)**, kept dropped, as a profile.
 11. **"Your entry back plus your share of the rest, when the losing side can pay the fees"** (P1 §4.6's approved line,
     qualified by the viability rule): **(a)**, re-approved.
