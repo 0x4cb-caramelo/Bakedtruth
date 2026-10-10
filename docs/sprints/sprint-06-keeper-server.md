@@ -152,8 +152,12 @@ From Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and retros
   and cadence, and `unix_timestamp` against wall time, in `knowledge-base/`, before mainnet values are set.
 - **A runbook line for a Pyth migration** (from Sprint 02's reviews, not written in Sprint 05): the receiver, the push
   oracle and the shard are compiled constants, so a move by Pyth stops every price opening until an upgrade.
-- **Drill or real constants on devnet.** This sprint's X1.1 asks for the drill constants; Sprint 05 recommends the real
-  ones for its own smoke. A drill build needs its own artifact, then an upgrade or a second program.
+- **Drill or real constants on devnet.** This sprint's X1.1 asks for the drill constants; Sprint 05 deployed the real
+  ones (`5Rx8…n8o`, Ronaldo's decision of 2026-10-09). A drill build needs its own artifact, then an upgrade or a second
+  program.
+- **The epoch turn on devnet** (the one devnet check Sprint 05 left): a `StakePoolTvlAtLeast` campaign opened on the
+  deployed program before an epoch turn and resolved after it. It needs a stake pool on devnet (`seed:devnet` takes
+  `--stake-pool`); devnet's epochs last about 28 hours at 235 ms slots.
 
 ## Risks
 

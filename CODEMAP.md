@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **546** |
+| Arquivos mapeados | **547** |
 | Acima de 200 linhas | **45** ⚠️ |
 | Sem cabeçalho `Purpose:` | **77** ⚠️ |
 
@@ -690,6 +690,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`detach-os.sh`](scripts/detach-os.sh) | detach-os.sh — desconecta seu projeto do repositório AI Dev Operating System | 157 |
 | [`devnet-clock-probe.ts`](scripts/devnet-clock-probe.ts) | measure a cluster's clock against wall time (slot length, the confirmed-to-finalized gap, the drift of the Clock sysvar and, under Alpenglow, of the leader's na | 201 |
 | [`devnet-seed.ts`](scripts/devnet-seed.ts) | seed a cluster with example campaigns opened free by a team key (Sprint 05 DoD), one per kind that can open there: a price campaign above and one below (targets | 137 |
+| [`devnet-settle-batch.ts`](scripts/devnet-settle-batch.ts) | the real settle batch on a cluster (Sprint 05 DoD, "the real settle batch with self-CPI events and its compute cost", T3, C7): a free team burn campaign, twelve | 153 |
 | [`devnet-smoke.ts`](scripts/devnet-smoke.ts) | the full cycle in SOL (Sprint 05 DoD, X0.2 and X0.5): a wallet outside the team opens a burn campaign and pays US$500 at the Pyth price after previewing the who | 76 |
 | [`devnet.ts`](scripts/devnet.ts) | the session the devnet scripts (smoke, seed) share: the cluster they write to, the payer, a team key, wallets, funding and fresh prices. `--cluster local` (the  | 127 |
 | [`extract-external-links.sh`](scripts/extract-external-links.sh) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 16 |
@@ -782,7 +783,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`negative-price.ts`](scripts/validator/negative-price.ts) | rewrite a sponsored Pyth account on the surfnet with one field changed, from the captured devnet bytes (the .bin files are never edited): price, confidence, exp | 56 |
 | [`negative-run.ts`](scripts/validator/negative-run.ts) | the slot matrix and one paid opening on a local validator (Sprint 05 DoD: "the negative tests, the slot tests and one paid opening run once on a real validator" | 146 |
 | [`negative-world.ts`](scripts/validator/negative-world.ts) | run the test kit's account injectors and the slot matrix's mutations against a surfnet, unchanged: a recording stand-in for the three synchronous LiteSVM calls  | 107 |
-| [`rpc.ts`](scripts/validator/rpc.ts) | talk to a cluster over JSON-RPC for the ops scripts: the cluster guard (a non-local URL is refused unless the caller names the cluster on purpose; the genesis h | 180 |
+| [`rpc.ts`](scripts/validator/rpc.ts) | talk to a cluster over JSON-RPC for the ops scripts: the cluster guard (a non-local URL is refused unless the caller names the cluster on purpose; the genesis h | 186 |
 | [`simulate.ts`](scripts/validator/simulate.ts) | simulate a transaction before sending it, so an ops script shows what the program would answer (its custom error by name, the logs, the compute units) without w | 53 |
 | [`spl-token.ts`](scripts/validator/spl-token.ts) | the few System Program and classic SPL Token instructions the ops scripts need to make a burn campaign's mint (`SupplyAtMost`): create an account, transfer SOL, | 115 |
 | [`surfnet.ts`](scripts/validator/surfnet.ts) | start and stop a local OFFLINE Surfpool surfnet for the ops rehearsals: no datasource (`--offline`), bound to 127.0.0.1 on two free ports in 4200-4299, run from | 95 |

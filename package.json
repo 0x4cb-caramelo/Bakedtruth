@@ -23,6 +23,7 @@
     "test:rust": "SBF_OUT_DIR=$PWD/target/deploy cargo test -p brot-markets --features no-entrypoint",
     "smoke:devnet": "bun run scripts/devnet-smoke.ts",
     "seed:devnet": "bun run scripts/devnet-seed.ts",
+    "settle-batch:devnet": "bun run scripts/devnet-settle-batch.ts",
     "deploy:devnet": "bun run scripts/deploy/devnet-deploy.ts",
     "deploy:rehearse": "bun run scripts/deploy/rehearse.ts",
     "team:rehearse": "bun run scripts/team/rehearse.ts",

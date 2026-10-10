@@ -3,7 +3,7 @@
  *          unless the caller names the cluster on purpose; the genesis hash is printed before anything is
  *          sent), account bytes and the Clock, and a transaction sent, landed and read back with its custom
  *          error code, its logs and the program's events decoded by the SDK (decoder rules of TP 3.4.14).
- * Version: 0.1.1
+ * Version: 0.1.2 (a landed transaction also reports its compute units and its wire size)
  * Sprint:  05 (SDK and the devnet cycle), lane OPS
  *
  * Transactions go out with `skipPreflight`, so a refusal lands as a failed transaction whose error is read
@@ -15,6 +15,7 @@ import {
   createTransactionMessage,
   getBase64EncodedWireTransaction,
   getSignatureFromTransaction,
+  getTransactionEncoder,
   pipe,
   setTransactionMessageFeePayerSigner,
   setTransactionMessageLifetimeUsingBlockhash,
@@ -109,6 +110,9 @@ export type Sent = {
   logs: string[];
   fee: bigint;
   events: DecodedEvent[];
+  computeUnits: bigint;
+  /** The signed transaction's size on the wire, against the 1,232-byte limit. */
+  wireBytes: number;
 };
 
 const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms));
@@ -155,6 +159,8 @@ export async function send(rpc: Rpc, payer: TransactionSigner, ixs: Instruction[
     logs: landed.meta.logMessages ?? [],
     fee: BigInt(landed.meta.fee ?? 0),
     events: decodeTransactionEvents(landed as RpcTransaction),
+    computeUnits: BigInt(landed.meta.computeUnitsConsumed ?? 0),
+    wireBytes: getTransactionEncoder().encode(tx).length,
   };
 }
 

@@ -178,9 +178,21 @@ quem pagou (o buffer de 0,81 SOL volta no fim), para o binário de 159.576 bytes
 | `close_campaign` | 7.099 | — |
 | `sweep_fees` | 2.047 | — |
 
-- **O que ainda falta medir no devnet:** o lote de 12 entradas numa transação de `settle_entry` (o smoke liquida uma
-  por transação); a virada de época (a 1179 termina perto da meia-noite de 10 para 11/10, horário de Brasília); e um
-  SIM de `StakeAtLeast`, que continua fechado.
+- **O que ainda falta medir no devnet:** a virada de época (a 1179 termina perto da meia-noite de 10 para 11/10,
+  horário de Brasília; vai para a Sprint 06) e um SIM de `StakeAtLeast`, que continua fechado.
+
+### 5.8 O lote real de liquidação e o seed, 9/10/2026, 23h50 (horário de Brasília)
+
+- **O lote de 12 entradas numa transação** (`bun run settle-batch:devnet -- --cluster devnet`, uma campanha grátis da
+  equipe com doze padeiros, seis no SIM e seis no NÃO): doze `settle_entry` numa transação, doze eventos `EntrySettled`
+  por self-CPI, cada pagamento igual ao `entryPayout` do SDK; 33.630 CU, 2.802 por entrada, e 1.152 dos 1.232 bytes do
+  limite, o mesmo tamanho que o LiteSVM mediu na Sprint 04. O ensaio local, no Surfpool, deu os mesmos 33.630 CU.
+  Assinatura: `4mFqVMvHjmuo1f7hz4VqjAPWTkKBhcNf8bEjEa8Vx8ykw2DQUnstNDVnwczpnD44ro3jhvpxioWLQDExsYcJbaFy`.
+- **O seed** abriu três campanhas grátis com a chave de time, que ficam abertas para o site: BTC/USD acima de
+  US$ 86.759,43 em 14 dias, SOL/USD abaixo de US$ 104,25 em 7 dias, e a queima de um mint novo até 500.000 em 30 dias.
+  Os tipos DAMM v2 e pool de stake ficaram de fora, por falta de um pool no devnet; `StakeAtLeast` continua fechado.
+- **Ao todo, 54 transações no programa naquela noite**, das quais só as duas tentativas repetidas do smoke falharam, de
+  propósito.
 
 ## Fontes
 

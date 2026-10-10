@@ -33,7 +33,9 @@ creator, pot, YES/NO; never "market" or "bet" outside the brand.
 - The program is `programs/brot-markets` (id `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o` since 2026-10-09; it
   replaced `6G2d…uVN`, whose keypair was not at hand for the devnet deploy), on Pinocchio.
   Sprint 02 built the config, the team and the pause, the paid opening and the SOL entry; Sprint 03 the five readers,
-  the opening of all five kinds, the join lock and `resolve_campaign`. Each instruction emits one event by self-CPI.
+  the opening of all five kinds, the join lock and `resolve_campaign`; Sprint 04 the review window, settlement, the
+  payouts, the fees, the creator share and the invariants; Sprint 05 the SDK and the devnet deploy. Each instruction
+  emits one event by self-CPI.
   Its client library is `packages/sdk` (`@brot/sdk`, Sprint 05): `read` and `tx` entry points over the Codama client
   generated from the Shank IDL (T9), plus `schemas` (zod). `app/lib` is the old program's client, kept only for the
   current site until Sprint 09.
@@ -216,8 +218,9 @@ This repository also carries the AI Dev Operating System (`.claude/rules`, `.cla
 are applied where they still add value rather than from zero. Phases 1 to 4 are done: BP v0.0.2 in `docs/business/`,
 the prototype lab with fourteen directions and the approved one in `docs/product/DESIGN-DIRECTION.md`, the Product
 Brief, the Technical Plan and the sprint roadmap. Phase 5 is under way: Sprints 00 and 01 are closed (tags `sprint-00`,
-`sprint-01`), Sprint 02 is merged (PR #35, 2026-10-08; tag `sprint-02`) and Sprint 03 is merged (PR #40, 2026-10-09;
-tag `sprint-03`). On 2026-10-08 BP v0.0.4 changed the product, and the Technical Plan and the
+`sprint-01`), Sprint 02 is merged (PR #35, 2026-10-08; tag `sprint-02`), Sprint 03 is merged (PR #40, 2026-10-09;
+tag `sprint-03`), Sprint 04 is merged (PR #41, 2026-10-09; tag `sprint-04`) and Sprint 05 is merged (PR #43,
+2026-10-10; tag `sprint-05`). On 2026-10-08 BP v0.0.4 changed the product, and the Technical Plan and the
 roadmap were rewritten in English from the approved architecture proposal 0.4; the Product Brief and the design
 direction are still to be aligned. The pitch (wizard stage 2.9) is written in `docs/business/PITCH.md`; the founder's
 own deck is served at `/pitch` by link only, and stays out of search engines until the founder approves the redaction

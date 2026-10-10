@@ -36,6 +36,11 @@ As respostas estão também no comentário do PR #40, e o porquê em
   abriu, e a Brot fica com os US$ 50.
 - **Anulação por feed parado, `StaleFeed` (Sprint 04):** "keep the 50$ fee for platform": causa externa, e a Brot fica
   com os US$ 50.
+- **A redação da regra de viabilidade (Sprint 04), confirmada à noite:** vale a leitura do código, a que está no devnet:
+  a taxa da Brot sai do lado perdedor, e a parte do criador é calculada sobre o pote inteiro. "I confirm again that the
+  code's current reading (which is now live on Devnet) is 100% correct. We want the fees charged on the losing side and
+  the creator share on the whole pot." As palavras anteriores, "taxas cobradas sobre o principal do lado vencedor",
+  deixam de valer.
 
 ### Decisões de 8 de outubro de 2026, sobre o BP v0.0.3 — prevalecem sobre tudo abaixo
 

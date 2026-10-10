@@ -1596,9 +1596,9 @@ the code does.
 - **Economic Viability Rule (decision of 2026-10-09).** A pot splits only when the losing side is larger than the fees
   that would come out of it (the house fee plus the creator share on V + P). Otherwise it resolves one-sided: entries
   come back net of their one-sided fees and the prize returns to whoever opened. Worked examples: V 990 / P 10 and
-  V 98,900 / P 1,100 are one-sided, with or without the prize; V 990 / P 13 splits, and V 990 / P 12 does not. Open
-  point for the founder: the decision's words say "fees charged on the winning side's principal", while the code
-  charges the house fee on the losing side (see the sprint file).
+  V 98,900 / P 1,100 are one-sided, with or without the prize; V 990 / P 13 splits, and V 990 / P 12 does not. The
+  founder confirmed this reading on 2026-10-09 (Ronaldo): the house fee on the losing side, the creator share on the
+  whole pot; the earlier words "fees charged on the winning side's principal" no longer apply.
 - **Prize flag.** `settle_prize` sets `prize_settled` on every settlement, Split included (it pays nothing for a
   Split); `close_campaign` needs the fee, prize and creator-share flags, and finalize sets the share flag when no share
   is due.

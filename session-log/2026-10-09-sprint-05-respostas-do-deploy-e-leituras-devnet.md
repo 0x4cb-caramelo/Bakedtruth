@@ -1,4 +1,4 @@
-# 2026-10-09 (noite) — Sprint 05: as respostas do Ronaldo, o id novo, o deploy no devnet e o smoke que passou
+# 2026-10-09 (noite) — Sprint 05: as respostas do Ronaldo, o id novo, o deploy no devnet, o smoke, o lote, o seed e o fechamento
 
 ## Ponto de partida
 
@@ -120,6 +120,43 @@ Depois: "funded, merge 44 and 45", e "Yes, you run it" para o deploy.
    - a varredura das taxas: `2cVHwKyKVHg637UFKnksWAWnGuBsz2t86oad3yzjAwXavEUpE2a3LToB6RiLiZdP4ruBVJTBpitw7mqAFsfEqGZX`
 
    As unidades de computação de cada uma estão na nota do cluster, seção 5.7.
+
+## O fechamento (das 23h45 de 9/10 ao começo de 10/10)
+
+O Ronaldo respondeu a lista que restava (texto colado na sessão): fez o backup dos três arquivos de chave; autorizou o
+seed no devnet com a chave de time; deixou as chaves do Lucas e do Bernardo para depois; confirmou a leitura do código
+da regra de viabilidade; autorizou as tags `sprint-04` e `sprint-05` e a mescla do PR #43.
+
+1. **A regra de viabilidade:** vale a leitura do código, a que está no devnet ("I confirm again that the code's current
+   reading [...] is 100% correct. We want the fees charged on the losing side and the creator share on the whole
+   pot"). Registrada em `docs/business/ideacao-perguntas-e-respostas.md`, na Sprint 04 e no plano técnico.
+2. **O lote real de liquidação** (`scripts/devnet-settle-batch.ts`, novo; `rpc.ts` passa a dizer as unidades de
+   computação e o tamanho da transação): ensaiado no cluster local e depois rodado no devnet, numa campanha grátis da
+   equipe com doze padeiros. Doze `settle_entry` numa transação, doze `EntrySettled`, cada pagamento igual ao do SDK,
+   33.630 CU (2.802 por entrada), 1.152 de 1.232 bytes. Assinaturas:
+   - abertura: `HTmu9phbCrWEViqBU1nzg4vLhTRrrFvERpBgQxDVoYfGaiAQoMPbpADpmSfE3oJyNFcLoVBVb3AP4R6SYsm27k6`
+   - resolução: `525pTABPQXdGwrGi5YHFmQvWxDAUgQU7skenpQDGnrjBdD3m8FU3jVC5kVtb2AWsbDsaWurWtk3WY8k7UvuQBamk`
+   - confirmação: `vgVb3n8s5nx7RVjRUasrry11FLRfofqRUL5tQd6enuAZTpPXMvUH2kJuCjA6TMBtooxjJ8uEdzaF4ZkrLA6wMoi`
+   - o lote: `4mFqVMvHjmuo1f7hz4VqjAPWTkKBhcNf8bEjEa8Vx8ykw2DQUnstNDVnwczpnD44ro3jhvpxioWLQDExsYcJbaFy`
+   - taxa, prêmio, fechamento e varredura: `3wTdnWYRx3U8FEJw3S9vX98U2EawjicZoZPbjCoVcpGaGmbiea68peqoQiPThSvcx75SazivykVRdrAVokKya8Qm`,
+     `48snxL9oxs2gFwhNZhbJezXFaxwitny7Pkxi5r8aU4dPj4PHQp1aYvMqcaDbCfRGz8SmTz3f9YPM8EjFpLkmDRkf`,
+     `2AsFuEZqRTQh1ZKfWao4niFbFBLTpEpkPchNAyfCgsUQFczWbsCwTxzcB3WJAKWNqeB3HdpHRtifsj3ZVzZzhgsj`,
+     `5pcGby9qwV8Zch9yEUwrPBjHcDFQK2p6S6xkkM9evFXJV3EXWh74HWgBbg9roNq8Rtyze5hQgDKTcjXvovmNz3DP`
+3. **O seed no devnet:** três campanhas grátis da equipe, abertas para o site:
+   - BTC/USD acima de US$ 86.759,43 em 14 dias, campanha `8765262715600548459`
+     (`5w8fmXruBuMswT4Aa8XAcNZihEf3T5jU8sxTpJCChPE4`), aberta em
+     `52b76DfuHoeWFHAJNFRY2zKdSWenQxX5G5wyMZhj4ktggGYU9bukxyKJw4mpisQN92EeGz8x5XrgeMjQCnP2puHp`
+   - SOL/USD abaixo de US$ 104,25 em 7 dias, campanha `5984109896353608392`
+     (`G6UntC4XuXZUZ6JiDEc8dY12SRkzUfTmDKoZTa7PbFkm`), aberta em
+     `JWtk8HSqrqvEHxqPd4skjr8fDcX91rxmKoYiDGUWRbSFFZSrWndsY1tARpHd3UtPejMSAWb9Yp9tVz6iHYpu29i`
+   - a queima do mint `4Rq3s26T3f33JqmcEqQuS8xH59xWVYkKPBMikyzrm9X8` até 500.000 em 30 dias, campanha
+     `9101337196993085036` (`CufcjrYXt36YkeS2FdMx5voBkbbSdw2rTmrcQTSbL59J`), aberta em
+     `44ct1t3jmNqs3JoRgv5Q4yhdPR814Ubeyne3GisoYwXcakjCYhQkUmdmaKrJmgGJrRWyiGSeRwAr7oEPcVZ4cd94`. O detentor das
+     moedas é uma chave descartável, então ninguém queima: a campanha resolve NÃO no prazo.
+4. **O que fica aberto da sprint:** a virada de época no devnet (vai para a Sprint 06) e a rodada negativa no runtime do
+   Agave (já ia para a Sprint 06). `StakeAtLeast` continua fechado.
+5. **A mescla e as tags:** o PR #43 sai de rascunho, o CI roda, e a mescla é comum; as tags anotadas `sprint-04` (na
+   mescla do #41, `2066c61`) e `sprint-05` (na mescla do #43) seguem o formato das anteriores.
 
 ## Erros meus nesta sessão
 

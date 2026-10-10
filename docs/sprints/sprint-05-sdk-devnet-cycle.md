@@ -1,8 +1,8 @@
 # Sprint 05 — SDK and the devnet cycle
 
-**Status:** in review: the code is done, reviewed three times and verified locally; the devnet rows wait on the
-founder (see "Record and retrospective") · **Branch:** `sprint-05-sdk-devnet-cycle`, stacked on PR #41 (Sprint 04, not merged) · **Dates:**
-none, by the founder's decision
+**Status:** done, merged into `main` with PR #43 on 2026-10-10; tagged `sprint-05`; the program runs on devnet at
+`5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o` · **Branch:** `sprint-05-sdk-devnet-cycle` · **Dates:** none, by the
+founder's decision
 
 | | |
 |---|---|
@@ -71,12 +71,12 @@ read, the window passes, the winners and the creator are paid.
 - [ ] The negative tests, the slot tests and one paid opening run once on a real validator (Surfpool or
       `solana-test-validator`), since Mollusk 0.14 and npm LiteSVM 1.5 are not the cluster's runtime (Sprint 02
       review).
-- [ ] `bun run seed:devnet`, rewritten, opens example campaigns with a team key, of the kinds that passed.
+- [x] `bun run seed:devnet`, rewritten, opens example campaigns with a team key, of the kinds that passed.
 - [ ] **Checked on devnet and recorded:** a `StakeAtLeast` YES (or the kind stays closed); the SOL/USD account's age
       against `max_price_age`; an epoch turn; the real settle batch with self-CPI events and its compute cost (T3,
       C7); the rent of `Campaign` and `Entry`; the clock drift (C12).
 - [x] Whether the public devnet deployment carries the drill constants or the real ones is decided and recorded [AC].
-- [ ] Common closure (`docs/SPRINTS.md`, section 4).
+- [x] Common closure (`docs/SPRINTS.md`, section 4).
 
 ## Deliverables
 
@@ -213,6 +213,8 @@ the second vector generator), so the binary CI builds on `main` after PR #41 mer
 | Deploy from CI's artifact | 2026-10-09, 23:27 BRT: CI run 38014319993 (`main` at `c20e79a`), `SHA256SUMS` and the IDL checked, sha256 `cf235937…a3a8` typed at `--execute`; program `5Rx8…n8o` read back on loader v3 with the upgrade authority recorded and the bytes equal to the artifact; deploy `2RrgGS8R…`, `admin_initialize_config` `5h8Xmnzv…`, `admin_set_team` `dVuqmiuZ…` (full signatures in the session log). The keypair at the declared id, outside any repository; the refusals rehearsed on the local cluster |
 | Smoke on devnet | `bun run smoke:devnet -- --cluster devnet`, exit 0, 23:27 to 23:28 BRT: a paid opening at US$500 (4.561686416 SOL at 109.60858649 SOL/USD), YES 0.05 and NO 0.03 SOL at the SDK's estimates, YES from the burned mint, the team's confirmation (`ResultConfirmed`, then `CampaignFinalized`), both entries, the creator share, the fee, the prize, the close and the sweep, each lamport equal to the SDK; 16 transactions, signatures in the session log |
 | Retries on devnet (X0.5) | The retried opening failed (`2AbmMide…`, `AlreadyInitialized`) and the retried entry failed (`2U96iXj6…`, `EntryTotalMismatch`), nothing charged twice |
+| Seed on devnet | `bun run seed:devnet -- --cluster devnet`, exit 0, 23:51 BRT, at Ronaldo's word: three free team campaigns that stay open for the site, BTC/USD above US$86,759.43 in 14 days, SOL/USD below US$104.25 in 7 days, a burn to 500,000 of a fresh mint in 30 days (its holder a throwaway key, so it will resolve NO at its deadline); the DAMM v2 and stake pool kinds skipped for want of a devnet pool, `StakeAtLeast` closed. Signatures in the session log |
+| Common closure | The standard checks (`docs/SPRINTS.md` §4) passed on the final branch; the secret scan is clean; the codemap is current; the changelog and the session logs are written; the coordinator review and two security reviews ran (below); merged into `main` by PR #43 and tagged `sprint-05`, at Ronaldo's word |
 
 **Open rows, and why**
 
@@ -222,8 +224,6 @@ the second vector generator), so the binary CI builds on `main` after PR #41 mer
   did not run there. `solana-test-validator` 3.1.10 needs AVX2, which this machine lacks. A CI job on GitHub's runners
   is carried to Sprint 06. Since 2026-10-09 the paid opening and two refusals (the retries) have also run on devnet's
   Agave runtime (the smoke); the refusal suites still have not.
-- **Seed:** rewritten in SOL on the SDK and rehearsed locally (exit 0, again after the new id); not run on devnet: it
-  opens public example campaigns with a team key, which waits on the founder's word.
 - **Deploy, smoke and retries on devnet:** done on 2026-10-09 (the evidence table above). The binary is CI's `main`
   build after PRs #41, #44 and #45, not this branch's: `scripts/deploy/binding.ts` checked that this checkout holds
   that commit with the program unchanged. Two attempts died first on the public RPC (above); a keyed RPC carried the
@@ -236,15 +236,18 @@ the second vector generator), so the binary CI builds on `main` after PR #41 mer
   sysvar ran 0.2 to 1.7 s behind this machine's NTP clock (median 1.1 s, whole seconds). Five minutes, not the week
   Sprint 02 asked for. After the deploy, the smoke measured each instruction's compute units on devnet (the note,
   section 5.7): one entry per `settle_entry` transaction, 2,924 and 2,681 CU, inside or near the 2,926 to 3,180 of
-  LiteSVM; the team's confirmation 4,778 against 4,785. Still open: the batch of 12 entries in one transaction, the
-  epoch turn (devnet's epoch 1179 ends near midnight from 10 to 11 October, BRT), and `StakeAtLeast`, which stays closed
-  (no build with the feature was deployed).
+  LiteSVM; the team's confirmation 4,778 against 4,785. **The real settle batch** ran on devnet the same night
+  (`bun run settle-batch:devnet -- --cluster devnet`, a free team campaign with twelve bakers): twelve `settle_entry`
+  in one transaction, twelve `EntrySettled` events by self-CPI, each payout equal to the SDK's, 33,630 CU (2,802 per
+  entry) and 1,152 of 1,232 bytes, the same as LiteSVM's size (Sprint 04). `StakeAtLeast` stays closed, which the row
+  allows (no build with the feature was deployed). The one item left is the epoch turn (devnet's epoch 1179 ends near
+  midnight from 10 to 11 October, BRT): carried to Sprint 06, so the row stays open.
 - **Drill or real constants on devnet:** decided on 2026-10-09: the real ones (Ronaldo: "Use `real` values for
   Devnet, not drill"), CI's default artifact, with which the smoke completes. Sprint 06's definition of done asks for
   the drill constants for X1.1, which takes a drill build with its own artifact, then an upgrade or a second program:
   to decide with Sprint 06.
-- **Common closure:** the checks, the secret scan, the codemap, the changelog and the session log are done; the three
-  reviews below are done and their fixes made; the merge and the tag are the founder's.
+- **Common closure:** done (the evidence table above). The merge and the tags were Ronaldo's word on 2026-10-09:
+  `sprint-04` on PR #41's merge, `sprint-05` on PR #43's.
 
 **Reviews** (read-only, file and line for each finding; reports summarized in the session log)
 
@@ -292,8 +295,9 @@ the second vector generator), so the binary CI builds on `main` after PR #41 mer
 
 **Carried to later sprints:** to Sprint 06, the negative run on Agave's runtime (a CI job on `solana-test-validator`),
 a week of devnet price and clock data (Sprint 02), the runbook line for a Pyth migration (Sprint 02, never written), and
-`tally_late_joins` before confirm or finalize in the keeper's order; to Sprint 08, the
-schemas entry point; to Sprint 11, the deploy-slot check in the SDK.
+`tally_late_joins` before confirm or finalize in the keeper's order, and the epoch turn on devnet (a stake pool
+campaign across an epoch, on the deployed program); to Sprint 08, the schemas entry point; to Sprint 11, the
+deploy-slot check in the SDK.
 
 **Retrospective**
 
@@ -308,3 +312,8 @@ schemas entry point; to Sprint 11, the deploy-slot check in the SDK.
   entry, a deploy that took any green run and a program id anyone can block. Each fix came with its test or rehearsal.
 - Two lanes ran in parallel (the React Native check; the deploy, team and smoke scripts) with disjoint files, and each
   claim was re-run here before it was recorded.
+- Deploy day: the read-only checks first, then a dry run, then the deploy, each step rehearsed before it touched the
+  cluster. What the rehearsal could not show was the public RPC: it dropped the buffer writes twice. Retries alone did
+  not fix it; a keyed RPC did, passed by flag and kept out of the repository and the logs.
+- Nobody had the first program id's keypair, and nobody could say where it had been; a new id was cheaper than the
+  search, and the deploy then ran in one session from the keys made that night.

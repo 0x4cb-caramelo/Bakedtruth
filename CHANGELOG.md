@@ -12,10 +12,17 @@ A Sprint 02, o núcleo do pote em Pinocchio, foi mesclada na `main` pelo PR #35 
 `sprint-02-pot-core`) e ganhou a tag `sprint-02` em 9/10/2026. A Sprint 03, os leitores e a resolução, foi mesclada
 na `main` pelo PR #40 em 9/10/2026, com a tag `sprint-03` (`docs/sprints/sprint-03-readers-resolution.md`). Quem
 mesclou os PRs #37 e #40 foi o Ronaldo, com a liberdade que o Lucas lhe deu; ele também respondeu as perguntas ao
-fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`).
+fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`). Na noite de
+9/10/2026 entraram na `main`, a pedido do Ronaldo: a Sprint 04 pelo PR #41 (tag `sprint-04`), o `CampaignFinalized`
+nos caminhos da equipe pelo PR #44 e o id novo do programa pelo PR #45; já em 10/10, a Sprint 05 pelo PR #43 (tag
+`sprint-05`). O programa roda no devnet desde a noite de 9/10.
 
 ### Changed
 
+- **A regra de viabilidade fica como está no código** (9/10/2026, à noite, Ronaldo): a taxa da Brot sai do lado
+  perdedor e a parte do criador é calculada sobre o pote inteiro; as palavras anteriores ("taxas cobradas sobre o
+  principal do lado vencedor") deixam de valer. Era a pergunta que a Sprint 04 deixou aberta antes da mescla
+  (`docs/business/ideacao-perguntas-e-respostas.md`, seção 1).
 - **Novo id do programa: `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o`** (9/10/2026, decisão do Ronaldo). O keypair
   do id anterior, `6G2d7Cv66MR1NayPabh5aL6ZThTx15WPxL3NU4N24uVN`, não estava na máquina de quem faz o deploy no
   devnet; o id foi declarado no commit `ae8b837`, de 5/10, e ninguém sabia por onde o keypair tinha andado desde
@@ -23,8 +30,8 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
   autoridade de eventos (`CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx`, bump 254 como antes), o IDL e o cliente
   Codama regenerados (`bun run idl`), e as constantes do kit de testes. O id antigo fica abandonado; nunca foi
   publicado em cluster nenhum. A mainnet terá um id próprio, mantido em segredo até o deploy.
-- **Sprint 05 em revisão** (branch `sprint-05-sdk-devnet-cycle`, PR #43, aberta da cabeça do PR #41, que foi mesclado
-  na `main` em 9/10; `docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and retrospective"). O programa não mudou
+- **Sprint 05 fechada e mesclada** (branch `sprint-05-sdk-devnet-cycle`, PR #43, tag `sprint-05`, aberta da cabeça do
+  PR #41, que foi mesclado na `main` em 9/10; `docs/sprints/sprint-05-sdk-devnet-cycle.md`, "Record and retrospective"). O programa não mudou
   nesta sprint; mudou fora dela, pelos PRs #44 (`CampaignFinalized`) e #45 (o id novo), que a branch traz da `main`. O
   que entrou:
   - **O SDK, `@brot/sdk`** (antes `@brot-markets/sdk`), a biblioteca única de site, app, serviços, scripts e testes,
@@ -58,6 +65,10 @@ fundador das Sprints 02 a 04 (`session-log/2026-10-09-respostas-do-fundador-e-me
     um RPC com chave, mantida fora do repositório. **O smoke passou no devnet** logo depois: abertura paga, as duas
     entradas, a resolução, a confirmação da equipe com os dois eventos, os pagamentos, a taxa, o fechamento e a
     varredura, cada lamport igual ao do SDK, e as duas tentativas repetidas recusadas.
+  - **O lote real de liquidação no devnet** (`bun run settle-batch:devnet`, script novo): doze `settle_entry` numa
+    transação, doze eventos por self-CPI, cada pagamento igual ao do SDK; 33.630 CU (2.802 por entrada) e 1.152 dos
+    1.232 bytes. **O seed** abriu três campanhas de exemplo da equipe, grátis, que ficam abertas para o site (BTC/USD
+    acima, SOL/USD abaixo, uma queima). A virada de época no devnet vai para a Sprint 06.
   - **As leituras só de leitura no devnet** (9/10/2026, 22h, com a autorização do Ronaldo; nada enviado;
     `knowledge-base/tecnologia/devnet-o-que-so-o-cluster-mostra.md`, seção 5): o id do programa, o ProgramData dele e
     a config estão livres; os aluguéis (`Campaign` 3.251.200 lamports, `Entry` 1.239.520, `Join` 1.137.920); a conta
