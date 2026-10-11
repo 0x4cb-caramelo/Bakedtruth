@@ -4,11 +4,12 @@
  *          `getSignaturesForAddress`, each read with `getTransaction` and decoded by the SDK's event decoder under its
  *          four rules, keeping the `EntryAdded` events of this campaign only. Each carries the pools after the entry,
  *          so the chance after every entry comes from the chain, not from the page.
- * Version: 0.1.0
+ * Version: 0.1.1 (the UI overhaul: each landed transaction read once, so the reads after an entry stay cheap)
  * Sprint:  11 (site: campaign page and entry)
  *
  * Bounded on purpose: the last `limit` transactions, read four at a time, once per page view and after an entry, so a
- * public RPC's rate limit holds. A transaction that does not read back is skipped, never guessed.
+ * public RPC's rate limit holds; a transaction already read is not read again. A transaction that does not read back
+ * is skipped, never guessed, and asked again on the next read.
  */
 import { address, signature as toSignature } from "@solana/kit";
 import { decodeTransactionEvents, Side, type RpcTransaction, type SolanaRpc } from "@brot/sdk/read";
@@ -27,12 +28,27 @@ export type ActivityItem = {
 
 export const ACTIVITY_LIMIT = 20;
 const AT_ONCE = 4;
+/** A landed transaction does not change: each is read once per page view, so a read after an entry costs one call. */
+const READ = new Map<string, ActivityItem[]>();
+const KEEP = 200;
 
 async function entriesIn(rpc: SolanaRpc, signature: string, campaign: string): Promise<ActivityItem[]> {
+  const known = READ.get(`${campaign}:${signature}`);
+  if (known) return known;
+  const items = await readEntriesIn(rpc, signature, campaign);
+  if (items !== null) {
+    if (READ.size >= KEEP) READ.delete(READ.keys().next().value as string);
+    READ.set(`${campaign}:${signature}`, items);
+  }
+  return items ?? [];
+}
+
+/** The transaction's entries into this campaign; `null` when it did not read back (asked again next time). */
+async function readEntriesIn(rpc: SolanaRpc, signature: string, campaign: string): Promise<ActivityItem[] | null> {
   try {
     const options = { encoding: "json", maxSupportedTransactionVersion: 0, commitment: "confirmed" } as const;
     const tx = await rpc.getTransaction(toSignature(signature), options).send();
-    if (!tx) return [];
+    if (!tx) return null;
     return decodeTransactionEvents(tx as unknown as RpcTransaction).flatMap((event) =>
       event.name === "EntryAdded" && event.data.campaign === campaign
         ? [
@@ -51,7 +67,7 @@ async function entriesIn(rpc: SolanaRpc, signature: string, campaign: string): P
         : [],
     );
   } catch {
-    return [];
+    return null;
   }
 }
 

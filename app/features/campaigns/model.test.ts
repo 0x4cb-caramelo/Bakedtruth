@@ -77,7 +77,7 @@ describe("the sentence", () => {
   test("a price campaign names its feed and target in the feed's units", () => {
     const card = toCard(campaign(), NOW);
     expect(card.asset).toBe("BTC/USD");
-    expect(card.title).toBe("BTC/USD reaches $83,660.42");
+    expect(card.title).toBe("BTC/USD reaches $83,660.42?");
   });
 
   test("a below campaign reads as a fall", () => {

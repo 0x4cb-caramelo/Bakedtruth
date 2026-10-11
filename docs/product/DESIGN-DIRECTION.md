@@ -47,6 +47,8 @@
     - a página da campanha mais enxuta: o título como pergunta ("…$150?"), a regra numa linha com a inteira em "Full
       rules", os detalhes da prova em "Proof details", as notas da entrada em "Read before you enter" (na cor de
       destaque), "Re-check it yourself" mais fino e a estimativa sem espaço sobrando;
+    - "?" também nos cartões; "Opened by" como link para a transação no Solscan; YES em verde e NO em vermelho na
+      estimativa; a folha antes de assinar com o essencial à vista e o resto dobrado;
     - "question" virou "campaign" no texto do site;
     - a regra do vocabulário segue inteira, sem exceção.
   - **Onde ficaram as palavras do site, e não as do protótipo:**

@@ -290,6 +290,21 @@ structure of the approved screens (`prototype-lab/campaigns/`, served at `/dev0x
   The entry button was checked, not changed: "Review entry" whenever the wallet covers the entry, its rent and the
   fee; "Get devnet SOL" only when it does not, as designed (both in the smoke). Tests:
   `tests/site/campaign-head.test.ts`, and a smoke scene that opens each fold.
+- **After the fourth look** (Ronaldo, 2026-10-11):
+  - **The page follows an entry.** After an entry or a payout lands, the page reads again at once and at 1.5, 4 and
+    8 s (`useSettle`): the public devnet RPC can answer for a moment from before the transaction, and the next timed
+    read was 20 s away. The split, the pot, the recent entries and the balance show the entry. The activity reader
+    reads each landed transaction once, so those reads cost one call each.
+  - **The cards ask too:** "SOL/USD reaches $150?" (`questionOf` in the card model). My entries keeps the statement.
+  - **"Opened by …" links the opening transaction on Solscan** (`opening.ts`): the address's history read newest
+    first, only the transactions of the opening's own seconds decoded, the one whose `CampaignOpened` names this
+    campaign and its `opens_at` (an address can carry a new campaign later). Plain text until found.
+  - **YES in green and NO in red** in the estimate's lines and the sheet (`SidesTinted`).
+  - **"Check before you sign", lighter.** In view: the side and the amount, what comes back if that side wins, what
+    leaves the wallet, the lock (L-03), a large entry's warning, a first entry's public notice (the founder's answer
+    9a) and "reject it if your wallet shows something different". Folded: the notes, and under "Transaction details"
+    the program's guards (`min_return_bps`, `expected_entry_total`), the rents, the fee, the network and A-3's
+    summary read from the bytes. The smoke opens the details before it checks them.
 - **Baked's bubble on a phone** is fitted to the screen again whenever Baked moves while it shows (Sprint 13's rule:
   it never cuts). A tap mid-hop used to leave it past the edge after the landing; the new layout exposed it.
 - **Tests:** two web-smoke expectations follow the design (the phone menu holds "How it works"; the wallet chip, not a

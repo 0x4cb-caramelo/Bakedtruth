@@ -183,6 +183,35 @@ botão de entrar que tinha virado "Get devnet SOL" já estaria certo, então era
 - **O espaço.** A caixa da estimativa tinha altura mínima de 96 px, e era isso que sobrava embaixo. "Re-check it
   yourself" perdeu metade do espaço de cima e de baixo.
 
+## A página que acompanha a entrada, e uma folha mais leve
+
+O Ronaldo pediu, com as próprias palavras, cinco coisas depois de entrar no YES com 0,1 SOL:
+
+- **A página não mudava depois da entrada.** Ela relia na hora em que a entrada era confirmada, mas o RPC público do
+  devnet, que distribui os pedidos entre vários nós, às vezes responde por um instante com o estado de antes; a
+  leitura seguinte só vinha 20 segundos depois. Agora a página relê na hora e de novo em 1,5, 4 e 8 segundos, e o
+  saldo junto. As entradas recentes guardam cada transação já lida, então essas leituras extras custam uma chamada
+  cada, e o limite do RPC público aguenta.
+- **"?" nos cartões**, como no título da página. Minhas entradas continua com a frase afirmada: ali a linha diz em
+  que a pessoa entrou.
+- **"Opened by …" vira link para o Solscan.** O programa guarda quando a campanha abriu, não a assinatura da
+  transação. A página lê o histórico do endereço, do mais novo para o mais velho, e só decodifica as transações do
+  segundo da abertura: vale a que traz o evento de abertura desta campanha com este horário. Pegar só a transação
+  mais antiga do endereço falharia em dois casos: o endereço pode receber uma campanha nova depois de fechado, e
+  qualquer um pode mandar SOL para um endereço antes.
+- **YES em verde e NO em vermelho** nas linhas da estimativa e na folha antes de assinar.
+- **A folha "Check before you sign".** Ficou à vista o que decide: o lado e o valor, o que volta se esse lado
+  ganhar e o total que sai da carteira. Também ficaram à vista, por serem compromissos já aprovados: o aviso do
+  travamento (L-03, do fundador), o aviso de que as entradas são públicas na primeira entrada (resposta 9a) e o de
+  que uma carteira que mostra outra coisa deve ser recusada; e o aviso de uma entrada grande, que é sobre o dinheiro
+  dela. Foram para dentro de "Transaction details" as travas do programa (`min_return_bps` e `expected_entry_total`),
+  os aluguéis, a taxa, a rede e o resumo lido dos bytes da transação (A-3). Esse resumo é a conferência de que o
+  site assina o que mostra; agora ele fica a um clique.
+
+Uma rodada do teste na web falhou no teste do campo de pontos, que tinha passado nas três anteriores. O mouse se moveu
+antes de o script da página começar a ouvir, e nada foi desenhado. A página estava certa; o teste agora move o
+ponteiro de novo enquanto espera.
+
 ## O que fica
 
 - O cartão de compartilhar, o painel "About this campaign", a linha do tempo "Where it is" com a campanha aberta, a

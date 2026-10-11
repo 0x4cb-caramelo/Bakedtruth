@@ -84,6 +84,7 @@ export const PAGE = {
   team: "Team",
   openedByTeam: "Opened by the Brot team (free; no creator share)",
   openedBy: (who: string, prize: string) => `Opened by ${who} (paid; prize ${prize} SOL)`,
+  onSolscan: "The transaction that opened this campaign, on Solscan",
   stateAsOf: (slot: string) => `State at chain slot ${slot}`,
 } as const;
 

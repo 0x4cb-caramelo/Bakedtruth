@@ -3,13 +3,13 @@
  *          entries, the re-check panel, and the entry panel, or the state card once entries close or when the site takes
  *          none (K-11). Two columns on a wide screen, the panel sticky on the right; under 860 px one column in the
  *          spec's phone order, so the reading order follows what is seen. Everything reads the chain through the SDK.
- * Version: 0.3.1 (the UI overhaul: the heading asks the sentence; 0.3.0, Sprint 13: "Report this campaign" in every
- *          state, C-10; 0.2.0, Sprint 12's states)
+ * Version: 0.3.2 (the UI overhaul: the heading asks the sentence, the reads after a landing; 0.3.0, Sprint 13:
+ *          "Report this campaign" in every state, C-10; 0.2.0, Sprint 12's states)
  * Sprint:  11 (site: campaign page and entry); 12 (site: my entries and campaign states); 13
  */
 "use client";
 
-import { useCallback, useState, useSyncExternalStore } from "react";
+import { useContext, useState, useSyncExternalStore } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 import { EmptyState } from "@/components/ui/empty-state";
@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { bytesToHex, Direction, ReaderKind } from "@/lib/brot";
 import { questionOf, sentenceOf, type SentenceInput } from "@/features/campaigns/sentence";
 import { EntryPanel, type Prefill } from "@/features/entry/entry-panel";
+import { SolBalance } from "@/features/wallet/sol-balance-provider";
 import { ReportCampaign } from "@/features/report/report-campaign";
 import type { Unlisted } from "@/features/report/unlisted";
 import { ActivityPanel } from "./activity-panel";
@@ -29,7 +30,7 @@ import { proofOf } from "./proof";
 import { ProofPanel } from "./proof-panel";
 import { RecheckPanel } from "./recheck-panel";
 import { Report, StatePanel } from "./state-panel";
-import { useCampaignPage, useEntriesAllowed } from "./use-campaign-page";
+import { useCampaignPage, useEntriesAllowed, useSettle } from "./use-campaign-page";
 import { noteFor, type VoidNote } from "./void-note";
 
 const PHONE = "(max-width: 860px)";
@@ -72,9 +73,9 @@ export function CampaignPage({
   const { state, reload } = useCampaignPage(id, wallet);
   const allowed = useEntriesAllowed();
   const phone = usePhone();
-  const [round, setRound] = useState(0);
   const [busy, setBusy] = useState(false);
-  const landed = useCallback(() => (setRound((n) => n + 1), reload()), [reload]);
+  // After a landing the split, the pot, the entries and the wallet's balance show it at once (Ronaldo, 2026-10-11).
+  const { round, landed } = useSettle(reload, useContext(SolBalance).refresh);
 
   if (state.status === "loading") {
     return (

@@ -3,7 +3,8 @@
  *          chance per side (none for an empty pot, L-05), the estimated return per side from the SDK's estimate, the listing
  *          rule (no entry 24 hours after opening leaves the home page), and the ranking groups (two-sided, one-sided, empty).
  *          Pure: it takes the chain's time as an input, so tests need no clock.
- * Version: 0.3.0 (the UI overhaul: the metric, the target and the answer for the prototype's card; 0.2.1, Sprint 13)
+ * Version: 0.3.1 (the title as a question; 0.3.0, the UI overhaul: the metric, the target and the answer for the
+ *          prototype's card; 0.2.1, Sprint 13)
  * Sprint:  10 (site: campaign list); 12; 13
  *
  * Assumption: the estimate uses one SOL on the joining side, as a first baker who is not the first of the campaign
@@ -12,7 +13,7 @@
 import { shownReturnBps, type JoinedPot } from "@brot/sdk/read";
 
 import type { Campaign } from "@/lib/api-client";
-import { assetOf, sentenceOf } from "./sentence";
+import { assetOf, questionOf } from "./sentence";
 import { chipOf, stateLine, type CardChip } from "./state-line";
 
 export const ONE_SOL = 1_000_000_000n;
@@ -95,7 +96,8 @@ export function toCard(c: Campaign, nowUnix: bigint): Card {
     address: c.address,
     kind: c.kind,
     state: c.state,
-    title: sentenceOf({
+    // The card asks it, as the campaign page does: "SOL/USD reaches $150?" (Ronaldo, 2026-10-11).
+    title: questionOf({
       kind: c.kind,
       direction: c.direction,
       feedIdHex: c.feed_id,

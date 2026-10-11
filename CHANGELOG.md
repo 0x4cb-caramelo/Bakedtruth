@@ -79,6 +79,18 @@ recomendado (1a a 12a).
       travamento continua à vista, e a folha antes de assinar mostra todas as notas abertas;
     - o botão de entrar não mudou: "Review entry" quando a carteira cobre a entrada, e "Get devnet SOL" só quando não
       cobre.
+  - **A página acompanha a entrada.** Depois que uma entrada entra na cadeia, a página relê na hora e de novo em 1,5,
+    4 e 8 segundos, porque o RPC público do devnet às vezes responde por um instante com o estado de antes. A divisão,
+    o pote, as entradas recentes e o saldo aparecem atualizados. Cada transação das entradas recentes é lida uma vez
+    só, para essas leituras extras saírem baratas.
+  - **"?" também nos cartões**, como no título da página.
+  - **"Opened by …" leva à transação que abriu a campanha, no Solscan.**
+  - **YES em verde e NO em vermelho** nas linhas da estimativa ("If YES wins…", "If NO wins…") e na folha antes de
+    assinar.
+  - **A folha "Check before you sign" mais leve.** À vista ficam o lado e o valor, o que volta se esse lado ganhar e
+    o total que sai da carteira, com o aviso do travamento, o de uma entrada grande e, na primeira entrada, o de que
+    as entradas são públicas. As notas ficam em "Read before you enter"; as travas do programa, os aluguéis, a taxa, a
+    rede e o resumo lido dos bytes da transação ficam em "Transaction details".
   - **O balão do Baked no celular:** encaixado na tela de novo sempre que o Baked se move enquanto fala. Antes, um
     toque no meio de um pulo podia deixá-lo cortado na borda; o defeito é anterior e o desenho novo o expôs.
 

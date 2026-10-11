@@ -183,18 +183,18 @@ test.describe("site pages and notices", () => {
   test("the dot field behind the page brightens around the pointer, as in the approved prototype", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("canvas#dots")).toHaveAttribute("aria-hidden", "true");
-    // The canvas's alpha at a dot's centre: dots sit every 24 px from 12 px, so (108, 300) and (300, 876) are dots.
-    const alphaAt = (x: number, y: number) =>
-      page.evaluate(
-        ([px, py]) => {
-          const canvas = document.querySelector<HTMLCanvasElement>("canvas#dots")!;
-          const dpr = canvas.width / window.innerWidth;
-          return canvas.getContext("2d")!.getImageData(Math.floor(px * dpr), Math.floor(py * dpr), 1, 1).data[3];
-        },
-        [x, y],
-      );
-    await page.mouse.move(108, 300);
-    await expect.poll(() => alphaAt(108, 300)).toBeGreaterThan(100);
-    expect(await alphaAt(300, 876)).toBeLessThan(40);
+    // A dot at the pointer and one far off (dots every 24 px from 12 px); the pointer moves until the script draws.
+    const alphas = () =>
+      page.evaluate(() => {
+        const c = document.querySelector<HTMLCanvasElement>("canvas#dots")!;
+        const k = c.width / window.innerWidth;
+        const at = (x: number, y: number) => c.getContext("2d")!.getImageData(x * k, y * k, 1, 1).data[3];
+        return [at(108, 300), at(300, 876)];
+      });
+    let step = 0;
+    await expect
+      .poll(async () => (await page.mouse.move(108 + (step++ % 2), 300), (await alphas())[0]))
+      .toBeGreaterThan(100);
+    expect((await alphas())[1]).toBeLessThan(40);
   });
 });

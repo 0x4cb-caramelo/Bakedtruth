@@ -42,6 +42,11 @@ test.describe("open a campaign", () => {
     await sheet(page).getByRole("link", { name: "Go to the campaign" }).click();
     await expect(page).toHaveURL(new RegExp(`/c/${id}$`));
     await expect(page.getByRole("heading", { level: 1 })).toContainText("BTC/USD reaches $93,733.57");
+    // "Opened by …" links the very transaction that opened it, on Solscan.
+    await expect(page.locator(".cp-by a")).toHaveAttribute(
+      "href",
+      /^https:\/\/solscan\.io\/tx\/\w{80,90}\?cluster=devnet$/,
+    );
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     expect(sockets).toEqual([]);
   });
