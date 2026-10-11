@@ -27,6 +27,24 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **Sprint 08, terceira parte: o indexador em SQLite, primeira fatia** (branch `sprint-08-indexer`, 11/10/2026;
+  `services/indexer`; `docs/sprints/sprint-08-indexer-api-points.md`; construído e testado, não implantado).
+  - **A ingestão:** as assinaturas do programa em `finalized`, listadas até o ponto de controle e guardadas com o lugar
+    de cada uma na cadeia; cada transação lida e decodificada pelo SDK, com as quatro regras do decodificador; uma
+    transação SQLite por assinatura, com os eventos (`INSERT OR IGNORE`), as projeções e o estado juntos. A transação
+    que o nó diz não ter segura as seguintes por até cinco tentativas e depois é pulada e contada; uma chamada que
+    falha só para a atualização, então uma queda do nó nunca faz pular nada; um buraco no `seq` de uma campanha faz
+    reler as assinaturas dela.
+  - **As tabelas do plano**, com uma mudança que a cadeia impôs: a campanha é chaveada por endereço e abertura, porque
+    um id fechado pode abrir outra campanha. Campanhas, entradas, pagamentos, pontos e ponto de controle; o
+    `feed_history` existe, e é gravado numa fatia seguinte.
+  - **Os pontos** pela regra do SDK, com a regra da conta viva (`campaignNow`) agora no SDK também, usada pela API e
+    pelo indexador: os dois dão os mesmos pontos.
+  - **A reconstrução** num arquivo novo é igual ao arquivo vivo, e cada conta viva bate com a linha dela e com o seu
+    cofre (X1.3). O teste achou que o `isFirst` de uma entrada é o primeiro padeiro do pote, não a primeira entrada da
+    carteira, e a contagem das entradas abertas passou a ser por carteira.
+  - **Fica para as próximas fatias:** as rotas `/api/v1` lidas do arquivo, os DTOs, o ranking, o
+    `content/partners.json`, os KPIs, o `feed_history` com a cópia noturna, os alertas, a unidade e o `logsSubscribe`.
 - **O site em `brot.markets/dev0x`, pronto para o servidor** (branch `feat/dev0x-deploy`, 11/10/2026, a pedido do
   Ronaldo; `deploy/vps/README.md`, "The site under /dev0x"; não implantado). A raiz do domínio continua sendo a página
   de espera.

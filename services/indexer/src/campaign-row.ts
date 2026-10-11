@@ -1,8 +1,9 @@
 /**
  * Purpose: one opening of a campaign as a `campaigns` row (TP §4; Sprint 08), folded from its events in `seq` order
  *          the way the program moves its account (state/transitions.rs): `CampaignOpened` sets the terms, the pot and
- *          the prize; each `EntryAdded` carries both pools after it, and a baker's first entry opens an `Entry`
- *          account; `CampaignResolved` puts it in review with the outcome; a contest makes it `Contested`; the team's
+ *          the prize; each `EntryAdded` carries both pools after it, and a baker's first one opens that baker's
+ *          `Entry` account (its `isFirst` is something else: the pot's first baker, Q3); `CampaignResolved` puts it in
+ *          review with the outcome; a contest makes it `Contested`; the team's
  *          void sets the outcome `Void`; `CampaignFinalized` stores the mode and moves it to `Settling`, or `Settled`
  *          when no entry was ever made; the last `EntrySettled` makes it `Settled`; `CampaignClosed` marks the account
  *          gone. `LateTallied` changes no pool: the late totals are kept apart (tally_late_joins), and the prize never
@@ -98,20 +99,23 @@ export function campaignRow(address: string, opening: number, events: readonly D
     listed: null,
     rank: null,
   };
+  const bakers = new Set<string>();
   for (const event of events.slice(1)) {
-    apply(row, event);
+    apply(row, event, bakers);
     row.last_seq = Number((event.data as { seq: bigint }).seq);
     row.updated_slot = Number(event.slot);
   }
   return row;
 }
 
-function apply(row: CampaignRow, event: DecodedEvent): void {
+/** One event's change to the row; `bakers` are the wallets with an `Entry` account so far (one per wallet). */
+function apply(row: CampaignRow, event: DecodedEvent, bakers: Set<string>): void {
   switch (event.name) {
     case "EntryAdded":
       row.pool_yes = event.data.poolYes.toString();
       row.pool_no = event.data.poolNo.toString();
-      if (event.data.isFirst) row.entries_open += 1;
+      if (!bakers.has(event.data.baker)) row.entries_open += 1;
+      bakers.add(event.data.baker);
       return;
     case "CampaignResolved":
       row.status = Status[Status.InReview];

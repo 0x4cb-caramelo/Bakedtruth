@@ -2,9 +2,10 @@
  * Purpose: the ingest against a scripted RPC (Sprint 08), no cluster: pages shorter than asked, chain order and the
  *          checkpoint, a node that ignores `until`, each transaction read once, a second refresh that changes nothing;
  *          a transaction that does not read back holds the later ones until it does; one that never does is skipped
- *          and, through its campaign's gap, read once more per refresh until it reads; a transaction the program's
- *          listing left out is found through the campaign's own listing; a failed one is kept and never read; a
- *          closed campaign's address opened again is a second opening. Filter: `bun test services/indexer`.
+ *          and, through its campaign's gap, read once more per refresh until it reads; a call that fails spends no
+ *          try; a transaction the program's listing left out is found through the campaign's own listing; a failed
+ *          one is kept and never read; a closed campaign's address opened again is a second opening. Filter:
+ *          `bun test services/indexer`.
  * Version: 0.1.0
  * Sprint:  08 (indexer, API, relay and points)
  */
@@ -51,7 +52,7 @@ describe("the ingest", () => {
     const second = await ingest.refresh();
     expect([second.listed, second.processed]).toEqual([1, 1]);
     expect(names()).toEqual(["a", "b", "c", "d"]);
-    expect(row()).toMatchObject({ pool_yes: String(2n * SOL), entries_open: 3, last_seq: 3 });
+    expect(row()).toMatchObject({ pool_yes: String(2n * SOL), entries_open: 2, last_seq: 3 }); // A had an Entry already
     const before = dump(store);
     expect(await ingest.refresh()).toMatchObject({ listed: 0, processed: 0 });
     expect(dump(store)).toEqual(before);
@@ -82,6 +83,17 @@ describe("the ingest", () => {
     expect(await ingest.refresh()).toMatchObject({ listed: 0, processed: 1, gaps: [] });
     expect(row()).toMatchObject({ pool_yes: String(SOL), pool_no: String(2n * SOL), entries_open: 2 });
     expect(store.db.query("SELECT count(*) AS n FROM entries").get()).toEqual({ n: 2 });
+  });
+
+  test("a call that fails stops the refresh and spends no try: an outage never makes the indexer skip", async () => {
+    const { store, ingest } = setup({ txs: three(), failing: new Map([[SIG("b"), 6]]) }, 2);
+    for (let i = 0; i < 6; i++)
+      expect(await ingest.refresh()).toMatchObject({ waiting: true, readError: "Error", skipped: 0 });
+    expect(store.db.query("SELECT state, tries FROM signatures WHERE signature = ?").get(SIG("b"))).toEqual({
+      state: "pending",
+      tries: 0,
+    });
+    expect(await ingest.refresh()).toMatchObject({ processed: 2, waiting: false, readError: null, gaps: [] });
   });
 
   test("a transaction the program's listing left out is found through the campaign's own", async () => {

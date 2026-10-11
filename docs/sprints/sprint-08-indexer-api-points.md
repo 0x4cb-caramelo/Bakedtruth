@@ -2,8 +2,9 @@
 
 **Status:** in progress. The **hackathon MVP** (founder, 2026-10-10), the read API for Lucas's screens, is merged
 (branch `sprint-08-read-api`). The **second part** (2026-10-11, branch `sprint-08-price-names-relay`): `/api/v1/names`,
-`/api/v1/price` and `brot-rpc`, built and tested, not deployed; the SQLite indexer is still to come · **Dates:** none,
-by the founder's decision
+`/api/v1/price` and `brot-rpc`, merged by PR #69, not deployed. The **indexer's first slice** (2026-10-11, branch
+`sprint-08-indexer`): the SQLite file, the ingest, the projections, the points and the rebuild, built and tested, not
+deployed · **Dates:** none, by the founder's decision
 
 ## Hackathon MVP scope (founder, 2026-10-10)
 
@@ -30,16 +31,19 @@ only path from a client to a paid RPC account, and it relays only what Brot's cl
 ## Definition of done
 
 - [ ] `services/indexer/src` has `ingest.ts`, `db/` (SQLite in WAL mode through `bun:sqlite`, behind a small adapter,
-      with one writer), `ranking.ts`, `points.ts`, `price.ts`, the KPIs and `api/` (TP §3.2).
+      with one writer), `ranking.ts`, `points.ts`, `price.ts`, the KPIs and `api/` (TP §3.2). **Slice 1 (2026-10-11):**
+      `ingest.ts`, `db/` and `points.ts`, with the listing, the projections and the rebuild beside them.
 - [ ] **Ingestion** (proposal §2.7): `getSignaturesForAddress` for the program at `finalized`, paged back to the
       checkpoint and processed oldest first; `logsSubscribe` mentioning the program only as a wake-up hint; failed
       transactions skipped; events decoded by the SDK under the four decoder rules, lookup tables included; one SQLite
       transaction per signature (`INSERT OR IGNORE` on signature, top-level index and inner index; projections;
-      checkpoint). A gap in a campaign's `seq` refetches that campaign's signatures.
-- [ ] Tables of TP §4 and Appendix B: `events`, `campaigns`, `entries`, `settlements`, `points`, `checkpoints`, and the
-      evidence table `feed_history`.
-- [ ] **Rebuild:** deleting the file and rebuilding gives the same content as the live file, and its totals equal the
-      on-chain `Campaign` accounts and vault balances (X1.3).
+      checkpoint). A gap in a campaign's `seq` refetches that campaign's signatures. **Built (2026-10-11)** but the
+      `logsSubscribe` wake-up: the ingest polls (`INDEXER_POLL_MS`, 15 s).
+- [x] Tables of TP §4 and Appendix B: `events`, `campaigns`, `entries`, `settlements`, `points`, `checkpoints`, and the
+      evidence table `feed_history`. **Done (2026-10-11)** (`services/indexer/src/db/schema.ts`); a campaign is keyed by
+      (address, opening), since a closed id can open again; `feed_history` is written from a later slice.
+- [x] **Rebuild:** deleting the file and rebuilding gives the same content as the live file, and its totals equal the
+      on-chain `Campaign` accounts and vault balances (X1.3). **Done (2026-10-11)** (`tests/indexer/cycles.test.ts`).
 - [ ] **`/api/v1`,** read-only (TP §6): the campaign list and each campaign, its activity and its history, the recent
       activity across campaigns (`/api/v1/activity`), a wallet's entries, the leaderboard, `/names`, `/price` and
       `/health`, under the D6 names. DTOs are zod schemas in the SDK's own `schemas` entry point
@@ -242,3 +246,32 @@ unit could not run the Bun binary as its own user, and its key sat in the enviro
 relay's own root-owned copy of the pinned binary; the shared group first written could not reach the keeper's, as
 above). Its four low items too: typed options, the 8 KB socket limit, no `*` CORS origin, a cap on
 CoinGecko's answer.
+
+### The third part: the indexer (2026-10-11, branch `sprint-08-indexer`, slice 1)
+
+- **The file** (`services/indexer/src/db/`): bun:sqlite in WAL mode, one writer, the schema version in
+  `PRAGMA user_version`; a file of another version, or one that is not the indexer's, is refused, never migrated.
+  Appendix B's tables, with three changes the chain forced: `campaigns` is keyed by (address, opening), since a closed
+  campaign's id, and so its address, can carry a new campaign; `signatures` keeps each listed signature's place in the
+  chain (`ord`), since a slot holds many transactions; each event keeps its own bytes (`raw`), which the SDK decodes
+  again exactly. `settlements` has no `reserved`: a reserved creator share emits no event, so every row is a payment.
+- **The ingest** (`ingest.ts`, `listing.ts`): the program's signatures at `finalized`, newest first and paged back to
+  the checkpoint (a node that ignores `until` is cut there; a short page does not end the listing); read oldest first;
+  one SQLite transaction per signature with its events (`INSERT OR IGNORE`), the projections of the campaigns it
+  touches and its state. A transaction the node answers null for holds the later ones for up to five tries, then is
+  skipped and counted; a call that fails (a timeout, a node down) only stops the refresh, so an outage never makes it
+  skip; a gap in a campaign's `seq` lists that campaign's own signatures again, each refresh until it closes, with one
+  more read of a skipped one.
+- **The projections** (`project.ts`, `campaign-row.ts`): each address rebuilt whole from its events, split into
+  openings at each `CampaignOpened` and folded in `seq` order the way the program moves its account; entries with the
+  creator's own wallet flagged; a settlement for each payout to a baker, the creator or whoever opened.
+- **The points** (`points.ts`, `live.ts`): the SDK's `pointsTable` over every event and the live accounts judged by
+  `campaignNow`, which moved from the read API's leaderboard into the SDK so both use one rule.
+- **The rebuild** (`rebuild.ts`): the whole history into a new file; it refuses an existing path.
+- **Tests:** 10 with no cluster (the file; the ingest against a scripted RPC) and 6 on LiteSVM (four whole cycles; each
+  live row against its account and vault; a closed campaign that paid out what it took in; each baker's settlement is
+  what reached the wallet; the rebuild equals the live file; a second refresh changes nothing; the points equal the
+  leaderboard's). The LiteSVM run found that `EntryAdded.isFirst` marks the pot's first baker (Q3), not a wallet's
+  first entry, so the open entries are counted by wallet.
+- **Not in this slice:** the `/api/v1` routes over the file, the zod DTOs, the ranking and `content/partners.json`, the
+  KPIs and the partner report, `feed_history` and the nightly snapshot, the alerts, `logsSubscribe` and the unit.

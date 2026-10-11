@@ -3,7 +3,8 @@
  *          and wrapped as a node writes a landed transaction (an inner instruction of the program whose one account is
  *          its event authority, so the SDK's decoder reads them under its rules), and a Kit-shaped scripted RPC that
  *          lists and returns them, with what the ingest must survive: pages shorter than asked, a node that ignores
- *          `until`, a transaction that does not read back, one the program's listing leaves out, a failed one.
+ *          `until`, a transaction that does not read back, a call that fails, one the program's listing leaves out,
+ *          a failed one.
  * Version: 0.1.0
  * Sprint:  08 (indexer, API, relay and points)
  */
@@ -85,6 +86,8 @@ export type Script = {
   hidden?: Set<string>;
   /** How many more reads of each signature answer null; `Infinity` for never. */
   unreadable?: Map<string, number>;
+  /** How many more reads of each signature fail as a call (a timeout, a node down). */
+  failing?: Map<string, number>;
 };
 
 /** A Kit-shaped RPC over `script`, oldest transaction first; `reads` records each signature read, in order. */
@@ -110,6 +113,11 @@ export function scripted(script: Script) {
     getTransaction: (sig: string) =>
       send(() => {
         reads.push(sig);
+        const down = script.failing?.get(sig) ?? 0;
+        if (down > 0) {
+          script.failing!.set(sig, down - 1);
+          throw new Error("503");
+        }
         const left = script.unreadable?.get(sig) ?? 0;
         if (left > 0) {
           script.unreadable!.set(sig, left - 1);

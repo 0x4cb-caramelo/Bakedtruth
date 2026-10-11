@@ -12,7 +12,8 @@
  * `signatures` keeps each listed signature with its place in the chain (`ord`), so a transaction read late, or again
  * for a gap, still sorts where it landed: a slot holds many transactions. `events.raw` keeps the event's own bytes
  * (base58), which the SDK decodes again exactly. `settlements` has no `reserved`: a reserved creator share emits no
- * event (settle_creator_share), so every settlement row is lamports that reached a wallet.
+ * event (settle_creator_share), so every settlement row is lamports that reached a wallet. `entries.is_first` is the
+ * event's `isFirst`: the wallet is the pot's first baker (Q3), on each of its entries.
  */
 export const SCHEMA_VERSION = 1;
 

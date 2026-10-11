@@ -4,8 +4,10 @@
  *          (`getTransaction`, JSON, version 0) and decodes their events with the SDK under its four decoder rules,
  *          lookup tables included. Each signature is one SQLite transaction: its events `INSERT OR IGNORE` on
  *          (signature, ix_index, inner_index), the projections of every campaign it touches (project.ts), and its
- *          own state, which is the processing checkpoint. A transaction that does not read back holds the later ones,
- *          so the chain's order holds, until its tries run out; then it is skipped and counted. A campaign whose
+ *          own state, which is the processing checkpoint. A transaction the node answers null for holds the later
+ *          ones, so the chain's order holds, until its tries run out; then it is skipped and counted. A call that
+ *          fails (a timeout, a 429, a node down) only stops the refresh and is named: an outage never costs a try, so
+ *          it never makes the indexer skip a transaction. A campaign whose
  *          `seq` has a gap gets its own signatures listed and read again, once per refresh until the gap closes (a
  *          skipped one gets one more read each time, and never holds the others again). Last, the points table
  *          (points.ts). Nothing about a visitor is ever stored: the indexer reads the chain only.
@@ -38,6 +40,8 @@ export type IngestReport = {
   skipped: number;
   /** Campaign addresses whose `seq` still has a gap after this refresh. */
   gaps: string[];
+  /** The name of a read or a gap's listing that failed in this refresh (a timeout, a node error). */
+  readError: string | null;
   pointsError: string | null;
 };
 
@@ -55,14 +59,15 @@ export function createIngest(rpc: SolanaRpc, store: Store, options: IngestOption
        raw) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   );
 
-  async function read(sig: string): Promise<RpcTransaction | null> {
+  /** The transaction, `null` when the node says it has none, or the name of the call's failure. */
+  async function read(sig: string): Promise<RpcTransaction | null | { failed: string }> {
     try {
       const tx = await rpc
         .getTransaction(toSignature(sig), TX)
         .send({ abortSignal: AbortSignal.timeout(list.timeoutMs) });
       return (tx as unknown as RpcTransaction | null) ?? null;
-    } catch {
-      return null;
+    } catch (caught) {
+      return { failed: nameOf(caught) };
     }
   }
 
@@ -97,6 +102,11 @@ export function createIngest(rpc: SolanaRpc, store: Store, options: IngestOption
       const read_ = await Promise.all(slice.map((p) => read(p.signature)));
       for (const [j, p] of slice.entries()) {
         const tx = read_[j];
+        if (tx !== null && "failed" in tx) {
+          report.readError = tx.failed; // the node did not answer: no try is spent, the refresh stops here
+          report.waiting = true;
+          return;
+        }
         if (tx !== null) {
           for (const at of write(p, tx)) touched.add(at);
           report.processed += 1;
@@ -131,7 +141,10 @@ export function createIngest(rpc: SolanaRpc, store: Store, options: IngestOption
 
   return {
     async refresh(): Promise<IngestReport> {
-      const report: IngestReport = { listed: 0, processed: 0, waiting: false, skipped: 0, gaps: [], pointsError: null };
+      const report: IngestReport = {
+        ...{ listed: 0, processed: 0, waiting: false, skipped: 0, gaps: [] },
+        ...{ readError: null, pointsError: null },
+      };
       gapped ??= withGap(
         (
           store.db.query("SELECT DISTINCT campaign FROM events WHERE campaign IS NOT NULL").all() as {
@@ -145,7 +158,7 @@ export function createIngest(rpc: SolanaRpc, store: Store, options: IngestOption
       await processPending(report, touched);
       const toFix = withGap([...touched, ...gapped]);
       if (toFix.size > 0 && !report.waiting) {
-        for (const at of toFix) await refetch(at);
+        for (const at of toFix) await refetch(at).catch((caught: unknown) => void (report.readError = nameOf(caught)));
         await processPending(report, touched);
       }
       gapped = withGap([...touched, ...toFix]);
