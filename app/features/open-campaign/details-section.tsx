@@ -70,8 +70,10 @@ export function DetailsSection(p: {
   const gap = (slot: Gap) => (slot === "account" ? KIND_WORDS[draft.kind].phrase : SLOTS.gap[slot]);
   return (
     <Card as="section" aria-labelledby={`${id}-h`} className="space-y-4 p-4 [grid-area:details]">
-      <h2 id={`${id}-h`} className="flex flex-wrap items-baseline gap-x-2 font-display text-2xl font-bold">
-        <span className="text-muted">2</span>
+      <h2 id={`${id}-h`} className="op-h">
+        <span className="op-n" aria-hidden="true">
+          2
+        </span>
         {BOX.details}
       </h2>
       <div className="rounded-sm bg-raised p-3">
@@ -93,6 +95,7 @@ export function DetailsSection(p: {
           <div className="space-y-1.5">
             <span className="block text-xs font-medium text-muted">{SLOTS.direction}</span>
             <Segmented
+              wide
               label={SLOTS.direction}
               value={draft.direction}
               onChange={(v) => setDraft((d) => ({ ...d, direction: v === "below" ? "below" : "above" }))}
@@ -121,16 +124,23 @@ export function DetailsSection(p: {
         <label htmlFor={`${id}-target`} className="text-xs font-medium text-muted">
           {SLOTS.target[draft.kind]}
         </label>
-        <input
-          id={`${id}-target`}
-          inputMode="decimal"
-          autoComplete="off"
-          value={draft.target}
-          onChange={(e) => setDraft((d) => ({ ...d, target: e.target.value }))}
-          aria-describedby={`${id}-target-help`}
-          aria-invalid={at("target").some((i) => i.level === "refuse")}
-          className="min-h-11 w-full rounded-sm border border-field-line bg-bg px-3 py-2.5 text-base text-text tabular-nums aria-[invalid=true]:border-error"
-        />
+        <div className={draft.kind === "price" ? "op-num pre" : "op-num"}>
+          {draft.kind === "price" ? (
+            <span className="op-pre" aria-hidden="true">
+              $
+            </span>
+          ) : null}
+          <input
+            id={`${id}-target`}
+            inputMode="decimal"
+            autoComplete="off"
+            value={draft.target}
+            onChange={(e) => setDraft((d) => ({ ...d, target: e.target.value }))}
+            aria-describedby={`${id}-target-help`}
+            aria-invalid={at("target").some((i) => i.level === "refuse")}
+            className="input"
+          />
+        </div>
         <p id={`${id}-target-help`} className="text-xs text-muted">
           {p.valueNow ? `${SLOTS.now(p.valueNow, below)} ` : ""}
           {SLOTS.targetHelp[draft.kind]}

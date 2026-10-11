@@ -34,11 +34,11 @@ export function EntryNotices({
   ];
   return (
     <div className={cx("space-y-2", compact ? "text-xs" : "text-[12.5px]")}>
-      <p className="m-0 flex items-start gap-2 rounded-sm bg-st-review-bg px-3 py-2 text-st-review-fg">
-        <Lock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+      <p className="en-lock">
+        <Lock className="size-4" aria-hidden="true" />
         <span>{NOTICES.lock}</span>
       </p>
-      <ul className="m-0 list-disc space-y-1 pl-5 text-muted">
+      <ul className="en-notes list-disc">
         {items.map((text, i) => (
           <li key={i} className={cx(i === 1 && large ? "text-warn" : undefined)}>
             {text}

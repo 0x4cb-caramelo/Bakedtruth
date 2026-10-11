@@ -4,7 +4,7 @@
  *          and its confidence, when it was published and posted, the campaign's maximum price age (30 s floor), and what
  *          the screen says when no fresh price exists (L-22) or the price sits within 1% of the target. Then the account
  *          read with its explorer link, the owner checked first, and entries close and the deadline in UTC and local time.
- * Version: 0.1.1 (Sprint 19: burn and lock numbers with their unit)
+ * Version: 0.2.0 (the UI overhaul: the approved prototype's `.cp-proof`; 0.1.1, Sprint 19's units)
  * Sprint:  11 (site: campaign page and entry)
  */
 "use client";
@@ -21,16 +21,16 @@ import type { PageData } from "./load";
 import { READER, type Proof } from "./proof";
 
 const Row = ({ label, children }: { label: string; children: ReactNode }) => (
-  <div className="grid grid-cols-[minmax(0,9.5rem)_1fr] gap-3 border-t border-line py-2 text-sm max-sm:grid-cols-1 max-sm:gap-0.5">
-    <dt className="text-muted">{label}</dt>
-    <dd className="m-0">{children}</dd>
+  <div>
+    <dt>{label}</dt>
+    <dd>{children}</dd>
   </div>
 );
 
 const When = ({ at }: { at: bigint }) => (
   <>
     {utc(at)}
-    <small className="block text-xs text-muted">{local(at)}</small>
+    <small>{local(at)}</small>
   </>
 );
 
@@ -43,54 +43,45 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
   const reader = READER[proof.kind];
   const unit = RAW_UNIT[proof.kind];
   return (
-    <section aria-labelledby="proof-title" className="rounded-md border border-line bg-panel p-4">
-      <h2 id="proof-title" className="m-0 mb-3 flex items-center gap-2 font-display text-2xl font-bold">
-        <Eye className="size-5" aria-hidden="true" />
+    <section aria-labelledby="proof-title" className="panel cp-proof">
+      <h2 id="proof-title" className="panel-head">
+        <Eye className="size-[15px]" aria-hidden="true" />
         {PROOF.title}
       </h2>
       {c.outcome === Outcome.Yes || c.outcome === Outcome.No ? (
-        <p className="m-0 mb-3 rounded-sm bg-raised px-3 py-2 text-sm">
+        <p className="cp-recorded">
           {PROOF.recorded}:{" "}
           <b className="tabular-nums">{valueWithUnit(proof.kind, c.observedValue, c.priceExponent)}</b> ·{" "}
           {utc(c.resolvedAt)}
         </p>
       ) : null}
-      <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
-        <p className="m-0">
-          <small className="block text-xs text-muted">{proof.kind === "price" ? PRICE.current : PROOF.valueNow}</small>
-          <b className="font-display text-3xl tabular-nums">{value ?? "—"}</b>
-          {value && unit ? <small className="ml-1 text-xs text-muted">{unit}</small> : null}
+      <div className="read-values">
+        <div>
+          <small>{proof.kind === "price" ? PRICE.current : PROOF.valueNow}</small>
+          <b>{value ?? "—"}</b>
+          {value && unit ? <small className="mt-1">{unit}</small> : null}
           {proof.price ? (
-            <small className="block text-xs text-muted">
-              {PRICE.confidence(valueText("price", proof.price.conf, exponent))}
-            </small>
+            <small className="mt-1">{PRICE.confidence(valueText("price", proof.price.conf, exponent))}</small>
           ) : null}
-        </p>
-        <p className="m-0">
-          <small className="block text-xs text-muted">{PROOF.target}</small>
-          <b className="font-display text-3xl tabular-nums">
+        </div>
+        <div>
+          <small>{PROOF.target}</small>
+          <b className="dim">
             {proof.comparator} {valueText(proof.kind, c.target, c.priceExponent)}
           </b>
-          {unit ? <small className="ml-1 text-xs text-muted">{unit}</small> : null}
-        </p>
+          {unit ? <small className="mt-1">{unit}</small> : null}
+        </div>
       </div>
       {proof.problem ? (
-        <p className="m-0 mt-3 text-sm text-warn">
+        <p className="cp-gap is-off">
           {proof.problem === "missing" ? PROOF.missing : PROOF.problem(proof.problem)}
         </p>
       ) : null}
       {before && proof.ifReadNow ? (
-        <p className="m-0 mt-3 flex flex-wrap items-center gap-2 text-sm">
+        <p className="cp-ifnow">
           {PROOF.ifReadNow}:
-          <span
-            className={cx(
-              "rounded-full px-2 py-0.5 text-xs font-bold",
-              proof.ifReadNow === "YES" ? "bg-yes-bg text-yes-fg" : "bg-no-bg text-no-fg",
-            )}
-          >
-            {proof.ifReadNow}
-          </span>
-          <span className="text-muted">{proof.ifReadNow === "YES" ? PROOF.ifYes : PROOF.ifNo}</span>
+          <span className={cx("chip", proof.ifReadNow === "YES" ? "yes" : "no")}>{proof.ifReadNow}</span>
+          <span>{proof.ifReadNow === "YES" ? PROOF.ifYes : PROOF.ifNo}</span>
         </p>
       ) : null}
       {before && proof.kind === "pool" && proof.ifReadNow === null && proof.measuredEpoch !== null ? (
@@ -100,7 +91,7 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
         <p className="m-0 mt-3 text-sm text-muted">{PROOF.stakeNote(proof.measuredEpoch.toString())}</p>
       ) : null}
       {before && proof.price ? <PriceFacts proof={proof} maxAge={c.maxAge} /> : null}
-      <dl className="m-0 mt-3">
+      <dl className="rows cp-rows">
         <Row label={PROOF.account}>
           <a
             href={explorerAddress(proof.account)}
@@ -138,7 +129,7 @@ function PriceFacts({ proof, maxAge }: { proof: Proof; maxAge: number }) {
   const p = proof.price!;
   const ahead = p.ageSeconds < 0n;
   return (
-    <div className="mt-3 space-y-2 text-sm">
+    <div className="mt-3 space-y-2 text-[12.5px]">
       <p className="m-0 text-muted">
         {PRICE.published(
           ahead ? "ahead of the cluster's clock" : `${ageText(p.ageSeconds)} ago`,
@@ -147,11 +138,11 @@ function PriceFacts({ proof, maxAge }: { proof: Proof; maxAge: number }) {
       </p>
       <p className="m-0 text-muted">{PRICE.maxAge(maxAge)}</p>
       {!p.fresh ? (
-        <p role="status" className="m-0 rounded-sm bg-st-review-bg px-3 py-2 text-st-review-fg">
+        <p role="status" className="notice warn">
           {ahead ? PRICE.ahead : PRICE.stale(p.symbol ?? "feed's", ageText(p.ageSeconds), maxAge)}
         </p>
       ) : p.tooClose && proof.ifReadNow === "NO" ? (
-        <p role="status" className="m-0 rounded-sm bg-st-review-bg px-3 py-2 text-st-review-fg">
+        <p role="status" className="notice warn">
           {PRICE.tooClose}
         </p>
       ) : null}

@@ -150,11 +150,11 @@ export function PayoutPanel(props: { data: PageData; wallet: string | null; roun
   return (
     <section
       aria-labelledby="mine-title"
-      className="space-y-2 rounded-md border border-line bg-panel p-4"
+      className="panel cp-mine space-y-2"
       data-payout={payout.kind}
     >
-      <h2 id="mine-title" className="m-0 flex items-center gap-2 font-display text-2xl font-bold">
-        <Receipt className="size-5" aria-hidden="true" />
+      <h2 id="mine-title" className="panel-head">
+        <Receipt className="size-[15px]" aria-hidden="true" />
         {YOURS.title}
       </h2>
       {sides ? <p className="m-0 text-sm">{YOURS.sides(sides)}</p> : null}

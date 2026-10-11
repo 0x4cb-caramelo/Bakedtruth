@@ -8,7 +8,7 @@
  */
 import type { FetchedAccount, OpenArgs } from "@brot/sdk/read";
 
-import { formatTarget } from "../campaigns/sentence";
+import { formatTarget, type SentenceInput } from "../campaigns/sentence";
 import type { Card } from "../campaigns/model";
 import { ageText } from "../campaign-page/format";
 import { accountState, feedState, type AccountState } from "./account-check";
@@ -76,6 +76,8 @@ export function slotReadOf(
 /** The list's card for the campaign the arguments open, before any entry (spec 3.12, "as it will appear"). */
 export function cardOf(a: {
   args: OpenArgs;
+  /** The sentence's own fields: the account, the feed, the target and its direction, as the list's card reads them. */
+  input: SentenceInput;
   kind: string;
   title: string;
   asset: string | null;
@@ -110,5 +112,12 @@ export function cardOf(a: {
     estNoBps: null,
     chip: "open",
     stateLine: null,
+    metricAccount: a.input.metricAccount ?? "",
+    feedId: a.input.feedIdHex ?? "",
+    target: a.args.target,
+    direction: a.input.direction === "Below" ? "Below" : a.input.direction === "Above" ? "Above" : "unknown",
+    priceExponent: a.input.priceExponent ?? 0,
+    outcome: "None",
+    resolvedAt: null,
   };
 }

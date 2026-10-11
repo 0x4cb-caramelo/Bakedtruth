@@ -58,8 +58,10 @@ export function WhatSection({
   const expanded = open && result.items.length > 0;
   return (
     <Card as="section" aria-labelledby={`${id}-h`} className="space-y-3 p-4 [grid-area:what]">
-      <h2 id={`${id}-h`} className="font-display text-2xl font-bold">
-        <span className="mr-2 text-muted">1</span>
+      <h2 id={`${id}-h`} className="op-h">
+        <span className="op-n" aria-hidden="true">
+          1
+        </span>
         {BOX.what}
       </h2>
       <div className="relative">

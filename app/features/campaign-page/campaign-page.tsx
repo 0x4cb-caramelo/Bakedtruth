@@ -147,7 +147,7 @@ export function CampaignPage({
   const stale = state.failed ? <p className="m-0 text-xs text-warn">{PAGE.loadFailedText}</p> : null;
   if (phone) {
     return (
-      <div className="space-y-4">
+      <div className="cp-main">
         {stale}
         {[
           blocks.head,
@@ -163,12 +163,12 @@ export function CampaignPage({
     );
   }
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_380px] items-start gap-6">
-      <div className="space-y-4">
+    <div className="cp-cols">
+      <div className="cp-main">
         {stale}
         {[blocks.head, blocks.proof, blocks.pot, blocks.activity, blocks.recheck, blocks.report]}
       </div>
-      <div className="sticky top-4 space-y-4">{[blocks.panel, blocks.mine]}</div>
+      <div className="cp-side">{[blocks.panel, blocks.mine]}</div>
     </div>
   );
 }

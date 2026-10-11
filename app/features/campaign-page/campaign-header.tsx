@@ -3,7 +3,7 @@
  *          (A-7), the team chip, the sentence as the page's one <h1>, the rule in plain words with the deadline in UTC
  *          and local time, who opened it, and the creator notice on burn, lock and stake campaigns (BR-26) with the
  *          creator's own entry when the creator's wallet has one.
- * Version: 0.1.0
+ * Version: 0.2.0 (the UI overhaul: the approved prototype's `.cp-head`)
  * Sprint:  11 (site: campaign page and entry)
  */
 "use client";
@@ -11,10 +11,10 @@
 import Link from "next/link";
 import { ArrowLeft, TriangleAlert } from "lucide-react";
 
-import { KindTile } from "@/components/ui/kind-tile";
 import { StateChip } from "@/components/ui/state-chip";
 import { formatSol, shortAddress } from "@/lib/brot";
 import { sol4 } from "@/features/entry/amount";
+import { KINDS } from "@/features/campaigns/card-parts";
 import { CREATOR_NOTICE, KIND_NAME, PAGE, creatorHasEntry, ruleText } from "./copy";
 import { local, stateChip, utc, valueText } from "./format";
 import type { PageData } from "./load";
@@ -41,35 +41,32 @@ export function CampaignHeader({ data, proof, sentence }: { data: PageData; proo
         .join(" and ")
     : "";
   return (
-    <header className="space-y-3">
-      <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-accent-soft hover:underline">
+    <header className="cp-head">
+      <Link href="/" className="cp-back">
         <ArrowLeft className="size-3.5" aria-hidden="true" />
         {PAGE.back}
       </Link>
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <span className="inline-flex items-center gap-2">
-          <KindTile kind={proof.kind} small />
-          <span className="font-semibold">{KIND_NAME[proof.kind]}</span>
+      <div className="cp-eyebrow">
+        <span className={`chip cp-kind kind-${proof.kind}`}>
+          <span aria-hidden="true">{KINDS[proof.kind].tile}</span>
+          {KIND_NAME[proof.kind]}
         </span>
-        <span className="text-muted">{name}</span>
-        <StateChip state={stateChip(data.view)} />
-        {c.creatorIsTeam ? (
-          <span className="rounded-full bg-raised px-2 py-0.5 text-[11px] font-semibold">{PAGE.team}</span>
-        ) : null}
+        <span className="cp-name">{name}</span>
+        <span className="cp-state">
+          <StateChip state={stateChip(data.view)} />
+          {c.creatorIsTeam ? <span className="chip">{PAGE.team}</span> : null}
+        </span>
       </div>
-      <h1 className="m-0 font-display text-4xl font-bold leading-tight">{sentence}</h1>
-      <p className="m-0 max-w-3xl text-sm text-muted">{rule}</p>
-      <p className="m-0 text-xs text-muted">
+      <h1 className="cp-title">{sentence}</h1>
+      <p className="cp-rule">{rule}</p>
+      <p className="cp-by">
         {c.creatorIsTeam ? PAGE.openedByTeam : PAGE.openedBy(shortAddress(c.creator), formatSol(c.prizeLamports))} ·{" "}
         {utc(c.opensAt)}
       </p>
       {proof.kind !== "price" ? (
-        <div
-          role="note"
-          className="flex items-start gap-2 rounded-sm bg-st-review-bg px-3 py-2 text-sm text-st-review-fg"
-        >
-          <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          <p className="m-0">
+        <div role="note" className="cp-creator mt-3">
+          <TriangleAlert className="size-4" aria-hidden="true" />
+          <p>
             <b>{CREATOR_NOTICE}</b>
             {creatorSides ? ` ${creatorHasEntry(creatorSides)}` : null}
           </p>

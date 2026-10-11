@@ -19,13 +19,14 @@ import { MINE } from "./copy";
 import { EntryRow } from "./entry-row";
 import { useMyEntries } from "./use-my-entries";
 
-function Total({ label, lamports, testId }: { label: string; lamports: bigint; testId: string }) {
+function Total(props: { label: string; lamports: bigint; testId: string; note: string }) {
   return (
-    <div className="rounded-md border border-line bg-panel p-4">
-      <small className="block text-xs font-semibold text-muted">{label}</small>
-      <b className="font-display text-3xl tabular-nums" data-testid={testId}>
-        {exactSol(lamports)} SOL
+    <div className="pg-stat">
+      <small>{props.label}</small>
+      <b className="num" data-testid={props.testId}>
+        {exactSol(props.lamports)} SOL
       </b>
+      <span>{props.note}</span>
     </div>
   );
 }
@@ -36,9 +37,10 @@ export function MyEntries() {
   const { state, reload, readOlder, readingOlder } = useMyEntries(wallet);
 
   const head = (
-    <header className="space-y-1">
-      <h1 className="m-0 font-display text-4xl font-bold">{MINE.title}</h1>
-      <p className="m-0 text-sm text-muted">{MINE.intro}</p>
+    <header>
+      <p className="t-kicker">{MINE.kicker}</p>
+      <h1 className="t-title">{MINE.title}</h1>
+      <p className="pg-lead">{MINE.intro}</p>
     </header>
   );
   if (!wallet || state.status === "idle")
@@ -76,15 +78,24 @@ export function MyEntries() {
   const { summary, history } = state;
   const read = history.seen.length + history.unread.length;
   return (
-    <div className="space-y-4">
+    <div className="pg">
       {head}
       {state.failed ? <p className="m-0 text-xs text-warn">{MINE.staleRead}</p> : null}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <Total label={MINE.received} lamports={summary.received} testId="received-total" />
-        <Total label={MINE.waiting} lamports={summary.waiting} testId="waiting-total" />
+      <div
+        className="pg-stats"
+        data-perch="stats"
+        data-perch-x="0.94"
+        data-perch-size="0.8"
+        data-perch-say="Counted to the lamport."
+      >
+        <Total
+          label={MINE.received}
+          lamports={summary.received}
+          testId="received-total"
+          note={MINE.receivedNote}
+        />
+        <Total label={MINE.waiting} lamports={summary.waiting} testId="waiting-total" note={MINE.waitingNote} />
       </div>
-      <p className="m-0 text-xs text-muted">{MINE.receivedNote}</p>
-      <p className="m-0 text-xs text-muted">{MINE.waitingNote}</p>
       {state.apiDown ? <p className="m-0 text-xs text-warn">{MINE.apiDown}</p> : null}
       {history.unread.length > 0 ? (
         <p className="m-0 text-xs text-warn">{MINE.unreadable(history.unread.length)}</p>
@@ -96,7 +107,7 @@ export function MyEntries() {
           </Link>
         </EmptyState>
       ) : (
-        <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0">
+        <ul className="pg-entries">
           {summary.rows.map((row) => (
             <EntryRow key={row.campaign} row={row} onChange={reload} />
           ))}

@@ -18,7 +18,7 @@ const sol = (lamports: bigint) => `${solText(lamports)} SOL`;
 
 const Box = ({ title, children }: { title: string; children: ReactNode }) => (
   <Card as="section" className="space-y-3 p-4">
-    <h2 className="m-0 font-display text-2xl font-bold">{title}</h2>
+    <h2 className="panel-head">{title}</h2>
     {children}
   </Card>
 );
@@ -46,7 +46,7 @@ function Example() {
   const { noPrize, withPrize, partner } = splitExamples();
   return (
     <Card as="section" aria-labelledby="fees-example" className="space-y-3 p-4" data-perch="fees-example">
-      <h2 id="fees-example" className="m-0 font-display text-2xl font-bold">
+      <h2 id="fees-example" className="t-section">
         {FEES.exampleTitle}
       </h2>
       <p className="m-0 text-sm">{FEES.exampleIntro}</p>
@@ -92,8 +92,8 @@ export function FeePage() {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <p className="m-0 text-xs uppercase tracking-wide text-muted">{FEES.kicker}</p>
-        <h1 className="m-0 font-display text-4xl font-bold">{FEES.title}</h1>
+        <p className="t-kicker">{FEES.kicker}</p>
+        <h1 className="t-title">{FEES.title}</h1>
         <p className="m-0 max-w-3xl text-sm text-muted">{FEES.lead}</p>
       </header>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

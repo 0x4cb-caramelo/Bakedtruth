@@ -96,6 +96,11 @@ export const SLOTS = {
     `Entries close ${utc}: 5% of the campaign's length before the deadline, never less than 24 hours and never more than 7 days.`,
   usd: "Opening amount · US$500 or more. The whole amount is split 90% prize, 10% Brot's opening fee.",
   custom: "Custom, whole US$",
+  /** The amount tiles' two lines (the approved prototype's `.op-amt`). */
+  customShort: "Custom",
+  customSub: "whole US$",
+  minimumSub: "the minimum",
+  prizeSub: (usd: string) => `${usd} prize`,
 } as const;
 
 export const ACCOUNT = {

@@ -15,12 +15,12 @@ export function HowPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <p className="m-0 text-xs uppercase tracking-wide text-muted">{HOW.kicker}</p>
-        <h1 className="m-0 font-display text-4xl font-bold">{HOW.title}</h1>
+        <p className="t-kicker">{HOW.kicker}</p>
+        <h1 className="t-title">{HOW.title}</h1>
         <p className="m-0 max-w-3xl text-sm text-muted">{HOW.lead}</p>
       </header>
       <section aria-labelledby="how-steps" className="space-y-3">
-        <h2 id="how-steps" className="m-0 font-display text-2xl font-bold">
+        <h2 id="how-steps" className="t-section">
           {HOW.stepsTitle}
         </h2>
         <ol
@@ -43,7 +43,7 @@ export function HowPage() {
         </ol>
       </section>
       <section aria-labelledby="how-more" className="space-y-3">
-        <h2 id="how-more" className="m-0 font-display text-2xl font-bold">
+        <h2 id="how-more" className="t-section">
           {HOW.moreTitle}
         </h2>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">

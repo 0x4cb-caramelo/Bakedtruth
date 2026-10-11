@@ -31,7 +31,7 @@ export function EstimateBlock({
   context: FailureContext;
 }) {
   return (
-    <div aria-live="polite" className="min-h-14 rounded-sm bg-raised px-3 py-2.5 text-sm">
+    <div aria-live="polite" className="en-est text-[13px]" data-tone={side}>
       {body(estimate, side, amount, oneSidedFeeBps, context)}
     </div>
   );
