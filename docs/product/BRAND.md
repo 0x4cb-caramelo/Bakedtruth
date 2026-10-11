@@ -429,13 +429,14 @@ rodapé.
 | Página inicial no ar (`brot.markets`) | Ainda a versão anterior, em azul, com o mascote na barra |
 | Termos, privacidade e `docs.brot.markets` | Ainda não seguem este documento; têm o mascote na barra |
 | Deck (`/pitch`) | Mesma família de cores, com as fontes IBM Plex |
-| Aplicativo | Ainda não segue este documento |
+| Aplicativo (o site novo, `app/`) | Segue as cores desde 2026-10-10 (`app/styles/tokens.css`), abrindo no tema escuro; as diferenças e o porquê estão em `DESIGN-DIRECTION.md`, "Cores" |
 | Ícone da aba do navegador | Ainda é o mascote (`img/favicon.png`) |
 
 ## 13. Em aberto
 
-- **Alinhar `DESIGN-DIRECTION.md` e o aplicativo a estas cores.** A direção aprovada em 3/10 usa azul como destaque
-  e um claro frio. O pedido de mudança aberto para a sprint de design segue essa direção antiga.
+- ~~**Alinhar `DESIGN-DIRECTION.md` e o aplicativo a estas cores.**~~ **Feito em 2026-10-10** para as cores do site
+  novo e para o `DESIGN-DIRECTION.md`. A tipografia e o resto da direção Ledger² continuam; o pedido de mudança aberto
+  para a sprint de design ainda descreve a direção antiga.
 - **Publicar a `/5` como página inicial**, e decidir o que acontece com as páginas `/2`, `/3` e `/4`.
 - **Levar o símbolo e as cores para os termos, a privacidade e o docs.**
 - **Trocar o ícone da aba** pelo pão, se o símbolo valer também lá.

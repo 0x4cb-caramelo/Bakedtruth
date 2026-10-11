@@ -8,6 +8,10 @@
   foi trocada em 3 de outubro: o Lucas pediu "vamos usar o layout D, Ledger2, e dele queremos a sua versão light" e,
   depois de ver a N no lab, respondeu "N aprovado". Os motivos estão em
   [`session-log/2026-10-03-direcao-ledger2-claro-e-escuro.md`](../../session-log/2026-10-03-direcao-ledger2-claro-e-escuro.md).
+- **Status em 2026-10-10: as cores mudaram para as da marca.** O site (`app/`) usa as cores de
+  [`BRAND.md`](BRAND.md) §5, tiradas da página `/5` que o Lucas aprovou em 9/10: azul-marinho e laranja no escuro,
+  creme e ferrugem no claro, nenhum azul. A estrutura, a tipografia, os componentes e o resto da direção Ledger²
+  continuam valendo. A troca e as escolhas que ela pediu estão em [Cores](#cores); a tabela antiga ficou como histórico.
 
 | Identificador | `ledger2-d-n` |
 |---|---|
@@ -84,7 +88,37 @@ Fonte: `prototype-lab/README.md`.
 
 ### Cores
 
-Escuro: `:root` de `shared/ledger.css`. Claro: `:root[data-theme='light']` de `prototype-n/styles.css`.
+**Desde 2026-10-10, as cores da marca** (o item em aberto de `BRAND.md` §13, pedido pelo Ronaldo: "port BRAND.md's
+colors ... to our current functional Next.js site"). Os valores ficam em `app/styles/tokens.css`; os componentes leem os
+nomes, nunca uma cor escrita direto.
+
+- **O que vem do `BRAND.md` §5, sem mudança:** fundo, painel, linhas, texto, apoio, letra miúda, destaque e a cor do
+  texto sobre ele, botão e botão sob o ponteiro, anel do botão, `--crust`, YES, NO, faixa do topo, trilho e barra
+  preenchida, erro, pontos do fundo, balão e sombra do mascote, sombras. Nos dois temas.
+- **O escuro continua sendo o tema de abertura do site**, como na direção aprovada em 3/10. A `/5` abre no claro
+  (`BRAND.md` §9); o site não.
+- **Onde o site difere da marca, e por quê:**
+  - `--raised` no escuro é `#1f2836`, um passo acima do painel. Na marca ele é igual ao painel, porque a `/5` só o usa
+    na caixa de sugestão; no site ele marca campos, botões desligados e caixas dentro de um painel.
+  - `--notice-bg` no escuro é `#232c3b`, azul-acinzentado. Na marca é o verde do "you joined" da lista de espera, que é
+    o mesmo verde do fundo do YES; no site ele está atrás das caixas de informação e da linha "You" do ranking, que
+    pareceriam YES.
+- **O que a marca não define e o site precisa**, tirado da mesma paleta, sem azul e com verde e vermelho só no YES e
+  no NO: os chips de estado (aberta em laranja; fechada e anulada em cinza da paleta; em revisão e contestada em
+  âmbar; resultado final em creme sobre neutro, para não parecer YES), os blocos dos tipos (preço em azul-ardósia da
+  paleta, `#2f3a4e`; os outros como estavam), as barras do YES, do NO e do prêmio (o prêmio em laranja), o aviso
+  (`--warn`, um âmbar mais amarelo que o destaque) e a borda dos campos.
+- **Leitura, conferida par a par** (WCAG): todo texto passa de 4,5 e toda borda de campo e barra passa de 3, nos dois
+  temas; os pares da marca dão os números do `BRAND.md` §5.4 (texto 15,9 e 15,4; destaque 8,8 e 5,0; YES 10,5 e 6,7;
+  NO 6,7 e 5,4). O teste `tests/site/tokens.test.ts` recalcula todos e falha se uma troca quebrar a leitura, se um azul
+  voltar ou se uma cor da marca mudar sem mudar o `BRAND.md`.
+- **Dois defeitos que a troca mostrou, corrigidos:** o anel do botão principal nunca aparecia (a classe virava
+  `background-color`, que não aceita gradiente); agora é desenhado com `background`, gira só no claro e para para quem
+  pede menos movimento (`BRAND.md` §10). E o botão principal desligado levava as cores do ligado e do desligado ao
+  mesmo tempo: no escuro, com o texto do destaque agora escuro, o texto sumia. Agora leva só as do desligado.
+
+**Valores do protótipo Ledger², em uso até 2026-10-10** (histórico). Escuro: `:root` de `shared/ledger.css`. Claro:
+`:root[data-theme='light']` de `prototype-n/styles.css`.
 
 | Variável | Escuro | Claro | Uso |
 |---|---|---|---|
