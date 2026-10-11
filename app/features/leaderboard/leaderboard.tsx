@@ -10,6 +10,7 @@
  */
 "use client";
 
+import { Trophy } from "lucide-react";
 import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 
@@ -26,6 +27,9 @@ import { useLeaderboard } from "./use-leaderboard";
 
 const FIRST = 50;
 
+/** The prototype's podium: the first three ranks in the brand's colour. */
+const top = (rank: number | null) => (rank !== null && rank <= 3 ? "text-crust-ink" : "text-muted");
+
 function Row({ line, mine }: { line: PointsLine; mine: boolean }) {
   return (
     <tr
@@ -33,15 +37,17 @@ function Row({ line, mine }: { line: PointsLine; mine: boolean }) {
       aria-current={mine ? "true" : undefined}
       data-wallet={line.wallet}
     >
-      <td className="py-2 pr-3 font-display text-xl tabular-nums">{line.rank}</td>
-      <td className="py-2 pr-3">
+      <td className={`border-t border-line py-3.5 pr-3 font-display text-2xl tabular-nums ${top(line.rank)}`}>
+        {line.rank}
+      </td>
+      <td className="border-t border-line py-3.5 pr-3">
         <a href={explorerAddress(line.wallet)} target="_blank" rel="noopener noreferrer" title={line.wallet}>
           <code className="text-sm">{shortAddress(line.wallet)}</code>
         </a>
         {mine ? <span className="ml-2 rounded-sm border border-line px-1.5 text-xs">{BOARD.you}</span> : null}
       </td>
-      <td className="py-2 pr-3 text-right font-bold tabular-nums">{line.points}</td>
-      <td className="py-2 text-right tabular-nums">{line.entered}</td>
+      <td className="border-t border-line py-3.5 pr-3 text-right font-display text-2xl tabular-nums">{line.points}</td>
+      <td className="border-t border-line py-3.5 text-right text-muted tabular-nums">{line.entered}</td>
     </tr>
   );
 }
@@ -88,12 +94,12 @@ function Board({ rows, total, wallet }: { rows: PointsLine[]; total: number; wal
       data-perch-x="0.9"
     >
       <table className="w-full min-w-[360px] border-collapse text-sm">
-        <thead className="text-left text-xs text-muted">
+        <thead className="text-left text-[11px] uppercase tracking-[0.04em] text-dim">
           <tr>
-            <th className="pb-2 pr-3 font-semibold">{BOARD.columns.rank}</th>
-            <th className="pb-2 pr-3 font-semibold">{BOARD.columns.wallet}</th>
-            <th className="pb-2 pr-3 text-right font-semibold">{BOARD.columns.points}</th>
-            <th className="pb-2 text-right font-semibold">{BOARD.columns.entered}</th>
+            <th className="pb-3 pr-3 font-semibold">{BOARD.columns.rank}</th>
+            <th className="pb-3 pr-3 font-semibold">{BOARD.columns.wallet}</th>
+            <th className="pb-3 pr-3 text-right font-semibold">{BOARD.columns.points}</th>
+            <th className="pb-3 text-right font-semibold">{BOARD.columns.entered}</th>
           </tr>
         </thead>
         <tbody>
@@ -118,10 +124,10 @@ export function LeaderboardPage() {
   const { state, retry } = useLeaderboard();
   return (
     <div className="space-y-6">
-      <header className="space-y-2">
-        <p className="m-0 text-xs uppercase tracking-wide text-muted">{BOARD.kicker}</p>
-        <h1 className="m-0 font-display text-4xl font-bold">{BOARD.title}</h1>
-        <p className="m-0 max-w-3xl text-sm text-muted">{BOARD.lead}</p>
+      <header>
+        <p className="t-kicker">{BOARD.kicker}</p>
+        <h1 className="t-title">{BOARD.title}</h1>
+        <p className="pg-lead">{BOARD.lead}</p>
         {state.status === "ready" ? <p className="m-0 text-xs text-muted">{BOARD.readAt(state.asOfSlot)}</p> : null}
       </header>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
@@ -164,7 +170,8 @@ export function LeaderboardPage() {
             />
           </Card>
           <Card as="section" aria-labelledby="points-how" className="space-y-2 p-4">
-            <h2 id="points-how" className="m-0 font-display text-2xl font-bold">
+            <h2 id="points-how" className="panel-head">
+              <Trophy className="size-4" aria-hidden="true" />
               {BOARD.howTitle}
             </h2>
             <ul className="m-0 list-disc space-y-1.5 pl-5 text-sm">

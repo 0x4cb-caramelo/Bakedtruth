@@ -9,6 +9,20 @@ Quando uma resposta posterior muda uma anterior, vale a posterior. A seção 1 t
 
 ## 1. Estado consolidado (vale este)
 
+### Decisões de 11 de outubro de 2026, sobre a revisão visual do site — prevalecem sobre tudo abaixo
+
+Dadas pelo Ronaldo, com as próprias palavras, depois de ver o site novo (o PR #70). O porquê está em
+`session-log/2026-10-11-revisao-visual-do-site.md`.
+
+- **O título e o subtítulo da página inicial** são os da capa do pitch, no vocabulário do site: "Campaigns the chain
+  resolves." e "Permissionless campaigns that turn on-chain milestones into growth, settled by the chain itself.".
+  Nas palavras dele: "Strategically and legally, framing our product as 'campaigns' rather than 'prediction markets'
+  protects us from gambling associations and perfectly fits our hackathon positioning as a growth primitive for
+  creators and protocols." A regra do vocabulário do Lucas segue "strictly intact across the entire site and tests,
+  with absolutely no exceptions".
+- **O botão da carteira diz "Connect"** ("i want only to change the 'use installed wallet' for 'connect'").
+- **"question" vira "campaign" no texto do site** ("lets change the 'questions' word for 'campaign' and
+  'campaigns'").
 ### Decisões de 11 de outubro de 2026, sobre as perguntas da Sprint 08 — prevalecem sobre tudo abaixo
 
 Dadas pelo Ronaldo, num texto que ele colou e depois confirmou na sessão. As perguntas, com as opções, estão em

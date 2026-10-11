@@ -15,7 +15,8 @@ const TONE: Record<KindName, string> = {
   stake: "bg-k-stake-bg text-k-stake-fg",
 };
 
-const LETTER: Record<KindName, string> = { price: "P", burn: "B", lock: "L", pool: "O", stake: "S" };
+// The approved prototype's letters (prototype-lab/campaigns, ui/parts.js): $ for a price, P for a pool, V for a validator.
+const LETTER: Record<KindName, string> = { price: "$", burn: "B", lock: "L", pool: "P", stake: "V" };
 
 export function KindTile({ kind, small, className }: { kind: KindName; small?: boolean; className?: string }) {
   return (

@@ -66,13 +66,13 @@ export function PowersView({ blocks }: { blocks: Block[] }) {
         if (b.kind === "table") return <Table key={i} head={b.head} rows={b.rows} />;
         if (b.kind === "h1")
           return (
-            <h1 key={i} className="m-0 font-display text-4xl font-bold">
+            <h1 key={i} className="t-title">
               {b.text}
             </h1>
           );
         if (b.kind === "h2")
           return (
-            <h2 key={i} className="m-0 pt-2 font-display text-2xl font-bold">
+            <h2 key={i} className="t-section pt-2">
               {b.text}
             </h2>
           );

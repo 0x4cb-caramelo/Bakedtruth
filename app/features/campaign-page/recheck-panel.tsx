@@ -70,12 +70,14 @@ export function RecheckPanel({ data, proof }: { data: PageData; proof: Proof }) 
       : []),
   ];
   return (
-    <details className="group rounded-md border border-line bg-panel p-4">
-      <summary className="flex cursor-pointer list-none items-center gap-2 font-display text-2xl font-bold">
-        <Terminal className="size-5" aria-hidden="true" />
-        <span className="flex-1">{RECHECK.title}</span>
-        <span className="font-sans text-xs font-normal text-muted max-sm:hidden">{RECHECK.hint}</span>
-        <ChevronDown className="size-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+    <details className="panel cp-recheck">
+      <summary>
+        <span className="cp-sum-title">
+          <Terminal className="size-[15px]" aria-hidden="true" />
+          {RECHECK.title}
+        </span>
+        <span className="hint">{RECHECK.hint}</span>
+        <ChevronDown className="size-4" aria-hidden="true" />
       </summary>
       <dl className="m-0 mt-3 text-sm">
         <div className="border-t border-line py-2">

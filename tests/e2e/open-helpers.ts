@@ -1,6 +1,6 @@
 /**
  * Purpose: what the creation box's smoke tests share (Sprint 19): the link that prefills a paid BTC/USD opening, the
- *          box and its button as locators, the connection through "Use Installed Wallet", "Review and sign" up to the
+ *          box and its button as locators, the connection through "Connect", "Review and sign" up to the
  *          summary (answering the guard's recent-opening question when an earlier test opened one, or when its look-up
  *          could not read the wallet's many test transactions), the campaign id the summary names, and lamports written
  *          as the box writes them.
@@ -9,7 +9,7 @@
  */
 import { expect, type Page } from "@playwright/test";
 
-import { sheet } from "./helpers";
+import { pickWallet, sheet } from "./helpers";
 
 /** 110% of the captured BTC/USD price (85,212.34): far enough from the band, and not met. */
 export const TARGET = "93733.57";
@@ -36,7 +36,8 @@ export type Opened = {
 };
 
 export async function connectBox(page: Page) {
-  await box(page).getByRole("button", { name: "Use Installed Wallet" }).click();
+  await box(page).getByRole("button", { name: "Connect", exact: true }).click();
+  await pickWallet(page);
   await expect(box(page).getByText(/^Balance \d/)).toBeVisible();
 }
 

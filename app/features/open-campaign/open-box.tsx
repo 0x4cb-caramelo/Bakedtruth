@@ -12,7 +12,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { feedsOf } from "@brot/sdk/read";
 
 import { Notice } from "@/components/ui/notice";
 import { useInstalledWallet } from "@/features/wallet/use-installed-wallet";
@@ -21,6 +20,7 @@ import { issuesAt, readyToReview } from "./check";
 import { BOX, KIND_WORDS } from "./copy";
 import { CostSection } from "./cost-section";
 import { DetailsSection } from "./details-section";
+import { feedSources } from "./feed-sources";
 import { templateOf } from "./kinds";
 import type { KnownName } from "./names";
 import { OpenAction } from "./open-action";
@@ -29,20 +29,18 @@ import type { Prefilled } from "./prefill";
 import { partsOf, previewFacts } from "./preview";
 import { feedOptions, slotReadOf } from "./preview-parts";
 import { PreviewSection } from "./preview-section";
-import { FEED_CLUSTER } from "./reads";
 import type { Suggestion } from "./search";
 import { useOpenBox } from "./use-open-box";
 import { useOpenFlow } from "./use-open-flow";
 import { WhatSection } from "./what-section";
-
-const LISTED = feedsOf(FEED_CLUSTER).map(([hex, symbol]) => ({ hex, symbol: symbol.replace(/^Crypto\./, "") }));
 
 export function OpenBox({ prefill, names }: { prefill: Prefilled; names: KnownName[] }) {
   const box = useOpenBox(prefill.draft);
   const { draft, setDraft, world, check, wallet, store } = box;
   const installed = useInstalledWallet();
   const flow = useOpenFlow({ wallet, store, draw: box.pageIdNow, redraw: box.redraw, onLanded: box.refresh });
-  const sources = useMemo(() => ({ feeds: LISTED, names }), [names]);
+  // The search reads the feeds' prices now, so it suggests only campaigns the program would open.
+  const sources = useMemo(() => ({ feeds: feedSources(world), names }), [world, names]);
   const feeds = useMemo(() => feedOptions(world), [world]);
   const slot = slotReadOf(draft, box.accounts, box.accountsRead, world?.clock.epoch ?? null);
   const inputs = { draft, check, world, slot, names, wallet };
@@ -62,6 +60,8 @@ export function OpenBox({ prefill, names }: { prefill: Prefilled; names: KnownNa
       feedHex: s.kind === "price" ? (s.feedHex ?? d.feedHex) : d.feedHex,
       account: s.kind === "price" ? "" : (s.account ?? (s.kind === d.kind ? d.account : "")),
       target: s.target ?? "",
+      direction: s.direction ?? d.direction,
+      deadline: s.days ? { days: s.days } : d.deadline,
     }));
   const action = (bar: boolean) => (
     <OpenAction

@@ -4,13 +4,13 @@
  *          estimate on screen equal to the SDK's, the review sheet with the summary and the lock notice, and the
  *          receipt; then, once at desktop width, each failure the smoke can provoke with its own message, and the retry
  *          guard across a reload. The client's RPC methods stay on the relay's allowlist and no WebSocket opens.
- * Version: 0.1.0
+ * Version: 0.1.2 (the UI overhaul: the top bar's balance follows the entries; the sheet's details folded)
  * Sprint:  11 (site: campaign page and entry)
  */
 import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 
-import { choose, connect, control, LOCK_NOTICE, openCampaign, panel, perOne, sheet } from "./helpers";
+import { chipSol, choose, connect, control, LOCK_NOTICE, openCampaign, panel, perOne, sheet } from "./helpers";
 
 const SOL = 1_000_000_000n;
 type Campaign = { id: string; address: string; closes: string };
@@ -33,6 +33,8 @@ test("an entry on each side lands once, and the estimate on screen is the SDK's"
   const c = await twoSided();
   const { wallet } = await openCampaign(page, c.id);
   await connect(page);
+  await expect.poll(() => chipSol(page)).toBeGreaterThan(0);
+  const before = await chipSol(page);
   await choose(page, "YES", "0.5");
   const { bps } = await control<{ bps: string }>("/estimate", {
     campaign: c.address,
@@ -43,9 +45,9 @@ test("an entry on each side lands once, and the estimate on screen is the SDK's"
   await expect(panel(page).getByText(`est. ${perOne(BigInt(bps))} per 1.`)).toBeVisible();
   await review(page);
   await expect(heading(page, "Check before you sign")).toBeVisible();
-  await expect(sheet(page).getByText(/min_return_bps \d/)).toBeVisible();
-  await expect(sheet(page).getByText(/Join campaign .* on YES with 0\.500000000 SOL/)).toBeVisible();
-  await expect(sheet(page).getByText(LOCK_NOTICE)).toBeVisible();
+  await sheet(page).getByText("Transaction details", { exact: true }).click(); // the guards and the bytes, folded
+  for (const text of [/min_return_bps \d/, /Join campaign .* on YES with 0\.500000000 SOL/, LOCK_NOTICE])
+    await expect(sheet(page).getByText(text)).toBeVisible();
   await signIt(page);
   await expect(heading(page, "You're in")).toBeVisible();
   await sheet(page).getByRole("button", { name: "Done" }).click();
@@ -60,6 +62,7 @@ test("an entry on each side lands once, and the estimate on screen is the SDK's"
   });
   // Sprint 12: the wallet's own amounts are written exactly, to the lamport (copy-states.ts `exactSol`).
   await expect(page.getByText("You have YES 0.5 SOL and NO 0.25 SOL in this campaign.")).toBeVisible();
+  await expect.poll(() => chipSol(page)).toBeLessThan(before - 0.75); // the top bar's balance follows the entries
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   expect(sockets).toEqual([]);
 });

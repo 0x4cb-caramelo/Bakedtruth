@@ -7,6 +7,8 @@
  * Sprint:  12 (site: my entries and campaign states)
  */
 export const MINE = {
+  /** The eyebrow above the title (the approved prototype's my entries). */
+  kicker: "Your wallet · devnet",
   title: "My entries",
   intro: "Your entries, results and payouts, read from the chain.",
   connect: "Connect a wallet to see its entries, results and payouts.",

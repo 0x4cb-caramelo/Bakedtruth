@@ -21,6 +21,8 @@ export const LOCK_NOTICE =
 export const pct = (bps: number): string => `${(bps / 100).toLocaleString("en-US", { maximumFractionDigits: 2 })}%`;
 
 export const NOTICES = {
+  /** The panel folds the notes under this line (Ronaldo, 2026-10-11); the sheet before signing shows them all. */
+  readBefore: "Read before you enter",
   estimate:
     "Estimate, not a promise: it is net of Brot's fee and the creator's share, and it changes with every entry until entries close.",
   largeEntry: "Your own entry counts in the pot: the more you put on a side, the lower that side's return per 1.",
@@ -61,7 +63,7 @@ export const PANEL = {
   rentFirst: (rent: string) =>
     `First entry here: + ${rent} SOL for the accounts it opens, returned when the campaign settles.`,
   rentAgain: (rent: string) => `+ ${rent} SOL for this entry's record, returned when the campaign settles.`,
-  connect: "Use Installed Wallet",
+  connect: "Connect",
   noWallet: "No installed wallet found",
   connecting: "Connecting…",
   faucet: "Get devnet SOL",
@@ -76,20 +78,25 @@ export const PANEL = {
 export const SHEET = {
   title: "Check before you sign",
   campaign: (id: string) => `Campaign ${id}`,
-  sideAmount: "Side · amount",
-  estimate: "Estimated return now",
-  estimateValue: (perOne: string, back: string, side: string) =>
-    `est. ${perOne} per 1 · est. ${back} SOL back if ${side} wins`,
-  estimateOnesided: (back: string, other: string) => `est. ${back} SOL back if ${other} stays empty`,
+  /** What a person needs to decide, in view (Ronaldo, 2026-10-11); the rest under "Transaction details". */
+  youEnter: "You enter",
+  addsTo: (total: string) => `Adds to the ${total} SOL you already have here.`,
+  ifWins: (side: string) => `If ${side} wins`,
+  ifEmpty: (other: string) => `If ${other} stays empty`,
+  backPerOne: (back: string, perOne: string) => `est. ${back} SOL back · ${perOne} per 1`,
+  backOnly: (back: string) => `est. ${back} SOL back`,
   tooSmall: (other: string) =>
-    `The ${other} side is too small to pay the fees: if entries closed now, the pot would not split and this entry would be refunded. The floor below is the program's own estimate, which assumes the pot splits.`,
+    `The ${other} side is too small to pay the fees: if entries closed now, the pot would not split and this entry would be refunded. The floor in the details is the program's own estimate, which assumes the pot splits.`,
+  youPay: "You pay",
+  payNote: (amount: string, rents: string, fee: string) =>
+    `${amount} SOL entry + ${rents} SOL account rent, returned when the campaign settles, + a network fee of at most ${fee} SOL.`,
+  details: "Transaction details",
   floor: "Lowest estimate you accept",
   floorValue: (perOne: string) => `${perOne} per 1`,
   floorNote: (bps: string) =>
     `min_return_bps ${bps}: if other entries go in first and the estimate falls below this, the program refuses the entry. Later entries can still lower it.`,
   guard: (total: string) =>
     `expected_entry_total ${total} SOL: this entry goes in only if your entry is still ${total} SOL when it lands, so this transaction cannot go in twice.`,
-  addsTo: (total: string) => `This entry adds to the ${total} SOL you already have in this campaign.`,
   notKept:
     'This browser does not keep data for this page. If it closes before your wallet answers, check "Your entry" here before you try again.',
   soFar: "Your entry so far",
@@ -98,7 +105,6 @@ export const SHEET = {
   rents: "Account rents",
   rentsNote: "Returned when the campaign settles",
   fee: "Network fee",
-  total: "Total from your wallet",
   network: "Network · program",
   bytes: "What you sign, read from the transaction's bytes",
   walletDiffers: "If your wallet shows something different from this summary, reject it.",

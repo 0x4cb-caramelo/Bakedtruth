@@ -213,3 +213,107 @@ product. **Resolved by D-q:** it is deleted here, not rewritten, and `OPENROUTER
 ## Record and retrospective
 
 Filled in during the sprint and at closure.
+
+### The UI overhaul (2026-10-11, branch `feat/full-ui-overhaul`)
+
+Sprint -1's code items, which its closure moved here, built on 2026-10-11 at Ronaldo's request: the site now has the
+structure of the approved screens (`prototype-lab/campaigns/`, served at `/dev0x/`), not only their colours (PR #67).
+
+- **The prototype's styles,** as they are, in `app/styles/ui/`, inside the `base` and `components` cascade layers so
+  Tailwind's utilities still win; their colours come from `app/styles/tokens.css` (BRAND.md §5), whose variables carry
+  the prototype's names. `additions.css` holds what the site needs on top.
+- **Rebuilt on the prototype's markup:**
+  - the frame (strip, top bar with Baked, search, wallet chip and menu, the menu under 1180 px, footer);
+  - the whole home page, with a batched live reading on every card;
+  - the campaign page and its entry panel;
+  - the creation box's sections;
+  - my entries and the leaderboard.
+
+  The content pages took the prototype's page head and titles.
+- **Kept from the site where its words are newer:** the full notices at every width, the devnet payout lines, Sprint
+  19's kind labels.
+- **Ronaldo's changes after seeing it (2026-10-11):**
+  - the home page's title and subtitle are the pitch cover's, in the site's vocabulary: "Campaigns the chain
+    resolves." and "Permissionless campaigns that turn on-chain milestones into growth, settled by the chain itself.";
+  - the wallet button says "Connect" (it still connects only from that click, S1);
+  - "question" became "campaign" in the site's copy;
+  - Lucas's vocabulary rule stays whole, with no exception.
+- **One opening button:** the home page's large yellow button is gone; the top bar's "Open a campaign" is the brand's
+  yellow primary.
+- **"Connect" opens the "Connect a wallet" list** of the approved design: the browser's wallets, detected first; the
+  picked one is selected and connected from that click only (S1); a wallet that does not connect says why. It used to
+  connect the first installed wallet and swallow its error, so a refusal or the wrong wallet looked like a dead
+  button.
+- **The creation box's search completes what is typed** (Ronaldo, 2026-10-11), as the approved prototype's does
+  (`open-slots.js`). Each suggestion is the whole sentence of the campaign it would start (template v1, the target in
+  the kind's unit, a reviewed name for the address), grouped by kind, its filled slots in bold. It reads:
+  - a direction ("falls to", "drop", "reaches");
+  - a deadline ("in 30 days", "2 weeks"), kept within the program's 3 to 90 days;
+  - a target with "k" or "m" ("120k").
+
+  With the feeds' live prices it never offers a target already met: a target past the price reads the one way the
+  program opens it. A bare number finds the feeds priced near it; an empty box starts with examples a fair way off the
+  price (BTC, SOL and ETH first); a feed without a fresh price is flagged. Outside the grammar, Baked skeptical over
+  "We can't check this on-chain." and the three nearest kinds. Enter takes the first suggestion, and the cursor moves
+  on to the account or the target. The query still stays in the page (D-j); a pick fills only the slots, checked as
+  typed ones. Tests: `tests/site/open-search.test.ts` and a scene in `tests/e2e/open.e2e.ts`. The chosen deadline chip
+  shows as chosen again (the prototype's `.op-days` style, which the overhaul had left out).
+- **"$" before a price** (Ronaldo, 2026-10-11): "SOL/USD reaches $150", as the prototype writes it (`dollars()` and
+  `value(v, "$")`), wherever template v1 shows (the cards, the campaign page, the creation box, the search's
+  suggestions) and on the other US$ prices of the page and the cards: the rule, the proof's price now, target and
+  confidence, the cards' read line and the home page's read panel (`priceText` in `sentence.ts`, through `valueText`).
+  A ratio feed (SSOL/SOL.RR) keeps a plain number, since its value is not in dollars. What a campaign stores and means
+  does not change. The creation box's own preview keeps its "US$" (Sprint 19's copy review).
+- **The prototype's pointer effects** (Ronaldo, 2026-10-11): their styles had come over in the overhaul, but not
+  `effects.js`. `app/components/pointer-effects.tsx` now draws the dot field behind every page, brightening within
+  190 px of the pointer, and moves the spotlight across the card grid; with prefers-reduced-motion the dots stay still
+  and the spotlight is off. The top bar's border on scroll was already the header's. A web-smoke scene reads the
+  canvas: the dot under the pointer lights up, a far one does not.
+- **The wallet's balance follows the entries** (Ronaldo, 2026-10-11: after a NO entry of 0.5 SOL the top bar still said
+  5.0 SOL). Each component read the balance once on its own: the entry panel read it again after a landing, but the top
+  bar's chip only when the wallet connected. One reading now serves the whole site (`sol-balance-provider.tsx`): read
+  on connect, after any landed entry or opening, every 20 s while the page is visible, and on return to the tab. The
+  smoke checks that the chip drops after the entries.
+- **A compact campaign page** (Ronaldo, 2026-10-11). Secondary text is folded with `.fold`, a quiet line with a
+  chevron, closed by default:
+  - the title asks the sentence ("SOL/USD reaches $150?", `questionOf`); a campaign outside the templates keeps its
+    name without a mark;
+  - the rule is one line with the condition, the target and the deadline (`ruleShort`); the whole rule is folded
+    under "Full rules";
+  - the proof keeps the price now, the target and "If read now" in view; when the price was published, the account,
+    the owner, the dates and the resolution are folded under "Proof details"; a stale or near-target price warning
+    stays in view;
+  - "Re-check it yourself" is thinner, and the estimate box no longer holds 96 px whatever it says;
+  - the panel's notes are folded under "Read before you enter", in the brand's accent. The lock notice (the founder's
+    L-03 words) stays in view, and the sheet before the wallet still shows every note, open.
+
+  The entry button was checked, not changed: "Review entry" whenever the wallet covers the entry, its rent and the
+  fee; "Get devnet SOL" only when it does not, as designed (both in the smoke). Tests:
+  `tests/site/campaign-head.test.ts`, and a smoke scene that opens each fold.
+- **After the fourth look** (Ronaldo, 2026-10-11):
+  - **The page follows an entry.** After an entry or a payout lands, the page reads again at once and at 1.5, 4 and
+    8 s (`useSettle`): the public devnet RPC can answer for a moment from before the transaction, and the next timed
+    read was 20 s away. The split, the pot, the recent entries and the balance show the entry. The activity reader
+    reads each landed transaction once, so those reads cost one call each.
+  - **The cards ask too:** "SOL/USD reaches $150?" (`questionOf` in the card model). My entries keeps the statement.
+  - **"Opened by …" links the opening transaction on Solscan** (`opening.ts`): the address's history read newest
+    first, only the transactions of the opening's own seconds decoded, the one whose `CampaignOpened` names this
+    campaign and its `opens_at` (an address can carry a new campaign later). Plain text until found.
+  - **YES in green and NO in red** in the estimate's lines and the sheet (`SidesTinted`).
+  - **"Check before you sign", lighter.** In view: the side and the amount, what comes back if that side wins, what
+    leaves the wallet, the lock (L-03), a large entry's warning, a first entry's public notice (the founder's answer
+    9a) and "reject it if your wallet shows something different". Folded: the notes, and under "Transaction details"
+    the program's guards (`min_return_bps`, `expected_entry_total`), the rents, the fee, the network and A-3's
+    summary read from the bytes. The smoke opens the details before it checks them.
+- **Baked's bubble on a phone** is fitted to the screen again whenever Baked moves while it shows (Sprint 13's rule:
+  it never cuts). A tap mid-hop used to leave it past the edge after the landing; the new layout exposed it.
+- **Tests:** two web-smoke expectations follow the design (the phone menu holds "How it works"; the wallet chip, not a
+  visible "Disconnect", says the wallet is connected); the notice registry points at the new footer.
+- **Not built yet:**
+  - the share card;
+  - "About this campaign";
+  - the open campaign's timeline;
+  - the dense list of every campaign;
+  - the phone's fixed join bar;
+  - the partner seal;
+  - Baked's lines per screen.

@@ -174,10 +174,10 @@ export function StatePanel(props: { data: PageData; proof: Proof; entriesTaken: 
   return (
     <section
       aria-labelledby="state-title"
-      className="space-y-3 rounded-md border border-line bg-panel p-4"
+      className={`panel cp-card-state is-${state.kind}`}
       data-state={state.kind}
     >
-      <h2 id="state-title" className="m-0 font-display text-2xl font-bold">
+      <h2 id="state-title" className="panel-head">
         {TITLE[state.kind](state)}
       </h2>
       {state.kind === "open" && !props.entriesTaken ? <Line>{PANEL.notTaken}</Line> : null}

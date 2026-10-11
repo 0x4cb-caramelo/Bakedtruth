@@ -64,7 +64,7 @@ export function RecordList({ log }: { log: VoidLog }) {
   return (
     <div className="space-y-4">
       <header className="space-y-2">
-        <h2 className="m-0 font-display text-3xl font-bold">{RECORD.title}</h2>
+        <h2 className="t-section">{RECORD.title}</h2>
         <p className="m-0 max-w-3xl text-sm text-muted">{RECORD.intro}</p>
         <p className="m-0 max-w-3xl text-sm text-muted">{RECORD.check}</p>
         <p className="m-0 max-w-3xl text-xs text-muted">{RECORD.automatic}</p>

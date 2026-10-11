@@ -31,17 +31,11 @@ export function AmountPicker({
   return (
     <fieldset>
       <legend className="mb-1.5 text-xs font-medium text-muted">{SLOTS.usd}</legend>
-      <div className="grid grid-cols-2 gap-2 min-[700px]:grid-cols-4">
+      <div className="op-amts">
         {[...AMOUNTS, "custom"].map((v) => {
           const on = v === "custom" ? custom : usd === v;
           return (
-            <label
-              key={v}
-              className={cx(
-                "cursor-pointer rounded-sm border p-2 text-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent",
-                on ? "border-accent bg-row-hover" : "border-line",
-              )}
-            >
+            <label key={v} className={cx("op-amt", on && "on")}>
               <input
                 type="radio"
                 name={`${id}-usd`}
@@ -49,7 +43,14 @@ export function AmountPicker({
                 checked={on}
                 onChange={() => setDraft((d) => ({ ...d, usd: v === "custom" ? "" : v }))}
               />
-              <b className="block">{v === "custom" ? SLOTS.custom : `US$${Number(v).toLocaleString("en-US")}`}</b>
+              <b>{v === "custom" ? SLOTS.customShort : `US$${Number(v).toLocaleString("en-US")}`}</b>
+              <small>
+                {v === "custom"
+                  ? SLOTS.customSub
+                  : v === AMOUNTS[0]
+                    ? SLOTS.minimumSub
+                    : SLOTS.prizeSub(`US$${((Number(v) * 9) / 10).toLocaleString("en-US")}`)}
+              </small>
             </label>
           );
         })}

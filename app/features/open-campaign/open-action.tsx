@@ -1,6 +1,6 @@
 /**
  * Purpose: the creation box's one button and its total (spec 3.12), at the foot of the preview and in the phone's
- *          sticky bar: "Use Installed Wallet" while no wallet is connected; the first thing that still stops the
+ *          sticky bar: "Connect" while no wallet is connected; the first thing that still stops the
  *          opening, as a disabled button, with the others listed under it; or "Review and sign", only for a verdict of
  *          the draft on screen. Nothing here signs: the review and the signature are use-open-flow.ts's, behind the
  *          SDK's preparation (A-3). The total is "–" until the opening is priced.

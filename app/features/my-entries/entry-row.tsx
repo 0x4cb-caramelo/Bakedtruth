@@ -53,7 +53,7 @@ export function EntryRow({ row, onChange }: { row: Row; onChange: () => void }) 
   const share = row.opener?.share;
   return (
     <li
-      className="space-y-2 rounded-md border border-line bg-panel p-4"
+      className="panel space-y-2"
       data-campaign={row.campaign}
       data-payout={row.payout.kind}
     >

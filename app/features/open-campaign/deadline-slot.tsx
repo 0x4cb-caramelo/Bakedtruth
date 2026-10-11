@@ -4,7 +4,8 @@
  *          close (5% of the time before the deadline, at least 24 hours and at most 7 days), from the SDK's mirror of
  *          `math/schedule.rs`. The program checks 3 to 90 days again when it opens the campaign. The local fields are
  *          written in the browser only, and a half-typed date or time is kept until both are set.
- * Version: 0.2.0 (the Sprint 19 reviews: no server time zone, a date typed before its time)
+ * Version: 0.2.1 (the UI overhaul: the chosen chip shows; 0.2.0, the Sprint 19 reviews: no server time zone, a date
+ *          typed before its time)
  * Sprint:  19 (site: open a campaign)
  */
 "use client";
@@ -78,6 +79,8 @@ export function DeadlineSlot({
             key={n}
             variant="secondary"
             small
+            // The prototype's chosen chip (open.css, `.op-days .btn[aria-pressed=true]`), as utilities over the Button's.
+            className="aria-pressed:border-accent aria-pressed:bg-[var(--spot)]"
             aria-pressed={pressed(n)}
             onClick={() => onChange(chainNow === null ? { days: n } : { at: daysFrom(chainNow, n) })}
           >

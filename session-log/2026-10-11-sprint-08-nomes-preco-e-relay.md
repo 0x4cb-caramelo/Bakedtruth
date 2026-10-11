@@ -104,6 +104,18 @@ não roda o teste na web.
   carteira pede e que a política de segurança do site bloqueia; isso já estava na `main` e não quebra nada.
 - **O indexador** espera o teste do Ronaldo, a pedido dele.
 
+## A mescla, depois da revisão visual
+
+O pedido veio num texto colado, e o Ronaldo respondeu às perguntas da sessão: mesclar o #69 como está. A revisão visual
+(PR #70) tinha entrado na `main` antes, e a `main` entrou na branch com cinco conflitos. Quatro eram registros que os
+dois lados escreveram no mesmo lugar: a mudança, o índice das sessões, as decisões do dia e o mapa do código, gerado de
+novo. Ficaram as duas entradas, e a mais nova em cima onde o arquivo pede. O quinto era a linha de importação de um
+teste na web, que cada lado ampliou; ficaram as duas importações.
+
+O `content/README.md` foi junto com a aprovação só do Ronaldo, por decisão dele ("merge it as is"). A regra de duas
+pessoas do `content/` não foi cumprida antes da mescla: a segunda revisão (Lucas ou Bernardo) continua aberta, agora
+sobre o que já está na `main`.
+
 ## O que fica com o fundador
 
 - Seguir os passos de `deploy/vps/README.md` ("The relay"): a conta de RPC do relay com limite de gasto (D4), o usuário

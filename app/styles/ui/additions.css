@@ -1,0 +1,31 @@
+/* Purpose: what the site needs on top of the approved prototype's styles (the other files here, ported as is): the
+   primary button's orbiting edge on the app's own keyframes (Tailwind's `spin` rotates the whole element and wins over
+   the prototype's `spin`), and the phone label of the wallet button when no wallet is installed, so the top bar never
+   overflows 412 px. Then the campaign page made compact (Ronaldo, 2026-10-11): `.fold`, a quiet line that opens what is
+   secondary (the full rule, the proof's details, the notes before an entry, the last in the brand's accent), a thinner
+   "Re-check it yourself", an estimate box as tall as what it says, and the opening line as a link.
+   Version: 0.2.0 (the compact campaign page; 0.1.0, Sprint 09, the UI overhaul) */
+@layer components {
+.cta { animation-name: brot-spin; }
+.wallet .cta .short { display: none; }
+@media (max-width: 700px) {
+  .wallet .cta .long { display: none; } .wallet .cta .short { display: inline; }
+}
+
+.fold > summary { display: inline-flex; align-items: center; gap: 5px; padding: 3px 0; cursor: pointer; list-style: none;
+  color: var(--muted); font-size: 12.5px; font-weight: 600; }
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary:hover { color: var(--text); }
+.fold > summary svg { flex-shrink: 0; transition: transform 0.2s; } .fold[open] > summary svg { transform: rotate(180deg); }
+.fold.accent > summary, .fold.accent > summary:hover { color: var(--accent); }
+.fold[open] > summary { margin-bottom: 6px; }
+@media (prefers-reduced-motion: reduce) { .fold > summary svg { transition: none; } }
+.cp-fullrule { margin-top: 4px; } .cp-fullrule .cp-rule { margin-top: 0; }
+.cp-proof-more { margin-top: 12px; } .cp-proof-more .cp-rows { margin-top: 4px; }
+.cp-opened { display: inline-flex; align-items: center; gap: 3px; color: inherit; text-decoration: underline;
+  text-decoration-color: var(--line-strong); text-underline-offset: 3px; } .cp-opened:hover { color: var(--accent); }
+
+.cp-recheck { padding-top: 8px; padding-bottom: 8px; }
+.cp-recheck summary { min-height: 26px; } .cp-recheck summary > svg { top: 5px; }
+.en-est { min-height: 0; }
+}
