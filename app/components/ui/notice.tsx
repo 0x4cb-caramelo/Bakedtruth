@@ -28,7 +28,10 @@ export function Notice({
   children: ReactNode;
 }) {
   return (
-    <div role={tone === "info" ? "status" : "alert"} className={cx("flex items-start gap-2.5 rounded-sm px-3.5 py-2.5 text-[12.5px]", TONE[tone])}>
+    <div
+      role={tone === "info" ? "status" : "alert"}
+      className={cx("flex items-start gap-2.5 rounded-sm px-3.5 py-2.5 text-[12.5px]", TONE[tone])}
+    >
       {icon ? <span className="mt-px shrink-0 [&>svg]:size-4">{icon}</span> : null}
       <div className="min-w-0 flex-1">{children}</div>
       {onClose ? (

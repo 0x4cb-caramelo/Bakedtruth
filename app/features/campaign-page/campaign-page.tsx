@@ -3,8 +3,8 @@
  *          entries, the re-check panel, and the entry panel, or the state card once entries close or when the site takes
  *          none (K-11). Two columns on a wide screen, the panel sticky on the right; under 860 px one column in the
  *          spec's phone order, so the reading order follows what is seen. Everything reads the chain through the SDK.
- * Version: 0.2.0 (Sprint 12: every state after entries close, the wallet's payout and the team's void note)
- * Sprint:  11 (site: campaign page and entry); 12 (site: my entries and campaign states)
+ * Version: 0.3.0 (Sprint 13: "Report this campaign" in every state, C-10; 0.2.0, Sprint 12's states)
+ * Sprint:  11 (site: campaign page and entry); 12 (site: my entries and campaign states); 13
  */
 "use client";
 
@@ -16,6 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { bytesToHex, Direction, ReaderKind } from "@/lib/brot";
 import { sentenceOf } from "@/features/campaigns/sentence";
 import { EntryPanel, type Prefill } from "@/features/entry/entry-panel";
+import { ReportCampaign } from "@/features/report/report-campaign";
+import type { Unlisted } from "@/features/report/unlisted";
 import { ActivityPanel } from "./activity-panel";
 import { CampaignHeader } from "./campaign-header";
 import { PAGE } from "./copy";
@@ -50,9 +52,20 @@ const sentence = (data: PageData) =>
     target: data.campaign.target.toString(),
     priceExponent: data.campaign.priceExponent,
     metricAccount: data.campaign.metricAccount,
+    epoch: data.campaign.epoch.toString(),
   });
 
-export function CampaignPage({ idParam, prefill, notes }: { idParam: string; prefill: Prefill; notes: VoidNote[] }) {
+export function CampaignPage({
+  idParam,
+  prefill,
+  notes,
+  unlisted,
+}: {
+  idParam: string;
+  prefill: Prefill;
+  notes: VoidNote[];
+  unlisted: Unlisted | null;
+}) {
   const id = campaignIdFrom(idParam);
   const { publicKey } = useWallet();
   const wallet = publicKey?.toBase58() ?? null;
@@ -73,7 +86,15 @@ export function CampaignPage({ idParam, prefill, notes }: { idParam: string; pre
   }
   if (state.status === "missing") {
     return state.closed ? (
-      <EmptyState title={PAGE.closedAccount} action={<Report />}>
+      <EmptyState
+        title={PAGE.closedAccount}
+        action={
+          <>
+            <Report />
+            <ReportCampaign id={idParam} unlisted={null} />
+          </>
+        }
+      >
         {PAGE.closedAccountText}
       </EmptyState>
     ) : (
@@ -115,13 +136,29 @@ export function CampaignPage({ idParam, prefill, notes }: { idParam: string; pre
       />
     ),
     mine: <PayoutPanel key="mine" data={data} wallet={wallet} round={round} onChange={landed} />,
+    report: (
+      <ReportCampaign
+        key="report"
+        id={data.campaign.id.toString()}
+        unlisted={unlisted && unlisted.opensAt === data.campaign.opensAt.toString() ? unlisted : null}
+      />
+    ),
   };
   const stale = state.failed ? <p className="m-0 text-xs text-warn">{PAGE.loadFailedText}</p> : null;
   if (phone) {
     return (
       <div className="space-y-4">
         {stale}
-        {[blocks.head, blocks.pot, blocks.panel, blocks.mine, blocks.proof, blocks.activity, blocks.recheck]}
+        {[
+          blocks.head,
+          blocks.pot,
+          blocks.panel,
+          blocks.mine,
+          blocks.proof,
+          blocks.activity,
+          blocks.recheck,
+          blocks.report,
+        ]}
       </div>
     );
   }
@@ -129,7 +166,7 @@ export function CampaignPage({ idParam, prefill, notes }: { idParam: string; pre
     <div className="grid grid-cols-[minmax(0,1fr)_380px] items-start gap-6">
       <div className="space-y-4">
         {stale}
-        {[blocks.head, blocks.proof, blocks.pot, blocks.activity, blocks.recheck]}
+        {[blocks.head, blocks.proof, blocks.pot, blocks.activity, blocks.recheck, blocks.report]}
       </div>
       <div className="sticky top-4 space-y-4">{[blocks.panel, blocks.mine]}</div>
     </div>

@@ -72,7 +72,6 @@ document.querySelector("[data-action=menu]").addEventListener("click", () =>
       ${LINKS.map(([href, ic, text]) => `<a href="${href}">${icon(ic, 18)}${text}</a>`).join("")}
       <hr /><button type="button" data-flip>${icon(root.dataset.theme === "dark" ? "sun" : "moon", 18)}Switch to the ${root.dataset.theme === "dark" ? "light" : "dark"} theme</button>
       <hr /><a href="https://docs.brot.markets" rel="noopener">${icon("external", 18)}Docs</a>
-      <a href="https://brot.markets/terms" rel="noopener">${icon("external", 18)}Terms</a>
       <a href="https://brot.markets/privacy" rel="noopener">${icon("external", 18)}Privacy</a></nav>`,
     mount(body, close) {
       body.querySelectorAll("a[href^='#']").forEach((a) => a.addEventListener("click", () => close({ restore: false })));

@@ -272,7 +272,7 @@ It is a loaf of bread. No.
 Brot Markets is in a test phase on Solana devnet, with test tokens. The program is not audited. Nothing in this
 repository is an offer or an invitation to put in real money, and availability by country has not been decided.
 
-[Terms](https://brot.markets/terms) · [Privacy](https://brot.markets/privacy)
+[Privacy](https://brot.markets/privacy)
 
 Found a hole in the program? Tell us before you tell the timeline: [@brotmarkets](https://x.com/brotmarkets).
 

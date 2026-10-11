@@ -227,7 +227,7 @@ html .wallet-adapter-modal-wrapper {
   position: absolute;
   left: 50%;
   bottom: 102%;
-  transform: translate(-50%, 6px);
+  transform: translate(calc(-50% + var(--say-shift, 0px)), 6px);
   white-space: nowrap;
   padding: 6px 10px;
   font:
@@ -244,7 +244,7 @@ html .wallet-adapter-modal-wrapper {
 }
 .bk-pet-say.is-on {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: translate(calc(-50% + var(--say-shift, 0px)), 0);
 }
 .bk-pet-say.is-below {
   bottom: auto;
@@ -256,6 +256,10 @@ html .wallet-adapter-modal-wrapper {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  /* BRAND.md §10: whoever asks for less motion sees neither the button's edge turn nor the mascot breathe. */
+  .animate-brot-spin {
+    animation: none;
+  }
   .bk-pet-body {
     animation: none;
   }

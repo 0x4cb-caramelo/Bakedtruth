@@ -5,8 +5,9 @@
  *          the founder approved the same day in Sprint 12 (no automatic payout, no time promised, until the keeper
  *          settles); changing it is the founder's decision. English, per L-01. Failures have their own file
  *          (copy-failures.ts).
- * Version: 0.2.0 (Sprint 12: L-03's devnet wording)
- * Sprint:  11 (site: campaign page and entry); 12
+ * Version: 0.3.1 (the founder's answer 9a: a winning entry "can appear" on the leaderboard, since answer 3a leaves
+ *          some unscored; 0.3.0, Sprint 13: the too-small refund before signing, the leaderboard in the first-entry line)
+ * Sprint:  11 (site: campaign page and entry); 12; 13
  */
 
 /**
@@ -28,7 +29,7 @@ export const NOTICES = {
   fee: (feeBps: number, creatorShareBps: number) =>
     `Brot keeps ${pct(feeBps)} of the losing side. ${creatorShareBps > 0 ? `The creator gets ${pct(creatorShareBps)} of the entries.` : "This campaign has no creator share."}`,
   oneSided: (oneSidedFeeBps: number) =>
-    `If only one side has entries when they close, every entry is refunded: the first wallet in full, the others less ${pct(oneSidedFeeBps)}.`,
+    `If only one side has entries when they close, or the losing side is too small to pay the fees, every entry is refunded: the first wallet in full, the others less ${pct(oneSidedFeeBps)}.`,
   devnet: "Solana devnet: entries use test SOL, which has no real value. The program is not audited yet.",
   lock: LOCK_NOTICE,
 } as const;
@@ -53,6 +54,8 @@ export const PANEL = {
     `If ${side} wins: est. ${back} SOL back on your ${amount} SOL`,
   ifLoses: (other: string) => `If ${other} wins: 0 SOL back.`,
   onesided: (other: string, back: string) => `If ${other} stays empty: est. ${back} SOL back`,
+  tooSmall: (other: string, oneSidedFeeBps: number) =>
+    `The ${other} side is too small to pay the fees. If entries closed now, the pot would not split: every entry would come back, less ${pct(oneSidedFeeBps)} for all but the first wallet.`,
   onesidedSub: (first: boolean, other: string, oneSidedFeeBps: number) =>
     `${first ? "No fee: you would be the first wallet." : `A ${pct(oneSidedFeeBps)} fee; the first wallet pays none.`} If someone joins ${other}, the winners split the pot.`,
   rentFirst: (rent: string) =>
@@ -78,6 +81,8 @@ export const SHEET = {
   estimateValue: (perOne: string, back: string, side: string) =>
     `est. ${perOne} per 1 · est. ${back} SOL back if ${side} wins`,
   estimateOnesided: (back: string, other: string) => `est. ${back} SOL back if ${other} stays empty`,
+  tooSmall: (other: string) =>
+    `The ${other} side is too small to pay the fees: if entries closed now, the pot would not split and this entry would be refunded. The floor below is the program's own estimate, which assumes the pot splits.`,
   floor: "Lowest estimate you accept",
   floorValue: (perOne: string) => `${perOne} per 1`,
   floorNote: (bps: string) =>
@@ -97,7 +102,8 @@ export const SHEET = {
   network: "Network · program",
   bytes: "What you sign, read from the transaction's bytes",
   walletDiffers: "If your wallet shows something different from this summary, reject it.",
-  public: "Entries are public and permanent: anyone can see this wallet's entries on-chain.",
+  public:
+    "Entries are public and permanent: anyone can see this wallet's entries on-chain, and a wallet that enters on the side that wins can appear on the public devnet leaderboard.",
   back: "Back",
   sign: "Sign in wallet",
 } as const;

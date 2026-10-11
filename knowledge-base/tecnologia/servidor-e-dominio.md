@@ -17,6 +17,7 @@ Pedido do fundador: "vamos levar este projeto pro nosso VPS, sem mexer no projet
 | Disco | 97 GB; 78 GB livres | `df -h /` |
 | Sistema | Ubuntu 22.04.5 LTS | `lsb_release` |
 | Onde fica | Leste dos Estados Unidos | ADR-019 |
+| Backups do provedor | Ligados, guardados por 30 dias | O fundador, no painel da Hostinger, em 10/10/2026 |
 | Carga | 0,3 (baixa) | `uptime` |
 | Acesso | Atalho de SSH `agent-rails-vps` na máquina do fundador, usuário `lucas`, com sudo sem senha | `~/.ssh/config`, `sudo -n true` |
 | Outra pessoa com acesso | `ronaldo` | `getent passwd` |

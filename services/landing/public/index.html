@@ -22,8 +22,9 @@
     <link rel="canonical" href="https://brot.markets/" />
     <link rel="icon" type="image/png" href="img/favicon.png" />
     <link rel="preload" href="fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
-    <!-- Cloudflare tells browsers to keep scripts and styles for hours. Raise "v" here, in privacy.html, terms.html and
-         404.html whenever one of these files changes, so a returning visitor never gets a new page with old files. -->
+    <!-- Cloudflare tells browsers to keep scripts and styles for hours. Raise "v" here, in privacy.html (through
+         scripts/build-legal.mjs) and 404.html whenever one of these files changes, so a returning visitor never gets a
+         new page with old files. -->
     <script src="app.js?v=2"></script>
     <script type="module" src="mascot.js?v=2"></script>
     <link rel="stylesheet" href="styles.css?v=3" />
@@ -179,7 +180,6 @@
           this page is an offer or an invitation to bet real money, and availability by country has not been decided.
         </p>
         <nav aria-label="Footer">
-          <a href="/terms">Terms</a>
           <a href="/privacy">Privacy</a>
           <a href="https://x.com/brotmarkets" rel="noopener">X</a>
           <span>© 2026 Brot Markets</span>

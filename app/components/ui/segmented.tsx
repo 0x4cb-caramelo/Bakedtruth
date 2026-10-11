@@ -19,7 +19,11 @@ export function Segmented({
   label: string;
 }) {
   return (
-    <div role="group" aria-label={label} className="inline-flex flex-wrap gap-0.5 rounded-sm border border-field-line bg-panel p-0.5">
+    <div
+      role="group"
+      aria-label={label}
+      className="inline-flex flex-wrap gap-0.5 rounded-sm border border-field-line bg-panel p-0.5"
+    >
       {items.map((item) => {
         const pressed = item.id === value;
         return (

@@ -1,8 +1,9 @@
 /**
  * Purpose: HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API), of the unlisted campaign preview
  *          under /dev0x/ and of docs.brot.markets (the docs. host, from docs-site/), bound to localhost behind the
- *          project's Cloudflare tunnel.
- * Version: 0.3.0 · Sprint: out of band (landing page), 2026-10-05; docs host 2026-10-08; /dev0x 2026-10-10
+ *          project's Cloudflare tunnel. The docs host is offline (`docsOffline`) until the docs describe the campaign
+ *          product: the founder took it down on 2026-10-10.
+ * Version: 0.4.0 · Sprint: out of band (landing page), 2026-10-05; docs host 2026-10-08; /dev0x, sweep, docs down 10-10
  *
  * Run: `node services/landing/server.mjs`. No dependencies. Configuration comes from the environment
  * (see .env.example): PORT, HOST, SITE_ORIGIN, LEADS_FILE.
@@ -50,6 +51,9 @@ function setSecurityHeaders(res, path, docs, campaignCsp) {
   if (docs) res.setHeader("X-Robots-Tag", "noindex, nofollow");
 }
 
+/** What docs.brot.markets answers while it is offline (the founder, 2026-10-10: down until the docs are rewritten). */
+const DOCS_OFFLINE = "The Brot Markets docs are offline while we rewrite them. Visit https://brot.markets.\n";
+
 function sendNotFound(root, req, res) {
   if (resolveStatic(root, "/404.html")) {
     serveStatic(root, req, res, "/404.html", 404);
@@ -63,6 +67,7 @@ function sendNotFound(root, req, res) {
 export function createApp({
   root,
   docsRoot,
+  docsOffline = false,
   campaignsRoot,
   store,
   limiter,
@@ -75,6 +80,11 @@ export function createApp({
   const docsHost = canonical && docsRoot ? `docs.${canonical.host}` : null;
   // The docs host answers pages from docsRoot and only the shared files from root; never the waitlist API.
   function serveDocs(req, res, path) {
+    if (docsOffline) {
+      res.writeHead(410, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+      res.end(req.method === "HEAD" ? undefined : DOCS_OFFLINE);
+      return;
+    }
     if (req.method !== "GET" && req.method !== "HEAD") {
       res.writeHead(405, { Allow: "GET, HEAD" }).end();
       return;
@@ -152,13 +162,18 @@ function start() {
   purge();
   setInterval(purge, DAY_MS).unref();
 
+  // The privacy page says a visitor's address is used for about a minute: drop it once its window has ended.
+  const limiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
+  setInterval(() => limiter.sweep(), 10_000).unref();
+
   const app = createApp({
     root: join(HERE, "public"),
     docsRoot: join(HERE, "docs-site"),
+    docsOffline: true, // the founder, 2026-10-10: the docs describe the earlier product; down until rewritten
     // The campaign screens live once, in prototype-lab/, and are served from there (the deploy copies the whole repo).
     campaignsRoot: join(HERE, "..", "..", "prototype-lab", "campaigns"),
     store,
-    limiter: createRateLimiter({ limit: 5, windowMs: 60_000 }),
+    limiter,
     allowedOrigins: [siteOrigin, `http://${host}:${port}`, `http://localhost:${port}`],
     siteOrigin,
     log,

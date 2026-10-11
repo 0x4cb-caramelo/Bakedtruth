@@ -20,8 +20,113 @@ nos caminhos da equipe pelo PR #44 e o id novo do programa pelo PR #45; já em 1
 A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir da `origin/main` (`6b5e3ec`), na branch
 `sprint-06-keeper-server`. Nada de código entrou ainda: a primeira tarefa é a checagem do Bun 1.4.2 no servidor.
 
+Em 10/10/2026 a Sprint 12 entrou na `main` pelo PR #61 (tag `sprint-12`, `107fec2`), e a Sprint 13 foi aberta a partir
+dessa tag, na branch `sprint-13-site-notices-copy`. Na mesma noite a Sprint 13 entrou na `main` pelo PR #63 (tag
+`sprint-13`, `2dc5cb1`, depois do CI verde na `main`), e o fundador respondeu as doze perguntas dela, todas como
+recomendado (1a a 12a).
+
 ### Added
 
+- **Sprint 19: a caixa de abertura em `/abrir`; qualquer carteira abre uma campanha pelo site** (branch
+  `sprint-19-site-open-campaign`, 10/10/2026; `docs/sprints/sprint-19-site-open-campaign.md`; mesclada na `main` pelo
+  PR #68 em 11/10/2026, a pedido do Ronaldo, com a tag `sprint-19`).
+  - **A caixa** (`app/features/open-campaign/`), como o desenho aprovado da Sprint -1: 1 O quê (a busca nos modelos e
+    nos nomes conhecidos, que nunca sai do navegador, e os cinco tipos), 2 Detalhes (a frase se preenchendo e os campos:
+    o feed da Pyth com o estado lido na hora, a direção, a conta conferida pelas regras do leitor, o alvo, a época, o
+    prazo), 3 Prévia (fixa ao lado no computador) e 4 Custo; no celular, uma barra embaixo com o total e o botão.
+  - **A frase vem do modelo v1 de cada tipo** (`app/features/campaigns/sentence.ts`), a mesma função de todas as
+    páginas: o que quem abre lê é o que o cartão e a página mostram. Queima e trava dizem a unidade bruta ("raw units",
+    "liquidity units"); pool e stake, a época medida.
+  - **A cotação** é a do SDK, ao preço da Pyth menos a faixa de confiança, com o 90/10 e o `max_lamports` 1% acima
+    (a margem do desenho aprovado), calculada só a partir do valor, desde a primeira tela; sem preço fresco, "Not priced
+    yet". Tudo em lamports exatos. O exemplo de referência do plano virou teste.
+  - **Cada recusa das linhas 1 a 10 tem a sua mensagem** (`copy-refusals.ts`), e 21 casos recusados e 4 aceitos passam
+    pela caixa e, com os mesmos argumentos, direto pelo programa no LiteSVM, que dá o mesmo veredito (A-10), em todos os
+    tipos que abrem; os demais erros com linha ficam nos testes de paridade do SDK da Sprint 05.
+  - **A guarda de nova tentativa (T17):** o id da campanha é sorteado uma vez e guardado no navegador quando "Sign in
+    wallet" entrega a transação, nunca antes; toda reconstrução usa o mesmo id, então uma segunda tentativa falha na
+    conta que já existe em vez de cobrar a abertura de novo. Sem tentativa em andamento, antes de uma abertura paga a
+    caixa procura nas transações recentes da própria carteira, da mais nova para a mais antiga, uma campanha aberta na
+    última meia hora e a oferece primeiro; quando não acha e não conseguiu ler tudo, diz que não sabe e quem abre
+    escolhe.
+  - **Antes de assinar,** "Check before you sign" mostra cada argumento, escrito só a partir da escolha preparada, e o
+    resumo do SDK dos bytes que a carteira recebe (A-3), com os avisos: devnet e SOL de teste, para onde vai o prêmio,
+    o que o devnet não envia sozinho, que a abertura não volta atrás, a regra sem entrada, que abrir é público e
+    permanente, os 18 anos. Um link preenche os campos, nunca o valor, e nunca assina. A chave da equipe abre de graça,
+    sem prêmio e sem a parte do criador, e não lê os avisos do prêmio.
+  - **O teste na web** ganhou a abertura paga (o valor guardado pelo programa é a cotação da caixa) e a da equipe, nas
+    duas larguras, e, no computador, três recusas e a guarda (resposta perdida num recarregamento, tentativa expirada
+    refeita no mesmo id, armazenamento apagado, carteira que nunca responde).
+  - **Também:** a página de taxas aponta para a caixa e diz "US$500 or more", a faixa de confiança e o teto de 1%;
+    `scripts/team/check-opening.ts`, só leitura, confere uma abertura contra a fórmula (os passos no
+    `deploy/devnet/README.md`); a lista de conferência dos navegadores das carteiras (X2.2) passa a existir, com a
+    abertura; a página de privacidade diz quando o registro da caixa é escrito e apagado e o que o serviço de RPC vê; o
+    resumo do SDK diz que a parte do criador é "1% of the entries".
+  - **As revisões de texto, jurídica e adversária, aplicadas:** os itens obrigatórios e os altos (a folha escrita a
+    partir do rascunho, a busca das aberturas recentes que falhava aberta, o "Free (team key)" para quem paga, a chave
+    da equipe lendo sobre prêmio, os alvos sem unidade, "Row 7:" na tela, o valor vindo do link) e a maior parte dos
+    recomendados. Ao corrigir, apareceram três defeitos, corrigidos com teste: um alvo com letras derrubava a caixa,
+    uma data digitada antes da hora se perdia, e um feed que a Pyth deixou de verificar mostrava "Reading the feed's
+    price…" para sempre. O coordenador aprovou com condições, todas aplicadas, e o teste que ele pediu para a limpeza
+    de um dia achou um quarto defeito, mais antigo: um registro ilegível no navegador parava a limpeza de todos os
+    outros, das aberturas e das entradas. A página da campanha passou a mostrar a unidade dos números de queima e
+    trava; o resumo do SDK diz "creation rules". O relatório jurídico ficou guardado para o advogado
+    (`docs/legal/2026-10-10-sprint-19-legal-review.md`). O que ficou para depois está no plano técnico, §7.5; as nove
+    perguntas de privacidade, no §8.3.
+  - **Esperando:** a abertura no devnet e a da equipe à mão (escrita no devnet é do fundador); os celulares reais; o
+    preço em US$ do CoinGecko (`/api/v1/price`), os nomes da API, o relay `/rpc` e o bloqueio por país, o
+    `content/partners.json` e o cartão de compartilhar, que são de outras sprints.
+
+- **As respostas às seis perguntas da Sprint 19** (11/10/2026, Ronaldo): 1a, 2a, 3a, 4a e 6a, todas como recomendado;
+  o item 5, os celulares, ele faz à mão. O banner do topo passa a dizer "We are in a test phase. Here you join and open
+  campaigns with test SOL, which has no real value." (6a). A abertura no devnet fica para depois da mescla (1a) e a
+  landing com a privacidade nova sobe antes de `/abrir` ficar público (2a), as duas com o fundador. O
+  `content/powers.md` teve a aprovação do Ronaldo como segundo revisor; como a mudança foi feita a pedido dele, a regra
+  de duas pessoas do `content/` ainda pede a revisão do Lucas ou do Bernardo.
+
+- **Sprint 13: o ranking, os avisos e o texto, que fecham o MVP no devnet** (branch `sprint-13-site-notices-copy`,
+  10/10/2026; `docs/sprints/sprint-13-site-notices-copy.md`).
+  - **`/leaderboard`, o ranking de pontos do devnet:** 1 ponto por campanha em que a carteira entrou no lado que
+    venceu, quando o resultado fica final (a janela de 6 horas acabou sem contestação, ou a campanha está liquidando);
+    anulação e entrada tardia não pontuam; o tamanho da entrada nunca conta. A regra está no SDK (`pointsTable`). Os
+    números vêm da rota nova `/api/v1/leaderboard` da API de leitura, que lê o histórico do próprio programa. A página
+    não manda a carteira de quem visita: acha a linha dela no navegador. **No devnet, a página só funciona depois que o
+    fundador reimplantar a API no servidor.**
+  - **`/fees`, a página de taxas:** o exemplo da P1 §1.2 em SOL, calculado pela conta do programa no SDK (6 e 4 SOL:
+    taxa 0,4, criador 0,1, vencedores 9,5, 1,583 por 1; com prêmio de 4,5 SOL, 14 e 2,333), o pote de um lado só, a
+    anulação, o 90/10 da abertura e a política de devolução.
+  - **A tabela de quem pode o quê em `/record`** (`content/powers.md`): cada chave por papel e endereço, nunca por
+    pessoa, e o limite de cada poder no código, inclusive que no devnet a chave de upgrade troca o programa a qualquer
+    hora. A página confere as chaves na rede e avisa quando a tabela ficou velha.
+  - **`/how-it-works`**, com os seis passos, aberto pela barra do topo também no celular, e a frase do BP-5 ("No human
+    picks the winner.") como recomendada.
+  - **"Report this campaign" em toda página de campanha**, link simples para https://x.com/brotmarkets; o remédio é
+    tirar a campanha da página inicial (`content/unlisted.json`, revisado por duas pessoas); ela continua na rede, com as
+    entradas, o resultado e os pagamentos iguais.
+  - **Os avisos obrigatórios** numa lista com a tela de cada um, e um teste que renderiza as telas. O teste de texto
+    passou a barrar as frases da coluna "Em vez de" da P1 §4.6 e as promessas (retorno, rendimento, pagamento
+    automático) em todo arquivo do site.
+  - **O PWA só com manifesto e ícones,** sem service worker.
+  - **`scripts/team/resolution-post.ts`:** o texto do post de resolução, a partir de um modelo, para uma pessoa postar;
+    sem API do X.
+  - **O balão do mascote não corta mais na borda da tela.**
+  - Testes: a regra dos pontos; a rota do ranking em ciclos inteiros no LiteSVM; o exemplo de taxas contra a conta do
+    SDK; cada aviso na sua tela; a tabela de poderes; o link de denúncia e a lista de despublicadas; o manifesto; o post
+    de resolução; e o cenário "site pages and notices" no smoke web, que passou inteiro com o site no Node e no Bun 1.4.2.
+- **A revisão de privacidade do ranking e do canal de denúncia** (gate 5; plano técnico, §8.2), com o que o Cloudflare
+  registra de quem visita, lido nas páginas do Cloudflare (`knowledge-base/tecnologia/cloudflare-logs-visitantes.md`).
+- **As revisões da Sprint 13 aplicadas** (texto, jurídica e adversarial; nenhum achado crítico): a regra de
+  viabilidade na página de taxas, em "How it works" e no aviso antes de assinar; a estimativa do painel, da folha de
+  revisão e dos cartões passou a mostrar o que o programa pagaria (num pote pago com 1 SOL no SIM e 0,01 no NÃO, a tela
+  mostrava cerca de 5 por 1; o programa devolveria 0,99); o ranking sem taxa de acerto, com o caminho para sair dele
+  (pedido no X, mensagem assinada, lista no servidor); os pontos sem os furos do SIM de preço antes do tally, do id de
+  campanha reaberto e da ordem dentro do slot; o leitor do histórico em laço próprio e com prazo; a tabela de poderes
+  com a causa da anulação e os tetos; o post de resolução que cabe em 280 com id real; e o CI rodando os testes do
+  próprio site. O que ficou para depois está no plano técnico, §7.4. O relatório jurídico ficou guardado para o
+  advogado (`docs/legal/2026-10-10-sprint-13-legal-review.md`), e o coordenador aprovou com ressalvas, aplicadas.
+- **Para o fundador, achados fora da sprint:** as páginas `/terms` e `/privacy` no ar ainda falam em USDC e pagamento
+  automático em até 55 horas; e entrar nos dois lados de uma campanha paga em que ninguém mais entra leva o prêmio sem
+  risco (plano técnico, §13).
 - **O modo foguete do deck em `/pitch`** (10/10/2026, pedido do fundador e publicado com o de acordo dele: "pode
   subir online, excelente"). Um botão de foguete na barra do deck (tecla R, ou `?motion=rocket`) liga um quarto modo:
   todas as animações do modo completo e, nos dois slides de mercado, as nove imagens novas no lugar do pãozinho a pé.
@@ -68,6 +173,67 @@ A Sprint 06, o servidor e o keeper principal, foi aberta em 10/10/2026 a partir 
   chip "Paid" esperam o fundador.
 
 ### Changed
+
+- **Sprint 19: a frase das campanhas de queima, trava e stake** (10/10/2026). O cartão e a página dessas campanhas
+  diziam só o tipo e o endereço ("Burn campaign So11…1112"); agora dizem a frase do modelo v1, com o alvo e a unidade
+  ("So11…1112 supply falls to 1,000 raw units"; "Stake pool … holds at least … SOL at the start of epoch 812"). A frase
+  de preço não mudou. **A privacidade** diz quando o navegador guarda o registro de uma abertura e quando o apaga, o que
+  o serviço de RPC vê (o saldo, a transação testada antes de assinar e o andamento dela, as transações recentes antes de
+  uma abertura paga, as contas conferidas na caixa) e que apagar os dados do site apaga as notas do navegador; a página
+  no ar só muda quando o fundador publicar a landing.
+- **O site novo nas cores da marca** (10/10/2026, pedido do Ronaldo; branch `feat/apply-deck-ui`). As cores do
+  `BRAND.md` §5, tiradas da página `/5` que o Lucas aprovou (branch `feat/site-3-original-com-cores-do-deck`), entram
+  em `app/styles/tokens.css`: azul-marinho e laranja no escuro, creme e ferrugem no claro, nenhum azul. O escuro segue
+  como tema de abertura. Duas cores ficam diferentes da marca de propósito (o `--raised` do escuro, um passo acima do
+  painel, e o fundo das caixas de informação no escuro, que na marca é o mesmo verde do YES), e as que a marca não
+  define (estados, tipos, barras, aviso, borda de campo) saem da mesma paleta. Todo texto passa de 4,5 e toda borda de
+  campo e barra de 3, nos dois temas; um teste novo (`tests/site/tokens.test.ts`) recalcula a leitura, barra o azul de
+  volta e confere as cores da marca. A troca mostrou dois defeitos, corrigidos: o anel do botão principal nunca
+  aparecia, e o botão principal desligado ficava com o texto invisível no escuro. O manifesto e os ícones do PWA foram
+  para o novo fundo escuro. O `DESIGN-DIRECTION.md` e o `BRAND.md` registram a troca. Nenhum texto mudou.
+- **Os detalhes do fundador na privacidade, a linha de 18 anos e o docs.brot.markets fora do ar** (10/10/2026, depois
+  da mescla do PR #65; branch `fix/privacy-details-docs-down`). A privacidade passa a dar o contato gm@brot.markets,
+  dizer que os backups da Hostinger guardam o arquivo da lista por até 30 dias e que a Cloudflare guarda os registros
+  básicos de acesso por até 7 dias, prometer resposta em até 15 dias para todo pedido e apagar a conversa no X depois
+  de atender um pedido de saída do ranking. O rodapé do site novo ganhou "Brot Markets is for adults, 18 and over.",
+  que antes só os termos diziam. O docs.brot.markets, que também descrevia o produto anterior, responde 410 em todo
+  endereço até a documentação ser reescrita; as páginas continuam no repositório. **Fica com o fundador:** o
+  roteamento do email gm@brot.markets (hoje o domínio não tem registro de email) antes de publicar a landing, e depois o
+  post no X e a nova API.
+- **As páginas legais, pela resposta 9a do fundador** (10/10/2026; branch `fix/legal-pages-9a`): os termos saem do ar
+  até a Sprint 17, porque descreviam o produto anterior (USDC, pagamento automático em até 55 horas, outros poderes da
+  equipe). O `/terms` deixa de ser gerado e responde 404, e nenhuma página da landing nem do docs.brot.markets aponta
+  mais para ele. A privacidade foi corrigida para o produto de hoje: campanhas em vez de mercados, o ranking do devnet
+  (o que mostra, que é calculado em memória, como sair dele e o prazo de 15 dias), o que o site novo guarda no
+  navegador, o serviço de RPC que vê a carteira e o IP, e o X como canal. A frase de propósito da lista de espera ficou
+  como as pessoas consentiram, e o formulário para sair dela continua. O rodapé do site novo passou a linkar a
+  privacidade, e a frase antes da primeira entrada diz que uma carteira do lado vencedor "pode" aparecer no ranking.
+  Uma revisão jurídica do texto achou duas promessas antigas que não eram verdade: o IP "por um minuto" ficava na
+  memória até o serviço reiniciar (agora o servidor varre os endereços vencidos a cada 10 segundos) e o "sem cópia de
+  backup" não estava conferido (a página agora diz que o provedor pode guardar backups do servidor por um tempo
+  limitado). **Fica com o fundador:** publicar a landing antes de a API do ranking ir ao ar e, como a própria página
+  promete, avisar a mudança no X; e conferir no painel da Hostinger se os backups do servidor estão ligados.
+- **A regra de pontos do ranking, pela resposta 3a do fundador** (10/10/2026, depois da mescla da Sprint 13; branch
+  `sprint-13-founder-answers`): deixam de pontuar a carteira com entradas nos dois lados de uma campanha
+  (`BOTH_SIDES_SCORE` agora é falso), o pote devolvido por ter um lado só ou um lado perdedor pequeno demais para pagar
+  as taxas, e a carteira que abriu uma campanha de queima, trava ou stake, cujo resultado quem abriu pode controlar. As
+  outras carteiras de quem abriu não têm como ser reconhecidas na rede e continuam pontuando; a página diz isso, e diz
+  também que um pedido para sair do ranking é respondido em até 15 dias (resposta 8a). A API de leitura passa a dizer,
+  para cada campanha viva, se o pote vai ser devolvido (pela conta do programa no SDK), quem a abriu e de que tipo ela
+  é. Testes novos: a regra (`tests/sdk/points-3a.test.ts`), a rota (`services/api/tests/leaderboard-pot.test.ts`) e um
+  ciclo inteiro no LiteSVM com pote de um lado só. Mudou antes de a API ir ao ar no devnet, então nenhum ranking
+  publicado é reescrito.
+- **As respostas do fundador às doze perguntas da Sprint 13 registradas** no documento da sprint, no roteiro, no plano
+  técnico (v0.1.6: §3.4.7, §3.5, §3.6, §7.4, §8.2, §13, §14.2) e no log da sessão. Quem guarda o login da conta do X é
+  o CTO, com aplicativo autenticador como segundo fator. Ficam pendentes: as páginas `/terms` (sair do ar até a Sprint
+  17) e `/privacy` (corrigir e linkar no rodapé do site), que o fundador publica (resposta 9a); o relatório do parceiro,
+  da Sprint 08 (L-24 respondida); e a regra contra a colheita de prêmio, antes da mainnet (resposta 12a).
+- **Sprint 13:** o cartão da lista usava outra redação do aviso do criador; agora usa a da página. O filtro de dado
+  pessoal do void log recusa também domínio solto e "@x" / "[@x]", e o site falha o build se não achar `content/`
+  (os dois achados que a Sprint 12 deixou para esta). Os dois avisos de toda tela foram para um arquivo de texto
+  (`app/components/copy-site.ts`), que o teste de vocabulário lê. O plano técnico foi para a v0.1.5.
+- **Sprint 12 mesclada** (PR #61, tag `sprint-12`, 10/10/2026); o ensaio das cinco campanhas no devnet segue com o
+  fundador.
 
 - **Sprint 11 fechada e mesclada** (branch `sprint-11-site-campaign-entry`, PR #60, 10/10/2026, a pedido do Ronaldo,
   com a tag `sprint-11`; `docs/sprints/sprint-11-site-campaign-entry.md`). O Ronaldo relatou o teste com a Phantom no

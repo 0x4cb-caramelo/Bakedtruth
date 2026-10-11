@@ -5,17 +5,7 @@
  */
 import { cx } from "./cx";
 
-export function SplitBar({
-  yes,
-  no,
-  prize,
-  thin,
-}: {
-  yes: number;
-  no: number;
-  prize: number;
-  thin?: boolean;
-}) {
+export function SplitBar({ yes, no, prize, thin }: { yes: number; no: number; prize: number; thin?: boolean }) {
   const total = yes + no + prize;
   const share = (part: number) => (total > 0 ? `${(part / total) * 100}%` : "0%");
   return (

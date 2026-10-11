@@ -1,7 +1,9 @@
 /**
  * Purpose: the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only),
- *          the port and host (loopback by default), the refresh interval, and the CORS origin for the site.
- * Version: 0.1.0
+ *          the port and host (loopback by default), the refresh interval, the CORS origin for the site, how many
+ *          program transactions a refresh reads for the leaderboard, and the file of wallets left out of it (Sprint
+ *          13).
+ * Version: 0.2.0
  * Sprint:  08 (indexer and API, hackathon MVP)
  */
 
@@ -12,6 +14,12 @@ export type ApiConfig = {
   refreshMs: number;
   corsOrigin: string;
   cluster: "devnet" | "local";
+  /** At most this many program transactions read per refresh for the leaderboard (Sprint 13). */
+  historyPerRefresh: number;
+  /** The file listing wallets left out of the leaderboard at their owner's request, outside the repository. */
+  hiddenFile: string | null;
+  /** The RPC the leaderboard's history reads through, when it should not share the snapshot's (a secret too). */
+  historyRpcUrl: string | null;
 };
 
 type Env = Record<string, string | undefined>;
@@ -34,7 +42,22 @@ export function loadApiConfig(env: Env = process.env): ApiConfig {
     refreshMs: positive(env.API_REFRESH_MS, 15_000, "API_REFRESH_MS"),
     corsOrigin: env.API_CORS_ORIGIN?.trim() || "*",
     cluster: cluster(env.API_CLUSTER),
+    historyPerRefresh: positive(env.API_HISTORY_PER_REFRESH, 200, "API_HISTORY_PER_REFRESH"),
+    hiddenFile: env.API_LEADERBOARD_HIDDEN?.trim() || null,
+    historyRpcUrl: url(env.API_HISTORY_RPC_URL, "API_HISTORY_RPC_URL"),
   };
+}
+
+/** An optional URL: unset or empty is null; anything else must parse. */
+function url(raw: string | undefined, name: string): string | null {
+  const text = raw?.trim();
+  if (!text) return null;
+  try {
+    new URL(text);
+  } catch {
+    throw new Error(`${name} is not a URL`);
+  }
+  return text;
 }
 
 function cluster(raw: string | undefined): "devnet" | "local" {

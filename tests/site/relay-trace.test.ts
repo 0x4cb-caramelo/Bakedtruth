@@ -4,9 +4,10 @@
  *          the program in LiteSVM behind a recording RPC, and every method they call must be in the table of
  *          docs/technical/relay-allowlist.md. No subscription is ever opened: the client polls. Sprint 12 adds the
  *          wallet's history, its entries, an entry's settlement, a closed campaign and the claim of a reserved share.
+ *          Sprint 19 adds the creation box: its reads, the opening, the retry guard's recent opening and the watch.
  *          Filter: `bun test tests/ -t "the client's rpc trace"`.
- * Version: 0.2.0
- * Sprint:  11 (site: campaign page and entry); 12
+ * Version: 0.3.0 (Sprint 19: the creation box)
+ * Sprint:  11 (site: campaign page and entry); 12; 19
  */
 import { afterEach, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -20,14 +21,18 @@ import { claimTransaction, lastValidOf, prepareReceive, watchClaim } from "../..
 import { readEntrySettlement, readWalletHistory } from "../../app/features/my-entries/history";
 import { loadMyEntries } from "../../app/features/my-entries/load";
 import { handToWallet, pendingOf, prepareEntry } from "../../app/features/entry/submit";
-import { openedCampaign } from "../brot/flows";
+import { readDraftAccounts, readWorld } from "../../app/features/open-campaign/reads";
+import { recentOpening } from "../../app/features/open-campaign/recent";
+import { idFor } from "../../app/features/open-campaign/retry-guard";
+import { handToWallet as handOpening, prepareOpening } from "../../app/features/open-campaign/submit";
+import { BTC_PRICE, newId, openedCampaign } from "../brot/flows";
 import { openingWorld } from "../brot/opening";
 import * as P from "../brot/program";
-import { fundedWallet } from "../brot/setup";
+import { fundedWallet, now } from "../brot/setup";
 import { ready } from "../sdk/prepared";
 import { runCycle } from "./cycle-run";
 import { startFakeChain, type FakeChain } from "./fake-chain";
-import { memoryStore, testWallet } from "./support";
+import { memoryStore, napThen, testWallet } from "./support";
 
 let chain: FakeChain | null = null;
 afterEach(() => chain?.close());
@@ -104,6 +109,39 @@ describe("the client's rpc trace", () => {
     const sig = await rpc.sendTransaction(getBase64EncodedWireTransaction(signed), { encoding: "base64" }).send();
     expect(await watchClaim(rpc, sig, lastValidOf(prepared.ready))).toBe("landed");
     const seen = new Set(chain.methods.slice(before));
+    expect([...seen].filter((m) => !documented().some((a) => a.method === m))).toEqual([]);
+    expect([...seen].some((m) => /subscribe|getProgramAccounts/i.test(m))).toBe(false);
+  });
+  test("the Sprint 19 creation box stays on the allowlist: its reads, the opening, the guard and its watch", async () => {
+    const w = await openingWorld();
+    chain = startFakeChain(w);
+    const rpc = createSolanaRpc(chain.url);
+    const store = memoryStore();
+    const creator = w.creator.address as string;
+    const record = idFor(store, creator, newId);
+    const id = BigInt(record.id);
+    await Promise.all([readWorld(rpc), readDraftAccounts(rpc, id, null)]);
+    expect(await recentOpening(rpc, creator, now(w.client))).toEqual({ status: "none" });
+    const choice = {
+      kind: P.ReaderKind.PriceTouch,
+      feedId: P.BTC_USD_FEED_ID,
+      target: (BTC_PRICE * 11n) / 10n,
+      deadlineAt: now(w.client) + 7n * P.DAY,
+      openingUsd: 500n,
+    };
+    const prepared = ready(await prepareOpening({ rpc, creator, choice, id, deploySlot: 0n })); // A-8 first
+    const outcome = await handOpening({
+      rpc,
+      ready: prepared,
+      record,
+      send: testWallet(w.creator, chain.url),
+      store,
+      watch: { sleep: napThen(() => {}) },
+    });
+    expect(outcome.kind).toBe("opened");
+    const recent = await recentOpening(rpc, creator, now(w.client));
+    expect(recent.status === "found" ? recent.opening.id : null).toBe(id);
+    const seen = new Set(chain.methods);
     expect([...seen].filter((m) => !documented().some((a) => a.method === m))).toEqual([]);
     expect([...seen].some((m) => /subscribe|getProgramAccounts/i.test(m))).toBe(false);
   });

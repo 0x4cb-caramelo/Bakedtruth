@@ -1,6 +1,9 @@
 /**
- * Purpose: the buttons of the design: the primary action with its orbiting edge, the secondary and quiet ones, and the icon button. Colour from the tokens only.
- * Version: 0.1.0
+ * Purpose: the buttons of the design: the primary action with its orbiting edge, the secondary and quiet ones, and
+ *          the icon button. Colour from the tokens only. The edge is `--cta-ring` painted as a background (a flat colour
+ *          in dark, the brand's turning rust and orange in light, BRAND.md §5.2); a disabled button has a plain edge.
+ * Version: 0.1.1 (the brand's colours, 2026-10-10: the edge drawn with `background`, which a gradient needs; a
+ *          disabled button carries only its own colours)
  * Sprint:  09 (site shell, theme and wallet; the design of Sprint -1)
  */
 import type { ButtonHTMLAttributes, ReactNode } from "react";
@@ -28,9 +31,9 @@ export function Button({ variant = "primary", wide, small, className, children, 
     return (
       <span
         className={cx(
-          "inline-block rounded-sm p-[1.5px] bg-[var(--cta-ring)] animate-brot-spin",
+          "inline-block rounded-sm p-[1.5px]",
+          disabled ? "bg-line" : "[background:var(--cta-ring)] animate-brot-spin",
           wide && "block w-full",
-          disabled && "animate-none bg-line",
           className,
         )}
       >
@@ -39,9 +42,10 @@ export function Button({ variant = "primary", wide, small, className, children, 
           disabled={disabled}
           className={cx(
             "flex w-full items-center justify-center gap-2 min-h-9 px-4 py-2 rounded-[calc(var(--r-sm)-1.5px)] " +
-              "bg-cta-bg text-on-accent font-semibold text-[13px] whitespace-nowrap hover:bg-cta-hover",
+              "font-semibold text-[13px] whitespace-nowrap",
+            // One set of colours at a time: with both, CSS order picked the enabled text on the disabled surface.
+            disabled ? "bg-raised text-dim" : "bg-cta-bg text-on-accent hover:bg-cta-hover",
             size,
-            disabled && "bg-raised text-dim hover:bg-raised",
           )}
           {...rest}
         >

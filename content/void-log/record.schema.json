@@ -40,7 +40,7 @@
         "text": {
           "type": "string",
           "minLength": 1,
-          "description": "The team's public text: no email address, @handle or URL"
+          "description": "The team's public text: no email address, @handle, URL or domain"
         },
         "sha256": {
           "type": "string",
@@ -91,7 +91,7 @@
         "text": {
           "type": "string",
           "minLength": 1,
-          "description": "The team's public text: no email address, @handle or URL"
+          "description": "The team's public text: no email address, @handle, URL or domain"
         },
         "sha256": {
           "type": "string",

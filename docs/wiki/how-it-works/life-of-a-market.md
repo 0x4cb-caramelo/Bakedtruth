@@ -29,9 +29,6 @@ and if it doesn't, the market doesn't open.
 There's no free text. The app writes the question from what was picked, so the words people read and the number the
 program checks are always the same thing.
 
-What it costs to open a market, and what the opener earns, are in the [Terms of Service](https://brot.markets/terms),
-section 7.
-
 ## Why entries close before the end
 
 On an exchange, buying late is expensive. In a pot there's no price, so someone who walks in at the last minute gets

@@ -3,13 +3,13 @@
  *          chance per side (none for an empty pot, L-05), the estimated return per side from the SDK's estimate, the listing
  *          rule (no entry 24 hours after opening leaves the home page), and the ranking groups (two-sided, one-sided, empty).
  *          Pure: it takes the chain's time as an input, so tests need no clock.
- * Version: 0.2.0 (Sprint 12: the state chip and line, state-line.ts)
- * Sprint:  10 (site: campaign list); 12
+ * Version: 0.2.1 (Sprint 13: the estimate is what finalize would pay; 0.2.0, Sprint 12: the state chip and line)
+ * Sprint:  10 (site: campaign list); 12; 13
  *
  * Assumption: the estimate uses one SOL on the joining side, as a first baker who is not the first of the campaign
  * (the program's own rules for a join). The campaign's rank is not the indexer's: the indexer (Sprint 08) is not built.
  */
-import { estimateReturnBps, type JoinedPot } from "@brot/sdk/read";
+import { shownReturnBps, type JoinedPot } from "@brot/sdk/read";
 
 import type { Campaign } from "@/lib/api-client";
 import { assetOf, sentenceOf } from "./sentence";
@@ -35,6 +35,8 @@ export type Card = {
   entries: number;
   group: 0 | 1 | 2;
   listed: boolean;
+  /** When the campaign opened (Unix seconds): with the id, it names one opening of an address that can be reused. */
+  opensAt: bigint | null;
   entriesCloseAt: bigint | null;
   deadlineAt: bigint | null;
   reviewEndsAt: bigint | null;
@@ -47,7 +49,11 @@ export type Card = {
 
 const big = (value: string | null): bigint => (value === null ? 0n : BigInt(value));
 
-/** The estimated return of one SOL on `side`, in bps of the stake, or null when the estimate refuses the inputs. */
+/**
+ * The estimated return of one SOL on `side`, in bps of the stake, or null when the estimate refuses the inputs. Since
+ * Sprint 13 it is what finalize would pay if entries closed now: the refund when the other side is too small to pay
+ * the fees (the Economic Viability Rule), not the split's formula.
+ */
 function estimate(c: Campaign, side: "yes" | "no"): bigint | null {
   const mine = side === "yes" ? big(c.pool_yes) : big(c.pool_no);
   const other = side === "yes" ? big(c.pool_no) : big(c.pool_yes);
@@ -62,7 +68,7 @@ function estimate(c: Campaign, side: "yes" | "no"): bigint | null {
     isFirst: false,
   };
   try {
-    return estimateReturnBps(pot);
+    return shownReturnBps(pot);
   } catch {
     return null;
   }
@@ -100,6 +106,7 @@ export function toCard(c: Campaign, nowUnix: bigint): Card {
     entries,
     group,
     listed: !idle,
+    opensAt,
     entriesCloseAt: c.entries_close_at === null ? null : BigInt(c.entries_close_at),
     deadlineAt: c.deadline_at === null ? null : BigInt(c.deadline_at),
     reviewEndsAt: c.review_ends_at === null ? null : BigInt(c.review_ends_at),

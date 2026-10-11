@@ -1,7 +1,8 @@
 # services/landing
 
-O site "em breve" do Brot Markets: a página inicial com a lista de espera, os termos, a privacidade e o deck em
-`/pitch`. O mesmo serviço responde por `docs.brot.markets`, a documentação. É provisório. Na Sprint 09 o site de verdade (`app/`, em Next.js) assume o endereço e esta pasta sai.
+O site "em breve" do Brot Markets: a página inicial com a lista de espera, a privacidade e o deck em
+`/pitch`. O mesmo serviço responde por `docs.brot.markets`, a documentação, fora do ar desde 10/10/2026 (responde 410)
+até ser reescrita para o produto de campanhas. É provisório. Na Sprint 09 o site de verdade (`app/`, em Next.js) assume o endereço e esta pasta sai.
 
 Não tem dependências. Roda com o Node que já existe no servidor (22 ou mais novo).
 
@@ -9,19 +10,19 @@ Não tem dependências. Roda com o Node que já existe no servidor (22 ou mais n
 
 | Caminho | O que é |
 |---|---|
-| `server.mjs` | Entrada HTTP: cabeçalhos de segurança, `/healthz`, API da lista e arquivos estáticos; no endereço `docs.`, as páginas de `docs-site/` |
+| `server.mjs` | Entrada HTTP: cabeçalhos de segurança, `/healthz`, API da lista e arquivos estáticos; no endereço `docs.`, as páginas de `docs-site/`, ou 410 enquanto `docsOffline` (ligado em `start()` desde 10/10/2026, por decisão do fundador) |
 | `lib/api.mjs` | `POST /api/leads` (entrar) e `POST /api/leads/remove` (sair) |
 | `lib/leads.mjs` | Validação do email e o arquivo da lista |
 | `lib/rate-limit.mjs` | Limite de pedidos por endereço, só em memória |
 | `lib/static.mjs` | Serve `public/`, sem deixar sair da pasta |
 | `lib/campaigns.mjs` | Serve a prévia das telas de campanha em `/dev0x/`, a partir de `prototype-lab/campaigns/` (uma cópia só) e com a CSP do protótipo |
 | `public/` | Página inicial, privacidade, 404, fontes e imagens |
-| `public/terms.html`, `public/privacy.html` | Termos e privacidade, gerados de `docs/legal/*.md` por `scripts/build-legal.mjs`. Edite o texto lá e rode o script; os testes falham se página e texto divergirem |
+| `public/privacy.html` | A privacidade, gerada de `docs/legal/PRIVACY-POLICY.md` por `scripts/build-legal.mjs`. Edite o texto lá e rode o script; os testes falham se página e texto divergirem. Os termos saíram do ar em 10/10/2026 (resposta 9a do fundador) até a Sprint 17: `/terms` responde 404, e um teste falha se uma página voltar a apontar para ele |
 | `public/2/` | A página inicial com o visual do deck (opção A, 9/10/2026), em `/2`, fora dos buscadores: o mesmo conteúdo de `index.html`, palavra por palavra (`tests/two.test.mjs` compara), com `base.css` e `home.css` próprios e as fontes de `public/pitch/`. Mudou o texto da página inicial? Mude aqui também |
 | `public/mascot*.js` | O Baked andando pela página inicial: `mascot.js` decide onde ele fica, `mascot-body.js` desenha, `mascot-senses.js` percebe o ponteiro, a rolagem e o teclado. Não guarda nem envia nada |
 | `public/pitch/` | O deck, desde 8/10/2026 o v4: nove slides, a demo animada e uma cena do mascote por troca, com os modos completo, leve (`N`) e desligado (`M`). Um palco leve (`deck.js`, `deck.css`) e o movimento em módulos curtos (`motion.js` decide; `scenes.js`, `exits.js`, `lever.js`, `team.js` têm as cenas; `sprites.js` as imagens de `img/`) |
 | `history/` | Os decks anteriores, guardados só como história, sem ser servidos: `pitch-1` (os oito slides do fundador), `pitch-2` (a resposta à banca) e `pitch-3` (o de dez slides), cada um com o seu roteiro de fala. Os endereços `/pitch2`, `/pitch3` e `/pitch4` levam ao deck atual |
-| `docs-site/` | `docs.brot.markets`. As páginas são geradas de `docs/wiki/` por `scripts/build-docs.mjs` (o menu está no script); edite o texto lá e rode o script. `docs.css` é escrito à mão. Desse endereço o servidor só empresta do `public/` as imagens, as fontes, `styles.css` e `app.js`. Fica fora dos buscadores (`X-Robots-Tag`) até o fundador aprovar |
+| `docs-site/` | `docs.brot.markets`. As páginas são geradas de `docs/wiki/` por `scripts/build-docs.mjs` (o menu está no script); edite o texto lá e rode o script. `docs.css` é escrito à mão. Desse endereço o servidor só empresta do `public/` as imagens, as fontes, `styles.css` e `app.js`. Fica fora dos buscadores (`X-Robots-Tag`) até o fundador aprovar. **Fora do ar desde 10/10/2026:** descreve o produto anterior (USDC, mercados, os poderes da equipe de antes); as páginas ficam aqui para a reescrita |
 | `scripts/markdown.mjs` | O conversor do Markdown simples que os termos e o wiki usam, comum aos dois geradores |
 | `deploy/` | As duas unidades do systemd: o site e o túnel do Cloudflare |
 | `tests/` | Testes do armazenamento, do limitador, do servidor por HTTP e do que as páginas prometem (`pages.test.mjs`) |
@@ -46,7 +47,8 @@ Cada inscrito é uma linha:
 
 - **Não grava** IP, navegador nem localização. O endereço de quem pede serve só de chave do limitador, em memória.
 - **Entrar duas vezes** e **sair sem estar na lista** respondem "ok", para a API não revelar quem está inscrito.
-- **Sair** apaga a linha na hora (`/privacy` tem o formulário).
+- **Sair** apaga a linha na hora (`/privacy` tem o formulário). Os backups do servidor, da Hostinger, guardam o arquivo
+  por até 30 dias, e a página de privacidade diz isso.
 - **Doze meses** depois da inscrição a linha é apagada sozinha, na partida do serviço e a cada 24 horas. A página de
   privacidade promete esse prazo: mudar um exige mudar o outro (`RETENTION_MS` em `server.mjs`).
 - **Teto de 50 mil linhas**, para uma enxurrada não encher o disco de um servidor dividido.

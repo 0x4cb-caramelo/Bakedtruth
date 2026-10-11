@@ -4,6 +4,7 @@
 // Poses follow context: `data-mood` under the pointer, frantic movement, idle time.
 // Styles live in app/globals.css under `.bk-pet`.
 
+import { fitBubble } from "./bubble";
 import { anchor, choose, score, visible, type Point } from "./perches";
 
 export const POSES = ["deadpan", "skeptical", "impatient", "tapping", "tired", "sulking", "approve", "point"] as const;
@@ -85,6 +86,7 @@ export function startMascot(opts: MascotOptions): MascotHandle {
     bubble.textContent = text;
     bubble.classList.toggle("is-below", !!at && at.y - opts.size * at.s < 56);
     bubble.classList.add("is-on");
+    fitBubble(bubble);
     clearTimeout(sayTimer);
     sayTimer = window.setTimeout(() => bubble.classList.remove("is-on"), ms);
   };

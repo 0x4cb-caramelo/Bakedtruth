@@ -115,6 +115,7 @@ export function EntryPanel({
     feeBps: c.feeBps,
     creatorShareBps: c.creatorShareBps,
     oneSidedFeeBps: c.oneSidedFeeBps,
+    prizeLamports: c.prizeLamports,
     fromLink,
     firstEntry: !data.mine,
     large,

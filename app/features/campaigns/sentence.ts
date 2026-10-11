@@ -1,11 +1,17 @@
 /**
- * Purpose: the campaign's sentence, from its stored fields (Sprint 10): a price campaign reads the feed's symbol from the
- *          SDK's pinned list and its target in the feed's exponent; the other kinds get their kind's name and the
- *          metric account shortened. The wording is a first version, to be confirmed with the founder.
- * Version: 0.1.1 (Sprint 11: a target below 1 keeps six significant digits)
- * Sprint:  10 (site: campaign list)
+ * Purpose: the campaign's sentence, template v1 (the program stores `template_version` 1, the SDK's
+ *          `CAMPAIGN_TEMPLATE_VERSION`; D-j and A-11), from its stored
+ *          fields only: one template per kind (Sprint 19). A price campaign reads the feed's symbol from the SDK's
+ *          pinned list and its target in the feed's exponent; a burn or a lock target is the raw amount the account
+ *          stores; a stake pool or a stake target is SOL. The other kinds name their account by its shortened address:
+ *          no creator-supplied text, and no name unless two people reviewed it. The creation box at /abrir writes its
+ *          preview with this same function, so the sentence a creator reads is the one every page shows.
+ * Version: 0.3.0 (the Sprint 19 copy review: units on burn and lock, the measured epoch; 0.2.0, the five templates)
+ * Sprint:  10 (site: campaign list); 19
  */
 import { feedSymbol, ReaderKind, shortAddress } from "@brot/sdk/read";
+
+import { sol4 } from "../entry/amount";
 
 export const KIND_LABEL: Record<string, string> = {
   PriceTouch: "Price",
@@ -33,20 +39,79 @@ export function formatTarget(target: bigint, exponent: number): string {
   );
 }
 
-export function sentenceOf(input: {
+/** 1234567n → "1,234,567", exactly (a raw supply or liquidity can pass 2^53). */
+export function groupedDigits(value: bigint): string {
+  const sign = value < 0n ? "-" : "";
+  return sign + (value < 0n ? -value : value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+/** Lamports as SOL with up to four decimals, rounded down, trailing zeros dropped: 10,000,000,000,000n → "10,000". */
+export function solTarget(lamports: bigint): string {
+  const [whole, fraction] = sol4(lamports).split(".");
+  const trimmed = fraction.replace(/0+$/, "");
+  return groupedDigits(BigInt(whole)) + (trimmed ? `.${trimmed}` : "");
+}
+
+/** A piece of a sentence: fixed words, or a slot with its value (`null` while the creator has not filled it). */
+export type SentencePart = string | { slot: "asset" | "account" | "target" | "epoch"; value: string | null };
+
+/** The fields a sentence is written from; `null` marks a slot the creation box has not filled yet. */
+export type SentenceInput = {
   kind: string;
   direction: string;
-  feedIdHex: string;
+  feedIdHex: string | null;
   target: string | null;
-  priceExponent: number;
-  metricAccount: string;
-}): string {
-  if (input.kind === ReaderKind[ReaderKind.PriceTouch]) {
-    const asset = assetOf(input.feedIdHex);
-    const value = input.target === null ? "?" : formatTarget(BigInt(input.target), input.priceExponent);
-    if (asset === null) return `${KIND_LABEL.PriceTouch} campaign ${shortAddress(input.metricAccount)}`;
-    const verb = input.direction === "Below" ? "falls to" : "reaches";
-    return `${asset} ${verb} ${value}`;
+  priceExponent: number | null;
+  metricAccount: string | null;
+  /** The epoch kinds: the epoch whose start is measured, when the caller has it (the read API's list does not). */
+  epoch?: string | null;
+};
+
+/** Template v1 as parts, so the creation box can show its gaps; `sentenceOf` joins the same parts. */
+export function sentenceParts(input: SentenceInput): SentencePart[] {
+  const raw = input.target === null ? null : BigInt(input.target);
+  const account = { slot: "account" as const, value: input.metricAccount ? shortAddress(input.metricAccount) : null };
+  const target = (format: (value: bigint) => string) => ({
+    slot: "target" as const,
+    value: raw === null ? null : format(raw),
+  });
+  switch (input.kind) {
+    case ReaderKind[ReaderKind.PriceTouch]: {
+      const asset = input.feedIdHex === null ? null : assetOf(input.feedIdHex);
+      if (input.feedIdHex !== null && asset === null) return [`${KIND_LABEL.PriceTouch} campaign `, account];
+      const exponent = input.priceExponent;
+      const value = raw === null || exponent === null ? null : formatTarget(raw, exponent);
+      const verb = input.direction === "Below" ? " falls to " : " reaches ";
+      return [{ slot: "asset", value: asset }, verb, { slot: "target", value }];
+    }
+    case ReaderKind[ReaderKind.SupplyAtMost]:
+      return [account, " supply falls to ", target(groupedDigits), " raw units"];
+    case ReaderKind[ReaderKind.DammV2LockedAtLeast]:
+      return ["Meteora pool ", account, " reaches ", target(groupedDigits), " liquidity units locked for good"];
+    case ReaderKind[ReaderKind.StakePoolTvlAtLeast]:
+      return [
+        "Stake pool ",
+        account,
+        " holds at least ",
+        target(solTarget),
+        " SOL at the start of ",
+        ...epochOf(input),
+      ];
+    case ReaderKind[ReaderKind.StakeAtLeast]:
+      return ["Validator ", account, " has at least ", target(solTarget), " SOL staked in ", ...epochOf(input)];
+    default:
+      return [`${KIND_LABEL[input.kind] ?? input.kind} campaign `, account];
   }
-  return `${KIND_LABEL[input.kind] ?? input.kind} campaign ${shortAddress(input.metricAccount)}`;
+}
+
+/** "epoch 812", or "its measured epoch" where the caller does not have it (the list's cards). */
+function epochOf(input: SentenceInput): SentencePart[] {
+  if (input.epoch === undefined) return ["its measured epoch"];
+  return ["epoch ", { slot: "epoch", value: input.epoch }];
+}
+
+export function sentenceOf(input: SentenceInput): string {
+  return sentenceParts(input)
+    .map((part) => (typeof part === "string" ? part : (part.value ?? `(${part.slot})`)))
+    .join("");
 }

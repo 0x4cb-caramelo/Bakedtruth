@@ -3,8 +3,8 @@
  *          opened with the injected wallet and the runner's answer for it (sign and send, refuse, send and never
  *          answer, never answer), the entry panel and the sheet as locators, and the per-1 figure written as the panel
  *          writes it, to compare the screen with the SDK's estimate.
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ * Version: 0.2.0 (Sprint 19: any page with the wallet, for the creation box)
+ * Sprint:  11 (site: campaign page and entry); 19
  */
 import { expect, type Page } from "@playwright/test";
 import { getBase58Encoder } from "@solana/kit";
@@ -30,7 +30,11 @@ export type WalletMode = "answer" | "refuse" | "no-answer" | "hang";
 export type Opened = { wallet: string; mode: { current: WalletMode } };
 
 /** Opens `/c/{id}` with the test wallet installed; `mode.current` decides what the wallet does when asked to sign. */
-export async function openCampaign(page: Page, id: string, query = ""): Promise<Opened> {
+export const openCampaign = (page: Page, id: string, query = ""): Promise<Opened> =>
+  openWithWallet(page, `/c/${id}${query}`);
+
+/** Opens `path` with the test wallet installed (Sprint 19: the creation box at /abrir too). */
+export async function openWithWallet(page: Page, path: string): Promise<Opened> {
   const { address } = await control<{ address: string }>("/wallet");
   const mode = { current: "answer" as WalletMode };
   await page.exposeFunction("__e2eSignAndSend", async (wire: string) => {
@@ -41,7 +45,7 @@ export async function openCampaign(page: Page, id: string, query = ""): Promise<
     return Buffer.from(getBase58Encoder().encode(signature)).toString("base64");
   });
   await page.addInitScript(injectWallet, { address, publicKey: Array.from(getBase58Encoder().encode(address)) });
-  await page.goto(`/c/${id}${query}`);
+  await page.goto(path);
   return { wallet: address, mode };
 }
 

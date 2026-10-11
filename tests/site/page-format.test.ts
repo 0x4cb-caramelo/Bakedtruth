@@ -7,7 +7,7 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { ageText, grouped, local, rawText, valueText } from "../../app/features/campaign-page/format";
+import { ageText, grouped, local, rawText, valueText, valueWithUnit } from "../../app/features/campaign-page/format";
 
 describe("how the campaign page writes", () => {
   test("whole numbers, values in their units, and raw values, exactly", () => {
@@ -20,6 +20,10 @@ describe("how the campaign page writes", () => {
     expect(valueText("price", 8_521_233_806_870n, -8)).toBe("85,212.34");
     expect(valueText("price", 2_150n, -8)).toBe("0.0000215");
     expect(valueText("burn", 1_000_000n, 0)).toBe("1,000,000");
+    // Burn and lock numbers carry their unit where the page shows them (the Sprint 19 copy review, M8).
+    expect(valueWithUnit("burn", 1_000_000n, 0)).toBe("1,000,000 raw units");
+    expect(valueWithUnit("lock", 7n, 0)).toBe("7 liquidity units");
+    expect(valueWithUnit("price", 8_521_233_806_870n, -8)).toBe("85,212.34");
     expect(valueText("pool", 5_000_000_000n, 0)).toBe("5.0000 SOL");
     expect(rawText(8_521_233_806_870n, -8)).toBe("8,521,233,806,870 × 10^-8");
     expect(rawText(42n, null)).toBe("42");
