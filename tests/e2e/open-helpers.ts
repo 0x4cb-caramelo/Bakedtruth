@@ -1,9 +1,10 @@
 /**
  * Purpose: what the creation box's smoke tests share (Sprint 19): the link that prefills a paid BTC/USD opening, the
  *          box and its button as locators, the connection through "Use Installed Wallet", "Review and sign" up to the
- *          summary (answering the guard's recent-opening question when an earlier test opened one), the campaign id
- *          the summary names, and lamports written as the box writes them.
- * Version: 0.1.0
+ *          summary (answering the guard's recent-opening question when an earlier test opened one, or when its look-up
+ *          could not read the wallet's many test transactions), the campaign id the summary names, and lamports written
+ *          as the box writes them.
+ * Version: 0.2.0 (the look-up fails closed)
  * Sprint:  19 (site: open a campaign)
  */
 import { expect, type Page } from "@playwright/test";
@@ -47,9 +48,12 @@ export async function connectBox(page: Page) {
 export async function review(page: Page) {
   await reviewButton(page).click();
   const recent = heading(page, "You opened a campaign recently");
+  // The shared test wallet soon has more transactions in the half hour than the look-up reads: it fails closed.
+  const unknown = heading(page, "Couldn't check this wallet's recent openings");
   const summary = heading(page, "Check before you sign");
-  await expect(recent.or(summary)).toBeVisible();
-  if (await recent.isVisible()) await sheet(page).getByRole("button", { name: "Open a new one" }).click();
+  await expect(recent.or(unknown).or(summary)).toBeVisible();
+  if (await recent.isVisible()) await sheet(page).getByRole("button", { name: "Open a new one", exact: true }).click();
+  else if (await unknown.isVisible()) await sheet(page).getByRole("button", { name: "Open a new one anyway" }).click();
   await expect(summary).toBeVisible();
 }
 

@@ -4,9 +4,11 @@
  *          flight, the box looks for a `CampaignOpened` by this wallet in its own transactions of the last half hour
  *          of chain time, so a creator whose first opening landed is shown it instead of paying again. The plan names
  *          the indexer for this; it does not exist yet (Sprint 08), so the box reads the chain the way "My entries"
- *          does. It fails closed: when it cannot read what it needs (a 429, a transaction that does not read back, more
- *          transactions than it reads), it says it does not know, and the creator chooses.
- * Version: 0.2.0 (the Sprint 19 adversarial review: closed on errors, paged to the half hour, a missing time counts)
+ *          does. It reads newest first and stops at the first opening, so a busy wallet's retry still finds it. It fails
+ *          closed: when it found none but could not read everything (a 429, a transaction that does not read back,
+ *          more transactions than it reads), it says it does not know, and the creator chooses.
+ * Version: 0.3.0 (the Sprint 19 reviews: closed on errors, paged to the half hour, a missing time counts; the newest
+ *          read first, found before giving up)
  * Sprint:  19 (site: open a campaign)
  */
 import { address, signature as toSignature } from "@solana/kit";
@@ -26,8 +28,11 @@ export type RecentCheck = { status: "found"; opening: RecentOpening } | { status
 
 type Listed = { signature: string; err: unknown; blockTime: bigint | number | null };
 
-/** The wallet's signatures since `cutoff` (a missing block time counts as recent), newest first; `null` when too many. */
-async function recentSignatures(rpc: SolanaRpc, wallet: string, cutoff: bigint): Promise<Listed[] | null> {
+/**
+ * The wallet's signatures since `cutoff` (a missing block time counts as recent), newest first, and whether that is
+ * all of them: `complete` is false past PAGES × PAGE signatures in the half hour.
+ */
+async function recentSignatures(rpc: SolanaRpc, wallet: string, cutoff: bigint) {
   const out: Listed[] = [];
   let before: string | undefined;
   for (let page = 0; page < PAGES; page++) {
@@ -39,25 +44,31 @@ async function recentSignatures(rpc: SolanaRpc, wallet: string, cutoff: bigint):
       })
       .send()) as readonly Listed[];
     for (const s of listed) {
-      if (s.blockTime !== null && BigInt(s.blockTime) < cutoff) return out;
+      if (s.blockTime !== null && BigInt(s.blockTime) < cutoff) return { listed: out, complete: true };
       out.push(s);
     }
-    if (listed.length < PAGE) return out;
+    if (listed.length < PAGE) return { listed: out, complete: true };
     before = listed[listed.length - 1].signature;
   }
-  return null; // more than PAGES × PAGE transactions in half an hour: too many to read here
+  return { listed: out, complete: false };
 }
 
-/** The wallet's newest opening of the last half hour by the chain's clock, none, or unknown (never a guess). */
+/**
+ * The wallet's newest opening of the last half hour by the chain's clock, read newest first, so the one a retry
+ * follows is found even in a busy wallet; "none" only when every landed transaction of the half hour was read and
+ * none opened a campaign; "unknown" otherwise (never a guess).
+ */
 export async function recentOpening(rpc: SolanaRpc, wallet: string, chainNow: bigint): Promise<RecentCheck> {
   try {
-    const listed = await recentSignatures(rpc, wallet, chainNow - RECENT_SECONDS);
-    if (listed === null) return { status: "unknown" };
+    const { listed, complete } = await recentSignatures(rpc, wallet, chainNow - RECENT_SECONDS);
     const landed = listed.filter((s) => s.err === null);
-    if (landed.length > READS) return { status: "unknown" };
-    for (const s of landed) {
+    let unread = !complete || landed.length > READS;
+    for (const s of landed.slice(0, READS)) {
       const events = await eventsIn(rpc, s.signature);
-      if (events === null) return { status: "unknown" }; // a transaction that does not read back: it may be the one
+      if (events === null) {
+        unread = true; // a transaction that does not read back: it may be the one, so an older find still counts
+        continue;
+      }
       const opened = events.find((e) => e.name === "CampaignOpened" && e.data.creator === wallet);
       if (opened?.name === "CampaignOpened") {
         const id = opened.data.id;
@@ -65,7 +76,7 @@ export async function recentOpening(rpc: SolanaRpc, wallet: string, chainNow: bi
         return { status: "found", opening: { id, campaign: await campaignAddress(id), at } };
       }
     }
-    return { status: "none" };
+    return unread ? { status: "unknown" } : { status: "none" };
   } catch {
     return { status: "unknown" };
   }

@@ -46,7 +46,7 @@ time by leaving the list. We don't sell, rent or share the list, and we use it f
 
 | What | Why | How long |
 |---|---|---|
-| Your wallet address, and the campaigns you entered, opened or received from | Solana records them; it's how the program works. Our site reads them to show your entries, each campaign's activity and the devnet leaderboard | On Solana: forever, and public |
+| Your wallet address, and the campaigns you entered, opened or received from | Solana records them; it's how the program works. Our site reads them to show your entries, each campaign's activity and the devnet leaderboard. A campaign's page names the wallet that opened it and, on every kind but a price campaign, that wallet's own entries in it | On Solana: forever, and public |
 | A copy of that public data, in our server's memory | So the site loads fast without asking Solana for everything every time, and to work out the leaderboard | Until the server restarts. It is never written to disk |
 
 **Before your first entry, the site tells you this:** entries are public and permanent, anyone can see a wallet's
@@ -85,11 +85,16 @@ The campaign site keeps a few notes in your browser's storage, on your device. I
 - the name of the wallet app you connected last, so it can reconnect when you ask;
 - the campaigns you saved;
 - while an entry is on its way, a record of it (its wallet, campaign, side and amount), so trying again can't enter
-  twice. It is deleted once the entry lands, or a day after it was refused or could no longer land;
-- while a campaign you open is on its way, a record of it (its wallet, the campaign number drawn for it, and the
-  transaction's signature and expiry), so trying again can't open it twice. It is deleted once the campaign opens, or
-  a day after it was refused or could no longer land;
+  twice. It is deleted once the entry lands, or, the next time a campaign page opens, a day after it was refused or
+  could no longer land;
+- from the moment the page hands a campaign you open to your wallet, a record of it (its wallet, the campaign number
+  drawn for it, the transaction's signature and expiry, and when it was saved), so trying again can't open it twice.
+  It is deleted once the campaign opens or you refuse it in your wallet. If the opening failed or could no longer land,
+  the record stays, so trying again reuses its number, until the next time you open the creation box a day or more
+  after it was saved;
 - for the open tab only, how many times the page reloaded to wait out an update of the program.
+
+Clearing this site's data in your browser deletes all of these at once.
 
 ## 3. Who else touches your data
 
@@ -105,15 +110,18 @@ The campaign site keeps a few notes in your browser's storage, on your device. I
 - **Solana, and the wallet you choose** (Phantom or another), handle your transactions under their own rules. We don't
   control them.
 - **The Solana RPC service** the campaign site reads the chain through (on devnet, Solana's public one,
-  api.devnet.solana.com) sees your IP address and, when the page reads your balance, your entries or, before you pay to
-  open a campaign, your wallet's recent transactions, your wallet address, under its own rules.
+  api.devnet.solana.com) sees your IP address, under its own rules. It also sees your wallet address whenever the page
+  asks it about your wallet: your balance and your entries; a transaction you are about to sign, which the page tests
+  first, and its progress after you sign; and, before you pay to open a campaign, your wallet's recent transactions.
+  It sees the accounts you check in the creation box too.
 - **X** carries what you send us there, such as a report about a campaign or a request to leave the leaderboard. It
   stays on X, under X's rules. Asking on X ties your X account to your wallet in our messages there, until we delete
   the conversation once your request is done.
 - **An email service** will be needed to send the "we're open" email. We haven't picked one. This page will name it
   before the first email goes out.
 
-Our server and X are in the United States, and Cloudflare's network is worldwide, so your data leaves your country.
+Our server and X are in the United States, Cloudflare's network is worldwide, and the RPC service may be outside your
+country too, so your data leaves your country.
 We'll give data to the authorities only when the law requires it. There isn't much to give.
 
 ## 4. What we don't do

@@ -143,7 +143,9 @@ export function CostSection({
       {CLUSTER === "devnet" ? <p className="text-xs">{team ? RETURNS_DEVNET_TEAM : RETURNS_DEVNET}</p> : null}
       {!team && q ? <p className="text-xs text-muted">{MONEY.usdSource}</p> : null}
       {/* The balance against the most the opening can take (the adversarial review, L2), as the box's own check. */}
-      {wallet && balance !== null && check?.maxTotal !== null && check?.maxTotal !== undefined ? (
+      {wallet && balance !== null && (check?.maxTotal === null || check?.maxTotal === undefined) ? (
+        <p className="text-xs text-muted">{MONEY.balance(sol4(balance))}</p>
+      ) : wallet && balance !== null && check?.maxTotal !== null && check?.maxTotal !== undefined ? (
         balance >= check.maxTotal ? (
           <p className="text-xs text-st-open-fg">{MONEY.balanceOk(sol4(balance))}</p>
         ) : (

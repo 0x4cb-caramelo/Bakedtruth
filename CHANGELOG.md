@@ -35,24 +35,39 @@ recomendado (1a a 12a).
     o feed da Pyth com o estado lido na hora, a direção, a conta conferida pelas regras do leitor, o alvo, a época, o
     prazo), 3 Prévia (fixa ao lado no computador) e 4 Custo; no celular, uma barra embaixo com o total e o botão.
   - **A frase vem do modelo v1 de cada tipo** (`app/features/campaigns/sentence.ts`), a mesma função de todas as
-    páginas: o que quem abre lê é o que o cartão e a página mostram.
+    páginas: o que quem abre lê é o que o cartão e a página mostram. Queima e trava dizem a unidade bruta ("raw units",
+    "liquidity units"); pool e stake, a época medida.
   - **A cotação** é a do SDK, ao preço da Pyth menos a faixa de confiança, com o 90/10 e o `max_lamports` 1% acima
-    (a margem do desenho aprovado). Tudo em lamports exatos. O exemplo de referência do plano virou teste.
-  - **Cada recusa das linhas 1 a 10 tem a sua mensagem** (`copy-refusals.ts`), e treze casos recusados passam pela
-    caixa e, com os mesmos argumentos, direto pelo programa no LiteSVM, que recusa igual (A-10).
-  - **A guarda de nova tentativa (T17):** o id da campanha é sorteado uma vez e guardado no navegador antes de a
-    carteira ver a transação; toda reconstrução usa o mesmo id, então uma segunda tentativa falha na conta que já existe
-    em vez de cobrar US$ 500 de novo. Sem registro salvo, antes de uma abertura paga a caixa procura nas transações
-    recentes da própria carteira uma campanha aberta na última meia hora e a oferece primeiro.
-  - **Antes de assinar,** "Check before you sign" mostra cada argumento e o resumo do SDK dos bytes que a carteira
-    recebe (A-3). Um link preenche os campos e nunca assina. A chave da equipe abre de graça, sem prêmio e sem a parte
-    do criador.
+    (a margem do desenho aprovado), calculada só a partir do valor, desde a primeira tela; sem preço fresco, "Not priced
+    yet". Tudo em lamports exatos. O exemplo de referência do plano virou teste.
+  - **Cada recusa das linhas 1 a 10 tem a sua mensagem** (`copy-refusals.ts`), e 21 casos recusados e 3 aceitos passam
+    pela caixa e, com os mesmos argumentos, direto pelo programa no LiteSVM, que dá o mesmo veredito (A-10), em todos os
+    tipos que abrem; os demais erros com linha ficam nos testes de paridade do SDK da Sprint 05.
+  - **A guarda de nova tentativa (T17):** o id da campanha é sorteado uma vez e guardado no navegador quando "Sign in
+    wallet" entrega a transação, nunca antes; toda reconstrução usa o mesmo id, então uma segunda tentativa falha na
+    conta que já existe em vez de cobrar a abertura de novo. Sem tentativa em andamento, antes de uma abertura paga a
+    caixa procura nas transações recentes da própria carteira, da mais nova para a mais antiga, uma campanha aberta na
+    última meia hora e a oferece primeiro; quando não acha e não conseguiu ler tudo, diz que não sabe e quem abre
+    escolhe.
+  - **Antes de assinar,** "Check before you sign" mostra cada argumento, escrito só a partir da escolha preparada, e o
+    resumo do SDK dos bytes que a carteira recebe (A-3), com os avisos: devnet e SOL de teste, para onde vai o prêmio,
+    o que o devnet não envia sozinho, que a abertura não volta atrás, a regra sem entrada, que abrir é público e
+    permanente, os 18 anos. Um link preenche os campos, nunca o valor, e nunca assina. A chave da equipe abre de graça,
+    sem prêmio e sem a parte do criador, e não lê os avisos do prêmio.
   - **O teste na web** ganhou a abertura paga (o valor guardado pelo programa é a cotação da caixa) e a da equipe, nas
     duas larguras, e, no computador, três recusas e a guarda (resposta perdida num recarregamento, tentativa expirada
     refeita no mesmo id, armazenamento apagado, carteira que nunca responde).
-  - **Também:** a página de taxas aponta para a caixa; `scripts/team/check-opening.ts`, só leitura, confere uma
-    abertura contra a fórmula (os passos no `deploy/devnet/README.md`); a lista de conferência dos navegadores das
-    carteiras (X2.2) passa a existir, com a abertura; a página de privacidade diz o que a caixa guarda e lê.
+  - **Também:** a página de taxas aponta para a caixa e diz "US$500 or more", a faixa de confiança e o teto de 1%;
+    `scripts/team/check-opening.ts`, só leitura, confere uma abertura contra a fórmula (os passos no
+    `deploy/devnet/README.md`); a lista de conferência dos navegadores das carteiras (X2.2) passa a existir, com a
+    abertura; a página de privacidade diz quando o registro da caixa é escrito e apagado e o que o serviço de RPC vê; o
+    resumo do SDK diz que a parte do criador é "1% of the entries".
+  - **As revisões de texto, jurídica e adversária, aplicadas:** os itens obrigatórios e os altos (a folha escrita a
+    partir do rascunho, a busca das aberturas recentes que falhava aberta, o "Free (team key)" para quem paga, a chave
+    da equipe lendo sobre prêmio, os alvos sem unidade, "Row 7:" na tela, o valor vindo do link) e a maior parte dos
+    recomendados. Ao corrigir, apareceram três defeitos, corrigidos com teste: um alvo com letras derrubava a caixa,
+    uma data digitada antes da hora se perdia, e um feed que a Pyth deixou de verificar mostrava "Reading the feed's
+    price…" para sempre. O que ficou para depois está no plano técnico, §7.5; as nove perguntas de privacidade, no §8.3.
   - **Esperando:** a abertura no devnet e a da equipe à mão (escrita no devnet é do fundador); os celulares reais; o
     preço em US$ do CoinGecko (`/api/v1/price`), os nomes da API, o relay `/rpc` e o bloqueio por país, o
     `content/partners.json` e o cartão de compartilhar, que são de outras sprints.
@@ -148,10 +163,12 @@ recomendado (1a a 12a).
 ### Changed
 
 - **Sprint 19: a frase das campanhas de queima, trava e stake** (10/10/2026). O cartão e a página dessas campanhas
-  diziam só o tipo e o endereço ("Burn campaign So11…1112"); agora dizem a frase do modelo v1, com o alvo ("So11…1112
-  supply falls to 1,000"). A frase de preço não mudou. **A privacidade** ganhou o registro da abertura que o navegador
-  guarda enquanto ela está a caminho e a leitura das transações recentes da carteira antes de uma abertura paga; a
-  página no ar só muda quando o fundador publicar a landing.
+  diziam só o tipo e o endereço ("Burn campaign So11…1112"); agora dizem a frase do modelo v1, com o alvo e a unidade
+  ("So11…1112 supply falls to 1,000 raw units"; "Stake pool … holds at least … SOL at the start of epoch 812"). A frase
+  de preço não mudou. **A privacidade** diz quando o navegador guarda o registro de uma abertura e quando o apaga, o que
+  o serviço de RPC vê (o saldo, a transação testada antes de assinar e o andamento dela, as transações recentes antes de
+  uma abertura paga, as contas conferidas na caixa) e que apagar os dados do site apaga as notas do navegador; a página
+  no ar só muda quando o fundador publicar a landing.
 - **O site novo nas cores da marca** (10/10/2026, pedido do Ronaldo; branch `feat/apply-deck-ui`). As cores do
   `BRAND.md` §5, tiradas da página `/5` que o Lucas aprovou (branch `feat/site-3-original-com-cores-do-deck`), entram
   em `app/styles/tokens.css`: azul-marinho e laranja no escuro, creme e ferrugem no claro, nenhum azul. O escuro segue

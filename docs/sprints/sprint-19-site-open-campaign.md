@@ -2,7 +2,8 @@
 
 **Status:** built on 2026-10-10 and in review (a pull request into `main`, not merged); the items that need the
 founder, a devnet write or a real device are marked waiting below · **Branch:** `sprint-19-site-open-campaign`, cut
-from `origin/main` at `70fc29b` (PR #66, which holds the tag `sprint-13`) · **Dates:** none, by the founder's decision
+from `origin/main` at `70fc29b` (PR #66, which holds the tag `sprint-13`), with `origin/main` at `c25d500` (PR #67, the
+brand's colours) merged in before the pull request · **Dates:** none, by the founder's decision
 
 ## Record (2026-10-10)
 
@@ -13,7 +14,8 @@ from `origin/main` at `70fc29b` (PR #66, which holds the tag `sprint-13`) · **D
 - **What already existed.** Sprint 05's SDK holds the program's rules for an opening: `validateOpenCampaign` (rows 1 to 10
   in the program's order), the opening quote at `price − conf` with `max_lamports`, `prepareOpenCampaign` (A-3: re-read,
   checked, built, summarised from the bytes, simulated, the whole debit) and its parity tests against the program. The
-  box is the site's layer over them; nothing in the program or the SDK changed.
+  box is the site's layer over them. Nothing in the program changed; in the SDK, only the summary's words for the
+  creator's share ("1% of the entries", not "of the pot", the reviews' S24 and L14).
 - **The box** (`app/features/open-campaign/`, at `/abrir`): the four sections of the approved Sprint -1 design (1 What,
   2 Details, 3 Preview sticky beside them on a wide screen, 4 Cost) and the phone's sticky bar under 861 px. Pure pieces
   first, each with its test: `draft.ts` (the slots parsed as text into the SDK's `OpeningChoice`, no float), `kinds.ts`
@@ -23,28 +25,40 @@ from `origin/main` at `70fc29b` (PR #66, which holds the tag `sprint-13`) · **D
   and `recent.ts` (T17), `submit.ts` and `watch.ts` (the hand-off and the watch to `finalized`). Then the React hooks and
   the components.
 - **The sentence is template v1 everywhere.** `app/features/campaigns/sentence.ts` now writes one template per kind
-  (the price wording unchanged: "BTC/USD reaches 120,000"; a burn "<mint> supply falls to <raw target>"; a lock "Meteora
-  pool <pool> reaches <raw target> liquidity locked for good"; a stake pool "Stake pool <pool> reaches <SOL> SOL"; a
-  stake "Validator <vote account> reaches <SOL> SOL staked"), from the stored fields only, and the box's preview uses the
-  same function, so what a creator reads is what every page and card shows. Accounts are named by their shortened
-  address; a reviewed name shows beside them in the box, never inside the sentence.
+  (the price wording unchanged: "BTC/USD reaches 120,000"; a burn "<mint> supply falls to <target> raw units"; a lock
+  "Meteora pool <pool> reaches <target> liquidity units locked for good"; a stake pool "Stake pool <pool> holds at least
+  <SOL> SOL at the start of epoch <E>"; a stake "Validator <vote account> has at least <SOL> SOL staked in epoch <E>",
+  "its measured epoch" where a list has no epoch), from the stored fields only, and the box's preview uses the same
+  function, so what a creator reads is what every page and card shows. A field not filled in yet reads "(target)",
+  "(epoch)". Accounts are named by their shortened address; a reviewed name shows beside them in the box, never inside
+  the sentence.
 - **The money.** The box's quote is the SDK's at the sponsored SOL/USD account, minus its confidence band, with
   `max_lamports` the quote plus 1% (`MARGIN_BPS`, the "quote + 1%" of the approved design; T25). On US$500 that bounds a
   price move of about US$5; past it the program refuses (`OpeningAboveMaxLamports`) and only the network fee of a sent
   transaction could move. Every amount is written in exact lamports as SOL. The reference example of the plan
   (US$109.27: 4,575,821,360, 4,118,239,224 and 457,582,136 lamports) is a test.
 - **A-10.** Every error with a row of TP §3.4.10 has its own message in `copy-refusals.ts` (a test fails when one is
-  missing), and thirteen refused cases are built through the box itself (the draft, read through the site's RPC,
-  `checkBox`) and their very arguments sent straight to the program in LiteSVM, which refuses each with the same error;
-  two cases the box cannot stop by itself (the terms changed, the price moved past `max_lamports`) are refused by the
-  program and then by the SDK on its re-read (`tests/site/open-refusals.test.ts`, `open-cases.ts`).
-- **The retry guard (T17, A-9).** The id is drawn once per page (randomly), saved in this browser at "Review and sign"
-  before anything reaches the wallet, and reused by every rebuild, so a second send fails on the existing `Campaign`;
-  on a return without an answer the box looks the campaign up by its id on every poll until the transaction can no
-  longer land, and links `/c/{id}` instead of offering a new opening. With no saved record, a paid opening first reads
-  the wallet's own transactions of the last half hour (at most 20 signatures, 5 transactions read) and offers the
-  campaign it finds; the plan's indexer for this does not exist. Tested end to end in LiteSVM
-  (`tests/site/open-retry.test.ts`) and in the browser (`tests/e2e/open-guard.e2e.ts`).
+  missing). Twenty-one refused cases are built through the box itself (the draft, read through the site's RPC,
+  `checkBox`) and their very arguments sent straight to the program in LiteSVM, which refuses each with the same error:
+  the price kind's rows 3 to 5, 7, 8 and 10, a burn on the wrong owner and on a live mint authority, the closed
+  `StakeAtLeast`, and, since the adversarial review (M7), a stake pool's epoch already started or after the deadline,
+  its target already met, a pool that stopped updating, a Meteora pool's target met and a resized account, a price band
+  too wide and a target out of reach. Three accepted cases go through both too (a stake pool on its measured epoch, a
+  Meteora pool, a team key with a stale SOL/USD). A feed Pyth no longer fully verifies is refused by the program, and
+  the box names it at the asset field. Two cases the box cannot stop by itself (the terms changed, the price moved past
+  `max_lamports`) are refused by the program and then by the SDK on its re-read (`tests/site/open-refusals.test.ts`,
+  `open-cases.ts`, `open-kinds.test.ts`). The other errors with a row are fed to the program and to the SDK by Sprint
+  05's parity tests (`tests/sdk/validate-open-*.test.ts`).
+- **The retry guard (T17, A-9).** The id is drawn once per page and wallet (randomly), saved in this browser when "Sign
+  in wallet" hands the transaction over (never before: the legal review, M6), and reused by every rebuild, so a second
+  send fails on the existing `Campaign`; on a return without an answer the box looks the campaign up by its id on every
+  poll until the transaction can no longer land, and links `/c/{id}` instead of offering a new opening. A refusal in the
+  wallet deletes only its own attempt's record. With no record in flight, a paid opening first reads the wallet's own
+  transactions of the last half hour (pages of 25 signatures, at most four; at most 20 transactions read) and offers
+  the campaign it finds, newest first, so a busy wallet's retry still finds it; when it found none and could not read
+  everything it says so and the creator chooses (the adversarial review, H2; the web smoke found the busy case); the
+  plan's indexer for this does not exist. Tested end to end in LiteSVM (`tests/site/open-retry.test.ts`,
+  `open-recent.test.ts`) and in the browser (`tests/e2e/open-guard.e2e.ts`).
 - **The web smoke** gained "open a campaign" (`tests/e2e/open.e2e.ts`, desktop and 412 px: a paid opening from a link,
   whose stored charge equals the box's quote and the formula, and a team key's free opening) and "open a campaign:
   refusals and the retry guard" (`tests/e2e/open-guard.e2e.ts`, desktop: three refusals, an answer lost across a reload
@@ -56,14 +70,16 @@ from `origin/main` at `70fc29b` (PR #66, which holds the tag `sprint-13`) · **D
   the guard intends, so the tests answer that question.
 - **Deviations, each until the piece it needs exists** (TP §3.6, "Built in Sprint 19"): names from
   `content/account-names.json` (empty) and Pyth's pinned list, since `/api/v1/names` is not built; the US$ shown is the
-  opening's own terms and the Pyth price with its publish time, since `/api/v1/price` is not built; reads through the
+  opening's own amounts and the Pyth price with its publish time, since `/api/v1/price` is not built; reads through the
   site's RPC (`docs/technical/relay-allowlist.md` lists them), since `/rpc` is not built; the guard's second witness from
   the chain, since the indexer is not built; the list card in place of the share card, which Sprint 10 carried.
 - **Also changed.** The fee page links the box. The read-only `scripts/team/check-opening.ts` checks a stored opening
   against the formula (the devnet DoD's evidence), with its steps in `deploy/devnet/README.md`. The wallet in-app
   browser checklist (X2.2) exists now, opening included (`docs/technical/wallet-browser-checklist.md`). The privacy page
-  lists the box's browser record and its RPC read (`docs/legal/PRIVACY-POLICY.md`, `services/landing/public/privacy.html`
-  rebuilt). The root `tsconfig.json` maps the site's `@/` alias, so tests can import any site file.
+  says when the box's browser record is written and deleted, what the RPC sees, and that clearing the site's data
+  deletes the browser's notes (`docs/legal/PRIVACY-POLICY.md`, `services/landing/public/privacy.html` rebuilt; the nine
+  questions in TP §8.3). The fee page, How it works and the powers table say "US$500 or more", split 90/10 as a whole.
+  The root `tsconfig.json` maps the site's `@/` alias, so tests can import any site file.
 
 | | |
 |---|---|
@@ -93,7 +109,7 @@ program decides; the box only mirrors its refusals. A retry never charges twice.
       the server, since `/api/v1/names` is not built (`search.ts` and its query stay in the component's memory;
       `sentence.ts`, template v1).
 - [x] **The five kinds (D-k; P1 §4.2):** one sentence template each. `StakeAtLeast` is offered only after its devnet
-      YES (TP §3.4.10, row 1). **Done:** five templates; `StakeAtLeast` is shown as "Opens after a YES on devnet" and the
+      YES (TP §3.4.10, row 1). **Done:** five templates; `StakeAtLeast` is shown as "Opens after a test YES on devnet" and the
       box refuses it with row 1's message (`STAKE_AT_LEAST_OPENS`).
 - [x] **The account check preview:** the account slot accepts any address (D-i) and checks it live through `/rpc`
       against the same rules as the kind's reader at creation: owner, size and layout. On the price kind, the
@@ -117,14 +133,18 @@ program decides; the box only mirrors its refusals. A retry never charges twice.
       stale SOL/USD in `tests/site/open-refusals.test.ts`).
 - [x] **`validateOpenCampaign`** (SDK, Sprint 05) runs on every change. Each refusal of TP §3.4.10, rows 1 to 10,
       has its own message in `copy.ts`. The SDK refuses at least what the program refuses (X0.7), and a test sends each
-      refused case straight to the program, past the site, and sees the program refuse it too (A-10). **Done**
-      (`copy-refusals.ts`; `tests/site/open-refusals.test.ts`, "validateOpenCampaign refuses what the program refuses").
+      refused case straight to the program, past the site, and sees the program refuse it too (A-10). **Done** for
+      twenty-one refused and three accepted cases built through the box, on every kind that opens (`copy-refusals.ts`;
+      `tests/site/open-refusals.test.ts` and `open-kinds.test.ts`); the other errors with a row are fed to the program
+      and the SDK by Sprint 05's parity tests (`tests/sdk/validate-open-*.test.ts`).
 - [ ] **The preview card** is built from the exact `OpenCampaignArgs` the transaction carries (proposal Appendix B):
       the sentence; the rule in plain words; the live value with "if resolved now: YES/NO"; the money (house fee of
       10% of the losing side; creator share of 1% from the pot; the opening in SOL with its US$ value and 90/10 split;
       `max_lamports`; no cap); the share-card preview; and, on burn, lock and stake kinds, "quem abriu pode controlar o
-      resultado e pode ter entrado no SIM ou no NÃO" (BR-26). **Built**, the creator notice in the campaign page's own
-      English words, and the list card as it will look. **Waiting:** the share-card preview, for the share card itself
+      resultado e pode ter entrado no SIM ou no NÃO" (BR-26). **Built**, from the arguments `checkBox` built and, in the
+      review sheet, from the prepared choice only (the adversarial review, H1); the creator notice in the campaign
+      page's own English words on every kind but price, with who else can move the number; the creator's share written
+      as 1% of the entries; and the list card as it will look. **Waiting:** the share-card preview, for the share card itself
       (`app/c/[id]/opengraph-image.tsx`, carried by Sprint 10 and not built).
 - [x] Before signing, `@brot/sdk/tx` re-reads the accounts, simulates, and shows the deterministic summary (A-3).
       **Done:** "Check before you sign" lists every argument and the SDK's summary of the very bytes the wallet gets.
@@ -191,9 +211,10 @@ pull request):
    then the read-only check that the charge equals the formula; and a team key's free opening by hand. (a) after this
    pull request is merged, with the steps and the check in `deploy/devnet/README.md`; (b) once the site is deployed on
    the server. Recommended (a). **Waiting.**
-2. **The privacy page before `/abrir` is public:** the box keeps one new record in the browser and, with none saved,
-   reads the wallet's recent transactions from the RPC. (a) deploy the landing with the updated page before the new
-   site is public; (b) drop the RPC read and keep only the browser record. Recommended (a), built. **Waiting.**
+2. **The privacy page before `/abrir` is public:** the box keeps one new record in the browser and, with none in
+   flight, reads the wallet's recent transactions from the RPC. (a) deploy the landing with the updated page, a new
+   date and the post on X its section 8 promises, before the new site is public; (b) drop the RPC read and keep only
+   the browser record. Recommended (a), built. **Waiting.**
 3. **Known account names:** (a) ship with none but Pyth's pinned feeds; the team adds names to
    `content/account-names.json`, each reviewed by two people; (b) the founder names some devnet accounts now.
    Recommended (a), built. **Waiting.**
@@ -203,7 +224,15 @@ pull request):
 5. **Real phones (only the founder can do it):** the wallet in-app browser checklist, opening included, in Phantom and
    Solflare on Android and iOS (`docs/technical/wallet-browser-checklist.md`; X2.2). **Waiting.**
 
-Recorded rather than asked: the `max_lamports` margin is 1%, the "quote + 1%" of the approved Sprint -1 design.
+6. **The site's top banner** (asked after the legal review, N1): it says "We are in a test phase. Here you join with
+   test SOL, which has no real value.", the founder's own P1 §4.6 line, and the box now takes test SOL for openings
+   too. (a) "We are in a test phase. Here you join and open campaigns with test SOL, which has no real value."; (b) keep
+   it as it is: the box says it on its own, by the price and in the sheet.
+   Recommended (a), because the banner is on every page and openings cost far more test SOL than entries. Not
+   changed until answered. **Waiting.**
+
+Recorded rather than asked: the `max_lamports` margin is 1%, the "quote + 1%" of the approved Sprint -1 design; a link
+never sets the opening's amount (the adversarial review, M6).
 
 ## Agents and skills
 
@@ -229,6 +258,8 @@ bun test tests/ -t "open campaign refuses"                           # Sprint 02
 bun test tests/ -t "validateOpenCampaign refuses what the program refuses"   # added (A-10, X0.7)
 bun test tests/ -t "opening quote matches the program charge"        # added: quote vs lamports moved (I14)
 bun test tests/ -t "a retried opening reuses its id"                 # added (T17)
+bun test tests/ -t "a lost record is looked up on-chain"             # added: the guard's second witness, closed on errors
+bun test tests/ -t "the box's other kinds agree with the program"    # added: A-10 for pool, lock and more price refusals
 bun test tests/ -t "open campaign box"                               # added: templates, slots, prefill, search, names
 bun test tests/ -t "check an opening"                                # added: the devnet check script
 bun test tests/ -t "every mandatory notice is on its screen"         # Sprint 13's, with the box's notices

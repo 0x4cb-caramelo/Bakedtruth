@@ -118,8 +118,9 @@ export function useOpenFlow(a: {
         if (failure.name === "AlreadyInitialized") {
           // A campaign already sits at this id: this wallet's (another tab, an answer lost before the record was
           // saved) or another wallet's. The guard's rule says which; nothing is sent either way.
+          // Nothing was handed over, so nothing is written or cleared here (the store is not passed).
           const synthetic = { ...record, state: "handed" as const, deadline: "0", signature: null };
-          const found = await settleOpening(rpc, synthetic, store, watchFor(g, wallet));
+          const found = await settleOpening(rpc, synthetic, null, watchFor(g, wallet));
           if (found.kind === "opened") return finish({ kind: "already", id: found.id }, g);
           if (found.kind === "taken") return finish(found, g);
         }

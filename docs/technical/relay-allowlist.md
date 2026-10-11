@@ -58,8 +58,11 @@ public ledger data; the page decodes only this program's events, under the SDK's
   still refused, never accepted. The relay may answer such an account's owner and length only, with no data.
 - `simulateTransaction`: one transaction whose only top-level instruction is the program's `user_open_campaign`.
 - `getMinimumBalanceForRentExemption`: 512 bytes (a `Campaign`) and 0 bytes (its vault).
-- `getSignaturesForAddress`: the connected wallet's own address, `limit` 20, and `getTransaction` on at most five of
-  the signatures of the last half hour, only before a paid opening with no saved record (the guard's recent opening).
+- `getSignaturesForAddress`: the connected wallet's own address, `limit` 25 with `before` to page back, at most four
+  pages, until the half hour is covered; and `getTransaction` on at most 20 of the landed signatures of the last half
+  hour, newest first, stopping at the first opening, only before a paid opening with no record in flight (the
+  guard's recent opening, `recent.ts`). When it found none and could not read them all, the answer is "unknown", never
+  a guess: the relay may cap these lower, and the box then asks the creator.
 - `getSignatureStatuses`: the opening's signature, polled until `finalized`. `getBlockHeight` as for an entry.
 
 ## Not on the list

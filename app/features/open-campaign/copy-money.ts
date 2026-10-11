@@ -33,6 +33,7 @@ export const MONEY = {
   onEntries: (feePct: string, sharePct: string | null) =>
     `On entries: Brot keeps ${feePct} of the losing side · ${sharePct ? `you get ${sharePct} of the entries when the pot splits` : "no creator share"} · no cap on the pot`,
   usdSource: "The US$ values are the opening's own amounts; the SOL is what the program charges at Pyth's price.",
+  balance: (sol: string) => `Balance ${sol} SOL`,
   balanceOk: (sol: string) => `Balance ${sol} SOL, enough`,
   balanceShort: (need: string, has: string) => `You need up to ${need} SOL; this wallet has ${has} SOL.`,
   faucet: "Get devnet SOL",

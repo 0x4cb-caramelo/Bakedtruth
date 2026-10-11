@@ -1412,13 +1412,21 @@ system of Sprint -1; it replaces the provisional `services/landing` on `127.0.0.
   function every page uses. Where it departs from the bullets above, each until the piece it needs exists:
   - **Names** come from `content/account-names.json` (empty until the team adds a reviewed name) and Pyth's pinned
     feed list, read on the server: `/api/v1/names` (Sprint 08) is not built.
-  - **The US$ shown** is the opening's own terms (US$500, 450, 50) and the Pyth price the program charges at, with its
-    publish time: `/api/v1/price` (CoinGecko, D-e) is not built.
+  - **The US$ shown** is the opening's own amounts (US$500 or more, split 90/10 as a whole) and the Pyth price the
+    program charges at, with its publish time: `/api/v1/price` (CoinGecko, D-e) is not built. The box prices an
+    opening from its amount alone, from the first screen, and says "Not priced yet" while the SOL/USD price does not
+    allow it; only a team key reads "Free".
   - **Reads go through the site's RPC** (the public devnet one), not `/rpc`; `docs/technical/relay-allowlist.md` lists
     what the box calls. `brot-rpc`'s country refusal of an opening waits for the relay.
-  - **The retry guard's second witness** reads the wallet's own recent transactions from the chain (at most 20
-    signatures and 5 transactions of the last half hour, before a paid opening with no saved record), since the
-    indexer does not exist.
+  - **The retry guard's record** is written when "Sign in wallet" hands the transaction over, never before; a refusal in
+    the wallet and a landed opening delete it at once; a failed or expired one is kept, so a retry reuses its id; the
+    box deletes any record saved more than a day before when it loads (`retry-guard.ts`; the legal review, M6).
+  - **The retry guard's second witness** reads the wallet's own recent transactions from the chain (pages of 25
+    signatures, at most four, back to the last half hour; at most 20 transactions read; before a paid opening with no
+    record in flight), since the indexer does not exist. It reads newest first and stops at the first opening, so a
+    busy wallet's retry still finds it; when it found none and could not read everything, the creator is told so and
+    chooses (`recent.ts`; the adversarial review, H2).
+  - **A link never sets the amount** (the adversarial review, M6): `usd` is not a prefill key; the creator picks it.
   - **`max_lamports`** is the quote plus 1% (`MARGIN_BPS`), the approved design's "quote + 1%" (T25).
   - **The share-card preview** waits for the share card itself (Sprint 10, carried); the preview shows the list card.
   - **A team key opens free** only, as the DoD says (no `opening_usd`): a team key's prize (C44), which the program
@@ -2016,10 +2024,27 @@ what they found was fixed in the sprint (`docs/sprints/sprint-13-site-notices-co
 | Once contests exist, the history would score a closed contested campaign by its first outcome (`CampaignFinalized` carries none) | Wrong points for contested campaigns | 14 (with the contest's events) |
 | The history reads at `finalized` and lags the snapshot (`confirmed`): until it reads a reopened campaign's `CampaignOpened`, the live account is matched to the old opening; until it reads a just-finalized YES price campaign's `LateTallied`, a late join counts. A transaction skipped after five tries leaves its events out (a closed campaign's creator then unknown, so its wallet can score) while `complete` stays true (the review of the 3a follow-up, 2026-10-10) | A wrong point for seconds to a minute after a reopen or a finalize, longer after an API restart; a skipped opening can let its creator score | 08 (the indexer: match a live account to its opening by `opens_at`, count a final result only once the history holds the event that made it final, and say when a transaction could not be read) |
 
+### 7.5 Deferred in Sprint 19
+
+The copy, legal and adversarial reviews of Sprint 19 (2026-10-10) found two high findings in the box (the review sheet
+read the draft, not the signed arguments; the guard's second witness failed open) and fixed them in the sprint with the
+rest (`docs/sprints/sprint-19-site-open-campaign.md`, record). Deferred on purpose:
+
+| Finding | Risk while open | Sprint |
+|---|---|---|
+| The box and the SDK's preparation use the real schedule (`REAL_SCHEDULE`); a drill build on devnet would need `build.schedule` passed (the adversarial review, L13) | With a drill build, the entries-close time, the 3-day floor and the box's 10-minute margin shown would be wrong | 06, if a drill build is ever deployed |
+| "90%", "10%" and "US$500" are written in the box's labels, while the admin can change the opening's fee and prize share (`set_creation_params`) (the copy review, NIT 10) | After such a change, labels would disagree with the quote until the copy follows; `CreationParamsChanged` still protects the signature | Before the first change of the creation parameters |
+| `StakeAtLeast` stays closed: opening it needs the vote account's epoch stake (`getVoteAccounts`) passed to the box and the SDK (L9) | None while closed; turned on as is, the box's check would throw | When `StakeAtLeast` opens, after its devnet YES |
+| `script-src 'unsafe-inline'` (§7.2): an injected script could read the browser's opening record or change what the sheet shows (the legal review, N13) | As §7.2 | 16 |
+| The reads go through the public devnet RPC, not the `/rpc` relay; the relay's country refusal of an opening (C-11) waits for it | The RPC operator sees the wallet with the IP (§8.3) | 08 |
+| Before mainnet (the legal review, B1 to B12): creator-controlled outcomes (a notice on devnet; entries by the creator, creator duties or KYB on mainnet), the paid opening as a consumer purchase (withdrawal, the fee kept on a house failure with no entry), the creator's 1% and partner labels, age assurance, screening and licensing of paid openings, unlisting a paid campaign said before paying, the prominence of risk text in the sheet, marks and named third parties, token units next to raw units, and the policy's legal basis per purpose | Devnet only: test SOL, no value | 17 (L0) and the audits |
+
 ## 8. Privacy and compliance baseline
 
-Joining or opening a campaign collects no personal data, and the KPIs are computed without it (K-04) **[FD]** (TP
-v0.0.1 §8; P2 §6.3). Three points remain, each answered with the nine questions of `.claude/rules/privacy-audit.md`.
+Joining or opening a campaign sends Brot's servers no personal data, and the KPIs are computed without it (K-04)
+**[FD]** (TP v0.0.1 §8; P2 §6.3). The visitor's browser keeps a few notes of its own, and the RPC provider sees the
+wallet with the IP (§7.3; for the creation box, §8.3). Three points remain, each answered with the nine questions of
+`.claude/rules/privacy-audit.md`.
 v0.0.1's fourth column, the X username shown on the suggestions page, leaves with that page (P1 §4.1).
 
 | Question | Wallet address | Visitor IP address and country | The Android app's device data **[INF]** |
@@ -2146,6 +2171,27 @@ deleted after a request to leave the ranking. docs.brot.markets, which also desc
 and linked from the site (9a, prepared; live once the landing is deployed), and who holds the X login recorded (8a,
 done). Report channel: PASS, its X-login condition met (8a). Nothing blocked the merge; the condition left is deploying
 9a's pages.
+
+### 8.3 Sprint 19: the creation box
+
+The nine questions for what the creation box (`/abrir`) adds, answered before the merge (the legal review of
+2026-10-10, applied to the code as merged). Nothing new reaches Brot's servers; what is new is a record in the visitor's
+browser and what the RPC provider sees **[F]**.
+
+| Question | The opening's record in the browser | What the RPC provider sees | What the chain shows |
+|---|---|---|---|
+| 1. What data | One record per wallet and program: the wallet address (in the key and the record), the campaign id drawn for it, an attempt id, the transaction's signature and last valid block height, its state and the device time it was saved. Never an amount, a key or a search | The IP with the wallet address: the balance, the transaction the page simulates before the wallet signs it and its status after, and, before a paid opening with no record in flight, the wallet's signatures of the last half hour (pages of 25, at most four) and up to 20 of its transactions; the accounts checked in the box | The creator's wallet, the campaign, what it paid; the campaign's page labels the creator and, on every kind but price, the creator's own entries |
+| 2. Why, and on what basis | So a retry cannot charge the opening twice (T17, A-9). Legitimate interest or steps at the user's request are the working readings (L0) **[Q]** | Checking every rule before signing (A-10), pricing and confirming the opening; the recent read is the guard's second witness when storage was cleared | How the program works; the creator label is BR-26 |
+| 3. Where | `localStorage`, mirrored in the page's memory; never sent to Brot | The RPC operator's systems (on devnet, Solana's public RPC), location not known | Solana, public and permanent; the read API's copy in memory |
+| 4. Who can access | Whoever uses that browser profile, and scripts of the site's own origin (the CSP blocks third-party scripts; `unsafe-inline` is §7.5's) | The RPC operator | Anyone |
+| 5. Control | Same-origin storage; no copy on a server | Bounded reads, decoded in the browser and discarded | None: it is public |
+| 6. Retention | Written at the hand-off to the wallet, never before; deleted when the campaign opens, when the wallet refuses it, or when another wallet holds the id; a failed or expired record is kept so a retry reuses its id, until the creation box next loads a day or more after it was saved; clearing the site's data deletes it | The operator's own rules | Forever |
+| 7. Logs | None | The operator's own rules; the box logs nothing | — |
+| 8. Deletion and export | Clearing the site's data; Brot holds nothing to delete or export | Not Brot's | The chain cannot be changed; the policy says so |
+| 9. Document or consent | `docs/legal/PRIVACY-POLICY.md` (this PR) names the record, when it is written and deleted, the RPC's reads and that clearing the site's data deletes it; the sheet says the id is saved when "Sign in wallet" is pressed, and that an opening is public and permanent. No consent asked: the record is strictly needed for the opening the person asked for (L0 confirms) | The policy names the RPC service and what it sees | The sheet's public-opening notice |
+
+**Verdict.** PASS, with one condition before `/abrir` is reachable at a public address: the founder deploys the
+landing with this text, a new date and the post on X its section 8 promises (answer 9a; the legal review, M8).
 
 ## 9. Testing strategy
 

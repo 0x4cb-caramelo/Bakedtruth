@@ -6,7 +6,8 @@
  *          campaign's; the review rule and "Waiting for payout" in their states; BP-5's line on How it works; L-09's on
  *          the leaderboard; since Sprint 19, the creation box's preview (the creator notice on a burn campaign and not on
  *          a price one, with who else can move the number, the no-entry rule, no taking it back) and its review sheet of
- *          a prepared opening (every notice before signing; a team key's free opening without the prize's). No notice
+ *          prepared openings (every notice before signing; the creator's on a burn and not on a price; a team key's free
+ *          opening without the prize's). No notice
  *          promises an automatic payout or a time. The web smoke checks the same on the built site.
  *          Filter: `bun test tests/ -t "every mandatory notice is on its screen"`.
  * Version: 0.3.0 (Sprint 19: the creation box and its review sheet)
@@ -157,23 +158,28 @@ describe("every mandatory notice is on its screen", () => {
     for (const id of ["no-entry", "no-take-back"]) expect(`${id}: ${burn.includes(notice(id))}`).toBe(`${id}: true`);
   });
 
-  test("the review sheet of an opening: every notice before signing; a team key's free one drops the prize's", async () => {
+  test("the review sheet: every notice before signing, the creator's on a burn; a team key's drops the prize's", async () => {
     const rpc = createSolanaRpc(chain.url);
-    const sheet = async (creator: string, openingUsd: bigint) => {
-      const choice = {
-        kind: P.ReaderKind.PriceTouch,
-        feedId: bytesToHex(P.BTC_USD_FEED_ID),
-        target: (BTC_PRICE * 11n) / 10n,
-        deadlineAt: now(w.client) + 7n * P.DAY,
-        openingUsd,
-      };
+    const mint = await anyAddress();
+    R.setRawAccount(w.client, mint, R.mintBytes({ supply: 1_000_000n, mintAuthority: null }), P.SPL_TOKEN_PROGRAM_ID);
+    const btc = { feedId: bytesToHex(P.BTC_USD_FEED_ID), target: (BTC_PRICE * 11n) / 10n };
+    const sheet = async (creator: string, openingUsd: bigint, burn = false) => {
+      const deadlineAt = now(w.client) + 7n * P.DAY;
+      const choice = burn
+        ? { kind: P.ReaderKind.SupplyAtMost, metricAccount: mint, target: 900_000n, deadlineAt, openingUsd }
+        : { kind: P.ReaderKind.PriceTouch, ...btc, deadlineAt, openingUsd };
       const prepared = ready(await prepareOpening({ rpc, creator, choice, id: newId() }));
-      const props = { ready: prepared, choice, metric: P.BTC_USD_ACCOUNT, names: [], persists: true, refreshed: false };
+      const metric = burn ? mint : P.BTC_USD_ACCOUNT;
+      const props = { ready: prepared, choice, metric, names: [], persists: true, refreshed: false };
       return render(C.OpenReview, { ...props, onBack: () => undefined, onSign: () => undefined });
     };
     const paid = await sheet(w.creator.address, 500n);
     const ids = ["devnet-opening", "prize-fate", "no-take-back", "no-entry", "returns-devnet", "public-opening"];
     for (const id of ids) expect(`${id}: ${paid.includes(notice(id))}`).toBe(`${id}: true`);
+    expect(paid).not.toContain(notice("creator"));
+    const burn = await sheet(w.creator.address, 500n, true);
+    expect(burn).toContain(notice("creator-opening"));
+    expect(burn).toContain(PREVIEW.othersCanPush.burn);
     const free = await sheet(w.team.address, 0n);
     for (const id of ["prize-fate", "no-take-back", "no-entry", "returns-devnet"])
       expect(`${id}: ${free.includes(notice(id))}`).toBe(`${id}: false`);
