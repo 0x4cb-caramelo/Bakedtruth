@@ -22,7 +22,7 @@ import { MANDATORY_NOTICES } from "../../app/features/notices/registry";
 import { loadCampaignPage, type PageData } from "../../app/features/campaign-page/load";
 import { proofOf } from "../../app/features/campaign-page/proof";
 import { PREVIEW } from "../../app/features/open-campaign/copy";
-import { RETURNS_DEVNET_TEAM } from "../../app/features/open-campaign/copy-money";
+import { OPEN_DEVNET_TEAM, RETURNS_DEVNET_TEAM } from "../../app/features/open-campaign/copy-money";
 import { EMPTY_DRAFT } from "../../app/features/open-campaign/draft";
 import { previewFacts } from "../../app/features/open-campaign/preview";
 import { prepareOpening } from "../../app/features/open-campaign/submit";
@@ -184,8 +184,9 @@ describe("every mandatory notice is on its screen", () => {
     for (const id of ["prize-fate", "no-take-back", "no-entry", "returns-devnet"])
       expect(`${id}: ${free.includes(notice(id))}`).toBe(`${id}: false`);
     for (const id of ["devnet-opening", "public-opening"])
-      expect(`${id}: ${free.includes(notice(id))}`).toBe(`${id}: true`);
+      expect(`${id}: ${free.includes(notice(id))}`).toBe(`${id}: ${id === "public-opening"}`);
     expect(free).toContain(RETURNS_DEVNET_TEAM);
+    expect(free).toContain(OPEN_DEVNET_TEAM);
   });
 
   test("How it works says BP-5's line; the leaderboard says what points are worth (L-09)", () => {

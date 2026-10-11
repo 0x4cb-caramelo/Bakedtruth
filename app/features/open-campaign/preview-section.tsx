@@ -1,6 +1,6 @@
 /**
- * Purpose: section 3 of the creation box, "Preview" (spec 3.12; proposal Appendix B), built only from what the
- *          transaction will carry (`OpenArgs` as `checkBox` built them): the sentence; the value now with "if resolved
+ * Purpose: section 3 of the creation box, "Preview" (spec 3.12; proposal Appendix B), built from the draft as `checkBox`
+ *          reads it and the arguments it built (`OpenArgs`): the sentence; the value now with "if resolved
  *          now"; the rule in the campaign page's own words, with the account and its explorer link, the deadline in UTC
  *          and in the visitor's time, when entries close, the one-sided and void refunds and who decides; the money; the
  *          creator notice on every kind but price (BR-26), with who else can move the number; and the campaign's card
@@ -109,7 +109,7 @@ export function PreviewSection({ facts, footer }: { facts: PreviewFacts; footer:
             <Line label={L.voided}>{facts.team ? PREVIEW.voidedTeam : PREVIEW.voided}</Line>
             {facts.team ? null : <Line label={L.noEntry}>{NO_ENTRY_RULE}</Line>}
             <Line label={L.who}>
-              {PREVIEW.who(PRINCIPLE)} {facts.creatorNotice ? `${PREVIEW.whoCreator} ` : null}
+              {PREVIEW.who(PRINCIPLE, facts.team)} {facts.creatorNotice ? `${PREVIEW.whoCreator} ` : null}
               <Link href="/record" className="underline">
                 {PREVIEW.whoLink}
               </Link>

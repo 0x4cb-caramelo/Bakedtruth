@@ -4,8 +4,8 @@
  *          the box's id), the site's switch, the wallet and its balance, and the verdict `checkBox` returns on every
  *          change (A-10: the SDK's mirror of the program, in its order). A deadline given in days becomes a moment, on
  *          the minute, once the chain's clock is known (A-7). The id is this wallet's saved one, or one drawn for this
- *          page and saved only at "Review and sign".
- * Version: 0.1.0
+ *          page, saved only when "Sign in wallet" hands the transaction over (submit.ts).
+ * Version: 0.1.1 (the Sprint 19 coordinator review: the header says when the id is saved)
  * Sprint:  19 (site: open a campaign)
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -25,7 +25,7 @@ import { loadOpening, pruneSettledOpenings } from "./retry-guard";
 const REFRESH_MS = 15_000;
 const ACCOUNT_DEBOUNCE_MS = 400;
 
-/** The browser's store with this page's memory first; settled opening records older than a day are deleted. */
+/** The browser's store with this page's memory first; opening records saved more than a day ago are deleted. */
 export function openingStore(): KeyValueStore & { persists: boolean } {
   const local = browserStore();
   pruneSettledOpenings(local as Parameters<typeof pruneSettledOpenings>[0], Date.now());

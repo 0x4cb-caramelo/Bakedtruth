@@ -127,6 +127,7 @@ describe("the retry guard's rules", () => {
     at("handed", 0, "old-handed");
     at("expired", 2 * day - 1_000, "fresh-expired");
     local.setItem("another-site-key", "kept");
+    local.setItem(pendingKey("unreadable", "b"), "{not json"); // deleted, and it does not stop the others' clean-up
     pruneSettled(local, 2 * day);
     expect([...map.keys()].sort()).toEqual(
       ["another-site-key", pendingKey("fresh-expired", "b"), pendingKey("old-handed", "b")].sort(),

@@ -4,7 +4,7 @@
  *          SOL/USD price that holds paid openings), and the retry guard (T17, A-9): an answer lost across a reload, an
  *          expired attempt and the rebuilt opening on the same id; a browser whose storage was cleared is shown the
  *          wallet's recent opening before a second payment; two openings from one page, each on its own id; a wallet
- *          that sends and never answers.
+ *          that sends and never answers; and a deadline typed by hand, date first or time first.
  * Version: 0.2.0 (the Sprint 19 reviews: the new words; a stale SOL/USD said once, and the opening not priced)
  * Sprint:  19 (site: open a campaign)
  */
@@ -101,6 +101,38 @@ test.describe("open a campaign: refusals and the retry guard", () => {
     expect(second).not.toBe(first);
     await sheet(page).getByRole("button", { name: "Sign in wallet" }).click();
     await expect(heading(page, "Opened. Your campaign is live.")).toBeVisible();
+  });
+
+  test("a date typed before its time, or a time before its date, is kept until both make a moment", async ({
+    page,
+  }) => {
+    await openWithWallet(page, link());
+    const date = box(page).getByLabel("Date (your time zone)");
+    const time = box(page).getByLabel("Time (your time zone)");
+    const inUtc = box(page).getByText(/^In UTC:/);
+    await expect(inUtc).toBeVisible(); // the link's 7 days, once the chain's clock is read
+    const typed = await time.inputValue();
+    await date.fill("");
+    await expect(inUtc).toHaveCount(0);
+    await expect(time).toHaveValue(typed); // the time stays while the date is typed again
+    const { unix } = await control<{ unix: string }>("/now");
+    const day = await page.evaluate(
+      (ms) => {
+        const d = new Date(ms);
+        const two = (n: number) => String(n).padStart(2, "0");
+        return `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}`;
+      },
+      (Number(unix) + 10 * 86_400) * 1_000,
+    );
+    await date.fill(day);
+    await expect(inUtc).toBeVisible();
+    await time.fill("");
+    await date.fill("");
+    await time.fill("09:30"); // the time first, with no date yet
+    await expect(time).toHaveValue("09:30");
+    await date.fill(day);
+    await expect(inUtc).toBeVisible();
+    await expect(time).toHaveValue("09:30");
   });
 
   test("a wallet that sends and never answers: the opening is found by its id", async ({ page }) => {

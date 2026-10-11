@@ -6,7 +6,7 @@
  * Version: 0.2.0 (the Sprint 19 copy, legal and adversarial reviews: plainer words, help by unit, the team variant)
  * Sprint:  19 (site: open a campaign)
  */
-import { CREATOR_NOTICE } from "../campaign-page/copy";
+import { CREATOR_NOTICE, RAW_UNIT } from "../campaign-page/copy";
 import type { KindName } from "../campaign-page/proof";
 
 export const BOX = {
@@ -50,8 +50,8 @@ export const WHAT = {
 /** Each kind's account slot, the program that must own it, and the account named in a sentence of help. */
 export const KIND_WORDS: Record<KindName, { slot: string | null; owner: string; phrase: string; unit: string }> = {
   price: { slot: null, owner: "the Pyth receiver", phrase: "Pyth price account", unit: "" },
-  burn: { slot: "Token mint", owner: "the classic SPL Token program", phrase: "token mint", unit: "raw units" },
-  lock: { slot: "DAMM v2 pool", owner: "Meteora DAMM v2", phrase: "DAMM v2 pool", unit: "liquidity units" },
+  burn: { slot: "Token mint", owner: "the classic SPL Token program", phrase: "token mint", unit: RAW_UNIT.burn ?? "" },
+  lock: { slot: "DAMM v2 pool", owner: "Meteora DAMM v2", phrase: "DAMM v2 pool", unit: RAW_UNIT.lock ?? "" },
   pool: { slot: "Stake pool", owner: "the SPL Stake Pool program", phrase: "stake pool", unit: "SOL" },
   stake: { slot: "Vote account", owner: "the Vote program", phrase: "vote account", unit: "SOL" },
 };
@@ -156,8 +156,8 @@ export const PREVIEW = {
   voided:
     "Every entry is refunded in full and the prize returns to whoever opened; the opening fee too, only if the void is Brot's fault.",
   voidedTeam: "Every entry is refunded in full.",
-  who: (principle: string) =>
-    `${principle} The program reads the account. During the review window a team key can confirm a YES or a NO, never change it; when the program voided a campaign by itself, the team records the cause, which decides whether the opening fee comes back. On devnet one key can still replace the program at any time.`,
+  who: (principle: string, team = false) =>
+    `${principle} The program reads the account. During the review window a team key can confirm a YES or a NO, never change it; when the program voided a campaign by itself, the team records the cause${team ? "" : ", which decides whether the opening fee comes back"}. On devnet one key can still replace the program at any time.`,
   whoCreator: "On this kind, whoever opened the campaign may be able to move the number the program reads.",
   whoLink: "Who can do what",
   opening: (sol: string, usd: string, prize: string, fee: string) =>

@@ -21,7 +21,15 @@ import { FAUCET_URL } from "@/features/wallet/wallet-state";
 import { sol4 } from "../entry/amount";
 import { issuesAt, type BoxCheck } from "./check";
 import { BOX } from "./copy";
-import { MONEY, NO_ENTRY_RULE, OPEN_DEVNET, RETURNS_DEVNET, RETURNS_DEVNET_TEAM, TEAM } from "./copy-money";
+import {
+  MONEY,
+  NO_ENTRY_RULE,
+  OPEN_DEVNET,
+  OPEN_DEVNET_TEAM,
+  RETURNS_DEVNET,
+  RETURNS_DEVNET_TEAM,
+  TEAM,
+} from "./copy-money";
 import type { Draft } from "./draft";
 import { AmountPicker } from "./amount-picker";
 import { exactSol, NETWORK_FEE, usdSplit, usdText } from "./quote";
@@ -136,7 +144,7 @@ export function CostSection({
       </dl>
       {CLUSTER === "devnet" ? (
         <p className="rounded-sm bg-notice-bg px-3 py-2 text-xs" data-notice="devnet-opening">
-          {OPEN_DEVNET}
+          {team ? OPEN_DEVNET_TEAM : OPEN_DEVNET}
         </p>
       ) : null}
       {!team ? <p className="text-xs">{NO_ENTRY_RULE}</p> : null}

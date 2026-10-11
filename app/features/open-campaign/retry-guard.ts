@@ -7,7 +7,8 @@
  *          the deadline with no campaign there; until then, wait. Nothing is written before the hand-off; a refusal in
  *          the wallet deletes the record at once, a landed opening too; a failed or expired one is kept, so trying
  *          again reuses its id, and every record goes a day after it was saved (the legal review of Sprint 19, M6).
- * Version: 0.2.0 (the legal review: written at the hand-off only, pruned after a day whatever its state)
+ * Version: 0.2.1 (the legal review: written at the hand-off only, pruned after a day whatever its state; an
+ *          unreadable record no longer stops the clean-up)
  * Sprint:  19 (site: open a campaign)
  *
  * The store is entry/retry-guard.ts's: this page's memory, mirrored to localStorage when the browser allows it. Nothing
@@ -16,6 +17,7 @@
 import { PROGRAM_ID } from "@brot/sdk/read";
 
 import { KEEP_SETTLED_MS, newAttempt, type KeyValueStore } from "../entry/retry-guard";
+import { storedRecord } from "../entry/stored-record";
 
 /** "drawn": in memory only, nothing handed over yet; "handed": the wallet has it, answer unknown; "expired": handed, and
  * it can no longer land. ("refused" is read for records an earlier version wrote; a refusal now deletes the record.) */
@@ -161,7 +163,7 @@ export function pruneSettledOpenings(
     for (let i = 0; i < local.length; i++) {
       const key = local.key(i);
       if (!key?.startsWith("brot-pending-open:")) continue;
-      const record = JSON.parse(local.getItem(key) ?? "null") as Partial<PendingOpening> | null;
+      const record = storedRecord<PendingOpening>(local.getItem(key)); // unreadable: none, so deleted
       if (!record || now - (record.savedAt ?? 0) > KEEP_SETTLED_MS) stale.push(key);
     }
     stale.forEach((key) => local.removeItem(key));

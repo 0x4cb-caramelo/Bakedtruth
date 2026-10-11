@@ -64,6 +64,8 @@ export const STEPS = {
   checkingText: (blocks: string | null) =>
     `Looking it up by its id until the transaction can no longer land${blocks ? ` (${blocks} ${blocks === "1" ? "block" : "blocks"} left)` : ""}. Nothing is sent again.`,
   closable: "The id is saved: coming back looks the campaign up instead of opening it twice.",
+  closableMemory:
+    "This browser can't keep the id across a reload, so keep this page open until the opening is decided.",
   labels: ["Check", "Sign", "Confirm"],
 } as const;
 
@@ -80,7 +82,7 @@ export const DONE = {
 
 export const ALREADY = {
   title: (id: string) => `It's open: campaign ${id}`,
-  text: "This campaign is already open: your first transaction landed. The opening was paid once.",
+  text: "This campaign is already open: your first transaction landed. The opening went through once.",
   go: "Go to it",
 } as const;
 

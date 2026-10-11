@@ -21,7 +21,7 @@ import { FAIL, STEPS } from "./copy-sheet";
 import type { OpenFlow } from "./flow-state";
 import { exactSol } from "./quote";
 
-export function Signing({ flow }: { flow: Extract<OpenFlow, { step: "signing" }> }) {
+export function Signing({ flow, persists }: { flow: Extract<OpenFlow, { step: "signing" }>; persists: boolean }) {
   const text =
     flow.stage === "wallet"
       ? flow.total !== null && flow.most !== null
@@ -50,7 +50,7 @@ export function Signing({ flow }: { flow: Extract<OpenFlow, { step: "signing" }>
         ))}
       </ol>
       <p aria-live="polite">{text}</p>
-      <p className="text-xs text-muted">{STEPS.closable}</p>
+      <p className="text-xs text-muted">{persists ? STEPS.closable : STEPS.closableMemory}</p>
     </div>
   );
 }

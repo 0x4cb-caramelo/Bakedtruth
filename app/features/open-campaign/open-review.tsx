@@ -30,6 +30,7 @@ import {
   NO_ENTRY_RULE,
   NO_TAKE_BACK,
   OPEN_DEVNET,
+  OPEN_DEVNET_TEAM,
   PRIZE_FATE,
   RETURNS_DEVNET,
   RETURNS_DEVNET_TEAM,
@@ -166,7 +167,7 @@ export function OpenReview(p: {
         </p>
       ) : null}
       <ul className="list-disc space-y-1 pl-5 text-xs" data-testid="sheet-notices">
-        {CLUSTER === "devnet" ? <li>{OPEN_DEVNET}</li> : null}
+        {CLUSTER === "devnet" ? <li>{free ? OPEN_DEVNET_TEAM : OPEN_DEVNET}</li> : null}
         {free ? null : <li>{PRIZE_FATE}</li>}
         {free ? null : <li>{NO_TAKE_BACK}</li>}
         {free ? null : <li>{NO_ENTRY_RULE}</li>}

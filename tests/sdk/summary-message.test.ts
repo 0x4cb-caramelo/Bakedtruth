@@ -174,7 +174,7 @@ describe("the summary reads the signed bytes", () => {
       "Open campaign #9 on the price of Crypto.BTC/USD [feed e62df6c8…] at or above 120000.00000000",
       `created by ${baker.address}, who pays US$500, at most 4.236154621 SOL into its vault`,
       "(refused if Pyth's SOL/USD price less its confidence is below US$118.03 when it lands)",
-      "under creation terms version 1: Brot's fee 10.00% of the losing side; the creator's share 1.00% of the entries",
+      "under creation rules version 1: Brot's fee 10.00% of the losing side; the creator's share 1.00% of the entries",
     ]) {
       expect(opening).toContain(part);
     }

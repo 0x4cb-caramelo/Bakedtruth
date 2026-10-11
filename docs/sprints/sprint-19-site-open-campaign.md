@@ -1,6 +1,6 @@
 # Sprint 19 — Site: open a campaign (the creation box, `/abrir`)
 
-**Status:** built on 2026-10-10 and in review (a pull request into `main`, not merged); the items that need the
+**Status:** built on 2026-10-10 and in review (pull request #68 into `main`, not merged); the items that need the
 founder, a devnet write or a real device are marked waiting below · **Branch:** `sprint-19-site-open-campaign`, cut
 from `origin/main` at `70fc29b` (PR #66, which holds the tag `sprint-13`), with `origin/main` at `c25d500` (PR #67, the
 brand's colours) merged in before the pull request · **Dates:** none, by the founder's decision
@@ -43,8 +43,8 @@ brand's colours) merged in before the pull request · **Dates:** none, by the fo
   the price kind's rows 3 to 5, 7, 8 and 10, a burn on the wrong owner and on a live mint authority, the closed
   `StakeAtLeast`, and, since the adversarial review (M7), a stake pool's epoch already started or after the deadline,
   its target already met, a pool that stopped updating, a Meteora pool's target met and a resized account, a price band
-  too wide and a target out of reach. Three accepted cases go through both too (a stake pool on its measured epoch, a
-  Meteora pool, a team key with a stale SOL/USD). A feed Pyth no longer fully verifies is refused by the program, and
+  too wide and a target out of reach. Four accepted cases go through both too (a stake pool on its measured epoch, a
+  Meteora pool, a burn on a revoked mint, a team key with a stale SOL/USD). A feed Pyth no longer fully verifies is refused by the program, and
   the box names it at the asset field. Two cases the box cannot stop by itself (the terms changed, the price moved past
   `max_lamports`) are refused by the program and then by the SDK on its re-read (`tests/site/open-refusals.test.ts`,
   `open-cases.ts`, `open-kinds.test.ts`). The other errors with a row are fed to the program and to the SDK by Sprint
@@ -62,7 +62,8 @@ brand's colours) merged in before the pull request · **Dates:** none, by the fo
 - **The web smoke** gained "open a campaign" (`tests/e2e/open.e2e.ts`, desktop and 412 px: a paid opening from a link,
   whose stored charge equals the box's quote and the formula, and a team key's free opening) and "open a campaign:
   refusals and the retry guard" (`tests/e2e/open-guard.e2e.ts`, desktop: three refusals, an answer lost across a reload
-  then an expired attempt rebuilt on the same id, cleared storage, a wallet that never answers). It runs on LiteSVM, as
+  then an expired attempt rebuilt on the same id, cleared storage, a wallet that never answers, a deadline typed by
+  hand). It runs on LiteSVM, as
   Sprint 11's smoke does, not on Surfpool: the same program binary with the captured Pyth accounts, in process.
 - **Two bugs the smoke found and the box now handles.** After a reload, the watch of an unresolved attempt restarted on
   every render and never ended (callbacks recreated each render, fixed with refs), and the sheet did not show "Checking"
@@ -134,7 +135,7 @@ program decides; the box only mirrors its refusals. A retry never charges twice.
 - [x] **`validateOpenCampaign`** (SDK, Sprint 05) runs on every change. Each refusal of TP §3.4.10, rows 1 to 10,
       has its own message in `copy.ts`. The SDK refuses at least what the program refuses (X0.7), and a test sends each
       refused case straight to the program, past the site, and sees the program refuse it too (A-10). **Done** for
-      twenty-one refused and three accepted cases built through the box, on every kind that opens (`copy-refusals.ts`;
+      twenty-one refused and four accepted cases built through the box, on every kind that opens (`copy-refusals.ts`;
       `tests/site/open-refusals.test.ts` and `open-kinds.test.ts`); the other errors with a row are fed to the program
       and the SDK by Sprint 05's parity tests (`tests/sdk/validate-open-*.test.ts`).
 - [ ] **The preview card** is built from the exact `OpenCampaignArgs` the transaction carries (proposal Appendix B):
@@ -176,12 +177,14 @@ program decides; the box only mirrors its refusals. A retry never charges twice.
       `scripts/team/check-opening.ts`, tested in `tests/ops/check-opening.test.ts`).
 - [ ] The web smoke covers opening at desktop width and about 412 CSS px on Surfpool: a paid opening, a team-key
       opening, three refusals and the retry guard. The wallet in-app browser checklists gain the opening (X2.2, closed
-      in Sprint 13). **Built:** the smoke covers all of it at both widths, on LiteSVM as Sprint 11's smoke does; the
-      checklist is written (`docs/technical/wallet-browser-checklist.md`). **Waiting (founder item 5):** running it on
+      in Sprint 13). **Built:** the paid and the team key's openings at desktop and 412 CSS px (`open.e2e.ts`); the three
+      refusals, the retry guard and a deadline typed by hand once, at desktop width (`open-guard.e2e.ts`); on LiteSVM as
+      Sprint 11's smoke does; the checklist is written (`docs/technical/wallet-browser-checklist.md`). **Waiting (founder item 5):** running it on
       Phantom and Solflare on real Android and iOS phones.
 - [x] `cd app && bun run lint && bun run build` passes.
 - [ ] Common closure (`docs/SPRINTS.md`, section 4). **Done but the merge and the tag:** the checks, the secret scan,
-      the code map, CHANGELOG and session log, the reviews (below); the pull request waits for review and is not merged.
+      the code map, CHANGELOG and session log, the four reviews (below); pull request #68 waits for review and is not
+      merged.
 
 ## Deliverables
 
@@ -259,7 +262,8 @@ bun test tests/ -t "validateOpenCampaign refuses what the program refuses"   # a
 bun test tests/ -t "opening quote matches the program charge"        # added: quote vs lamports moved (I14)
 bun test tests/ -t "a retried opening reuses its id"                 # added (T17)
 bun test tests/ -t "a lost record is looked up on-chain"             # added: the guard's second witness, closed on errors
-bun test tests/ -t "the box's other kinds agree with the program"    # added: A-10 for pool, lock and more price refusals
+bun test tests/ -t "the box's other kinds agree with the program"    # added: A-10 for pool, lock, burn and more price refusals
+bun test tests/ -t "the creation box keeps its promises"             # added: the sheet's facts, the clean-up, no false refusal
 bun test tests/ -t "open campaign box"                               # added: templates, slots, prefill, search, names
 bun test tests/ -t "check an opening"                                # added: the devnet check script
 bun test tests/ -t "every mandatory notice is on its screen"         # Sprint 13's, with the box's notices
@@ -292,4 +296,72 @@ A paid opening and a team-key opening by hand on devnet, in a desktop browser an
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+**The reviews (2026-10-10).** Four reviews ran on the box. The legal report is filed for the lawyer in
+`docs/legal/2026-10-10-sprint-19-legal-review.md`, as Sprint 13's was; the others stayed in the session's scratchpad.
+
+- **Copy** (`copywriter-agent`): 9 must, 26 should, 14 nits. The ones that mattered: a paying creator read "Free (team
+  key)" and a total of a few thousandths of a SOL until every field was filled; the team key read about a prize and a
+  share it does not have; burn and lock targets had no unit; "Row 7:" reached the screen through the program's message;
+  the target help said to use a dot where no decimal parses. All must items and most others applied; NIT 10 (the 90/10
+  and US$500 written in labels) is deferred (TP §7.5).
+- **Legal** (`legal-compliance-agent`): the box's own devnet and not-audited lines, where the prize goes in the usual
+  case and that devnet sends nothing by itself, "public and permanent" before an opening, an exact privacy page and
+  the nine questions (TP §8.3): applied. M8, deploying the landing before `/abrir` is public, is the founder's (item 2);
+  N1, the top banner's words, is the founder's (item 6); B1 to B12, before mainnet, are in TP §7.5 for the lawyer.
+- **Devil's advocate** (`devils-advocate-agent`): two high findings, fixed: the review sheet wrote its sentence,
+  account and target from the draft, which could change while the opening was prepared (now from the prepared choice
+  only, and the box is inert while it prepares); the recent-openings look-up failed open. Also fixed: never "free" by
+  default, `max_lamports` and the balance against the most an opening can take, the record cleared only by its own
+  attempt, the id redrawn as soon as a campaign sits at it, a superseded watch kept off the screen, commas only as
+  thousands, the 90-day choice inside the bound, the link that set the amount, and the A-10 claim (now 21 refused and
+  4 accepted cases on every kind that opens). L9 and L13 are deferred (TP §7.5).
+- **Coordinator** (`coordinator-agent`, the final gate): **approve with conditions**. Both high findings and every must
+  item of the three reviews were fixed in the code; six conditions, all applied: a header that still said the id was
+  saved at "Review and sign"; this DoD's web-smoke line, which claimed both widths for everything; a test claimed for
+  the date typed before its time that did not exist (now in the smoke); the privacy page's "before you open a
+  campaign"; this record (the coordinator's verdict, the legal report filed); and the checks run again. Its should-fix
+  items were applied too: a team key's own devnet line and "went through once", a test of the review sheet's facts
+  and of the one-day clean-up, no false refusal while an account is read, the unit on the campaign page's proof and
+  state panels, an accepted burn case, "creation rules" in the SDK's summary, and the residuals in TP §7.5.
+
+**Found while fixing and checking.** A target with letters ("abc", "1e5") threw and would have taken the whole box down;
+a date typed before its time was wiped; a feed Pyth no longer fully verifies showed "Reading the feed's price…" forever.
+The web smoke then found two regressions of the fixes themselves: with a stale SOL/USD the box no longer showed the
+wallet's balance, and the recent-openings look-up gave up before reading anything once a wallet had more than 20
+transactions in the half hour, so a busy wallet's retry was asked "couldn't check" instead of shown its campaign (now
+read newest first). The coordinator's test of the one-day clean-up found one more, older than the sprint: one unreadable
+record in the browser stopped the clean-up of every other, for openings and for Sprint 11's entries alike (now each
+record is read on its own). Each has a test.
+
+**`main` moved.** PR #67 (the brand's colours) was merged into the branch before the pull request: `CHANGELOG.md`
+keeps both entries, `session-log/INDEX.md` merged by itself, `CODEMAP.md` was generated again. Every colour token the
+box uses exists in the new tokens.
+
+**Checks, on the merged head, after the coordinator's conditions.**
+
+| Check | Result |
+|---|---|
+| `bun run test` | 701 pass, 3 fail: the three CPI-proxy tests, which fail locally by design (CI builds `cpi_proxy.so`) |
+| `bunx tsc --noEmit`, and the app's `tsc` | clean |
+| `bun run lint`; `cd app && bun run lint` | clean |
+| `cd app && bun run build` (devnet) | passes; A-8 reads the deploy at slot 509389614 |
+| Web smoke (`bun run e2e`, isolated network) | 38 passed, 0 failed, 22 skipped by design (each width's own tests) |
+| The opening scenarios with the site built and served by Bun 1.4.2 (`E2E_RUNTIME=bun`) | 9 passed, 0 failed, 5 skipped by design |
+| `node scripts/codemap.js --check` | up to date |
+| `node scripts/ci-secret-scan.js origin/main` | clean |
+| `node scripts/os-self-test.js` | coherent, with its usual warnings |
+| Landing tests, after rebuilding the privacy page | 47 pass |
+| CI on pull request #68 | green on `8259f13` (App, Repo, Program, Mobile bundle); the final head's run is in the pull request |
+
+**Retrospective.**
+
+- **What worked.** Writing the pure pieces first, each with its test, made the reviews' many changes cheap and safe:
+  most landed as copy or one function. Building the A-10 cases through the box itself, not only the SDK, is what
+  proved the units and the epoch parsing once the new kinds were added. The web smoke caught two regressions that the
+  unit tests could not see.
+- **What did not.** The first build showed "Free (team key)" to a payer and wrote the review sheet from the draft: a
+  test of what a paying visitor sees before filling anything, and one rendering the sheet from prepared arguments,
+  would have caught both before review. The DoD's A-10 line claimed more than the tests did. The first privacy text
+  was written before the guard's write and delete rules settled, and described an older rule.
+- **Next time.** Render every screen that carries a notice in the notices test from the first commit; count the cases
+  before writing a DoD claim; write the privacy bullet last, from the code's own tests.

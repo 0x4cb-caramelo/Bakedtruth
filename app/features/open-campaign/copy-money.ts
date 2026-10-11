@@ -47,6 +47,9 @@ export const NO_TAKE_BACK = "The opening can't be taken back: the prize stays in
 /** The legal review (M1): the box's own devnet line, said where the price is, and in the sheet before signing. */
 export const OPEN_DEVNET =
   "Solana devnet: an opening is paid in test SOL, which has no real value. The US$ amounts only set how much test SOL it costs, at Pyth's SOL/USD price. The program is not audited yet.";
+/** The coordinator review (S-1): a team key's opening pays no US$ amount, only the rent and the network fee. */
+export const OPEN_DEVNET_TEAM =
+  "Solana devnet: the rent and the network fee are paid in test SOL, which has no real value. The program is not audited yet.";
 /** The legal review (M3): the usual case, said plainly; the founder's devnet wording for what comes back. */
 export const PRIZE_FATE =
   "When the pot splits, the prize goes to the side that was right. It comes back to you only if nobody enters, the pot is refunded (one side only, or a losing side too small to pay the fees) or the campaign is voided.";

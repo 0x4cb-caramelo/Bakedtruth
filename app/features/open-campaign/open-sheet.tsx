@@ -110,7 +110,7 @@ export function OpenSheet(p: {
           </Button>
         </div>
       ) : flow.step === "signing" ? (
-        <Signing flow={flow} />
+        <Signing flow={flow} persists={p.review.persists} />
       ) : flow.step === "done" ? (
         <div className="space-y-3 text-sm">
           {flow.outcome.kind === "opened" ? (

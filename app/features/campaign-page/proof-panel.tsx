@@ -4,7 +4,7 @@
  *          and its confidence, when it was published and posted, the campaign's maximum price age (30 s floor), and what
  *          the screen says when no fresh price exists (L-22) or the price sits within 1% of the target. Then the account
  *          read with its explorer link, the owner checked first, and entries close and the deadline in UTC and local time.
- * Version: 0.1.0
+ * Version: 0.1.1 (Sprint 19: burn and lock numbers with their unit)
  * Sprint:  11 (site: campaign page and entry)
  */
 "use client";
@@ -15,8 +15,8 @@ import { ArrowUpRight, Eye } from "lucide-react";
 import { cx } from "@/components/ui/cx";
 import { Outcome, shortAddress } from "@/lib/brot";
 import { explorerAddress } from "@/lib/config";
-import { PRICE, PROOF } from "./copy";
-import { ageText, grouped, local, utc, valueText } from "./format";
+import { PRICE, PROOF, RAW_UNIT } from "./copy";
+import { ageText, grouped, local, utc, valueText, valueWithUnit } from "./format";
 import type { PageData } from "./load";
 import { READER, type Proof } from "./proof";
 
@@ -41,6 +41,7 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
   const exponent = proof.price?.exponent ?? c.priceExponent;
   const value = proof.value === null ? null : valueText(proof.kind, proof.value, exponent);
   const reader = READER[proof.kind];
+  const unit = RAW_UNIT[proof.kind];
   return (
     <section aria-labelledby="proof-title" className="rounded-md border border-line bg-panel p-4">
       <h2 id="proof-title" className="m-0 mb-3 flex items-center gap-2 font-display text-2xl font-bold">
@@ -49,7 +50,8 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
       </h2>
       {c.outcome === Outcome.Yes || c.outcome === Outcome.No ? (
         <p className="m-0 mb-3 rounded-sm bg-raised px-3 py-2 text-sm">
-          {PROOF.recorded}: <b className="tabular-nums">{valueText(proof.kind, c.observedValue, c.priceExponent)}</b> ·{" "}
+          {PROOF.recorded}:{" "}
+          <b className="tabular-nums">{valueWithUnit(proof.kind, c.observedValue, c.priceExponent)}</b> ·{" "}
           {utc(c.resolvedAt)}
         </p>
       ) : null}
@@ -57,6 +59,7 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
         <p className="m-0">
           <small className="block text-xs text-muted">{proof.kind === "price" ? PRICE.current : PROOF.valueNow}</small>
           <b className="font-display text-3xl tabular-nums">{value ?? "—"}</b>
+          {value && unit ? <small className="ml-1 text-xs text-muted">{unit}</small> : null}
           {proof.price ? (
             <small className="block text-xs text-muted">
               {PRICE.confidence(valueText("price", proof.price.conf, exponent))}
@@ -68,6 +71,7 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
           <b className="font-display text-3xl tabular-nums">
             {proof.comparator} {valueText(proof.kind, c.target, c.priceExponent)}
           </b>
+          {unit ? <small className="ml-1 text-xs text-muted">{unit}</small> : null}
         </p>
       </div>
       {proof.problem ? (

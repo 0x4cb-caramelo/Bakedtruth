@@ -89,12 +89,14 @@ termos que mudaram desde a prévia; linha 9, transação malformada; linha 10, o
 
 ## As revisões
 
-Quatro revisões, com os relatórios guardados fora do repositório (no rascunho da sessão):
+Quatro revisões. O relatório jurídico ficou guardado para o advogado (`docs/legal/2026-10-10-sprint-19-legal-review.md`),
+como o da Sprint 13; os outros ficaram no rascunho da sessão.
 
 - **A de texto** achou 9 itens obrigatórios, 26 recomendados e 14 detalhes. Os que mais pesavam: quem pagava lia "Free
   (team key)" e um total de milésimos de SOL até preencher tudo; a chave da equipe lia sobre prêmio e parte do criador
   que ela não tem; os alvos de queima e trava sem unidade; "Row 7:" chegando à tela pela mensagem do programa; a ajuda
-  do alvo mandando usar ponto onde nenhum decimal vale. Todos aplicados; o que ficou está no plano, §7.5.
+  do alvo mandando usar ponto onde nenhum decimal vale. Todos os obrigatórios e a maior parte dos outros aplicados; o
+  que ficou está no plano, §7.5.
 - **A jurídica** pediu os avisos de devnet e "sem auditoria" na própria caixa e na folha, onde vai o prêmio no caso comum
   e que o devnet não envia nada sozinho, "público e permanente" antes de abrir, a página de privacidade exata e as nove
   perguntas no plano (§8.3). Aplicados. Ficam com o fundador: publicar a landing antes de `/abrir` ficar público (a
@@ -104,11 +106,22 @@ Quatro revisões, com os relatórios guardados fora do repositório (no rascunho
   partir do rascunho, que podia mudar durante a preparação (agora vem só da escolha preparada, e a caixa fica inerte
   enquanto prepara); e a busca das aberturas recentes falhava aberta. Também: o valor vindo de um link (agora o link não
   define o valor), uma conta de terceiro e o aviso só sobre o criador (agora a caixa diz quem mais pode mexer no
-  número), a cobertura A-10 menor do que o DoD dizia (agora 21 casos recusados e 3 aceitos passam pela caixa e pelo
+  número), a cobertura A-10 menor do que o DoD dizia (agora 21 casos recusados e 4 aceitos passam pela caixa e pelo
   programa, em todos os tipos que abrem), a vírgula lida como nada ("1,5" virava 15), e uma vigia antiga que podia
   sobrescrever um fluxo novo.
+- **A do coordenador** (o portão final): aprovou com condições. Os dois achados altos e todos os obrigatórios das três
+  revisões estavam corrigidos; as seis condições foram aplicadas: um cabeçalho que ainda dizia que o id era guardado no
+  "Review and sign"; a linha do DoD que dizia que o teste na web roda tudo nas duas larguras; um teste prometido para a
+  data digitada antes da hora que não existia (agora está no teste na web); o "antes de abrir uma campanha" na página de
+  privacidade; este registro (o veredito e o relatório jurídico guardado); e as checagens rodadas de novo. Também
+  entraram os recomendados: a linha de devnet própria da chave da equipe, um teste dos fatos da folha e da limpeza de
+  um dia, nenhuma recusa falsa enquanto a conta é lida, a unidade nos painéis da página da campanha, um caso aceito de
+  queima, "creation rules" no resumo do SDK, e o que sobrou anotado no plano, §7.5.
 - **Achados ao corrigir:** um alvo com letras ("abc", "1e5") derrubava a caixa inteira; uma data digitada antes da hora
-  se perdia; e um feed que a Pyth deixou de verificar mostrava "Reading the feed's price…" para sempre. Os três têm teste.
+  se perdia; e um feed que a Pyth deixou de verificar mostrava "Reading the feed's price…" para sempre. O teste da
+  limpeza de um dia, pedido pelo coordenador, achou um quarto, mais antigo que a sprint: um registro ilegível no
+  navegador parava a limpeza de todos os outros, das aberturas e das entradas da Sprint 11 (agora cada registro é lido
+  sozinho). Todos têm teste.
 
 ## A mescla da `main`
 

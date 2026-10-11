@@ -3,10 +3,13 @@
  *          plain words, the proof's labels, the price facts and the screen when no fresh price exists (L-22), the
  *          re-check panel, the creator notice (BR-26, BP-14's recommendation, still open in P-9), the pot, the activity
  *          and the state card. The entry panel's words are in features/entry/copy.ts.
- * Version: 0.2.0 (Sprint 12: the closed account; the state words moved to copy-states.ts)
+ * Version: 0.2.1 (Sprint 19: the burn and lock rules and units; 0.2.0, Sprint 12: the closed account)
  * Sprint:  11 (site: campaign page and entry); 12
  */
 import type { KindName } from "./proof";
+
+/** The unit a burn or a lock number is read in (the Sprint 19 copy review, M8): the program compares raw values. */
+export const RAW_UNIT: Partial<Record<KindName, string>> = { burn: "raw units", lock: "liquidity units" };
 
 export const KIND_NAME: Record<KindName, string> = {
   price: "Price",

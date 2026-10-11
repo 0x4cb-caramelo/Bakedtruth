@@ -28,7 +28,7 @@ recomendado (1a a 12a).
 ### Added
 
 - **Sprint 19: a caixa de abertura em `/abrir`; qualquer carteira abre uma campanha pelo site** (branch
-  `sprint-19-site-open-campaign`, 10/10/2026; `docs/sprints/sprint-19-site-open-campaign.md`; pull request aberto, não
+  `sprint-19-site-open-campaign`, 10/10/2026; `docs/sprints/sprint-19-site-open-campaign.md`; pull request #68, não
   mesclado).
   - **A caixa** (`app/features/open-campaign/`), como o desenho aprovado da Sprint -1: 1 O quê (a busca nos modelos e
     nos nomes conhecidos, que nunca sai do navegador, e os cinco tipos), 2 Detalhes (a frase se preenchendo e os campos:
@@ -40,7 +40,7 @@ recomendado (1a a 12a).
   - **A cotação** é a do SDK, ao preço da Pyth menos a faixa de confiança, com o 90/10 e o `max_lamports` 1% acima
     (a margem do desenho aprovado), calculada só a partir do valor, desde a primeira tela; sem preço fresco, "Not priced
     yet". Tudo em lamports exatos. O exemplo de referência do plano virou teste.
-  - **Cada recusa das linhas 1 a 10 tem a sua mensagem** (`copy-refusals.ts`), e 21 casos recusados e 3 aceitos passam
+  - **Cada recusa das linhas 1 a 10 tem a sua mensagem** (`copy-refusals.ts`), e 21 casos recusados e 4 aceitos passam
     pela caixa e, com os mesmos argumentos, direto pelo programa no LiteSVM, que dá o mesmo veredito (A-10), em todos os
     tipos que abrem; os demais erros com linha ficam nos testes de paridade do SDK da Sprint 05.
   - **A guarda de nova tentativa (T17):** o id da campanha é sorteado uma vez e guardado no navegador quando "Sign in
@@ -67,7 +67,12 @@ recomendado (1a a 12a).
     da equipe lendo sobre prêmio, os alvos sem unidade, "Row 7:" na tela, o valor vindo do link) e a maior parte dos
     recomendados. Ao corrigir, apareceram três defeitos, corrigidos com teste: um alvo com letras derrubava a caixa,
     uma data digitada antes da hora se perdia, e um feed que a Pyth deixou de verificar mostrava "Reading the feed's
-    price…" para sempre. O que ficou para depois está no plano técnico, §7.5; as nove perguntas de privacidade, no §8.3.
+    price…" para sempre. O coordenador aprovou com condições, todas aplicadas, e o teste que ele pediu para a limpeza
+    de um dia achou um quarto defeito, mais antigo: um registro ilegível no navegador parava a limpeza de todos os
+    outros, das aberturas e das entradas. A página da campanha passou a mostrar a unidade dos números de queima e
+    trava; o resumo do SDK diz "creation rules". O relatório jurídico ficou guardado para o advogado
+    (`docs/legal/2026-10-10-sprint-19-legal-review.md`). O que ficou para depois está no plano técnico, §7.5; as nove
+    perguntas de privacidade, no §8.3.
   - **Esperando:** a abertura no devnet e a da equipe à mão (escrita no devnet é do fundador); os celulares reais; o
     preço em US$ do CoinGecko (`/api/v1/price`), os nomes da API, o relay `/rpc` e o bloqueio por país, o
     `content/partners.json` e o cartão de compartilhar, que são de outras sprints.

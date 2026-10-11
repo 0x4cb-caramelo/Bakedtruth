@@ -1,7 +1,7 @@
 /**
  * Purpose: A-10 for the box's other kinds and its price refusals past row 4's staleness (the Sprint 19 adversarial
- *          review, M7): a stake pool opened on its measured epoch and a Meteora pool on its locked liquidity, each
- *          accepted by the box and by the program; then the epoch refusals, a pool that stopped updating, a pool's
+ *          review, M7): a stake pool opened on its measured epoch, a Meteora pool on its locked liquidity and a burn on
+ *          a revoked mint, each accepted by the box and by the program; then the epoch refusals, a pool that stopped updating, a pool's
  *          target already met, a resized DAMM v2 account, a price band too wide, a target out of reach, and a feed
  *          Pyth no longer fully verifies. Each is built through the box (a draft read through the site's RPC, checked
  *          by `checkBox`), and the very arguments it would sign go straight to the program in LiteSVM, past the site,
@@ -21,6 +21,7 @@ import * as P from "../brot/program";
 import {
   DAMM_OFFSETS,
   fixtureBytes,
+  mintBytes,
   setClock,
   setFixture,
   setMainnetEpochSchedule,
@@ -114,6 +115,16 @@ describe("the box's other kinds agree with the program", () => {
     const bad = await boxThenProgram(w, w.team, lock(resized, (LOCKED * 102n) / 100n));
     expectBoxRefusal(bad.check, "ReaderBadLayout");
     expectError(await bad.program(), "ReaderBadLayout");
+  });
+
+  test("a burn on a mint whose authority is revoked: accepted by the box and by the program", async () => {
+    const w = await openingWorld();
+    const mint = (await generateKeyPairSigner()).address;
+    setRawAccount(w.client, mint, mintBytes({ supply: 1_000_000n, mintAuthority: null }), P.SPL_TOKEN_PROGRAM_ID);
+    const burn = await boxThenProgram(w, w.team, { ...PRICE_DRAFT, kind: "burn", account: mint, target: "900,000" });
+    expect(burn.check.verdict?.ok).toBe(true);
+    expect(burn.check.args?.target).toBe(900_000n);
+    expectOk(await burn.program());
   });
 
   test("a price band too wide, and a target out of reach, are refused by the box and by the program", async () => {

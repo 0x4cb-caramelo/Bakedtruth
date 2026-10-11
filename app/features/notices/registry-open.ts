@@ -61,7 +61,8 @@ export const OPEN_NOTICES: readonly MandatoryNotice[] = [
     id: "devnet-opening",
     source: "BR-47; the Sprint 19 legal review (M1): an opening is paid in test SOL; the program is not audited",
     text: OPEN_DEVNET,
-    screens: "the creation box, by the price, and its review sheet, on devnet",
+    screens:
+      "the creation box, by the price, and its review sheet, on devnet (a team key's own words: the rent and the network fee)",
     drawnBy: [
       { file: COST_FILE, uses: "OPEN_DEVNET" },
       { file: REVIEW_FILE, uses: "OPEN_DEVNET" },

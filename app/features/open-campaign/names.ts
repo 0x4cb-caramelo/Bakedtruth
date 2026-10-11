@@ -1,6 +1,6 @@
 /**
  * Purpose: the reviewed account names (A-11; TP §3.4.10 "Display names"), read on the server from
- *          content/account-names.json when the site is built: a list of `{ "address": "<base58>", "kind": "burn" |
+ *          content/account-names.json: a list of `{ "address": "<base58>", "kind": "burn" |
  *          "lock" | "pool" | "stake", "name": "<short public name>" }`, changed only by a commit two people review.
  *          A name is not a gate (D-i): any account the reader accepts can still be used and shows its shortened
  *          address. The typeahead searches these and the pinned Pyth feeds; nothing a creator types becomes a name.

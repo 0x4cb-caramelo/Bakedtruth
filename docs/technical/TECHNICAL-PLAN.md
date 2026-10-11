@@ -2027,8 +2027,9 @@ what they found was fixed in the sprint (`docs/sprints/sprint-13-site-notices-co
 ### 7.5 Deferred in Sprint 19
 
 The copy, legal and adversarial reviews of Sprint 19 (2026-10-10) found two high findings in the box (the review sheet
-read the draft, not the signed arguments; the guard's second witness failed open) and fixed them in the sprint with the
-rest (`docs/sprints/sprint-19-site-open-campaign.md`, record). Deferred on purpose:
+read the draft, not the signed arguments; the guard's second witness failed open), fixed in the sprint with most of the
+rest; the coordinator's gate listed what was left (`docs/sprints/sprint-19-site-open-campaign.md`, record). Deferred on
+purpose:
 
 | Finding | Risk while open | Sprint |
 |---|---|---|
@@ -2036,6 +2037,10 @@ rest (`docs/sprints/sprint-19-site-open-campaign.md`, record). Deferred on purpo
 | "90%", "10%" and "US$500" are written in the box's labels, while the admin can change the opening's fee and prize share (`set_creation_params`) (the copy review, NIT 10) | After such a change, labels would disagree with the quote until the copy follows; `CreationParamsChanged` still protects the signature | Before the first change of the creation parameters |
 | `StakeAtLeast` stays closed: opening it needs the vote account's epoch stake (`getVoteAccounts`) passed to the box and the SDK (L9) | None while closed; turned on as is, the box's check would throw | When `StakeAtLeast` opens, after its devnet YES |
 | `script-src 'unsafe-inline'` (§7.2): an injected script could read the browser's opening record or change what the sheet shows (the legal review, N13) | As §7.2 | 16 |
+| The guard's record is keyed by wallet and program, not by cluster, and a record's deadline is not checked against the chain it came from (the adversarial review, L3) | Only if one origin served two clusters with the same program id; each cluster has its own build and origin today | 18 (mainnet: one origin per cluster, or the genesis hash in the key) |
+| No status line while the recent-openings look-up runs; the button reads "Checking your opening…" (the legal review, N12) | A creator waits a few seconds without being told why | 08 (the indexer answers the look-up instead) |
+| The creator notice is not made more prominent when the account came from a link (the adversarial review, M6); the box says a link filled it, and who else can move the number | A careless creator on a shared link may still miss it | 17, with B1 below |
+| Nobody has looked at the review sheet at 640 CSS px or wider in a browser (the copy review, O3); the smoke runs at 1280 and 412 | A layout problem at tablet widths | The phones' checklist run (founder item 5 of Sprint 19) |
 | The reads go through the public devnet RPC, not the `/rpc` relay; the relay's country refusal of an opening (C-11) waits for it | The RPC operator sees the wallet with the IP (§8.3) | 08 |
 | Before mainnet (the legal review, B1 to B12): creator-controlled outcomes (a notice on devnet; entries by the creator, creator duties or KYB on mainnet), the paid opening as a consumer purchase (withdrawal, the fee kept on a house failure with no entry), the creator's 1% and partner labels, age assurance, screening and licensing of paid openings, unlisting a paid campaign said before paying, the prominence of risk text in the sheet, marks and named third parties, token units next to raw units, and the policy's legal basis per purpose | Devnet only: test SOL, no value | 17 (L0) and the audits |
 

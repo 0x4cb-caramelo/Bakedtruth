@@ -128,7 +128,11 @@ export async function checkBox(a: BoxInputs): Promise<BoxCheck> {
       if (!(feedRefused && slot === "target")) issues.push(missingIssue(slot, draft, priceExponent));
     return { ...base, issues: [...issues, ...wallet()] };
   }
-  if (draft.kind !== "price" && a.accounts === null) issues.push(issue("account", "wait", ISSUES.accountWait));
+  // While the slot's account is read, the mirror would read it as absent and flash a false refusal (S-3): wait.
+  if (draft.kind !== "price" && a.accounts === null) {
+    issues.push(issue("account", "wait", ISSUES.accountWait));
+    return { ...base, choice: made.choice, issues: [...issues, ...wallet()] };
+  }
   const args: OpenArgs = {
     id: a.id,
     kind: made.choice.kind,

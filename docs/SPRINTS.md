@@ -109,7 +109,7 @@ mainnet line, which still says "and a cap" and whose new wording waits for the f
 | 16 | [Hardening (multisig, pause, incident plan, creation rules frozen)](sprints/sprint-16-hardening.md) | B9 (TP §7, §7.1) | 14, 15, 07 |
 | 17 | [Audits and fixes](sprints/sprint-17-audit-fixes.md) | B9 (TP §7, §8) | 16 |
 | 18 | [Mainnet](sprints/sprint-18-mainnet.md) | B9 (TP §7, §12) | 17 |
-| 19 | [Site: open a campaign (the creation box, `/abrir`)](sprints/sprint-19-site-open-campaign.md) (built 2026-10-10, in review in a pull request; waiting: the founder's devnet openings, the phones (X2.2), the US$ price route, the names route, the relay's country refusal, `content/partners.json` and the share card) | B8 | 11, -1 |
+| 19 | [Site: open a campaign (the creation box, `/abrir`)](sprints/sprint-19-site-open-campaign.md) (built 2026-10-10, in review in pull request #68; waiting: the founder's devnet openings, the phones (X2.2), the US$ price route, the names route, the relay's country refusal, `content/partners.json` and the share card) | B8 | 11, -1 |
 | 20 | [Android app: design pass and skeleton (M-1)](sprints/sprint-20-android-skeleton.md) | M (TP §3.7) | 13, 05 |
 | 21 | [Android app: money flows on devnet (M-2)](sprints/sprint-21-android-money-flows.md) | M (TP §3.7) | 20 |
 | 22 | [Android app: dApp Store release (M-3)](sprints/sprint-22-android-release.md) | M (TP §3.7) | 21, 18; the company exists; L0 |
