@@ -85,6 +85,24 @@ Ele abriu a versão nova na porta 3100 e pediu três coisas:
   no celular o balão não corta. Agora o balão é encaixado de novo sempre que o Baked se move enquanto ele aparece. O
   defeito é anterior à revisão; o desenho novo mudou onde o Baked pousa e o expôs.
 
+## Os dois consertos depois da segunda olhada
+
+O pedido chegou num texto colado, e o Ronaldo confirmou com as próprias palavras ("Yes, both").
+
+- **Um botão de abrir, não dois.** A página inicial tinha o botão grande amarelo no topo e o "Open a campaign" azul da
+  barra. O amarelo saiu e o da barra virou o amarelo da marca (o botão primário do desenho). A linha de topo ficou só
+  com o custo da abertura. O carrossel vazio ainda mostra o seu "Open a campaign" pequeno, que é o estado vazio do
+  protótipo, não um terceiro botão no topo.
+- **"Connect" não fazia nada.** Ele ligava direto a primeira carteira que o navegador dizia ter instalada, sem lista,
+  e engolia o erro. Uma recusa, uma carteira trancada ou a carteira errada, entre várias, pareciam um botão morto. O
+  desenho aprovado tem a lista "Connect a wallet", e foi o que entrou:
+  - as carteiras do navegador, as detectadas primeiro e as que faltam apagadas;
+  - a escolhida é selecionada e ligada, só pelo clique (S1);
+  - o que a carteira responde quando não liga aparece na lista.
+
+  Os três botões ("Connect" na barra, no painel de entrada e na caixa de abertura) abrem a mesma lista. Os testes na
+  web escolhem a carteira de teste nela.
+
 ## O que fica
 
 - O cartão de compartilhar, o painel "About this campaign", a linha do tempo "Where it is" com a campanha aberta, a

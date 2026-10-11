@@ -1,13 +1,11 @@
 /**
- * Purpose: the home page's top line (the approved prototype's `.home-lead`): what this is, and the opening action with
- *          what a US$500 opening costs in SOL right now at Pyth's SOL/USD price (4a: US$ only where it sets a cost).
- * Version: 0.1.0
+ * Purpose: the home page's top line (the approved prototype's `.home-lead`): what this is, and what a US$500 opening
+ *          costs in SOL right now at Pyth's SOL/USD price (4a: US$ only where it sets a cost). The opening action is the
+ *          top bar's yellow "Open a campaign" alone (Ronaldo, 2026-10-11: one button, not two).
+ * Version: 0.2.0 (one opening button, in the top bar)
  * Sprint:  10 (campaign list), in the UI overhaul
  */
 "use client";
-
-import Link from "next/link";
-import { Plus } from "lucide-react";
 
 import { solShort } from "@/features/campaigns/when";
 import { usdText } from "@/features/open-campaign/quote";
@@ -34,12 +32,6 @@ export function HomeLead() {
         <p>{HOME.sub}</p>
       </div>
       <div className="home-open">
-        <Link className="cta" href="/abrir">
-          <span>
-            <Plus className="size-[15px]" aria-hidden="true" />
-            {HOME.open}
-          </span>
-        </Link>
         <p>{HOME.cost}</p>
         <p>{line}</p>
       </div>

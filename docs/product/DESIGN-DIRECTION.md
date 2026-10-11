@@ -34,7 +34,9 @@
   - **Os pedidos do Ronaldo depois de ver a revisão (11/10):**
     - o título e o subtítulo da página inicial são os da capa do pitch, no vocabulário do site: "Campaigns the chain
       resolves." e "Permissionless campaigns that turn on-chain milestones into growth, settled by the chain itself.";
-    - o botão da carteira diz "Connect", e conecta só pelo clique, como antes (S1);
+    - o botão da carteira diz "Connect" e abre a lista "Connect a wallet" do desenho aprovado; a carteira escolhida
+      conecta só pelo clique (S1), e o erro dela aparece;
+    - um só botão de abrir campanha: o da barra, no amarelo da marca; o grande da página inicial saiu;
     - "question" virou "campaign" no texto do site;
     - a regra do vocabulário segue inteira, sem exceção.
   - **Onde ficaram as palavras do site, e não as do protótipo:**

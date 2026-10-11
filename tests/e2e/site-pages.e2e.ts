@@ -15,7 +15,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { AGE_NOTICE, AUDIT_NOTICE, PRIVACY_LABEL, TEST_NOTICE } from "../../app/components/copy-site";
 import { PRIVACY_URL } from "../../app/lib/config";
 import { PANEL, SHEET } from "../../app/features/entry/copy";
-import { choose, connect, control, openCampaign, panel, sheet } from "./helpers";
+import { choose, connect, control, openCampaign, panel, pickWallet, sheet } from "./helpers";
 
 const ROUTES = ["/", "/leaderboard", "/record", "/fees", "/how-it-works", "/my-entries", "/abrir"];
 const desktopOnly = (name: string) => test.skip(name !== "desktop", "runs once, at desktop width");
@@ -101,6 +101,7 @@ test.describe("site pages and notices", () => {
     const { wallet } = await openCampaign(page, (await control<{ id: string }>("/state", { name: "closed" })).id);
     await page.goto("/leaderboard");
     await page.getByRole("button", { name: "Connect", exact: true }).first().click();
+    await pickWallet(page);
     await expect(page.getByRole("button", { name: /^Wallet / })).toBeVisible(); // the top bar's chip, once connected
     const row = page.locator(`tr[data-wallet='${wallet}']`);
     await expect(row).toBeVisible();

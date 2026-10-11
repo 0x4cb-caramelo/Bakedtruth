@@ -52,9 +52,18 @@ export async function openWithWallet(page: Page, path: string): Promise<Opened> 
 export const panel = (page: Page) => page.locator("section[aria-labelledby='entry-title']");
 export const sheet = (page: Page) => page.getByRole("dialog");
 
-/** Connects through the panel's "Connect" and waits for the balance. */
+/** Picks the injected test wallet in the "Connect a wallet" list that every Connect button opens. */
+export async function pickWallet(page: Page) {
+  await page
+    .getByRole("dialog", { name: "Connect a wallet" })
+    .getByRole("button", { name: /E2E Test Wallet/ })
+    .click();
+}
+
+/** Connects through the panel's "Connect" and the wallet list, and waits for the balance. */
 export async function connect(page: Page) {
   await panel(page).getByRole("button", { name: "Connect", exact: true }).click();
+  await pickWallet(page);
   await expect(panel(page).getByText(/^Balance \d/)).toBeVisible();
 }
 

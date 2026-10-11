@@ -238,6 +238,12 @@ structure of the approved screens (`prototype-lab/campaigns/`, served at `/dev0x
   - the wallet button says "Connect" (it still connects only from that click, S1);
   - "question" became "campaign" in the site's copy;
   - Lucas's vocabulary rule stays whole, with no exception.
+- **One opening button:** the home page's large yellow button is gone; the top bar's "Open a campaign" is the brand's
+  yellow primary.
+- **"Connect" opens the "Connect a wallet" list** of the approved design: the browser's wallets, detected first; the
+  picked one is selected and connected from that click only (S1); a wallet that does not connect says why. It used to
+  connect the first installed wallet and swallow its error, so a refusal or the wrong wallet looked like a dead
+  button.
 - **Baked's bubble on a phone** is fitted to the screen again whenever Baked moves while it shows (Sprint 13's rule:
   it never cuts). A tap mid-hop used to leave it past the edge after the landing; the new layout exposed it.
 - **Tests:** two web-smoke expectations follow the design (the phone menu holds "How it works"; the wallet chip, not a

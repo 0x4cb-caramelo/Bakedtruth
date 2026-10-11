@@ -10,6 +10,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import { ToastProvider } from "@/components/toast";
 import { CLUSTER, RPC_URL } from "@/lib/config";
 import { registerMwaOnce } from "@/features/wallet/register-mwa";
+import { WalletPickerProvider } from "@/features/wallet/wallet-picker";
 
 export function Providers({ children }: { children: ReactNode }) {
   // Phantom and Solflare are always listed (with an install link when missing); any other
@@ -28,7 +29,9 @@ export function Providers({ children }: { children: ReactNode }) {
       {/* No autoConnect: connecting happens only from the user's "Connect" gesture. */}
       <WalletProvider wallets={wallets}>
         <WalletModalProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <WalletPickerProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </WalletPickerProvider>
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

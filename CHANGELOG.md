@@ -46,6 +46,11 @@ recomendado (1a a 12a).
     pitch, no vocabulário do site ("Campaigns the chain resolves." e "Permissionless campaigns that turn on-chain
     milestones into growth, settled by the chain itself."); o botão da carteira diz "Connect"; "question" virou
     "campaign" no texto do site. A regra do vocabulário segue inteira, sem exceção.
+  - **Um só botão de abrir campanha:** o grande amarelo da página inicial saiu, e o "Open a campaign" da barra virou o
+    amarelo da marca.
+  - **"Connect" abre a lista "Connect a wallet"** do desenho aprovado: as carteiras do navegador, a escolhida ligada só
+    pelo clique e o erro da carteira à vista. Antes ele ligava a primeira carteira instalada e engolia o erro, e o
+    botão parecia morto.
   - **O balão do Baked no celular:** encaixado na tela de novo sempre que o Baked se move enquanto fala. Antes, um
     toque no meio de um pulo podia deixá-lo cortado na borda; o defeito é anterior e o desenho novo o expôs.
 

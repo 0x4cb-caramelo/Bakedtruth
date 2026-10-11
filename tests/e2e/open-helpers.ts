@@ -9,7 +9,7 @@
  */
 import { expect, type Page } from "@playwright/test";
 
-import { sheet } from "./helpers";
+import { pickWallet, sheet } from "./helpers";
 
 /** 110% of the captured BTC/USD price (85,212.34): far enough from the band, and not met. */
 export const TARGET = "93733.57";
@@ -37,6 +37,7 @@ export type Opened = {
 
 export async function connectBox(page: Page) {
   await box(page).getByRole("button", { name: "Connect", exact: true }).click();
+  await pickWallet(page);
   await expect(box(page).getByText(/^Balance \d/)).toBeVisible();
 }
 

@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **877** |
+| Arquivos mapeados | **879** |
 | Acima de 200 linhas | **39** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -138,9 +138,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`header-search.tsx`](app/components/header-search.tsx) | the top bar's campaign search (the approved prototype's `.search`): what you type filters the home grid by title, asset, kind, address, creator or state (featur | 42 |
 | [`mascot.tsx`](app/components/mascot.tsx) | Mounts the mascot once for the whole app. Each page decides where it may stand with | 31 |
 | [`phone-menu.tsx`](app/components/phone-menu.tsx) | the menu under 1180 px (the approved prototype's `.phone-nav` sheet): the campaign search (the top bar's field hides on a phone), every route, the theme switch  | 64 |
-| [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 37 |
+| [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 40 |
 | [`site-footer.tsx`](app/components/site-footer.tsx) | the footer of every screen, in the approved prototype's style (prototype-lab/campaigns, `.foot`): the links, then the legal lines the site must carry: BRAND.md' | 60 |
-| [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): Baked and the wordmark, the three main links with the current one unde | 109 |
+| [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): Baked and the wordmark, the three main links with the current one unde | 111 |
 | [`site-notice.tsx`](app/components/site-notice.tsx) | the strip above every screen (Sprint 09, BR-47, P1 §4.6), in the approved prototype's place and style (prototype-lab/campaigns, `.status`): the devnet mark, the | 27 |
 | [`toast.tsx`](app/components/toast.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 71 |
 | [`wallet-button.tsx`](app/components/wallet-button.tsx) | the top bar's wallet control (Sprint 09, S1), in the approved prototype's look (prototype-lab/campaigns, ui/wallet.js): "Connect" as the primary button connects | 121 |
@@ -263,7 +263,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`home-empty.tsx`](app/features/home/home-empty.tsx) | the home page's empty block (the approved prototype's `.empty`): Baked sulking, one sentence and at most one way out ("No campaigns here." [Clear filters]) | 21 |
 | [`home-feature.tsx`](app/features/home/home-feature.tsx) | the home page's "Open now" carousel (the approved prototype's `.home-feature`, home-mosaic.js): the top-ranked listed campaigns that take entries, up to five, a | 174 |
 | [`home-how.tsx`](app/features/home/home-how.tsx) | the home page's "How it works" (the approved prototype's `.home-how`): the six steps told in three, with the link to every step, fee and refund, then the three  | 70 |
-| [`home-lead.tsx`](app/features/home/home-lead.tsx) | the home page's top line (the approved prototype's `.home-lead`): what this is, and the opening action with what a US$500 opening costs in SOL right now at Pyth | 49 |
+| [`home-lead.tsx`](app/features/home/home-lead.tsx) | the home page's top line (the approved prototype's `.home-lead`): what this is, and what a US$500 opening costs in SOL right now at Pyth's SOL/USD price (4a: US | 41 |
 | [`home-page.tsx`](app/features/home/home-page.tsx) | the home page (the UI overhaul; the approved prototype's home.js): the top line with the opening's cost, the mosaic ("Open now" and the two side boxes), how it  | 76 |
 | [`home-proof.tsx`](app/features/home/home-proof.tsx) | the "On-chain read" panel of a home slide (the approved prototype's `.home-proof`, where the old chart was): the value read now against the target, "if read now | 106 |
 | [`home-side.tsx`](app/features/home/home-side.tsx) | the two boxes beside the home page's carousel (the approved prototype's `.home-side`): "Closing soon", the four listed campaigns whose entries close first, and  | 113 |
@@ -376,10 +376,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
+| [`copy.ts`](app/features/wallet/copy.ts) | the words of the "Connect a wallet" list (the approved prototype's connectDialog, ui/wallet.js): its title, what each wallet's state says, the reassurance under | 19 |
 | [`mwa-chain.test.ts`](app/features/wallet/mwa-chain.test.ts) | X2.1. The chain the wallet registers for (from the site's cluster setting) equals the chain for the cluster the read API reports in /api/v1/health. Registration | 54 |
 | [`register-mwa.ts`](app/features/wallet/register-mwa.ts) | the explicit Mobile Wallet Adapter registration (S1, proposal §3.4). Registers the MWA wallet once, for the chain of the site's cluster (never the RPC URL's), w | 46 |
-| [`use-installed-wallet.ts`](app/features/wallet/use-installed-wallet.ts) | "Connect" (S1, proposal §3.4 rule 3): connect only from a person's click, through the installed wallet the site found (MWA on Android, or a browser wallet). Sha | 39 |
+| [`use-installed-wallet.ts`](app/features/wallet/use-installed-wallet.ts) | "Connect" (S1, proposal §3.4 rule 3): connect only from a person's click. Shared by the top bar's button, the entry panel and the creation box, so all three con | 23 |
 | [`use-sol-balance.ts`](app/features/wallet/use-sol-balance.ts) | the connected wallet's SOL balance in lamports, read from the site's connection. `null` while it loads or when nothing is connected. A failed read leaves `null` | 33 |
+| [`wallet-picker.tsx`](app/features/wallet/wallet-picker.tsx) | "Connect" opens this list (the approved prototype's "Connect a wallet" dialog, ui/wallet.js): every wallet the browser has, detected ones first and the missing  | 113 |
 | [`wallet-state.test.ts`](app/features/wallet/wallet-state.test.ts) | the wallet's view: disconnected, connected with a balance, no SOL (faucet on devnet only), the balance still loading, and the SOL formatting (four decimals, tru | 54 |
 | [`wallet-state.ts`](app/features/wallet/wallet-state.ts) | the wallet's view, as pure logic: disconnected; connected with its address and SOL balance; connected with no SOL, which offers the devnet faucet only on devnet | 36 |
 
@@ -1371,15 +1373,15 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`control-open.ts`](tests/e2e/control-open.ts) | the web smoke's control routes for Sprint 19 ("open a campaign"): make the smoke's test wallet a team key, or take that away again (the admin's `admin_set_team` | 53 |
 | [`control-states.ts`](tests/e2e/control-states.ts) | the web smoke's control routes for Sprint 12 ("campaign states"): a campaign written in any public state (tests/site/state-world.ts); a whole cycle with the smo | 97 |
 | [`control.ts`](tests/e2e/control.ts) | the web smoke's control endpoint (loopback, test only): what the Playwright runner asks of the chain. Sign the bytes the injected wallet was handed with the tes | 167 |
-| [`helpers.ts`](tests/e2e/helpers.ts) | what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page opened with the injected wallet and the runner's answer f | 79 |
+| [`helpers.ts`](tests/e2e/helpers.ts) | what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page opened with the injected wallet and the runner's answer f | 88 |
 | [`open-guard.e2e.ts`](tests/e2e/open-guard.e2e.ts) | "open a campaign: refusals and the retry guard" in the web smoke (Sprint 19 DoD), once at desktop width: three refusals each with its own message on the box (a  | 149 |
-| [`open-helpers.ts`](tests/e2e/open-helpers.ts) | what the creation box's smoke tests share (Sprint 19): the link that prefills a paid BTC/USD opening, the box and its button as locators, the connection through | 67 |
+| [`open-helpers.ts`](tests/e2e/open-helpers.ts) | what the creation box's smoke tests share (Sprint 19): the link that prefills a paid BTC/USD opening, the box and its button as locators, the connection through | 68 |
 | [`open.e2e.ts`](tests/e2e/open.e2e.ts) | "open a campaign" in the web smoke (Sprint 19 DoD; `bun run e2e -- --grep "open a campaign"`): the creation box at /abrir in Chromium at desktop width and at 41 | 70 |
 | [`playwright.config.ts`](tests/e2e/playwright.config.ts) | the web smoke's Playwright configuration (Sprint 11; @playwright/test 1.63.0, pinned in package.json, whose Chromium is build 1243): the site built against the  | 27 |
 | [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 65 |
-| [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 164 |
+| [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 165 |
 | [`smoke.e2e.ts`](tests/e2e/smoke.e2e.ts) | the web smoke (Sprint 11 DoD; `bun run e2e`): the built site in Chromium at desktop width and at 412 CSS px, with an injected Wallet Standard test wallet, again | 198 |
-| [`states.e2e.ts`](tests/e2e/states.e2e.ts) | "campaign states" in the web smoke (Sprint 12 DoD; `bun run e2e -- --grep "campaign states"`): the built site in Chromium against the program in LiteSVM. Every  | 79 |
+| [`states.e2e.ts`](tests/e2e/states.e2e.ts) | "campaign states" in the web smoke (Sprint 12 DoD; `bun run e2e -- --grep "campaign states"`): the built site in Chromium against the program in LiteSVM. Every  | 80 |
 | [`upgrade.e2e.ts`](tests/e2e/upgrade.e2e.ts) | A-8 in the web smoke (the founder's answer of 2026-10-10): the program is upgraded while a page built for its previous deploy is open (the site was built agains | 92 |
 | [`wallet.ts`](tests/e2e/wallet.ts) | the web smoke's injected wallet: a Wallet Standard wallet ("E2E Test Wallet") registered in the page before its own scripts run, the way a browser extension reg | 66 |
 

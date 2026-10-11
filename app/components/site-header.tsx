@@ -66,9 +66,11 @@ export function SiteHeader() {
       </nav>
       <HeaderSearch />
       <div className="top-actions">
-        <Link className="btn open-link" href="/abrir">
-          <Plus className="size-4" aria-hidden="true" />
-          Open a campaign
+        <Link className="cta open-link" href="/abrir">
+          <span>
+            <Plus className="size-4" aria-hidden="true" />
+            Open a campaign
+          </span>
         </Link>
         <button className="icon-btn search-btn" type="button" aria-label="Search campaigns" onClick={() => setMenu("search")}>
           <Search className="size-[18px]" aria-hidden="true" />
