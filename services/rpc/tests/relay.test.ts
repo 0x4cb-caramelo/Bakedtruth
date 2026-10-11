@@ -2,8 +2,8 @@
  * Purpose: brot-rpc's refusals and its account rule, with an in-process fake upstream (Sprint 08; X1.7): a batch, an
  *          oversized body, a method off the allowlist, a subscription, an argument or an option the trace never used —
  *          each refused before the upstream sees it; an account under an owner no reader accepts comes back with its
- *          owner and no data; ProgramData only as its first 45 bytes; the cache never holding an Entry, a missing
- *          account or a signature status; the upstream's busy, failed and error answers. Filter: `bun test services/rpc`.
+ *          owner and no data; ProgramData only as its first 45 bytes; the cache holding a reader's account, never
+ *          the program's own (config, campaign, entry), a missing account or a signature status; the upstream's busy, failed and error answers. Filter: `bun test services/rpc`.
  * Version: 0.1.0
  * Sprint:  08 (indexer, API, relay and points)
  */
@@ -98,22 +98,19 @@ describe("brot-rpc's account rule and cache", () => {
     ).toBe(CODE.params);
   });
 
-  test("the cache holds a campaign for a moment, never an entry, a missing account or a signature status", async () => {
+  test("the cache holds a reader's account for a moment, never the program's own, a missing one or a status", async () => {
+    const CAMPAIGN = "Campaign11111111111111111111111111111111111";
+    const ENTRY = "Entry111111111111111111111111111111111111111";
+    const values: Record<string, unknown> = {
+      [ADDR]: account(SPL_TOKEN_PROGRAM_ID),
+      [CAMPAIGN]: account(PROGRAM_ID, ACCOUNT_TAG.campaign),
+      [ENTRY]: account(PROGRAM_ID, ACCOUNT_TAG.entry),
+    };
     const r = setup({
       answer: (c) =>
         c.method === "getSignatureStatuses"
           ? { result: { context: { slot: 1 }, value: [null] } }
-          : {
-              result: {
-                context: { slot: 1 },
-                value:
-                  c.params[0] === ADDR
-                    ? account(PROGRAM_ID, ACCOUNT_TAG.campaign)
-                    : c.params[0] === PROGRAM_ID
-                      ? account(PROGRAM_ID, ACCOUNT_TAG.entry)
-                      : null,
-              },
-            },
+          : { result: { context: { slot: 1 }, value: values[c.params[0] as string] ?? null } },
     });
     const twice = async (method: string, params: unknown[]) => {
       const before = r.calls.length;
@@ -122,8 +119,11 @@ describe("brot-rpc's account rule and cache", () => {
       return r.calls.length - before;
     };
     expect(await twice("getAccountInfo", [ADDR, B64])).toBe(1);
-    expect(await twice("getAccountInfo", [PROGRAM_ID, B64])).toBe(2);
-    expect(await twice("getAccountInfo", [SPL_TOKEN_PROGRAM_ID, B64])).toBe(2);
+    // A page acts on the program's own accounts: the smoke through the relay saw a cached config keep a pause.
+    expect(await twice("getAccountInfo", [CAMPAIGN, B64])).toBe(2);
+    expect(await twice("getAccountInfo", [ENTRY, B64])).toBe(2);
+    expect(await twice("getAccountInfo", [SPL_TOKEN_PROGRAM_ID, B64])).toBe(2); // missing
+    expect(await twice("getMultipleAccounts", [[ADDR, CAMPAIGN], B64])).toBe(2);
     expect(await twice("getSignatureStatuses", [["1".repeat(88)]])).toBe(2);
     r.clock.now += 2_000;
     expect(await twice("getAccountInfo", [ADDR, B64])).toBe(1);

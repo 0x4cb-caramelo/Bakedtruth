@@ -1298,6 +1298,16 @@ from a browser or the app to a paid provider.
 - **What it cannot gate.** On Android the wallet submits through `sign_and_send_transactions` [E1], so the relay's
   country gate covers simulation, not submission. The entry panel's switch therefore reads `entries_allowed` from
   `/api/v1/health` (§3.6).
+- **Built in Sprint 08's second part (2026-10-11) [F]** (`services/rpc/`, its README): the eleven methods of the trace
+  with the arguments and options it saw, everything else refused before the upstream; transactions with only the
+  program, ComputeBudget and Lighthouse at the top level; account answers cut by owner, an unaccepted owner's account
+  answered with its owner and size but no data (so the creation box can still say whose it is), ProgramData only as a
+  45-byte slice; the token bucket keyed by `cf-connecting-ip` (an IPv6 address by its /64), the daily budget and the
+  short cache, in memory, for metric accounts and sysvars only (never the program's own accounts: the smoke through the
+  relay saw a cached config keep a pause that had ended), a missing account or a status; the country gate built with an empty
+  list, so it blocks nothing (the founder, 2026-10-11). Tested against a fake upstream (X1.7) and, under `E2E_RELAY=1`,
+  with the whole web smoke going through it. The unit (`deploy/vps/brot-rpc.service`), its provider account with a
+  spending limit (D4), the tunnel's `/rpc` route and pointing the site at it are the founder's.
 
 **The read API.** `/api/v1` is served by the indexer process, read-only, with zod schemas from `@brot/sdk/read`; its
 conventions and routes are §6.
@@ -1891,8 +1901,8 @@ exposes only `GET /healthz` and `POST /restart` (TP v0.0.1 §5, §12) **[DP]**.
 | `GET /api/v1/activity` | Recent activity across campaigns (X1.4) | 08 |
 | `GET /api/v1/wallets/:address/entries` | One wallet's entries, results and payouts ("my entries"). Not built yet: Sprint 12's page reads the chain meanwhile | 08 |
 | `GET /api/v1/leaderboard` | Devnet points. **Built in Sprint 13 [F]** in `services/api` from the program's own history (`history.ts`: in memory, on its own loop, incremental by `until`, every call with a timeout) and the live accounts, until the indexer takes it over; paged; each row is a rank, a wallet, its points and the campaigns it entered; it takes no wallet parameter and drops the wallets on the hide list (§8.2) | 08; 13 |
-| `GET /api/v1/names` | Display names from `content/account-names.json` and the pinned Pyth feed list | 08 |
-| `GET /api/v1/price` | SOL in US$, with source and time | 08 |
+| `GET /api/v1/names` | Display names from `content/account-names.json` and the pinned Pyth feed list. **Built in Sprint 08 (2026-10-11) [F]** in `services/api`: the names checked by the SDK's `parseAccountNames` (the site's rules), the feeds with their sponsored accounts; a broken file keeps the last good list | 08 |
+| `GET /api/v1/price` | SOL in US$, with source and time. **Built in Sprint 08 (2026-10-11) [F]** in `services/api`: CoinGecko first, Pyth SOL/USD when CoinGecko fails, is off or is older than ten minutes; source, times, staleness and attribution in each answer; not run in public before the legal check of CoinGecko's terms | 08 |
 | `GET /api/v1/health` | `program_last_deploy_slot`, `schema_version`, `cluster`, `entries_allowed` | 08 |
 
 `campaigns`, `campaigns/:id`, its `activity` and `chance`, `wallets/:address/entries`, `leaderboard` and `health` are

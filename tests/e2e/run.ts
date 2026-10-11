@@ -18,7 +18,6 @@ const SITE = "http://127.0.0.1:4240";
 /** E2E_RELAY=1 (Sprint 08): the browser reaches the chain through brot-rpc on 4244, so every call meets its rules. */
 const viaRelay = process.env.E2E_RELAY === "1";
 const RPC = viaRelay ? "http://127.0.0.1:4244" : "http://127.0.0.1:4241";
-process.env.E2E_RPC_URL = RPC; // the tests that cut the network read it
 const env = {
   ...process.env,
   NEXT_PUBLIC_RPC_URL: RPC,
@@ -58,6 +57,8 @@ try {
       RELAY_BURST: "1000000",
       RELAY_RATE_PER_SECOND: "1000000",
       RELAY_DAILY_BUDGET: "100000000",
+      // The tests change the chain from the control port and reload at once; the cache's own rules are unit-tested.
+      RELAY_CACHE_MS: "1",
     };
     started.push(spawn(["bun", "services/rpc/src/main.ts"], { env: relayEnv, ...io }));
     await waitFor("http://127.0.0.1:4244/healthz", "the relay");
@@ -72,7 +73,7 @@ try {
   await waitFor(SITE, "the site");
   const playwright = spawn(
     ["node_modules/.bin/playwright", "test", "-c", "tests/e2e/playwright.config.ts", ...process.argv.slice(2)],
-    io,
+    { env: { ...process.env, E2E_RPC_URL: RPC }, ...io },
   );
   code = await playwright.exited;
 } catch (error) {

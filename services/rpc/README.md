@@ -25,9 +25,10 @@ identity and its own provider account, so `/rpc` traffic can never starve the ke
    C9). On Android the wallet submits through its own RPC, so the gate covers simulation there, not submission.
 6. **The client's token bucket** (`src/limits.ts`): keyed by `cf-connecting-ip`, an IPv6 address by its /64; weighted
    per method (a working guess until each provider's credit weights are measured, TP C32 [AC]); in memory only.
-7. **The short cache:** a campaign, the config, a metric account or a sysvar for `RELAY_CACHE_MS` (1.5 s by default),
-   the rent table for a minute; **never** an entry or a join of the program, a missing account, ProgramData, a
-   signature status, the block height or a blockhash, which the retry guard decides on.
+7. **The short cache:** a metric account (another program's) or a sysvar for `RELAY_CACHE_MS` (1.5 s by default), the
+   rent table for a minute; **never** the program's own accounts (a page acts on its config, campaigns and entries: the
+   web smoke through the relay saw a cached config keep showing a pause that had ended), a missing account,
+   ProgramData, a signature status, the block height or a blockhash, which the retry guard decides on.
 8. **The daily budget:** at most `RELAY_DAILY_BUDGET` credits a UTC day, every client together; a cached answer
    spends none.
 

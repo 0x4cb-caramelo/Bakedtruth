@@ -1254,7 +1254,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`accounts.ts`](services/rpc/src/accounts.ts) | what an account read may return through brot-rpc (TP §3.5, by owner, since there is no list of accounts, D-i): an account owned by the program, one of the five  | 77 |
+| [`accounts.ts`](services/rpc/src/accounts.ts) | what an account read may return through brot-rpc (TP §3.5, by owner, since there is no list of accounts, D-i): an account owned by the program, one of the five  | 62 |
 | [`allowlist.ts`](services/rpc/src/allowlist.ts) | the methods brot-rpc relays and the arguments each may carry (docs/technical/relay-allowlist.md, the trace of Sprints 11 to 19; TP §3.5, §6): eleven methods, ea | 135 |
 | [`config.ts`](services/rpc/src/config.ts) | brot-rpc's settings, read from its environment only (TP §3.5, T14; Sprint 08): the upstream RPC of its own account (a secret: logs never show it), a loopback bi | 75 |
 | [`limits.ts`](services/rpc/src/limits.ts) | brot-rpc's limits (TP §3.5; Sprint 08), all in memory, none written to a disk or a log: whose request it is (Cloudflare's `cf-connecting-ip`, an IPv6 address by | 104 |
@@ -1376,7 +1376,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`open-helpers.ts`](tests/e2e/open-helpers.ts) | what the creation box's smoke tests share (Sprint 19): the link that prefills a paid BTC/USD opening, the box and its button as locators, the connection through | 67 |
 | [`open.e2e.ts`](tests/e2e/open.e2e.ts) | "open a campaign" in the web smoke (Sprint 19 DoD; `bun run e2e -- --grep "open a campaign"`): the creation box at /abrir in Chromium at desktop width and at 41 | 70 |
 | [`playwright.config.ts`](tests/e2e/playwright.config.ts) | the web smoke's Playwright configuration (Sprint 11; @playwright/test 1.63.0, pinned in package.json, whose Chromium is build 1243): the site built against the  | 27 |
-| [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 85 |
+| [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 86 |
 | [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 161 |
 | [`smoke.e2e.ts`](tests/e2e/smoke.e2e.ts) | the web smoke (Sprint 11 DoD; `bun run e2e`): the built site in Chromium at desktop width and at 412 CSS px, with an injected Wallet Standard test wallet, again | 199 |
 | [`states.e2e.ts`](tests/e2e/states.e2e.ts) | "campaign states" in the web smoke (Sprint 12 DoD; `bun run e2e -- --grep "campaign states"`): the built site in Chromium against the program in LiteSVM. Every  | 79 |

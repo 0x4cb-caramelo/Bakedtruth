@@ -4,14 +4,13 @@
  *          whole; any other comes back with its owner and size but no data, so the creation box can still say whose it
  *          is while the relay serves no other program's bytes; a missing one stays null. The program's ProgramData is
  *          the one exception by address (A-8), and only as a slice of offset 0 and at most 45 bytes. What may be
- *          cached: never a missing account, ProgramData, or the program's Entry or Join, which the retry guard
- *          decides on (docs/technical/relay-allowlist.md). Pure.
+ *          cached: another program's account and the sysvars, never the program's own (a page acts on its config, its
+ *          campaigns and its entries: the web smoke through the relay saw a reload inside the cache's life keep a pause
+ *          that had ended), a missing account or ProgramData. Pure.
  * Version: 0.1.0
  * Sprint:  08 (indexer, API, relay and points)
  */
-import { getBase64Encoder } from "@solana/kit";
 import {
-  ACCOUNT_TAG,
   BPF_LOADER_UPGRADEABLE_ID,
   DAMM_V2_PROGRAM_ID,
   PROGRAM_DATA_METADATA_LEN,
@@ -33,8 +32,6 @@ const SERVED = new Set<string>([
   VOTE_PROGRAM_ID,
   SYSVAR_OWNER,
 ]);
-/** The program's accounts a short cache may hold: its config and its campaigns, never an entry or a join. */
-const CACHED_TAGS = new Set<number>([ACCOUNT_TAG.globalConfig, ACCOUNT_TAG.campaign]);
 
 export type AccountInfo = { owner?: unknown; data?: unknown; [field: string]: unknown } | null;
 
@@ -57,20 +54,8 @@ export const isProgramDataSlice = (slice: unknown) => {
   return s?.offset === 0 && typeof s.length === "number" && s.length >= 1 && s.length <= PROGRAM_DATA_METADATA_LEN;
 };
 
-function firstByte(info: AccountInfo): number | null {
-  const data = (info as { data?: unknown } | null)?.data;
-  if (!Array.isArray(data) || data[1] !== "base64" || typeof data[0] !== "string" || data[0] === "") return null;
-  try {
-    return getBase64Encoder().encode(data[0])[0] ?? null;
-  } catch {
-    return null;
-  }
-}
-
-/** Whether an answer holding this account may be cached for a moment. */
+/** Whether an answer holding this account may be cached for a moment: never the program's own, never a missing one. */
 export function cacheable(info: AccountInfo): boolean {
   if (info === null || typeof info !== "object") return false;
-  if (info.owner !== PROGRAM_ID) return true;
-  const tag = firstByte(info);
-  return tag !== null && CACHED_TAGS.has(tag);
+  return typeof info.owner === "string" && info.owner !== PROGRAM_ID;
 }
