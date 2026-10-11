@@ -45,10 +45,12 @@ export function PreviewSection({ facts, footer }: { facts: PreviewFacts; footer:
       className="rounded-md border border-line bg-panel [grid-area:preview] min-[861px]:sticky min-[861px]:top-20 min-[861px]:flex min-[861px]:max-h-[calc(100vh-6rem)] min-[861px]:flex-col"
     >
       <div className="space-y-4 p-4 min-[861px]:min-h-0 min-[861px]:flex-1 min-[861px]:overflow-auto">
-        <h2 id="open-preview-h" className="flex items-center gap-2 font-display text-2xl font-bold">
-          <span className="text-muted">3</span>
+        <h2 id="open-preview-h" className="op-h">
+          <span className="op-n" aria-hidden="true">
+            3
+          </span>
           {BOX.preview}
-          <span className="rounded-sm bg-raised px-2 py-0.5 font-sans text-xs font-normal">{BOX.notSigned}</span>
+          <span className="chip">{BOX.notSigned}</span>
         </h2>
         <p className="font-display text-2xl font-bold leading-tight" data-testid="open-sentence">
           {facts.sentence}
@@ -141,7 +143,14 @@ export function PreviewSection({ facts, footer }: { facts: PreviewFacts; footer:
           </h3>
           {facts.card && facts.complete ? (
             <div inert className="pointer-events-none">
-              <CampaignCard card={facts.card} saved={false} onToggle={() => undefined} />
+              <CampaignCard
+                card={facts.card}
+                now={facts.card.opensAt ?? 0n}
+                reading={undefined}
+                preview
+                saved={false}
+                onToggle={() => undefined}
+              />
             </div>
           ) : (
             <p className="text-xs text-muted">{PREVIEW.cardWhenFilled}</p>

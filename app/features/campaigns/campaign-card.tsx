@@ -1,82 +1,147 @@
 /**
- * Purpose: one campaign's card in the list (Sprint 10): the kind, the sentence, the state, the pot in SOL, the chance per
- *          side (none for an empty pot), the estimated return per side (labelled as an estimate), the two moments (entries
- *          close, deadline), the review clock, the save button, and the notice on burn, lock and stake campaigns (BR-26).
- *          There is no redemption here. The creator notice is the campaign page's own words (Sprint 13: one text).
- * Version: 0.2.1 (Sprint 13: the creator notice from campaign-page/copy.ts; 0.2.0, Sprint 12's state chip and line)
+ * Purpose: one campaign's card (Sprint 10), in the approved prototype's structure (prototype-lab/campaigns, ui/card.js
+ *          and css/card.css): kind and state, the sentence, the value read now against the target, each side's share
+ *          of the entries with the pot bar, YES and NO shortcuts with what 1 SOL returns now (the entry panel's own
+ *          estimate) while entries are open, the line past entries otherwise (Sprint 12), the creator notice on burn,
+ *          lock and stake campaigns (BR-26, as a chip with the campaign page's words), the pot, the close and the save.
+ * Version: 0.3.0 (the UI overhaul: the prototype's card; 0.2.1, Sprint 13's creator notice)
  * Sprint:  10 (site: campaign list); 12; 13
  */
 import Link from "next/link";
+import { AlertTriangle, Bookmark, Check, Clock, X } from "lucide-react";
 
+import { cx } from "@/components/ui/cx";
 import { SplitBar } from "@/components/ui/split-bar";
-import { StateChip } from "@/components/ui/state-chip";
-import { formatUtc } from "@/lib/brot";
-import { formatSol as formatSolFour } from "@/features/wallet/wallet-state";
-import type { Card } from "./model";
 import { CREATOR_NOTICE } from "@/features/campaign-page/copy";
-import { KIND_LABEL } from "./sentence";
+import { PANEL } from "@/features/entry/copy";
+import { perOne } from "@/features/entry/estimate";
+import { CardChipView, KindTileOf, kindLabel } from "./card-parts";
+import type { Card } from "./model";
+import { ReadLine } from "./read-line";
+import type { Reading } from "./readings";
+import { relative, solShort, soon } from "./when";
 
-const sol = (lamports: bigint) => `${formatSolFour(lamports)} SOL`;
-
-export function CampaignCard({ card, saved, onToggle }: { card: Card; saved: boolean; onToggle: () => void }) {
-  const hasChance = card.yesShare !== null;
-  const yesPct = hasChance ? Math.round((card.yesShare ?? 0) * 100) : null;
-  const noPct = yesPct === null ? null : 100 - yesPct;
+function Sides({ card }: { card: Card }) {
+  const empty = card.yesLamports === 0n && card.noLamports === 0n;
+  const per = (side: "yes" | "no") => {
+    if (empty) return "";
+    const mine = side === "yes" ? card.yesLamports : card.noLamports;
+    const other = side === "yes" ? card.noLamports : card.yesLamports;
+    if (mine === 0n) return "be first";
+    if (other === 0n) return `refund if ${side === "yes" ? "NO" : "YES"} stays empty`;
+    const bps = side === "yes" ? card.estYesBps : card.estNoBps;
+    return bps === null ? "" : PANEL.perOne(perOne(bps));
+  };
+  const button = (side: "yes" | "no") => (
+    <Link className={`side-btn ${side}`} href={`/c/${card.id}?side=${side}`}>
+      <span>{`${empty ? "Join " : ""}${side.toUpperCase()}`}</span>
+      <span className="per">{per(side)}</span>
+    </Link>
+  );
+  const note = empty ? "No entries yet" : card.yesLamports === 0n || card.noLamports === 0n ? "One-sided so far" : "";
   return (
-    <article className="rounded-md border border-line bg-panel p-4">
-      <div className="flex flex-wrap items-center gap-2 text-xs text-dim">
-        <span>{KIND_LABEL[card.kind] ?? card.kind}</span>
-        <StateChip state={card.chip} />
-        {!card.listed && <span>Not on the home page: no entries in its first 24 hours.</span>}
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-pressed={saved}
-          className="ml-auto rounded border border-line px-2 py-0.5 text-ink"
-        >
-          {saved ? "Saved" : "Save"}
-        </button>
+    <>
+      <div className="card-sides">
+        {button("yes")}
+        {button("no")}
       </div>
-      <Link href={`/c/${card.id}`} className="mt-2 block text-lg font-bold text-ink hover:underline">
+      {note ? <p className="card-note">{note}</p> : null}
+    </>
+  );
+}
+
+function Status({ card }: { card: Card }) {
+  const paid = card.chip === "paid" || card.chip === "final";
+  const answer = card.outcome === "Yes" ? " yes" : card.outcome === "No" ? " no" : "";
+  const tone = paid ? `paid${answer}` : card.chip === "in_review" ? "review" : card.chip;
+  const Icon = paid ? Check : card.chip === "void" ? X : Clock;
+  return (
+    <p className={cx("card-status", tone)} data-testid="card-state">
+      <Icon className="size-3.5 shrink-0" aria-hidden="true" />
+      <span>{card.stateLine}</span>
+    </p>
+  );
+}
+
+export function CampaignCard(props: {
+  card: Card;
+  now: bigint;
+  reading: Reading | null | undefined;
+  /** The creation box's "as it will appear": no live line, since nothing reads a campaign before it opens. */
+  preview?: boolean;
+  saved: boolean;
+  onToggle: () => void;
+}) {
+  const { card, now } = props;
+  const yes = card.yesShare === null ? null : Math.round(card.yesShare * 100);
+  const share = (n: number | null) => (n === null ? "–" : `${n}%`);
+  const open = card.chip === "open";
+  return (
+    <article className="card" data-perch={`card-${card.id}`} data-perch-x="0.86" data-perch-size="0.74">
+      <div className="card-top">
+        <KindTileOf card={card} />
+        <div className="card-kind">
+          <b>{kindLabel(card)}</b>
+          <span>{card.asset ?? `${card.metricAccount.slice(0, 4)}…${card.metricAccount.slice(-4)}`}</span>
+        </div>
+        <div className="card-chips">
+          <CardChipView chip={card.chip} />
+        </div>
+      </div>
+      <Link className="card-title" href={`/c/${card.id}`}>
         {card.title}
       </Link>
-      <p className="mt-1 text-sm text-dim">
-        Pot {sol(card.potLamports)}
-        {card.prizeLamports > 0n ? ` · prize ${sol(card.prizeLamports)}` : ""} · {card.entries}{" "}
-        {card.entries === 1 ? "entry" : "entries"}
-      </p>
-      <div className="mt-3">
-        {hasChance ? (
-          <>
-            <SplitBar yes={Number(card.yesLamports)} no={Number(card.noLamports)} prize={Number(card.prizeLamports)} />
-            <div className="mt-1 flex justify-between text-sm">
-              <span className="text-ink">YES {yesPct}%</span>
-              <span className="text-ink">NO {noPct}%</span>
-            </div>
-          </>
-        ) : (
-          <p className="text-sm text-dim">No entries yet</p>
-        )}
+      {props.preview ? null : <ReadLine card={card} reading={props.reading} />}
+      <div
+        className="card-chance"
+        aria-label={`Share of the entries: YES ${yes === null ? "none yet" : `${yes}%`}, NO ${yes === null ? "none yet" : `${100 - yes}%`}`}
+      >
+        <span className="y">
+          <small>YES</small>
+          <strong className="num">{share(yes)}</strong>
+        </span>
+        <span className="n">
+          <small>NO</small>
+          <strong className="num">{share(yes === null ? null : 100 - yes)}</strong>
+        </span>
       </div>
-      <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-dim">
-        {card.stateLine === null ? (
-          <>
-            {card.estYesBps !== null && (
-              <span>If YES wins: ×{(Number(card.estYesBps) / 10_000).toFixed(2)} (estimate)</span>
-            )}
-            {card.estNoBps !== null && (
-              <span>If NO wins: ×{(Number(card.estNoBps) / 10_000).toFixed(2)} (estimate)</span>
-            )}
-            {card.entriesCloseAt !== null && <span>Entries close {formatUtc(card.entriesCloseAt)}</span>}
-            {card.deadlineAt !== null && <span>Deadline {formatUtc(card.deadlineAt)}</span>}
-          </>
-        ) : (
-          <span className="col-span-2" data-testid="card-state">
-            {card.stateLine}
+      <SplitBar thin yes={Number(card.yesLamports)} no={Number(card.noLamports)} prize={Number(card.prizeLamports)} />
+      {open ? <Sides card={card} /> : <Status card={card} />}
+      {card.kind !== "PriceTouch" ? (
+        <span className="chip card-creator" title={CREATOR_NOTICE}>
+          <AlertTriangle className="size-3" aria-hidden="true" />
+          Creator may control the result
+        </span>
+      ) : null}
+      <div className="card-foot">
+        <span>
+          Pot <b className="tabular">{solShort(card.potLamports + card.prizeLamports)}</b>
+        </span>
+        <span aria-hidden="true">·</span>
+        {open && card.entriesCloseAt !== null ? (
+          <span>
+            Entries close{" "}
+            <span className={soon(card.entriesCloseAt, now) ? "soon" : ""}>{relative(card.entriesCloseAt, now)}</span>
           </span>
+        ) : (
+          <span>{`${card.entries} ${card.entries === 1 ? "baker" : "bakers"}`}</span>
         )}
+        {card.creatorIsTeam ? (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>Team</span>
+          </>
+        ) : null}
+        <button
+          type="button"
+          className="save"
+          aria-pressed={props.saved}
+          aria-label={`${props.saved ? "Remove from" : "Add to"} saved: ${card.title}`}
+          onClick={props.onToggle}
+        >
+          <Bookmark className="size-[15px]" aria-hidden="true" />
+        </button>
       </div>
-      {card.kind !== "PriceTouch" && <p className="mt-2 text-xs text-dim">{CREATOR_NOTICE}</p>}
     </article>
   );
 }

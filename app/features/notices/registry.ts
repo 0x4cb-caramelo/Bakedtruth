@@ -55,14 +55,20 @@ export const MANDATORY_NOTICES: readonly MandatoryNotice[] = [
     source: "TP §8.2; the legal review (M5); the founder's answer 9a (2026-10-10)",
     text: PRIVACY_LABEL,
     screens: "every screen, in the footer, linking PRIVACY_URL (app/lib/config.ts)",
-    drawnBy: [{ file: "app/layout.tsx", uses: "href={PRIVACY_URL}" }],
+    drawnBy: [
+      { file: "components/site-footer.tsx", uses: "href={PRIVACY_URL}" },
+      { file: "app/layout.tsx", uses: "<SiteFooter />" },
+    ],
   },
   {
     id: "adults",
     source: "the founder (2026-10-10): the age rule, which lived in the terms (down until Sprint 17)",
     text: AGE_NOTICE,
     screens: "every screen, in the footer",
-    drawnBy: [{ file: "app/layout.tsx", uses: "{AGE_NOTICE}" }],
+    drawnBy: [
+      { file: "components/site-footer.tsx", uses: "{AGE_NOTICE}" },
+      { file: "app/layout.tsx", uses: "<SiteFooter />" },
+    ],
   },
   {
     id: "lock",

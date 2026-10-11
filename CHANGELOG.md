@@ -27,6 +27,73 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **A revisão visual do site: as telas aprovadas da Sprint -1 no `app/`** (branch `feat/full-ui-overhaul`, 11/10/2026,
+  a pedido do Ronaldo; `docs/product/DESIGN-DIRECTION.md`, "Status em 2026-10-11"). O PR #67 tinha trazido só as
+  cores da marca; agora o site tem a estrutura do protótipo aprovado (`prototype-lab/campaigns/`, servido em
+  `/dev0x/`).
+  - **Os estilos do protótipo** foram para `app/styles/ui/` como estão, em camadas de CSS, com as cores da marca.
+  - **Mudaram de estrutura:** a moldura (faixa, barra do topo com o Baked, busca, carteira com menu, menu do celular,
+    rodapé), a página inicial (topo com o custo da abertura agora, o carrossel "Open now" com a leitura na cadeia,
+    "Closing soon", "Answered recently", os passos, a barra de filtros, a grade), o cartão de campanha com a leitura
+    de agora contra o alvo, a página da campanha e o painel de entrada, a caixa de abertura, Minhas entradas e o
+    ranking; Fees, How it works e o registro ganharam a cabeça e os títulos do protótipo.
+  - **Nada mudou no que o site faz:** as mesmas leituras, regras, textos que o teste na web confere e fluxos. Duas
+    expectativas do teste mudaram com o desenho: no celular, "How it works" fica no menu; ligada a carteira, o sinal é
+    o chip com o endereço e o saldo (o "Disconnect" fica no menu dela).
+  - **Ainda fora:** o cartão de compartilhar, o painel "About this campaign", a linha do tempo com a campanha aberta,
+    a lista densa de todas as campanhas, a barra fixa de entrada do celular e o selo de parceiro.
+  - **Os pedidos do Ronaldo depois de ver a revisão:** o título e o subtítulo da página inicial são os da capa do
+    pitch, no vocabulário do site ("Campaigns the chain resolves." e "Permissionless campaigns that turn on-chain
+    milestones into growth, settled by the chain itself."); o botão da carteira diz "Connect"; "question" virou
+    "campaign" no texto do site. A regra do vocabulário segue inteira, sem exceção.
+  - **Um só botão de abrir campanha:** o grande amarelo da página inicial saiu, e o "Open a campaign" da barra virou o
+    amarelo da marca.
+  - **"Connect" abre a lista "Connect a wallet"** do desenho aprovado: as carteiras do navegador, a escolhida ligada só
+    pelo clique e o erro da carteira à vista. Antes ele ligava a primeira carteira instalada e engolia o erro, e o
+    botão parecia morto.
+  - **A busca da caixa de abrir completa o que se digita**, como uma barra de busca e como o protótipo aprovado
+    (`/dev0x/`): cada sugestão é a frase inteira da campanha que ela abriria ("BTC/USD reaches $120,000"), agrupada por
+    tipo. Ela lê a direção ("falls to", "reaches"), o prazo ("in 30 days", "2 weeks") e o alvo com "k" ("120k"). Com o
+    preço da Pyth lido agora, nunca sugere um alvo já atingido, que o programa recusaria, e a caixa vazia começa com
+    exemplos a uma distância justa do preço. Fora do que a cadeia confere, o Baked desconfiado diz "We can't check
+    this on-chain." e mostra os três tipos mais próximos. Enter pega a primeira sugestão, e o cursor vai para o campo
+    que falta. O que se digita continua só na página (D-j). O botão do prazo escolhido voltou a aparecer marcado.
+  - **"$" antes do preço:** "SOL/USD reaches $150", como o protótipo aprovado escreve, na frase da campanha (cartões,
+    página da campanha, caixa de abrir, sugestões da busca) e nos outros preços em US$ da página e dos cartões: a regra,
+    a prova na cadeia (preço de agora, alvo e confiança), a leitura dos cartões e o painel da página inicial. Um feed
+    de razão, como SSOL/SOL.RR, continua sem "$", porque o valor dele não é em dólar.
+  - **O campo de pontos do protótipo atrás da página:** os pontos acendem em volta do cursor, e a luz segue o cursor
+    sobre os cartões da grade. Com "reduzir movimento" ligado no sistema, os pontos ficam parados e a luz dos cartões
+    não aparece.
+  - **O saldo da carteira acompanha as entradas.** O da barra do topo era lido uma vez, ao conectar, e ficava parado:
+    depois de uma entrada de 0,5 SOL ele ainda dizia 5,0 SOL. Agora o site tem uma leitura só do saldo, refeita quando
+    uma entrada ou uma abertura entra na cadeia, a cada 20 s com a página à vista e quando a pessoa volta para a aba.
+  - **A página da campanha mais enxuta:**
+    - o título pergunta: "SOL/USD reaches $150?";
+    - a regra cabe numa linha, só com a condição, o alvo e o prazo; a regra inteira fica em "Full rules", fechada;
+    - na prova na cadeia, o preço de agora, o alvo e o "If read now" ficam à vista; o resto (quando o preço foi
+      publicado, a conta lida, o dono conferido, as datas e a resolução) fica em "Proof details", fechado; um aviso de
+      preço velho ou perto do alvo continua à vista;
+    - "Re-check it yourself" ficou mais fino, e a caixa da estimativa tem o tamanho do que ela diz;
+    - as notas do painel de entrada ficam em "Read before you enter", na cor de destaque da marca; o aviso do
+      travamento continua à vista, e a folha antes de assinar mostra todas as notas abertas;
+    - o botão de entrar não mudou: "Review entry" quando a carteira cobre a entrada, e "Get devnet SOL" só quando não
+      cobre.
+  - **A página acompanha a entrada.** Depois que uma entrada entra na cadeia, a página relê na hora e de novo em 1,5,
+    4 e 8 segundos, porque o RPC público do devnet às vezes responde por um instante com o estado de antes. A divisão,
+    o pote, as entradas recentes e o saldo aparecem atualizados. Cada transação das entradas recentes é lida uma vez
+    só, para essas leituras extras saírem baratas.
+  - **"?" também nos cartões**, como no título da página.
+  - **"Opened by …" leva à transação que abriu a campanha, no Solscan.**
+  - **YES em verde e NO em vermelho** nas linhas da estimativa ("If YES wins…", "If NO wins…") e na folha antes de
+    assinar.
+  - **A folha "Check before you sign" mais leve.** À vista ficam o lado e o valor, o que volta se esse lado ganhar e
+    o total que sai da carteira, com o aviso do travamento, o de uma entrada grande e, na primeira entrada, o de que
+    as entradas são públicas. As notas ficam em "Read before you enter"; as travas do programa, os aluguéis, a taxa, a
+    rede e o resumo lido dos bytes da transação ficam em "Transaction details".
+  - **O balão do Baked no celular:** encaixado na tela de novo sempre que o Baked se move enquanto fala. Antes, um
+    toque no meio de um pulo podia deixá-lo cortado na borda; o defeito é anterior e o desenho novo o expôs.
+
 - **Sprint 19: a caixa de abertura em `/abrir`; qualquer carteira abre uma campanha pelo site** (branch
   `sprint-19-site-open-campaign`, 10/10/2026; `docs/sprints/sprint-19-site-open-campaign.md`; mesclada na `main` pelo
   PR #68 em 11/10/2026, a pedido do Ronaldo, com a tag `sprint-19`).

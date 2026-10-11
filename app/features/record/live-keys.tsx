@@ -54,7 +54,7 @@ export function LiveKeys({ published }: { published: Record<string, string> }) {
     typeof chain === "object" && chain[role].length === 1 && chain[role][0] === published[role];
   return (
     <Card as="section" aria-labelledby="keys-live" className="space-y-2 p-4" data-testid="live-keys">
-      <h2 id="keys-live" className="m-0 font-display text-2xl font-bold">
+      <h2 id="keys-live" className="panel-head">
         {KEYS.title}
       </h2>
       <p className="m-0 text-sm text-muted">{KEYS.intro}</p>

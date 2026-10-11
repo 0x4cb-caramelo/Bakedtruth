@@ -1,7 +1,7 @@
 /**
  * Purpose: the web smoke's injected wallet: a Wallet Standard wallet ("E2E Test Wallet") registered in the page before
  *          its own scripts run, the way a browser extension registers itself, so the site finds it as an installed
- *          wallet and connects through "Use Installed Wallet". Its `signAndSendTransaction` hands the exact bytes the
+ *          wallet and connects through "Connect". Its `signAndSendTransaction` hands the exact bytes the
  *          site gave it to the runner (`window.__e2eSignAndSend`), which decides what this wallet does: sign and send,
  *          refuse, send and never answer, or never answer at all. No key is in the page.
  * Version: 0.1.0

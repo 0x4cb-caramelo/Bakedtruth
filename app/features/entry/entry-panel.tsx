@@ -126,13 +126,10 @@ export function EntryPanel({
   const onText = (next: string) => (setText(next), setFromLink(false));
 
   return (
-    <section aria-labelledby="entry-title" className="space-y-3 rounded-md border border-line bg-panel p-4">
-      <h2
-        id="entry-title"
-        className="m-0 flex flex-wrap items-baseline justify-between gap-2 font-display text-2xl font-bold"
-      >
+    <section aria-labelledby="entry-title" className="panel en-panel">
+      <h2 id="entry-title" className="panel-head">
         {PANEL.title}
-        <span className="font-sans text-xs font-normal text-muted">{PANEL.closes(formatUtc(c.entriesCloseAt))}</span>
+        <span className="hint">{PANEL.closes(formatUtc(c.entriesCloseAt))}</span>
       </h2>
       <SidePicker value={side} views={views} onChange={(next) => (setSide(next), setFromLink(false))} />
       <AmountField
@@ -153,17 +150,16 @@ export function EntryPanel({
         context={context}
       />
       {rent !== null ? (
-        <p className="m-0 text-xs text-muted">
-          {data.mine ? PANEL.rentAgain(sol4(rent, "up")) : PANEL.rentFirst(sol4(rent, "up"))}
-        </p>
+        <p className="en-rent">{data.mine ? PANEL.rentAgain(sol4(rent, "up")) : PANEL.rentFirst(sol4(rent, "up"))}</p>
       ) : null}
       <EntryNotices
+        folded
         feeBps={c.feeBps}
         creatorShareBps={c.creatorShareBps}
         oneSidedFeeBps={c.oneSidedFeeBps}
         large={large}
       />
-      {noSol || short ? <p className="m-0 rounded-sm bg-notice-bg px-3 py-2 text-xs">{PANEL.noSol}</p> : null}
+      {noSol || short ? <p className="notice">{PANEL.noSol}</p> : null}
       <EntryAction
         paused={paused}
         stale={stale}

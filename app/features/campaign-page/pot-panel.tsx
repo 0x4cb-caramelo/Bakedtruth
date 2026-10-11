@@ -27,31 +27,34 @@ export function PotPanel({ data }: { data: PageData }) {
         ? POT.oneSided(c.poolYes > 0n ? "YES" : "NO", c.poolYes > 0n ? "NO" : "YES")
         : null;
   const side = (name: "yes" | "no", lamports: bigint) => (
-    <div className={name === "yes" ? "text-yes-fg" : "text-no-fg"}>
-      <small className="block text-xs font-semibold">{name.toUpperCase()}</small>
-      <b className="font-display text-3xl tabular-nums">{odds ? `${odds[name]}%` : "–"}</b>
-      <span className="block text-xs text-muted">{POT.onSide(sol4(lamports), name.toUpperCase())}</span>
+    <div key={name} className={name === "yes" ? "cp-side-yes" : "cp-side-no"}>
+      <small>{name.toUpperCase()}</small>
+      <strong className="num">{odds ? `${odds[name]}%` : "–"}</strong>
+      <span>{POT.onSide(sol4(lamports), name.toUpperCase())}</span>
     </div>
   );
   return (
-    <section aria-labelledby="pot-title" className="space-y-3 rounded-md border border-line bg-panel p-4">
-      <h2 id="pot-title" className="m-0 flex items-center gap-2 font-display text-2xl font-bold">
-        <Vault className="size-5" aria-hidden="true" />
-        <span className="flex-1">{POT.title}</span>
-        <span className="font-sans text-xs font-normal text-muted">{POT.bakers(c.entriesOpen)}</span>
+    <section aria-labelledby="pot-title" className="panel">
+      <h2 id="pot-title" className="panel-head">
+        <Vault className="size-[15px]" aria-hidden="true" />
+        {POT.title}
+        <span className="hint">{POT.bakers(c.entriesOpen)}</span>
       </h2>
       {odds ? (
-        <div className="grid grid-cols-2 gap-3">{[side("yes", c.poolYes), side("no", c.poolNo)]}</div>
+        <div className="cp-chance">{[side("yes", c.poolYes), side("no", c.poolNo)]}</div>
       ) : (
-        <p className="m-0 text-sm text-muted">{POT.noEntries}</p>
+        <p className="cp-nochance">{POT.noEntries}</p>
       )}
       <SplitBar yes={Number(c.poolYes)} no={Number(c.poolNo)} prize={Number(c.prizeLamports)} />
-      <p className="m-0 text-xs text-muted">{c.prizeLamports > 0n ? POT.prize(sol4(c.prizeLamports)) : POT.noPrize}</p>
-      <p className="m-0 flex items-baseline justify-between text-sm">
-        <span className="text-muted">{POT.pot}</span>
-        <b className="font-display text-2xl tabular-nums">{sol4(pot)} SOL</b>
+      <p className="cp-prize">
+        {c.prizeLamports > 0n ? <span className="cp-swatch" aria-hidden="true" /> : null}
+        {c.prizeLamports > 0n ? POT.prize(sol4(c.prizeLamports)) : POT.noPrize}
       </p>
-      {note ? <p className="m-0 text-xs text-muted">{note}</p> : null}
+      <p className="cp-total">
+        <span>{POT.pot}</span>
+        <b className="num">{sol4(pot)} SOL</b>
+      </p>
+      {note ? <p className="cp-pot-note">{note}</p> : null}
     </section>
   );
 }

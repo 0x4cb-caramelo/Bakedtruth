@@ -147,6 +147,7 @@ export function previewFacts(a: Inputs): PreviewFacts {
   const card: Card | null = args
     ? cardOf({
         args,
+        input,
         kind: input.kind,
         title: sentenceOf(input),
         asset: feed?.symbol ?? null,

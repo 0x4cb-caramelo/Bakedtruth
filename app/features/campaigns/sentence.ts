@@ -2,11 +2,13 @@
  * Purpose: the campaign's sentence, template v1 (the program stores `template_version` 1, the SDK's
  *          `CAMPAIGN_TEMPLATE_VERSION`; D-j and A-11), from its stored
  *          fields only: one template per kind (Sprint 19). A price campaign reads the feed's symbol from the SDK's
- *          pinned list and its target in the feed's exponent; a burn or a lock target is the raw amount the account
+ *          pinned list and its target in the feed's exponent, "$150" when the feed is quoted in US$; a burn or a lock
+ *          target is the raw amount the account
  *          stores; a stake pool or a stake target is SOL. The other kinds name their account by its shortened address:
  *          no creator-supplied text, and no name unless two people reviewed it. The creation box at /abrir writes its
  *          preview with this same function, so the sentence a creator reads is the one every page shows.
- * Version: 0.3.0 (the Sprint 19 copy review: units on burn and lock, the measured epoch; 0.2.0, the five templates)
+ * Version: 0.4.0 (the UI overhaul: "$" before a price in US$, the page's title as a question; 0.3.0, the Sprint 19
+ *          copy review: units on burn and lock, the measured epoch; 0.2.0, the five templates)
  * Sprint:  10 (site: campaign list); 19
  */
 import { feedSymbol, ReaderKind, shortAddress } from "@brot/sdk/read";
@@ -37,6 +39,14 @@ export function formatTarget(target: bigint, exponent: number): string {
   return new Intl.NumberFormat("en-US", small ? { maximumSignificantDigits: 6 } : { maximumFractionDigits: 2 }).format(
     value,
   );
+}
+
+/**
+ * A price as the approved prototype writes it: "$150" when the feed is quoted in US$ ("SOL/USD"); a ratio feed's value
+ * ("SSOL/SOL.RR") stays a plain number, since it is not in dollars.
+ */
+export function priceText(value: bigint, exponent: number, asset: string | null): string {
+  return `${asset !== null && asset.endsWith("/USD") ? "$" : ""}${formatTarget(value, exponent)}`;
 }
 
 /** 1234567n → "1,234,567", exactly (a raw supply or liquidity can pass 2^53). */
@@ -80,7 +90,7 @@ export function sentenceParts(input: SentenceInput): SentencePart[] {
       const asset = input.feedIdHex === null ? null : assetOf(input.feedIdHex);
       if (input.feedIdHex !== null && asset === null) return [`${KIND_LABEL.PriceTouch} campaign `, account];
       const exponent = input.priceExponent;
-      const value = raw === null || exponent === null ? null : formatTarget(raw, exponent);
+      const value = raw === null || exponent === null ? null : priceText(raw, exponent, asset);
       const verb = input.direction === "Below" ? " falls to " : " reaches ";
       return [{ slot: "asset", value: asset }, verb, { slot: "target", value }];
     }
@@ -110,8 +120,18 @@ function epochOf(input: SentenceInput): SentencePart[] {
   return ["epoch ", { slot: "epoch", value: input.epoch }];
 }
 
+const joined = (parts: SentencePart[]) =>
+  parts.map((part) => (typeof part === "string" ? part : (part.value ?? `(${part.slot})`))).join("");
+
 export function sentenceOf(input: SentenceInput): string {
-  return sentenceParts(input)
-    .map((part) => (typeof part === "string" ? part : (part.value ?? `(${part.slot})`)))
-    .join("");
+  return joined(sentenceParts(input));
+}
+
+/**
+ * The campaign page's title asks the sentence (Ronaldo, 2026-10-11): "SOL/USD reaches $150?". A campaign outside the
+ * templates ("Price campaign 7Avi…HmyE") is a name, not a question, and takes no mark.
+ */
+export function questionOf(input: SentenceInput): string {
+  const parts = sentenceParts(input);
+  return joined(parts) + (parts.some((p) => typeof p !== "string" && p.slot === "target") ? "?" : "");
 }

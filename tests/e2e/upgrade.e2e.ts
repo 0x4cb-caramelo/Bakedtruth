@@ -28,7 +28,7 @@ const review = (page: Page) => panel(page).getByRole("button", { name: "Review e
 const reloads = (page: Page) => page.evaluate(() => sessionStorage.getItem("brot-a8-reloads"));
 /** After a reload the panel offers the wallet again (the sheet is gone with the old page). */
 const reloaded = (page: Page) =>
-  expect(panel(page).getByRole("button", { name: "Use Installed Wallet" })).toBeVisible({ timeout: 20_000 });
+  expect(panel(page).getByRole("button", { name: "Connect", exact: true })).toBeVisible({ timeout: 20_000 });
 
 test.describe("signing pauses during an upgrade (A-8)", () => {
   test.beforeEach(({}, info) => test.skip(info.project.name !== "desktop", "A-8 runs once, at desktop width"));

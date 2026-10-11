@@ -12,6 +12,57 @@
   [`BRAND.md`](BRAND.md) §5, tiradas da página `/5` que o Lucas aprovou em 9/10: azul-marinho e laranja no escuro,
   creme e ferrugem no claro, nenhum azul. A estrutura, a tipografia, os componentes e o resto da direção Ledger²
   continuam valendo. A troca e as escolhas que ela pediu estão em [Cores](#cores); a tabela antiga ficou como histórico.
+- **Status em 2026-10-11: o site tem a estrutura das telas aprovadas, não só as cores** (a revisão visual, branch
+  `feat/full-ui-overhaul`, a pedido do Ronaldo). As telas da Sprint -1 (`prototype-lab/campaigns/`, servidas em
+  `/dev0x/`, aprovadas pelo fundador em 10/10) passaram para `app/`:
+  - **Os estilos do protótipo** estão em `app/styles/ui/` como estão (dez arquivos), dentro das camadas `base` e
+    `components`, para os utilitários do Tailwind valerem onde os dois se encontram. As cores vêm de
+    `app/styles/tokens.css`, cujas variáveis têm os nomes do protótipo, então o azul do Ledger² vira o laranja da marca
+    sem tocar nos arquivos portados. `additions.css` guarda só o que o site precisa a mais.
+  - **O que ganhou a estrutura do protótipo:**
+    - a moldura: a faixa da devnet, a barra do topo com o Baked, as três abas, a busca, "Open a campaign", o tema, a
+      carteira (o chip com saldo e o menu) e, abaixo de 1180 px, o menu com todas as rotas; o rodapé;
+    - a página inicial inteira: a linha de topo com o custo da abertura agora, o carrossel "Open now" com o painel de
+      leitura, "Closing soon", "Answered recently", os passos e os princípios, a barra de filtros e a grade;
+    - o cartão de campanha, com a leitura de agora contra o alvo, lida em lote;
+    - a página da campanha e o painel de entrada;
+    - a caixa de abertura (números em círculo, as letras dos tipos, a direção em duas metades, o "$" do alvo, as
+      faixas de valor);
+    - Minhas entradas e o ranking.
+
+    Fees, How it works e o registro ganharam a cabeça de página e os títulos do protótipo.
+  - **Os pedidos do Ronaldo depois de ver a revisão (11/10):**
+    - o título e o subtítulo da página inicial são os da capa do pitch, no vocabulário do site: "Campaigns the chain
+      resolves." e "Permissionless campaigns that turn on-chain milestones into growth, settled by the chain itself.";
+    - o botão da carteira diz "Connect" e abre a lista "Connect a wallet" do desenho aprovado; a carteira escolhida
+      conecta só pelo clique (S1), e o erro dela aparece;
+    - um só botão de abrir campanha: o da barra, no amarelo da marca; o grande da página inicial saiu;
+    - a busca da caixa de abertura completa o que se digita, como a do protótipo (`open-slots.js`): a frase inteira de
+      cada campanha sugerida, agrupada por tipo, com a direção, o prazo e o alvo lidos do texto; nunca um alvo já
+      atingido; exemplos na caixa vazia; e o Baked desconfiado fora do que a cadeia confere;
+    - "$" antes do preço, como no protótipo: na frase ("SOL/USD reaches $150") e nos outros preços em US$ (a regra, a
+      prova, os cartões); um feed de razão (SSOL/SOL.RR) fica sem "$";
+    - os efeitos do protótipo que seguem o mouse (`effects.js`): o campo de pontos atrás da página, que acende em volta
+      do cursor, e a luz sobre os cartões da grade;
+    - a página da campanha mais enxuta: o título como pergunta ("…$150?"), a regra numa linha com a inteira em "Full
+      rules", os detalhes da prova em "Proof details", as notas da entrada em "Read before you enter" (na cor de
+      destaque), "Re-check it yourself" mais fino e a estimativa sem espaço sobrando;
+    - "?" também nos cartões; "Opened by" como link para a transação no Solscan; YES em verde e NO em vermelho na
+      estimativa; a folha antes de assinar com o essencial à vista e o resto dobrado;
+    - "question" virou "campaign" no texto do site;
+    - a regra do vocabulário segue inteira, sem exceção.
+  - **Onde ficaram as palavras do site, e não as do protótipo:**
+    - a faixa diz os dois avisos inteiros em qualquer largura;
+    - o terceiro princípio diz que no devnet o pagamento ainda não é automático (o protótipo dizia "No claim button");
+    - os rótulos dos tipos na caixa de abertura são os da Sprint 19.
+  - **Ainda não estão no site:**
+    - o cartão de compartilhar (BR-33);
+    - o painel "About this campaign";
+    - a linha do tempo "Where it is" enquanto a campanha está aberta;
+    - a lista densa de `#/campaigns` (no site, o interruptor "All campaigns, unlisted too" da grade);
+    - a barra fixa de entrada do celular na página da campanha (no site, o painel vai na coluna);
+    - o selo de parceiro (não há `content/partners.json`);
+    - as falas próprias do Baked em cada tela.
 
 | Identificador | `ledger2-d-n` |
 |---|---|

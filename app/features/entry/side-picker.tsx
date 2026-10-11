@@ -25,7 +25,7 @@ export function SidePicker({
   disabled?: boolean;
 }) {
   return (
-    <div role="group" aria-label={PANEL.sideGroup} className="grid grid-cols-2 gap-2">
+    <div role="group" aria-label={PANEL.sideGroup} className="en-sides">
       {views.map((view) => (
         <button
           key={view.side}
@@ -33,20 +33,13 @@ export function SidePicker({
           aria-pressed={value === view.side}
           disabled={disabled}
           onClick={() => onChange(view.side)}
-          className={cx(
-            "flex min-h-14 flex-col items-start gap-0.5 rounded-sm px-3 py-2 text-left disabled:opacity-60",
-            "hover:brightness-110 light:hover:brightness-95",
-            view.side === "yes" ? "bg-yes-bg text-yes-fg" : "bg-no-bg text-no-fg",
-            value === view.side && "shadow-[inset_0_0_0_2px_currentColor]",
-          )}
+          className={cx("side-btn", view.side, "disabled:opacity-60")}
         >
-          <span className="flex w-full items-baseline justify-between font-display text-xl font-bold">
-            <span>{view.side.toUpperCase()}</span>
-            {view.chance !== null ? <span className="text-base tabular-nums">{view.chance}%</span> : null}
+          <span className="en-side-top">
+            <b>{view.side.toUpperCase()}</b>
+            {view.chance !== null ? <span>{view.chance}%</span> : null}
           </span>
-          <span className="text-xs tabular-nums">
-            {view.alone ? PANEL.refundIfAlone : view.perOne ? PANEL.perOne(view.perOne) : " "}
-          </span>
+          <span className="per">{view.alone ? PANEL.refundIfAlone : view.perOne ? PANEL.perOne(view.perOne) : " "}</span>
         </button>
       ))}
     </div>

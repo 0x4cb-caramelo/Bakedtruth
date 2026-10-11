@@ -83,8 +83,10 @@ export function CostSection({
   const rent = world ? world.rents.campaign + world.rents.vault : null;
   return (
     <Card as="section" aria-labelledby={`${id}-h`} className="space-y-3 p-4 [grid-area:cost]">
-      <h2 id={`${id}-h`} className="font-display text-2xl font-bold">
-        <span className="mr-2 text-muted">4</span>
+      <h2 id={`${id}-h`} className="op-h">
+        <span className="op-n" aria-hidden="true">
+          4
+        </span>
         {BOX.cost}
       </h2>
       {team ? (

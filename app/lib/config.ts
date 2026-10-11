@@ -13,3 +13,6 @@ const explorer = (path: string) =>
   `https://explorer.solana.com/${path}${CLUSTER === "mainnet-beta" ? "" : `?cluster=${CLUSTER}`}`;
 export const explorerAddress = (address: string) => explorer(`address/${address}`);
 export const explorerTx = (signature: string) => explorer(`tx/${signature}`);
+/** Solscan, where the campaign page links the transaction that opened the campaign (Ronaldo, 2026-10-11). */
+export const solscanTx = (signature: string) =>
+  `https://solscan.io/tx/${signature}${CLUSTER === "mainnet-beta" ? "" : `?cluster=${CLUSTER}`}`;

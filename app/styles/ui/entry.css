@@ -1,0 +1,79 @@
+/* Purpose: the entry panel and its flow: side toggle, amount with quick amounts, the live estimate, rent and lock lines; then the sheet "Check before you sign", the signing steps, the receipt and the refusals. On phones the sheet's buttons stay pinned to its bottom edge. Tokens only; see ../README.md for the contract. Small amber text uses --st-review-fg on its own background, which holds 4.5:1 in both themes. From prototype-lab/campaigns/css/entry.css (Sprint -1, approved 2026-10-10), as is, in the `components` layer;
+   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.0 · Sprint 09 (the UI overhaul) */
+@layer components {
+.en-panel { display: flex; flex-direction: column; gap: 14px; }
+.en-panel > .panel-head { margin: 0; }
+.panel-head .hint.en-soon { color: var(--st-review-fg); font-weight: 600; }
+
+/* Side toggle: the chosen side in its colour with a ring; the other one quiet. */
+.en-sides { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.en-sides .side-btn { flex-direction: column; align-items: stretch; justify-content: center; gap: 4px; min-height: 60px; padding: 10px 12px; text-align: left; }
+.en-sides .side-btn[aria-pressed="false"] { background: var(--raised); color: var(--muted); }
+.en-sides .side-btn[aria-pressed="false"]:hover { color: var(--text); }
+.en-side-top { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.en-side-top b { font: 700 21px/1 var(--display); letter-spacing: 0.3px; } .en-side-top span { font: 700 19px/1 var(--num); font-variant-numeric: tabular-nums; }
+.en-sides .per { font-size: 11.5px; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+/* Amount. */
+.en-amount-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.en-amount-top span { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.en-amount .input { padding-right: 52px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.en-chips { display: flex; flex-wrap: wrap; gap: 6px; } .en-chips .btn { flex: 1 0 auto; min-width: 46px; font-variant-numeric: tabular-nums; } .en-chips .btn:disabled { opacity: 0.45; }
+.help.en-linked { display: flex; align-items: flex-start; gap: 6px; color: var(--st-review-fg); font-weight: 600; }
+.help svg { flex-shrink: 0; margin-top: 1px; }
+
+/* The estimate: a polite live region. */
+.en-est { min-height: 96px; padding: 12px 14px; border-radius: var(--r-sm); background: var(--raised); }
+.en-est p { margin: 0; } .en-est-main { font-size: 13px; }
+.en-est-main b { color: var(--yes-fg); font: 700 24px/1 var(--num); font-variant-numeric: tabular-nums; } .en-est[data-tone="no"] .en-est-main b { color: var(--no-fg); }
+.en-est .en-est-sub { margin-top: 5px; color: var(--text); font-size: 12.5px; }
+.en-est .en-est-note { margin-top: 6px; color: var(--muted); font-size: 11.5px; }
+.en-est .en-warn { display: flex; align-items: flex-start; gap: 6px; padding: 6px 8px; border-radius: 5px; background: var(--st-review-bg); color: var(--st-review-fg); font-weight: 500; }
+.en-est .en-warn svg { flex-shrink: 0; margin-top: 1px; }
+.en-rent { margin: 0; color: var(--muted); font-size: 12px; }
+.en-lock { display: flex; align-items: flex-start; gap: 8px; margin: 0; padding: 10px 12px; border: var(--bw) solid var(--line-strong); border-radius: var(--r-sm); color: var(--text); font-size: 12.5px; }
+.en-lock svg { flex-shrink: 0; margin-top: 1px; color: var(--crust-ink); } .en-lock b { font-weight: 600; }
+.en-panel .cta.wide > span { min-height: 48px; font-size: 14.5px; }
+a.cta:hover { text-decoration: none; }
+
+/* The sheet and every flow dialog. */
+.en-sheet { display: flex; flex-direction: column; gap: 14px; } .en-sheet > p { margin: 0; font-size: 13px; }
+.en-sum-q { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: var(--r-sm); background: var(--raised); font-weight: 600; }
+.en-sheet > .en-sum-q { font-size: 13px; } .en-sum-q small { display: block; margin-top: 3px; color: var(--muted); font-size: 11.5px; font-weight: 400; }
+.en-rows { margin: 0; } .en-rows dd { font-variant-numeric: tabular-nums; }
+.en-rows dd small { display: block; max-width: 36ch; margin: 2px 0 0 auto; color: var(--muted); font-size: 11.5px; font-weight: 400; }
+.en-rows .chip { margin-right: 4px; vertical-align: 1px; } .en-rows a { display: inline-flex; align-items: center; gap: 2px; }
+.en-does h3 { margin: 0 0 6px; font-size: 12.5px; font-weight: 600; }
+.en-does ul, .en-notes { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12px; } .en-does li + li, .en-notes li + li { margin-top: 4px; }
+.en-notes { padding: 10px 12px 10px 28px; border-radius: var(--r-sm); background: var(--raised); }
+.en-actions { position: sticky; bottom: -20px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin: 0 -22px -20px; padding: 12px 22px 16px;
+  border-top: var(--bw) solid var(--line); background: var(--panel); }
+
+/* Signing steps. */
+.en-steps { display: grid; gap: 12px; margin: 4px 0; padding: 0; list-style: none; }
+.en-steps li { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+.en-dot { display: grid; flex-shrink: 0; place-items: center; width: 26px; height: 26px; border: 2px solid var(--line-strong); border-radius: 50%; color: transparent; }
+.en-steps .is-done { color: var(--text); } .en-steps .is-done .en-dot { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+.en-steps .is-now { color: var(--text); font-weight: 600; }
+.en-steps .is-now .en-dot { border-color: var(--accent); border-right-color: transparent; animation: en-spin 0.8s linear infinite; }
+@keyframes en-spin { to { transform: rotate(360deg); } }
+
+/* Receipt and refusals. */
+.en-done, .en-fail { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: var(--r-sm); font-size: 13.5px; }
+.en-sheet > .en-done, .en-sheet > .en-fail { margin: 0; }
+.en-done { background: var(--st-paid-bg); color: var(--st-paid-fg); } .en-done b { font-weight: 700; }
+.en-fail.error { background: var(--danger-bg); color: var(--error); } .en-fail.info { background: var(--note-bg); color: var(--note-fg); }
+.en-done svg, .en-fail svg { flex-shrink: 0; margin-top: 1px; }
+.en-sheet > .en-cost { font-weight: 600; } .en-sheet > .en-code { color: var(--muted); font-size: 12px; }
+.en-check { display: grid; gap: 6px; } .en-check small { color: var(--muted); font-size: 11.5px; }
+.en-track { display: block; height: 6px; overflow: hidden; border-radius: var(--r-pill); background: var(--track); }
+.en-track > span { display: block; width: 38%; height: 100%; background: var(--fill); } .en-track > span.is-run { animation: en-fill 3.6s linear forwards; }
+@keyframes en-fill { from { width: 4%; } to { width: 100%; } }
+
+@media (max-width: 700px) {
+  .en-sides .side-btn { min-height: 62px; } .en-chips .btn { min-height: var(--tap); }
+  .en-rows > div { flex-direction: column; gap: 2px; } .en-rows dd { text-align: left; } .en-rows dd small { max-width: none; margin-left: 0; }
+  .en-actions { bottom: calc(-18px - env(safe-area-inset-bottom)); margin: 0 -16px calc(-18px - env(safe-area-inset-bottom)); padding: 12px 16px calc(14px + env(safe-area-inset-bottom)); }
+  .en-actions > * { flex: 1 1 auto; } .en-actions .cta > span, .en-actions .btn { min-height: var(--tap); }
+}
+}

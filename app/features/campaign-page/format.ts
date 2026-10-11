@@ -3,12 +3,13 @@
  *          supply or a liquidity as a whole number, a pool or a stake in SOL), a moment in UTC (the SDK's, exact) and
  *          in the visitor's own time zone, an age in seconds and minutes, and the public state's chip. Money never
  *          passes through a float; a price is shown through Sprint 10's target format so the page agrees with the list.
- * Version: 0.1.2 (Sprint 19: the grouping is the sentence's; burn and lock values with their unit)
+ * Version: 0.1.3 (the UI overhaul: "$" on a price in US$; 0.1.2, Sprint 19: the grouping is the sentence's; burn and
+ *          lock values with their unit)
  * Sprint:  11 (site: campaign page and entry); 19
  */
-import { formatUtc, type PublicView } from "@brot/sdk/read";
+import { bytesToHex, formatUtc, type PublicView } from "@brot/sdk/read";
 
-import { formatTarget, groupedDigits as grouped } from "../campaigns/sentence";
+import { assetOf, groupedDigits as grouped, priceText } from "../campaigns/sentence";
 import { sol4 } from "../entry/amount";
 import { RAW_UNIT } from "./copy";
 import type { KindName } from "./proof";
@@ -19,16 +20,20 @@ export type ChipState = "open" | "closed" | "in_review" | "final" | "paid" | "vo
 /** 1234567n → "1,234,567", exactly (Sprint 19: the sentence's own grouping, so the two always agree). */
 export { grouped };
 
-/** A value read or a target, in the units its kind reads. */
-export function valueText(kind: KindName, value: bigint, exponent: number): string {
-  if (kind === "price") return formatTarget(value, exponent);
+/** A price campaign's feed symbol ("SOL/USD"), so its values read "$150"; null on the other kinds. */
+export const priceAsset = (kind: KindName, feedId: Parameters<typeof bytesToHex>[0]) =>
+  kind === "price" ? assetOf(bytesToHex(feedId)) : null;
+
+/** A value read or a target, in the units its kind reads; a price with "$" when its feed (`asset`) is in US$. */
+export function valueText(kind: KindName, value: bigint, exponent: number, asset: string | null = null): string {
+  if (kind === "price") return priceText(value, exponent, asset);
   if (kind === "pool" || kind === "stake") return `${sol4(value)} SOL`;
   return grouped(value);
 }
 
 /** A value with its unit where the number alone would mislead: "1,000,000 raw units" on a burn, "… liquidity units". */
-export const valueWithUnit = (kind: KindName, value: bigint, exponent: number) =>
-  RAW_UNIT[kind] ? `${valueText(kind, value, exponent)} ${RAW_UNIT[kind]}` : valueText(kind, value, exponent);
+export const valueWithUnit = (kind: KindName, value: bigint, exponent: number, asset: string | null = null) =>
+  RAW_UNIT[kind] ? `${valueText(kind, value, exponent)} ${RAW_UNIT[kind]}` : valueText(kind, value, exponent, asset);
 
 /** The exact raw value, as the account stores it: "8,521,233,806,870 × 10^-8". */
 export const rawText = (value: bigint, exponent: number | null) =>

@@ -70,6 +70,7 @@ export function startMascot(opts: MascotOptions): MascotHandle {
   let moodEl: HTMLElement | null = null;
   let moodUntil = 0;
   let sayTimer = 0;
+  let fitAt = { x: NaN, y: NaN };
   let quip = 0;
   let raf = 0;
   const saidAt = new Map<string, number>();
@@ -87,6 +88,7 @@ export function startMascot(opts: MascotOptions): MascotHandle {
     bubble.classList.toggle("is-below", !!at && at.y - opts.size * at.s < 56);
     bubble.classList.add("is-on");
     fitBubble(bubble);
+    fitAt = { x: NaN, y: NaN }; // the next frame fits it where Baked is then
     clearTimeout(sayTimer);
     sayTimer = window.setTimeout(() => bubble.classList.remove("is-on"), ms);
   };
@@ -200,6 +202,12 @@ export function startMascot(opts: MascotOptions): MascotHandle {
     root.style.width = `${w}px`;
     root.style.height = `${h}px`;
     root.style.transform = `translate3d(${x}px,${y}px,0)`;
+    // A bubble said mid-hop rides along to the landing: fit it again whenever Baked moves while it shows (on a phone
+    // the landing can be at the edge, and the bubble must never be cut there).
+    if (bubble.classList.contains("is-on") && (x !== fitAt.x || y !== fitAt.y)) {
+      fitBubble(bubble);
+      fitAt = { x, y };
+    }
     flip.style.transform = `scaleX(${facing})`;
     squash.style.transform = `scale(${sx},${sy})`;
     setPose(hop ? "deadpan" : restingPose(now));
