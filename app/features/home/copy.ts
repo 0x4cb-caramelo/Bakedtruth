@@ -7,8 +7,9 @@
  * Sprint:  10 (campaign list), in the UI overhaul
  */
 export const HOME = {
-  title: "YES/NO questions an on-chain account answers.",
-  sub: "Join with SOL; the program reads the result.",
+  // The pitch's cover, in the site's own vocabulary (Ronaldo, 2026-10-11).
+  title: "Campaigns the chain resolves.",
+  sub: "Permissionless campaigns that turn on-chain milestones into growth, settled by the chain itself.",
   open: "Open a campaign",
   cost: "US$500 in SOL · 90% becomes the prize",
   now: (sol: string, usd: string) => `Now ${sol} at Pyth SOL/USD ${usd}`,
@@ -30,7 +31,7 @@ export const HOME = {
 export const STEPS: readonly (readonly [string, string])[] = [
   [
     "Open a campaign",
-    "Any wallet opens one for US$500 in SOL: 90% is a prize in the pot, 10% goes to Brot. The site writes the question from the kind, the account, the target and the date.",
+    "Any wallet opens one for US$500 in SOL: 90% is a prize in the pot, 10% goes to Brot. The site writes the campaign from the kind, the account, the target and the date.",
   ],
   [
     "Join YES or NO with SOL",

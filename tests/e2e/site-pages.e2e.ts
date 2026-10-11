@@ -100,7 +100,7 @@ test.describe("site pages and notices", () => {
     await control("/cycle-baker");
     const { wallet } = await openCampaign(page, (await control<{ id: string }>("/state", { name: "closed" })).id);
     await page.goto("/leaderboard");
-    await page.getByRole("button", { name: "Use Installed Wallet" }).first().click();
+    await page.getByRole("button", { name: "Connect", exact: true }).first().click();
     await expect(page.getByRole("button", { name: /^Wallet / })).toBeVisible(); // the top bar's chip, once connected
     const row = page.locator(`tr[data-wallet='${wallet}']`);
     await expect(row).toBeVisible();

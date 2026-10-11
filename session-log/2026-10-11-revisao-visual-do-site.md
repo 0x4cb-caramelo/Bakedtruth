@@ -52,8 +52,42 @@
 - Ligada a carteira, o sinal é o chip com o endereço e o saldo; o "Disconnect" mora no menu dele. Os testes esperam o
   chip.
 
+## Os ajustes do Ronaldo depois de ver a revisão
+
+Ele abriu a versão nova na porta 3100 e pediu três coisas:
+- o título e o subtítulo da página inicial exatamente como no pitch;
+- "Connect" no lugar de "Use Installed Wallet";
+- "campaign" e "campaigns" no lugar de "question" e "questions".
+
+- **O título e o subtítulo.** A capa do deck em `/pitch` diz "Prediction markets the chain resolves." e "Permissionless
+  prediction markets that turn on-chain milestones into growth campaigns, settled by the chain itself.". Copiadas
+  exatamente, as duas linhas poriam "prediction markets" no site, contra a regra do Lucas de 8/10 (nunca "market" fora
+  da marca), que um teste do site guarda. Perguntei. O Ronaldo escolheu a forma do pitch com "campaigns", e deu o
+  porquê: "Strategically and legally, framing our product as 'campaigns' rather than 'prediction markets' protects us
+  from gambling associations and perfectly fits our hackathon positioning as a growth primitive for creators and
+  protocols." E pediu a regra "strictly intact across the entire site and tests, with absolutely no exceptions".
+  Ficou "Campaigns the chain resolves." e "Permissionless campaigns that turn on-chain milestones into growth, settled
+  by the chain itself.".
+- **"Connect".** Só o rótulo mudou: o botão continua conectando só pelo clique de quem usa, pela carteira instalada
+  (S1). Os testes procuram o nome exato, "Connect", para não confundir com "Disconnect".
+- **"question" virou "campaign".**
+  - O título de How it works: "A campaign the chain answers".
+  - O passo de abrir, na página inicial e em How it works: "the site writes the campaign…".
+  - As dicas da busca da caixa de abertura: "Campaigns we can check".
+  - No primeiro parágrafo de How it works, a troca literal daria "An On-Chain Campaign is a YES/NO campaign"; ficou
+    "An On-Chain Campaign: YES or NO, about one Solana account.".
+  - As citações internas do plano ("TP §8, question 8") não são texto do site e ficaram.
+- O teste do vocabulário pegou a palavra "markets" num comentário que eu tinha escrito no arquivo de texto da página
+  inicial; o comentário mudou, e o teste ficou como estava.
+- **Um defeito antigo do Baked apareceu.** No teste do celular, o balão de fala passou 41 px da tela em How it works,
+  embora a foto do erro o mostrasse dentro. O balão era encaixado na tela uma vez, quando aparecia. Se o toque pegava o
+  Baked no meio de um pulo, ele pousava perto da borda e levava o balão junto, para fora. A regra da Sprint 13 diz que
+  no celular o balão não corta. Agora o balão é encaixado de novo sempre que o Baked se move enquanto ele aparece. O
+  defeito é anterior à revisão; o desenho novo mudou onde o Baked pousa e o expôs.
+
 ## O que fica
 
 - O cartão de compartilhar, o painel "About this campaign", a linha do tempo "Where it is" com a campanha aberta, a
-  lista densa de todas as campanhas, a barra fixa de entrada do celular, o selo de parceiro e as falas do Baked por tela.
+  lista densa de todas as campanhas, a barra fixa de entrada do celular, o selo de parceiro e as falas do Baked por
+  tela.
 - Fees, How it works e o registro só ganharam a cabeça e os títulos; o corpo deles segue o das sprints.

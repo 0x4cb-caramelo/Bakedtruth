@@ -18,7 +18,7 @@ const state = (page: Page) => page.locator("section[aria-labelledby='state-title
 
 /** Connects the injected wallet from the header (a settled campaign shows no entry panel). */
 async function connectFromHeader(page: Page) {
-  await page.getByRole("button", { name: "Use Installed Wallet" }).first().click();
+  await page.getByRole("button", { name: "Connect", exact: true }).first().click();
   await expect(page.getByRole("button", { name: /^Wallet / })).toBeVisible(); // the top bar's chip, once connected
 }
 

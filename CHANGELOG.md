@@ -42,6 +42,12 @@ recomendado (1a a 12a).
     o chip com o endereço e o saldo (o "Disconnect" fica no menu dela).
   - **Ainda fora:** o cartão de compartilhar, o painel "About this campaign", a linha do tempo com a campanha aberta,
     a lista densa de todas as campanhas, a barra fixa de entrada do celular e o selo de parceiro.
+  - **Os pedidos do Ronaldo depois de ver a revisão:** o título e o subtítulo da página inicial são os da capa do
+    pitch, no vocabulário do site ("Campaigns the chain resolves." e "Permissionless campaigns that turn on-chain
+    milestones into growth, settled by the chain itself."); o botão da carteira diz "Connect"; "question" virou
+    "campaign" no texto do site. A regra do vocabulário segue inteira, sem exceção.
+  - **O balão do Baked no celular:** encaixado na tela de novo sempre que o Baked se move enquanto fala. Antes, um
+    toque no meio de um pulo podia deixá-lo cortado na borda; o defeito é anterior e o desenho novo o expôs.
 
 - **Sprint 19: a caixa de abertura em `/abrir`; qualquer carteira abre uma campanha pelo site** (branch
   `sprint-19-site-open-campaign`, 10/10/2026; `docs/sprints/sprint-19-site-open-campaign.md`; mesclada na `main` pelo

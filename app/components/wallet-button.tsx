@@ -1,6 +1,6 @@
 /**
  * Purpose: the top bar's wallet control (Sprint 09, S1), in the approved prototype's look (prototype-lab/campaigns,
- *          ui/wallet.js): "Use Installed Wallet" as the primary button connects only from that click, through the
+ *          ui/wallet.js): "Connect" as the primary button connects only from that click, through the
  *          installed wallet the site registered (MWA on Android, or an installed browser wallet). Connected, a chip
  *          shows the short address and the SOL balance, amber when the wallet has no SOL, and opens a menu: the
  *          faucet link on devnet when there is no SOL, copy the address, the explorer, my entries, and Disconnect.
@@ -50,7 +50,7 @@ export function WalletButton() {
         <span>
           <Wallet className="size-[15px]" aria-hidden="true" />
           {installed ? (
-            "Use Installed Wallet"
+            "Connect"
           ) : (
             <>
               <span className="long">No installed wallet found</span>

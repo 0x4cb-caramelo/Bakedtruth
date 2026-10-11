@@ -16,7 +16,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 A regra diz "under 200 lines where practical". Estes passaram — vale checar se dá pra separar:
 
-- `app/lib/mascot/engine.ts` — 304 linhas
+- `app/lib/mascot/engine.ts` — 312 linhas
 - `programs/brot-markets/src/error.rs` — 328 linhas
 - `programs/brot-markets/src/instructions/campaigns/open_campaign.rs` — 210 linhas
 - `programs/brot-markets/src/instructions/entries/join_campaign.rs` — 212 linhas
@@ -143,7 +143,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): Baked and the wordmark, the three main links with the current one unde | 109 |
 | [`site-notice.tsx`](app/components/site-notice.tsx) | the strip above every screen (Sprint 09, BR-47, P1 §4.6), in the approved prototype's place and style (prototype-lab/campaigns, `.status`): the devnet mark, the | 27 |
 | [`toast.tsx`](app/components/toast.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 71 |
-| [`wallet-button.tsx`](app/components/wallet-button.tsx) | the top bar's wallet control (Sprint 09, S1), in the approved prototype's look (prototype-lab/campaigns, ui/wallet.js): "Use Installed Wallet" as the primary bu | 121 |
+| [`wallet-button.tsx`](app/components/wallet-button.tsx) | the top bar's wallet control (Sprint 09, S1), in the approved prototype's look (prototype-lab/campaigns, ui/wallet.js): "Connect" as the primary button connects | 121 |
 
 ## `app/components/ui/`
 
@@ -227,7 +227,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`amount.ts`](app/features/entry/amount.ts) | the amount a baker types, as lamports, exactly: no floating point between the text and the bigint the transaction carries. Accepts a dot or a comma, at most nin | 36 |
 | [`copy-failures.ts`](app/features/entry/copy-failures.ts) | one message for each way an entry can fail (the Sprint 11 list: entries closed, outcome already known, no fresh price, pause, below the minimum, not enough SOL, | 152 |
 | [`copy.ts`](app/features/entry/copy.ts) | the entry panel's words (BR-12, BR-27; D-m vocabulary): the panel, the five notices a baker reads before signing (the estimate, a large entry, the lock, the fee | 132 |
-| [`entry-action.tsx`](app/features/entry/entry-action.tsx) | the entry panel's one button, the one that fits the moment: entries paused, waiting for a fresh price, "Use Installed Wallet", the devnet faucet when the wallet | 66 |
+| [`entry-action.tsx`](app/features/entry/entry-action.tsx) | the entry panel's one button, the one that fits the moment: entries paused, waiting for a fresh price, "Connect", the devnet faucet when the wallet cannot cover | 66 |
 | [`entry-estimate.tsx`](app/features/entry/entry-estimate.tsx) | the live estimate under the amount (BR-09), in a polite live region: what the entry returns if its side wins, net of Brot's fee and the creator's share, with th | 77 |
 | [`entry-notices.tsx`](app/features/entry/entry-notices.tsx) | the notices a baker reads before signing (Sprint 11 DoD; BR-12, P1 §3.2, P1 §4.6): the return is an estimate that changes until entries close; a large entry low | 51 |
 | [`entry-panel.tsx`](app/features/entry/entry-panel.tsx) | the entry panel of the campaign page (Sprint 11; spec 3.6 of Sprint -1): YES or NO, the amount in SOL (the campaign's minimum, 0.01 SOL under P-5), the estimate | 191 |
@@ -259,7 +259,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`copy.ts`](app/features/home/copy.ts) | the home page's words (the UI overhaul), from the approved prototype (prototype-lab/campaigns, home.js and home-mosaic.js) where they hold on devnet, and change | 85 |
+| [`copy.ts`](app/features/home/copy.ts) | the home page's words (the UI overhaul), from the approved prototype (prototype-lab/campaigns, home.js and home-mosaic.js) where they hold on devnet, and change | 86 |
 | [`home-empty.tsx`](app/features/home/home-empty.tsx) | the home page's empty block (the approved prototype's `.empty`): Baked sulking, one sentence and at most one way out ("No campaigns here." [Clear filters]) | 21 |
 | [`home-feature.tsx`](app/features/home/home-feature.tsx) | the home page's "Open now" carousel (the approved prototype's `.home-feature`, home-mosaic.js): the top-ranked listed campaigns that take entries, up to five, a | 174 |
 | [`home-how.tsx`](app/features/home/home-how.tsx) | the home page's "How it works" (the approved prototype's `.home-how`): the six steps told in three, with the link to every step, fee and refund, then the three  | 70 |
@@ -330,7 +330,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`issue-list.tsx`](app/features/open-campaign/issue-list.tsx) | the messages of one place of the creation box (a slot, the box, the wallet), each with an icon by its level (refused, blocked, waiting, needed) so a refusal nev | 39 |
 | [`kinds.ts`](app/features/open-campaign/kinds.ts) | the five templates of the creation box (D-k; P1 §4.2; TP §3.4.10 row 1), one per kind: its reader kind, the template id a link may name, what the account slot i | 107 |
 | [`names.ts`](app/features/open-campaign/names.ts) | the reviewed account names (A-11; TP §3.4.10 "Display names"), read on the server from content/account-names.json: a list of `{ "address": "<base58>", "kind": " | 56 |
-| [`open-action.tsx`](app/features/open-campaign/open-action.tsx) | the creation box's one button and its total (spec 3.12), at the foot of the preview and in the phone's sticky bar: "Use Installed Wallet" while no wallet is con | 84 |
+| [`open-action.tsx`](app/features/open-campaign/open-action.tsx) | the creation box's one button and its total (spec 3.12), at the foot of the preview and in the phone's sticky bar: "Connect" while no wallet is connected; the f | 84 |
 | [`open-box.tsx`](app/features/open-campaign/open-box.tsx) | the creation box at /abrir (Sprint 19; spec 3.12 of Sprint -1, prototype-lab/campaigns/js/screens/open*.js): any wallet opens an On-Chain Campaign inside the ru | 140 |
 | [`open-review.tsx`](app/features/open-campaign/open-review.tsx) | "Check before you sign" for an opening (A-3; spec 3.12): every argument the transaction carries, from the choice the SDK prepared and its preparation (the id th | 188 |
 | [`open-sheet.tsx`](app/features/open-campaign/open-sheet.tsx) | the one dialog of an opening, from "Review and sign" to the campaign's link (spec 3.12): the recent opening found on-chain (or the look-up that failed), the rev | 142 |
@@ -378,7 +378,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`mwa-chain.test.ts`](app/features/wallet/mwa-chain.test.ts) | X2.1. The chain the wallet registers for (from the site's cluster setting) equals the chain for the cluster the read API reports in /api/v1/health. Registration | 54 |
 | [`register-mwa.ts`](app/features/wallet/register-mwa.ts) | the explicit Mobile Wallet Adapter registration (S1, proposal §3.4). Registers the MWA wallet once, for the chain of the site's cluster (never the RPC URL's), w | 46 |
-| [`use-installed-wallet.ts`](app/features/wallet/use-installed-wallet.ts) | "Use Installed Wallet" (S1, proposal §3.4 rule 3): connect only from a person's click, through the installed wallet the site found (MWA on Android, or a browser | 39 |
+| [`use-installed-wallet.ts`](app/features/wallet/use-installed-wallet.ts) | "Connect" (S1, proposal §3.4 rule 3): connect only from a person's click, through the installed wallet the site found (MWA on Android, or a browser wallet). Sha | 39 |
 | [`use-sol-balance.ts`](app/features/wallet/use-sol-balance.ts) | the connected wallet's SOL balance in lamports, read from the site's connection. `null` while it loads or when nothing is connected. A failed read leaves `null` | 33 |
 | [`wallet-state.test.ts`](app/features/wallet/wallet-state.test.ts) | the wallet's view: disconnected, connected with a balance, no SOL (faucet on devnet only), the balance still loading, and the SOL formatting (four decimals, tru | 54 |
 | [`wallet-state.ts`](app/features/wallet/wallet-state.ts) | the wallet's view, as pure logic: disconnected; connected with its address and SOL balance; connected with no SOL, which offers the devnet faucet only on devnet | 36 |
@@ -403,7 +403,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`bubble.ts`](app/lib/mascot/bubble.ts) | keeps the mascot's speech bubble inside the screen (Sprint 13 DoD: on phones the bubble does not cut). The | 16 |
-| [`engine.ts`](app/lib/mascot/engine.ts) | Baked, the mascot, as a page resident. It does not follow the cursor freely: it hops to the | 304 |
+| [`engine.ts`](app/lib/mascot/engine.ts) | Baked, the mascot, as a page resident. It does not follow the cursor freely: it hops to the | 312 |
 | [`perches.ts`](app/lib/mascot/perches.ts) | Where the mascot may stand. A page declares perches as data attributes on any element: | 65 |
 
 ## `packages/sdk/src/read/`

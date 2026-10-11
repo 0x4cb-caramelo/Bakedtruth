@@ -31,8 +31,13 @@
     - Minhas entradas e o ranking.
 
     Fees, How it works e o registro ganharam a cabeça de página e os títulos do protótipo.
+  - **Os pedidos do Ronaldo depois de ver a revisão (11/10):**
+    - o título e o subtítulo da página inicial são os da capa do pitch, no vocabulário do site: "Campaigns the chain
+      resolves." e "Permissionless campaigns that turn on-chain milestones into growth, settled by the chain itself.";
+    - o botão da carteira diz "Connect", e conecta só pelo clique, como antes (S1);
+    - "question" virou "campaign" no texto do site;
+    - a regra do vocabulário segue inteira, sem exceção.
   - **Onde ficaram as palavras do site, e não as do protótipo:**
-    - o botão da carteira segue "Use Installed Wallet" (S1);
     - a faixa diz os dois avisos inteiros em qualquer largura;
     - o terceiro princípio diz que no devnet o pagamento ainda não é automático (o protótipo dizia "No claim button");
     - os rótulos dos tipos na caixa de abertura são os da Sprint 19.

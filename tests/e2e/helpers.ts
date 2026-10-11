@@ -52,9 +52,9 @@ export async function openWithWallet(page: Page, path: string): Promise<Opened> 
 export const panel = (page: Page) => page.locator("section[aria-labelledby='entry-title']");
 export const sheet = (page: Page) => page.getByRole("dialog");
 
-/** Connects through the panel's "Use Installed Wallet" and waits for the balance. */
+/** Connects through the panel's "Connect" and waits for the balance. */
 export async function connect(page: Page) {
-  await panel(page).getByRole("button", { name: "Use Installed Wallet" }).click();
+  await panel(page).getByRole("button", { name: "Connect", exact: true }).click();
   await expect(panel(page).getByText(/^Balance \d/)).toBeVisible();
 }
 

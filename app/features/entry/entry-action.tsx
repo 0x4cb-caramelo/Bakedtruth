@@ -1,6 +1,6 @@
 /**
  * Purpose: the entry panel's one button, the one that fits the moment: entries paused, waiting for a fresh price,
- *          "Use Installed Wallet", the devnet faucet when the wallet cannot cover the entry, or "Review entry" (disabled
+ *          "Connect", the devnet faucet when the wallet cannot cover the entry, or "Review entry" (disabled
  *          while the program would refuse the entry or while it is being prepared). Nothing here signs.
  * Version: 0.1.0
  * Sprint:  11 (site: campaign page and entry)

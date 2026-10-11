@@ -1,5 +1,5 @@
 /**
- * Purpose: "Use Installed Wallet" (S1, proposal §3.4 rule 3): connect only from a person's click, through the installed
+ * Purpose: "Connect" (S1, proposal §3.4 rule 3): connect only from a person's click, through the installed
  *          wallet the site found (MWA on Android, or a browser wallet). Shared by the top bar's button and the entry
  *          panel, so both connect the same way. `select()` is asynchronous: the connection starts once the chosen
  *          wallet is the selected one, never from the effect's own state; a wallet already selected (remembered from

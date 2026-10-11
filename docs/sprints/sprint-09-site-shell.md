@@ -230,8 +230,16 @@ structure of the approved screens (`prototype-lab/campaigns/`, served at `/dev0x
   - my entries and the leaderboard.
 
   The content pages took the prototype's page head and titles.
-- **Kept from the site where its words are newer:** "Use Installed Wallet" (S1), the full notices at every width, the
-  devnet payout lines, Sprint 19's kind labels.
+- **Kept from the site where its words are newer:** the full notices at every width, the devnet payout lines, Sprint
+  19's kind labels.
+- **Ronaldo's changes after seeing it (2026-10-11):**
+  - the home page's title and subtitle are the pitch cover's, in the site's vocabulary: "Campaigns the chain
+    resolves." and "Permissionless campaigns that turn on-chain milestones into growth, settled by the chain itself.";
+  - the wallet button says "Connect" (it still connects only from that click, S1);
+  - "question" became "campaign" in the site's copy;
+  - Lucas's vocabulary rule stays whole, with no exception.
+- **Baked's bubble on a phone** is fitted to the screen again whenever Baked moves while it shows (Sprint 13's rule:
+  it never cuts). A tap mid-hop used to leave it past the edge after the landing; the new layout exposed it.
 - **Tests:** two web-smoke expectations follow the design (the phone menu holds "How it works"; the wallet chip, not a
   visible "Disconnect", says the wallet is connected); the notice registry points at the new footer.
 - **Not built yet:**

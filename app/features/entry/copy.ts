@@ -61,7 +61,7 @@ export const PANEL = {
   rentFirst: (rent: string) =>
     `First entry here: + ${rent} SOL for the accounts it opens, returned when the campaign settles.`,
   rentAgain: (rent: string) => `+ ${rent} SOL for this entry's record, returned when the campaign settles.`,
-  connect: "Use Installed Wallet",
+  connect: "Connect",
   noWallet: "No installed wallet found",
   connecting: "Connecting…",
   faucet: "Get devnet SOL",

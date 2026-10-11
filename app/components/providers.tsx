@@ -25,7 +25,7 @@ export function Providers({ children }: { children: ReactNode }) {
   }, []);
   return (
     <ConnectionProvider endpoint={RPC_URL} config={{ commitment: "confirmed" }}>
-      {/* No autoConnect: connecting happens only from the user's "Use Installed Wallet" gesture. */}
+      {/* No autoConnect: connecting happens only from the user's "Connect" gesture. */}
       <WalletProvider wallets={wallets}>
         <WalletModalProvider>
           <ToastProvider>{children}</ToastProvider>

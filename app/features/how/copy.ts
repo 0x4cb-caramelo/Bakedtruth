@@ -17,13 +17,13 @@ export const MASCOT_NAME = "Baked";
 
 export const HOW = {
   kicker: "How it works",
-  title: "A question the chain answers",
-  lead: "An On-Chain Campaign is a YES/NO question about one Solana account. Bakers join YES or NO with SOL. When the time comes, the program reads the account, and the side that was right splits the pot.",
+  title: "A campaign the chain answers",
+  lead: "An On-Chain Campaign: YES or NO, about one Solana account. Bakers join YES or NO with SOL. When the time comes, the program reads the account, and the side that was right splits the pot.",
   stepsTitle: "Six steps, from opening to payout",
   steps: [
     [
       "Open",
-      "A wallet opens a campaign for US$500 or more in SOL: 90% becomes a prize in the pot, 10% goes to Brot. The team and launch partners open for free. The question is written from the kind, the account, the target and the date, never from free text.",
+      "A wallet opens a campaign for US$500 or more in SOL: 90% becomes a prize in the pot, 10% goes to Brot. The team and launch partners open for free. The campaign is written from the kind, the account, the target and the date, never from free text.",
     ],
     [
       "Join",
