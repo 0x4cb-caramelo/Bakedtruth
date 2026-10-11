@@ -143,3 +143,16 @@ juntou as duas linhas sozinho. Todas as cores que a caixa usa existem nos tokens
 6. (Depois da revisão jurídica.) O banner do topo diz "Here you join with test SOL"; a caixa agora também cobra em SOL
    de teste: (a) "Here you join and open campaigns with test SOL, which has no real value."; (b) deixar como está.
    Recomendado (a). Não mudou até a resposta.
+
+## As respostas e a mescla (11/10/2026)
+
+- O Ronaldo respondeu as seis perguntas: 1a, 2a, 3a, 4a e 6a, todas como recomendado; o item 5, os celulares, ele faz
+  à mão. A resposta chegou colada, então a mescla e a tag só andaram depois que ele confirmou com as próprias palavras.
+- 6a entrou no código: o banner do topo diz "Here you join and open campaigns with test SOL". 1a e 2a são ações do
+  fundador que continuam esperando: a abertura no devnet, depois da mescla, e a landing com a privacidade nova, antes de
+  `/abrir` ficar público.
+- O `content/powers.md` mudou nesta sprint ("US$500 or more", o 90/10 sobre o valor inteiro). O Ronaldo aprovou como
+  segundo revisor; como a mudança foi feita a pedido dele, a regra de duas pessoas do `content/` ainda pede o Lucas ou o
+  Bernardo, e isso ficou anotado como pendência, não como feito.
+- O PR #68 entra na `main` a pedido do Ronaldo, com o CI verde no commit final; a tag `sprint-19` vai no commit da
+  mescla, depois do CI verde na `main`.

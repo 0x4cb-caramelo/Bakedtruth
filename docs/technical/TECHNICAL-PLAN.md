@@ -2196,7 +2196,8 @@ browser and what the RPC provider sees **[F]**.
 | 9. Document or consent | `docs/legal/PRIVACY-POLICY.md` (this PR) names the record, when it is written and deleted, the RPC's reads and that clearing the site's data deletes it; the sheet says the id is saved when "Sign in wallet" is pressed, and that an opening is public and permanent. No consent asked: the record is strictly needed for the opening the person asked for (L0 confirms) | The policy names the RPC service and what it sees | The sheet's public-opening notice |
 
 **Verdict.** PASS, with one condition before `/abrir` is reachable at a public address: the founder deploys the
-landing with this text, a new date and the post on X its section 8 promises (answer 9a; the legal review, M8).
+landing with this text, a new date and the post on X its section 8 promises (answer 9a; the legal review, M8;
+confirmed by Sprint 19's answer 2a, 2026-10-11).
 
 ## 9. Testing strategy
 

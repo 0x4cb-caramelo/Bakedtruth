@@ -134,7 +134,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`copy-site.ts`](app/components/copy-site.ts) | the words every screen shows above any campaign or entry (BR-47; P1 §4.6), in English per L-01: the test-money notice and the not-audited notice, while each is  | 22 |
+| [`copy-site.ts`](app/components/copy-site.ts) | the words every screen shows above any campaign or entry (BR-47; P1 §4.6), in English per L-01: the test-money notice and the not-audited notice, while each is  | 24 |
 | [`mascot.tsx`](app/components/mascot.tsx) | Mounts the mascot once for the whole app. Each page decides where it may stand with | 31 |
 | [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 37 |
 | [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar (Sprint 09): the brand, the routes (Sprint 13 adds "How it works" and the fees, so both open from a phone too), the theme button and the wall | 68 |

@@ -1,9 +1,10 @@
 # Sprint 19 — Site: open a campaign (the creation box, `/abrir`)
 
-**Status:** built on 2026-10-10 and in review (pull request #68 into `main`, not merged); the items that need the
-founder, a devnet write or a real device are marked waiting below · **Branch:** `sprint-19-site-open-campaign`, cut
-from `origin/main` at `70fc29b` (PR #66, which holds the tag `sprint-13`), with `origin/main` at `c25d500` (PR #67, the
-brand's colours) merged in before the pull request · **Dates:** none, by the founder's decision
+**Status:** built on 2026-10-10; merged into `main` with pull request #68 on 2026-10-11, at Ronaldo's request, with
+the tag `sprint-19` on the merge commit once CI passes on `main`; the items that need the founder, a devnet write or a
+real device are marked waiting below · **Branch:** `sprint-19-site-open-campaign`, cut from `origin/main` at
+`70fc29b` (PR #66, which holds the tag `sprint-13`), with `origin/main` at `c25d500` (PR #67, the brand's colours)
+merged in before the pull request · **Dates:** none, by the founder's decision
 
 ## Record (2026-10-10)
 
@@ -124,8 +125,9 @@ program decides; the box only mirrors its refusals. A retry never charges twice.
       US$500, US$450 and US$50 split; at the US$109.27 reference these are 4.5758, 4.1182 and 0.4576 SOL (display
       example; the program charges at the Pyth price). The US$ display value comes from `/api/v1/price`, with source
       and time (D-e). **Built:** the quote, the split and the reference example are tests
-      (`tests/site/open-quote.test.ts`, "opening quote matches the program charge"). **Waiting (founder item 4):**
-      `/api/v1/price` does not exist; the box shows the opening's own US$ terms and the Pyth price with its publish time.
+      (`tests/site/open-quote.test.ts`, "opening quote matches the program charge"). **Waiting:** `/api/v1/price` does
+      not exist; by answer 4a the box shows the opening's own US$ amounts and the Pyth price with its publish time
+      until it does.
 - [x] The transaction carries `max_lamports`: the quote plus a margin recorded at the sprint's opening **[AC]** (T25).
       The box also shows the rent of the two new accounts, returned at close. **Done:** 1% (`MARGIN_BPS`), recorded
       above and in the session log; the rent is read from the cluster.
@@ -172,19 +174,21 @@ program decides; the box only mirrors its refusals. A retry never charges twice.
       the home list shows it once the read API reads it again.
 - [ ] **On devnet,** a non-team wallet opens a paid campaign through the box, and the `Campaign` account shows
       `opening_paid_lamports` equal to the quote's formula at the price read, split as
-      `prize_lamports + opening_fee_lamports` (I14). **Waiting (founder item 1):** every devnet write is the founder's.
+      `prize_lamports + opening_fee_lamports` (I14). **Waiting (founder item 1, answered 1a: after the merge):** every
+      devnet write is the founder's.
       Ready: the steps and the read-only check (`deploy/devnet/README.md`, "Checking an opening";
       `scripts/team/check-opening.ts`, tested in `tests/ops/check-opening.test.ts`).
 - [ ] The web smoke covers opening at desktop width and about 412 CSS px on Surfpool: a paid opening, a team-key
       opening, three refusals and the retry guard. The wallet in-app browser checklists gain the opening (X2.2, closed
       in Sprint 13). **Built:** the paid and the team key's openings at desktop and 412 CSS px (`open.e2e.ts`); the three
       refusals, the retry guard and a deadline typed by hand once, at desktop width (`open-guard.e2e.ts`); on LiteSVM as
-      Sprint 11's smoke does; the checklist is written (`docs/technical/wallet-browser-checklist.md`). **Waiting (founder item 5):** running it on
-      Phantom and Solflare on real Android and iOS phones.
+      Sprint 11's smoke does; the checklist is written (`docs/technical/wallet-browser-checklist.md`). **Waiting (item
+      5):** Ronaldo runs it by hand, on Phantom and Solflare, on real Android and iOS phones.
 - [x] `cd app && bun run lint && bun run build` passes.
-- [ ] Common closure (`docs/SPRINTS.md`, section 4). **Done but the merge and the tag:** the checks, the secret scan,
-      the code map, CHANGELOG and session log, the four reviews (below); pull request #68 waits for review and is not
-      merged.
+- [x] Common closure (`docs/SPRINTS.md`, section 4). **Done:** the checks, the secret scan, the code map, CHANGELOG and
+      session log, the four reviews (below); merged with pull request #68 at Ronaldo's request, tag `sprint-19`. One
+      thing stays open: `content/powers.md` changed in this sprint, and its two-person review has Ronaldo's approval
+      only, while the change was made at his request; Lucas or Bernardo reviews it.
 
 ## Deliverables
 
@@ -208,31 +212,33 @@ entry and the added prize (15). The Android app's creation box (21).
   fixed fees); P-3 (team and partners pay nothing and keep no 1%).
 
 **Asked on 2026-10-10, at the start, in one list** (each built as recommended where it is a choice; none blocks the
-pull request):
+pull request). **Answered on 2026-10-11 by Ronaldo: 1a, 2a, 3a, 4a and 6a, each as recommended; item 5 he runs by
+hand.** He also approved `content/powers.md` as its second reviewer; since the change was made at his request, the
+`content/` rule's second person is still Lucas or Bernardo (open).
 
 1. **The devnet opening (only the founder can do it):** a paid opening through `/abrir` from a wallet outside the team,
    then the read-only check that the charge equals the formula; and a team key's free opening by hand. (a) after this
    pull request is merged, with the steps and the check in `deploy/devnet/README.md`; (b) once the site is deployed on
-   the server. Recommended (a). **Waiting.**
+   the server. Recommended (a). **Answered (a); waiting for the opening itself.**
 2. **The privacy page before `/abrir` is public:** the box keeps one new record in the browser and, with none in
    flight, reads the wallet's recent transactions from the RPC. (a) deploy the landing with the updated page, a new
    date and the post on X its section 8 promises, before the new site is public; (b) drop the RPC read and keep only
-   the browser record. Recommended (a), built. **Waiting.**
+   the browser record. Recommended (a), built. **Answered (a); waiting for the landing deploy, before `/abrir` is
+   public.**
 3. **Known account names:** (a) ship with none but Pyth's pinned feeds; the team adds names to
    `content/account-names.json`, each reviewed by two people; (b) the founder names some devnet accounts now.
-   Recommended (a), built. **Waiting.**
+   Recommended (a), built. **Answered (a).**
 4. **The US$ shown next to SOL:** `/api/v1/price` (CoinGecko, D-e) does not exist. (a) until it does, the opening's own
    US$ terms and the Pyth price the program charges at, with its publish time; (b) block the box until Sprint 08 builds
-   the route. Recommended (a), built. **Waiting.**
+   the route. Recommended (a), built. **Answered (a).**
 5. **Real phones (only the founder can do it):** the wallet in-app browser checklist, opening included, in Phantom and
-   Solflare on Android and iOS (`docs/technical/wallet-browser-checklist.md`; X2.2). **Waiting.**
-
+   Solflare on Android and iOS (`docs/technical/wallet-browser-checklist.md`; X2.2). **Ronaldo runs it by hand.**
 6. **The site's top banner** (asked after the legal review, N1): it says "We are in a test phase. Here you join with
    test SOL, which has no real value.", the founder's own P1 §4.6 line, and the box now takes test SOL for openings
    too. (a) "We are in a test phase. Here you join and open campaigns with test SOL, which has no real value."; (b) keep
    it as it is: the box says it on its own, by the price and in the sheet.
-   Recommended (a), because the banner is on every page and openings cost far more test SOL than entries. Not
-   changed until answered. **Waiting.**
+   Recommended (a), because the banner is on every page and openings cost far more test SOL than entries.
+   **Answered (a); applied** (`app/components/copy-site.ts`).
 
 Recorded rather than asked: the `max_lamports` margin is 1%, the "quote + 1%" of the approved Sprint -1 design; a link
 never sets the opening's amount (the adversarial review, M6).

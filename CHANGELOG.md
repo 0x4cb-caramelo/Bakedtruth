@@ -28,8 +28,8 @@ recomendado (1a a 12a).
 ### Added
 
 - **Sprint 19: a caixa de abertura em `/abrir`; qualquer carteira abre uma campanha pelo site** (branch
-  `sprint-19-site-open-campaign`, 10/10/2026; `docs/sprints/sprint-19-site-open-campaign.md`; pull request #68, não
-  mesclado).
+  `sprint-19-site-open-campaign`, 10/10/2026; `docs/sprints/sprint-19-site-open-campaign.md`; mesclada na `main` pelo
+  PR #68 em 11/10/2026, a pedido do Ronaldo, com a tag `sprint-19`).
   - **A caixa** (`app/features/open-campaign/`), como o desenho aprovado da Sprint -1: 1 O quê (a busca nos modelos e
     nos nomes conhecidos, que nunca sai do navegador, e os cinco tipos), 2 Detalhes (a frase se preenchendo e os campos:
     o feed da Pyth com o estado lido na hora, a direção, a conta conferida pelas regras do leitor, o alvo, a época, o
@@ -76,6 +76,13 @@ recomendado (1a a 12a).
   - **Esperando:** a abertura no devnet e a da equipe à mão (escrita no devnet é do fundador); os celulares reais; o
     preço em US$ do CoinGecko (`/api/v1/price`), os nomes da API, o relay `/rpc` e o bloqueio por país, o
     `content/partners.json` e o cartão de compartilhar, que são de outras sprints.
+
+- **As respostas às seis perguntas da Sprint 19** (11/10/2026, Ronaldo): 1a, 2a, 3a, 4a e 6a, todas como recomendado;
+  o item 5, os celulares, ele faz à mão. O banner do topo passa a dizer "We are in a test phase. Here you join and open
+  campaigns with test SOL, which has no real value." (6a). A abertura no devnet fica para depois da mescla (1a) e a
+  landing com a privacidade nova sobe antes de `/abrir` ficar público (2a), as duas com o fundador. O
+  `content/powers.md` teve a aprovação do Ronaldo como segundo revisor; como a mudança foi feita a pedido dele, a regra
+  de duas pessoas do `content/` ainda pede a revisão do Lucas ou do Bernardo.
 
 - **Sprint 13: o ranking, os avisos e o texto, que fecham o MVP no devnet** (branch `sprint-13-site-notices-copy`,
   10/10/2026; `docs/sprints/sprint-13-site-notices-copy.md`).
