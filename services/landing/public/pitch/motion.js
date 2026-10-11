@@ -10,10 +10,10 @@
  * It listens to the "slidechange" event that deck.js sends.
  */
 import { startDemo, stopDemo } from "./demo.js?v=3";
-import { EXITS } from "./exits.js?v=3";
+import { EXITS } from "./exits.js?v=4";
 import { finale, resetFinale } from "./finale.js?v=1";
-import { load as loadRides } from "./moon.js?v=1";
-import { SCENES, plain, settled } from "./scenes.js?v=8";
+import { load as loadRides } from "./moon.js?v=2";
+import { SCENES, plain, settled } from "./scenes.js?v=9";
 import { preload } from "./sprites.js?v=1";
 
 const EASE = "cubic-bezier(.2,.8,.2,1)";

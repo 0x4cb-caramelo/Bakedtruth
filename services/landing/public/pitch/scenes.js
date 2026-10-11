@@ -14,7 +14,7 @@
  */
 
 import { months, pullBack, still } from "./market.js?v=3";
-import { drive, landed, liftOff } from "./moon.js?v=1";
+import { drive, landed, liftOff } from "./moon.js?v=2";
 import { partners } from "./partners.js?v=3";
 import { run } from "./runner.js?v=1";
 import { sprite } from "./sprites.js?v=1";

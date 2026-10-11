@@ -2,12 +2,13 @@
  * Purpose: the rocket setting of the two Market slides of /pitch (the bar's rocket button, the "R" key). In place of
  *          the mascot on foot: on "Market" it gets into a lambo and drives the four measured months; on "Projection"
  *          it gets out, puts a helmet on and rides a rocket along the scenario until it hits the moon.
- * Version: 0.1.0 · Sprint: out of band (landing page), 2026-10-10
+ * Version: 0.1.1 · Sprint: out of band (landing page), 2026-10-11
  *
  * The founder asked for it on 2026-10-10 as an extra setting: the full and the lighter settings stay as they were.
  * The nine drawings are his (docs/product/tothemoon), cut to transparent WebP. Each is a square frame; SEATS says how
  * big it is on the slide and which point of it sits on the tip of the line. The chart, its figures and the words of
- * the two slides are the same in every setting: only what travels the line changes.
+ * the two slides are the same in every setting: only what travels the line changes. On 2026-10-11 he redrew the last
+ * one: the mascot hits the moon laughing, in the same frame as before, so its seat and its angle did not change.
  */
 import { draw, end } from "./chart.js?v=2";
 import { chartOf, smooth, tween, words } from "./market.js?v=3";
@@ -21,7 +22,7 @@ const FILES = {
   helmet: "25-capacete",
   rocket: "26-foguete",
   panic: "27-foguete-panico",
-  crash: "28-batendo-na-lua",
+  crash: "28-batendo-na-lua-feliz",
 };
 // pose: the frame's side on the slide (px), the anchor's x and y in it (fractions), its height over the line (px).
 // The lambo's anchor is on the ground just behind the front wheel; the rocket's is the middle of its body.
