@@ -1,9 +1,9 @@
 # The `/rpc` relay's allowlist, from a trace of the site
 
 Sprint 11, 2026-10-10. The Technical Plan (§3.5) and the architecture proposal (§2.6) say the relay `brot-rpc` takes its
-final allowlist "from a trace of the real client in Sprint 11". This is that trace, for Sprint 08's relay, which is not
-built yet: until it is, the browser reads the RPC named by `NEXT_PUBLIC_RPC_URL` directly (the public devnet endpoint
-by default, with no key).
+final allowlist "from a trace of the real client in Sprint 11". This is that trace, for Sprint 08's relay, built on
+2026-10-11 (below) but not deployed: until it is, the browser reads the RPC named by `NEXT_PUBLIC_RPC_URL` directly (the
+public devnet endpoint by default, with no key).
 
 **How it was taken.** `tests/site/relay-trace.test.ts` runs the site's own code against the program in LiteSVM behind
 a recording JSON-RPC endpoint (`tests/site/fake-chain.ts`): the campaign page's reads (`load.ts`), the entry's
@@ -71,11 +71,21 @@ Every `*Subscribe` method (no WebSocket), `getProgramAccounts` (the read API lis
 `requestAirdrop` (the faucet is a link), `getRecentPrioritizationFees` (the SDK sets no priority fee; the proposal lists
 it for the keeper), and batches (one method per request).
 
+## Built (Sprint 08, 2026-10-11)
+
+`services/rpc/` (brot-rpc) relays exactly this table: the eleven methods, the arguments above (at most 100 accounts and
+16 statuses a call, `limit` up to 1,000, base64 for accounts and transactions, `json` for `getTransaction`) and only
+the options the client passes; `simulateTransaction`'s `accounts` option, which would return any account's data, is
+refused. Its tests send each refusal to it (`services/rpc/tests/`), and `E2E_RELAY=1 bun run e2e` runs the whole web
+smoke with the browser reaching the chain through it. What follows is how it treats what it relays.
+
 ## For the relay (Sprint 08)
 
 - **Never cache** what the retry guard decides on: signature statuses, the block height and the wallet's `Entry`. A
   stale answer there would tell a baker an entry did not land, or let the page offer a retry too early (Sprint 11
-  security review). The short-TTL cache is for the campaign, the config and the metric accounts.
+  security review). The short-TTL cache is for the metric accounts and the sysvars. Since the relay was built (Sprint
+  08), not for the campaign or the config either: the web smoke through it saw a page reloaded inside the cache's life
+  keep showing a pause that had ended.
 
 - Account reads are allowed by owner, as the proposal says (D-i: no list of accounts): the relay returns an account only
   when its owner is the program, a reader's program, or a sysvar the client reads (Clock; EpochSchedule since Sprint 19), and `null` when it does not

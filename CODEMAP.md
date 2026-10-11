@@ -8,8 +8,8 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **888** |
-| Acima de 200 linhas | **41** ⚠️ |
+| Arquivos mapeados | **906** |
+| Acima de 200 linhas | **40** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -41,7 +41,6 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `scripts/sync-selfhosted.js` — 349 linhas
 - `scripts/test/hooks.test.js` — 278 linhas
 - `scripts/tokenomics-model.ts` — 584 linhas
-- `services/api/tests/api.test.ts` — 206 linhas
 - `services/landing/tests/pages.test.mjs` — 229 linhas
 - `tests/brot/codama-spike.test.ts` — 219 linhas
 - `tests/brot/events.test.ts` — 211 linhas
@@ -56,7 +55,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `tests/brot/slot-matrix-fixtures.ts` — 267 linhas
 - `tests/brot/slot-matrix.gen.ts` — 428 linhas
 - `tests/e2e/site-pages.e2e.ts` — 201 linhas
-- `tests/e2e/smoke.e2e.ts` — 201 linhas
+- `tests/e2e/smoke.e2e.ts` — 202 linhas
 
 ---
 
@@ -335,7 +334,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`flow-state.ts`](app/features/open-campaign/flow-state.ts) | an opening's sheet as values (Sprint 19; A-3, T17): the steps from "Review and sign" to the campaign's link, the receipt of what an opening paid, the step an at | 75 |
 | [`issue-list.tsx`](app/features/open-campaign/issue-list.tsx) | the messages of one place of the creation box (a slot, the box, the wallet), each with an icon by its level (refused, blocked, waiting, needed) so a refusal nev | 39 |
 | [`kinds.ts`](app/features/open-campaign/kinds.ts) | the five templates of the creation box (D-k; P1 §4.2; TP §3.4.10 row 1), one per kind: its reader kind, the template id a link may name, what the account slot i | 107 |
-| [`names.ts`](app/features/open-campaign/names.ts) | the reviewed account names (A-11; TP §3.4.10 "Display names"), read on the server from content/account-names.json: a list of `{ "address": "<base58>", "kind": " | 56 |
+| [`names.ts`](app/features/open-campaign/names.ts) | the reviewed account names (A-11; TP §3.4.10 "Display names"), read on the server from content/account-names.json: a list of `{ "address": "<base58>", "kind": " | 28 |
 | [`open-action.tsx`](app/features/open-campaign/open-action.tsx) | the creation box's one button and its total (spec 3.12), at the foot of the preview and in the phone's sticky bar: "Connect" while no wallet is connected; the f | 84 |
 | [`open-box.tsx`](app/features/open-campaign/open-box.tsx) | the creation box at /abrir (Sprint 19; spec 3.12 of Sprint -1, prototype-lab/campaigns/js/screens/open*.js): any wallet opens an On-Chain Campaign inside the ru | 140 |
 | [`open-review.tsx`](app/features/open-campaign/open-review.tsx) | "Check before you sign" for an opening (A-3; spec 3.12): every argument the transaction carries, from the choice the SDK prepared and its preparation (the id th | 188 |
@@ -423,7 +422,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`accounts.ts`](packages/sdk/src/read/accounts.ts) | the program's own accounts decoded from their bytes (Codama's codecs, from the Shank IDL), after the checks the program makes before it reads a field: the owner | 70 |
 | [`bytes.ts`](packages/sdk/src/read/bytes.ts) | small byte helpers the SDK shares, written without `Buffer`, `TextEncoder` or any Node or DOM API, so they run the same in a browser, in Bun and under React Nat | 39 |
-| [`constants.ts`](packages/sdk/src/read/constants.ts) | the program's address and the constants compiled into it that a client needs: seeds, other programs, code ceilings, price and reader bounds, account sizes, and  | 115 |
+| [`constants.ts`](packages/sdk/src/read/constants.ts) | the program's address and the constants compiled into it that a client needs: seeds, other programs, code ceilings, price and reader bounds, account sizes, and  | 122 |
 | [`decoder.ts`](packages/sdk/src/read/decoder.ts) | the program's events out of a transaction as the RPC returns it (`getTransaction` with JSON encoding, or `simulateTransaction`), under the four decoder rules ev | 153 |
 | [`events.ts`](packages/sdk/src/read/events.ts) | the program's events: each name with its discriminator and the Codama decoder of its payload, and the decoding of one event's inner-instruction data `[0xFF, dis | 99 |
 | [`feeds.ts`](packages/sdk/src/read/feeds.ts) | the compiled lists of Pyth feeds a price campaign may name, one per cluster, as programs/brot-markets/src/feeds.rs compiles them (founder answer 1, 2026-10-09;  | 113 |
@@ -486,7 +485,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`index.ts`](packages/sdk/src/schemas/index.ts) | `@brot/sdk/schemas`, the zod 4 schemas the site, the app and the services share: the opening's input; the public format of a void-log record (Sprint 12); the re | 11 |
+| [`account-names.ts`](packages/sdk/src/schemas/account-names.ts) | the reviewed account names of `content/account-names.json` (A-11; TP §3.4.10 "Display names"): a JSON array of `{ "address", "kind", "name" }`, each address onc | 45 |
+| [`index.ts`](packages/sdk/src/schemas/index.ts) | `@brot/sdk/schemas`, the zod 4 schemas the site, the app and the services share: the opening's input; the public format of a void-log record (Sprint 12); the re | 13 |
 | [`open-campaign.ts`](packages/sdk/src/schemas/open-campaign.ts) | the zod schema of an opening's input (TP Appendix B, written here as Sprint 05 must), shared by the SDK, the site, the app and the preview: what a creator may c | 117 |
 | [`void-log.ts`](packages/sdk/src/schemas/void-log.ts) | the public format of a `content/void-log/` record (TP §3.4.7, BR-45; Sprint 12 gives it its public format, which Sprint 05's `scripts/team/void.ts` started): a  | 135 |
 
@@ -501,7 +501,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`prepare.ts`](packages/sdk/src/tx/prepare.ts) | A-3 for a join: re-read the campaign, the config, the baker's entry, the metric account and the chain's clock through the RPC; check them with the SDK's mirror  | 126 |
 | [`simulate.ts`](packages/sdk/src/tx/simulate.ts) | simulate a transaction before the wallet signs it (A-3): the cluster runs it on its current state, unsigned, with the latest blockhash, and the SDK reports the  | 90 |
 | [`summary-brot.ts`](packages/sdk/src/tx/summary-brot.ts) | the summary of this program's own instructions (A-3). The structure is checked against the IDL first: the exact data size, the exact account count, each slot's  | 163 |
-| [`summary-budget.ts`](packages/sdk/src/tx/summary-budget.ts) | the summary's reading of compute-budget instructions (Sprint 05 review, H1): the unit limit and the unit price decoded, the priority fee they allow bounded and  | 87 |
+| [`summary-budget.ts`](packages/sdk/src/tx/summary-budget.ts) | the summary's reading of compute-budget instructions (Sprint 05 review, H1): the unit limit and the unit price decoded, the priority fee they allow bounded and  | 89 |
 | [`summary-other.ts`](packages/sdk/src/tx/summary-other.ts) | what the summary says for the instructions that move no money out of a signer's wallet (the admin, team and settlement instructions), each with the values it si | 122 |
 | [`summary.ts`](packages/sdk/src/tx/summary.ts) | the deterministic summary of a transaction before the wallet signs it (A-3). `summarizeMessage` reads the very bytes the wallet signs: the compiled message, dec | 173 |
 
@@ -1120,14 +1120,17 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`config.ts`](services/api/src/config.ts) | the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only), the port and host (loopback by default), the refresh i | 76 |
+| [`config.ts`](services/api/src/config.ts) | the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only), the port and host (loopback by default), the refresh i | 84 |
 | [`dto.ts`](services/api/src/dto.ts) | the JSON shape of a campaign for the site. Amounts are lamport strings, addresses base58, times Unix seconds (strings for the big integers). The state is the SD | 58 |
 | [`hidden.ts`](services/api/src/hidden.ts) | the wallets left out of the public leaderboard at their owner's request (Sprint 13, the privacy review, TP §8.2 question 8): a JSON array of base58 addresses in | 61 |
 | [`history.ts`](services/api/src/history.ts) | the program's own history, read for the leaderboard (Sprint 13) until Sprint 08's indexer exists: every signature of the program through `getSignaturesForAddres | 152 |
 | [`leaderboard.ts`](services/api/src/leaderboard.ts) | `GET /api/v1/leaderboard` (TP §6; Sprint 13, BR-29): devnet points from the program's events (history.ts) and the live campaign accounts (the snapshot), through | 118 |
-| [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, reads the program's new history and the hide list | 75 |
-| [`query.ts`](services/api/src/query.ts) | validates the list's query string. An unknown parameter, a bad state, or a limit or offset out of range is a 400 with a named code; nothing is guessed. The stat | 49 |
-| [`routes.ts`](services/api/src/routes.ts) | the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged), /api/v1/campaigns/:address and, since Sprint 13, /api/v1/leaderb | 107 |
+| [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, reads the program's new history and the hide list | 105 |
+| [`names.ts`](services/api/src/names.ts) | what /api/v1/names serves (TP §6; A-11; Sprint 08): the reviewed account names of content/account-names.json, checked by the SDK's `parseAccountNames` (the rule | 55 |
+| [`price-source.ts`](services/api/src/price-source.ts) | the display price's source (D-f; Sprint 08): Pyth's SOL/USD sponsored account, read through the API's RPC and decoded by the SDK, the account the program prices | 33 |
+| [`price.ts`](services/api/src/price.ts) | the price /api/v1/price serves (TP §3.5 "Display price", §6; D-f; Sprint 08): SOL in US$, for display only; the program never reads it. It is Pyth's SOL/USD spo | 67 |
+| [`query.ts`](services/api/src/query.ts) | validates the list's query string. An unknown parameter, a bad state, or a limit or offset out of range is a 400 with a named code; nothing is guessed. The stat | 50 |
+| [`routes.ts`](services/api/src/routes.ts) | the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged), /api/v1/campaigns/:address, since Sprint 13 /api/v1/leaderboard  | 149 |
 | [`snapshot.ts`](services/api/src/snapshot.ts) | one read of the chain: every campaign account of the program, decoded by the SDK (a wrong owner, tag or version is skipped), with its public state computed from | 46 |
 | [`store.ts`](services/api/src/store.ts) | holds the last good chain snapshot in memory and refreshes it on a timer. A failed refresh keeps the last good snapshot and records the error, so the API answer | 33 |
 
@@ -1135,11 +1138,13 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`api.test.ts`](services/api/tests/api.test.ts) | the read API's contract with fake data and no cluster: the list's filters and paging, the 400 and 404 answers, the detail route, CORS, the method refusal, the h | 206 |
+| [`api.test.ts`](services/api/tests/api.test.ts) | the read API's contract with fake data and no cluster: the list's filters and paging, the 400 and 404 answers, the detail route, CORS, the method refusal, the h | 180 |
 | [`board-kit.ts`](services/api/tests/board-kit.ts) | the leaderboard route tests' fake data, with no cluster: campaign rows as the snapshot keeps them (a paid pot with 1 SOL on each side and the devnet rates, open | 110 |
+| [`config.test.ts`](services/api/tests/config.test.ts) | the read API's settings: the refusals (no RPC URL, a public bind, an unknown cluster) and the defaults, since Sprint 13 the leaderboard's and since Sprint 08's  | 39 |
 | [`history.test.ts`](services/api/tests/history.test.ts) | the leaderboard's history reader against a scripted RPC (Sprint 13, the adversarial review's cases): a node that ignores `until` costs a re-listing but never a  | 129 |
 | [`leaderboard-pot.test.ts`](services/api/tests/leaderboard-pot.test.ts) | what the leaderboard route reads from a live account for the founder's answer 3a (2026-10-10), with fake data and no cluster: whether a final pot splits (the mo | 49 |
 | [`leaderboard.test.ts`](services/api/tests/leaderboard.test.ts) | the leaderboard route's contract with fake data and no cluster (Sprint 13): 503 until the program's history has been read (or with no history at all), what heal | 91 |
+| [`names-price.test.ts`](services/api/tests/names-price.test.ts) | /api/v1/names and /api/v1/price with fake data and no cluster (Sprint 08): the names file read with the SDK's rules and the listed feeds with their sponsored ac | 132 |
 
 ## `services/keeper/src/`
 
@@ -1149,7 +1154,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`campaigns.ts`](services/keeper/src/campaigns.ts) | the keeper's view of the chain: every campaign account of the program that has a given status. One `getProgramAccounts` filtered by the campaign's size; each ac | 38 |
 | [`config.ts`](services/keeper/src/config.ts) | the keeper's settings, read from its environment only: the RPC URL (a secret, so the log shows its origin and never the path or the query), the keeper's keypair | 116 |
 | [`cycle.ts`](services/keeper/src/cycle.ts) | one keeper cycle: read the open campaigns, try the resolve task on each, and report the counts and the keeper's SOL balance. A failure on one campaign is logged | 51 |
-| [`health.ts`](services/keeper/src/health.ts) | GET /healthz on a loopback address only: the keeper's last full cycle (open campaigns, what it tried, its SOL balance), the cycle count and the last cycle's err | 37 |
+| [`health.ts`](services/keeper/src/health.ts) | GET /healthz on a loopback address only: the keeper's last full cycle (open campaigns, what it tried, its SOL balance), the cycle count and the last cycle's err | 39 |
 | [`log.ts`](services/keeper/src/log.ts) | one JSON line per event on stdout, with a time stamp. The RPC URL and the keypair never reach it: the caller passes only fields it has checked (an origin, a pub | 10 |
 | [`main.ts`](services/keeper/src/main.ts) | the keeper's entry point. Reads its settings and keypair, serves /healthz on loopback (and POST /restart on the primary, when its secret is set), and runs one c | 84 |
 | [`resolve.ts`](services/keeper/src/resolve.ts) | the keeper's one task in the MVP: for an open campaign, offer `resolve_campaign` with the campaign's own metric account (the program's reader decides), simulate | 51 |
@@ -1281,6 +1286,27 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 193 |
 | [`two.test.mjs`](services/landing/tests/two.test.mjs) | tests /2, the home page in the pitch deck's look: it says exactly what the home page says (only the look may differ), the mascot perches and moods are the same, | 53 |
 
+## `services/rpc/src/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`accounts.ts`](services/rpc/src/accounts.ts) | what an account read may return through brot-rpc (TP §3.5, by owner, since there is no list of accounts, D-i): an account owned by the program, one of the five  | 62 |
+| [`allowlist.ts`](services/rpc/src/allowlist.ts) | the methods brot-rpc relays and the arguments each may carry (docs/technical/relay-allowlist.md, the trace of Sprints 11 to 19; TP §3.5, §6): eleven methods, ea | 161 |
+| [`config.ts`](services/rpc/src/config.ts) | brot-rpc's settings, read from its environment only (TP §3.5, T14; Sprint 08): the upstream RPC of its own account (a secret: logs never show it), a loopback bi | 107 |
+| [`limits.ts`](services/rpc/src/limits.ts) | brot-rpc's limits (TP §3.5; Sprint 08), all in memory, none written to a disk or a log: whose request it is (Cloudflare's `cf-connecting-ip`, an IPv6 address by | 128 |
+| [`main.ts`](services/rpc/src/main.ts) | brot-rpc's entry point (TP §3.5, T14; Sprint 08). Reads its settings, derives the program's ProgramData address once (A-8), and serves the relay on the loopback | 78 |
+| [`relay.ts`](services/rpc/src/relay.ts) | brot-rpc's handler (TP §3.5, §6; proposal §2.6; Sprint 08): one JSON-RPC 2.0 call per POST, in this order — the body's size (8 KB), its shape (no batch), the me | 176 |
+| [`transaction.ts`](services/rpc/src/transaction.ts) | what a transaction may hold to pass brot-rpc (TP §3.5; Sprint 08): sendTransaction and simulateTransaction carry a base64 wire transaction whose every top-level | 49 |
+
+## `services/rpc/tests/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`gates.test.ts`](services/rpc/tests/gates.test.ts) | brot-rpc's gates on transactions and clients (Sprint 08; X1.7): a transaction carries only this program, ComputeBudget and Lighthouse at its top level, never a  | 130 |
+| [`hardening.test.ts`](services/rpc/tests/hardening.test.ts) | the fixes of the Sprint 08 security review, each tested: a hostile option value is refused, never converted (M1, L1), and any throw is a JSON-RPC error with no  | 128 |
+| [`kit.ts`](services/rpc/tests/kit.ts) | what the relay's tests share (Sprint 08): settings as the defaults give them with a fake upstream URL, a relay wired to an in-process fake upstream that records | 103 |
+| [`relay.test.ts`](services/rpc/tests/relay.test.ts) | brot-rpc's refusals and its account rule, with an in-process fake upstream (Sprint 08; X1.7): a batch, an oversized body, a method off the allowlist, a subscrip | 154 |
+
 ## `tests/`
 
 | Arquivo | Núcleo | Linhas |
@@ -1387,10 +1413,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`open-helpers.ts`](tests/e2e/open-helpers.ts) | what the creation box's smoke tests share (Sprint 19): the link that prefills a paid BTC/USD opening, the box and its button as locators, the connection through | 68 |
 | [`open.e2e.ts`](tests/e2e/open.e2e.ts) | "open a campaign" in the web smoke (Sprint 19 DoD; `bun run e2e -- --grep "open a campaign"`): the creation box at /abrir in Chromium at desktop width and at 41 | 104 |
 | [`playwright.config.ts`](tests/e2e/playwright.config.ts) | the web smoke's Playwright configuration (Sprint 11; @playwright/test 1.63.0, pinned in package.json, whose Chromium is build 1243): the site built against the  | 27 |
-| [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 65 |
+| [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 86 |
 | [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 201 |
-| [`smoke.e2e.ts`](tests/e2e/smoke.e2e.ts) | the web smoke (Sprint 11 DoD; `bun run e2e`): the built site in Chromium at desktop width and at 412 CSS px, with an injected Wallet Standard test wallet, again | 201 |
-| [`states.e2e.ts`](tests/e2e/states.e2e.ts) | "campaign states" in the web smoke (Sprint 12 DoD; `bun run e2e -- --grep "campaign states"`): the built site in Chromium against the program in LiteSVM. Every  | 80 |
+| [`smoke.e2e.ts`](tests/e2e/smoke.e2e.ts) | the web smoke (Sprint 11 DoD; `bun run e2e`): the built site in Chromium at desktop width and at 412 CSS px, with an injected Wallet Standard test wallet, again | 202 |
+| [`states.e2e.ts`](tests/e2e/states.e2e.ts) | "campaign states" in the web smoke (Sprint 12 DoD; `bun run e2e -- --grep "campaign states"`): the built site in Chromium against the program in LiteSVM. Every  | 83 |
 | [`upgrade.e2e.ts`](tests/e2e/upgrade.e2e.ts) | A-8 in the web smoke (the founder's answer of 2026-10-10): the program is upgraded while a page built for its previous deploy is open (the site was built agains | 92 |
 | [`wallet.ts`](tests/e2e/wallet.ts) | the web smoke's injected wallet: a Wallet Standard wallet ("E2E Test Wallet") registered in the page before its own scripts run, the way a browser extension reg | 66 |
 
@@ -1436,9 +1462,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`boundaries.test.ts`](tests/sdk/boundaries.test.ts) | every import rule of `.dependency-cruiser.cjs` fires (Sprint 05 review): the SDK is copied into a temporary folder with the configuration, one violation of each | 64 |
+| [`boundaries.test.ts`](tests/sdk/boundaries.test.ts) | every import rule of `.dependency-cruiser.cjs` fires (Sprint 05 review): the SDK is copied into a temporary folder with the configuration, one violation of each | 67 |
 | [`builders.test.ts`](tests/sdk/builders.test.ts) | every builder of `@brot/sdk/tx` against the test kit's hand-written builder of the same instruction (which tests/brot/idl.test.ts checks against the IDL and eve | 110 |
 | [`contract-events.test.ts`](tests/sdk/contract-events.test.ts) | the SDK's event table and addresses against the program: each event's discriminator and size as events.rs and events/*.rs declare them, the event decoder's refu | 103 |
+| [`contract-relay.test.ts`](tests/sdk/contract-relay.test.ts) | the read half's hand-written values the relay depends on (Sprint 08), checked so they cannot drift: the two instruction discriminators of the country gate again | 30 |
 | [`contract-source.test.ts`](tests/sdk/contract-source.test.ts) | the SDK's hand-written copies of the program's contract, checked against the program's own source so they cannot drift: the error codes (and one IDL message per | 166 |
 | [`decoder-shapes.test.ts`](tests/sdk/decoder-shapes.test.ts) | the decoder reads an inner instruction whichever way the node wrote it (Sprint 05 review, M1 and L6): compiled with indexes (`getTransaction`, `json`), partiall | 139 |
 | [`decoder.test.ts`](tests/sdk/decoder.test.ts) | the decoder rules (TP 3.4.14; proposal 2.3) on transactions sent in LiteSVM and read back in the RPC's shape: a failed transaction is skipped; only this program | 168 |

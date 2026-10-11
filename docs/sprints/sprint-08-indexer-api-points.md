@@ -1,6 +1,9 @@
 # Sprint 08 — Indexer, API, relay and points
 
-**Status:** in progress, **hackathon MVP** (founder, 2026-10-10): only the read API for Lucas's screens. Branch `sprint-08-read-api` · **Dates:** none, by the founder's decision
+**Status:** in progress. The **hackathon MVP** (founder, 2026-10-10), the read API for Lucas's screens, is merged
+(branch `sprint-08-read-api`). The **second part** (2026-10-11, branch `sprint-08-price-names-relay`): `/api/v1/names`,
+`/api/v1/price` and `brot-rpc`, built and tested, not deployed; the SQLite indexer is still to come · **Dates:** none,
+by the founder's decision
 
 ## Hackathon MVP scope (founder, 2026-10-10)
 
@@ -44,10 +47,12 @@ only path from a client to a paid RPC account, and it relays only what Brot's cl
       returns `program_last_deploy_slot`, `schema_version`, `cluster` and `entries_allowed`.
 - [ ] Amounts are lamport strings, addresses base58, times Unix seconds in UTC. An unknown query parameter returns 400.
       An error returns `{ "error": { "code", "message" } }`, never a stack trace.
-- [ ] **`/api/v1/price`** serves SOL's price in US$ from CoinGecko `simple/price`, fetched every few minutes, with its
-      source and time, Pyth SOL/USD as the fallback, and the attribution if the plan requires it. It never reaches the
-      program (D-e, D-f).
-- [ ] **`/api/v1/names`** serves `content/account-names.json` (names reviewed by two people, A-11).
+- [x] **`/api/v1/price`** serves SOL's price in US$, fetched every few minutes, with its source and time. It never
+      reaches the program (D-f). **Done (2026-10-11)** on Pyth SOL/USD only: Ronaldo dropped CoinGecko the same day
+      (2b), after the legal review found no plan whose terms can be met, so the planned CoinGecko source with Pyth as
+      fallback is gone from the code.
+- [x] **`/api/v1/names`** serves `content/account-names.json` (names reviewed by two people, A-11). **Done
+      (2026-10-11)**, with the program's listed feeds and their sponsored accounts.
 - [ ] **`content/partners.json`** exists, linking each launch partner's campaign (opened by a team key, P-3) to the
       partner, with its highlight dates; the ranking reads it. Sprint 10 adds the seal's display fields and Sprint 15
       the sponsors'. A JSON Schema check in CI covers `content/*.json`.
@@ -68,13 +73,19 @@ only path from a client to a paid RPC account, and it relays only what Brot's cl
       `simulateTransaction` only for brot_markets, ComputeBudget and known wallet-assertion programs (the Lighthouse
       id recorded in Sprint 03); no batches; bodies of at most 8 KB; a weighted token bucket per IP and per IPv6 /64;
       a short-TTL cache; a daily credit budget; a join or opening refused when `CF-IPCountry` is on `GEO_BLOCK`.
-- [ ] `brot-rpc` refuses a foreign-program transaction, a batch, an oversized body, a join or opening from a blocked
-      country, and a read of an account whose owner no reader accepts (X1.7, tests).
-- [ ] Rate limits are keyed on `cf-connecting-ip`, and per /64 for IPv6, in memory. No IP reaches a disk or a log.
+      **Built (2026-10-11)** (`services/rpc/`), the country list empty by the founder's answer; **waiting** for the
+      founder: the RPC account and its limit (D4), the unit installed, the tunnel's `/rpc` route, the site pointed at it.
+- [x] `brot-rpc` refuses a foreign-program transaction, a batch, an oversized body, a join or opening from a blocked
+      country, and a read of an account whose owner no reader accepts (X1.7, tests). **Done (2026-10-11)**
+      (`services/rpc/tests/`); the last answers the account's owner and size with no data, as the allowlist allows, so
+      the creation box can still say whose it is.
+- [x] Rate limits are keyed on `cf-connecting-ip`, and per /64 for IPv6, in memory. No IP reaches a disk or a log.
+      **Done (2026-10-11)** in the relay, with a sweep every ten seconds (an IP leaves memory about a minute after its
+      last call).
 - [ ] **Evidence and snapshots:** `feed_history` records every update of each sponsored feed with an open campaign; a
       nightly `VACUUM INTO` snapshot reaches VM 2 (T16).
-- [ ] The alerts the indexer feeds (an entry by the creator's own wallet on a burn, lock or stake campaign;
-      CoinGecko and Pyth apart beyond a threshold) reach Sprint 07's alert path, each with its runbook [INF].
+- [ ] The alerts the indexer feeds (an entry by the creator's own wallet on a burn, lock or stake campaign; the gap
+      between CoinGecko and Pyth is gone with 2b) reach Sprint 07's alert path, each with its runbook [INF].
 - [ ] `brot-indexer.service` on `127.0.0.1:4201` and `brot-rpc.service` on `127.0.0.1:4202`, each with its own
       identity, credentials, `MemoryMax` and `CPUQuota`. The tunnel's main host routes `/api/v1` to 4201 and `/rpc` to
       4202 (TP §12); the domain itself still serves the landing until Sprint 09.
@@ -104,9 +115,17 @@ route: none exists. Visit analytics. The relay's allowlist refined from a trace 
 ## Founder decisions that block the sprint
 
 - **Answered:** Q7 (the working default of TP v0.0.1: 1 point per campaign entered on the right side, for devnet);
-  D-e (CoinGecko for display and reports).
-- **Open: D4** for the indexer's RPC account and the CoinGecko plan. The free plan's commercial terms are unclear, and
-  the paid plans require the line "Data provided by CoinGecko" (proposal §2.4.5).
+  D-e (CoinGecko for display and reports), replaced by 2b below.
+- **Open: D4** for the indexer's RPC account and the relay's RPC account (with a hard spending limit).
+- **Answered 2026-10-11 (Ronaldo):** the second part covers names, price, then the relay; the price from CoinGecko with
+  Pyth as fallback, once a legal check of CoinGecko's terms allows it (it does not yet: off by default); the relay's
+  country gate built but blocking nothing ("dont block nothing yet").
+- **Answered 2026-10-11 (Ronaldo), after the legal review's questions:** **2b**, no CoinGecko: the display price is
+  Pyth's, "native to Solana", and avoids the terms (the legal review of 2026-10-11 had read CoinGecko's terms of 5 Sept
+  2025: "Powered by CoinGecko" on every plan, no use "for or to promote gambling", no re-distributed access, binding
+  user terms first; none could be met); **3a**, the site moves to the relay the day the relay is installed, with the
+  privacy text live the same day; **4a**, on devnet a US$ value shows only where it sets a cost in test SOL (the
+  opening), never as a pot's value.
 
 ## Agents and skills
 
@@ -172,4 +191,54 @@ and the JSON Schemas, the `.env.example` files, `CODEMAP.md`.
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+### The second part (2026-10-11, branch `sprint-08-price-names-relay`)
+
+- **`/api/v1/names`** (`services/api/src/names.ts`): the reviewed names of `content/account-names.json`, checked by the
+  SDK's `parseAccountNames` (moved from the site, so the site, the API and the app share one set of rules), and the
+  program's 17 devnet feeds with their sponsored accounts. A missing or broken file keeps the last good list, and
+  health names the error.
+- **`/api/v1/price`** (`price.ts`, `price-source.ts`): SOL in US$ for display only, from Pyth SOL/USD; source, times,
+  staleness and the attribution in each answer; a failed read keeps the last price; none older than a day. CoinGecko's
+  `simple/price` was built first behind `API_COINGECKO=on`, with Pyth as fallback, and removed after 2b (below).
+- **`brot-rpc`** (`services/rpc/`): the eleven methods of the trace with their arguments and options; transactions
+  with only the program, ComputeBudget and Lighthouse at the top level; account answers cut by owner, an unaccepted
+  owner's account answered with its owner and size but no data, ProgramData only as a 45-byte slice; a token bucket
+  per IP and per IPv6 /64, swept every ten seconds so an IP leaves memory about a minute after its last call; a daily
+  budget; a short cache for other programs' accounts and the sysvars only; the country gate built with an empty
+  list; counts-only logs. The unit `deploy/vps/brot-rpc.service` is written, not installed.
+- **The SDK:** the read half gained ComputeBudget (moved from `tx`), Lighthouse and the join and open discriminators,
+  checked against the generated client (`tests/sdk/contract-relay.test.ts`); the boundaries test plants the import
+  rule's violation in the relay too. The root typecheck, which CI runs, covers `services/` now.
+- **The web smoke through the relay** (`E2E_RELAY=1`): the first run found a real defect, a cached `GlobalConfig` that
+  kept showing a pause that had ended after a reload, and a harness bug; with both fixed, the whole smoke passes
+  through the relay, as without it.
+- **A race in a Sprint 12 scene**, seen once in the smoke without the relay: after "Receive", the success line lasts
+  only until the page reads the chain again, and on the local chain that read can finish before the check looks. The
+  scene now checks what stays, the share paid and no button left (`tests/e2e/states.e2e.ts`). CI does not run the web
+  smoke, so it never failed there.
+- **The relay's health check** answered 403 once the tunnel's secret was set, so step 6 of the server procedure could
+  not pass without typing the secret. `GET /healthz` now answers on the server without it, and never a request that
+  came through Cloudflare (`cf-connecting-ip` set).
+- **The relay's Bun binary.** The security review's fix (M5) gave the relay the keeper's binary through a shared
+  group, but that binary sits in `brot`'s home, `/var/lib/brot-markets` (`0750`, with the waitlist), which the
+  relay's user cannot enter: the unit would not have started. The relay now runs its own root-owned copy of the pinned
+  binary (`/usr/local/lib/brot-rpc/bun`, compared byte for byte with `cmp`), and nothing of the running keeper
+  changes.
+
+- **The founder's answers (Ronaldo, 2026-10-11), applied in PR #69:** 2b, no CoinGecko, so its source, its settings,
+  the gap between sources and `attribution_url` left the code and `/api/v1/price` reads Pyth only; 3a, the site moves
+  to the relay the day it is installed; 4a, on devnet US$ only where it sets a cost (the plan, Sprint 10's carried
+  item and Sprint 18 updated). He approved `content/README.md` as a reviewer; since the change was made at his
+  request, the `content/` rule's second person is still Lucas or Bernardo (open).
+
+**Reviews:** the legal and privacy review (`docs/legal/2026-10-11-sprint-08-legal-review.md`) turned CoinGecko off by
+default and asked for the relay's timed sweep (R1), both applied; its policy text waits for the day the site moves to
+the relay. The security review (`technical-security-red-team-agent`) found nothing high and six medium items, all
+applied: a hostile option value (or, in the read API, `?state=constructor`) could make the service answer with a full
+stack trace (now typed options, a catch-all and `development: false`, the keeper's health server too); a local process
+could forge Cloudflare's headers (now a secret header the tunnel adds); one source could spend the shared daily budget
+(now a /48 bucket and a reserve for the signing path, with Cloudflare's rate rule a precondition of the route); the
+unit could not run the Bun binary as its own user, and its key sat in the environment (now `LoadCredential=`, and the
+relay's own root-owned copy of the pinned binary; the shared group first written could not reach the keeper's, as
+above). Its four low items too: typed options, the 8 KB socket limit, no `*` CORS origin, a cap on
+CoinGecko's answer.

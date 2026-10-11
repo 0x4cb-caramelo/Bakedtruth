@@ -2,10 +2,11 @@
  * Purpose: the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only),
  *          the port and host (loopback by default), the refresh interval, the CORS origin for the site, how many
  *          program transactions a refresh reads for the leaderboard, and the file of wallets left out of it (Sprint
- *          13).
- * Version: 0.2.0
+ *          13); the names file and the display price's interval (Sprint 08).
+ * Version: 0.3.1 (2b: no CoinGecko settings)
  * Sprint:  08 (indexer and API, hackathon MVP)
  */
+import { fileURLToPath } from "node:url";
 
 export type ApiConfig = {
   rpcUrl: string;
@@ -20,6 +21,10 @@ export type ApiConfig = {
   hiddenFile: string | null;
   /** The RPC the leaderboard's history reads through, when it should not share the snapshot's (a secret too). */
   historyRpcUrl: string | null;
+  /** The reviewed account names (Sprint 08): the repository's content/account-names.json unless set. */
+  namesFile: string;
+  /** How often the display price, Pyth's SOL/USD, is read (Sprint 08), in milliseconds. */
+  priceRefreshMs: number;
 };
 
 type Env = Record<string, string | undefined>;
@@ -45,6 +50,9 @@ export function loadApiConfig(env: Env = process.env): ApiConfig {
     historyPerRefresh: positive(env.API_HISTORY_PER_REFRESH, 200, "API_HISTORY_PER_REFRESH"),
     hiddenFile: env.API_LEADERBOARD_HIDDEN?.trim() || null,
     historyRpcUrl: url(env.API_HISTORY_RPC_URL, "API_HISTORY_RPC_URL"),
+    namesFile:
+      env.API_NAMES_FILE?.trim() || fileURLToPath(new URL("../../../content/account-names.json", import.meta.url)),
+    priceRefreshMs: positive(env.API_PRICE_REFRESH_MS, 180_000, "API_PRICE_REFRESH_MS"),
   };
 }
 

@@ -27,8 +27,39 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **Sprint 08, segunda parte: os nomes, o preço e o relay `brot-rpc`** (branch `sprint-08-price-names-relay`, PR #69,
+  11/10/2026; `docs/sprints/sprint-08-indexer-api-points.md`; construídos e testados, não implantados).
+  - **`/api/v1/names`** na API de leitura: os nomes revisados de `content/account-names.json`, com as regras que saíram
+    do site para o SDK (`parseAccountNames`), e os 17 feeds da lista do programa com a conta patrocinada de cada um.
+  - **`/api/v1/price`**: o SOL em US$ só para exibição, da Pyth SOL/USD, o mesmo preço que o programa cobra. Sem
+    CoinGecko: a revisão jurídica leu os termos dele e nenhum plano cabia (atribuição em qualquer plano, nada de
+    "gambling", nada de redistribuir o acesso, termos de uso próprios antes), e o Ronaldo decidiu tirá-lo (2b); o código
+    dele saiu.
+  - **O `brot-rpc`** (`services/rpc/`): o único caminho do navegador até a RPC paga, só com as onze chamadas que os
+    clientes da Brot fazem e os argumentos que eles usam; uma transação só com este programa, o ComputeBudget e o
+    Lighthouse; a conta de outro programa volta sem os dados; limites por IP e por /64 e /48 do IPv6, esquecidos em
+    cerca de um minuto; um orçamento diário com uma reserva para assinar; um cache curto só de contas de outros
+    programas; o bloqueio por país construído e vazio, sem bloquear ninguém (o Ronaldo, 11/10); um cabeçalho secreto
+    que o túnel acrescenta; nada de IP nem de URL no log. O teste na web inteiro passa com o relay no meio
+    (`E2E_RELAY=1`), e foi assim que um defeito do cache apareceu e saiu. Sem o relay, uma cena da Sprint 12 falhou
+    uma vez numa corrida (a linha de sucesso do "Receive" some quando a página relê a cadeia); ela agora confere o
+    resultado, a parte paga e nenhum botão.
+  - **As revisões jurídica e de segurança, aplicadas.** O relatório jurídico ficou guardado para o advogado
+    (`docs/legal/2026-10-11-sprint-08-legal-review.md`), com o texto da privacidade para o dia em que o site passar a
+    usar o relay. A de segurança achou um caminho para a API de leitura responder com a pilha do erro
+    (`?state=constructor`), corrigido junto.
+  - **As decisões do Ronaldo de 11/10** (`docs/business/ideacao-perguntas-e-respostas.md`): sem CoinGecko, só a Pyth
+    (2b); o site passa para o relay no dia em que ele for instalado, com o texto da privacidade no mesmo dia (3a); no
+    devnet, US$ só onde define um custo, a abertura, e nunca como valor de um pote (4a). Ele também aprovou o
+    `content/README.md` como revisor; como a mudança foi feita a pedido dele, a regra de duas pessoas do `content/`
+    ainda pede a revisão do Lucas ou do Bernardo.
+  - **Esperando o fundador:** a conta de RPC do relay com limite de gasto, o usuário, o Bun e as credenciais no
+    servidor, as duas regras do Cloudflare, a unidade, a rota `/rpc` e o texto da privacidade (`deploy/vps/README.md`).
+  - **Mesclada na `main` pelo PR #69 em 11/10/2026**, a pedido do Ronaldo, depois da revisão visual (PR #70): a main
+    entrou na branch e os cinco conflitos ficaram com as duas entradas. O `content/README.md` foi junto com a
+    aprovação só dele, por decisão dele; a segunda revisão (Lucas ou Bernardo) continua aberta.
 - **A revisão visual do site: as telas aprovadas da Sprint -1 no `app/`** (branch `feat/full-ui-overhaul`, 11/10/2026,
-  a pedido do Ronaldo; `docs/product/DESIGN-DIRECTION.md`, "Status em 2026-10-11"). O PR #67 tinha trazido só as
+  a pedido do Ronaldo; mesclada na `main` pelo PR #70 no mesmo dia; `docs/product/DESIGN-DIRECTION.md`, "Status em 2026-10-11"). O PR #67 tinha trazido só as
   cores da marca; agora o site tem a estrutura do protótipo aprovado (`prototype-lab/campaigns/`, servido em
   `/dev0x/`).
   - **Os estilos do protótipo** foram para `app/styles/ui/` como estão, em camadas de CSS, com as cores da marca.

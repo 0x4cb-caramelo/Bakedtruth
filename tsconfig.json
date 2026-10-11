@@ -11,5 +11,5 @@
     "noEmit": true,
     "paths": { "@/*": ["./app/*"] }
   },
-  "include": ["tests/**/*.ts", "scripts/**/*.ts", "packages/**/*.ts"]
+  "include": ["tests/**/*.ts", "scripts/**/*.ts", "packages/**/*.ts", "services/**/*.ts"]
 }

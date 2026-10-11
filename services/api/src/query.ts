@@ -2,7 +2,7 @@
  * Purpose: validates the list's query string. An unknown parameter, a bad state, or a limit or offset out of range is a
  *          400 with a named code; nothing is guessed. The states "active" (open or closed) and "resolved" (in review,
  *          paid or void) group the five public states.
- * Version: 0.1.0
+ * Version: 0.1.1 (the Sprint 08 security review, M2: only the groups' own names)
  * Sprint:  08 (indexer and API, hackathon MVP)
  */
 
@@ -27,7 +27,8 @@ export function parseListQuery(url: URL): ListQuery {
   const state = url.searchParams.get("state");
   let states: ReadonlySet<string> | null = null;
   if (state !== null) {
-    const group = GROUPS[state];
+    // An own key only: "constructor" or "__proto__" would find Object's and throw (the Sprint 08 security review, M2).
+    const group = Object.hasOwn(GROUPS, state) ? GROUPS[state] : undefined;
     if (!group) throw new BadQuery(`state must be one of ${Object.keys(GROUPS).join(", ")}`);
     states = new Set(group);
   }

@@ -1,0 +1,59 @@
+# Purpose: brot-rpc, the relay between browsers or the app and the paid RPC (Sprint 08; TP §3.5, T14): its own unit,
+#          its own identity and its own provider account, on 127.0.0.1:4202 for the tunnel's /rpc route.
+# Installs: the shared VPS. NOT INSTALLED yet. The steps are in deploy/vps/README.md ("The relay"): the relay's RPC
+#           account with a hard spending limit (D4); its user, its own root-owned copy of the pinned Bun binary and its
+#           release; the two credential files; Cloudflare's rules (a rate rule on /rpc, and a header rule that sets
+#           x-brot-tunnel); the tunnel's /rpc route last. Check with `systemd-analyze security brot-rpc.service` and one
+#           start before enabling.
+# Secrets: the upstream URL (it carries the provider's key) and the tunnel's secret are credentials (LoadCredential=,
+#          root-owned 0400 files), never in the environment (T13). The env file holds only settings. The relay logs
+#          counts only, never the URL, an IP, a header or a parameter.
+
+[Unit]
+Description=Brot Markets brot-rpc relay (/rpc)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=brot-rpc
+Group=brot-rpc
+WorkingDirectory=/srv/brot-markets/rpc/current/services/rpc
+EnvironmentFile=/etc/brot-markets/rpc.env
+LoadCredential=upstream-url:/etc/brot-markets/rpc-upstream-url
+LoadCredential=tunnel-secret:/etc/brot-markets/rpc-tunnel-secret
+Environment=RELAY_UPSTREAM_URL_FILE=%d/upstream-url
+Environment=RELAY_TUNNEL_SECRET_FILE=%d/tunnel-secret
+# Its own home, created by systemd and the only place it may write (Bun's caches); nothing of the relay's is kept there.
+StateDirectory=brot-rpc
+Environment=HOME=/var/lib/brot-rpc
+# Its own root-owned copy of the pinned Bun binary: the keeper's sits in brot's home (0750, with the waitlist), which
+# this user cannot enter and should not (M5).
+ExecStart=/usr/local/lib/brot-rpc/bun src/main.ts
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+# Limits: the relay holds buckets and a short cache in memory, nothing on disk.
+MemoryMax=192M
+CPUQuota=50%
+TasksMax=64
+
+# Sandboxing, as the keeper's units; the relay writes nothing.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

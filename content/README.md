@@ -49,6 +49,8 @@ list, which the program compiles, never here.
    ```
 
    `kind` is `burn`, `lock`, `pool` or `stake`; `name` is 1 to 32 plain characters (letters, digits, spaces, `.`,
-   `$`, `-`, `/`), never a link, an @handle or a person.
+   `$`, `-`, `/`), never a link, an @handle or a person. The second reviewer confirms the name is a project's or an
+   organization's: a validator named after a person stays unnamed, since Git keeps every name for good and the code
+   cannot tell a person's name from a project's (the Sprint 08 legal review).
 
 3. Open a pull request; a second person reviews the address and the name; merge; build and deploy the site.

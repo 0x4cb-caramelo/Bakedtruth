@@ -1,9 +1,9 @@
 /**
  * Purpose: the read API's entry point. Reads its settings, takes a chain snapshot at start and then every
  *          API_REFRESH_MS, reads the program's new history and the hide list for the leaderboard on a loop of their own
- *          (Sprint 13), and serves /api/v1 on the loopback address. Logs one JSON line per refresh, never the RPC URL
- *          or a wallet.
- * Version: 0.3.0 (the Sprint 13 adversarial review: the history on its own loop, so it can never hold the snapshot)
+ *          (Sprint 13), the names file with it and the display price on a loop of its own (Sprint 08), and serves
+ *          /api/v1 on the loopback address. Logs one JSON line per refresh, never the RPC URL, a key or a wallet.
+ * Version: 0.4.2 (2b: the price from Pyth only; 0.4.1, names and price, no development error page)
  * Sprint:  08 (indexer and API, hackathon MVP); 13
  *
  * Run: API_RPC_URL=... bun services/api/src/main.ts
@@ -13,6 +13,9 @@ import { rpcFor } from "@brot/sdk/read";
 import { loadApiConfig } from "./config";
 import { createHidden } from "./hidden";
 import { createHistory } from "./history";
+import { createNames } from "./names";
+import { createPrice } from "./price";
+import { pythSource } from "./price-source";
 import { createHandler } from "./routes";
 import { createStore } from "./store";
 
@@ -24,9 +27,21 @@ const history = createHistory(config.historyRpcUrl ? rpcFor(config.historyRpcUrl
   perRefresh: config.historyPerRefresh,
 });
 const hidden = createHidden(config.hiddenFile);
-const handle = createHandler(store, { corsOrigin: config.corsOrigin, cluster: config.cluster, history, hidden });
+const names = await createNames(config.namesFile);
+const unixNow = () => BigInt(Math.floor(Date.now() / 1_000));
+const price = createPrice({ pyth: pythSource(rpc), now: unixNow });
+const handle = createHandler(store, {
+  corsOrigin: config.corsOrigin,
+  cluster: config.cluster,
+  history,
+  hidden,
+  names,
+  price,
+  now: unixNow,
+});
 
-Bun.serve({ hostname: config.host, port: config.port, fetch: handle });
+// development: false whatever NODE_ENV says, so no error page can ever show a stack trace (the security review, M1/M2).
+Bun.serve({ hostname: config.host, port: config.port, fetch: handle, development: false });
 console.log(JSON.stringify({ ts: new Date().toISOString(), event: "start", host: config.host, port: config.port }));
 
 const log = (fields: Record<string, unknown>) =>
@@ -53,6 +68,7 @@ async function snapshotLoop() {
 async function historyLoop() {
   for (;;) {
     hidden.refresh();
+    names.refresh();
     const error = await history.refresh().then(
       () => null,
       (caught: unknown) => (caught instanceof Error ? caught.name : "Error"),
@@ -70,5 +86,19 @@ async function historyLoop() {
   }
 }
 
+/** The display price, every API_PRICE_REFRESH_MS: its source and a named error. */
+async function priceLoop() {
+  for (;;) {
+    await price.refresh();
+    log({
+      event: price.lastError() ? "price-error" : "price",
+      source: price.current()?.source ?? null,
+      error: price.lastError(),
+    });
+    await new Promise((done) => setTimeout(done, config.priceRefreshMs));
+  }
+}
+
 void snapshotLoop();
 void historyLoop();
+void priceLoop();

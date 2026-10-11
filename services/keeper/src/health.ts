@@ -3,7 +3,7 @@
  *          its SOL balance), the cycle count and the last cycle's error, if any. Read-only; it never triggers work.
  *          POST /restart is routed only when a restart handler is given (the primary in Sprint 07); every other
  *          path answers 404.
- * Version: 0.2.0
+ * Version: 0.2.1 (Sprint 08 security review: no development error page)
  * Sprint:  07 (standby keeper and watchdog)
  */
 import type { CycleReport } from "./cycle";
@@ -26,6 +26,8 @@ export function startHealth(
   return Bun.serve({
     hostname: host,
     port,
+    // No development error page, whatever NODE_ENV says: a throw never shows a stack trace (Sprint 08 security review).
+    development: false,
     fetch(request) {
       const { pathname } = new URL(request.url);
       if (pathname === "/healthz") return Response.json(state());

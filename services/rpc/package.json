@@ -1,0 +1,16 @@
+{
+  "name": "@brot/rpc",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Brot Markets brot-rpc relay (Sprint 08): the only path from a browser or the app to the paid RPC, for the calls Brot's clients make",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "bun src/main.ts",
+    "test": "bun test services/rpc"
+  },
+  "dependencies": {
+    "@brot/sdk": "workspace:*",
+    "@solana/kit": "~8.4.0"
+  }
+}
