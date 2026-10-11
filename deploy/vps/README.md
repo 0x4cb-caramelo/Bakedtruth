@@ -207,15 +207,18 @@ release on. Decided by Ronaldo on 2026-10-11: the tunnel and systemd (no Nginx, 
    Expected: the health says `"status":"ok"` once the first snapshot is read, and the site answers `200` with
    `x-robots-tag: noindex, nofollow, noarchive` (the demo stays out of search engines, as the preview at `/dev0x/` was).
 
-7. **The landing**, so the preview moves to `/prototype/`: bring its folder (`<landing-root>`, from step 1) to this
-   commit's `services/landing/` and `prototype-lab/campaigns/`. Its waitlist lives in `/var/lib/brot-markets/leads`,
-   outside both.
+7. **The landing**, so the preview moves to `/prototype/`. In the landing's folder (`<landing-root>`, from step 1),
+   the move is one file: since the preview went live (`b05b4db`), `lib/campaigns.mjs` changed only its `PREFIX`.
+   Copying the whole landing instead would also put live every other landing change on `main` (the deck, the privacy
+   page, the age line), which is a separate decision. Its waitlist lives in `/var/lib/brot-markets/leads`, outside.
 
    ```bash
-   sudo rsync -a --delete "$R/services/landing/" <landing-root>/services/landing/
-   sudo rsync -a --delete "$R/prototype-lab/campaigns/" <landing-root>/prototype-lab/campaigns/
+   sudo install -m 0644 "$R/services/landing/lib/campaigns.mjs" <landing-root>/services/landing/lib/campaigns.mjs
    sudo systemctl restart brot-landing && curl -sI http://127.0.0.1:4200/prototype/ | head -1
    ```
+
+   The whole landing at this commit, when that is wanted: `sudo rsync -a --delete "$R/services/landing/"
+   <landing-root>/services/landing/` and the same for `prototype-lab/campaigns/`, then the restart above.
 
 8. **The tunnel's two routes**, in the Cloudflare dashboard (Zero Trust → Networks → Tunnels → `brot-markets` →
    Public hostnames). The tunnel takes the first rule that matches, so both go above the landing's:
