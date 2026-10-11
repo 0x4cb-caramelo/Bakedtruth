@@ -50,7 +50,9 @@ export function coingeckoSource(o: {
   return async () => {
     const response = await (o.fetch ?? fetch)(url, { headers, signal: AbortSignal.timeout(o.timeoutMs ?? 10_000) });
     if (!response.ok) throw new PriceSourceError(`Status${response.status}`);
-    const body = (await response.json()) as { solana?: { usd?: unknown; last_updated_at?: unknown } };
+    const text = await response.text();
+    if (text.length > 4_096) throw new PriceSourceError("TooLarge"); // one price; never a big body (security review, L4)
+    const body = JSON.parse(text) as { solana?: { usd?: unknown; last_updated_at?: unknown } };
     const usd = body?.solana?.usd;
     const at = body?.solana?.last_updated_at;
     if (typeof usd !== "number" || !Number.isFinite(usd) || usd <= 0) throw new PriceSourceError("BadPrice");

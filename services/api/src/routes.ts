@@ -4,14 +4,14 @@
  *          second part /api/v1/names and /api/v1/price. Every answer is JSON with CORS for the site; errors are
  *          {"error": {"code", "message"}}, never a stack trace. Reads only what is in memory: the chain snapshot, the
  *          program's history, the names and the last display price.
- * Version: 0.3.0 (Sprint 08: names and price)
+ * Version: 0.3.1 (Sprint 08: names and price; the security review: any throw is a JSON 500)
  * Sprint:  08 (indexer and API, hackathon MVP); 13
  */
 import type { Hidden } from "./hidden";
 import type { History } from "./history";
 import { createBoard, leaderboardOf, parseLeaderboardQuery } from "./leaderboard";
 import type { Names } from "./names";
-import { priceBody, type Price } from "./price";
+import { MAX_SERVED_SECONDS, priceBody, type Price } from "./price";
 import { BadQuery, parseListQuery } from "./query";
 import { toCampaign } from "./dto";
 import type { Store } from "./store";
@@ -44,6 +44,18 @@ const fail = (status: number, code: string, message: string, cors: string) =>
 
 export function createHandler(store: Store, options: RouteOptions) {
   const board = options.history ? createBoard(options.history, options.hidden) : null;
+  const handle = route(store, options, board);
+  // Any throw becomes the documented error shape, never a stack trace (the Sprint 08 security review, M2).
+  return async function safe(request: Request): Promise<Response> {
+    try {
+      return await handle(request);
+    } catch {
+      return fail(500, "internal", "the request could not be answered", options.corsOrigin);
+    }
+  };
+}
+
+function route(store: Store, options: RouteOptions, board: ReturnType<typeof createBoard> | null) {
   return async function handle(request: Request): Promise<Response> {
     const cors = options.corsOrigin;
     if (request.method !== "GET" && request.method !== "HEAD") return fail(405, "method_not_allowed", "GET only", cors);
@@ -117,6 +129,8 @@ export function createHandler(store: Store, options: RouteOptions) {
       const price = options.price?.current();
       if (!price) return fail(503, "starting", "no price has been read yet", cors);
       const now = options.now ? options.now() : BigInt(Math.floor(Date.now() / 1_000));
+      if (now - price.publishedAt > MAX_SERVED_SECONDS)
+        return fail(503, "no_recent_price", "no price of the last day", cors);
       return json({ chain_time: chainTime, price: priceBody(price, now) }, 200, cors);
     }
     const detail = url.pathname.match(/^\/api\/v1\/campaigns\/([1-9A-HJ-NP-Za-km-z]{32,44})$/);

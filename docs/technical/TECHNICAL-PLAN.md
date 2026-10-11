@@ -1270,8 +1270,13 @@ whose owner asked to leave the ranking are dropped before ranking (§8.2).
 
 *Display price* (D-e, D-f) **[FD]**. The indexer fetches CoinGecko `simple/price` for SOL in US$ every few minutes,
 server-side, and serves it at `/api/v1/price` with its source and time; Pyth SOL/USD is the fallback. It is for
-display and reports only and never reaches the program [E79][E80]. If the plan bought under D4 requires attribution,
-the site shows "Data provided by CoinGecko" [E79] **[AC]**.
+display and reports only and never reaches the program [E79][E80]. **Since the Sprint 08 legal review (2026-10-11,
+`docs/legal/2026-10-11-sprint-08-legal-review.md`) [F]:** CoinGecko's API terms (5 Sept 2025) ask for "Powered by
+CoinGecko" on every plan (§4.3), bar any use "for or to promote gambling" (§4.1.7.2) and re-distributing access
+(§4.1.6), and need binding user terms with their clauses (§7.1); its keyless API is "not suitable for production
+workloads, scheduled polling", and the Demo plan is for "testing and exploration", 10,000 calls a month. None can be
+met today, so `/api/v1/price` runs on Pyth SOL/USD, CoinGecko off by default (`API_COINGECKO`), until the founder
+decides D4 (a written answer from CoinGecko, a paid plan, or Pyth for good).
 
 *Evidence tables* (A-4) **[DP]**. Two tables cannot be rebuilt from RPC: the history of every sponsored feed with an
 open campaign (`publish_time`, price, confidence), used to judge a void inside the window and as a reference for T8;
@@ -1305,9 +1310,15 @@ from a browser or the app to a paid provider.
   45-byte slice; the token bucket keyed by `cf-connecting-ip` (an IPv6 address by its /64), the daily budget and the
   short cache, in memory, for metric accounts and sysvars only (never the program's own accounts: the smoke through the
   relay saw a cached config keep a pause that had ended), a missing account or a status; the country gate built with an empty
-  list, so it blocks nothing (the founder, 2026-10-11). Tested against a fake upstream (X1.7) and, under `E2E_RELAY=1`,
-  with the whole web smoke going through it. The unit (`deploy/vps/brot-rpc.service`), its provider account with a
-  spending limit (D4), the tunnel's `/rpc` route and pointing the site at it are the founder's.
+  list, so it blocks nothing (the founder, 2026-10-11). After its security review (2026-10-11): every option's value
+  typed before it is read and any throw answered as a bare JSON-RPC error, never a stack trace (`development: false`);
+  a secret header Cloudflare adds (`x-brot-tunnel`), without which a local caller cannot pose as a visitor; a second
+  bucket per IPv6 /48; a tenth of the daily budget kept for the signing path; the upstream URL and the tunnel's secret
+  as systemd credentials (T13). One source can still spend the reads' share of the budget: the Cloudflare rate rule on
+  `/rpc` is a precondition of the route. Tested against a fake upstream (X1.7) and, under `E2E_RELAY=1`, with the
+  whole web smoke going through it. The unit (`deploy/vps/brot-rpc.service`), its provider account with a spending
+  limit (D4), Cloudflare's two rules, the tunnel's `/rpc` route and pointing the site at it are the founder's, in the
+  order of `deploy/vps/README.md`.
 
 **The read API.** `/api/v1` is served by the indexer process, read-only, with zod schemas from `@brot/sdk/read`; its
 conventions and routes are §6.
@@ -1902,7 +1913,7 @@ exposes only `GET /healthz` and `POST /restart` (TP v0.0.1 §5, §12) **[DP]**.
 | `GET /api/v1/wallets/:address/entries` | One wallet's entries, results and payouts ("my entries"). Not built yet: Sprint 12's page reads the chain meanwhile | 08 |
 | `GET /api/v1/leaderboard` | Devnet points. **Built in Sprint 13 [F]** in `services/api` from the program's own history (`history.ts`: in memory, on its own loop, incremental by `until`, every call with a timeout) and the live accounts, until the indexer takes it over; paged; each row is a rank, a wallet, its points and the campaigns it entered; it takes no wallet parameter and drops the wallets on the hide list (§8.2) | 08; 13 |
 | `GET /api/v1/names` | Display names from `content/account-names.json` and the pinned Pyth feed list. **Built in Sprint 08 (2026-10-11) [F]** in `services/api`: the names checked by the SDK's `parseAccountNames` (the site's rules), the feeds with their sponsored accounts; a broken file keeps the last good list | 08 |
-| `GET /api/v1/price` | SOL in US$, with source and time. **Built in Sprint 08 (2026-10-11) [F]** in `services/api`: CoinGecko first, Pyth SOL/USD when CoinGecko fails, is off or is older than ten minutes; source, times, staleness and attribution in each answer; not run in public before the legal check of CoinGecko's terms | 08 |
+| `GET /api/v1/price` | SOL in US$, with source and time. **Built in Sprint 08 (2026-10-11) [F]** in `services/api`: Pyth SOL/USD on devnet, CoinGecko off by default (the legal review of 2026-10-11, §3.5); when switched on, CoinGecko first and Pyth when it fails or is older than ten minutes; source, times, staleness and attribution with its link in each answer; no price older than a day | 08 |
 | `GET /api/v1/health` | `program_last_deploy_slot`, `schema_version`, `cluster`, `entries_allowed` | 08 |
 
 `campaigns`, `campaigns/:id`, its `activity` and `chance`, `wallets/:address/entries`, `leaderboard` and `health` are
@@ -2209,6 +2220,23 @@ browser and what the RPC provider sees **[F]**.
 landing with this text, a new date and the post on X its section 8 promises (answer 9a; the legal review, M8;
 confirmed by Sprint 19's answer 2a, 2026-10-11).
 
+### 8.4 Sprint 08's second part: the relay, the names and the price
+
+The nine questions, answered by the legal review of 2026-10-11 (`docs/legal/2026-10-11-sprint-08-legal-review.md`,
+where the full tables are) **[F]**:
+
+- **`brot-rpc`:** PASS with conditions before the site is pointed at `/rpc`. It reads the visitor's IP
+  (`cf-connecting-ip`, an IPv6 address by its /64) as a rate limiter's key, in memory only, and the country
+  (`CF-IPCountry`) for a join or an opening, against a list that is empty; it logs counts only. R1, the sweep that drops
+  an idle client's bucket within a minute, is built. Still before the switch: the policy text of the review's (c),
+  published that day with the provider named and the post on X (R2); the provider's own terms read before choosing it
+  (R3); the country list kept empty until the founder, L0 and the C9 check (R5). After the switch, the provider sees
+  the wallet without the IP, and only the relay (in memory) and Cloudflare see both; §8.2's line on browser calls going
+  to the provider directly changes that day.
+- **`/api/v1/price`:** PASS: it takes nothing from a visitor; only the server calls CoinGecko or the RPC.
+- **`/api/v1/names`:** PASS: no person is named today; "never a person" is the two reviewers' check, since the code
+  cannot see a person's name (a validator named after a person stays unnamed).
+
 ## 9. Testing strategy
 
 | Layer | What is tested | Tool | Sprint |
@@ -2476,7 +2504,7 @@ The business risks are in P4 §7. These are the plan's. Severities marked "(P4 �
 | # | Question | Recommendation or working default | Blocks |
 |---|---|---|---|
 | L0 | The team lawyer's written review (an action, D-s) | Classification first (is a pot inside MP 1.394, or CMN 5.298, or another regime?), then open creation, the US$500 opening, SOL, no caps and no list, the dApp Store, the C-items of §3.7. An outside reader stays a BP proposal (P4 §5.1) | D5; C-06; Sprint 22; the mainnet date (18) |
-| D4 | Budget: RPC accounts, VM 2, email, the Pyth and CoinGecko plans, a Seeker and another Android phone. Includes v0.0.1's Q8 | Devnet below about US$150 a month **[INF]**: Helius Developer (US$49) for the keeper, free tiers elsewhere **[AC]**. Pyth: paid openings need no plan; keyed proofs for mainnet price campaigns need Hermes Starter, US$500 a month [E51], or price campaigns wait. CoinGecko: Demo terms unclear; paid plans require attribution [E79] | 06; 07; 08; 16 (Pyth); 20 (devices) |
+| D4 | Budget: RPC accounts, VM 2, email, the Pyth and CoinGecko plans, a Seeker and another Android phone. Includes v0.0.1's Q8 | Devnet below about US$150 a month **[INF]**: Helius Developer (US$49) for the keeper, free tiers elsewhere **[AC]**. Pyth: paid openings need no plan; keyed proofs for mainnet price campaigns need Hermes Starter, US$500 a month [E51], or price campaigns wait. CoinGecko: no plan fits today (the Sprint 08 legal review, 2026-10-11: attribution on every plan, no gambling use, no re-distributed access, binding user terms first; §3.5), so the display price is Pyth's until the founder decides [E79] | 06; 07; 08; 16 (Pyth); 20 (devices) |
 | D5 | Attestation of each entry, and wallet screening | (a) None on devnet: gates live in the site, the app and `brot-rpc`. Decide after L0, before Sprint 14. (b) and (c) see wallets with IPs or send addresses to a third party (K-04) | 14 |
 | P-6 | Ceiling of the referral rebate | 0.05 SOL; the US$50 and US$250 thresholds also in SOL (0.4576 and 2.2879 SOL at the reference price **[INF]**, P1 §3.9) | 14 |
 | P-7 | The treasury, with a SOL-only platform | The platform receives and pays in SOL; the company converts monthly what it needs, outside it; `fee_recipient` under the multisig | 06 (runbook); 18 |
@@ -2641,7 +2669,7 @@ Closed in Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`; `session-log/
 | C28 | The Cloudflare Cache Rule needed to cache `/api/v1` JSON | 08 |
 | C29 | The `next/og` route convention in this Next.js version | 10 |
 | C31 | The waitlist record's fields named the same in code, README, privacy page and §8.1 | 09 |
-| C32 | Per-method RPC credit weights; CoinGecko's commercial terms | 08 |
+| C32 | Per-method RPC credit weights; CoinGecko's commercial terms (read 2026-10-11: no plan fits today, §3.5) | 08 |
 | C33 | Which Kit calls the app makes, and what the Hermes engine provides | 20 |
 | C34 | Seed Vault Wallet on devnet; the Android UI test tool | 20 |
 | C35 | The App Links certificate fingerprint and `assetlinks.json` | 20 |
@@ -2862,7 +2890,7 @@ without one. [E82] and [E83] are added by this plan, from sources TP v0.0.1 reli
 - [E76] Bun installation documentation: bun.com/docs/installation (glibc 2.17 or newer, kernel 5.6 or newer recommended, x64 with SSE4.2)
 - [E77] CVE-2026-24910 (Bun, medium, fixed in 1.3.5): cvefeed.io/vuln/detail/CVE-2026-24910. Bun's blocked lifecycle scripts and `trustedDependencies` (secondary): named without a URL, none at hand
 - [E78] Bun's Next.js guide: bun.com/guides/ecosystem/nextjs; a community report of a Next.js 16.3 build failing with Bun on Vercel (secondary): community.vercel.com/t/next-js-16-3-bun-runtime-1-3-12-build-failure-on-vercel-while-bun-1-3-14-works-locally/47139
-- [E79] CoinGecko API pricing page: www.coingecko.com/en/api/pricing (the Demo plan, and the "Data provided by CoinGecko" attribution on paid plans); API terms: www.coingecko.com/en/api_terms
+- [E79] CoinGecko API pricing page: www.coingecko.com/en/api/pricing (the Demo plan, and the "Data provided by CoinGecko" attribution on paid plans); API terms, version of 5 Sept 2025: www.coingecko.com/en/api_terms ("Powered by CoinGecko" on every plan, §4.3); the keyless API: docs.coingecko.com/docs/keyless-public-api; the attribution guide: brand.coingecko.com/resources/attribution-guide; the data licence: www.coingecko.com/en/api/enterprise/data-license. All read 2026-10-11
 - [E80] CoinGecko public API, `simple/price`, SOL in US$: api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd, read 2026-10-08 at 15:29 UTC: US$109.27
 - [E81] Shank IDL and Codama client for a Pinocchio program: QuickNode guide, www.quicknode.com/fr/guides/solana-development/pinocchio/how-to-build-and-deploy-a-solana-program-using-pinocchio; Codama clients in the Solana docs: solana.com/docs/programs/codama/clients
 

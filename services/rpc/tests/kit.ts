@@ -49,6 +49,7 @@ export function setup(o: { answer?: Answer; env?: Record<string, string>; clock?
       return { status: a.status ?? 200, text: JSON.stringify({ jsonrpc: "2.0", id: call.id, ...payload }) };
     },
     limiter: createLimiter({ ratePerSecond: config.ratePerSecond, burst: config.burst, now }),
+    area: createLimiter({ ratePerSecond: config.ratePerSecond * 8, burst: config.burst * 8, now }),
     budget: createBudget({ daily: config.dailyBudget, now }),
     cache: createCache(now),
   });

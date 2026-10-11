@@ -25,7 +25,7 @@ export type ApiConfig = {
   namesFile: string;
   /** How often the display price is read (Sprint 08), in milliseconds. */
   priceRefreshMs: number;
-  /** CoinGecko for the display price, or Pyth only (Sprint 08, D-e; off while its terms are checked). */
+  /** CoinGecko for the display price, or Pyth only, the default (Sprint 08; off by the legal review of 2026-10-11). */
   coingecko: boolean;
   /** The CoinGecko key (a secret; null: the keyless API) and the plan it belongs to. */
   coingeckoKey: string | null;
@@ -58,7 +58,7 @@ export function loadApiConfig(env: Env = process.env): ApiConfig {
     namesFile:
       env.API_NAMES_FILE?.trim() || fileURLToPath(new URL("../../../content/account-names.json", import.meta.url)),
     priceRefreshMs: positive(env.API_PRICE_REFRESH_MS, 180_000, "API_PRICE_REFRESH_MS"),
-    coingecko: onOff(env.API_COINGECKO, true, "API_COINGECKO"),
+    coingecko: onOff(env.API_COINGECKO, false, "API_COINGECKO"),
     coingeckoKey: env.API_COINGECKO_KEY?.trim() || null,
     coingeckoPlan: plan(env.API_COINGECKO_PLAN),
   };

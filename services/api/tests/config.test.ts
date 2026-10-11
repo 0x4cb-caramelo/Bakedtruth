@@ -34,7 +34,7 @@ describe("config", () => {
       // Sprint 08: the repository's names file, a price every 3 minutes, CoinGecko keyless on the Demo plan's root.
       namesFile: expect.stringMatching(/content\/account-names\.json$/),
       priceRefreshMs: 180_000,
-      coingecko: true,
+      coingecko: false, // off by the legal review of 2026-10-11
       coingeckoKey: null,
       coingeckoPlan: "demo",
     });

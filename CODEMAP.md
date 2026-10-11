@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **874** |
+| Arquivos mapeados | **875** |
 | Acima de 200 linhas | **38** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -1089,12 +1089,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`hidden.ts`](services/api/src/hidden.ts) | the wallets left out of the public leaderboard at their owner's request (Sprint 13, the privacy review, TP §8.2 question 8): a JSON array of base58 addresses in | 61 |
 | [`history.ts`](services/api/src/history.ts) | the program's own history, read for the leaderboard (Sprint 13) until Sprint 08's indexer exists: every signature of the program through `getSignaturesForAddres | 152 |
 | [`leaderboard.ts`](services/api/src/leaderboard.ts) | `GET /api/v1/leaderboard` (TP §6; Sprint 13, BR-29): devnet points from the program's events (history.ts) and the live campaign accounts (the snapshot), through | 118 |
-| [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, reads the program's new history and the hide list | 114 |
+| [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, reads the program's new history and the hide list | 115 |
 | [`names.ts`](services/api/src/names.ts) | what /api/v1/names serves (TP §6; A-11; Sprint 08): the reviewed account names of content/account-names.json, checked by the SDK's `parseAccountNames` (the rule | 55 |
-| [`price-sources.ts`](services/api/src/price-sources.ts) | the two sources of the display price (D-e, D-f; Sprint 08). CoinGecko's `simple/price` for SOL in US$, with the time CoinGecko last updated it: the paid plan's  | 73 |
-| [`price.ts`](services/api/src/price.ts) | the price /api/v1/price serves (TP §3.5 "Display price", §6; D-e, D-f; Sprint 08): SOL in US$, for display and reports only; the program never reads it. CoinGec | 81 |
-| [`query.ts`](services/api/src/query.ts) | validates the list's query string. An unknown parameter, a bad state, or a limit or offset out of range is a 400 with a named code; nothing is guessed. The stat | 49 |
-| [`routes.ts`](services/api/src/routes.ts) | the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged), /api/v1/campaigns/:address, since Sprint 13 /api/v1/leaderboard  | 136 |
+| [`price-sources.ts`](services/api/src/price-sources.ts) | the two sources of the display price (D-e, D-f; Sprint 08). CoinGecko's `simple/price` for SOL in US$, with the time CoinGecko last updated it: the paid plan's  | 75 |
+| [`price.ts`](services/api/src/price.ts) | the price /api/v1/price serves (TP §3.5 "Display price", §6; D-e, D-f; Sprint 08): SOL in US$, for display and reports only; the program never reads it. CoinGec | 85 |
+| [`query.ts`](services/api/src/query.ts) | validates the list's query string. An unknown parameter, a bad state, or a limit or offset out of range is a 400 with a named code; nothing is guessed. The stat | 50 |
+| [`routes.ts`](services/api/src/routes.ts) | the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged), /api/v1/campaigns/:address, since Sprint 13 /api/v1/leaderboard  | 150 |
 | [`snapshot.ts`](services/api/src/snapshot.ts) | one read of the chain: every campaign account of the program, decoded by the SDK (a wrong owner, tag or version is skipped), with its public state computed from | 46 |
 | [`store.ts`](services/api/src/store.ts) | holds the last good chain snapshot in memory and refreshes it on a timer. A failed refresh keeps the last good snapshot and records the error, so the API answer | 33 |
 
@@ -1108,7 +1108,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`history.test.ts`](services/api/tests/history.test.ts) | the leaderboard's history reader against a scripted RPC (Sprint 13, the adversarial review's cases): a node that ignores `until` costs a re-listing but never a  | 129 |
 | [`leaderboard-pot.test.ts`](services/api/tests/leaderboard-pot.test.ts) | what the leaderboard route reads from a live account for the founder's answer 3a (2026-10-10), with fake data and no cluster: whether a final pot splits (the mo | 49 |
 | [`leaderboard.test.ts`](services/api/tests/leaderboard.test.ts) | the leaderboard route's contract with fake data and no cluster (Sprint 13): 503 until the program's history has been read (or with no history at all), what heal | 91 |
-| [`names-price.test.ts`](services/api/tests/names-price.test.ts) | /api/v1/names and /api/v1/price with fake data and no cluster (Sprint 08): the names file read with the SDK's rules and the listed feeds with their sponsored ac | 169 |
+| [`names-price.test.ts`](services/api/tests/names-price.test.ts) | /api/v1/names and /api/v1/price with fake data and no cluster (Sprint 08): the names file read with the SDK's rules and the listed feeds with their sponsored ac | 175 |
 
 ## `services/keeper/src/`
 
@@ -1118,7 +1118,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`campaigns.ts`](services/keeper/src/campaigns.ts) | the keeper's view of the chain: every campaign account of the program that has a given status. One `getProgramAccounts` filtered by the campaign's size; each ac | 38 |
 | [`config.ts`](services/keeper/src/config.ts) | the keeper's settings, read from its environment only: the RPC URL (a secret, so the log shows its origin and never the path or the query), the keeper's keypair | 116 |
 | [`cycle.ts`](services/keeper/src/cycle.ts) | one keeper cycle: read the open campaigns, try the resolve task on each, and report the counts and the keeper's SOL balance. A failure on one campaign is logged | 51 |
-| [`health.ts`](services/keeper/src/health.ts) | GET /healthz on a loopback address only: the keeper's last full cycle (open campaigns, what it tried, its SOL balance), the cycle count and the last cycle's err | 37 |
+| [`health.ts`](services/keeper/src/health.ts) | GET /healthz on a loopback address only: the keeper's last full cycle (open campaigns, what it tried, its SOL balance), the cycle count and the last cycle's err | 39 |
 | [`log.ts`](services/keeper/src/log.ts) | one JSON line per event on stdout, with a time stamp. The RPC URL and the keypair never reach it: the caller passes only fields it has checked (an origin, a pub | 10 |
 | [`main.ts`](services/keeper/src/main.ts) | the keeper's entry point. Reads its settings and keypair, serves /healthz on loopback (and POST /restart on the primary, when its secret is set), and runs one c | 84 |
 | [`resolve.ts`](services/keeper/src/resolve.ts) | the keeper's one task in the MVP: for an open campaign, offer `resolve_campaign` with the campaign's own metric account (the program's reader decides), simulate | 51 |
@@ -1255,19 +1255,20 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`accounts.ts`](services/rpc/src/accounts.ts) | what an account read may return through brot-rpc (TP §3.5, by owner, since there is no list of accounts, D-i): an account owned by the program, one of the five  | 62 |
-| [`allowlist.ts`](services/rpc/src/allowlist.ts) | the methods brot-rpc relays and the arguments each may carry (docs/technical/relay-allowlist.md, the trace of Sprints 11 to 19; TP §3.5, §6): eleven methods, ea | 135 |
-| [`config.ts`](services/rpc/src/config.ts) | brot-rpc's settings, read from its environment only (TP §3.5, T14; Sprint 08): the upstream RPC of its own account (a secret: logs never show it), a loopback bi | 75 |
-| [`limits.ts`](services/rpc/src/limits.ts) | brot-rpc's limits (TP §3.5; Sprint 08), all in memory, none written to a disk or a log: whose request it is (Cloudflare's `cf-connecting-ip`, an IPv6 address by | 104 |
-| [`main.ts`](services/rpc/src/main.ts) | brot-rpc's entry point (TP §3.5, T14; Sprint 08). Reads its settings, derives the program's ProgramData address once (A-8), and serves the relay on the loopback | 51 |
-| [`relay.ts`](services/rpc/src/relay.ts) | brot-rpc's handler (TP §3.5, §6; proposal §2.6; Sprint 08): one JSON-RPC 2.0 call per POST, in this order — the body's size (8 KB), its shape (no batch), the me | 139 |
+| [`allowlist.ts`](services/rpc/src/allowlist.ts) | the methods brot-rpc relays and the arguments each may carry (docs/technical/relay-allowlist.md, the trace of Sprints 11 to 19; TP §3.5, §6): eleven methods, ea | 161 |
+| [`config.ts`](services/rpc/src/config.ts) | brot-rpc's settings, read from its environment only (TP §3.5, T14; Sprint 08): the upstream RPC of its own account (a secret: logs never show it), a loopback bi | 107 |
+| [`limits.ts`](services/rpc/src/limits.ts) | brot-rpc's limits (TP §3.5; Sprint 08), all in memory, none written to a disk or a log: whose request it is (Cloudflare's `cf-connecting-ip`, an IPv6 address by | 128 |
+| [`main.ts`](services/rpc/src/main.ts) | brot-rpc's entry point (TP §3.5, T14; Sprint 08). Reads its settings, derives the program's ProgramData address once (A-8), and serves the relay on the loopback | 78 |
+| [`relay.ts`](services/rpc/src/relay.ts) | brot-rpc's handler (TP §3.5, §6; proposal §2.6; Sprint 08): one JSON-RPC 2.0 call per POST, in this order — the body's size (8 KB), its shape (no batch), the me | 173 |
 | [`transaction.ts`](services/rpc/src/transaction.ts) | what a transaction may hold to pass brot-rpc (TP §3.5; Sprint 08): sendTransaction and simulateTransaction carry a base64 wire transaction whose every top-level | 49 |
 
 ## `services/rpc/tests/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`gates.test.ts`](services/rpc/tests/gates.test.ts) | brot-rpc's gates on transactions and clients (Sprint 08; X1.7): a transaction carries only this program, ComputeBudget and Lighthouse at its top level, never a  | 106 |
-| [`kit.ts`](services/rpc/tests/kit.ts) | what the relay's tests share (Sprint 08): settings as the defaults give them with a fake upstream URL, a relay wired to an in-process fake upstream that records | 102 |
+| [`gates.test.ts`](services/rpc/tests/gates.test.ts) | brot-rpc's gates on transactions and clients (Sprint 08; X1.7): a transaction carries only this program, ComputeBudget and Lighthouse at its top level, never a  | 130 |
+| [`hardening.test.ts`](services/rpc/tests/hardening.test.ts) | the fixes of the Sprint 08 security review, each tested: a hostile option value is refused, never converted (M1, L1), and any throw is a JSON-RPC error with no  | 122 |
+| [`kit.ts`](services/rpc/tests/kit.ts) | what the relay's tests share (Sprint 08): settings as the defaults give them with a fake upstream URL, a relay wired to an in-process fake upstream that records | 103 |
 | [`relay.test.ts`](services/rpc/tests/relay.test.ts) | brot-rpc's refusals and its account rule, with an in-process fake upstream (Sprint 08; X1.7): a batch, an oversized body, a method off the allowlist, a subscrip | 154 |
 
 ## `tests/`

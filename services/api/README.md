@@ -44,14 +44,16 @@ a file that does not parse keeps the last good list. The chain itself cannot be 
 Amounts are lamport strings, times Unix seconds, addresses base58. An unknown parameter or a bad value is a 400
 `{"error": {"code": "bad_query", "message": ...}}`. A request before the first snapshot is a 503.
 
-**The display price (Sprint 08, D-e, D-f).** CoinGecko's `simple/price` for SOL in US$, every `API_PRICE_REFRESH_MS`
-(default 3 minutes): with `API_COINGECKO_KEY` on the Demo plan's root (`x-cg-demo-api-key`) or the paid one's
-(`x-cg-pro-api-key`, `API_COINGECKO_PLAN=pro`), or the keyless API without a key; the key travels in a header, never
-in the URL. Pyth's SOL/USD sponsored account, read through `API_RPC_URL`, is used when CoinGecko fails, reports a price
-older than ten minutes, or is off (`API_COINGECKO=off`). A refresh that reads both logs the gap, and `price-gap` above
-2%. It is for display and reports only: the program charges an opening at the Pyth price it reads itself. CoinGecko's
-API terms ask for "Powered by CoinGecko" wherever its data is shown, discourage caching, and limit re-distributing
-access; the legal check of those terms comes before this runs in public (`docs/sprints/sprint-08-indexer-api-points.md`).
+**The display price (Sprint 08, D-e, D-f).** By default, Pyth's SOL/USD sponsored account, read through `API_RPC_URL`
+every `API_PRICE_REFRESH_MS` (default 3 minutes): the price the program charges an opening at. CoinGecko is **off by
+default**: its API terms (5 Sept 2025) ask for "Powered by CoinGecko" on every plan, bar any use "for or to promote
+gambling" and re-distributing access, and need binding user terms with its clauses, none of which can be met today (the
+legal review, `docs/legal/2026-10-11-sprint-08-legal-review.md`). Once the founder decides it (D4), `API_COINGECKO=on`
+reads its `simple/price`: with `API_COINGECKO_KEY` on the Demo plan's root (`x-cg-demo-api-key`, 10,000 calls a month,
+so `API_PRICE_REFRESH_MS` of 300000 or more) or the paid one's (`x-cg-pro-api-key`, `API_COINGECKO_PLAN=pro`); the key
+travels in a header, never in the URL; Pyth takes over when CoinGecko fails or is older than ten minutes, and a
+refresh that reads both logs the gap, `price-gap` above 2%. No price older than a day is served. Display and reports
+only; the program never reads it.
 
 ## Run
 

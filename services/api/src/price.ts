@@ -3,8 +3,9 @@
  *          and reports only; the program never reads it. CoinGecko first (price-sources.ts), Pyth's SOL/USD sponsored
  *          account when CoinGecko fails, is turned off or reports a price older than ten minutes. Each refresh also
  *          reads the other source when it can, so a gap between them is measured (the alert of TP §3.5 reads it from
- *          the log). A failed refresh keeps the last good price and names the error; nothing here holds a key.
- * Version: 0.1.0
+ *          the log). A failed refresh keeps the last good price and names the error, for a day at most; nothing here
+ *          holds a key. CoinGecko is off by default since the legal review of 2026-10-11 (config.ts).
+ * Version: 0.1.1 (the Sprint 08 legal review: a day at most, the attribution's link)
  * Sprint:  08 (indexer, API, relay and points)
  */
 
@@ -15,6 +16,8 @@ export type DisplayPrice = SourcePrice & { source: PriceSource; fetchedAt: bigin
 
 /** A price older than this is not used as CoinGecko's, and is served as stale. */
 export const STALE_SECONDS = 600n;
+/** No price older than a day is served at all (CoinGecko's terms, §6.1.1: a cache refreshed at least daily). */
+export const MAX_SERVED_SECONDS = 86_400n;
 
 export type PriceDeps = {
   /** null when CoinGecko is turned off (API_COINGECKO=off). */
@@ -75,6 +78,7 @@ export function priceBody(p: DisplayPrice, now: bigint) {
     fetched_at: p.fetchedAt,
     stale: now - p.publishedAt > STALE_SECONDS,
     attribution: p.source === "coingecko" ? "Powered by CoinGecko" : "Pyth Network SOL/USD",
+    attribution_url: p.source === "coingecko" ? "https://www.coingecko.com/en/api" : null,
     use: "display only; the program charges at the Pyth price it reads on-chain",
   };
 }

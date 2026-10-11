@@ -1,12 +1,20 @@
 /**
  * Purpose: brot-rpc's limits (TP §3.5; Sprint 08), all in memory, none written to a disk or a log: whose request it is
- *          (Cloudflare's `cf-connecting-ip`, an IPv6 address by its /64, since one host holds a whole /64), a weighted
- *          token bucket per client, the daily credit budget the relay may spend upstream (counted per UTC day), and
- *          a short cache of answers. Idle buckets and expired answers are dropped, so the maps stay small. Pure but for
- *          the clock it is given.
- * Version: 0.1.0
+ *          (Cloudflare's `cf-connecting-ip`, an IPv6 address by its /64, since one host holds a whole /64, and by its
+ *          /48 for a second, wider bucket), a weighted token bucket per client, the daily credit budget the relay may
+ *          spend upstream (counted per UTC day, a tenth kept for the signing path), and
+ *          a short cache of answers. A sweep every ten seconds drops a bucket idle for 50 s or full again, and expired
+ *          answers, so a visitor's IP stays in memory about a minute after its last call (the legal review, R1). Pure but
+ *          for the clock it is given.
+ * Version: 0.2.0 (the Sprint 08 legal review, R1: the timed sweep; the security review, M3: the /48, the reserve)
  * Sprint:  08 (indexer, API, relay and points)
  */
+
+/** An IPv6 address's /48, the size one customer can hold, for a second bucket (the security review, M3); null for IPv4. */
+export function areaKey(ip: string | null | undefined): string | null {
+  const key = clientKey(ip);
+  return key.endsWith("::/64") ? `${key.split(":").slice(0, 3).join(":")}::/48` : null;
+}
 
 /** A client's key: an IPv4 address as it is, an IPv6 one cut to its first 64 bits; "direct" with no header. */
 export function clientKey(ip: string | null | undefined): string {
@@ -28,7 +36,9 @@ export function clientKey(ip: string | null | undefined): string {
     .join(":")}::/64`;
 }
 
-export type Limiter = { take(key: string, weight: number): boolean; size(): number };
+export type Limiter = { take(key: string, weight: number): boolean; size(): number; sweep(): void };
+/** A bucket idle this long is dropped by the sweep, whatever it holds: an IP stays about a minute after its last call. */
+export const IDLE_MS = 50_000;
 
 /** `ratePerSecond` credits earned per second, at most `burst` held; an idle client's bucket is dropped once full. */
 export function createLimiter(o: { ratePerSecond: number; burst: number; now: () => number }): Limiter {
@@ -36,10 +46,12 @@ export function createLimiter(o: { ratePerSecond: number; burst: number; now: ()
   let calls = 0;
   const prune = (now: number) => {
     for (const [key, b] of buckets)
-      if (b.tokens + ((now - b.at) / 1_000) * o.ratePerSecond >= o.burst) buckets.delete(key);
+      if (now - b.at >= IDLE_MS || b.tokens + ((now - b.at) / 1_000) * o.ratePerSecond >= o.burst) buckets.delete(key);
   };
   return {
     size: () => buckets.size,
+    /** Run every 10 s by main.ts (the legal review, R1), as the landing's limiter is. */
+    sweep: () => prune(o.now()),
     take(key, weight) {
       const now = o.now();
       if (++calls % 1_000 === 0) prune(now);
@@ -55,7 +67,10 @@ export function createLimiter(o: { ratePerSecond: number; burst: number; now: ()
   };
 }
 
-export type Budget = { spend(weight: number): boolean; left(): number };
+export type Budget = { spend(weight: number, signing?: boolean): boolean; left(): number };
+/** The share of the day's budget kept for the signing path (send, simulate, statuses, heights, blockhashes): reads
+ * alone can never spend it, so a flood of reads still leaves bakers able to sign and the guard able to watch (M3). */
+export const SIGNING_RESERVE = 0.1;
 
 /** At most `daily` credits per UTC day, every client together; the count starts again at midnight UTC. */
 export function createBudget(o: { daily: number; now: () => number }): Budget {
@@ -70,21 +85,30 @@ export function createBudget(o: { daily: number; now: () => number }): Budget {
   };
   return {
     left: () => (roll(), Math.max(0, o.daily - spent)),
-    spend(weight) {
+    spend(weight, signing = false) {
       roll();
-      if (spent + weight > o.daily) return false;
+      const ceiling = signing ? o.daily : o.daily * (1 - SIGNING_RESERVE);
+      if (spent + weight > ceiling) return false;
       spent += weight;
       return true;
     },
   };
 }
 
-export type Cache = { get(key: string): unknown; set(key: string, value: unknown, ms: number): void; size(): number };
+export type Cache = {
+  get(key: string): unknown;
+  set(key: string, value: unknown, ms: number): void;
+  size(): number;
+  sweep(): void;
+};
 
 export function createCache(now: () => number, max = 10_000): Cache {
   const entries = new Map<string, { value: unknown; until: number }>();
   return {
     size: () => entries.size,
+    sweep() {
+      for (const [k, e] of entries) if (e.until <= now()) entries.delete(k);
+    },
     get(key) {
       const hit = entries.get(key);
       if (!hit) return undefined;

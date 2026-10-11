@@ -116,7 +116,13 @@ describe("the display price", () => {
       stale: true,
       attribution: "Powered by CoinGecko",
     });
+    expect(answer.price.attribution_url).toBe("https://www.coingecko.com/en/api");
     expect((await ok(new Request("http://api.test/api/v1/price?vs=eur"))).status).toBe(400);
+    // No price older than a day is served (CoinGecko's terms, §6.1.1; the legal review, F3).
+    const late = createHandler(store, { corsOrigin: "*", cluster: "devnet", price: fresh, now: () => NOW + 86_400n });
+    expect(await body(await late(new Request("http://api.test/api/v1/price")))).toEqual({
+      error: { code: "no_recent_price", message: "no price of the last day" },
+    });
     const health = await body(await ok(new Request("http://api.test/api/v1/health")));
     expect([health.price_source, health.price_error]).toEqual(["coingecko", "pyth:NoAccount"]);
   });

@@ -8,10 +8,12 @@
  * Version: 0.1.0
  * Sprint:  08 (indexer, API, relay and points)
  */
+import { timingSafeEqual } from "node:crypto";
+
 import { cacheable, isProgramDataSlice, served, servedProgramData, type AccountInfo } from "./accounts";
 import { checkParams, METHODS } from "./allowlist";
 import type { RelayConfig } from "./config";
-import { clientKey, type Budget, type Cache, type Limiter } from "./limits";
+import { areaKey, clientKey, type Budget, type Cache, type Limiter } from "./limits";
 import { checkTransaction } from "./transaction";
 
 export type Upstream = (body: string) => Promise<{ status: number; text: string }>;
@@ -21,6 +23,8 @@ export type RelayDeps = {
   programData: string;
   upstream: Upstream;
   limiter: Limiter;
+  /** A wider bucket per IPv6 /48, so one customer's many /64s cannot each start full (the security review, M3). */
+  area?: Limiter;
   budget: Budget;
   cache: Cache;
   /** Counts by outcome, for the relay's own per-minute log line; never an IP or a parameter. */
@@ -30,6 +34,13 @@ export type RelayDeps = {
 type Id = string | number | null;
 export const CODE = { parse: -32700, invalid: -32600, method: -32601, params: -32602, upstream: -32000 } as const;
 export const REFUSED = { rate: -32001, budget: -32002, program: -32003, country: -32004 } as const;
+
+/** Equal strings in a time that does not depend on where they differ. */
+const same = (a: string, b: string) => {
+  const x = new TextEncoder().encode(a);
+  const y = new TextEncoder().encode(b);
+  return x.length === y.length && timingSafeEqual(x, y);
+};
 
 export function createRelay(d: RelayDeps) {
   const headers = (extra: Record<string, string> = {}) => ({
@@ -44,8 +55,29 @@ export function createRelay(d: RelayDeps) {
     return reply({ jsonrpc: "2.0", id, error: { code, message } }, status);
   };
 
+  const relay = handler(d, reply, error, headers);
+  // Any throw is a JSON-RPC error with no detail, never a stack trace (the security review, M1).
+  return async function safe(request: Request): Promise<Response> {
+    try {
+      return await relay(request);
+    } catch {
+      return error(null, -32603, "internal error", 500, "internal");
+    }
+  };
+}
+
+function handler(
+  d: RelayDeps,
+  reply: (body: unknown, status?: number) => Response,
+  error: (id: Id, code: number, message: string, status?: number, outcome?: string) => Response,
+  headers: (extra?: Record<string, string>) => Record<string, string>,
+) {
   return async function relay(request: Request): Promise<Response> {
     const url = new URL(request.url);
+    // Cloudflare adds the tunnel's secret to every /rpc request; a local caller without it cannot pose as a visitor and
+    // forge cf-connecting-ip or cf-ipcountry (the security review, M4). Unset on a development machine.
+    if (d.config.tunnelSecret && !same(request.headers.get("x-brot-tunnel") ?? "", d.config.tunnelSecret))
+      return error(null, CODE.invalid, "not through the site", 403, "untunnelled");
     if (request.method === "GET" && url.pathname === "/healthz")
       return reply({ status: "ok", budget_left: d.budget.left(), cached: d.cache.size(), clients: d.limiter.size() });
     if (request.method === "OPTIONS" && d.config.corsOrigin)
@@ -88,7 +120,9 @@ export function createRelay(d: RelayDeps) {
       if (tx.joinsOrOpens && d.config.geoBlock.has(country))
         return error(id, REFUSED.country, "joining and opening campaigns is not available from this country");
     }
-    if (!d.limiter.take(clientKey(request.headers.get("cf-connecting-ip")), spec.weight))
+    const ip = request.headers.get("cf-connecting-ip");
+    const area = areaKey(ip);
+    if ((area !== null && d.area && !d.area.take(area, spec.weight)) || !d.limiter.take(clientKey(ip), spec.weight))
       return error(id, REFUSED.rate, "too many requests; try again in a moment", 429, "rate");
     const key = spec.kind === "account" || spec.kind === "rent" ? `${call.method}:${JSON.stringify(params)}` : null;
     const hit = key && !programData ? d.cache.get(key) : undefined;
@@ -96,7 +130,7 @@ export function createRelay(d: RelayDeps) {
       d.count?.("cached");
       return reply({ jsonrpc: "2.0", id, result: hit });
     }
-    if (!d.budget.spend(spec.weight))
+    if (!d.budget.spend(spec.weight, spec.signing === true))
       return error(id, REFUSED.budget, "the relay's daily budget is spent", 503, "budget");
     let up: { status: number; text: string };
     try {

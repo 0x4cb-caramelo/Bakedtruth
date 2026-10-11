@@ -3,7 +3,8 @@
  *          ComputeBudget and Lighthouse at its top level, never a System transfer or a program named through a lookup
  *          table; a join or an opening from a country on GEO_BLOCK_COUNTRIES is refused, and with the list empty, the
  *          default for now, nothing is (the founder, 2026-10-11); the token bucket per IP and per IPv6 /64 refills with
- *          time; the daily budget stops the relay's spending, and a cached answer spends none; the settings' refusals.
+ *          time, and the sweep forgets an idle client within a minute (the legal review, R1); the daily budget stops the
+ *          relay's spending, and a cached answer spends none; the settings' refusals.
  *          Filter: `bun test services/rpc`.
  * Version: 0.1.0
  * Sprint:  08 (indexer, API, relay and points)
@@ -19,7 +20,7 @@ import {
 } from "@brot/sdk/read";
 
 import { loadRelayConfig } from "../src/config";
-import { clientKey, createBudget, createLimiter } from "../src/limits";
+import { clientKey, createBudget, createCache, createLimiter, IDLE_MS } from "../src/limits";
 import { REFUSED } from "../src/relay";
 import { checkTransaction } from "../src/transaction";
 import { ix, setup, wire } from "./kit";
@@ -79,6 +80,23 @@ describe("brot-rpc's gates", () => {
     expect([bucket.take("a", 2), bucket.take("a", 1)]).toEqual([true, false]);
   });
 
+  test("the sweep forgets a client about a minute after its last call, and expired answers with it", () => {
+    const clock = { now: 0 };
+    const limiter = createLimiter({ ratePerSecond: 0.001, burst: 1_000, now: () => clock.now });
+    limiter.take("203.0.113.7", 900); // far from full again: only time drops it
+    clock.now = IDLE_MS - 1;
+    limiter.sweep();
+    expect(limiter.size()).toBe(1);
+    clock.now = IDLE_MS;
+    limiter.sweep();
+    expect(limiter.size()).toBe(0);
+    const cache = createCache(() => clock.now);
+    cache.set("k", 1, 1_500);
+    clock.now += 1_500;
+    cache.sweep();
+    expect(cache.size()).toBe(0);
+  });
+
   test("the daily budget stops the relay's spending; a cached answer spends nothing; a new UTC day starts over", async () => {
     const r = setup({ env: { RELAY_DAILY_BUDGET: "2" }, answer: () => ({ result: 1 }) });
     expect((await r.call("getMinimumBalanceForRentExemption", [96])).status).toBe(200);
@@ -86,11 +104,17 @@ describe("brot-rpc's gates", () => {
     expect((await r.call("getBlockHeight", [])).status).toBe(200);
     const spent = await r.call("getBlockHeight", []);
     expect([spent.status, spent.json.error.code]).toEqual([503, REFUSED.budget]);
+    // A tenth of the day is kept for the signing path: reads alone stop at nine of ten (the security review, M3).
     const day = { now: 86_400_000 - 1 };
-    const budget = createBudget({ daily: 1, now: () => day.now });
-    expect([budget.spend(1), budget.spend(1)]).toEqual([true, false]);
+    const budget = createBudget({ daily: 10, now: () => day.now });
+    expect([budget.spend(9), budget.spend(1), budget.spend(1, true), budget.spend(1, true)]).toEqual([
+      true,
+      false,
+      true,
+      false,
+    ]);
     day.now += 1;
-    expect(budget.spend(1)).toBe(true);
+    expect(budget.spend(9)).toBe(true);
   });
 
   test("the settings: an upstream is needed, the bind is loopback, a country code is two letters", () => {
