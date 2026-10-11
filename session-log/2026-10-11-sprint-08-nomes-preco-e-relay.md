@@ -46,6 +46,18 @@ O `E2E_RELAY=1` põe o relay entre o navegador e a cadeia de teste, em todas as 
   então o corte caía na porta errada. O executor agora passa o endereço para eles.
 - As outras quatro falhas eram consequência da segunda: o teste deixou o preço velho para os seguintes.
 
+Depois das correções, o teste sem o relay falhou uma cena da Sprint 12, a do "Receive" da parte do criador. O
+pagamento tinha saído, mas a página já mostrava "Sent to your wallet." em vez da linha de sucesso que a cena esperava.
+A linha de sucesso só dura até a página reler a cadeia; direto na cadeia local, essa releitura pode terminar antes de
+o teste olhar. É uma corrida que o teste quase sempre ganha: a cena tinha passado nas seis rodadas anteriores, quatro
+delas sem o relay. A cena agora confere o que fica: a parte paga e nenhum botão. O código do site não mudou, e o CI
+não roda o teste na web.
+
+Relendo os passos do servidor, vi que o `/healthz` do relay respondia 403 assim que o segredo do túnel entrava: o
+passo 6 do `deploy/vps/README.md` não passaria sem digitar o segredo no terminal, onde ele ficaria no histórico. Agora
+o `/healthz` responde no servidor sem o segredo, só com contagens, e nunca a um pedido que veio pelo Cloudflare (que
+sempre traz o `cf-connecting-ip`).
+
 ## As revisões
 
 - **A jurídica e de privacidade** (`docs/legal/2026-10-11-sprint-08-legal-review.md`) leu os termos do CoinGecko de

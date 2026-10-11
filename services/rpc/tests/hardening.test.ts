@@ -1,9 +1,10 @@
 /**
  * Purpose: the fixes of the Sprint 08 security review, each tested: a hostile option value is refused, never converted
- *          (M1, L1), and any throw is a JSON-RPC error with no detail; the tunnel's secret header (M4); one IPv6 /48
- *          bounded as eight clients, whatever its /64s (M3); the upstream URL read from a credential file, which wins
- *          over the variable (M6); no "*" CORS origin (L3); and, in the read API, a state named after an Object member
- *          refused as a bad query, any throw answered as a JSON 500 (M2). Filter: `bun test services/rpc`.
+ *          (M1, L1), and any throw is a JSON-RPC error with no detail; the tunnel's secret header (M4), with the
+ *          server's own health check exempt and closed to visitors; one IPv6 /48 bounded as eight clients, whatever its
+ *          /64s (M3); the upstream URL read from a credential file, which wins over the variable (M6); no "*" CORS
+ *          origin (L3); and, in the read API, a state named after an Object member refused as a bad query, any throw
+ *          answered as a JSON 500 (M2). Filter: `bun test services/rpc`.
  * Version: 0.1.0
  * Sprint:  08 (indexer, API, relay and points)
  */
@@ -67,6 +68,11 @@ describe("the security review's fixes", () => {
     expect((await r.call("getBlockHeight", [], { "x-brot-tunnel": "s".repeat(39) + "t" })).status).toBe(403);
     expect((await r.call("getBlockHeight", [], { "x-brot-tunnel": SECRET })).status).toBe(200);
     expect(r.calls.length).toBe(1);
+    // The server's own health check needs no secret; a request through the tunnel never gets the counts.
+    const health = (headers: Record<string, string> = {}) =>
+      r.relay(new Request("http://relay.test/healthz", { headers }));
+    expect((await health()).status).toBe(200);
+    expect((await health({ "cf-connecting-ip": "203.0.113.7", "x-brot-tunnel": SECRET })).status).toBe(405);
     expect(() => loadRelayConfig({ RELAY_UPSTREAM_URL: "https://u.test", RELAY_TUNNEL_SECRET: "short" })).toThrow("32");
   });
 

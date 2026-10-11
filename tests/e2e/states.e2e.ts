@@ -9,7 +9,7 @@
  */
 import { expect, test, type Page } from "@playwright/test";
 
-import { exactSol } from "../../app/features/campaign-page/copy-states";
+import { exactSol, OPENER } from "../../app/features/campaign-page/copy-states";
 import { control, openCampaign } from "./helpers";
 
 type Made = { id: string; address: string };
@@ -66,7 +66,10 @@ test.describe("campaign states", () => {
     const mine = page.locator("section[aria-labelledby='mine-title']");
     await expect(mine).toContainText("Kept in the vault for you");
     await mine.getByRole("button", { name: `Receive ${exactSol(BigInt(creator.reserved))} SOL` }).click();
-    await expect(mine).toContainText(`${exactSol(BigInt(creator.reserved))} SOL received, now in your wallet.`);
+    // The success line lasts only until the page reads the chain again, which can beat this check on the local chain;
+    // the paid share, with no button left, is what stays.
+    await expect(mine).toContainText(`${OPENER.share(exactSol(BigInt(creator.reserved)))} · ${OPENER.sent}`);
+    await expect(mine.getByRole("button", { name: /^Receive / })).toHaveCount(0);
 
     const { received } = await control<{ received: string }>("/received");
     expect(BigInt(received)).toBe(BigInt(baker.expected) + BigInt(creator.reserved));

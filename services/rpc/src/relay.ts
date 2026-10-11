@@ -4,7 +4,8 @@
  *          transaction holds and, for a join or an opening, the visitor's country (CF-IPCountry against the configured
  *          list, empty by default), the client's token bucket, the short cache, the daily budget — and only then the
  *          upstream, whose account answers are cut by owner (accounts.ts). Refusals are JSON-RPC errors with no detail
- *          of the upstream; no IP, key or parameter is logged or kept beyond the in-memory limits. GET /healthz.
+ *          of the upstream; no IP, key or parameter is logged or kept beyond the in-memory limits. GET /healthz, on the
+ *          server only.
  * Version: 0.1.0
  * Sprint:  08 (indexer, API, relay and points)
  */
@@ -74,12 +75,14 @@ function handler(
 ) {
   return async function relay(request: Request): Promise<Response> {
     const url = new URL(request.url);
+    // The operator's check on the server, counts only, so it needs no secret; never a visitor's, since Cloudflare sets
+    // cf-connecting-ip on every request through the tunnel.
+    if (request.method === "GET" && url.pathname === "/healthz" && !request.headers.has("cf-connecting-ip"))
+      return reply({ status: "ok", budget_left: d.budget.left(), cached: d.cache.size(), clients: d.limiter.size() });
     // Cloudflare adds the tunnel's secret to every /rpc request; a local caller without it cannot pose as a visitor and
     // forge cf-connecting-ip or cf-ipcountry (the security review, M4). Unset on a development machine.
     if (d.config.tunnelSecret && !same(request.headers.get("x-brot-tunnel") ?? "", d.config.tunnelSecret))
       return error(null, CODE.invalid, "not through the site", 403, "untunnelled");
-    if (request.method === "GET" && url.pathname === "/healthz")
-      return reply({ status: "ok", budget_left: d.budget.left(), cached: d.cache.size(), clients: d.limiter.size() });
     if (request.method === "OPTIONS" && d.config.corsOrigin)
       return new Response(null, {
         status: 204,

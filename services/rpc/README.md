@@ -54,8 +54,9 @@ body too large (HTTP 413), `-32601` a method not relayed, `-32602` arguments or 
 requests (HTTP 429), `-32002` the daily budget spent (HTTP 503), `-32003` a program the relay does not carry, `-32004`
 a join or an opening from a blocked country, `-32000` the network busy or not answering (HTTP 503 or 502), `-32603`
 anything that threw (HTTP 500), with no detail of the upstream and never a stack trace (the server runs with
-`development: false`); a call without the tunnel's header, HTTP 403. The upstream's own JSON-RPC errors pass as they are. `GET /healthz`: the budget left, the
-cache's and the buckets' sizes.
+`development: false`); a call without the tunnel's header, HTTP 403. The upstream's own JSON-RPC errors pass as they
+are. `GET /healthz`, the operator's check on the server: the budget left, the cache's and the buckets' sizes. It needs
+no tunnel header, and a request that came through Cloudflare (`cf-connecting-ip` set) never gets it.
 
 **Privacy.** The relay keeps the client's IP only as a bucket's key, in memory, and drops an idle bucket; it logs one
 line a minute with counts by outcome and the budget left, never the upstream URL, an IP, a header or a parameter.

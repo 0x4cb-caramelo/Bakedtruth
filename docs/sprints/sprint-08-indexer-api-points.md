@@ -212,6 +212,13 @@ and the JSON Schemas, the `.env.example` files, `CODEMAP.md`.
 - **The web smoke through the relay** (`E2E_RELAY=1`): the first run found a real defect, a cached `GlobalConfig` that
   kept showing a pause that had ended after a reload, and a harness bug; with both fixed, the whole smoke passes
   through the relay, as without it.
+- **A race in a Sprint 12 scene**, seen once in the smoke without the relay: after "Receive", the success line lasts
+  only until the page reads the chain again, and on the local chain that read can finish before the check looks. The
+  scene now checks what stays, the share paid and no button left (`tests/e2e/states.e2e.ts`). CI does not run the web
+  smoke, so it never failed there.
+- **The relay's health check** answered 403 once the tunnel's secret was set, so step 6 of the server procedure could
+  not pass without typing the secret. `GET /healthz` now answers on the server without it, and never a request that
+  came through Cloudflare (`cf-connecting-ip` set).
 
 **Reviews:** the legal and privacy review (`docs/legal/2026-10-11-sprint-08-legal-review.md`) turned CoinGecko off by
 default and asked for the relay's timed sweep (R1), both applied; its policy text waits for the day the site moves to

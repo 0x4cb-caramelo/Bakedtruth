@@ -40,7 +40,9 @@ recomendado (1a a 12a).
     cerca de um minuto; um orçamento diário com uma reserva para assinar; um cache curto só de contas de outros
     programas; o bloqueio por país construído e vazio, sem bloquear ninguém (o Ronaldo, 11/10); um cabeçalho secreto
     que o túnel acrescenta; nada de IP nem de URL no log. O teste na web inteiro passa com o relay no meio
-    (`E2E_RELAY=1`), e foi assim que um defeito do cache apareceu e saiu.
+    (`E2E_RELAY=1`), e foi assim que um defeito do cache apareceu e saiu. Sem o relay, uma cena da Sprint 12 falhou
+    uma vez numa corrida (a linha de sucesso do "Receive" some quando a página relê a cadeia); ela agora confere o
+    resultado, a parte paga e nenhum botão.
   - **As revisões jurídica e de segurança, aplicadas.** O relatório jurídico ficou guardado para o advogado
     (`docs/legal/2026-10-11-sprint-08-legal-review.md`), com o texto da privacidade para o dia em que o site passar a
     usar o relay. A de segurança achou um caminho para a API de leitura responder com a pilha do erro
