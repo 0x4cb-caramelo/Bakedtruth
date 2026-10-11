@@ -1,9 +1,10 @@
 /**
  * Purpose: the creation box's one button and its total (spec 3.12), at the foot of the preview and in the phone's
  *          sticky bar: "Use Installed Wallet" while no wallet is connected; the first thing that still stops the
- *          opening, as a disabled button, with the others listed under it; or "Review and sign". Nothing here signs:
- *          the review and the signature are use-open-flow.ts's, behind the SDK's preparation (A-3).
- * Version: 0.1.0
+ *          opening, as a disabled button, with the others listed under it; or "Review and sign", only for a verdict of
+ *          the draft on screen. Nothing here signs: the review and the signature are use-open-flow.ts's, behind the
+ *          SDK's preparation (A-3). The total is "–" until the opening is priced.
+ * Version: 0.2.0 (the Sprint 19 reviews: the opening's own words, the verdict of the draft on screen)
  * Sprint:  19 (site: open a campaign)
  */
 "use client";
@@ -13,11 +14,14 @@ import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PANEL } from "../entry/copy";
 import { readyToReview, type BoxCheck } from "./check";
-import { ACTION, MONEY } from "./copy";
+import { ACTION, MONEY } from "./copy-money";
+import type { Draft } from "./draft";
 import { exactSol } from "./quote";
 
 export function OpenAction(p: {
   check: BoxCheck | null;
+  /** The draft on screen: the button acts only on a verdict computed for it. */
+  draft: Draft;
   connected: boolean;
   wallet: { installed: boolean; connecting: boolean; connectInstalled: () => void };
   preparing: boolean;
@@ -26,7 +30,7 @@ export function OpenAction(p: {
   bar?: boolean;
 }) {
   const issues = (p.check?.issues ?? []).filter((i) => i.place !== "wallet");
-  const ok = p.check !== null && readyToReview(p.check);
+  const ok = p.check !== null && readyToReview(p.check, p.draft);
   const total = p.check?.total;
   const button = !p.connected ? (
     <Button wide={!p.bar} disabled={!p.wallet.installed || p.wallet.connecting} onClick={p.wallet.connectInstalled}>
@@ -34,7 +38,7 @@ export function OpenAction(p: {
     </Button>
   ) : (
     <Button wide={!p.bar} disabled={!ok || p.preparing} onClick={p.onReview}>
-      {p.preparing ? PANEL.preparing : ok ? ACTION.review : (p.check?.issues[0]?.tag ?? ACTION.review)}
+      {p.preparing ? ACTION.preparing : ok ? ACTION.review : (p.check?.issues[0]?.tag ?? ACTION.review)}
     </Button>
   );
   if (p.bar) {

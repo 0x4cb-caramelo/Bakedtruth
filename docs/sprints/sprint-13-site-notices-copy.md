@@ -160,8 +160,8 @@ the site with both services on. The exit criteria X2 are met here.
       the web smoke.
 - [ ] **A full devnet cycle through the site, with both services on:** a non-team wallet opens a paid campaign at
       `/abrir` (19), two wallets join it through the site, the keeper resolves and pays, and the result shows in "my
-      entries" and on the leaderboard. **Waiting:** `/abrir` is Sprint 19 and is not built; every devnet write is the
-      founder's; on devnet the keeper only resolves and does not pay (the founder's answer); the leaderboard needs the
+      entries" and on the leaderboard. **Waiting:** `/abrir` was built in Sprint 19 (2026-10-10, in review); every devnet
+      write is the founder's; on devnet the keeper only resolves and does not pay (the founder's answer); the leaderboard needs the
       read API redeployed. The same cycle runs end to end in the web smoke against the program in LiteSVM, opening by
       script.
 - [ ] **X2 is met and recorded:** X2.1 (MWA chain equals `/api/v1/health.cluster`); X2.2 (the wallet in-app browser
@@ -171,8 +171,9 @@ the site with both services on. The exit criteria X2 are met here.
       "X2.1: the wallet's chain equals the API's cluster"); X2.3, no chat route and no `OPENROUTER` in `app/`; X2.4, the
       whole web smoke passes with the site built and served by Bun 1.4.2 on the development machine (28 passed, 16
       skipped by design, on the final code), not yet in staging, which stays with the deferred server work; X2.5, the headers and the CSP are checked on the built site in the web smoke.
-      **X2.2 waits** for Phantom and Solflare on real Android and iOS devices, and for `/abrir` (Sprint 19); Sprint
-      11's Phantom entry stays "reported, not verified".
+      **X2.2 waits** for Phantom and Solflare on real Android and iOS devices; `/abrir` and the checklist, opening
+      included, came with Sprint 19 (`docs/technical/wallet-browser-checklist.md`); Sprint 11's Phantom entry stays
+      "reported, not verified".
 - [x] The `privacy-audit` skill answers the nine questions for the leaderboard (wallet addresses ranked in public) and
       for the report channel, before closure (gate 5), with what Cloudflare logs about visitors read and recorded (TP
       §14.4 C13 [AC]). **Done:** TP §8.2 (both PASS with conditions before going public: the live `/privacy`

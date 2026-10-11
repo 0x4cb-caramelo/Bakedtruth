@@ -1,10 +1,11 @@
 /**
  * Purpose: the creation box's prefill (proposal §3.8; TP §3.6 "Links"): `/abrir` accepts a template id and slot values
  *          in the URL — `t` (or `template`), `kind`, `feed` (a symbol such as BTC/USD, or the feed id in hex), `dir`,
- *          `target`, `days` (3 to 90) or `deadline` (Unix seconds), `epoch`, `account` and `usd` — each checked against
- *          its slot's own form, anything else dropped. A prefilled box is labelled as such and never signs anything: a
- *          link only fills the draft, and "Review and sign" waits for the creator's click.
- * Version: 0.1.0
+ *          `target`, `days` (3 to 90) or `deadline` (Unix seconds), `epoch` and `account`, each checked against its
+ *          field's own form, anything else dropped. The amount is never read from a link: it stays US$500 until the
+ *          creator picks another. A prefilled box is labelled as such and never signs anything: a link only fills the
+ *          draft, and "Review and sign" waits for the creator's click.
+ * Version: 0.2.0 (the Sprint 19 adversarial review, M6: no amount from a link)
  * Sprint:  19 (site: open a campaign)
  */
 import { isAddress } from "@solana/kit";
@@ -19,19 +20,7 @@ export type Query = Record<string, string | string[] | undefined>;
 export type Prefilled = { draft: Draft; fromLink: boolean };
 
 /** The parameters a link may carry; any one of them present makes the box say it came from a link. */
-export const PREFILL_KEYS = [
-  "t",
-  "template",
-  "kind",
-  "feed",
-  "dir",
-  "target",
-  "days",
-  "deadline",
-  "epoch",
-  "account",
-  "usd",
-];
+export const PREFILL_KEYS = ["t", "template", "kind", "feed", "dir", "target", "days", "deadline", "epoch", "account"];
 
 const KINDS: readonly KindName[] = ["price", "burn", "lock", "pool", "stake"];
 const one = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value)?.trim();
@@ -67,7 +56,6 @@ export function prefillOf(query: Query): Prefilled {
   if (epoch && /^\d{1,19}$/.test(epoch)) draft.epoch = epoch;
   const account = one(query.account);
   if (kind !== "price" && account && isAddress(account)) draft.account = account;
-  const usd = one(query.usd);
-  if (usd && /^\d{1,9}$/.test(usd)) draft.usd = usd;
+  // The amount is never taken from a link: the creator picks what they pay (the adversarial review, M6).
   return { draft, fromLink };
 }

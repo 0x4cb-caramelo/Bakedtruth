@@ -46,7 +46,7 @@ export async function connectBox(page: Page) {
  */
 export async function review(page: Page) {
   await reviewButton(page).click();
-  const recent = heading(page, "You opened a campaign a moment ago");
+  const recent = heading(page, "You opened a campaign recently");
   const summary = heading(page, "Check before you sign");
   await expect(recent.or(summary)).toBeVisible();
   if (await recent.isVisible()) await sheet(page).getByRole("button", { name: "Open a new one" }).click();

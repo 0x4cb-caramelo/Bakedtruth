@@ -3,19 +3,19 @@
  *          then the kind's typed slots, each a labelled field and never an inline blank: for a price, the listed Pyth
  *          feeds with their state read live and the direction; for the other kinds, the account slot; the target in
  *          the kind's unit with the value now; the epoch on the epoch kinds; and the deadline, in the visitor's own time
- *          with its UTC moment and when entries close. Each slot shows its own messages.
- * Version: 0.1.0
+ *          with its UTC moment and when entries close. Each slot shows its own messages; the help and the gaps are in the
+ *          kind's own words and unit.
+ * Version: 0.2.0 (the Sprint 19 copy review: help by unit, the gaps' words)
  * Sprint:  19 (site: open a campaign)
  */
 "use client";
 
 import { useId } from "react";
-import { CAMPAIGN_TEMPLATE_VERSION } from "@brot/sdk/read";
 
 import { Card } from "@/components/ui/card";
 import { Segmented } from "@/components/ui/segmented";
 import type { SentencePart } from "../campaigns/sentence";
-import { SLOTS, BOX } from "./copy";
+import { BOX, KIND_WORDS, SLOTS } from "./copy";
 import { issuesAt, type BoxCheck } from "./check";
 import { AccountSlot } from "./account-slot";
 import { DeadlineSlot } from "./deadline-slot";
@@ -26,7 +26,9 @@ import { templateOf } from "./kinds";
 import type { KnownName } from "./names";
 import type { FeedOption, SlotRead } from "./preview";
 
-const Sentence = ({ parts }: { parts: SentencePart[] }) => (
+type Gap = Exclude<SentencePart, string>["slot"];
+
+const Sentence = ({ parts, gap }: { parts: SentencePart[]; gap: (slot: Gap) => string }) => (
   <p className="font-display text-xl font-bold leading-snug" aria-live="polite">
     {parts.map((p, i) =>
       typeof p === "string" ? (
@@ -37,7 +39,7 @@ const Sentence = ({ parts }: { parts: SentencePart[] }) => (
         </b>
       ) : (
         <span key={i} className="rounded-sm border border-dashed border-line-strong px-1.5 text-base text-muted">
-          {p.slot}
+          {gap(p.slot)}
         </span>
       ),
     )}
@@ -64,18 +66,17 @@ export function DetailsSection(p: {
   const at = (place: Parameters<typeof issuesAt>[1]) => (check ? issuesAt(check, place) : []);
   const below = draft.kind === "burn" || (draft.kind === "price" && draft.direction === "below");
   const slotSaysWhy = p.slotRead.status === "read" && p.slotRead.state.state !== "ok";
+  // The gaps in the kind's own words: "token mint", "DAMM v2 pool", "stake pool", "vote account" (S19).
+  const gap = (slot: Gap) => (slot === "account" ? KIND_WORDS[draft.kind].phrase : SLOTS.gap[slot]);
   return (
     <Card as="section" aria-labelledby={`${id}-h`} className="space-y-4 p-4 [grid-area:details]">
       <h2 id={`${id}-h`} className="flex flex-wrap items-baseline gap-x-2 font-display text-2xl font-bold">
         <span className="text-muted">2</span>
         {BOX.details}
-        <span className="font-sans text-xs font-normal text-muted">
-          {BOX.template(t.id, CAMPAIGN_TEMPLATE_VERSION)}
-        </span>
       </h2>
       <div className="rounded-sm bg-raised p-3">
         <span className="text-xs font-medium text-muted">{SLOTS.sentence}</span>
-        <Sentence parts={p.parts} />
+        <Sentence parts={p.parts} gap={gap} />
       </div>
       {draft.kind === "price" ? (
         <>
@@ -131,8 +132,8 @@ export function DetailsSection(p: {
           className="min-h-11 w-full rounded-sm border border-field-line bg-bg px-3 py-2.5 text-base text-text tabular-nums aria-[invalid=true]:border-error"
         />
         <p id={`${id}-target-help`} className="text-xs text-muted">
-          {p.valueNow ? `${SLOTS.now(p.valueNow, below)}. ` : ""}
-          {SLOTS.targetHelp}
+          {p.valueNow ? `${SLOTS.now(p.valueNow, below)} ` : ""}
+          {SLOTS.targetHelp[draft.kind]}
         </p>
         <IssueList issues={at("target")} />
       </div>

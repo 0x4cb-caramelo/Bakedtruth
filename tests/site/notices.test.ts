@@ -5,24 +5,33 @@
  *          one-sided notices before signing; the creator notice on a burn campaign's page and not on a price
  *          campaign's; the review rule and "Waiting for payout" in their states; BP-5's line on How it works; L-09's on
  *          the leaderboard; since Sprint 19, the creation box's preview (the creator notice on a burn campaign and not on
- *          a price one, the no-entry rule, no taking it back). No notice promises an automatic payout or a time. The web
- *          smoke checks the same on the built site. Filter: `bun test tests/ -t "every mandatory notice is on its screen"`.
- * Version: 0.2.0 (Sprint 19: the creation box)
+ *          a price one, with who else can move the number, the no-entry rule, no taking it back) and its review sheet of
+ *          a prepared opening (every notice before signing; a team key's free opening without the prize's). No notice
+ *          promises an automatic payout or a time. The web smoke checks the same on the built site.
+ *          Filter: `bun test tests/ -t "every mandatory notice is on its screen"`.
+ * Version: 0.3.0 (Sprint 19: the creation box and its review sheet)
  * Sprint:  13 (site: ranking, notices and copy); 19
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { createSolanaRpc } from "@solana/kit";
+import { bytesToHex } from "@brot/sdk/read";
 
 import { MANDATORY_NOTICES } from "../../app/features/notices/registry";
 import { loadCampaignPage, type PageData } from "../../app/features/campaign-page/load";
 import { proofOf } from "../../app/features/campaign-page/proof";
+import { PREVIEW } from "../../app/features/open-campaign/copy";
+import { RETURNS_DEVNET_TEAM } from "../../app/features/open-campaign/copy-money";
 import { EMPTY_DRAFT } from "../../app/features/open-campaign/draft";
 import { previewFacts } from "../../app/features/open-campaign/preview";
+import { prepareOpening } from "../../app/features/open-campaign/submit";
+import { BTC_PRICE, newId } from "../brot/flows";
 import { openingWorld, type OpeningWorld } from "../brot/opening";
 import * as P from "../brot/program";
 import * as R from "../brot/readers";
 import { anyAddress, campaignOn } from "../brot/resolve-support";
+import { now } from "../brot/setup";
+import { ready } from "../sdk/prepared";
 import { startFakeChain, type FakeChain } from "./fake-chain";
 import { injectState } from "./state-world";
 
@@ -61,6 +70,7 @@ beforeAll(async () => {
     HowPage: (await import(site("features/how/how-page.tsx"))).HowPage,
     LeaderboardPage: (await import(site("features/leaderboard/leaderboard.tsx"))).LeaderboardPage,
     PreviewSection: (await import(site("features/open-campaign/preview-section.tsx"))).PreviewSection,
+    OpenReview: (await import(site("features/open-campaign/open-review.tsx"))).OpenReview,
   };
   w = await openingWorld();
   chain = startFakeChain(w);
@@ -141,9 +151,35 @@ describe("every mandatory notice is on its screen", () => {
     };
     const burn = preview("burn");
     expect(burn).toContain(notice("creator-opening"));
+    expect(burn).toContain(PREVIEW.othersCanPush.burn);
     expect(notice("creator-opening")).toContain(notice("creator"));
     expect(preview("price")).not.toContain(notice("creator"));
     for (const id of ["no-entry", "no-take-back"]) expect(`${id}: ${burn.includes(notice(id))}`).toBe(`${id}: true`);
+  });
+
+  test("the review sheet of an opening: every notice before signing; a team key's free one drops the prize's", async () => {
+    const rpc = createSolanaRpc(chain.url);
+    const sheet = async (creator: string, openingUsd: bigint) => {
+      const choice = {
+        kind: P.ReaderKind.PriceTouch,
+        feedId: bytesToHex(P.BTC_USD_FEED_ID),
+        target: (BTC_PRICE * 11n) / 10n,
+        deadlineAt: now(w.client) + 7n * P.DAY,
+        openingUsd,
+      };
+      const prepared = ready(await prepareOpening({ rpc, creator, choice, id: newId() }));
+      const props = { ready: prepared, choice, metric: P.BTC_USD_ACCOUNT, names: [], persists: true, refreshed: false };
+      return render(C.OpenReview, { ...props, onBack: () => undefined, onSign: () => undefined });
+    };
+    const paid = await sheet(w.creator.address, 500n);
+    const ids = ["devnet-opening", "prize-fate", "no-take-back", "no-entry", "returns-devnet", "public-opening"];
+    for (const id of ids) expect(`${id}: ${paid.includes(notice(id))}`).toBe(`${id}: true`);
+    const free = await sheet(w.team.address, 0n);
+    for (const id of ["prize-fate", "no-take-back", "no-entry", "returns-devnet"])
+      expect(`${id}: ${free.includes(notice(id))}`).toBe(`${id}: false`);
+    for (const id of ["devnet-opening", "public-opening"])
+      expect(`${id}: ${free.includes(notice(id))}`).toBe(`${id}: true`);
+    expect(free).toContain(RETURNS_DEVNET_TEAM);
   });
 
   test("How it works says BP-5's line; the leaderboard says what points are worth (L-09)", () => {

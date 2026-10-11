@@ -45,14 +45,21 @@ export function useOpenBox(initial: Draft) {
   const [accounts, setAccounts] = useState<{ metric: string; id: bigint; value: BoxInputs["accounts"] } | null>(null);
   const [check, setCheck] = useState<BoxCheck | null>(null);
   const [tick, setTick] = useState(0);
-  const pageId = useRef<bigint | null>(null);
+  const pageIds = useRef(new Map<string, bigint>());
 
-  /** This page's id, drawn once (randomly, never from the device's clock) and kept until another wallet takes it. */
-  const pageIdNow = (): bigint => (pageId.current ??= randomCampaignId());
+  /** This page's id for a wallet, drawn once (randomly, never from the device's clock) until a campaign sits at it. */
+  const pageIdNow = useCallback((who: string | null): bigint => {
+    const key = who ?? "";
+    const known = pageIds.current.get(key);
+    if (known !== undefined) return known;
+    const drawn = randomCampaignId();
+    pageIds.current.set(key, drawn);
+    return drawn;
+  }, []);
   /** The id this wallet's opening uses now: its saved record's, or this page's. */
   const idNow = (): bigint => {
     const saved = wallet ? loadOpening(store, wallet) : null;
-    return saved ? BigInt(saved.id) : pageIdNow();
+    return saved ? BigInt(saved.id) : pageIdNow(wallet);
   };
 
   useEffect(() => {
@@ -104,9 +111,9 @@ export function useOpenBox(initial: Draft) {
     setTick((n) => n + 1);
     setLandings((n) => n + 1);
   }, []);
-  /** Another wallet took this page's id: the next opening draws a new one. */
-  const redraw = useCallback(() => {
-    pageId.current = randomCampaignId();
+  /** A campaign now sits at this page's id for `who` (theirs, or another wallet's): the next opening draws anew. */
+  const redraw = useCallback((who: string) => {
+    pageIds.current.set(who, randomCampaignId());
   }, []);
   const boxId = current?.id ?? 0n;
   useEffect(() => {

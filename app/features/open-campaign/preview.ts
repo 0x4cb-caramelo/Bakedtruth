@@ -4,7 +4,7 @@
  *          the transaction, never from what was typed into the search: the value now and "if resolved now", the rule in
  *          the campaign page's words, the money, the creator notice and the list card (preview-parts.ts) as it will
  *          look with no entry yet.
- * Version: 0.1.0
+ * Version: 0.2.0 (the Sprint 19 reviews: units on raw targets, the team variant, never "free" by default)
  * Sprint:  19 (site: open a campaign)
  */
 import { Direction, entriesCloseAt, formatUtc, ReaderKind, shortAddress } from "@brot/sdk/read";
@@ -13,13 +13,14 @@ import { sentenceOf, sentenceParts, type SentenceInput } from "../campaigns/sent
 import type { Card } from "../campaigns/model";
 import { ruleText } from "../campaign-page/copy";
 import { valueText } from "../campaign-page/format";
-import { feedState, ifResolvedNow, type AccountState } from "./account-check";
+import { ifResolvedNow, type AccountState } from "./account-check";
 import type { BoxCheck } from "./check";
-import { MONEY, PREVIEW } from "./copy";
+import { PREVIEW } from "./copy";
+import { MONEY } from "./copy-money";
 import { accountOf, parseTarget, resolveDeadline, type Draft } from "./draft";
 import { creatorCanPush, templateOf } from "./kinds";
 import type { KnownName } from "./names";
-import { cardOf, pct, usd, type SlotRead } from "./preview-parts";
+import { cardOf, pct, priceReading, usd, withUnit, type PriceReading, type SlotRead } from "./preview-parts";
 import { exactSol, usdSplit } from "./quote";
 import type { BoxWorld } from "./reads";
 
@@ -35,8 +36,14 @@ export type PreviewFacts = {
   deadlineAt: bigint | null;
   entriesClose: bigint | null;
   creatorNotice: boolean;
+  /** Who else can move the number, said to a paying creator next to the creator notice (the adversarial review, M6). */
+  othersCanPush: string | null;
   card: Card | null;
   money: string[];
+  /** A team key's free opening: no prize, no creator share, nothing but the rent comes back. */
+  team: boolean;
+  /** Read at the start of a named epoch: a read now decides nothing. */
+  epochKind: boolean;
 };
 
 type Inputs = {
@@ -48,7 +55,7 @@ type Inputs = {
   wallet: string | null;
 };
 
-/** The sentence's fields from the draft, with `null` for each slot not filled yet. */
+/** The sentence's fields from the draft, with `null` for each field not filled in yet. */
 export function sentenceInput(a: Inputs): SentenceInput {
   const { draft, world } = a;
   const t = templateOf(draft.kind);
@@ -62,25 +69,23 @@ export function sentenceInput(a: Inputs): SentenceInput {
     target: raw === null ? null : raw.toString(),
     priceExponent: exponent,
     metricAccount: draft.kind === "price" ? (feed?.address ?? null) : accountOf(draft),
+    epoch: t.epoch ? draft.epoch.trim() || null : undefined,
   };
 }
 
 export const partsOf = (a: Inputs) => sentenceParts(sentenceInput(a));
 
-function valueNow(a: Inputs): { value: bigint | null; text: string | null; price: ReturnType<typeof readingOf> } {
-  const price = readingOf(a);
+function valueNow(a: Inputs): { value: bigint | null; text: string | null; price: PriceReading | null } {
+  const price = a.draft.kind === "price" ? priceReading(a.world, a.draft.feedHex) : null;
   if (a.draft.kind === "price")
     return { value: price?.price ?? null, text: price ? usd(price.price, price.exponent) : null, price };
   const state: AccountState | null = a.slot.status === "read" ? a.slot.state : null;
   const value = state?.state === "ok" ? state.value : null;
-  return { value, text: value === null ? null : valueText(a.draft.kind, value, 0), price: null };
-}
-
-function readingOf(a: Inputs) {
-  if (a.draft.kind !== "price" || !a.world?.config) return null;
-  const feed = a.world.feeds.find((f) => f.hex === a.draft.feedHex);
-  const state = feed ? feedState(feed.account, feed.hex, a.world.clock, a.world.config.params.campaignMaxAge) : null;
-  return state?.ok ? state.reading : null;
+  return {
+    value,
+    text: value === null ? null : withUnit(a.draft.kind, valueText(a.draft.kind, value, 0)),
+    price: null,
+  };
 }
 
 export function previewFacts(a: Inputs): PreviewFacts {
@@ -105,6 +110,7 @@ export function previewFacts(a: Inputs): PreviewFacts {
       : input.metricAccount
         ? shortAddress(input.metricAccount)
         : PREVIEW.theAccount;
+  const shownTarget = targetText === null ? null : withUnit(draft.kind, targetText);
   const deadlineAt = resolveDeadline(draft.deadline, world?.clock.unixTimestamp ?? null);
   let entriesClose: bigint | null = check?.verdict?.ok ? check.verdict.entriesCloseAt : null;
   if (entriesClose === null && deadlineAt !== null && world) {
@@ -119,17 +125,21 @@ export function previewFacts(a: Inputs): PreviewFacts {
     ? {
         address: input.metricAccount,
         label:
-          draft.kind === "price"
-            ? PREVIEW.priceAccount(feed?.symbol ?? "")
-            : PREVIEW.accountOf(named ?? null, t.owner.replace(/^the /, "")),
+          draft.kind === "price" ? PREVIEW.priceAccount(feed?.symbol ?? "") : PREVIEW.accountOf(named ?? null, t.owner),
       }
     : null;
   const config = world?.config;
   const q = check?.quote ?? null;
   const split = q && config ? usdSplit(q.openingUsd, config.params.openingPrizeBps) : null;
   const team = check?.isTeam ?? false;
+  // Free only for a team key; a paid opening shows its quote, or "not priced yet" (the reviews, M1).
+  const opening = team
+    ? MONEY.free
+    : q && split
+      ? PREVIEW.opening(exactSol(q.paid), split.total, split.prize, split.fee)
+      : MONEY.notPriced;
   const money = [
-    team || !q || !split ? MONEY.free : PREVIEW.opening(exactSol(q.paid), split.total, split.prize, split.fee),
+    opening,
     ...(q && !team ? [PREVIEW.most(exactSol(q.maxLamports))] : []),
     MONEY.onEntries(pct(config?.params.feeBps ?? 1_000), team ? null : pct(config?.params.creatorShareBps ?? 100)),
   ];
@@ -153,7 +163,7 @@ export function previewFacts(a: Inputs): PreviewFacts {
     now: {
       name,
       value: now.text,
-      target: targetText,
+      target: shownTarget,
       below,
       ifNow: ifResolvedNow({
         kind: draft.kind,
@@ -168,7 +178,7 @@ export function previewFacts(a: Inputs): PreviewFacts {
       name:
         draft.kind === "price"
           ? (feed?.symbol ?? PREVIEW.gaps.asset)
-          : (named ?? shortAddress(input.metricAccount ?? "…")),
+          : (named ?? (input.metricAccount ? shortAddress(input.metricAccount) : PREVIEW.gaps.account)),
       target: targetText ?? PREVIEW.gaps.target,
       below,
       deadline: deadlineAt === null ? PREVIEW.gaps.deadline : formatUtc(deadlineAt),
@@ -178,7 +188,10 @@ export function previewFacts(a: Inputs): PreviewFacts {
     deadlineAt,
     entriesClose,
     creatorNotice: creatorCanPush(draft.kind),
+    othersCanPush: draft.kind === "price" || team ? null : PREVIEW.othersCanPush[draft.kind],
     card,
     money,
+    team,
+    epochKind: t.epoch,
   };
 }

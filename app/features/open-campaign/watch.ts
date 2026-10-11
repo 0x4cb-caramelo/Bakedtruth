@@ -5,7 +5,7 @@
  *          opening with a signature is then followed to `finalized` before the box links `/c/{id}` as final (Sprint 19
  *          DoD). A failure is read from the landed transaction: a retry refused as `AlreadyInitialized` by a campaign
  *          this wallet opened is the first attempt landing, not a failure.
- * Version: 0.1.0
+ * Version: 0.2.0 (the Sprint 19 adversarial review: a record cleared only by its own attempt; the id spent at once)
  * Sprint:  19 (site: open a campaign)
  */
 import { signature as toSignature } from "@solana/kit";
@@ -16,7 +16,7 @@ import { failedProgram } from "../entry/landed";
 import type { KeyValueStore } from "../entry/retry-guard";
 import { POLL_MS, statusFrom } from "../entry/watch";
 import { readCampaignAt } from "./reads";
-import { clearOpening, decideOpening, updateOpening, type PendingOpening } from "./retry-guard";
+import { clearAttemptOpening, decideOpening, updateOpening, type PendingOpening } from "./retry-guard";
 import type { OpenOutcome, Stage } from "./submit";
 
 const MAX_FAILED_POLLS = 15;
@@ -35,6 +35,8 @@ export type OpeningWatchOptions = {
   signal?: AbortSignal;
   onWait?: (blocksLeft: bigint) => void;
   onStage?: (stage: Stage) => void;
+  /** A campaign now sits at the record's id (this wallet's or another's): called at once, before any finality wait. */
+  onSpent?: () => void;
   sleep?: (ms: number) => Promise<void>;
 };
 
@@ -98,12 +100,14 @@ export async function watchOpening(
         verdict = decideOpening(record, { campaignCreator: creator, blockHeight: height, status: seen.status });
       }
       if (verdict === "landed") {
-        clearOpening(store, record.creator);
+        clearAttemptOpening(store, record);
+        o.onSpent?.();
         if (seen.status === "failed") return { kind: "already", id };
         return { kind: "opened", id, signature: record.signature, finalized: await finalize(rpc, record.signature, o) };
       }
       if (verdict === "taken") {
-        clearOpening(store, record.creator);
+        clearAttemptOpening(store, record);
+        o.onSpent?.();
         return { kind: "taken", id };
       }
       if (verdict === "failed") {

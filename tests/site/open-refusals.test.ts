@@ -17,7 +17,7 @@ import { checkBox } from "../../app/features/open-campaign/check";
 import { REFUSALS, refusalCopy } from "../../app/features/open-campaign/copy-refusals";
 import { DEFAULT_PARAMS, openedCampaign, SOL_PRICE } from "../brot/flows";
 import * as I from "../brot/instructions";
-import { openingWorld } from "../brot/opening";
+import { openingWorld, STALE } from "../brot/opening";
 import * as P from "../brot/program";
 import { expectError, expectOk, send, setPriceAccount } from "../brot/setup";
 import {
@@ -61,6 +61,16 @@ describe("validateOpenCampaign refuses what the program refuses", () => {
     const { check, program } = await boxThenProgram(w, w.team, draft);
     expectBoxRefusal(check, "MintAuthorityLive");
     expectError(await program(), "MintAuthorityLive");
+  });
+
+  test("a stale SOL/USD price holds paid openings only: a team key's free opening still goes through", async () => {
+    const w = await openingWorld();
+    setPriceAccount(w.client, P.SOL_USD_ACCOUNT, "pyth-sol-usd-devnet", { publishTime: STALE });
+    const { check, program } = await boxThenProgram(w, w.team, PRICE_DRAFT);
+    expect(check.isTeam).toBe(true);
+    expect(check.verdict?.ok).toBe(true);
+    expect(check.issues.filter((i) => i.place !== "wallet")).toEqual([]);
+    expectOk(await program());
   });
 
   test("row 10: an id already open is refused; the box's guard reuses ids, the program refuses a repeat", async () => {

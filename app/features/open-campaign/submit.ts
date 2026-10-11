@@ -19,7 +19,7 @@ import type { KeyValueStore } from "../entry/retry-guard";
 import { STAKE_AT_LEAST_OPENS } from "./kinds";
 import { MARGIN_BPS } from "./quote";
 import { FEED_CLUSTER } from "./reads";
-import { handedRecord, saveOpening, updateOpening, type PendingOpening } from "./retry-guard";
+import { clearAttemptOpening, handedRecord, saveOpening, updateOpening, type PendingOpening } from "./retry-guard";
 import { watchOpening, WatchStopped, type OpeningWatchOptions } from "./watch";
 
 export type ReadyOpening = Extract<PreparedOpening, { ok: true }>;
@@ -97,7 +97,7 @@ export async function handToWallet(a: {
   } catch (error) {
     const failure = fromError(error);
     if (nothingSent(failure)) {
-      updateOpening(a.store, { ...record, state: "refused" });
+      clearAttemptOpening(a.store, record); // nothing was sent: nothing to guard
       return { kind: "failed", failure, signature: null, cost: "nothing" };
     }
     // No answer that proves nothing was sent: the wallet may have sent it. Watch until it lands or expires.

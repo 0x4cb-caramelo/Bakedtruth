@@ -5,7 +5,7 @@
  *          the program's actual errors. Row 6 has no refusal: the fees and the share are read from the program, never
  *          typed. tests/site/open-refusals.test.ts checks every error with a row has its message here, and sends each
  *          refused case straight to the program.
- * Version: 0.1.0
+ * Version: 0.2.0 (the Sprint 19 copy review: the reader's own words for an account, a price target too far, plainer)
  * Sprint:  19 (site: open a campaign)
  */
 import type { BrotErrorName } from "@brot/sdk/read";
@@ -15,7 +15,9 @@ import type { Slot } from "./draft";
 /** Where a refusal shows: a slot of the box, the box as a whole, or only once the program answered. */
 export type RefusalPlace = Slot | "box" | "after";
 
-export type RefusalCopy = { place: RefusalPlace; tag: string; text: (ctx: { owner: string; kind: string }) => string };
+/** What a refusal's text may name: the program that must own the account, the kind, the account in words. */
+export type RefusalContext = { owner: string; kind: string; phrase: string };
+export type RefusalCopy = { place: RefusalPlace; tag: string; text: (ctx: RefusalContext) => string };
 
 const fixed = (place: RefusalPlace, tag: string, text: string): RefusalCopy => ({ place, tag, text: () => text });
 const RELOAD = "Reload the page and try again.";
@@ -28,15 +30,22 @@ export const REFUSALS: Partial<Record<BrotErrorName, RefusalCopy>> = {
   ReaderKindNotOpen: fixed(
     "kind",
     "Opens later",
-    "This kind opens after a YES is recorded on devnet. The other four kinds open now.",
+    "This kind isn't open yet. It opens once a YES has been recorded for it on devnet. The other four kinds are open.",
   ),
   // Row 2: the account fits the kind.
   ReaderWrongOwner: {
     place: "account",
     tag: "Account refused",
-    text: ({ owner, kind }) => `This account doesn't belong to ${owner}, so it can't back a ${kind} campaign.`,
+    text: ({ owner, kind, phrase }) =>
+      phrase === "token mint"
+        ? "This account isn't a classic SPL token mint, so it can't back a burn campaign. Token-2022 mints aren't supported."
+        : `This account isn't owned by ${owner}, so it can't back a ${kind.toLowerCase()} campaign.`,
   },
-  ReaderBadLayout: fixed("account", "Account refused", "Right owner, but not the account this kind reads."),
+  ReaderBadLayout: {
+    place: "account",
+    tag: "Account refused",
+    text: ({ phrase }) => `Right owner, but this isn't a ${phrase}.`,
+  },
   MetricAccountMismatch: fixed("feed", "Wrong price account", "This isn't the price account Pyth keeps for that feed."),
   MintAuthorityLive: fixed(
     "account",
@@ -52,7 +61,7 @@ export const REFUSALS: Partial<Record<BrotErrorName, RefusalCopy>> = {
   TargetAlreadyTouched: fixed(
     "target",
     "Already met",
-    "Already met: the campaign would be decided at birth. Pick a target the account hasn't reached.",
+    "Already met: the campaign would be decided the moment it opens. Pick a target the account hasn't reached yet.",
   ),
   TargetTooClose: fixed(
     "target",
@@ -61,8 +70,8 @@ export const REFUSALS: Partial<Record<BrotErrorName, RefusalCopy>> = {
   ),
   TargetUnreachable: fixed(
     "target",
-    "Can't be reached",
-    "No value this account can hold would ever reach this target.",
+    "Too far",
+    "Too far from the price now. The target must be within ten times the price, up or down, and above zero.",
   ),
   // Row 4: the price kind's feed.
   FeedNotOnList: fixed("feed", "Feed not listed", "This feed isn't on the program's list of Pyth feeds."),
@@ -94,7 +103,7 @@ export const REFUSALS: Partial<Record<BrotErrorName, RefusalCopy>> = {
   OpeningAboveMaxLamports: fixed(
     "after",
     "Price moved",
-    "SOL/USD moved more than 1% since your quote, so the program refused the opening. Nothing was charged.",
+    "SOL/USD moved more than 1% since your quote, so the program refused the opening and took no opening payment.",
   ),
   SolUsdAccountMismatch: fixed("box", "Price unusable", `The SOL/USD price can't be used right now. ${RELOAD}`),
   SolUsdStale: fixed(
@@ -103,7 +112,11 @@ export const REFUSALS: Partial<Record<BrotErrorName, RefusalCopy>> = {
     "Pyth's SOL/USD price is older than the program accepts, so paid openings wait for its next update (about once a minute on devnet). A team key can still open.",
   ),
   SolUsdConfidenceTooWide: fixed("box", "Price uncertain", SOL_USD_SHAKY),
-  SolUsdPriceNonPositive: fixed("box", "Price unusable", SOL_USD_SHAKY),
+  SolUsdPriceNonPositive: fixed(
+    "box",
+    "Price unusable",
+    "Pyth reports no valid SOL/USD price right now. Try again in a minute.",
+  ),
   PriceExponentOutOfRange: fixed("box", "Price unusable", `The SOL/USD price can't be used right now. ${RELOAD}`),
   SolUsdWrongOwner: fixed("box", "Price unusable", SOL_USD_UNUSABLE),
   SolUsdBadLayout: fixed("box", "Price unusable", SOL_USD_UNUSABLE),
@@ -113,17 +126,17 @@ export const REFUSALS: Partial<Record<BrotErrorName, RefusalCopy>> = {
   OpenWhilePaused: fixed(
     "box",
     "Paused",
-    "The program is paused: no campaign can open and no entry can go in until the team resumes it. Nothing already in a campaign changes.",
+    "The team paused entries and new campaigns. Payouts and refunds continue. Try again when they resume.",
   ),
   TooManyOpenCampaigns: fixed(
     "box",
     "Limit reached",
-    "The program's limit of open campaigns is reached, so paid openings wait until one closes. A team key can still open.",
+    "The program's limit of open campaigns is reached, so paid openings wait until one ends.",
   ),
   CreationParamsChanged: fixed(
     "after",
-    "Terms changed",
-    "Brot's terms changed since this preview: the fees, the split or the price rules. Review the new ones before you sign.",
+    "Rules changed",
+    "Brot's creation rules changed since this preview: the fees, the split or the price rules. Review the new ones before you sign.",
   ),
   // Row 9: no free text, a fixed layout.
   BadInstructionData: fixed("after", "Malformed", `This transaction is malformed. ${RELOAD}`),

@@ -1,11 +1,12 @@
 /**
  * Purpose: section 4 of the creation box, "Cost" (spec 3.12; TP §3.4.10, §3.4.16; P-3): the opening amount (US$500 or
- *          more, the extra a bigger prize at the same 90/10), the charge at Pyth's SOL/USD price minus its confidence
+ *          more, split 90/10 as a whole; amount-picker.tsx), the charge at Pyth's SOL/USD price minus its confidence
  *          band with its publish time, the money table in exact lamports (the prize, the opening fee, `max_lamports`,
  *          the rent of the two new accounts returned at close, the network fee, the total now and at most), what a
- *          campaign with no entry keeps, the fees on entries, and the wallet's balance against the total. A team key
- *          sees no payment and no creator share.
- * Version: 0.1.0
+ *          campaign with no entry keeps, and the wallet's balance against the most the opening can take. Priced from
+ *          the amount alone, "not priced yet" until the SOL/USD price allows it; only a team key sees "free", with no
+ *          prize and no creator share. The box's own stops and the fees on entries are said once, elsewhere.
+ * Version: 0.2.0 (the Sprint 19 copy and adversarial reviews: never "free" by default, the team variant, at most)
  * Sprint:  19 (site: open a campaign)
  */
 "use client";
@@ -19,14 +20,12 @@ import { CLUSTER } from "@/lib/config";
 import { FAUCET_URL } from "@/features/wallet/wallet-state";
 import { sol4 } from "../entry/amount";
 import { issuesAt, type BoxCheck } from "./check";
-import { BOX, MONEY, NO_ENTRY_RULE, SLOTS, TEAM } from "./copy";
+import { BOX } from "./copy";
+import { MONEY, NO_ENTRY_RULE, OPEN_DEVNET, RETURNS_DEVNET, RETURNS_DEVNET_TEAM, TEAM } from "./copy-money";
 import type { Draft } from "./draft";
-import { IssueList } from "./issue-list";
-import { pct } from "./preview-parts";
+import { AmountPicker } from "./amount-picker";
 import { exactSol, NETWORK_FEE, usdSplit, usdText } from "./quote";
 import type { BoxWorld } from "./reads";
-
-const AMOUNTS = ["500", "1000", "1500"];
 
 const Row = ({
   label,
@@ -74,7 +73,6 @@ export function CostSection({
   const config = world?.config ?? null;
   const split = q && config ? usdSplit(q.openingUsd, config.params.openingPrizeBps) : null;
   const rent = world ? world.rents.campaign + world.rents.vault : null;
-  const custom = !AMOUNTS.includes(draft.usd);
   return (
     <Card as="section" aria-labelledby={`${id}-h`} className="space-y-3 p-4 [grid-area:cost]">
       <h2 id={`${id}-h`} className="font-display text-2xl font-bold">
@@ -86,42 +84,7 @@ export function CostSection({
           {TEAM.note}
         </p>
       ) : (
-        <fieldset>
-          <legend className="mb-1.5 text-xs font-medium text-muted">{SLOTS.usd}</legend>
-          <div className="grid grid-cols-2 gap-2 min-[700px]:grid-cols-4">
-            {[...AMOUNTS, "custom"].map((v) => {
-              const on = v === "custom" ? custom : draft.usd === v;
-              return (
-                <label
-                  key={v}
-                  className={cx(
-                    "cursor-pointer rounded-sm border p-2 text-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent",
-                    on ? "border-accent bg-row-hover" : "border-line",
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name={`${id}-usd`}
-                    className="sr-only"
-                    checked={on}
-                    onChange={() => setDraft((d) => ({ ...d, usd: v === "custom" ? "" : v }))}
-                  />
-                  <b className="block">{v === "custom" ? SLOTS.custom : `US$${Number(v).toLocaleString("en-US")}`}</b>
-                </label>
-              );
-            })}
-          </div>
-          {custom ? (
-            <input
-              aria-label={SLOTS.custom}
-              inputMode="numeric"
-              value={draft.usd}
-              onChange={(e) => setDraft((d) => ({ ...d, usd: e.target.value.trim() }))}
-              className="mt-2 min-h-11 w-full rounded-sm border border-field-line bg-bg px-3 text-base text-text tabular-nums"
-            />
-          ) : null}
-          <IssueList issues={check ? issuesAt(check, "usd") : []} className="mt-1.5" />
-        </fieldset>
+        <AmountPicker usd={draft.usd} setDraft={setDraft} issues={check ? issuesAt(check, "usd") : []} />
       )}
       {q && split && !team ? (
         <p className="text-sm" data-testid="charge-line">
@@ -131,10 +94,13 @@ export function CostSection({
           </span>
         </p>
       ) : null}
-      <IssueList issues={check ? issuesAt(check, "box") : []} />
       <dl data-testid="money">
-        {team || !q ? (
+        {team ? (
           <Row label={MONEY.opening}>{MONEY.free}</Row>
+        ) : !q ? (
+          <Row label={MONEY.opening} note={MONEY.notPricedNote}>
+            {MONEY.notPriced}
+          </Row>
         ) : (
           <>
             <Row label={MONEY.prize} note={MONEY.prizeNote}>
@@ -155,22 +121,34 @@ export function CostSection({
         ) : null}
         <Row label={MONEY.network}>≈ {exactSol(NETWORK_FEE)} SOL</Row>
         {check?.total !== null && check?.total !== undefined ? (
-          <Row label={MONEY.total} total note={q && !team ? MONEY.atMost(exactSol(check.maxTotal ?? 0n)) : undefined}>
-            {exactSol(check.total)} SOL
+          <Row
+            label={MONEY.total}
+            total
+            note={q && !team && check.maxTotal !== null ? MONEY.atMost(exactSol(check.maxTotal)) : undefined}
+          >
+            ≈ {exactSol(check.total)} SOL
+          </Row>
+        ) : world ? (
+          <Row label={MONEY.total} total>
+            –
           </Row>
         ) : null}
       </dl>
-      {!team ? <p className="text-xs text-muted">{NO_ENTRY_RULE}</p> : null}
-      <p className="text-xs text-muted">
-        {MONEY.onEntries(pct(config?.params.feeBps ?? 1_000), team ? null : pct(config?.params.creatorShareBps ?? 100))}
-      </p>
+      {CLUSTER === "devnet" ? (
+        <p className="rounded-sm bg-notice-bg px-3 py-2 text-xs" data-notice="devnet-opening">
+          {OPEN_DEVNET}
+        </p>
+      ) : null}
+      {!team ? <p className="text-xs">{NO_ENTRY_RULE}</p> : null}
+      {CLUSTER === "devnet" ? <p className="text-xs">{team ? RETURNS_DEVNET_TEAM : RETURNS_DEVNET}</p> : null}
       {!team && q ? <p className="text-xs text-muted">{MONEY.usdSource}</p> : null}
-      {wallet && balance !== null && check?.total !== null && check?.total !== undefined ? (
-        balance >= check.total ? (
+      {/* The balance against the most the opening can take (the adversarial review, L2), as the box's own check. */}
+      {wallet && balance !== null && check?.maxTotal !== null && check?.maxTotal !== undefined ? (
+        balance >= check.maxTotal ? (
           <p className="text-xs text-st-open-fg">{MONEY.balanceOk(sol4(balance))}</p>
         ) : (
           <p className="text-xs text-error">
-            {MONEY.balanceShort(sol4(check.total, "up"), sol4(balance))}{" "}
+            {MONEY.balanceShort(sol4(check.maxTotal, "up"), sol4(balance))}{" "}
             {CLUSTER === "devnet" ? (
               <a href={FAUCET_URL} target="_blank" rel="noreferrer" className="underline">
                 {MONEY.faucet}

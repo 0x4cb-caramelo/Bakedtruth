@@ -2,9 +2,10 @@
  * Purpose: the search behind "What should the chain answer?" (spec 3.12; TP §3.6, the creation box): known names first
  *          (the pinned Pyth feeds and content/account-names.json), then the templates whose words match; a number in
  *          the query becomes a suggested target. Outside the grammar, "we can't check this on-chain" and the three
- *          nearest templates by shared trigrams. Pure and local: the query is never sent, stored or put in the draft
- *          (D-j); only a picked suggestion fills slots, and only with values the box already knows.
- * Version: 0.1.0
+ *          nearest templates by shared trigrams. Pure and local: the query is never sent or stored (D-j). A picked
+ *          suggestion fills the draft with its kind, a pinned feed or a reviewed account, and the number read from the
+ *          query as its target, which the box then checks like any typed target; no other word of the query goes in.
+ * Version: 0.1.1 (the Sprint 19 adversarial review: a comma only groups thousands; the header says what is filled)
  * Sprint:  19 (site: open a campaign)
  */
 import type { KindName } from "../campaign-page/proof";
@@ -33,10 +34,15 @@ function trigrams(text: string): Set<string> {
   return grams;
 }
 
-/** A plain number in the query ("120000", "120,000", "0.5"), as typed, for the target slot. */
+/**
+ * A plain number in the query ("120000", "120,000", "0.5"), for the target field. A comma only groups thousands, as in
+ * the field itself: "0,5" suggests no target rather than 5 (the Sprint 19 adversarial review, M5).
+ */
 function numberIn(query: string): string | undefined {
   const match = /\d[\d,]*(?:\.\d+)?/.exec(query);
-  return match ? match[0].replace(/,/g, "") : undefined;
+  if (!match) return undefined;
+  const typed = match[0].replace(/,+$/, "");
+  return /^(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/.test(typed) ? typed.replace(/,/g, "") : undefined;
 }
 
 export function search(query: string, sources: SearchSources, limit = 12): SearchResult {

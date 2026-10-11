@@ -1,10 +1,11 @@
 /**
  * Purpose: the creation box's pure pieces (Sprint 19): one sentence template per kind (template v1, the same function
  *          every page uses); the slots parsed exactly into the SDK's `OpeningChoice` (no float between the text and the
- *          bigint); a team key's free opening; the prefill a link may carry (and what it drops); the typeahead's search
- *          (never part of the draft); the reviewed names file; the US$ split of the opening's terms.
- *          Filter: `bun test tests/ -t "open campaign box"`.
- * Version: 0.1.0
+ *          bigint, a comma only as a thousands group, no more precision than the sentence prints); the quick deadlines
+ *          inside the program's bounds; a team key's free opening; the prefill a link may carry (never the amount) and
+ *          what it drops; the typeahead's search; the reviewed names file, the committed one included; the US$ split
+ *          of the opening's terms. Filter: `bun test tests/ -t "open campaign box"`.
+ * Version: 0.2.0 (the Sprint 19 reviews)
  * Sprint:  19 (site: open a campaign)
  */
 import { describe, expect, test } from "bun:test";
@@ -14,13 +15,15 @@ import { bytesToHex, Direction, ReaderKind } from "@brot/sdk/read";
 import { sentenceOf } from "../../app/features/campaigns/sentence";
 import {
   choiceOf,
+  daysFrom,
   EMPTY_DRAFT,
+  LAND_MARGIN_SECONDS,
   parseScaled,
   parseTarget,
   resolveDeadline,
 } from "../../app/features/open-campaign/draft";
 import { TEMPLATES, templateById } from "../../app/features/open-campaign/kinds";
-import { parseNames } from "../../app/features/open-campaign/names";
+import { loadNames, parseNames } from "../../app/features/open-campaign/names";
 import { prefillOf } from "../../app/features/open-campaign/prefill";
 import { usdSplit, usdText } from "../../app/features/open-campaign/quote";
 import { search } from "../../app/features/open-campaign/search";
@@ -32,19 +35,28 @@ const FEEDS = [
   { hex: BTC, symbol: "BTC/USD" },
   { hex: "ef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d", symbol: "SOL/USD" },
 ];
-const at = (kind: string, target: string, direction = "Above") =>
-  sentenceOf({ kind, direction, feedIdHex: BTC, target, priceExponent: -8, metricAccount: MINT });
+const at = (kind: string, target: string, direction = "Above", epoch?: string | null) =>
+  sentenceOf({ kind, direction, feedIdHex: BTC, target, priceExponent: -8, metricAccount: MINT, epoch });
 
 describe("open campaign box: templates and slots", () => {
   test("one sentence template per kind, from the stored fields only", () => {
     expect(at("PriceTouch", "12000000000000")).toBe("BTC/USD reaches 120,000");
     expect(at("PriceTouch", "5000000000000", "Below")).toBe("BTC/USD falls to 50,000");
-    expect(at("SupplyAtMost", "812400000000000")).toBe("So11…1112 supply falls to 812,400,000,000,000");
+    // Burn and lock targets are raw units, said so (the copy review, M8); the epoch kinds name their epoch (S6).
+    expect(at("SupplyAtMost", "812400000000000")).toBe("So11…1112 supply falls to 812,400,000,000,000 raw units");
     expect(at("DammV2LockedAtLeast", "340282366920938463463374607431768211455")).toBe(
-      "Meteora pool So11…1112 reaches 340,282,366,920,938,463,463,374,607,431,768,211,455 liquidity locked for good",
+      "Meteora pool So11…1112 reaches 340,282,366,920,938,463,463,374,607,431,768,211,455 liquidity units locked for good",
     );
-    expect(at("StakePoolTvlAtLeast", "431880500000000")).toBe("Stake pool So11…1112 reaches 431,880.5 SOL");
-    expect(at("StakeAtLeast", "958310000000000")).toBe("Validator So11…1112 reaches 958,310 SOL staked");
+    expect(at("StakePoolTvlAtLeast", "431880500000000", "Above", "812")).toBe(
+      "Stake pool So11…1112 holds at least 431,880.5 SOL at the start of epoch 812",
+    );
+    expect(at("StakeAtLeast", "958310000000000", "Above", "812")).toBe(
+      "Validator So11…1112 has at least 958,310 SOL staked in epoch 812",
+    );
+    // A field not filled in yet shows as its name in brackets, never a question mark (S8).
+    expect(at("StakePoolTvlAtLeast", "431880500000000", "Above", null)).toBe(
+      "Stake pool So11…1112 holds at least 431,880.5 SOL at the start of epoch (epoch)",
+    );
     expect(TEMPLATES.map((t) => t.readerKind)).toEqual([0, 1, 2, 3, 4]);
     expect(templateById("validator-stake")?.opens).toBe("after-devnet-yes");
   });
@@ -59,6 +71,23 @@ describe("open campaign box: templates and slots", () => {
     expect(parseTarget("usd", "110000", null)).toBeNull(); // the feed's exponent is read first
     expect(parseTarget("raw", "1,000,000", null)).toBe(1_000_000n);
     expect(parseTarget("sol", "10000", null)).toBe(10_000_000_000_000n);
+    // A comma only groups thousands (M5): "0,5" and "1,5" are refused, never read as 5 or 15.
+    for (const bad of ["0,5", "1,5", "12,34", "1,0000"]) expect(parseScaled(bad, 9)).toBeNull();
+    // No more precision than the sentence prints (M4); letters are refused, never thrown on.
+    expect(parseTarget("usd", "120000.5", -8)).toBe(12_000_050_000_000n);
+    expect(parseTarget("usd", "120000.123", -8)).toBeNull();
+    expect(parseTarget("usd", "0.0001234567", -10)).toBeNull();
+    expect(parseTarget("usd", "0.000123456", -10)).toBe(1_234_560n);
+    expect(parseTarget("raw", "1.5", null)).toBeNull();
+    expect(parseTarget("sol", "1.00001", null)).toBeNull();
+    for (const junk of ["abc", "1e5", "12a", "0x10"]) expect(parseTarget("usd", junk, -8)).toBeNull();
+  });
+
+  test("the quick deadlines stay inside the program's bounds: 90 days never passes them, 3 days gets its margin", () => {
+    const now = 1_000_000_123n;
+    expect(daysFrom(now, 90) - now).toBeLessThanOrEqual(90n * 86_400n);
+    expect(daysFrom(now, 90) % 60n).toBe(0n);
+    expect(daysFrom(now, 3) - now).toBeGreaterThanOrEqual(3n * 86_400n + LAND_MARGIN_SECONDS);
   });
 
   test("the draft becomes the SDK's choice; a team key sends no opening_usd", () => {
@@ -82,18 +111,20 @@ describe("open campaign box: templates and slots", () => {
     expect(resolveDeadline({ at: 5n }, null)).toBe(5n);
   });
 
-  test("a link prefills checked slots, drops the rest, and says it came from a link", () => {
-    const query = { t: "price-touch", feed: "BTC/USD", dir: "below", target: "50000", days: "7", usd: "1000" };
+  test("a link prefills checked slots, drops the rest, never sets the amount, and says it came from a link", () => {
+    const query = { t: "price-touch", feed: "BTC/USD", dir: "below", target: "50000", days: "7", usd: "5000" };
     const { draft, fromLink } = prefillOf(query);
     expect(fromLink).toBe(true);
+    // The amount stays US$500 until the creator picks another (the adversarial review, M6).
     expect([draft.kind, draft.feedHex, draft.direction, draft.target, draft.deadline, draft.usd]).toEqual([
       "price",
       BTC,
       "below",
       "50000",
       { days: 7 },
-      "1000",
+      "500",
     ]);
+    expect(prefillOf({ usd: "5000" }).fromLink).toBe(false);
     const junk = prefillOf({ kind: "burn", account: "not-an-address", target: "1;drop", days: "200", usd: "-5" });
     expect([junk.draft.kind, junk.draft.account, junk.draft.target, junk.draft.deadline, junk.draft.usd]).toEqual([
       "burn",
@@ -116,10 +147,14 @@ describe("open campaign box: templates and slots", () => {
     expect(outside.outside).toBe(true);
     expect(outside.items).toHaveLength(3);
     expect(search("", { feeds: FEEDS, names }).items).toHaveLength(5);
+    // A comma in the query only groups thousands, as in the target field.
+    expect(search("BTC 120,000", { feeds: FEEDS, names }).items[0].target).toBe("120000");
+    expect(search("BTC 0,5", { feeds: FEEDS, names }).items[0].target).toBeUndefined();
   });
 
-  test("the names file takes plain names of non-price accounts, each once", () => {
+  test("the names file takes plain names of non-price accounts, each once; the committed one parses", () => {
     expect(parseNames("[]")).toEqual([]);
+    expect(() => loadNames()).not.toThrow();
     const bad = [
       [{ address: MINT, kind: "price", name: "SOL" }],
       [{ address: "nope", kind: "burn", name: "X" }],

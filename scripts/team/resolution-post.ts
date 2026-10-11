@@ -72,6 +72,7 @@ export function resolutionPost(campaign: Campaign, address: string, chain: Chain
     target: campaign.target.toString(),
     priceExponent: campaign.priceExponent,
     metricAccount: campaign.metricAccount,
+    epoch: campaign.epoch.toString(),
   });
   const voided = campaign.outcome === Outcome.Void;
   const value = (v: bigint) => valueText(kind, v, campaign.priceExponent);

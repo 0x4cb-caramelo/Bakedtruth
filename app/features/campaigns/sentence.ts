@@ -6,7 +6,7 @@
  *          stores; a stake pool or a stake target is SOL. The other kinds name their account by its shortened address:
  *          no creator-supplied text, and no name unless two people reviewed it. The creation box at /abrir writes its
  *          preview with this same function, so the sentence a creator reads is the one every page shows.
- * Version: 0.2.0 (Sprint 19: the five templates; 0.1.1, a target below 1 keeps six significant digits)
+ * Version: 0.3.0 (the Sprint 19 copy review: units on burn and lock, the measured epoch; 0.2.0, the five templates)
  * Sprint:  10 (site: campaign list); 19
  */
 import { feedSymbol, ReaderKind, shortAddress } from "@brot/sdk/read";
@@ -53,7 +53,7 @@ export function solTarget(lamports: bigint): string {
 }
 
 /** A piece of a sentence: fixed words, or a slot with its value (`null` while the creator has not filled it). */
-export type SentencePart = string | { slot: "asset" | "account" | "target"; value: string | null };
+export type SentencePart = string | { slot: "asset" | "account" | "target" | "epoch"; value: string | null };
 
 /** The fields a sentence is written from; `null` marks a slot the creation box has not filled yet. */
 export type SentenceInput = {
@@ -63,6 +63,8 @@ export type SentenceInput = {
   target: string | null;
   priceExponent: number | null;
   metricAccount: string | null;
+  /** The epoch kinds: the epoch whose start is measured, when the caller has it (the read API's list does not). */
+  epoch?: string | null;
 };
 
 /** Template v1 as parts, so the creation box can show its gaps; `sentenceOf` joins the same parts. */
@@ -83,20 +85,33 @@ export function sentenceParts(input: SentenceInput): SentencePart[] {
       return [{ slot: "asset", value: asset }, verb, { slot: "target", value }];
     }
     case ReaderKind[ReaderKind.SupplyAtMost]:
-      return [account, " supply falls to ", target(groupedDigits)];
+      return [account, " supply falls to ", target(groupedDigits), " raw units"];
     case ReaderKind[ReaderKind.DammV2LockedAtLeast]:
-      return ["Meteora pool ", account, " reaches ", target(groupedDigits), " liquidity locked for good"];
+      return ["Meteora pool ", account, " reaches ", target(groupedDigits), " liquidity units locked for good"];
     case ReaderKind[ReaderKind.StakePoolTvlAtLeast]:
-      return ["Stake pool ", account, " reaches ", target(solTarget), " SOL"];
+      return [
+        "Stake pool ",
+        account,
+        " holds at least ",
+        target(solTarget),
+        " SOL at the start of ",
+        ...epochOf(input),
+      ];
     case ReaderKind[ReaderKind.StakeAtLeast]:
-      return ["Validator ", account, " reaches ", target(solTarget), " SOL staked"];
+      return ["Validator ", account, " has at least ", target(solTarget), " SOL staked in ", ...epochOf(input)];
     default:
       return [`${KIND_LABEL[input.kind] ?? input.kind} campaign `, account];
   }
 }
 
+/** "epoch 812", or "its measured epoch" where the caller does not have it (the list's cards). */
+function epochOf(input: SentenceInput): SentencePart[] {
+  if (input.epoch === undefined) return ["its measured epoch"];
+  return ["epoch ", { slot: "epoch", value: input.epoch }];
+}
+
 export function sentenceOf(input: SentenceInput): string {
   return sentenceParts(input)
-    .map((part) => (typeof part === "string" ? part : (part.value ?? "?")))
+    .map((part) => (typeof part === "string" ? part : (part.value ?? `(${part.slot})`)))
     .join("");
 }

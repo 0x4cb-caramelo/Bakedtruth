@@ -1,46 +1,37 @@
 /**
- * Purpose: an opening's steps in React, around submit.ts (A-3, A-8, A-9; T17): "Review and sign" saves the guard's id
- *          before anything else, then the SDK re-reads the accounts, checks every rule, builds, summarises the very
- *          bytes and simulates; "Sign in wallet" checks the deploy and the blockhash again, hands the bytes over and
- *          watches the result. While an attempt may still land, no new one is prepared: the box watches it (on mount
- *          and on "Review and sign"). With no saved record, a paid opening first looks for this wallet's opening of
- *          the last half hour on-chain (recent.ts) and offers it instead of a second payment.
- * Version: 0.1.0
+ * Purpose: an opening's steps in React, around submit.ts (A-3, A-8, A-9; T17): "Review and sign" takes the guard's id
+ *          (the saved one, or the page's for this wallet), then the SDK re-reads the accounts, checks every rule,
+ *          builds, summarises the very bytes and simulates; "Sign in wallet" checks the deploy and the blockhash again,
+ *          saves the guard's record, hands the bytes over and watches the result. While an attempt may still land, no
+ *          new one is prepared: the box watches it. With no attempt in flight, a paid opening first looks for this
+ *          wallet's opening of the last half hour on-chain (recent.ts) and, found or not known, asks before paying.
+ *          Each step belongs to one generation: a watch a newer step superseded never overwrites it.
+ * Version: 0.3.0 (the Sprint 19 adversarial review: generations, the recent check closed, the id spent at once; the
+ *          states and the step after an outcome in flow-state.ts)
  * Sprint:  19 (site: open a campaign)
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { assertDeploy } from "@brot/sdk/read";
+import { assertDeploy, sponsoredPriceAddress } from "@brot/sdk/read";
 import type { OpeningChoice } from "@brot/sdk/tx";
 
 import { BUILT_FOR } from "@/lib/deploy";
 import { rpc } from "@/lib/rpc";
-import { failure as plain, fromError, fromRefusal, fromSimulation, type Failure } from "../entry/failures";
+import { failure as plain, fromError, fromRefusal, fromSimulation } from "../entry/failures";
 import type { KeyValueStore } from "../entry/retry-guard";
 import { deployConfirmed } from "../entry/upgrade-pause";
-import { recentOpening, type RecentOpening } from "./recent";
+import { advance, CHECKING, FRESH_BLOCKS, isCurrent, movedFunds, stepAfter } from "./flow-state";
+import type { OpenFlow, Receipt } from "./flow-state";
+import { recentOpening } from "./recent";
 import { idFor, loadOpening, type PendingOpening } from "./retry-guard";
 import { handToWallet, lastValidOf, prepareOpening, settleOpening, type OpenOutcome } from "./submit";
-import type { ReadyOpening, Stage } from "./submit";
-
-export type OpenFlow =
-  | { step: "idle" }
-  | { step: "preparing" }
-  | { step: "recent"; choice: OpeningChoice; recent: RecentOpening; chainNow: bigint }
-  | { step: "review"; choice: OpeningChoice; ready: ReadyOpening; refreshed: boolean }
-  | { step: "signing"; stage: Stage; blocksLeft: bigint | null; total: bigint | null }
-  | { step: "done"; outcome: Extract<OpenOutcome, { kind: "opened" | "already" | "taken" }> }
-  | { step: "failed"; failure: Failure; cost: "nothing" | "fee" | "unknown"; resume?: PendingOpening };
-
-/** Fewer blocks than this left on the prepared blockhash, and the opening is prepared again before the wallet. */
-const FRESH_BLOCKS = 60n;
 
 export function useOpenFlow(a: {
   wallet: string | null;
   store: KeyValueStore;
-  /** The id a new record takes: the page's own; `redraw` replaces it once another wallet took it. */
-  draw: () => bigint;
-  redraw: () => void;
+  /** The id a new record takes for a wallet: the page's own; `redraw` replaces it once a campaign sits at it. */
+  draw: (wallet: string) => bigint;
+  redraw: (wallet: string) => void;
   onLanded: () => void;
 }) {
   const { sendTransaction } = useWallet();
@@ -49,89 +40,95 @@ export function useOpenFlow(a: {
   const { wallet, store, draw } = a;
   // The page's callbacks change on every render; the watch must not restart for that, so it reads them here.
   const page = useRef({ redraw: a.redraw, onLanded: a.onLanded });
+  const paying = useRef<Receipt | null>(null);
+  const generation = useRef(0);
   useEffect(() => {
     page.current = { redraw: a.redraw, onLanded: a.onLanded };
   });
 
-  const finish = useCallback((outcome: OpenOutcome) => {
-    if (outcome.kind === "taken") page.current.redraw();
-    if (outcome.kind === "opened" || outcome.kind === "already" || outcome.kind === "taken") {
-      setFlow({ step: "done", outcome });
-      page.current.onLanded();
-    } else if (outcome.kind === "stopped") {
-      setFlow({ step: "failed", failure: plain("stillChecking"), cost: "unknown", resume: outcome.record });
-    } else if (outcome.kind === "not-landed") {
-      setFlow({ step: "failed", failure: plain("notLanded"), cost: outcome.cost });
-    } else {
-      setFlow({ step: "failed", failure: outcome.failure, cost: outcome.cost });
-      if (outcome.cost === "fee") page.current.onLanded();
-    }
-  }, []);
+  const next = useCallback(() => advance(generation), []);
+  const mine = useCallback((g: number) => isCurrent(generation, g), []);
 
-  /** While an attempt is watched: the blocks left, and the checking step shown for an attempt found on load. */
-  const onWait = useCallback(
-    (left: bigint) =>
-      setFlow((f) =>
-        f.step === "signing"
-          ? { ...f, blocksLeft: left }
-          : { step: "signing", stage: "checking", blocksLeft: left, total: null },
-      ),
-    [],
+  const finish = useCallback(
+    (outcome: OpenOutcome, g: number) => {
+      if (movedFunds(outcome)) page.current.onLanded();
+      if (mine(g)) setFlow(stepAfter(outcome, paying.current));
+    },
+    [mine],
+  );
+
+  /** The watch's options for generation `g`: the blocks left, the checking step, and the spent id redrawn at once. */
+  const watchFor = useCallback(
+    (g: number, creator: string, signal?: AbortSignal) => ({
+      signal,
+      onSpent: () => page.current.redraw(creator),
+      onWait: (left: bigint) =>
+        mine(g) &&
+        setFlow((f) => (f.step === "signing" ? { ...f, blocksLeft: left } : { ...CHECKING, blocksLeft: left })),
+    }),
+    [mine],
   );
 
   /** Watches an unresolved attempt to its end (a reload, a lost answer, "Check again"). */
   const resume = useCallback(
     async (record: PendingOpening, signal?: AbortSignal) => {
-      setFlow({ step: "signing", stage: "checking", blocksLeft: null, total: null });
-      const outcome = await settleOpening(rpc, record, store, { signal, onWait });
-      if (!signal?.aborted) finish(outcome);
+      const g = next();
+      paying.current = null; // an attempt found on load: its payment is the campaign page's to show
+      setFlow(CHECKING);
+      const outcome = await settleOpening(rpc, record, store, watchFor(g, record.creator, signal));
+      if (!signal?.aborted) finish(outcome, g);
     },
-    [store, finish, onWait],
+    [store, finish, watchFor, next],
   );
 
-  // A record left by a frozen tab or a closed page: watch it to its end before anything else (A-9).
+  // A record left by a frozen tab or a closed page: watch it to its end before anything else (A-9). Its first wait
+  // shows the checking step (watchFor's onWait), so the effect itself sets no state.
   useEffect(() => {
     if (!wallet) return;
     const record = loadOpening(store, wallet);
     if (record?.state !== "handed") return;
     const abort = new AbortController();
-    settleOpening(rpc, record, store, { signal: abort.signal, onWait }).then((outcome) => {
-      if (!abort.signal.aborted) finish(outcome);
+    const g = next();
+    paying.current = null;
+    settleOpening(rpc, record, store, watchFor(g, record.creator, abort.signal)).then((outcome) => {
+      if (!abort.signal.aborted) finish(outcome, g);
     });
     return () => abort.abort();
-  }, [wallet, store, finish, onWait]);
+  }, [wallet, store, next, watchFor, finish]);
 
   const prepare = useCallback(
-    async (choice: OpeningChoice, refreshed = false) => {
+    async (choice: OpeningChoice, refreshed = false, generationOf?: number) => {
       if (!wallet) return;
-      const record = idFor(store, wallet, draw); // saved before anything reaches the wallet (T17)
+      const g = generationOf ?? next();
+      setFlow({ step: "preparing" });
+      const record = idFor(store, wallet, () => draw(wallet)); // saved only at the hand-off (T17)
       try {
-        const prepared = await prepareOpening({
-          rpc,
-          creator: wallet,
-          choice,
-          id: BigInt(record.id),
-          deploySlot: BUILT_FOR,
-        });
+        const [prepared, metric] = await Promise.all([
+          prepareOpening({ rpc, creator: wallet, choice, id: BigInt(record.id), deploySlot: BUILT_FOR }),
+          choice.metricAccount ? Promise.resolve(choice.metricAccount) : sponsoredPriceAddress(choice.feedId ?? ""),
+        ]);
         deployConfirmed(); // the SDK checked the deploy before anything else
-        if (prepared.ok) return setFlow({ step: "review", choice, ready: prepared, refreshed });
+        if (!mine(g)) return;
+        if (prepared.ok)
+          return setFlow({ step: "review", choice, ready: prepared, refreshed, creator: wallet, metric, record });
         const failure =
           prepared.stage === "check"
             ? fromRefusal(prepared.check.refusal.errorName)
             : fromSimulation(prepared.simulation);
         if (failure.name === "AlreadyInitialized") {
-          // A campaign already sits at the saved id: this wallet's (another tab, an answer lost before the record
-          // was handed) or another wallet's. The guard's rule says which; nothing is sent either way.
-          const found = await settleOpening(rpc, { ...record, state: "handed", deadline: "0", signature: null }, store);
-          if (found.kind === "opened") return finish({ kind: "already", id: found.id });
-          if (found.kind === "taken") return finish(found);
+          // A campaign already sits at this id: this wallet's (another tab, an answer lost before the record was
+          // saved) or another wallet's. The guard's rule says which; nothing is sent either way.
+          const synthetic = { ...record, state: "handed" as const, deadline: "0", signature: null };
+          const found = await settleOpening(rpc, synthetic, store, watchFor(g, wallet));
+          if (found.kind === "opened") return finish({ kind: "already", id: found.id }, g);
+          if (found.kind === "taken") return finish(found, g);
         }
         setFlow({ step: "failed", failure, cost: "nothing" });
       } catch (error) {
-        setFlow({ step: "failed", failure: fromError(error), cost: "nothing" });
+        if (mine(g)) setFlow({ step: "failed", failure: fromError(error), cost: "nothing" });
       }
     },
-    [wallet, store, draw, finish],
+    [wallet, store, draw, finish, watchFor, next, mine],
   );
 
   const review = useCallback(
@@ -139,23 +136,29 @@ export function useOpenFlow(a: {
       if (!wallet) return;
       const saved = loadOpening(store, wallet);
       if (saved?.state === "handed") return resume(saved); // never a new attempt while one may still land
+      const g = next();
       setFlow({ step: "preparing" });
-      if (!saved && !skipRecent && choice.openingUsd > 0n) {
-        const recent = await recentOpening(rpc, wallet, chainNow).catch(() => null);
-        if (recent) return setFlow({ step: "recent", choice, recent, chainNow });
+      if (!skipRecent && choice.openingUsd > 0n) {
+        const check = await recentOpening(rpc, wallet, chainNow);
+        if (!mine(g)) return;
+        if (check.status !== "none") return setFlow({ step: "recent", choice, check, chainNow });
       }
-      await prepare(choice);
+      await prepare(choice, false, g);
     },
-    [wallet, store, resume, prepare],
+    [wallet, store, resume, prepare, next, mine],
   );
 
   const sign = useCallback(async () => {
     if (flow.step !== "review") return;
-    const { choice, ready } = flow;
-    const record = wallet ? loadOpening(store, wallet) : null;
-    if (!wallet || !record || BigInt(record.id) !== ready.id) {
+    const { choice, ready, record } = flow;
+    const g = next();
+    const saved = wallet ? loadOpening(store, wallet) : null;
+    // Prepared for another wallet, or another tab saved another id meanwhile: never hand these bytes over.
+    if (!wallet || wallet !== flow.creator || BigInt(record.id) !== ready.id || (saved && saved.id !== record.id)) {
       return setFlow({ step: "failed", failure: plain("walletChanged"), cost: "nothing" });
     }
+    // The review leaves the screen at once, so a second click cannot hand the bytes over twice.
+    setFlow({ ...CHECKING, stage: "wallet", total: ready.debit.total, most: ready.debit.maxTotal });
     let left: bigint;
     try {
       // A-8 again: an upgrade may have landed while the summary was on screen.
@@ -165,22 +168,28 @@ export function useOpenFlow(a: {
       ]);
       left = lastValidOf(ready) - height;
     } catch (error) {
-      return setFlow({ step: "failed", failure: fromError(error), cost: "nothing" });
+      if (mine(g)) setFlow({ step: "failed", failure: fromError(error), cost: "nothing" });
+      return;
     }
-    if (left < FRESH_BLOCKS) return prepare(choice, true);
-    setFlow({ step: "signing", stage: "wallet", blocksLeft: null, total: ready.debit.total });
+    if (!mine(g)) return;
+    if (left < FRESH_BLOCKS) return prepare(choice, true, g);
+    const pay = ready.check.payment;
+    paying.current = pay.paid > 0n ? { paid: pay.paid, price: pay.price, exponent: pay.exponent } : null;
     const outcome = await handToWallet({
       rpc,
       ready,
       record,
       store,
       send: (transaction) => sendTransaction(transaction, connection, { preflightCommitment: "confirmed" }),
-      onStage: (stage) => setFlow((f) => (f.step === "signing" ? { ...f, stage } : f)),
-      watch: { onWait },
+      onStage: (stage) => mine(g) && setFlow((f) => (f.step === "signing" ? { ...f, stage } : f)),
+      watch: watchFor(g, wallet),
     });
-    finish(outcome);
-  }, [flow, wallet, store, prepare, sendTransaction, connection, finish, onWait]);
+    finish(outcome, g);
+  }, [flow, wallet, store, prepare, sendTransaction, connection, finish, watchFor, next, mine]);
 
-  const reset = useCallback(() => setFlow({ step: "idle" }), []);
+  const reset = useCallback(() => {
+    next();
+    setFlow({ step: "idle" });
+  }, [next]);
   return { flow, review, prepare, sign, resume, reset };
 }

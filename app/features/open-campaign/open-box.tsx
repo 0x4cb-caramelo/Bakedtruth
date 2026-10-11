@@ -4,8 +4,9 @@
  *          slots; 3 Preview, sticky beside them on a wide screen, shows what the transaction carries; 4 Cost prices it at
  *          Pyth's SOL/USD; on a phone a sticky bar keeps the total and the button. The program decides: the box mirrors
  *          its refusals (A-10), shows the deterministic summary of the very bytes (A-3), and never opens twice (T17).
- *          A prefilled box says so and never signs by itself.
- * Version: 0.1.0
+ *          A prefilled box says so and never signs by itself. Only the verdict of the draft on screen opens the review,
+ *          and the box is inert while the opening is prepared.
+ * Version: 0.2.0 (the Sprint 19 adversarial review, H1)
  * Sprint:  19 (site: open a campaign)
  */
 "use client";
@@ -16,8 +17,8 @@ import { feedsOf } from "@brot/sdk/read";
 import { Notice } from "@/components/ui/notice";
 import { useInstalledWallet } from "@/features/wallet/use-installed-wallet";
 import { KIND_NAME } from "../campaign-page/copy";
-import { issuesAt } from "./check";
-import { BOX } from "./copy";
+import { issuesAt, readyToReview } from "./check";
+import { BOX, KIND_WORDS } from "./copy";
 import { CostSection } from "./cost-section";
 import { DetailsSection } from "./details-section";
 import { templateOf } from "./kinds";
@@ -48,8 +49,11 @@ export function OpenBox({ prefill, names }: { prefill: Prefilled; names: KnownNa
   const facts = previewFacts(inputs);
   const t = templateOf(draft.kind);
   const team = check?.isTeam ?? false;
+  const preparing = flow.flow.step === "preparing";
+  // Only the verdict of the draft on screen opens the review (H1); the box is inert until it is prepared.
   const review = () => {
-    if (check?.choice && world) void flow.review(check.choice, world.clock.unixTimestamp);
+    if (check && readyToReview(check, draft) && check.choice && world)
+      void flow.review(check.choice, world.clock.unixTimestamp);
   };
   const onPick = (s: Suggestion) =>
     setDraft((d) => ({
@@ -62,9 +66,10 @@ export function OpenBox({ prefill, names }: { prefill: Prefilled; names: KnownNa
   const action = (bar: boolean) => (
     <OpenAction
       check={check}
+      draft={draft}
       connected={wallet !== null}
       wallet={installed}
-      preparing={flow.flow.step === "preparing"}
+      preparing={preparing}
       onReview={review}
       bar={bar}
     />
@@ -83,7 +88,10 @@ export function OpenBox({ prefill, names }: { prefill: Prefilled; names: KnownNa
           <span data-refusal={issue.refusal}>{issue.text}</span>
         </Notice>
       ))}
-      <div className="grid grid-cols-1 items-start gap-4 [grid-template-areas:'what'_'details'_'preview'_'cost'] min-[861px]:grid-cols-[minmax(0,1.2fr)_minmax(340px,1fr)] min-[861px]:[grid-template-areas:'what_preview'_'details_preview'_'cost_preview']">
+      <div
+        inert={preparing}
+        className="grid grid-cols-1 items-start gap-4 [grid-template-areas:'what'_'details'_'preview'_'cost'] min-[861px]:grid-cols-[minmax(0,1.2fr)_minmax(340px,1fr)] min-[861px]:[grid-template-areas:'what_preview'_'details_preview'_'cost_preview']"
+      >
         <WhatSection
           kind={draft.kind}
           sources={sources}
@@ -118,13 +126,8 @@ export function OpenBox({ prefill, names }: { prefill: Prefilled; names: KnownNa
       {action(true)}
       <OpenSheet
         flow={flow.flow}
-        review={{
-          sentence: facts.sentence,
-          account: facts.account,
-          targetText: facts.now.target ?? "",
-          persists: store.persists,
-        }}
-        context={{ owner: t.owner, kind: KIND_NAME[draft.kind] }}
+        review={{ names, persists: store.persists }}
+        context={{ owner: t.owner, kind: KIND_NAME[draft.kind], phrase: KIND_WORDS[draft.kind].phrase }}
         onSign={() => void flow.sign()}
         onAgain={() => (flow.reset(), review())}
         onAnyway={() => flow.flow.step === "recent" && void flow.prepare(flow.flow.choice)}

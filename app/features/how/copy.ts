@@ -23,7 +23,7 @@ export const HOW = {
   steps: [
     [
       "Open",
-      "A wallet opens a campaign for US$500 in SOL: 90% becomes a prize in the pot, 10% goes to Brot. The team and launch partners open for free. The question is written from the kind, the account, the target and the date, never from free text.",
+      "A wallet opens a campaign for US$500 or more in SOL: 90% becomes a prize in the pot, 10% goes to Brot. The team and launch partners open for free. The question is written from the kind, the account, the target and the date, never from free text.",
     ],
     [
       "Join",

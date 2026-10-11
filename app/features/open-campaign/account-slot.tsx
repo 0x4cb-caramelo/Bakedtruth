@@ -17,7 +17,7 @@ import { shortAddress } from "@/lib/brot";
 import { explorerAddress } from "@/lib/config";
 import { KIND_NAME } from "../campaign-page/copy";
 import type { KindName } from "../campaign-page/proof";
-import { ACCOUNT } from "./copy";
+import { ACCOUNT, KIND_WORDS } from "./copy";
 import { refusalCopy } from "./copy-refusals";
 import { templateOf } from "./kinds";
 import type { KnownName } from "./names";
@@ -47,7 +47,7 @@ function State({ kind, text, read, names }: { kind: KindName; text: string; read
     const message =
       state.state === "missing"
         ? ACCOUNT.missing
-        : refusalCopy(state.refusal).text({ owner: t.owner, kind: KIND_NAME[kind] });
+        : refusalCopy(state.refusal).text({ owner: t.owner, kind: KIND_NAME[kind], phrase: KIND_WORDS[kind].phrase });
     return (
       <p
         className={`${row} bg-danger-bg text-error`}
@@ -59,7 +59,7 @@ function State({ kind, text, read, names }: { kind: KindName; text: string; read
     );
   }
   const name = names.find((n) => n.address === text && n.kind === kind)?.name;
-  const owner = t.owner.replace(/^the /, "");
+  const owner = t.owner;
   return (
     <p className={`${row} bg-st-open-bg text-st-open-fg`}>
       <Check className="size-4 shrink-0" aria-hidden="true" />
@@ -104,7 +104,7 @@ export function AccountSlot({
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-xs font-medium text-muted">
-        {ACCOUNT.label(templateOf(kind).slot ?? "")}
+        {KIND_WORDS[kind].slot}
       </label>
       <input
         id={id}

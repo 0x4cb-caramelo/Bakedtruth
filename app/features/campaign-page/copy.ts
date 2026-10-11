@@ -37,8 +37,8 @@ export function ruleText(a: {
 }): string {
   const rules: Record<KindName, string> = {
     price: `YES if Pyth's ${a.name} price reaches ${a.target} ${a.below ? "or less" : "or more"}, with its whole confidence band past it, at any moment before ${a.deadline}; that resolves YES at once and locks entries. It counts once a signed Pyth price showing it is posted on-chain within 60 seconds of publication, so a touch of a few seconds may not count. NO if the deadline passes without one; a touch after it does not count. If the price feed stops updating before the deadline, the campaign is voided and every entry is refunded.`,
-    burn: `YES if the total supply of the mint ${a.name} is at or below ${a.target} before ${a.deadline}. Its mint authority is revoked, so the supply cannot grow back; entries lock the moment the target is reached. ${BEFORE}`,
-    lock: `YES if the Meteora pool ${a.name} has at least ${a.target} of liquidity locked for good before ${a.deadline}. Locked liquidity only grows; entries lock the moment the target is reached. ${BEFORE}`,
+    burn: `YES if the total supply of the mint ${a.name} is at or below ${a.target} raw units (the token's smallest unit) before ${a.deadline}. Its mint authority is revoked, so the supply cannot grow back; entries lock the moment the target is reached. ${BEFORE}`,
+    lock: `YES if the Meteora pool ${a.name} has at least ${a.target} liquidity units locked for good before ${a.deadline}. Locked liquidity only grows; entries lock the moment the target is reached. ${BEFORE}`,
     pool: `YES if the stake pool ${a.name} records at least ${a.target} at the start of epoch ${a.epoch}. NO if less. ${EPOCH}`,
     stake: `YES if the vote account ${a.name} has at least ${a.target} of active stake in epoch ${a.epoch}. NO if less. ${EPOCH}`,
   };

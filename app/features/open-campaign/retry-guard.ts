@@ -1,20 +1,24 @@
 /**
- * Purpose: the opening's retry guard (T17, A-9; TP §3.4.10 row 10). The campaign's id is a random u64 drawn once and
- *          saved in this browser before the wallet sees the transaction; every rebuilt transaction reuses it, so a
- *          second send fails on the existing `Campaign` (`AlreadyInitialized`) instead of charging US$500 twice. On a
- *          return without an answer the record says what to wait for: the opening landed once the campaign at its id
- *          exists with this wallet as creator; it can no longer land once the finalized block height passed the
- *          deadline with no campaign there; until then, wait. A landed opening's record is cleared, so the next opening
- *          draws a new id.
- * Version: 0.1.0
+ * Purpose: the opening's retry guard (T17, A-9; TP §3.4.10 row 10). The campaign's id is a random u64 drawn once per
+ *          page and saved in this browser just before the wallet gets the transaction; every rebuilt transaction reuses
+ *          it, so a second send fails on the existing `Campaign` (`AlreadyInitialized`) instead of charging US$500
+ *          twice. On a return without an answer the record says what to wait for: the opening landed once the campaign
+ *          at its id exists with this wallet as creator; it can no longer land once the finalized block height passed
+ *          the deadline with no campaign there; until then, wait. Nothing is written before the hand-off; a refusal in
+ *          the wallet deletes the record at once, a landed opening too; a failed or expired one is kept, so trying
+ *          again reuses its id, and every record goes a day after it was saved (the legal review of Sprint 19, M6).
+ * Version: 0.2.0 (the legal review: written at the hand-off only, pruned after a day whatever its state)
  * Sprint:  19 (site: open a campaign)
  *
  * The store is entry/retry-guard.ts's: this page's memory, mirrored to localStorage when the browser allows it. Nothing
- * here leaves the browser; a settled record is deleted after a day (`pruneSettledOpenings`).
+ * here leaves the browser; a record is deleted a day after it was saved (`pruneSettledOpenings`, when the box loads).
  */
+import { PROGRAM_ID } from "@brot/sdk/read";
+
 import { KEEP_SETTLED_MS, newAttempt, type KeyValueStore } from "../entry/retry-guard";
 
-/** "drawn": the id is saved, nothing handed over yet; "handed": the wallet has it, answer unknown; "refused": provably not sent. */
+/** "drawn": in memory only, nothing handed over yet; "handed": the wallet has it, answer unknown; "expired": handed, and
+ * it can no longer land. ("refused" is read for records an earlier version wrote; a refusal now deletes the record.) */
 export type OpeningState = "drawn" | "handed" | "refused" | "expired";
 
 export type PendingOpening = {
@@ -33,7 +37,8 @@ export type PendingOpening = {
   savedAt: number;
 };
 
-export const openingKey = (creator: string) => `brot-pending-open:${creator}`;
+/** One record per wallet and program: a record left by another program's deploy (another cluster) is never read. */
+export const openingKey = (creator: string) => `brot-pending-open:${PROGRAM_ID}:${creator}`;
 const DIGITS = /^\d{1,20}$/;
 const U64_MAX = (1n << 64n) - 1n;
 
@@ -77,12 +82,12 @@ export function clearOpening(store: KeyValueStore | null, creator: string): void
 
 /**
  * The id this wallet's next opening uses: the saved one while a record is kept (a rebuilt transaction reuses it), or
- * `draw()`'s, saved at once with state "drawn" before anything reaches the wallet.
+ * `draw()`'s (the page's own id) in a record kept in memory: nothing is written until the hand-off saves it.
  */
 export function idFor(store: KeyValueStore | null, creator: string, draw: () => bigint): PendingOpening {
   const saved = loadOpening(store, creator);
   if (saved) return saved;
-  const record: PendingOpening = {
+  return {
     v: 1,
     attempt: newAttempt(),
     id: draw().toString(),
@@ -93,8 +98,6 @@ export function idFor(store: KeyValueStore | null, creator: string, draw: () => 
     state: "drawn",
     savedAt: Date.now(),
   };
-  saveOpening(store, record);
-  return record;
 }
 
 /** The record of a hand-off: same id, a new attempt, the blockhash's last valid height. */
@@ -112,6 +115,11 @@ export const handedRecord = (record: PendingOpening, lastValid: bigint): Pending
 export function updateOpening(store: KeyValueStore | null, record: PendingOpening): void {
   const now = loadOpening(store, record.creator);
   if (!now || now.attempt === record.attempt) saveOpening(store, record);
+}
+
+/** Deletes the record only while it still holds `record`'s attempt (a refusal in the wallet: nothing was sent). */
+export function clearAttemptOpening(store: KeyValueStore | null, record: PendingOpening): void {
+  if (loadOpening(store, record.creator)?.attempt === record.attempt) clearOpening(store, record.creator);
 }
 
 /** What the chain shows now for the record's id. */
@@ -139,7 +147,10 @@ export function decideOpening(record: PendingOpening, now: OpeningNow): OpeningV
   return "wait";
 }
 
-/** Deletes this browser's settled opening records older than a day (privacy: they matter only while they guard). */
+/**
+ * Deletes this browser's opening records saved more than a day ago, whatever their state (privacy: a blockhash lives
+ * about a minute, so an attempt that old can no longer land; they matter only while they guard).
+ */
 export function pruneSettledOpenings(
   local: (KeyValueStore & { key(i: number): string | null; length: number }) | null,
   now: number,
@@ -151,8 +162,7 @@ export function pruneSettledOpenings(
       const key = local.key(i);
       if (!key?.startsWith("brot-pending-open:")) continue;
       const record = JSON.parse(local.getItem(key) ?? "null") as Partial<PendingOpening> | null;
-      const settled = record?.state !== "handed";
-      if (!record || (settled && now - (record.savedAt ?? 0) > KEEP_SETTLED_MS)) stale.push(key);
+      if (!record || now - (record.savedAt ?? 0) > KEEP_SETTLED_MS) stale.push(key);
     }
     stale.forEach((key) => local.removeItem(key));
   } catch {

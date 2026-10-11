@@ -1,12 +1,13 @@
 /**
  * Purpose: the opening's retry guard end to end (T17, A-9; TP §3.4.10 row 10), against the program in LiteSVM behind a
- *          local RPC: the id is drawn once and saved before the wallet sees anything, and every rebuild reuses it; a
- *          wallet that sends and never answers is found opened by the campaign at its id; one that never sent is
- *          declared unlanded only past its last valid block height, and the rebuilt opening then lands once, on the
- *          same id; a second send of that id (from a page that skipped the SDK's check) fails on the existing
- *          `Campaign`, its watch reads it as the first attempt landing, and nothing is charged twice. With the record gone (storage cleared), the wallet's recent opening is
- *          found on-chain. Filter: `bun test tests/ -t "a retried opening reuses its id"`.
- * Version: 0.1.0
+ *          local RPC: the id is the page's until the hand-off saves it, every rebuild reuses it, and a refusal clears
+ *          only its own attempt; a wallet that sends and never answers is found opened by the campaign at its id; one
+ *          that never sent is declared unlanded only past its last valid block height, and the rebuilt opening then
+ *          lands once, on the same id; a second send of that id (from a page that skipped the SDK's check) fails on
+ *          the existing `Campaign`, its watch reads it as the first attempt landing, and nothing is charged twice. The
+ *          look-up for a browser that lost its record is open-recent.test.ts's.
+ *          Filter: `bun test tests/ -t "a retried opening reuses its id"`.
+ * Version: 0.2.0 (the Sprint 19 reviews: saved at the hand-off only)
  * Sprint:  19 (site: open a campaign)
  */
 import { afterEach, describe, expect, test } from "bun:test";
@@ -15,8 +16,15 @@ import { address, compileTransaction, createNoopSigner, createSolanaRpc } from "
 import { bytesToHex, ReaderKind } from "@brot/sdk/read";
 import { buildOpenCampaign, messageFor, type OpeningChoice } from "@brot/sdk/tx";
 
-import { decideOpening, idFor, loadOpening, openingKey } from "../../app/features/open-campaign/retry-guard";
-import { recentOpening } from "../../app/features/open-campaign/recent";
+import {
+  clearAttemptOpening,
+  decideOpening,
+  handedRecord,
+  idFor,
+  loadOpening,
+  openingKey,
+  saveOpening,
+} from "../../app/features/open-campaign/retry-guard";
 import { handToWallet, prepareOpening, type ReadyOpening } from "../../app/features/open-campaign/submit";
 import { BTC_PRICE, newId } from "../brot/flows";
 import { openingWorld } from "../brot/opening";
@@ -44,18 +52,29 @@ async function setup() {
 }
 
 describe("a retried opening reuses its id", () => {
-  test("the id is drawn once and saved before the wallet; a rebuild reuses it", () => {
+  test("the id is the page's until the hand-off saves it; a rebuild reuses the saved one", () => {
     const store = memoryStore();
     let draws = 0;
     const draw = () => (draws++, 12_345n);
     const first = idFor(store, "wallet-a", draw);
-    expect(store.map.has(openingKey("wallet-a"))).toBe(true);
-    expect(loadOpening(store, "wallet-a")).toEqual(first);
+    // Nothing is written before the wallet gets the transaction (the legal review, M6).
+    expect(store.map.has(openingKey("wallet-a"))).toBe(false);
+    expect(first).toMatchObject({ id: "12345", state: "drawn" });
+    const handed = handedRecord(first, 500n);
+    expect(saveOpening(store, handed)).toBe(true);
+    expect(loadOpening(store, "wallet-a")).toEqual(handed);
     expect(idFor(store, "wallet-a", () => 99n).id).toBe("12345");
     expect(draws).toBe(1);
+    // A refusal in the wallet deletes the record of its own attempt only, never a newer one.
+    const newer = handedRecord(handed, 600n);
+    saveOpening(store, newer);
+    clearAttemptOpening(store, handed);
+    expect(loadOpening(store, "wallet-a")?.attempt).toBe(newer.attempt);
+    clearAttemptOpening(store, newer);
+    expect(store.map.has(openingKey("wallet-a"))).toBe(false);
     const at = (creator: string | null, height = 0n, status: "landed" | "failed" | null = null) =>
       decideOpening(
-        { ...first, state: "handed", deadline: "10" },
+        { ...handed, state: "handed", deadline: "10" },
         { campaignCreator: creator, blockHeight: height, status },
       );
     expect([at("wallet-a"), at("wallet-b"), at(null, 11n), at(null, 9n), at(null, 9n, "failed")]).toEqual([
@@ -144,24 +163,5 @@ describe("a retried opening reuses its id", () => {
     expect(outcome).toEqual({ kind: "already", id });
     expect(afterOpen - balance(w, w.creator.address)).toBeLessThanOrEqual(5_000n);
     expect(store.map.has(openingKey(creator))).toBe(false);
-  });
-
-  test("with the record gone, the wallet's opening of the last half hour is found on-chain", async () => {
-    const { w, rpc, choice, store, creator } = await setup();
-    expect(await recentOpening(rpc, creator, now(w.client))).toBeNull();
-    const record = idFor(store, creator, newId);
-    const prepared = ready(await prepareOpening({ rpc, creator, choice, id: BigInt(record.id) }));
-    await handToWallet({
-      rpc,
-      ready: prepared,
-      record,
-      send: testWallet(w.creator, chain!.url),
-      store,
-      watch: { sleep: napThen(() => {}) },
-    });
-    store.map.clear();
-    const found = await recentOpening(rpc, creator, now(w.client));
-    expect(found?.id).toBe(BigInt(record.id));
-    expect(await recentOpening(rpc, creator, now(w.client) + 31n * 60n)).toBeNull();
   });
 });

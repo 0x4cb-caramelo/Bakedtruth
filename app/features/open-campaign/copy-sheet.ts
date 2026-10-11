@@ -4,19 +4,20 @@
  *          the signing steps, the opened campaign, the retried opening that finds its campaign already open, the
  *          recent opening found when this browser kept no record, and one message for each way an opening fails that
  *          is not a program refusal (those are copy-refusals.ts's). What a failure cost reuses the entry's lines.
- * Version: 0.1.0
+ * Version: 0.2.0 (the Sprint 19 copy, legal and adversarial reviews)
  * Sprint:  19 (site: open a campaign)
  */
 import type { FailureKey } from "../entry/failures";
 
 export const SHEET = {
   title: "Check before you sign",
-  sentence: "The sentence",
   network: "Network",
+  onNetwork: (cluster: string) => `Solana ${cluster}`,
   program: "Program",
   id: "Campaign id",
-  idNote: "Saved in this browser before signing, so a retry can't open it twice",
-  idNotKept: "This browser can't keep it across a reload; the box still checks your wallet's recent openings first",
+  idNote: 'Saved in this browser when you press "Sign in wallet", so a retry can\'t open it twice',
+  idNotKept:
+    "This browser can't keep it across a reload. If you reload, the page looks at your wallet's recent openings first.",
   kind: "Kind",
   account: "Account read",
   feed: "Feed id",
@@ -26,36 +27,42 @@ export const SHEET = {
   epoch: "Epoch",
   deadline: "Deadline",
   closes: "Entries close",
+  closesEpoch: (epoch: string) => `Or when epoch ${epoch} starts, if that comes first.`,
   opening: (usd: string) => `Opening · ${usd}`,
   openingNote: (price: string, published: string, raw: string, exponent: number) =>
-    `At Pyth SOL/USD ${price}, its price minus its confidence band, published ${published} (${raw} at exponent ${exponent})`,
+    `At Pyth SOL/USD ${price}, its price minus its confidence band, published ${published} (raw ${raw}, exponent ${exponent})`,
   openingFree: "Opening",
   free: "Free (team key)",
   freeNote: "No prize, no creator share",
-  prize: "Prize, on no side · 90%",
-  fee: "Opening fee, held · 10%",
+  prize: "Prize in the pot (90%)",
+  fee: "Opening fee (10%)",
   most: "Most you'll pay (max_lamports)",
   mostNote: "The quote plus 1%: above it the program refuses",
   rent: "Rent of the two new accounts",
-  rentNote: "Returned when the campaign closes",
+  rentNote: "Returned to you when the campaign is closed after its payouts",
   networkFee: "Network fee",
   total: "Total now",
-  bytes: "What the wallet will sign, read from its bytes",
+  bytes: "What you sign, read from the transaction's bytes",
   walletDiffers: "If your wallet shows something different from this summary, reject it.",
+  /** The legal review (M5): said before an opening, as SHEET.public is before a first entry. */
+  public:
+    "Openings are public and permanent: anyone can see, on-chain and on this site, that this wallet opened this campaign and what it paid. On every kind but price, the campaign's page also shows any entry this wallet makes in it.",
   back: "Back",
   sign: "Sign in wallet",
-  refreshed: "The price or the blockhash moved, so the box prepared the opening again. Check it once more.",
+  refreshed:
+    "The transaction was about to expire, so the page prepared it again at the current price. Check the amounts once more.",
 } as const;
 
 export const STEPS = {
   title: "Approve in your wallet",
-  wallet: (total: string) =>
-    `Your wallet should show about ${total} SOL leaving this wallet for the Brot Markets program. If it shows anything else, reject it.`,
+  wallet: (total: string, most: string) =>
+    `Your wallet should show about ${total} SOL leaving this wallet, at most ${most} SOL. If it shows anything else, reject it.`,
+  walletPlain: "Your wallet should ask you to approve the opening. If it shows anything you did not review, reject it.",
   confirming: "Sent. Waiting for devnet to confirm it.",
   finalizing: "Confirmed. Waiting for devnet to finalize it.",
   checking: "Checking whether your campaign opened…",
   checkingText: (blocks: string | null) =>
-    `Looking it up by its id until the transaction can no longer land${blocks ? ` (${blocks} blocks left)` : ""}. Nothing is sent again.`,
+    `Looking it up by its id until the transaction can no longer land${blocks ? ` (${blocks} ${blocks === "1" ? "block" : "blocks"} left)` : ""}. Nothing is sent again.`,
   closable: "The id is saved: coming back looks the campaign up instead of opening it twice.",
   labels: ["Check", "Sign", "Confirm"],
 } as const;
@@ -63,29 +70,34 @@ export const STEPS = {
 export const DONE = {
   title: "Opened. Your campaign is live.",
   final: "Finalized on devnet.",
-  confirmedOnly: "Confirmed on devnet; finality is still on its way.",
-  listed: "It shows in the list once the read API reads it again.",
+  confirmedOnly: "Confirmed on devnet. Final confirmation is still on its way.",
+  listed:
+    "Its page is ready now. The list of campaigns shows it a little later, unless the team unlists it after a report; it stays open on-chain either way.",
   go: "Go to the campaign",
-  charged: (sol: string, price: string) => `Charged ${sol} SOL at ${price}, the price the program read.`,
-  share: "Share on X",
-  shareText: (sentence: string) => `${sentence}. An On-Chain Campaign on Brot Markets (devnet, test SOL).`,
+  charged: (sol: string, price: string) =>
+    `Charged ${sol} SOL at Pyth SOL/USD ${price} (its price minus its confidence band), the price the program read.`,
 } as const;
 
 export const ALREADY = {
   title: (id: string) => `It's open: campaign ${id}`,
-  text: "This campaign is already open: your first transaction landed. Nothing was charged twice.",
+  text: "This campaign is already open: your first transaction landed. The opening was paid once.",
   go: "Go to it",
 } as const;
 
 export const TAKEN = {
   title: "This id is taken",
-  text: "Another wallet opened a campaign at the id this box drew, so yours could not open there. Nothing was charged. A new id is drawn when you try again.",
+  text: "Another wallet opened a campaign at the id this page drew, so yours could not open there. No opening payment was taken; if your transaction was sent, only its network fee moved. A new id is drawn when you try again.",
 } as const;
 
 export const RECENT = {
-  title: "You opened a campaign a moment ago",
-  text: (id: string, ago: string) =>
-    `This wallet opened campaign ${id} ${ago} ago. If that was this campaign, go to it instead of paying again.`,
+  title: "You opened a campaign recently",
+  text: (id: string, ago: string | null) =>
+    `This wallet opened campaign ${id} ${ago ? `${ago} ago` : "moments ago"}. If that was this campaign, go to it instead of paying again.`,
+  unknownTitle: "Couldn't check this wallet's recent openings",
+  unknownText:
+    "Before a paid opening the page looks for one this wallet made in the last half hour, so a retry can't pay twice. It could not read them right now.",
+  checkAgain: "Check again",
+  anywayUnknown: "Open a new one anyway",
   /** How long ago, by the chain's clock. */
   ago: (seconds: bigint) => (seconds < 60n ? "less than a minute" : `${seconds / 60n} min`),
   go: "Go to it",
@@ -102,7 +114,7 @@ export const FAIL: Partial<Record<FailureKey, { title: string; text: string }>> 
   },
   notLanded: {
     title: "It didn't open",
-    text: "Your wallet gave no answer, and the transaction expired before it landed. Trying again reuses the same id, so it can't open twice.",
+    text: "The transaction expired before it landed. Trying again reuses the same id, so it can't open twice.",
   },
   stillChecking: {
     title: "Still checking your opening",
@@ -110,7 +122,7 @@ export const FAIL: Partial<Record<FailureKey, { title: string; text: string }>> 
   },
   programUpgraded: {
     title: "Brot's program was just updated",
-    text: "This page was built for the program's previous version, so it does not ask your wallet to sign. It reloads to get the page built for the new one.",
+    text: "This page was built for the program's previous version, so it does not ask your wallet to sign. Reload the page to get the version built for the new program.",
   },
   versionUnknown: {
     title: "This page can't confirm the program's version",

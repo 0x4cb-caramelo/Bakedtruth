@@ -4,9 +4,10 @@
  *          "lock" | "pool" | "stake", "name": "<short public name>" }`, changed only by a commit two people review.
  *          A name is not a gate (D-i): any account the reader accepts can still be used and shows its shortened
  *          address. The typeahead searches these and the pinned Pyth feeds; nothing a creator types becomes a name.
- *          The plan's `/api/v1/names` (Sprint 08) does not exist, so the box reads the file itself. A malformed file
- *          fails the build.
- * Version: 0.1.0
+ *          The plan's `/api/v1/names` (Sprint 08) does not exist, so the page reads the file itself on each request (it
+ *          is dynamic: it reads the link's query). A malformed file throws here; the page then goes on with no names, and
+ *          tests/site/open-draft.test.ts fails on it before a merge.
+ * Version: 0.1.1 (the Sprint 19 adversarial review: the header says when the file is read)
  * Sprint:  19 (site: open a campaign)
  */
 import { readFileSync } from "node:fs";

@@ -46,6 +46,7 @@ function titleOf(read: CampaignRead, opened: Opened | undefined): string {
     target: src.target.toString(),
     priceExponent: src.priceExponent,
     metricAccount: src.metricAccount,
+    epoch: src.epoch.toString(),
   });
 }
 

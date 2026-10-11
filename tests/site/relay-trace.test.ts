@@ -121,7 +121,7 @@ describe("the client's rpc trace", () => {
     const record = idFor(store, creator, newId);
     const id = BigInt(record.id);
     await Promise.all([readWorld(rpc), readDraftAccounts(rpc, id, null)]);
-    expect(await recentOpening(rpc, creator, now(w.client))).toBeNull();
+    expect(await recentOpening(rpc, creator, now(w.client))).toEqual({ status: "none" });
     const choice = {
       kind: P.ReaderKind.PriceTouch,
       feedId: P.BTC_USD_FEED_ID,
@@ -139,7 +139,8 @@ describe("the client's rpc trace", () => {
       watch: { sleep: napThen(() => {}) },
     });
     expect(outcome.kind).toBe("opened");
-    expect((await recentOpening(rpc, creator, now(w.client)))?.id).toBe(id);
+    const recent = await recentOpening(rpc, creator, now(w.client));
+    expect(recent.status === "found" ? recent.opening.id : null).toBe(id);
     const seen = new Set(chain.methods);
     expect([...seen].filter((m) => !documented().some((a) => a.method === m))).toEqual([]);
     expect([...seen].some((m) => /subscribe|getProgramAccounts/i.test(m))).toBe(false);

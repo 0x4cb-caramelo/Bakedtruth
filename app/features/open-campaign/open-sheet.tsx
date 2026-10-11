@@ -1,30 +1,29 @@
 /**
  * Purpose: the one dialog of an opening, from "Review and sign" to the campaign's link (spec 3.12): the recent opening
- *          found on-chain, the review (open-review.tsx), the signing steps (the wallet, confirming, finalizing, or
- *          checking an attempt the wallet never answered for, with the blocks left), the opened campaign with its link,
- *          the retried opening already open (T17), the id another wallet took, and each failure with its message, the
- *          program's own code, what it cost and its way out. It cannot be closed while the wallet has the transaction.
- * Version: 0.1.0
+ *          found on-chain (or the look-up that failed), the review (open-review.tsx), the signing steps and a failure
+ *          (sheet-steps.tsx), the opened campaign with its receipt and link, the retried opening already open (T17), and
+ *          the id another wallet took. It cannot be closed while the wallet has the transaction; while the page
+ *          confirms or checks, it can: the id is saved and the watch goes on.
+ * Version: 0.2.0 (the Sprint 19 reviews: the steps split out, the recent look-up's failure)
  * Sprint:  19 (site: open a campaign)
  */
 "use client";
 
 import Link from "next/link";
-import { Check, CircleAlert, LoaderCircle } from "lucide-react";
-import { errorMessage } from "@brot/sdk/read";
 
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
-import { FAUCET_URL } from "@/features/wallet/wallet-state";
-import { ACTIONS, COST, programLine } from "../entry/copy-failures";
-import { reloadForUpgrade } from "../entry/upgrade-pause";
-import { refusalCopy } from "./copy-refusals";
+import type { RefusalContext } from "./copy-refusals";
 import { ALREADY, DONE, FAIL, failTitle, RECENT, SHEET, STEPS, TAKEN } from "./copy-sheet";
+import type { OpenFlow } from "./flow-state";
 import { OpenReview } from "./open-review";
-import { exactSol } from "./quote";
-import type { OpenFlow } from "./use-open-flow";
+import { exactSol, usdText } from "./quote";
+import { Failed, Signing } from "./sheet-steps";
 
-type ReviewProps = Omit<Parameters<typeof OpenReview>[0], "ready" | "choice" | "refreshed" | "onSign" | "onBack">;
+type ReviewProps = Omit<
+  Parameters<typeof OpenReview>[0],
+  "ready" | "choice" | "metric" | "refreshed" | "onSign" | "onBack"
+>;
 
 const Go = ({ id, text }: { id: bigint; text: string }) => (
   <Link
@@ -34,81 +33,6 @@ const Go = ({ id, text }: { id: bigint; text: string }) => (
     {text}
   </Link>
 );
-
-function Signing({ flow }: { flow: Extract<OpenFlow, { step: "signing" }> }) {
-  const text =
-    flow.stage === "wallet"
-      ? STEPS.wallet(flow.total === null ? "the total" : exactSol(flow.total))
-      : flow.stage === "checking"
-        ? STEPS.checkingText(flow.blocksLeft && flow.blocksLeft > 0n ? flow.blocksLeft.toLocaleString("en-US") : null)
-        : flow.stage === "finalizing"
-          ? STEPS.finalizing
-          : STEPS.confirming;
-  const at = flow.stage === "wallet" ? 1 : 2;
-  return (
-    <div className="space-y-3 text-sm">
-      <ol className="grid list-none grid-cols-3 gap-1.5 p-0 text-xs">
-        {STEPS.labels.map((label, i) => (
-          <li key={label} aria-current={i === at ? "step" : undefined} className="flex items-center gap-1.5">
-            {i < at ? (
-              <Check className="size-4" aria-hidden="true" />
-            ) : i === at ? (
-              <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
-            ) : (
-              <span className="size-4" />
-            )}
-            {label}
-          </li>
-        ))}
-      </ol>
-      <p aria-live="polite">{text}</p>
-      <p className="text-xs text-muted">{STEPS.closable}</p>
-    </div>
-  );
-}
-
-type RefusalContext = { owner: string; kind: string };
-
-function Failed(p: {
-  flow: Extract<OpenFlow, { step: "failed" }>;
-  context: RefusalContext;
-  onAgain: () => void;
-  onCheck: () => void;
-  onClose: () => void;
-}) {
-  const { failure, cost, resume } = p.flow;
-  const text = failure.name ? refusalCopy(failure.name).text(p.context) : FAIL[failure.key]?.text;
-  const way = resume
-    ? { label: ACTIONS.check, act: p.onCheck }
-    : failure.key === "programUpgraded"
-      ? { label: ACTIONS.reload, act: () => reloadForUpgrade() }
-      : { label: ACTIONS.again, act: p.onAgain };
-  return (
-    <div className="space-y-3 text-sm">
-      <p className="flex gap-2 rounded-sm bg-danger-bg p-3 text-error" data-refusal={failure.name ?? failure.key}>
-        <CircleAlert className="size-4 shrink-0" aria-hidden="true" />
-        {text}
-      </p>
-      {failure.code !== null && failure.name ? (
-        <p className="text-xs text-muted">
-          {programLine(failure.code, failure.name, failure.programMessage ?? errorMessage(failure.code) ?? "")}
-        </p>
-      ) : null}
-      <p className="text-xs text-muted">{COST[cost]}</p>
-      <div className="flex flex-wrap justify-end gap-2">
-        {failure.key === "notEnoughSol" ? (
-          <a href={FAUCET_URL} target="_blank" rel="noreferrer" className="text-sm underline">
-            {ACTIONS.faucet}
-          </a>
-        ) : null}
-        <Button variant="secondary" onClick={p.onClose}>
-          {ACTIONS.close}
-        </Button>
-        <Button onClick={way.act}>{way.label}</Button>
-      </div>
-    </div>
-  );
-}
 
 export function OpenSheet(p: {
   flow: OpenFlow;
@@ -127,7 +51,9 @@ export function OpenSheet(p: {
     flow.step === "review"
       ? SHEET.title
       : flow.step === "recent"
-        ? RECENT.title
+        ? flow.check.status === "found"
+          ? RECENT.title
+          : RECENT.unknownTitle
         : flow.step === "signing"
           ? flow.stage === "checking"
             ? STEPS.checking
@@ -142,22 +68,45 @@ export function OpenSheet(p: {
               ? (FAIL[flow.failure.key]?.title ?? failTitle(flow.failure.name !== null))
               : "";
   return (
-    <Dialog open={open} title={title} onClose={p.onClose} dismissable={flow.step !== "signing"}>
+    // Only the wallet's own step holds the sheet: once sent or being checked, the id is saved and closing loses nothing.
+    <Dialog
+      open={open}
+      title={title}
+      onClose={p.onClose}
+      dismissable={!(flow.step === "signing" && flow.stage === "wallet")}
+    >
       {flow.step === "review" ? (
         <OpenReview
           {...p.review}
           ready={flow.ready}
           choice={flow.choice}
+          metric={flow.metric}
           refreshed={flow.refreshed}
           onBack={p.onClose}
           onSign={p.onSign}
         />
       ) : flow.step === "recent" ? (
         <div className="space-y-3 text-sm">
-          <p>{RECENT.text(flow.recent.id.toString(), RECENT.ago(flow.chainNow - flow.recent.at))}</p>
-          <Go id={flow.recent.id} text={RECENT.go} />
+          {flow.check.status === "found" ? (
+            <>
+              <p>
+                {RECENT.text(
+                  flow.check.opening.id.toString(),
+                  flow.check.opening.at === null ? null : RECENT.ago(flow.chainNow - flow.check.opening.at),
+                )}
+              </p>
+              <Go id={flow.check.opening.id} text={RECENT.go} />
+            </>
+          ) : (
+            <>
+              <p>{RECENT.unknownText}</p>
+              <Button wide onClick={p.onAgain}>
+                {RECENT.checkAgain}
+              </Button>
+            </>
+          )}
           <Button variant="secondary" wide onClick={p.onAnyway}>
-            {RECENT.anyway}
+            {flow.check.status === "found" ? RECENT.anyway : RECENT.anywayUnknown}
           </Button>
         </div>
       ) : flow.step === "signing" ? (
@@ -167,6 +116,11 @@ export function OpenSheet(p: {
           {flow.outcome.kind === "opened" ? (
             <>
               <p>{flow.outcome.finalized ? DONE.final : DONE.confirmedOnly}</p>
+              {flow.receipt ? (
+                <p className="text-sm" data-testid="receipt">
+                  {DONE.charged(exactSol(flow.receipt.paid), usdText(flow.receipt.price, flow.receipt.exponent))}
+                </p>
+              ) : null}
               <p className="text-xs text-muted">{DONE.listed}</p>
               <Go id={flow.outcome.id} text={DONE.go} />
             </>

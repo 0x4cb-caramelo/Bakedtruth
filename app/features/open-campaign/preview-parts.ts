@@ -1,8 +1,9 @@
 /**
  * Purpose: the pieces of the creation box's preview that read what the box fetched, as pure values (Sprint 19): the
- *          listed feeds with their state read live (TP §3.4.10 row 4), the account slot's state (row 2), and the list
- *          card the campaign will have with no entry yet, built from the arguments the transaction carries.
- * Version: 0.1.0
+ *          listed feeds with their state read live (TP §3.4.10 row 4) and a feed's price now, a raw amount with its
+ *          unit, the account slot's state (row 2), and the list card the campaign will have with no entry yet, built
+ *          from the arguments the transaction carries.
+ * Version: 0.2.0
  * Sprint:  19 (site: open a campaign)
  */
 import type { FetchedAccount, OpenArgs } from "@brot/sdk/read";
@@ -11,7 +12,7 @@ import { formatTarget } from "../campaigns/sentence";
 import type { Card } from "../campaigns/model";
 import { ageText } from "../campaign-page/format";
 import { accountState, feedState, type AccountState } from "./account-check";
-import { SLOTS } from "./copy";
+import { KIND_WORDS, SLOTS } from "./copy";
 import { refusalCopy } from "./copy-refusals";
 import type { Draft } from "./draft";
 import type { BoxWorld } from "./reads";
@@ -20,6 +21,19 @@ import type { BoxWorld } from "./reads";
 export const usd = (price: bigint, exponent: number) => `US$${formatTarget(price, exponent)}`;
 /** Basis points as a short percentage: 1,000 → "10%", 50 → "0.5%". */
 export const pct = (bps: number) => `${bps / 100}%`;
+
+/** A raw amount with its unit (the copy review, M8): burn and lock targets are raw units, not tokens. */
+export const withUnit = (kind: Draft["kind"], text: string) =>
+  KIND_WORDS[kind].unit && kind !== "pool" && kind !== "stake" ? `${text} ${KIND_WORDS[kind].unit}` : text;
+
+/** The feed's price now, when its sponsored account is fresh enough to back a campaign (row 4). */
+export function priceReading(world: BoxWorld | null, feedHex: string | null) {
+  if (!world?.config) return null;
+  const feed = world.feeds.find((f) => f.hex === feedHex);
+  const state = feed ? feedState(feed.account, feed.hex, world.clock, world.config.params.campaignMaxAge) : null;
+  return state?.ok ? state.reading : null;
+}
+export type PriceReading = NonNullable<ReturnType<typeof priceReading>>;
 
 /** One listed feed in the asset slot: its symbol, its price now, its state (row 4) and whether it can back a campaign. */
 export type FeedOption = { hex: string; symbol: string; price: string | null; tag: string; usable: boolean };

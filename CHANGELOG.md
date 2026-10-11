@@ -27,6 +27,36 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **Sprint 19: a caixa de abertura em `/abrir`; qualquer carteira abre uma campanha pelo site** (branch
+  `sprint-19-site-open-campaign`, 10/10/2026; `docs/sprints/sprint-19-site-open-campaign.md`; pull request aberto, não
+  mesclado).
+  - **A caixa** (`app/features/open-campaign/`), como o desenho aprovado da Sprint -1: 1 O quê (a busca nos modelos e
+    nos nomes conhecidos, que nunca sai do navegador, e os cinco tipos), 2 Detalhes (a frase se preenchendo e os campos:
+    o feed da Pyth com o estado lido na hora, a direção, a conta conferida pelas regras do leitor, o alvo, a época, o
+    prazo), 3 Prévia (fixa ao lado no computador) e 4 Custo; no celular, uma barra embaixo com o total e o botão.
+  - **A frase vem do modelo v1 de cada tipo** (`app/features/campaigns/sentence.ts`), a mesma função de todas as
+    páginas: o que quem abre lê é o que o cartão e a página mostram.
+  - **A cotação** é a do SDK, ao preço da Pyth menos a faixa de confiança, com o 90/10 e o `max_lamports` 1% acima
+    (a margem do desenho aprovado). Tudo em lamports exatos. O exemplo de referência do plano virou teste.
+  - **Cada recusa das linhas 1 a 10 tem a sua mensagem** (`copy-refusals.ts`), e treze casos recusados passam pela
+    caixa e, com os mesmos argumentos, direto pelo programa no LiteSVM, que recusa igual (A-10).
+  - **A guarda de nova tentativa (T17):** o id da campanha é sorteado uma vez e guardado no navegador antes de a
+    carteira ver a transação; toda reconstrução usa o mesmo id, então uma segunda tentativa falha na conta que já existe
+    em vez de cobrar US$ 500 de novo. Sem registro salvo, antes de uma abertura paga a caixa procura nas transações
+    recentes da própria carteira uma campanha aberta na última meia hora e a oferece primeiro.
+  - **Antes de assinar,** "Check before you sign" mostra cada argumento e o resumo do SDK dos bytes que a carteira
+    recebe (A-3). Um link preenche os campos e nunca assina. A chave da equipe abre de graça, sem prêmio e sem a parte
+    do criador.
+  - **O teste na web** ganhou a abertura paga (o valor guardado pelo programa é a cotação da caixa) e a da equipe, nas
+    duas larguras, e, no computador, três recusas e a guarda (resposta perdida num recarregamento, tentativa expirada
+    refeita no mesmo id, armazenamento apagado, carteira que nunca responde).
+  - **Também:** a página de taxas aponta para a caixa; `scripts/team/check-opening.ts`, só leitura, confere uma
+    abertura contra a fórmula (os passos no `deploy/devnet/README.md`); a lista de conferência dos navegadores das
+    carteiras (X2.2) passa a existir, com a abertura; a página de privacidade diz o que a caixa guarda e lê.
+  - **Esperando:** a abertura no devnet e a da equipe à mão (escrita no devnet é do fundador); os celulares reais; o
+    preço em US$ do CoinGecko (`/api/v1/price`), os nomes da API, o relay `/rpc` e o bloqueio por país, o
+    `content/partners.json` e o cartão de compartilhar, que são de outras sprints.
+
 - **Sprint 13: o ranking, os avisos e o texto, que fecham o MVP no devnet** (branch `sprint-13-site-notices-copy`,
   10/10/2026; `docs/sprints/sprint-13-site-notices-copy.md`).
   - **`/leaderboard`, o ranking de pontos do devnet:** 1 ponto por campanha em que a carteira entrou no lado que
@@ -116,6 +146,12 @@ recomendado (1a a 12a).
   chip "Paid" esperam o fundador.
 
 ### Changed
+
+- **Sprint 19: a frase das campanhas de queima, trava e stake** (10/10/2026). O cartão e a página dessas campanhas
+  diziam só o tipo e o endereço ("Burn campaign So11…1112"); agora dizem a frase do modelo v1, com o alvo ("So11…1112
+  supply falls to 1,000"). A frase de preço não mudou. **A privacidade** ganhou o registro da abertura que o navegador
+  guarda enquanto ela está a caminho e a leitura das transações recentes da carteira antes de uma abertura paga; a
+  página no ar só muda quando o fundador publicar a landing.
 
 - **Os detalhes do fundador na privacidade, a linha de 18 anos e o docs.brot.markets fora do ar** (10/10/2026, depois
   da mescla do PR #65; branch `fix/privacy-details-docs-down`). A privacidade passa a dar o contato gm@brot.markets,

@@ -3,8 +3,9 @@
  *          over the templates, the pinned Pyth feeds and the reviewed names, with the keyboard of a listbox (arrows,
  *          Enter, Escape) and a polite count for screen readers; outside the grammar, "we can't check this on-chain"
  *          and the nearest templates. Then the five kinds; `StakeAtLeast` says when it opens. What is typed in the
- *          combobox stays in this component's memory: it is never sent, stored or put in the draft (D-j).
- * Version: 0.1.0
+ *          combobox stays in this component's memory and is never sent or stored (D-j); a picked suggestion fills only
+ *          what search.ts says, checked like a typed field.
+ * Version: 0.1.1 (the Sprint 19 reviews: the header says what a suggestion fills; the label from the copy file)
  * Sprint:  19 (site: open a campaign)
  */
 "use client";
@@ -24,7 +25,11 @@ import { TEMPLATES } from "./kinds";
 import { search, type SearchSources, type Suggestion } from "./search";
 
 const label = (s: Suggestion) =>
-  s.feedSymbol ? `${s.feedSymbol} · Pyth price` : s.name ? `${s.name} · ${KIND_NAME[s.kind]}` : KIND_NAME[s.kind];
+  s.feedSymbol
+    ? `${s.feedSymbol} · ${WHAT.pythPrice}`
+    : s.name
+      ? `${s.name} · ${KIND_NAME[s.kind]}`
+      : KIND_NAME[s.kind];
 
 export function WhatSection({
   kind,

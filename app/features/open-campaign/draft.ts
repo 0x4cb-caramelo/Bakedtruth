@@ -3,8 +3,9 @@
  *          kind, the account, the target, the deadline, the epoch on the epoch kinds and, for the price kind, the feed
  *          and the direction; nothing else). Every number is parsed as text into a bigint, never through a float: a
  *          price target in the feed's own exponent, a raw supply or liquidity as a whole number, a stake target in
- *          lamports, whole US$. What a person types in the search box is not part of the draft and is never sent.
- * Version: 0.1.0
+ *          lamports, whole US$. A comma only groups thousands, and a target has no more precision than the sentence
+ *          prints. What a person types in the search box is never sent; a picked suggestion fills fields (search.ts).
+ * Version: 0.2.0 (the Sprint 19 reviews: commas as thousands only, the sentence's precision, the 90-day bound)
  * Sprint:  19 (site: open a campaign)
  */
 import { isAddress, type Address } from "@solana/kit";
@@ -47,26 +48,55 @@ export const EMPTY_DRAFT: Draft = {
   usd: "500",
 };
 
-/** Digits with an optional dot and at most `decimals` decimals; commas, spaces and underscores group thousands. */
+/**
+ * Digits with an optional dot and at most `decimals` decimals. A comma is read only as a thousands separator in its
+ * place ("120,000"); anywhere else ("1,5") the text is refused rather than guessed, since the entry panel reads a comma
+ * as a decimal point (the Sprint 19 adversarial review, M5).
+ */
 export function parseScaled(text: string, decimals: number): bigint | null {
-  const plain = text.trim().replace(/[\s,_]/g, "");
-  const match = /^(\d{1,40})(?:\.(\d+))?$/.exec(plain);
+  const plain = text.trim();
+  const match = /^(\d{1,40}|\d{1,3}(?:,\d{3})+)(?:\.(\d+))?$/.exec(plain);
   if (!match || decimals < 0) return null;
-  const [, whole, fraction = ""] = match;
+  const whole = match[1].replace(/,/g, "");
+  const fraction = match[2] ?? "";
   if (fraction.length > decimals) return null;
   return BigInt(whole) * 10n ** BigInt(decimals) + BigInt(fraction.padEnd(decimals, "0") || "0");
 }
 
+/**
+ * No more precision than the sentence prints (M4), so every page states the very threshold the program stores: a price
+ * at most 2 decimals from US$1 up and 6 significant digits below it; SOL at most 4 decimals; raw units whole.
+ */
+export function withinPrecision(unit: TargetUnit, text: string): boolean {
+  const [whole, fraction = ""] = text.trim().replace(/,/g, "").split(".");
+  if (!/^\d*$/.test(whole) || !/^\d*$/.test(fraction)) return false; // "abc", "1e5": parseScaled says why
+  if (unit === "raw") return fraction === "";
+  if (unit === "sol") return fraction.length <= 4;
+  if (BigInt(whole || "0") > 0n) return fraction.length <= 2;
+  return fraction.replace(/^0+/, "").length <= 6;
+}
+
 /** The target in the kind's raw unit: the feed's exponent for a price (needs it read), lamports for SOL. */
 export function parseTarget(unit: TargetUnit, text: string, priceExponent: number | null): bigint | null {
+  if (!withinPrecision(unit, text)) return null;
   if (unit === "usd") return priceExponent === null || priceExponent > 0 ? null : parseScaled(text, -priceExponent);
   return parseScaled(text, unit === "sol" ? 9 : 0);
 }
 
-/** A moment `days` after `chainNow`, rounded up to the minute, so the date and time fields show a whole minute. */
+/** The ten minutes a transaction may take to land, on top of the program's three-day floor (spec 3.12). */
+export const LAND_MARGIN_SECONDS = 600n;
+
+/**
+ * A moment `days` after `chainNow`, on the minute, so the date and time fields show a whole minute: rounded down (90
+ * days never passes the program's bound), except 3 days, which gets the ten minutes to land and rounds up.
+ */
 export const daysFrom = (chainNow: bigint, days: number) => {
+  if (days <= 3) {
+    const at = chainNow + BigInt(days) * DAY_SECONDS + LAND_MARGIN_SECONDS;
+    return at % 60n === 0n ? at : at + 60n - (at % 60n);
+  }
   const at = chainNow + BigInt(days) * DAY_SECONDS;
-  return at % 60n === 0n ? at : at + 60n - (at % 60n);
+  return at - (at % 60n);
 };
 
 /** A deadline given in days becomes a moment once the chain's clock is known (A-7: never the device's). */

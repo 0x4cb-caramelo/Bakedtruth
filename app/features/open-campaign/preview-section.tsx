@@ -3,13 +3,15 @@
  *          transaction will carry (`OpenArgs` as `checkBox` built them): the sentence; the value now with "if resolved
  *          now"; the rule in the campaign page's own words, with the account and its explorer link, the deadline in UTC
  *          and in the visitor's time, when entries close, the one-sided and void refunds and who decides; the money; the
- *          creator notice on burn, lock and stake kinds (BR-26); and the campaign's card as the list will show it.
- *          Sticky beside the builder on a wide screen; the total and "Review and sign" sit at its foot.
- * Version: 0.1.0
+ *          creator notice on every kind but price (BR-26), with who else can move the number; and the campaign's card
+ *          as the list will show it. A team key's free opening drops the prize's lines. Sticky beside the builder on a
+ *          wide screen; the total and "Review and sign" sit at its foot.
+ * Version: 0.2.0 (the Sprint 19 copy and adversarial reviews: the team variant, the epoch kinds, who else can move it)
  * Sprint:  19 (site: open a campaign)
  */
 "use client";
 
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { CircleAlert, ExternalLink } from "lucide-react";
 
@@ -20,8 +22,10 @@ import { explorerAddress } from "@/lib/config";
 import { CampaignCard } from "../campaigns/campaign-card";
 import { local } from "../campaign-page/format";
 import { PRINCIPLE } from "../how/copy";
-import { BOX, NO_ENTRY_RULE, NO_TAKE_BACK, PREVIEW } from "./copy";
+import { BOX, PREVIEW } from "./copy";
+import { NO_ENTRY_RULE, NO_TAKE_BACK } from "./copy-money";
 import type { PreviewFacts } from "./preview";
+import { useIsClient } from "./use-is-client";
 
 const L = PREVIEW.labels;
 
@@ -34,6 +38,7 @@ const Line = ({ label, children }: { label: string; children: ReactNode }) => (
 
 export function PreviewSection({ facts, footer }: { facts: PreviewFacts; footer: ReactNode }) {
   const n = facts.now;
+  const client = useIsClient();
   return (
     <section
       aria-labelledby="open-preview-h"
@@ -63,6 +68,8 @@ export function PreviewSection({ facts, footer }: { facts: PreviewFacts; footer:
               <b className={cx(n.ifNow === "YES" ? "text-yes" : "text-no")} data-testid="if-now">
                 {n.ifNow}
               </b>
+            ) : facts.epochKind ? (
+              <b className="font-normal">{PREVIEW.decidedAtEpoch}</b>
             ) : (
               <b>–</b>
             )}
@@ -89,19 +96,24 @@ export function PreviewSection({ facts, footer }: { facts: PreviewFacts; footer:
             {facts.deadlineAt !== null ? (
               <Line label={L.deadline}>
                 {formatUtc(facts.deadlineAt)}
-                <small className="block text-muted">{local(facts.deadlineAt)}</small>
+                {client ? <small className="block text-muted">{local(facts.deadlineAt)}</small> : null}
               </Line>
             ) : null}
             {facts.entriesClose !== null ? (
               <Line label={L.closes}>
                 {formatUtc(facts.entriesClose)}
-                <small className="block text-muted">{local(facts.entriesClose)}</small>
+                {client ? <small className="block text-muted">{local(facts.entriesClose)}</small> : null}
               </Line>
             ) : null}
-            <Line label={L.oneSided}>{PREVIEW.oneSided}</Line>
-            <Line label={L.voided}>{PREVIEW.voided}</Line>
-            <Line label={L.noEntry}>{NO_ENTRY_RULE}</Line>
-            <Line label={L.who}>{PREVIEW.who(PRINCIPLE)}</Line>
+            <Line label={L.oneSided}>{facts.team ? PREVIEW.oneSidedTeam : PREVIEW.oneSided}</Line>
+            <Line label={L.voided}>{facts.team ? PREVIEW.voidedTeam : PREVIEW.voided}</Line>
+            {facts.team ? null : <Line label={L.noEntry}>{NO_ENTRY_RULE}</Line>}
+            <Line label={L.who}>
+              {PREVIEW.who(PRINCIPLE)} {facts.creatorNotice ? `${PREVIEW.whoCreator} ` : null}
+              <Link href="/record" className="underline">
+                {PREVIEW.whoLink}
+              </Link>
+            </Line>
           </ul>
         </div>
         <div>
@@ -110,13 +122,16 @@ export function PreviewSection({ facts, footer }: { facts: PreviewFacts; footer:
             {facts.money.map((line) => (
               <li key={line}>{line}</li>
             ))}
-            <li>{NO_TAKE_BACK}</li>
+            {facts.team ? null : <li>{NO_TAKE_BACK}</li>}
           </ul>
         </div>
         {facts.creatorNotice ? (
           <p className="flex gap-2 rounded-sm bg-st-review-bg p-3 text-xs text-st-review-fg" data-notice="creator">
             <CircleAlert className="size-4 shrink-0" aria-hidden="true" />
-            {PREVIEW.creatorNotice}
+            <span>
+              {PREVIEW.creatorNotice}
+              {facts.othersCanPush ? ` ${facts.othersCanPush}` : null}
+            </span>
           </p>
         ) : null}
         <div>
