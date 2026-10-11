@@ -174,6 +174,11 @@ recomendado (1a a 12a).
 
 ### Changed
 
+- **O último desenho do modo foguete do deck** (11/10/2026, pedido do fundador). No fim do slide 5 o mascote passa a
+  bater na lua rindo, no lugar do rosto em pânico. O desenho novo tem o mesmo enquadramento do anterior, então o
+  tamanho, o ponto de apoio, o ângulo e a lua que espera na borda do slide não mudaram. O arquivo ganhou outro nome
+  (`28-batendo-na-lua-feliz.webp`) para nenhum navegador mostrar o antigo guardado. O quadro anterior à batida
+  continua sendo o do foguete em pânico.
 - **Sprint 19: a frase das campanhas de queima, trava e stake** (10/10/2026). O cartão e a página dessas campanhas
   diziam só o tipo e o endereço ("Burn campaign So11…1112"); agora dizem a frase do modelo v1, com o alvo e a unidade
   ("So11…1112 supply falls to 1,000 raw units"; "Stake pool … holds at least … SOL at the start of epoch 812"). A frase
