@@ -29,9 +29,15 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 
 export const WHAT = {
   search: "What should the chain answer?",
-  placeholder: "Try: BTC 120000, burn, stake pool",
+  placeholder: "Try: BTC 120k in 30 days, SOL falls to 90, burn, stake pool",
   searchHelp: "A search over the templates and the known names. What you type here is never sent or stored.",
-  outside: "We can't check this on-chain. Campaigns we can check:",
+  outsideTitle: "We can't check this on-chain.",
+  outsideNext: "Campaigns we can check:",
+  /** A suggestion's head: the asset and its feed, a reviewed name and its owner, or the kind alone. */
+  feedHead: (symbol: string) => `Pyth ${symbol}`,
+  stale: "no fresh price now",
+  example: "an example target; type your own",
+  days: (n: number) => `deadline in ${n} days`,
   count: (n: number) => `${plural(n, "suggestion", "suggestions")}.`,
   countOutside: (n: number) => `We can't check this on-chain. ${plural(n, "campaign", "campaigns")} we can check.`,
   pythPrice: "Pyth price",

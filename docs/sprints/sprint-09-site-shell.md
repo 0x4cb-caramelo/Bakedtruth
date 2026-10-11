@@ -244,6 +244,20 @@ structure of the approved screens (`prototype-lab/campaigns/`, served at `/dev0x
   picked one is selected and connected from that click only (S1); a wallet that does not connect says why. It used to
   connect the first installed wallet and swallow its error, so a refusal or the wrong wallet looked like a dead
   button.
+- **The creation box's search completes what is typed** (Ronaldo, 2026-10-11), as the approved prototype's does
+  (`open-slots.js`). Each suggestion is the whole sentence of the campaign it would start (template v1, the target in
+  the kind's unit, a reviewed name for the address), grouped by kind, its filled slots in bold. It reads:
+  - a direction ("falls to", "drop", "reaches");
+  - a deadline ("in 30 days", "2 weeks"), kept within the program's 3 to 90 days;
+  - a target with "k" or "m" ("120k").
+
+  With the feeds' live prices it never offers a target already met: a target past the price reads the one way the
+  program opens it. A bare number finds the feeds priced near it; an empty box starts with examples a fair way off the
+  price (BTC, SOL and ETH first); a feed without a fresh price is flagged. Outside the grammar, Baked skeptical over
+  "We can't check this on-chain." and the three nearest kinds. Enter takes the first suggestion, and the cursor moves
+  on to the account or the target. The query still stays in the page (D-j); a pick fills only the slots, checked as
+  typed ones. Tests: `tests/site/open-search.test.ts` and a scene in `tests/e2e/open.e2e.ts`. The chosen deadline chip
+  shows as chosen again (the prototype's `.op-days` style, which the overhaul had left out).
 - **Baked's bubble on a phone** is fitted to the screen again whenever Baked moves while it shows (Sprint 13's rule:
   it never cuts). A tap mid-hop used to leave it past the edge after the landing; the new layout exposed it.
 - **Tests:** two web-smoke expectations follow the design (the phone menu holds "How it works"; the wallet chip, not a

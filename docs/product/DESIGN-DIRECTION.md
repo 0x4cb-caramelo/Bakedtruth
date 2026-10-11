@@ -37,6 +37,9 @@
     - o botão da carteira diz "Connect" e abre a lista "Connect a wallet" do desenho aprovado; a carteira escolhida
       conecta só pelo clique (S1), e o erro dela aparece;
     - um só botão de abrir campanha: o da barra, no amarelo da marca; o grande da página inicial saiu;
+    - a busca da caixa de abertura completa o que se digita, como a do protótipo (`open-slots.js`): a frase inteira de
+      cada campanha sugerida, agrupada por tipo, com a direção, o prazo e o alvo lidos do texto; nunca um alvo já
+      atingido; exemplos na caixa vazia; e o Baked desconfiado fora do que a cadeia confere;
     - "question" virou "campaign" no texto do site;
     - a regra do vocabulário segue inteira, sem exceção.
   - **Onde ficaram as palavras do site, e não as do protótipo:**

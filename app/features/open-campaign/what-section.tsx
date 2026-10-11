@@ -5,7 +5,8 @@
  *          and the nearest templates. Then the five kinds; `StakeAtLeast` says when it opens. What is typed in the
  *          combobox stays in this component's memory and is never sent or stored (D-j); a picked suggestion fills only
  *          what search.ts says, checked like a typed field.
- * Version: 0.1.1 (the Sprint 19 reviews: the header says what a suggestion fills; the label from the copy file)
+ * Version: 0.2.0 (the UI overhaul: the prototype's list, each suggestion a whole campaign sentence; Enter takes the
+ *          first; after a pick the cursor moves to the account or the target; 0.1.1, the Sprint 19 reviews)
  * Sprint:  19 (site: open a campaign)
  */
 "use client";
@@ -23,13 +24,7 @@ import { BOX, WHAT } from "./copy";
 import { IssueList } from "./issue-list";
 import { TEMPLATES } from "./kinds";
 import { search, type SearchSources, type Suggestion } from "./search";
-
-const label = (s: Suggestion) =>
-  s.feedSymbol
-    ? `${s.feedSymbol} · ${WHAT.pythPrice}`
-    : s.name
-      ? `${s.name} · ${KIND_NAME[s.kind]}`
-      : KIND_NAME[s.kind];
+import { WhatList } from "./what-list";
 
 export function WhatSection({
   kind,
@@ -49,13 +44,17 @@ export function WhatSection({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const result = useMemo(() => search(query, sources), [query, sources]);
+  const { items } = result;
   const pick = (s: Suggestion) => {
     onPick(s);
     setQuery("");
     setOpen(false);
     setActive(-1);
+    // As in the prototype, the cursor goes on to what is left to type: the account, or else the target.
+    const next = s.kind !== "price" && !s.account ? "account" : "target";
+    requestAnimationFrame(() => document.querySelector<HTMLInputElement>(`[data-op-next="${next}"]`)?.focus());
   };
-  const expanded = open && result.items.length > 0;
+  const expanded = open && items.length > 0;
   return (
     <Card as="section" aria-labelledby={`${id}-h`} className="space-y-3 p-4 [grid-area:what]">
       <h2 id={`${id}-h`} className="op-h">
@@ -64,14 +63,15 @@ export function WhatSection({
         </span>
         {BOX.what}
       </h2>
-      <div className="relative">
-        <label htmlFor={`${id}-q`} className="text-xs font-medium text-muted">
+      <div className="op-combo relative">
+        <label htmlFor={`${id}-q`} className="op-label">
           {WHAT.search}
         </label>
-        <div className="mt-1.5 flex items-center gap-2 rounded-sm border border-field-line bg-bg px-3">
-          <Search className="size-4 text-muted" aria-hidden="true" />
+        <div className="op-qbox mt-1.5">
+          <Search className="size-4" aria-hidden="true" />
           <input
             id={`${id}-q`}
+            className="input"
             role="combobox"
             aria-expanded={expanded}
             aria-controls={`${id}-list`}
@@ -87,49 +87,22 @@ export function WhatSection({
             onBlur={() => setOpen(false)}
             onKeyDown={(e) => {
               if (e.key === "Escape") return setOpen(false);
-              if (!["ArrowDown", "ArrowUp", "Enter"].includes(e.key) || result.items.length === 0) return;
+              if (!["ArrowDown", "ArrowUp", "Enter"].includes(e.key) || items.length === 0) return;
               e.preventDefault();
-              if (e.key === "Enter") return active >= 0 && pick(result.items[active]);
+              // Enter takes the highlighted suggestion, or the first, as a search bar does.
+              if (e.key === "Enter") return pick(items[active >= 0 ? active : 0]);
               const step = e.key === "ArrowDown" ? 1 : -1;
               setOpen(true);
-              setActive((i) => (i + step + result.items.length) % result.items.length);
+              setActive((i) => (i + step + items.length) % items.length);
             }}
-            className="min-h-11 w-full bg-transparent py-2.5 text-base text-text outline-none"
           />
+          {expanded ? <WhatList id={id} result={result} active={active} onPick={pick} onActive={setActive} /> : null}
         </div>
-        {expanded ? (
-          <div className="absolute inset-x-0 z-20 mt-1 max-h-72 overflow-auto rounded-sm border border-line bg-panel shadow-[var(--shadow-pop)]">
-            {result.outside ? <p className="px-3 pt-2 text-xs font-semibold">{WHAT.outside}</p> : null}
-            <ul id={`${id}-list`} role="listbox" aria-label={WHAT.search} className="list-none p-1">
-              {result.items.map((s, i) => (
-                <li
-                  key={`${s.kind}:${s.feedHex ?? ""}:${s.account ?? ""}`}
-                  id={`${id}-o${i}`}
-                  role="option"
-                  aria-selected={i === active}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => pick(s)}
-                  className={cx(
-                    "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm",
-                    i === active ? "bg-pressed-bg text-pressed-fg" : "hover:bg-row-hover",
-                  )}
-                >
-                  <KindTile kind={s.kind} small />
-                  <span>{label(s)}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-        <p id={`${id}-help`} className="mt-1.5 text-xs text-muted">
+        <p id={`${id}-help`} className="help mt-1.5">
           {WHAT.searchHelp}
         </p>
         <p className="sr-only" aria-live="polite">
-          {open && query
-            ? result.outside
-              ? WHAT.countOutside(result.items.length)
-              : WHAT.count(result.items.length)
-            : ""}
+          {open && query ? (result.outside ? WHAT.countOutside(items.length) : WHAT.count(items.length)) : ""}
         </p>
       </div>
       <fieldset>

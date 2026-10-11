@@ -132,6 +132,7 @@ export function DetailsSection(p: {
           ) : null}
           <input
             id={`${id}-target`}
+            data-op-next="target"
             inputMode="decimal"
             autoComplete="off"
             value={draft.target}

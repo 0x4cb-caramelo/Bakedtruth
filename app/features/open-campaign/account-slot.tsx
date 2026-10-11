@@ -108,6 +108,7 @@ export function AccountSlot({
       </label>
       <input
         id={id}
+        data-op-next="account"
         value={value}
         onChange={(e) => onChange(e.target.value.trim())}
         autoComplete="off"

@@ -103,6 +103,39 @@ O pedido chegou num texto colado, e o Ronaldo confirmou com as próprias palavra
   Os três botões ("Connect" na barra, no painel de entrada e na caixa de abertura) abrem a mesma lista. Os testes na
   web escolhem a carteira de teste nela.
 
+## A busca da caixa de abrir
+
+O Ronaldo pediu que a caixa onde se escreve a campanha, em `/abrir`, completasse o texto enquanto se digita, "como a
+barra de busca do Google", levando a pessoa a uma campanha que a cadeia de fato confere. Ele apontou o protótipo em
+`/dev0x/` como o exemplo quase perfeito.
+
+A busca da Sprint 19 já existia, mas sugeria rótulos soltos ("BTC/USD", "Burn"). Entrou o comportamento do protótipo
+(`open-slots.js`), com o que faltava para ele guiar:
+
+- **Cada sugestão é a frase da campanha** que ela abriria, escrita pelo mesmo modelo v1 da página da campanha, com o
+  alvo na unidade do tipo e o nome revisado no lugar do endereço. O que falta aparece como "…".
+- **Ela lê o que a pessoa escreve:** a direção ("falls to", "drop", "reaches"), o prazo ("in 30 days", "2 weeks",
+  dentro dos 3 a 90 dias do programa) e o alvo com "k" e "m" ("120k"). Palavras de ligação ("in", "to") não contam:
+  sem isso, "in" achava o INF/USD e "to" achava o "token" da queima.
+- **Com o preço da Pyth lido agora, nunca sugere um alvo já atingido**, que o programa recusa. Com o BTC a 85 mil,
+  "BTC reaches 50000" vira "BTC/USD falls to 50,000", o único jeito de essa campanha abrir. Corrigir a direção pareceu
+  melhor do que esconder a sugestão: a frase mostra a correção antes do clique.
+- **Um número sozinho** ("120000") acha os feeds com preço perto dele. **A caixa vazia** começa com três exemplos 25%
+  acima do preço (BTC, SOL e ETH primeiro), e depois os cinco tipos.
+- **Um feed sem preço fresco** continua achável, marcado "no fresh price now"; a caixa diz o resto quando ele é
+  escolhido.
+- **Fora do que a cadeia confere**, o Baked desconfiado diz "We can't check this on-chain." e mostra os três tipos mais
+  próximos, como no protótipo.
+- **Enter pega a primeira sugestão.** O protótipo só pegava a destacada, mas numa barra de busca o Enter faz alguma
+  coisa. Depois da escolha, o cursor vai para o campo que falta: a conta, ou o alvo.
+
+O que se digita continua só na memória da página (D-j): nada vai para servidor nem fica guardado, e a escolha preenche
+só os campos, conferidos como se tivessem sido digitados. As capturas de tela mostraram mais uma falha, anterior a esta
+mudança: o botão do prazo escolhido ("30 days") não aparecia marcado, porque a revisão visual não tinha levado o estilo
+do protótipo para esses botões. Agora ele aparece. O teste na web da cena nova falhou na primeira rodada por um
+erro do próprio teste: a frase "We can't check this on-chain." aparece duas vezes, na tela e no aviso para leitor de
+tela, e o localizador pegava as duas.
+
 ## O que fica
 
 - O cartão de compartilhar, o painel "About this campaign", a linha do tempo "Where it is" com a campanha aberta, a

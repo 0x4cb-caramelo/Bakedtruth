@@ -51,6 +51,13 @@ recomendado (1a a 12a).
   - **"Connect" abre a lista "Connect a wallet"** do desenho aprovado: as carteiras do navegador, a escolhida ligada só
     pelo clique e o erro da carteira à vista. Antes ele ligava a primeira carteira instalada e engolia o erro, e o
     botão parecia morto.
+  - **A busca da caixa de abrir completa o que se digita**, como uma barra de busca e como o protótipo aprovado
+    (`/dev0x/`): cada sugestão é a frase inteira da campanha que ela abriria ("BTC/USD reaches 120,000"), agrupada por
+    tipo. Ela lê a direção ("falls to", "reaches"), o prazo ("in 30 days", "2 weeks") e o alvo com "k" ("120k"). Com o
+    preço da Pyth lido agora, nunca sugere um alvo já atingido, que o programa recusaria, e a caixa vazia começa com
+    exemplos a uma distância justa do preço. Fora do que a cadeia confere, o Baked desconfiado diz "We can't check
+    this on-chain." e mostra os três tipos mais próximos. Enter pega a primeira sugestão, e o cursor vai para o campo
+    que falta. O que se digita continua só na página (D-j). O botão do prazo escolhido voltou a aparecer marcado.
   - **O balão do Baked no celular:** encaixado na tela de novo sempre que o Baked se move enquanto fala. Antes, um
     toque no meio de um pulo podia deixá-lo cortado na borda; o defeito é anterior e o desenho novo o expôs.
 

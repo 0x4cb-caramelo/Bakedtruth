@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **879** |
+| Arquivos mapeados | **883** |
 | Acima de 200 linhas | **39** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -313,19 +313,20 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`account-check.ts`](app/features/open-campaign/account-check.ts) | the account check of the creation box (D-i: any address; TP §3.4.10 rows 2 and 4), live, through the SDK's copies of the program's readers, owner first and then | 125 |
-| [`account-slot.tsx`](app/features/open-campaign/account-slot.tsx) | the account slot of the creation box (D-i: any address; spec 3.12's states): empty, not an address, checking, no account there, refused by the kind's reader (ow | 140 |
+| [`account-slot.tsx`](app/features/open-campaign/account-slot.tsx) | the account slot of the creation box (D-i: any address; spec 3.12's states): empty, not an address, checking, no account there, refused by the kind's reader (ow | 141 |
 | [`amount-picker.tsx`](app/features/open-campaign/amount-picker.tsx) | the opening amount of the creation box's Cost section (spec 3.12; TP §3.4.10 row 7): US$500, 1,000 or 1,500, or a custom whole number of US$, with what the box  | 71 |
 | [`check-issues.ts`](app/features/open-campaign/check-issues.ts) | what the creation box says before the program's mirror has the whole draft (the Sprint 19 reviews): the stops the box can name early (the pause, a full valve, a | 99 |
 | [`check.ts`](app/features/open-campaign/check.ts) | the creation box's verdict on every change (Sprint 19 DoD; A-10, X0.7): the draft turned into the exact arguments the transaction will carry (`OpenArgs`, with t | 183 |
 | [`copy-money.ts`](app/features/open-campaign/copy-money.ts) | the creation box's money words and notices (BR-01, BR-26; TP §3.4.10, §3.4.16; D-m vocabulary; English per L-01): the charge at Pyth's price, the cost table wit | 105 |
 | [`copy-refusals.ts`](app/features/open-campaign/copy-refusals.ts) | one message for each refusal of `user_open_campaign` (TP §3.4.10, rows 1 to 10; D-m vocabulary; English per L-01), keyed by the program's error name, with the s | 157 |
 | [`copy-sheet.ts`](app/features/open-campaign/copy-sheet.ts) | the words of an opening's sheet, from "Review and sign" to the campaign's link (spec 3.12 of Sprint -1; A-3; T17; D-m vocabulary; English per L-01): "Check befo | 144 |
-| [`copy.ts`](app/features/open-campaign/copy.ts) | the creation box's words (spec 3.12 of Sprint -1; BR-01, BR-02, BR-26; D-m vocabulary; English per L-01): the four sections, the five kinds' words, the fields a | 172 |
+| [`copy.ts`](app/features/open-campaign/copy.ts) | the creation box's words (spec 3.12 of Sprint -1; BR-01, BR-02, BR-26; D-m vocabulary; English per L-01): the four sections, the five kinds' words, the fields a | 178 |
 | [`cost-section.tsx`](app/features/open-campaign/cost-section.tsx) | section 4 of the creation box, "Cost" (spec 3.12; TP §3.4.10, §3.4.16; P-3): the opening amount (US$500 or more, split 90/10 as a whole; amount-picker.tsx), the | 175 |
-| [`deadline-slot.tsx`](app/features/open-campaign/deadline-slot.tsx) | the deadline slot of the creation box (TP §3.4.10 row 5; P1 §3.6): quick choices of 7 to 90 days from the chain's clock (A-7), a date and a time in the visitor' | 124 |
-| [`details-section.tsx`](app/features/open-campaign/details-section.tsx) | section 2 of the creation box, "Details" (spec 3.12): the sentence as it fills (template v1, with its gaps), then the kind's typed slots, each a labelled field  | 176 |
+| [`deadline-slot.tsx`](app/features/open-campaign/deadline-slot.tsx) | the deadline slot of the creation box (TP §3.4.10 row 5; P1 §3.6): quick choices of 7 to 90 days from the chain's clock (A-7), a date and a time in the visitor' | 127 |
+| [`details-section.tsx`](app/features/open-campaign/details-section.tsx) | section 2 of the creation box, "Details" (spec 3.12): the sentence as it fills (template v1, with its gaps), then the kind's typed slots, each a labelled field  | 177 |
 | [`draft.ts`](app/features/open-campaign/draft.ts) | what the creator fills in the creation box, and the exact `OpeningChoice` the SDK prepares from it (D-j: the kind, the account, the target, the deadline, the ep | 158 |
 | [`feed-picker.tsx`](app/features/open-campaign/feed-picker.tsx) | the asset slot of a price campaign (TP §3.4.10 row 4): the Pyth feeds on the program's compiled list, each read live from its sponsored account, with its price  | 63 |
+| [`feed-sources.ts`](app/features/open-campaign/feed-sources.ts) | the pinned feeds as the "What" search reads them (search.ts): each with whether it can back a campaign right now (fresh and verified, by the box's own feedState | 31 |
 | [`flow-state.ts`](app/features/open-campaign/flow-state.ts) | an opening's sheet as values (Sprint 19; A-3, T17): the steps from "Review and sign" to the campaign's link, the receipt of what an opening paid, the step an at | 75 |
 | [`issue-list.tsx`](app/features/open-campaign/issue-list.tsx) | the messages of one place of the creation box (a slot, the box, the wallet), each with an icon by its level (refused, blocked, waiting, needed) so a refusal nev | 39 |
 | [`kinds.ts`](app/features/open-campaign/kinds.ts) | the five templates of the creation box (D-k; P1 §4.2; TP §3.4.10 row 1), one per kind: its reader kind, the template id a link may name, what the account slot i | 107 |
@@ -343,14 +344,16 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`recent.ts`](app/features/open-campaign/recent.ts) | the retry guard's second witness, for a browser whose storage was cleared between the hand-off and the return, or another browser of the same wallet (T17, A-9 [ | 84 |
 | [`retry-guard.ts`](app/features/open-campaign/retry-guard.ts) | the opening's retry guard (T17, A-9; TP §3.4.10 row 10). The campaign's id is a random u64 drawn once per page and saved in this browser just before the wallet  | 174 |
 | [`review-facts.ts`](app/features/open-campaign/review-facts.ts) | what "Check before you sign" says about the campaign, from the signed arguments only (A-3; the Sprint 19 adversarial review, H1): the sentence (template v1) wri | 61 |
-| [`search.ts`](app/features/open-campaign/search.ts) | the search behind "What should the chain answer?" (spec 3.12; TP §3.6, the creation box): known names first (the pinned Pyth feeds and content/account-names.jso | 80 |
+| [`search.ts`](app/features/open-campaign/search.ts) | the search behind "What should the chain answer?" (spec 3.12; TP §3.6, the creation box), which completes what a person types into campaigns the chain can check | 170 |
 | [`sheet-steps.tsx`](app/features/open-campaign/sheet-steps.tsx) | two steps of an opening's sheet (spec 3.12; split from open-sheet.tsx in the Sprint 19 reviews): signing (the wallet, with the total and the most it can take; c | 98 |
 | [`submit.ts`](app/features/open-campaign/submit.ts) | an opening from the box to the chain, without React. `prepareOpening` is the SDK's A-3 preparation for the connected wallet's address (the config, the SOL/USD a | 125 |
+| [`suggestion-text.ts`](app/features/open-campaign/suggestion-text.ts) | what one suggestion of "What should the chain answer?" says (the approved prototype's option, open-slots.js): the campaign sentence it would start, written by t | 45 |
 | [`use-is-client.ts`](app/features/open-campaign/use-is-client.ts) | whether this render is in the browser (the Sprint 19 adversarial review, L12): the visitor's own time zone exists only there, so the creation box writes local t | 18 |
 | [`use-open-box.ts`](app/features/open-campaign/use-open-box.ts) | the creation box's data in React: the draft, the chain as the box reads it (once, then every 15 seconds while the tab is visible), the draft's own accounts (the | 154 |
 | [`use-open-flow.ts`](app/features/open-campaign/use-open-flow.ts) | an opening's steps in React, around submit.ts (A-3, A-8, A-9; T17): "Review and sign" takes the guard's id (the saved one, or the page's for this wallet), then  | 197 |
 | [`watch.ts`](app/features/open-campaign/watch.ts) | watching an opening after the wallet, by polling and never a WebSocket (proposal §2.6): the signature's status (`getSignatureStatuses`), the finalized block hei | 135 |
-| [`what-section.tsx`](app/features/open-campaign/what-section.tsx) | section 1 of the creation box, "What" (spec 3.12; TP §3.6): the combobox "What should the chain answer?" over the templates, the pinned Pyth feeds and the revie | 170 |
+| [`what-list.tsx`](app/features/open-campaign/what-list.tsx) | the suggestions under "What should the chain answer?" (the approved prototype's `.op-drop`, open-slots.js): grouped by kind, the most relevant group first, each | 106 |
+| [`what-section.tsx`](app/features/open-campaign/what-section.tsx) | section 1 of the creation box, "What" (spec 3.12; TP §3.6): the combobox "What should the chain answer?" over the templates, the pinned Pyth feeds and the revie | 143 |
 
 ## `app/features/record/`
 
@@ -1376,7 +1379,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`helpers.ts`](tests/e2e/helpers.ts) | what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page opened with the injected wallet and the runner's answer f | 88 |
 | [`open-guard.e2e.ts`](tests/e2e/open-guard.e2e.ts) | "open a campaign: refusals and the retry guard" in the web smoke (Sprint 19 DoD), once at desktop width: three refusals each with its own message on the box (a  | 149 |
 | [`open-helpers.ts`](tests/e2e/open-helpers.ts) | what the creation box's smoke tests share (Sprint 19): the link that prefills a paid BTC/USD opening, the box and its button as locators, the connection through | 68 |
-| [`open.e2e.ts`](tests/e2e/open.e2e.ts) | "open a campaign" in the web smoke (Sprint 19 DoD; `bun run e2e -- --grep "open a campaign"`): the creation box at /abrir in Chromium at desktop width and at 41 | 70 |
+| [`open.e2e.ts`](tests/e2e/open.e2e.ts) | "open a campaign" in the web smoke (Sprint 19 DoD; `bun run e2e -- --grep "open a campaign"`): the creation box at /abrir in Chromium at desktop width and at 41 | 99 |
 | [`playwright.config.ts`](tests/e2e/playwright.config.ts) | the web smoke's Playwright configuration (Sprint 11; @playwright/test 1.63.0, pinned in package.json, whose Chromium is build 1243): the site built against the  | 27 |
 | [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 65 |
 | [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 165 |
@@ -1487,6 +1490,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`open-recent.test.ts`](tests/site/open-recent.test.ts) | the retry guard's second witness (T17, A-9 [INF]; recent.ts), for a browser that lost its record: against the program in LiteSVM behind a local RPC, the wallet' | 116 |
 | [`open-refusals.test.ts`](tests/site/open-refusals.test.ts) | A-10 and X0.7, the creation box's half (Sprint 19 DoD): every refusal of TP §3.4.10 rows 1 to 10 has its own message in the box's copy; then each refused case t | 105 |
 | [`open-retry.test.ts`](tests/site/open-retry.test.ts) | the opening's retry guard end to end (T17, A-9; TP §3.4.10 row 10), against the program in LiteSVM behind a local RPC: the id is the page's until the hand-off s | 168 |
+| [`open-search.test.ts`](tests/site/open-search.test.ts) | the creation box's search as a search bar (the UI overhaul, the approved prototype's open-slots.js): what a person types becomes campaigns the chain can check.  | 132 |
 | [`page-format.test.ts`](tests/site/page-format.test.ts) | how the campaign page writes what it read: exact grouped integers, a value in its kind's units, an age, the visitor's local time (built with options a browser a | 41 |
 | [`powers.test.ts`](tests/site/powers.test.ts) | the powers table (BR-41, Sprint 13 DoD): content/powers.md is published on /record with who holds each key and the limit of each power (P4 §4.2), its four roles | 122 |
 | [`received.test.ts`](tests/site/received.test.ts) | what "my entries" says a wallet received equals the program's settlement events for that wallet, and the SOL that actually reached it (Sprint 12 DoD), on whole  | 172 |
