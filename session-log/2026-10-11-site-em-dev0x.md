@@ -64,6 +64,12 @@ caminho base só existia no ambiente do build. A unidade agora carrega o mesmo `
 O único erro no console é a folha de estilo do Google que o pacote da carteira pede e a política de segurança do site
 bloqueia, igual à `main`.
 
+## O CI do PR #71
+
+O primeiro CI do #71 falhou no autoteste do projeto: o `/dev0x` entre crases, no mapa do código, parecia um comando
+que não existe. Ele entrou na lista de caminhos do site que o autoteste aceita, ao lado de `/abrir` e `/rpc`, com o
+`/prototype` do landing.
+
 ## O que fica com o Ronaldo e o fundador
 
 - Rodar os passos no servidor e criar as duas rotas no painel do Cloudflare.
