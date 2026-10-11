@@ -1,0 +1,50 @@
+# Purpose: brot-rpc, the relay between browsers or the app and the paid RPC (Sprint 08; TP §3.5, T14): its own unit,
+#          its own identity and its own provider account, on 127.0.0.1:4202 for the tunnel's /rpc route.
+# Installs: the shared VPS. NOT INSTALLED yet: the founder creates the relay's RPC account (D4, with a hard spending
+#           limit), fills /etc/brot-markets/rpc.env from services/rpc/.env.example, adds the tunnel's /rpc route, and
+#           then enables this unit. Check it first with `systemd-analyze security brot-rpc.service`.
+# Secrets: RELAY_UPSTREAM_URL carries the provider's key: the env file is root-owned, mode 0640, never in the
+#          repository. The relay logs counts only, never the URL, an IP, a header or a parameter.
+
+[Unit]
+Description=Brot Markets brot-rpc relay (/rpc)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=brot-rpc
+Group=brot-rpc
+WorkingDirectory=/srv/brot-markets/rpc/current/services/rpc
+EnvironmentFile=/etc/brot-markets/rpc.env
+# Its own home, created by systemd and the only place it may write (Bun's caches); nothing of the relay's is kept there.
+StateDirectory=brot-rpc
+Environment=HOME=/var/lib/brot-rpc
+ExecStart=/var/lib/brot-markets/bun/bun src/main.ts
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+# Limits: the relay holds buckets and a short cache in memory, nothing on disk.
+MemoryMax=192M
+CPUQuota=50%
+TasksMax=64
+
+# Sandboxing, as the keeper's units; the relay writes nothing.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

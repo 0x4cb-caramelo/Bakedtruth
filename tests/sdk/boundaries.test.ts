@@ -4,8 +4,8 @@
  *          dependency-cruiser must report every rule by name. A rule added without a plant fails the test.
  *          The repository's own tree is never written; `bun run lint:sdk` checks it as it is.
  *          Filter: `bun test tests/ -t "every import rule fires"`.
- * Version: 0.1.0
- * Sprint:  05 (SDK)
+ * Version: 0.1.1 (Sprint 08: the relay's plant, now that services/rpc exists)
+ * Sprint:  05 (SDK); 08
  */
 import { describe, expect, test } from "bun:test";
 import { spawnSync } from "node:child_process";
@@ -28,7 +28,10 @@ const PLANTS: Record<string, [path: string, source: string][]> = {
     [`${SDK}/read/__plant_self.ts`, 'import "../../../../tests/__plant_target";'],
   ],
   "sdk-not-codama-errors": [[`${SDK}/read/__plant_errors.ts`, 'import "../idl/generated/errors/index";']],
-  "read-services-import-read-only": [["services/indexer/__plant.ts", `import "../../${SDK}/tx/index";`]],
+  "read-services-import-read-only": [
+    ["services/indexer/__plant.ts", `import "../../${SDK}/tx/index";`],
+    ["services/rpc/__plant.ts", `import "../../${SDK}/tx/index";`], // the relay, since Sprint 08
+  ],
   "sdk-no-circular": [
     [`${SDK}/read/__plant_a.ts`, 'import "./__plant_b";'],
     [`${SDK}/read/__plant_b.ts`, 'import "./__plant_a";'],

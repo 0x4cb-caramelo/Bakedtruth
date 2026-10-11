@@ -112,10 +112,11 @@ test.describe("each failure with its own message", () => {
       no: "0",
     });
     await sheet(page).getByRole("button", { name: "Close" }).first().click();
-    await page.route("http://127.0.0.1:4241/**", (route) => route.abort());
+    const rpc = `${process.env.E2E_RPC_URL ?? "http://127.0.0.1:4241"}/**`; // the relay's port under E2E_RELAY=1
+    await page.route(rpc, (route) => route.abort());
     await review(page);
     await expect(heading(page, "Can't reach Solana right now")).toBeVisible();
-    await page.unroute("http://127.0.0.1:4241/**");
+    await page.unroute(rpc);
   });
 
   test("entries paused, no fresh price, and not enough SOL", async ({ page }) => {
