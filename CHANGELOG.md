@@ -27,13 +27,14 @@ recomendado (1a a 12a).
 
 ### Added
 
-- **Sprint 08, segunda parte: os nomes, o preço e o relay `brot-rpc`** (branch `sprint-08-price-names-relay`,
+- **Sprint 08, segunda parte: os nomes, o preço e o relay `brot-rpc`** (branch `sprint-08-price-names-relay`, PR #69,
   11/10/2026; `docs/sprints/sprint-08-indexer-api-points.md`; construídos e testados, não implantados).
   - **`/api/v1/names`** na API de leitura: os nomes revisados de `content/account-names.json`, com as regras que saíram
     do site para o SDK (`parseAccountNames`), e os 17 feeds da lista do programa com a conta patrocinada de cada um.
-  - **`/api/v1/price`**: o SOL em US$ só para exibição, da Pyth SOL/USD, o mesmo preço que o programa cobra. O CoinGecko
-    está pronto no código, mas desligado por padrão: a revisão jurídica leu os termos dele e nenhum plano cabe hoje
-    (atribuição em qualquer plano, nada de "gambling", nada de redistribuir o acesso, termos de uso próprios antes).
+  - **`/api/v1/price`**: o SOL em US$ só para exibição, da Pyth SOL/USD, o mesmo preço que o programa cobra. Sem
+    CoinGecko: a revisão jurídica leu os termos dele e nenhum plano cabia (atribuição em qualquer plano, nada de
+    "gambling", nada de redistribuir o acesso, termos de uso próprios antes), e o Ronaldo decidiu tirá-lo (2b); o código
+    dele saiu.
   - **O `brot-rpc`** (`services/rpc/`): o único caminho do navegador até a RPC paga, só com as onze chamadas que os
     clientes da Brot fazem e os argumentos que eles usam; uma transação só com este programa, o ComputeBudget e o
     Lighthouse; a conta de outro programa volta sem os dados; limites por IP e por /64 e /48 do IPv6, esquecidos em
@@ -47,9 +48,13 @@ recomendado (1a a 12a).
     (`docs/legal/2026-10-11-sprint-08-legal-review.md`), com o texto da privacidade para o dia em que o site passar a
     usar o relay. A de segurança achou um caminho para a API de leitura responder com a pilha do erro
     (`?state=constructor`), corrigido junto.
+  - **As decisões do Ronaldo de 11/10** (`docs/business/ideacao-perguntas-e-respostas.md`): sem CoinGecko, só a Pyth
+    (2b); o site passa para o relay no dia em que ele for instalado, com o texto da privacidade no mesmo dia (3a); no
+    devnet, US$ só onde define um custo, a abertura, e nunca como valor de um pote (4a). Ele também aprovou o
+    `content/README.md` como revisor; como a mudança foi feita a pedido dele, a regra de duas pessoas do `content/`
+    ainda pede a revisão do Lucas ou do Bernardo.
   - **Esperando o fundador:** a conta de RPC do relay com limite de gasto, o usuário, o Bun e as credenciais no
-    servidor, as duas regras do Cloudflare, a unidade, a rota `/rpc` e o texto da privacidade (`deploy/vps/README.md`);
-    a decisão sobre o CoinGecko.
+    servidor, as duas regras do Cloudflare, a unidade, a rota `/rpc` e o texto da privacidade (`deploy/vps/README.md`).
 
 - **Sprint 19: a caixa de abertura em `/abrir`; qualquer carteira abre uma campanha pelo site** (branch
   `sprint-19-site-open-campaign`, 10/10/2026; `docs/sprints/sprint-19-site-open-campaign.md`; mesclada na `main` pelo

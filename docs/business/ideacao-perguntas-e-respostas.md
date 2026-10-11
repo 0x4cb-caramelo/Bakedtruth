@@ -9,6 +9,23 @@ Quando uma resposta posterior muda uma anterior, vale a posterior. A seção 1 t
 
 ## 1. Estado consolidado (vale este)
 
+### Decisões de 11 de outubro de 2026, sobre as perguntas da Sprint 08 — prevalecem sobre tudo abaixo
+
+Dadas pelo Ronaldo, num texto que ele colou e depois confirmou na sessão. As perguntas, com as opções, estão em
+`docs/legal/2026-10-11-sprint-08-legal-review.md` (seção (d)); o porquê, em
+`session-log/2026-10-11-sprint-08-nomes-preco-e-relay.md`.
+
+- **Sem CoinGecko (2b).** "Let's drop CoinGecko and just keep Pyth. It is native to Solana, avoids ToS headaches, and
+  is much better for our hackathon timeline." O preço mostrado no site e nos relatórios passa a ser o da Pyth, o mesmo
+  que o programa cobra. Substitui a decisão de 8/10 de usar a CoinGecko para mostrar preço (D-e); o preço de referência
+  das contas do BP (US$ 109,27, lido na CoinGecko em 8/10) continua como registro daquele dia.
+- **O site passa para o relay no dia em que o relay for instalado (3a):** "Switch the day the relay is installed." O
+  texto de privacidade novo entra no ar no mesmo dia.
+- **US$ só onde define um custo (4a):** "Show US$ only where it sets a cost to avoid confusion with the devnet
+  banner." No devnet, o valor em dólar aparece só na abertura, nunca como valor de um pote.
+- **Mais cedo no mesmo dia:** o bloqueio por país fica construído e vazio ("for now we dont need the country block you
+  can do this but dont block nothing yet").
+
 ### Decisões de 10 de outubro de 2026, sobre as perguntas da Sprint 13 — prevalecem sobre tudo abaixo
 
 Dadas pelo Ronaldo, depois da mescla do PR #63: "Yes, 1a to 12a all as recommended". A lista, com as opções, está em

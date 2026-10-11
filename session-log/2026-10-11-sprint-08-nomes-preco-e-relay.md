@@ -83,12 +83,32 @@ não roda o teste na web.
   própria do mesmo Bun, de root, em `/usr/local/lib/brot-rpc/bun`, conferida byte a byte com `cmp`, e nada do keeper
   que está no ar muda.
 
+## As respostas do Ronaldo, o PR e o teste no navegador
+
+- **O PR #69** abriu com a segunda parte da Sprint 08; o envio foi pelo nome da branch, que não acompanhava nada.
+- **As respostas às perguntas da revisão jurídica** chegaram num texto colado, e por isso pedi a confirmação dele com as
+  próprias palavras antes de agir ("Yes, all of it"). **2b:** sem CoinGecko ("Let's drop CoinGecko and just keep
+  Pyth"). Tirei o código inteiro, e não só a chave: a fonte, as configurações, a diferença entre as fontes no log e na
+  saúde, e o `attribution_url`. Código desligado que ninguém vai ligar é só mais coisa para revisar e um convite a
+  religar sem ler os termos. **3a:** o site passa para o relay no dia da instalação. **4a:** no devnet, US$ só onde
+  define um custo. As três foram para o registro das respostas, que prevalece sobre o resto, e o BP ficou na v0.0.4,
+  como nas decisões de 9 e 10/10.
+- **O `content/README.md`:** o Ronaldo aprovou como revisor. Como no `content/powers.md` da Sprint 19, a mudança foi
+  feita a pedido dele, então a segunda pessoa da regra do `content/` continua sendo o Lucas ou o Bernardo.
+- **O deploy em `brot.markets/dev0x`**, pedido em outro texto colado, ficou de lado: o Ronaldo explicou que queria "see
+  and test the work we did in the sprints" no navegador, sem celular por agora, e escolheu rodar aqui. O site subiu
+  nesta máquina contra o devnet, construído para o deploy do programa no slot 509389614, com a API de leitura ao lado.
+  Conferi as oito páginas num navegador sem tela. A lista abre vazia, e não por defeito: as quatro campanhas abertas no
+  devnet são da equipe, ninguém entrou nelas e já passaram de 24 horas, e a regra da Sprint 10 tira essas campanhas da
+  página inicial. Com "Show unlisted" elas aparecem. O console mostra uma folha de estilo do Google que o pacote da
+  carteira pede e que a política de segurança do site bloqueia; isso já estava na `main` e não quebra nada.
+- **O indexador** espera o teste do Ronaldo, a pedido dele.
+
 ## O que fica com o fundador
 
 - Seguir os passos de `deploy/vps/README.md` ("The relay"): a conta de RPC do relay com limite de gasto (D4), o usuário
   `brot-rpc` e a cópia própria do Bun, os dois arquivos de credencial, as duas regras do Cloudflare (o limite por IP em
   `/rpc` e o cabeçalho `x-brot-tunnel`), a unidade, a rota `/rpc` do túnel por último, e o texto da privacidade no
-  mesmo dia.
-- O CoinGecko (D4): escrever ao suporte deles sobre a cláusula de "gambling" e sobre mostrar o preço por uma API
-  própria, ou tirar o CoinGecko do plano e ficar com a Pyth.
+  mesmo dia, que é quando o site passa para o relay (3a).
+- A segunda revisão do `content/README.md` e do `content/powers.md` (o Lucas ou o Bernardo).
 - Conferir no servidor se o `CF-IPCountry` chega pelo túnel (C9), antes de qualquer país entrar na lista.

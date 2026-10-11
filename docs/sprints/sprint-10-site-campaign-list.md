@@ -20,7 +20,9 @@
 ## Not built (carried, with the reason)
 
 - **The US$ value and its source and time:** the read API has no SOL/USD price yet. Carried to the price endpoint
-  (Sprint 08's `/api/v1/price`) and the decision D-e (CoinGecko or Pyth).
+  (Sprint 08's `/api/v1/price`) and the decision D-e (CoinGecko or Pyth). **Settled on 2026-10-11 (Ronaldo):** on
+  devnet a card shows no US$ value (4a: a dollar figure for a test pot would contradict the banner); the endpoint is
+  built on Pyth (2b, no CoinGecko) for when mainnet shows one.
 - **The proof bar** on each card: the price campaign's proof progress is not computed yet.
 - **The share card (BR-33)** and its link: carried to a later sprint.
 - **Partner seal, name and 72-hour highlight:** no `content/partners.json` exists yet, so no card moves up for a partner.
@@ -60,7 +62,8 @@ share card it carries to X.
   - the chance on each side, the share of entries (P1 §3.2);
   - the estimated return, with the word "estimativa", net of the fee and the creator share, from the SDK math;
   - the pot and each side in SOL, the prize when there is one, and the US$ display value with its source and time
-    (D-e), with CoinGecko's attribution if the plan in use requires it **[AC]** (D4; [E79]);
+    (D-e), with CoinGecko's attribution if the plan in use requires it **[AC]** (D4; [E79]); since 2026-10-11, none
+    on devnet (4a), and Pyth's price on mainnet (2b);
   - entries close and deadline; the proof with its bar; the state.
 - [ ] The categories are the five kinds. The filters are the five states and "Saved", kept in `localStorage`. The sort
       is by pot, by entries close and by YES chance.
@@ -100,7 +103,8 @@ The sponsor's seal on a sealed entry (15).
 ## Founder decisions that block the sprint
 
 None open. Sprint -1 must have answered L-24 (where the partner's seal and highlight go). **Answered:** D-d (partners
-open free, with a 72-hour highlight), D-e (CoinGecko for display), D-t (no sponsor request).
+open free, with a 72-hour highlight), D-e (CoinGecko for display; replaced on 2026-10-11 by 2b, Pyth), D-t (no
+sponsor request).
 
 ## Agents and skills
 

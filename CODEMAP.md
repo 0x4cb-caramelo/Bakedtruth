@@ -1084,17 +1084,17 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`config.ts`](services/api/src/config.ts) | the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only), the port and host (loopback by default), the refresh i | 105 |
+| [`config.ts`](services/api/src/config.ts) | the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only), the port and host (loopback by default), the refresh i | 84 |
 | [`dto.ts`](services/api/src/dto.ts) | the JSON shape of a campaign for the site. Amounts are lamport strings, addresses base58, times Unix seconds (strings for the big integers). The state is the SD | 58 |
 | [`hidden.ts`](services/api/src/hidden.ts) | the wallets left out of the public leaderboard at their owner's request (Sprint 13, the privacy review, TP §8.2 question 8): a JSON array of base58 addresses in | 61 |
 | [`history.ts`](services/api/src/history.ts) | the program's own history, read for the leaderboard (Sprint 13) until Sprint 08's indexer exists: every signature of the program through `getSignaturesForAddres | 152 |
 | [`leaderboard.ts`](services/api/src/leaderboard.ts) | `GET /api/v1/leaderboard` (TP §6; Sprint 13, BR-29): devnet points from the program's events (history.ts) and the live campaign accounts (the snapshot), through | 118 |
-| [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, reads the program's new history and the hide list | 115 |
+| [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, reads the program's new history and the hide list | 105 |
 | [`names.ts`](services/api/src/names.ts) | what /api/v1/names serves (TP §6; A-11; Sprint 08): the reviewed account names of content/account-names.json, checked by the SDK's `parseAccountNames` (the rule | 55 |
-| [`price-sources.ts`](services/api/src/price-sources.ts) | the two sources of the display price (D-e, D-f; Sprint 08). CoinGecko's `simple/price` for SOL in US$, with the time CoinGecko last updated it: the paid plan's  | 75 |
-| [`price.ts`](services/api/src/price.ts) | the price /api/v1/price serves (TP §3.5 "Display price", §6; D-e, D-f; Sprint 08): SOL in US$, for display and reports only; the program never reads it. CoinGec | 85 |
+| [`price-source.ts`](services/api/src/price-source.ts) | the display price's source (D-f; Sprint 08): Pyth's SOL/USD sponsored account, read through the API's RPC and decoded by the SDK, the account the program prices | 33 |
+| [`price.ts`](services/api/src/price.ts) | the price /api/v1/price serves (TP §3.5 "Display price", §6; D-f; Sprint 08): SOL in US$, for display only; the program never reads it. It is Pyth's SOL/USD spo | 67 |
 | [`query.ts`](services/api/src/query.ts) | validates the list's query string. An unknown parameter, a bad state, or a limit or offset out of range is a 400 with a named code; nothing is guessed. The stat | 50 |
-| [`routes.ts`](services/api/src/routes.ts) | the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged), /api/v1/campaigns/:address, since Sprint 13 /api/v1/leaderboard  | 150 |
+| [`routes.ts`](services/api/src/routes.ts) | the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged), /api/v1/campaigns/:address, since Sprint 13 /api/v1/leaderboard  | 149 |
 | [`snapshot.ts`](services/api/src/snapshot.ts) | one read of the chain: every campaign account of the program, decoded by the SDK (a wrong owner, tag or version is skipped), with its public state computed from | 46 |
 | [`store.ts`](services/api/src/store.ts) | holds the last good chain snapshot in memory and refreshes it on a timer. A failed refresh keeps the last good snapshot and records the error, so the API answer | 33 |
 
@@ -1104,11 +1104,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`api.test.ts`](services/api/tests/api.test.ts) | the read API's contract with fake data and no cluster: the list's filters and paging, the 400 and 404 answers, the detail route, CORS, the method refusal, the h | 180 |
 | [`board-kit.ts`](services/api/tests/board-kit.ts) | the leaderboard route tests' fake data, with no cluster: campaign rows as the snapshot keeps them (a paid pot with 1 SOL on each side and the devnet rates, open | 110 |
-| [`config.test.ts`](services/api/tests/config.test.ts) | the read API's settings: the refusals (no RPC URL, a public bind, an unknown cluster, a bad switch or plan) and the defaults, since Sprint 13 the leaderboard's  | 47 |
+| [`config.test.ts`](services/api/tests/config.test.ts) | the read API's settings: the refusals (no RPC URL, a public bind, an unknown cluster) and the defaults, since Sprint 13 the leaderboard's and since Sprint 08's  | 39 |
 | [`history.test.ts`](services/api/tests/history.test.ts) | the leaderboard's history reader against a scripted RPC (Sprint 13, the adversarial review's cases): a node that ignores `until` costs a re-listing but never a  | 129 |
 | [`leaderboard-pot.test.ts`](services/api/tests/leaderboard-pot.test.ts) | what the leaderboard route reads from a live account for the founder's answer 3a (2026-10-10), with fake data and no cluster: whether a final pot splits (the mo | 49 |
 | [`leaderboard.test.ts`](services/api/tests/leaderboard.test.ts) | the leaderboard route's contract with fake data and no cluster (Sprint 13): 503 until the program's history has been read (or with no history at all), what heal | 91 |
-| [`names-price.test.ts`](services/api/tests/names-price.test.ts) | /api/v1/names and /api/v1/price with fake data and no cluster (Sprint 08): the names file read with the SDK's rules and the listed feeds with their sponsored ac | 175 |
+| [`names-price.test.ts`](services/api/tests/names-price.test.ts) | /api/v1/names and /api/v1/price with fake data and no cluster (Sprint 08): the names file read with the SDK's rules and the listed feeds with their sponsored ac | 132 |
 
 ## `services/keeper/src/`
 

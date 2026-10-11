@@ -36,12 +36,14 @@ the treasury rule are the founder's items that also gate the day.
 - [ ] The incident plan is rehearsed once: pause and resume.
 - [ ] **The treasury rule is written (P-7):** the platform receives and pays in SOL; the company converts monthly,
       outside the platform, what dollar costs need; the fee is split 25% treasury and 75% operations (BR-15); who
-      signs and on which day; a monthly report in SOL with its US$ value at that day's CoinGecko price (BR-43).
+      signs and on which day; a monthly report in SOL with its US$ value at that day's Pyth SOL/USD price (BR-43;
+      no CoinGecko since 2b, 2026-10-11; whether the accounts need a recognised reference rate is for the accountant
+      and L0).
 - [ ] The monthly volume report that the 180-day stop rule reads exists from the first mainnet day (BR-35).
 - [ ] The site shows the mainnet notices, the terms and the country switch as L0 set them; the devnet notice is gone.
 - [ ] Referral is live from the first mainnet day, if BP-9's reading holds (P-9).
-- [ ] The `release-check` skill passes, and the `usage-monitor` skill is set up for RPC credits, the Pyth and
-      CoinGecko plans, and SOL received and spent.
+- [ ] The `release-check` skill passes, and the `usage-monitor` skill is set up for RPC credits, the Pyth plan,
+      and SOL received and spent.
 - [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
 ## Deliverables

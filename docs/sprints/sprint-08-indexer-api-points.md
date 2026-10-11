@@ -47,10 +47,10 @@ only path from a client to a paid RPC account, and it relays only what Brot's cl
       returns `program_last_deploy_slot`, `schema_version`, `cluster` and `entries_allowed`.
 - [ ] Amounts are lamport strings, addresses base58, times Unix seconds in UTC. An unknown query parameter returns 400.
       An error returns `{ "error": { "code", "message" } }`, never a stack trace.
-- [ ] **`/api/v1/price`** serves SOL's price in US$ from CoinGecko `simple/price`, fetched every few minutes, with its
-      source and time, Pyth SOL/USD as the fallback, and the attribution if the plan requires it. It never reaches the
-      program (D-e, D-f). **Built (2026-10-11),** with Pyth by default: **waiting** for D4, since no CoinGecko plan fits
-      its terms today (the legal review; attribution is due on every plan).
+- [x] **`/api/v1/price`** serves SOL's price in US$, fetched every few minutes, with its source and time. It never
+      reaches the program (D-f). **Done (2026-10-11)** on Pyth SOL/USD only: Ronaldo dropped CoinGecko the same day
+      (2b), after the legal review found no plan whose terms can be met, so the planned CoinGecko source with Pyth as
+      fallback is gone from the code.
 - [x] **`/api/v1/names`** serves `content/account-names.json` (names reviewed by two people, A-11). **Done
       (2026-10-11)**, with the program's listed feeds and their sponsored accounts.
 - [ ] **`content/partners.json`** exists, linking each launch partner's campaign (opened by a team key, P-3) to the
@@ -84,8 +84,8 @@ only path from a client to a paid RPC account, and it relays only what Brot's cl
       last call).
 - [ ] **Evidence and snapshots:** `feed_history` records every update of each sponsored feed with an open campaign; a
       nightly `VACUUM INTO` snapshot reaches VM 2 (T16).
-- [ ] The alerts the indexer feeds (an entry by the creator's own wallet on a burn, lock or stake campaign;
-      CoinGecko and Pyth apart beyond a threshold) reach Sprint 07's alert path, each with its runbook [INF].
+- [ ] The alerts the indexer feeds (an entry by the creator's own wallet on a burn, lock or stake campaign; the gap
+      between CoinGecko and Pyth is gone with 2b) reach Sprint 07's alert path, each with its runbook [INF].
 - [ ] `brot-indexer.service` on `127.0.0.1:4201` and `brot-rpc.service` on `127.0.0.1:4202`, each with its own
       identity, credentials, `MemoryMax` and `CPUQuota`. The tunnel's main host routes `/api/v1` to 4201 and `/rpc` to
       4202 (TP §12); the domain itself still serves the landing until Sprint 09.
@@ -115,16 +115,17 @@ route: none exists. Visit analytics. The relay's allowlist refined from a trace 
 ## Founder decisions that block the sprint
 
 - **Answered:** Q7 (the working default of TP v0.0.1: 1 point per campaign entered on the right side, for devnet);
-  D-e (CoinGecko for display and reports).
-- **Open: D4** for the indexer's RPC account, the relay's RPC account (with a hard spending limit) and CoinGecko. The
-  legal review of 2026-10-11 (`docs/legal/2026-10-11-sprint-08-legal-review.md`) read CoinGecko's terms of 5 Sept
-  2025: "Powered by CoinGecko" on every plan; no use "for or to promote gambling"; no re-distributed access without an
-  agreement; binding user terms with CoinGecko's clauses first; the keyless API not for scheduled polling; the Demo
-  plan for testing, 10,000 calls a month. None can be met today, so the display price is Pyth's, CoinGecko off by
-  default, until the founder decides.
+  D-e (CoinGecko for display and reports), replaced by 2b below.
+- **Open: D4** for the indexer's RPC account and the relay's RPC account (with a hard spending limit).
 - **Answered 2026-10-11 (Ronaldo):** the second part covers names, price, then the relay; the price from CoinGecko with
   Pyth as fallback, once a legal check of CoinGecko's terms allows it (it does not yet: off by default); the relay's
   country gate built but blocking nothing ("dont block nothing yet").
+- **Answered 2026-10-11 (Ronaldo), after the legal review's questions:** **2b**, no CoinGecko: the display price is
+  Pyth's, "native to Solana", and avoids the terms (the legal review of 2026-10-11 had read CoinGecko's terms of 5 Sept
+  2025: "Powered by CoinGecko" on every plan, no use "for or to promote gambling", no re-distributed access, binding
+  user terms first; none could be met); **3a**, the site moves to the relay the day the relay is installed, with the
+  privacy text live the same day; **4a**, on devnet a US$ value shows only where it sets a cost in test SOL (the
+  opening), never as a pot's value.
 
 ## Agents and skills
 
@@ -196,10 +197,9 @@ and the JSON Schemas, the `.env.example` files, `CODEMAP.md`.
   SDK's `parseAccountNames` (moved from the site, so the site, the API and the app share one set of rules), and the
   program's 17 devnet feeds with their sponsored accounts. A missing or broken file keeps the last good list, and
   health names the error.
-- **`/api/v1/price`** (`price.ts`, `price-sources.ts`): SOL in US$ for display only. Pyth SOL/USD by default; CoinGecko's
-  `simple/price` behind `API_COINGECKO=on` (the Demo or paid key in a header, never in the URL), with Pyth when it
-  fails or is older than ten minutes; source, times, staleness and the attribution with its link in each answer; no
-  price older than a day; the gap between the sources logged, and above 2% as `price-gap`.
+- **`/api/v1/price`** (`price.ts`, `price-source.ts`): SOL in US$ for display only, from Pyth SOL/USD; source, times,
+  staleness and the attribution in each answer; a failed read keeps the last price; none older than a day. CoinGecko's
+  `simple/price` was built first behind `API_COINGECKO=on`, with Pyth as fallback, and removed after 2b (below).
 - **`brot-rpc`** (`services/rpc/`): the eleven methods of the trace with their arguments and options; transactions
   with only the program, ComputeBudget and Lighthouse at the top level; account answers cut by owner, an unaccepted
   owner's account answered with its owner and size but no data, ProgramData only as a 45-byte slice; a token bucket
@@ -224,6 +224,12 @@ and the JSON Schemas, the `.env.example` files, `CODEMAP.md`.
   relay's user cannot enter: the unit would not have started. The relay now runs its own root-owned copy of the pinned
   binary (`/usr/local/lib/brot-rpc/bun`, compared byte for byte with `cmp`), and nothing of the running keeper
   changes.
+
+- **The founder's answers (Ronaldo, 2026-10-11), applied in PR #69:** 2b, no CoinGecko, so its source, its settings,
+  the gap between sources and `attribution_url` left the code and `/api/v1/price` reads Pyth only; 3a, the site moves
+  to the relay the day it is installed; 4a, on devnet US$ only where it sets a cost (the plan, Sprint 10's carried
+  item and Sprint 18 updated). He approved `content/README.md` as a reviewer; since the change was made at his
+  request, the `content/` rule's second person is still Lucas or Bernardo (open).
 
 **Reviews:** the legal and privacy review (`docs/legal/2026-10-11-sprint-08-legal-review.md`) turned CoinGecko off by
 default and asked for the relay's timed sweep (R1), both applied; its policy text waits for the day the site moves to

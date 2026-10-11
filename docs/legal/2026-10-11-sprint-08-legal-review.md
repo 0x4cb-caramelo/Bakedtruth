@@ -9,6 +9,12 @@ legal opinion.
 > idle buckets every ten seconds, with a test. P2/F2 applied to the plan, the roadmap and the Sprint 08 doc. The policy
 > blocks of (c) stay here, unpublished, for the day the site moves to the relay. The founder's decisions in (d) and the
 > questions for the lawyer stand.
+>
+> **The decisions in (d), answered the same day by Ronaldo:** 2b, no CoinGecko: the display price is Pyth's, and
+> CoinGecko's code, its settings and `attribution_url` are gone, so its terms no longer apply; 3a, the site moves to the
+> relay the day it is installed, with the policy text of (c) live the same day; 4a, on devnet a US$ value shows only
+> where it sets a cost in test SOL (the opening). The country list stays empty (decided earlier that day). The
+> questions for the lawyer about CoinGecko are moot; the others stand.
 
 > **Disclaimer.** I am not a lawyer. This is a safe first draft, built from public standards, the third parties' own
 > published terms and the project's documents. Before real money, sensitive data or critical jurisdictions (health,

@@ -1,9 +1,8 @@
 /**
- * Purpose: the read API's settings: the refusals (no RPC URL, a public bind, an unknown cluster, a bad switch or plan)
- *          and the defaults, since Sprint 13 the leaderboard's and since Sprint 08's second part the names file and
- *          the display price's (CoinGecko keyless on the Demo plan's root, a price every 3 minutes). Moved from
- *          api.test.ts.
- * Version: 0.1.0
+ * Purpose: the read API's settings: the refusals (no RPC URL, a public bind, an unknown cluster) and the defaults,
+ *          since Sprint 13 the leaderboard's and since Sprint 08's second part the names file and the display price's
+ *          interval (a Pyth price every 3 minutes). Moved from api.test.ts.
+ * Version: 0.2.0 (2b: no CoinGecko settings)
  * Sprint:  08 (indexer and API)
  */
 import { describe, expect, test } from "bun:test";
@@ -31,16 +30,9 @@ describe("config", () => {
       historyPerRefresh: 200,
       hiddenFile: null,
       historyRpcUrl: null,
-      // Sprint 08: the repository's names file, a price every 3 minutes, CoinGecko keyless on the Demo plan's root.
+      // Sprint 08: the repository's names file and a Pyth price every 3 minutes.
       namesFile: expect.stringMatching(/content\/account-names\.json$/),
       priceRefreshMs: 180_000,
-      coingecko: false, // off by the legal review of 2026-10-11
-      coingeckoKey: null,
-      coingeckoPlan: "demo",
     });
-    expect(() => loadApiConfig({ API_RPC_URL: "https://rpc.example.test", API_COINGECKO: "yes" })).toThrow("on or off");
-    expect(() => loadApiConfig({ API_RPC_URL: "https://rpc.example.test", API_COINGECKO_PLAN: "free" })).toThrow(
-      "demo or pro",
-    );
   });
 });

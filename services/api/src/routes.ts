@@ -4,7 +4,7 @@
  *          second part /api/v1/names and /api/v1/price. Every answer is JSON with CORS for the site; errors are
  *          {"error": {"code", "message"}}, never a stack trace. Reads only what is in memory: the chain snapshot, the
  *          program's history, the names and the last display price.
- * Version: 0.3.1 (Sprint 08: names and price; the security review: any throw is a JSON 500)
+ * Version: 0.3.2 (2b: no price gap in health; 0.3.1, names and price, any throw a JSON 500)
  * Sprint:  08 (indexer and API, hackathon MVP); 13
  */
 import type { Hidden } from "./hidden";
@@ -77,7 +77,6 @@ function route(store: Store, options: RouteOptions, board: ReturnType<typeof cre
           names_error: options.names ? options.names.lastError() : null,
           price_source: options.price?.current()?.source ?? null,
           price_error: options.price ? options.price.lastError() : null,
-          price_gap_bps: options.price ? options.price.gapBps() : null,
         },
         snap ? 200 : 503,
         cors,

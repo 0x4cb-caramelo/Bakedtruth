@@ -83,7 +83,8 @@ creator's 1%, as you decided.
 | Team scripts and `content/` files | Team operations, partner links, account display names, the void log | Team machines; Git |
 
 **What it rests on.** Your decisions of 2026-10-08: SOL only (D-a). The US$500 opening, 90% prize and 10% Brot (D-b),
-charged at the Pyth price read on-chain, with CoinGecko only for display (D-e, D-f). The team and the 20 to 30 launch
+charged at the Pyth price read on-chain, with CoinGecko only for display (D-e, D-f; on 2026-10-11 Ronaldo dropped
+CoinGecko, so the display price is Pyth's too, 2b). The team and the 20 to 30 launch
 partners open free and keep no 1% (D-c, D-d, P-3). The creator's 1% comes from the pot, and from Brot's fee only so
 that winners never get back less than they put in (D-g, P-2; since the Economic Viability Rule (2026-10-09, §3.4.18) a pot that cannot pay both is refunded instead, so the share never comes from the fee); there is none on a void, in a one-sided pot
 or on the prize (P-1). On a void or a one-sided pot the prize returns to whoever opened, and the 10% follows the cause (P-4). A
@@ -142,7 +143,7 @@ What the repository pins today stays, unless a decision of 2026-10-08 changes it
 | Website | Next.js 16.3.8, React 19.2.8, Tailwind v4; `@solana/wallet-adapter-react` 0.15.40; `@solana-mobile/wallet-standard-mobile` 0.6.0 with an explicit `registerMwa`; `@solana/web3.js` 1.99.0 while wallet-adapter needs it | **[F]** `app/package.json`; MWA registration **[DP]** |
 | Website runtime | Bun 1.4.2 if the staging test passes (build, `next start`, the E2E smoke); Node 22 as the site's fallback only | **[FD]** D-p |
 | Share card | `next/og` (`ImageResponse`), self-hosted fonts; the route convention checked in `app/node_modules/next/dist/docs/` first **[AC]** | **[DP]** |
-| Display price | CoinGecko `simple/price`, server-side, plan per D4 [E79] | **[FD]** D-e, D-f |
+| Display price | Pyth SOL/USD, read server-side by the read API (`/api/v1/price`); no CoinGecko since 2026-10-11 (2b) [E79] | **[FD]** D-f; 2b |
 | Android app | Expo (custom development build); React Native; `@wallet-ui/react-native-kit` 4.3.0 or the MWA protocol packages 2.3.0 / 0.4.0; `dapp-store-cli` 1.0.1; `solana-mobile` CLI 0.5.0, all in `mobile/package.json` [E2][E23] | **[FD]** D-n; versions pinned in Sprint 20 |
 | Web end-to-end | Playwright, pinned in Sprint 11 | **[DP]** |
 | Ops | `cloudflared` 2026.9.3 | **[F]** `knowledge-base/tecnologia/servidor-e-dominio.md` |
@@ -221,7 +222,7 @@ program before the Sprint 04 randomized money test passes.
 | Z2 Service wallets | Keeper wallets 1 and 2, with SOL for network fees only | Call permissionless instructions | Choose an outcome, an amount or a destination; reach the fee account |
 | Z3 Team and admin | One team key per person; the admin and upgrade authority, a 2-of-3 hardware multisig on mainnet | Team keys: confirm, void, contest, pause, open free with no creator share. Multisig: creation parameters, resume, team keys, upgrades, the fee recipient | Invert a result; move a baker's entry; change an open campaign's fee or share |
 | Z4 Read path | Indexer, API, relay, site, app | Copy, aggregate, rank, relay allowlisted traffic, display | Hold a signing key; decide anything about money |
-| Z5 Third parties | RPC providers, Pyth, CoinGecko, email, Cloudflare, the dApp Store | Provide data, transport and distribution | Be trusted for correctness |
+| Z5 Third parties | RPC providers, Pyth, email, Cloudflare, the dApp Store | Provide data, transport and distribution | Be trusted for correctness |
 
 **Architecture invariants [DP]** (proposal §1.5; A-2 was removed with D-q).
 - **A-1** No off-chain process holds a key that can move SOL out of a vault, and no such key exists (§3.4.9).
@@ -229,7 +230,7 @@ program before the Sprint 04 randomized money test passes.
   accounts it depends on, is simulated and is summarised by deterministic code.
 - **A-4** Every off-chain table can be rebuilt from the chain and `content/`, except two evidence tables (price-feed
   history; referral payout ledger), snapshotted nightly to VM 2.
-- **A-5** No browser or app receives a paid RPC key, the Pyth key or the CoinGecko key.
+- **A-5** No browser or app receives a paid RPC key or the Pyth key.
 - **A-6** The site and the app import the same `@brot/sdk` for PDAs, money math, creation checks, public state and
   event decoding; neither has a signing path outside the wallet.
 - **A-7** Public state is computed by one SDK function against chain time, never the device clock.
@@ -1136,7 +1137,7 @@ top is §3.6.
 |---|---|---|---|---|---|---|
 | `brot-keeper` primary | Shared VPS | 127.0.0.1:4210 | None: it re-reads the chain every cycle | Keeper wallet 1; RPC key (keeper account); HMAC secret; Hermes key once bought (D4) | SOL for network fees only. No baker money, no on-chain privilege | 06 |
 | Standby keeper and watchdog | VM 2, at another provider | Outbound only | The nightly snapshots it receives | Keeper wallet 2, never the same as wallet 1; RPC key B (another company); email key; HMAC secret | The same as wallet 1 | 07 |
-| `brot-indexer`, with the `/api/v1` read API | Shared VPS | 127.0.0.1:4201 | SQLite in WAL mode: rebuildable tables and two evidence tables (§4) | RPC key (indexer account); CoinGecko key, only on a paid plan | None | 08 |
+| `brot-indexer`, with the `/api/v1` read API | Shared VPS | 127.0.0.1:4201 | SQLite in WAL mode: rebuildable tables and two evidence tables (§4) | RPC key (indexer account) | None | 08 |
 | `brot-rpc` relay | Shared VPS | 127.0.0.1:4202 | A short-TTL cache in memory | RPC key (`/rpc` account, with a hard spending limit) | None | 08 |
 | `brot-web`, the site | Shared VPS | 127.0.0.1:4200 | None | None | None | 09 (§3.6) |
 | `services/landing`, the provisional site | Shared VPS | 127.0.0.1:4200 | `leads.jsonl` (§8.1) | None | None | Exists **[F]**; leaves at Sprint 09 |
@@ -1268,15 +1269,16 @@ them after devnet (L-09, answered 2a).
 Until the indexer, `services/api` reads the program's own history in memory for it (`/api/v1/leaderboard`, §6); wallets
 whose owner asked to leave the ranking are dropped before ranking (§8.2).
 
-*Display price* (D-e, D-f) **[FD]**. The indexer fetches CoinGecko `simple/price` for SOL in US$ every few minutes,
-server-side, and serves it at `/api/v1/price` with its source and time; Pyth SOL/USD is the fallback. It is for
-display and reports only and never reaches the program [E79][E80]. **Since the Sprint 08 legal review (2026-10-11,
-`docs/legal/2026-10-11-sprint-08-legal-review.md`) [F]:** CoinGecko's API terms (5 Sept 2025) ask for "Powered by
-CoinGecko" on every plan (§4.3), bar any use "for or to promote gambling" (§4.1.7.2) and re-distributing access
-(§4.1.6), and need binding user terms with their clauses (§7.1); its keyless API is "not suitable for production
-workloads, scheduled polling", and the Demo plan is for "testing and exploration", 10,000 calls a month. None can be
-met today, so `/api/v1/price` runs on Pyth SOL/USD, CoinGecko off by default (`API_COINGECKO`), until the founder
-decides D4 (a written answer from CoinGecko, a paid plan, or Pyth for good).
+*Display price* (D-f) **[FD]**. `/api/v1/price` serves Pyth's SOL/USD sponsored account, read server-side every few
+minutes with its publish time: the price the program charges an opening at, for display and reports only; it never
+reaches the program. **No CoinGecko (2b, Ronaldo, 2026-10-11), replacing D-e for display and reports.** The Sprint 08
+legal review of that day (`docs/legal/2026-10-11-sprint-08-legal-review.md`) [F] read CoinGecko's API terms (5 Sept
+2025): "Powered by CoinGecko" on every plan (§4.3), no use "for or to promote gambling" (§4.1.7.2), no re-distributed
+access (§4.1.6) and binding user terms with their clauses (§7.1); its keyless API is "not suitable for production
+workloads, scheduled polling", and the Demo plan is for "testing and exploration", 10,000 calls a month. None could be
+met, and its code is gone [E79][E80]. **On devnet a US$ value shows only where it sets a cost in test SOL** (the
+opening), never as a pot's or a card's value (4a, Ronaldo, 2026-10-11): a dollar figure for a test pot would
+contradict the banner's "test SOL, which has no real value".
 
 *Evidence tables* (A-4) **[DP]**. Two tables cannot be rebuilt from RPC: the history of every sponsored feed with an
 open campaign (`publish_time`, price, confidence), used to judge a void inside the window and as a reference for T8;
@@ -1344,11 +1346,11 @@ Per-method credit weights were not verified; Sprint 08 measures them **[AC]** (p
 | Liveness | Primary down; standby took over; a resolvable campaign idle for more than 10 minutes; a settling one idle for more than 30; keeper SOL below a floor | CTO by email |
 | Results | NO recorded with `met_late`; a second-read mismatch; a credit reserved for more than 7 days | CTO and the reviewer of the day |
 | Open creation | `open_campaigns` above 80% of `max_open_campaigns`; openings per hour above a threshold; every opening by a team key; creator-held entries on burn, lock and stake campaigns | CTO |
-| Opening price | SOL/USD older than `max_price_age` (paid openings blocked); CoinGecko and Pyth apart beyond a threshold | CTO |
+| Opening price | SOL/USD older than `max_price_age` (paid openings blocked) | CTO |
 | Exposure | SOL held in all open vaults, since no cap bounds a bug (§3.4.10; §13) | CTO; the founder monthly |
 | Pyth programs | The receiver's and the push oracle's upgrade slot and configuration (Sprint 07) | CTO |
 | Edge | Unknown tunnel connectors **[AC: the Cloudflare notification to use]**; `/rpc` rate-rule hits | CTO |
-| Cost | Credits per RPC account; the Pyth and CoinGecko plans; SOL received and spent | The founder, monthly, with the `usage-monitor` skill (Sprint 18) |
+| Cost | Credits per RPC account; the Pyth plan; SOL received and spent | The founder, monthly, with the `usage-monitor` skill (Sprint 18) |
 
 Alerts go out from VM 2 through an email API, never the neighbour project's mail server (TP v0.0.1 §3.5); the
 provider is T5. Telegram is a phase-2 channel (v0.0.2 P1:772). The plan's own risk applies: the alert has no backup
@@ -1434,9 +1436,9 @@ system of Sprint -1; it replaces the provisional `services/landing` on `127.0.0.
   - **Names** come from `content/account-names.json` (empty until the team adds a reviewed name) and Pyth's pinned
     feed list, read on the server: `/api/v1/names` (Sprint 08) is not built.
   - **The US$ shown** is the opening's own amounts (US$500 or more, split 90/10 as a whole) and the Pyth price the
-    program charges at, with its publish time: `/api/v1/price` (CoinGecko, D-e) is not built. The box prices an
-    opening from its amount alone, from the first screen, and says "Not priced yet" while the SOL/USD price does not
-    allow it; only a team key reads "Free".
+    program charges at, with its publish time: `/api/v1/price` (Sprint 08, Pyth only since 2b) was not built yet. The
+    box prices an opening from its amount alone, from the first screen, and says "Not priced yet" while the SOL/USD
+    price does not allow it; only a team key reads "Free".
   - **Reads go through the site's RPC** (the public devnet one), not `/rpc`; `docs/technical/relay-allowlist.md` lists
     what the box calls. `brot-rpc`'s country refusal of an opening waits for the relay.
   - **The retry guard's record** is written when "Sign in wallet" hands the transaction over, never before; a refusal in
@@ -1913,7 +1915,7 @@ exposes only `GET /healthz` and `POST /restart` (TP v0.0.1 §5, §12) **[DP]**.
 | `GET /api/v1/wallets/:address/entries` | One wallet's entries, results and payouts ("my entries"). Not built yet: Sprint 12's page reads the chain meanwhile | 08 |
 | `GET /api/v1/leaderboard` | Devnet points. **Built in Sprint 13 [F]** in `services/api` from the program's own history (`history.ts`: in memory, on its own loop, incremental by `until`, every call with a timeout) and the live accounts, until the indexer takes it over; paged; each row is a rank, a wallet, its points and the campaigns it entered; it takes no wallet parameter and drops the wallets on the hide list (§8.2) | 08; 13 |
 | `GET /api/v1/names` | Display names from `content/account-names.json` and the pinned Pyth feed list. **Built in Sprint 08 (2026-10-11) [F]** in `services/api`: the names checked by the SDK's `parseAccountNames` (the site's rules), the feeds with their sponsored accounts; a broken file keeps the last good list | 08 |
-| `GET /api/v1/price` | SOL in US$, with source and time. **Built in Sprint 08 (2026-10-11) [F]** in `services/api`: Pyth SOL/USD on devnet, CoinGecko off by default (the legal review of 2026-10-11, §3.5); when switched on, CoinGecko first and Pyth when it fails or is older than ten minutes; source, times, staleness and attribution with its link in each answer; no price older than a day | 08 |
+| `GET /api/v1/price` | SOL in US$, with source and time. **Built in Sprint 08 (2026-10-11) [F]** in `services/api`: Pyth SOL/USD, the price the program charges at (no CoinGecko: 2b, 2026-10-11, §3.5); source, times, staleness and attribution in each answer; a failed read keeps the last price; none older than a day | 08 |
 | `GET /api/v1/health` | `program_last_deploy_slot`, `schema_version`, `cluster`, `entries_allowed` | 08 |
 
 `campaigns`, `campaigns/:id`, its `activity` and `chance`, `wallets/:address/entries`, `leaderboard` and `health` are
@@ -1941,7 +1943,7 @@ timestamp and body; the keeper checks the signature and the timestamp (TP v0.0.1
 | Never trust the client | The program recomputes every value; the site, the app and the keeper only simulate. No creation rule lives only in the site (A-10) |
 | Test with two users | A cannot receive, close or redirect B's entry; cannot receive B's creator share or refund; cannot open free without a team key; cannot send the fee vault anywhere but `fee_recipient` |
 | Admin routes, limits, errors | No admin route; limits on `/api/v1` and `/rpc`; no stack trace |
-| Service keys server-side only | Keeper wallets, RPC keys, the Hermes key, the CoinGecko key, the HMAC secret and the tunnel token never in a `NEXT_PUBLIC_` variable or a client bundle (A-5) |
+| Service keys server-side only | Keeper wallets, RPC keys, the Hermes key, the HMAC secret and the tunnel token never in a `NEXT_PUBLIC_` variable or a client bundle (A-5) |
 | Least privilege; signed webhooks | One RPC account per service; the Cloudflare token limited to the tunnel; `POST /restart` checks HMAC and time. No inbound webhooks |
 | A leak | Rotate first. A keeper wallet has no on-chain privilege: generate another and move its SOL. A leaked team key opens free campaigns: remove it through the multisig. Record it in `session-log/` |
 
@@ -2232,8 +2234,9 @@ where the full tables are) **[F]**:
   published that day with the provider named and the post on X (R2); the provider's own terms read before choosing it
   (R3); the country list kept empty until the founder, L0 and the C9 check (R5). After the switch, the provider sees
   the wallet without the IP, and only the relay (in memory) and Cloudflare see both; §8.2's line on browser calls going
-  to the provider directly changes that day.
-- **`/api/v1/price`:** PASS: it takes nothing from a visitor; only the server calls CoinGecko or the RPC.
+  to the provider directly changes that day. **The switch (3a, Ronaldo, 2026-10-11):** the site moves to `/rpc` the
+  day the relay is installed, with the policy text live the same day.
+- **`/api/v1/price`:** PASS: it takes nothing from a visitor; only the server reads the RPC (no CoinGecko since 2b).
 - **`/api/v1/names`:** PASS: no person is named today; "never a person" is the two reviewers' check, since the code
   cannot see a person's name (a validator named after a person stays unnamed).
 
@@ -2344,7 +2347,6 @@ No values here. Non-secret settings live in `/etc/brot-markets/<unit>.env` (root
 | `RPC_URL_INDEXER` | Indexer | Credential | Yes |
 | `SQLITE_PATH`, `RATE_LIMIT_PER_MIN` | Indexer | `indexer.env` | No |
 | The relay's provider URL (its own account, T14; name set in Sprint 08) | `brot-rpc` | Credential | Yes |
-| The CoinGecko key, only on a paid plan (D4; name set in Sprint 08) | Indexer | Credential | Yes |
 | `RPC_URL_KEEPER`, `KEEPER_KEYPAIR` | Keeper, one set per provider | Credential | Yes |
 | `KEEPER_MODE` (`primary`, `standby`) | Keeper | `keeper.env` | No |
 | `PRICE_SOURCE_URL`, `PRICE_SOURCE_KEY` | Keeper (Hermes; the key only once bought, D4) | `keeper.env`; the key as a credential | The key, yes |
@@ -2504,7 +2506,7 @@ The business risks are in P4 §7. These are the plan's. Severities marked "(P4 �
 | # | Question | Recommendation or working default | Blocks |
 |---|---|---|---|
 | L0 | The team lawyer's written review (an action, D-s) | Classification first (is a pot inside MP 1.394, or CMN 5.298, or another regime?), then open creation, the US$500 opening, SOL, no caps and no list, the dApp Store, the C-items of §3.7. An outside reader stays a BP proposal (P4 §5.1) | D5; C-06; Sprint 22; the mainnet date (18) |
-| D4 | Budget: RPC accounts, VM 2, email, the Pyth and CoinGecko plans, a Seeker and another Android phone. Includes v0.0.1's Q8 | Devnet below about US$150 a month **[INF]**: Helius Developer (US$49) for the keeper, free tiers elsewhere **[AC]**. Pyth: paid openings need no plan; keyed proofs for mainnet price campaigns need Hermes Starter, US$500 a month [E51], or price campaigns wait. CoinGecko: no plan fits today (the Sprint 08 legal review, 2026-10-11: attribution on every plan, no gambling use, no re-distributed access, binding user terms first; §3.5), so the display price is Pyth's until the founder decides [E79] | 06; 07; 08; 16 (Pyth); 20 (devices) |
+| D4 | Budget: RPC accounts, VM 2, email, the Pyth plan, a Seeker and another Android phone. Includes v0.0.1's Q8 | Devnet below about US$150 a month **[INF]**: Helius Developer (US$49) for the keeper, free tiers elsewhere **[AC]**. Pyth: paid openings need no plan; keyed proofs for mainnet price campaigns need Hermes Starter, US$500 a month [E51], or price campaigns wait. CoinGecko: dropped on 2026-10-11 (2b), since the Sprint 08 legal review found no plan that fits (attribution on every plan, no gambling use, no re-distributed access, binding user terms first; §3.5); the display price is Pyth's [E79] | 06; 07; 08; 16 (Pyth); 20 (devices) |
 | D5 | Attestation of each entry, and wallet screening | (a) None on devnet: gates live in the site, the app and `brot-rpc`. Decide after L0, before Sprint 14. (b) and (c) see wallets with IPs or send addresses to a third party (K-04) | 14 |
 | P-6 | Ceiling of the referral rebate | 0.05 SOL; the US$50 and US$250 thresholds also in SOL (0.4576 and 2.2879 SOL at the reference price **[INF]**, P1 §3.9) | 14 |
 | P-7 | The treasury, with a SOL-only platform | The platform receives and pays in SOL; the company converts monthly what it needs, outside it; `fee_recipient` under the multisig | 06 (runbook); 18 |
@@ -2561,7 +2563,7 @@ L-08 (test USDC), L-17 (the suggestions page) and L-19 (the cap's value) fall aw
 | P-3 | Does the team keep the 1% and pay the US$500? Do partners keep the 1%? | No, no and no: "porque nos ja cobramos taxa"; "parceiros nao ficam com 1%". Every team-key opening: no payment, `creator_share_bps = 0`, no `partner` argument **[FD]** |
 | P-4 | The US$450 prize and the 10% in a one-sided pot and on a void | The prize returns to whoever opened; the 10% follows the cause (`VoidReason`), held in the vault until the outcome (T23) **[FD]** |
 | P-5 | Minimum entry | 0.01 SOL **[FD]** |
-| D-f | The price source for the US$500 | Pyth SOL/USD read on-chain; CoinGecko for display **[FD]** |
+| D-f | The price source for the US$500 | Pyth SOL/USD read on-chain; Pyth for display too, no CoinGecko (2b, 2026-10-11) **[FD]** |
 | Bun for the site | The site on Bun too? (BP index, P4 §2.2) | Yes if the Sprint 09 staging test passes, Node 22 otherwise: decided with the approval of proposal 0.4 (D-p) **[FD]**, as BP v0.0.4 now records (P4 §2.2, §8; the index) |
 | D3 | The Android app's scope | Decided by D-n; timing per §3.7 **[FD]** |
 | D6 | Vocabulary in code and copy | (a): copy first, then code and docs in one PR, per the rename table, before Sprint 02 writes identifiers. Built that way in Sprint 02: the landing copy in `c82be03`, then the identifiers and documents in PR #30. The founder took what Sprint 02 built as decided, in PR #35 (2026-10-08): "as decisões ali são minhas e do Ronaldo, e escritas por ele. O que foi feito lá no código dele a gente traz como nova realidade [...] pode tocar ficha e continuar" **[FD]** |
@@ -2669,7 +2671,7 @@ Closed in Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`; `session-log/
 | C28 | The Cloudflare Cache Rule needed to cache `/api/v1` JSON | 08 |
 | C29 | The `next/og` route convention in this Next.js version | 10 |
 | C31 | The waitlist record's fields named the same in code, README, privacy page and §8.1 | 09 |
-| C32 | Per-method RPC credit weights; CoinGecko's commercial terms (read 2026-10-11: no plan fits today, §3.5) | 08 |
+| C32 | Per-method RPC credit weights (CoinGecko's terms, read 2026-10-11, are closed: no plan fit, and 2b dropped it, §3.5) | 08 |
 | C33 | Which Kit calls the app makes, and what the Hermes engine provides | 20 |
 | C34 | Seed Vault Wallet on devnet; the Android UI test tool | 20 |
 | C35 | The App Links certificate fingerprint and `assetlinks.json` | 20 |
@@ -2697,7 +2699,7 @@ Android app comes from D-n, which BP v0.0.4 records in P1 §2.2 and places after
 | BR-01 | Any wallet opens a campaign for US$500 in SOL, inside the rules | P1 §4.1; D-b | `user_open_campaign`; the creation box | §3.4.10, §3.4.16, §3.6 | 02–03; -1 and 19 |
 | BR-02 | Creation rules in the program: five kinds, the account checked by its reader, no free text, 3–90 days, fixed fees; no list | P1 §4.2; P4 §4.3; D-i, D-k | The opening checks; A-10, A-11 | §3.4.8, §3.4.10 | 02–03 |
 | BR-03 | The creator's 1% of entries, from the pot while winners stay whole, the shortfall from Brot's fee (never reached since the Economic Viability Rule, §3.4.18: a pot that cannot pay both is refunded); none for the team or launch partners | P1 §3.4; D-g; P-2, P-3 (decided) | `creator_share()`; `settle_creator_share`; I11–I13 | §3.4.5, §3.4.13, §3.4.16 | 04 |
-| BR-04 | The opening: 90% prize, 10% to Brot, held in the campaign vault and collected at the outcome (T23); priced by Pyth, shown with CoinGecko (D-f, decided); treasury per P-7 (open) | P1 §4.1; P4 §4.7; D-b, D-e, D-f | Opening conversion; `sweep_fees`; refill and conversion runbook | §3.4.4, §3.4.10, §3.4.16, §12 | 02; 04; 06; 18 |
+| BR-04 | The opening: 90% prize, 10% to Brot, held in the campaign vault and collected at the outcome (T23); priced and shown by Pyth (D-f; 2b, 2026-10-11); treasury per P-7 (open) | P1 §4.1; P4 §4.7; D-b, D-e, D-f | Opening conversion; `sweep_fees`; refill and conversion runbook | §3.4.4, §3.4.10, §3.4.16, §12 | 02; 04; 06; 18 |
 | BR-05 | YES/NO; five public states; at most 90 days | P1 §3.1, §3.6 | State machine; `math/schedule.rs`; SDK `view` | §3.4.2, §3.6 | 02–05 |
 | BR-06 | Entries close at 5% of the duration (24 h–7 d) or at an irreversible fact; early resolution | P1 §3.6, §4.1 | `schedule.rs`; `outcome_knowable` | §3.4.8, §3.4.10 | 02–03 |
 | BR-07 | Repeat entries per wallet, no tokens; a minimum entry of 0.01 SOL (P-5, decided) | P1 §2.1, §3.1, §3.10 | `Entry` PDA; `user_join_campaign`; `expected_entry_total`; `min_entry_lamports` | §3.4.1, §3.4.3 | 02 |

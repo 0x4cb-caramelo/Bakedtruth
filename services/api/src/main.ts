@@ -3,7 +3,7 @@
  *          API_REFRESH_MS, reads the program's new history and the hide list for the leaderboard on a loop of their own
  *          (Sprint 13), the names file with it and the display price on a loop of its own (Sprint 08), and serves
  *          /api/v1 on the loopback address. Logs one JSON line per refresh, never the RPC URL, a key or a wallet.
- * Version: 0.4.1 (Sprint 08: names and price, no development error page; 0.3.0, the history on its own loop)
+ * Version: 0.4.2 (2b: the price from Pyth only; 0.4.1, names and price, no development error page)
  * Sprint:  08 (indexer and API, hackathon MVP); 13
  *
  * Run: API_RPC_URL=... bun services/api/src/main.ts
@@ -15,12 +15,9 @@ import { createHidden } from "./hidden";
 import { createHistory } from "./history";
 import { createNames } from "./names";
 import { createPrice } from "./price";
-import { coingeckoSource, pythSource } from "./price-sources";
+import { pythSource } from "./price-source";
 import { createHandler } from "./routes";
 import { createStore } from "./store";
-
-/** A gap between CoinGecko and Pyth above this is logged as "price-gap", for the alert path (TP §3.5) [AC]. */
-const PRICE_GAP_ALERT_BPS = 200;
 
 const config = loadApiConfig();
 const rpc = rpcFor(config.rpcUrl);
@@ -32,11 +29,7 @@ const history = createHistory(config.historyRpcUrl ? rpcFor(config.historyRpcUrl
 const hidden = createHidden(config.hiddenFile);
 const names = await createNames(config.namesFile);
 const unixNow = () => BigInt(Math.floor(Date.now() / 1_000));
-const price = createPrice({
-  coingecko: config.coingecko ? coingeckoSource({ key: config.coingeckoKey, plan: config.coingeckoPlan }) : null,
-  pyth: pythSource(rpc),
-  now: unixNow,
-});
+const price = createPrice({ pyth: pythSource(rpc), now: unixNow });
 const handle = createHandler(store, {
   corsOrigin: config.corsOrigin,
   cluster: config.cluster,
@@ -93,18 +86,15 @@ async function historyLoop() {
   }
 }
 
-/** The display price, every API_PRICE_REFRESH_MS: its source, a named error and the gap between the sources. */
+/** The display price, every API_PRICE_REFRESH_MS: its source and a named error. */
 async function priceLoop() {
   for (;;) {
     await price.refresh();
-    const gapBps = price.gapBps();
     log({
       event: price.lastError() ? "price-error" : "price",
       source: price.current()?.source ?? null,
       error: price.lastError(),
-      gapBps,
     });
-    if (gapBps !== null && gapBps > PRICE_GAP_ALERT_BPS) log({ event: "price-gap", gapBps });
     await new Promise((done) => setTimeout(done, config.priceRefreshMs));
   }
 }

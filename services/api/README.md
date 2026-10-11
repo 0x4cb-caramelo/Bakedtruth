@@ -13,11 +13,12 @@ every 15 s by default.
 | `/campaigns/:address` | one campaign, or 404                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `/leaderboard`        | devnet points (Sprint 13): `rows` (`rank`, `wallet`, `points`, `entered`) of the wallets with points, with `total`, `offset`, `limit`, `complete`, `rule`, `both_sides_score` (false: the founder's answer 3a, which also leaves out refunded pots and the creator's own wallet on a burn, lock or stake campaign), `as_of_slot`, `chain_time`. `limit` 1 to 100 (default 50); `offset`. No `wallet` parameter, and no success rate (the privacy review). 503 until the history's first read |
 | `/names`              | `names` (`address`, `kind`, `name`: the reviewed names of `content/account-names.json`, checked by the SDK's `parseAccountNames`) and `feeds` (`feed_id`, `symbol`, `account`: the Pyth feeds the program lists, each with its sponsored account), with `chain_time`. No parameters (a query is a 400)                                                                                                                                                                                       |
-| `/price`              | `price`: SOL in US$ for display only (`usd`, `source` `coingecko` or `pyth`, `published_at`, `fetched_at`, `stale`, `attribution`, `use`), with `chain_time`; 503 until a first price. No parameters                                                                                                                                                                                                                                                                                         |
+| `/price`              | `price`: SOL in US$ for display only (`usd`, `source` `pyth`, `published_at`, `fetched_at`, `stale`, `attribution`, `use`), with `chain_time`; 503 until a first price. No parameters                                                                                                                                                                                                                                                                                         |
 
-Health also says `names_error` (a missing or broken names file keeps the last good list), `price_source`,
-`price_error` and `price_gap_bps` (the gap between CoinGecko and Pyth at the last read of both), and `leaderboard_complete` (`null` with no history; `false` while transactions wait for a later refresh or
-after a failed one) and `leaderboard_skipped` (transactions that never read back after five tries).
+Health also says `names_error` (a missing or broken names file keeps the last good list), `price_source` and
+`price_error` (the last read's, named), `leaderboard_complete` (`null` with no history; `false` while transactions wait
+for a later refresh or after a failed one) and `leaderboard_skipped` (transactions that never read back after five
+tries).
 
 **The leaderboard's source (Sprint 13, until the indexer):** every signature of the program at `finalized`, paged back
 to the first, and each landed transaction read once and decoded by the SDK; only the events the points rule reads are
@@ -44,16 +45,11 @@ a file that does not parse keeps the last good list. The chain itself cannot be 
 Amounts are lamport strings, times Unix seconds, addresses base58. An unknown parameter or a bad value is a 400
 `{"error": {"code": "bad_query", "message": ...}}`. A request before the first snapshot is a 503.
 
-**The display price (Sprint 08, D-e, D-f).** By default, Pyth's SOL/USD sponsored account, read through `API_RPC_URL`
-every `API_PRICE_REFRESH_MS` (default 3 minutes): the price the program charges an opening at. CoinGecko is **off by
-default**: its API terms (5 Sept 2025) ask for "Powered by CoinGecko" on every plan, bar any use "for or to promote
-gambling" and re-distributing access, and need binding user terms with its clauses, none of which can be met today (the
-legal review, `docs/legal/2026-10-11-sprint-08-legal-review.md`). Once the founder decides it (D4), `API_COINGECKO=on`
-reads its `simple/price`: with `API_COINGECKO_KEY` on the Demo plan's root (`x-cg-demo-api-key`, 10,000 calls a month,
-so `API_PRICE_REFRESH_MS` of 300000 or more) or the paid one's (`x-cg-pro-api-key`, `API_COINGECKO_PLAN=pro`); the key
-travels in a header, never in the URL; Pyth takes over when CoinGecko fails or is older than ten minutes, and a
-refresh that reads both logs the gap, `price-gap` above 2%. No price older than a day is served. Display and reports
-only; the program never reads it.
+**The display price (Sprint 08, D-f).** Pyth's SOL/USD sponsored account, read through `API_RPC_URL` every
+`API_PRICE_REFRESH_MS` (default 3 minutes): the price the program charges an opening at. A failed read keeps the last
+good price and names the error; a price older than ten minutes is served as stale, and none older than a day is served.
+Display only; the program never reads it. There is no CoinGecko: Ronaldo dropped it on 2026-10-11 (2b), after the legal
+review of its terms (`docs/legal/2026-10-11-sprint-08-legal-review.md`).
 
 ## Run
 

@@ -1,11 +1,10 @@
 /**
  * Purpose: /api/v1/names and /api/v1/price with fake data and no cluster (Sprint 08): the names file read with the SDK's
  *          rules and the listed feeds with their sponsored accounts, a broken or missing file keeping the last good
- *          list; the display price from CoinGecko, from Pyth when CoinGecko fails, is off or is older than ten
- *          minutes, the last good price kept when both fail, and the gap between them; CoinGecko's request for each
- *          plan (the key in a header, never in the URL) and its answers; Pyth's SOL/USD on the captured devnet
- *          account; each route's 400, 503 and body, and what health says of them. Filter: `bun test services/api`.
- * Version: 0.1.0
+ *          list; the display price from Pyth, the last good price kept when a read fails; Pyth's SOL/USD on the
+ *          captured devnet account; each route's 400, 503 and body, and what health says of them. Filter:
+ *          `bun test services/api`.
+ * Version: 0.2.0 (2b: Pyth only)
  * Sprint:  08 (indexer, API, relay and points)
  */
 import { describe, expect, test } from "bun:test";
@@ -17,7 +16,7 @@ import type { SolanaRpc } from "@brot/sdk/read";
 
 import { createNames } from "../src/names";
 import { createPrice, type SourcePrice } from "../src/price";
-import { coingeckoRequest, coingeckoSource, PriceSourceError, pythSource } from "../src/price-sources";
+import { PriceSourceError, pythSource } from "../src/price-source";
 import { createHandler } from "../src/routes";
 
 const MINT = "So11111111111111111111111111111111111111112";
@@ -66,96 +65,54 @@ describe("/api/v1/names", () => {
 
 describe("the display price", () => {
   const NOW = 1_800_000_000n;
-  test("CoinGecko first; Pyth when CoinGecko fails, is off or is stale; the last price when both fail", async () => {
-    const pyth = async () => at("147.00", NOW - 30n);
-    const fresh = createPrice({ coingecko: async () => at("150.00", NOW - 60n), pyth, now: () => NOW });
-    await fresh.refresh();
-    expect(fresh.current()).toEqual({ usd: "150.00", publishedAt: NOW - 60n, source: "coingecko", fetchedAt: NOW });
-    expect(fresh.gapBps()).toBe(204);
-    const down = createPrice({ coingecko: failing("Status429"), pyth, now: () => NOW });
-    await down.refresh();
-    expect([down.current()?.source, down.lastError()]).toEqual(["pyth", "coingecko:Status429"]);
-    const stale = createPrice({ coingecko: async () => at("150.00", NOW - 601n), pyth, now: () => NOW });
-    await stale.refresh();
-    expect([stale.current()?.source, stale.lastError()]).toEqual(["pyth", "coingecko:Stale"]);
-    const off = createPrice({ coingecko: null, pyth, now: () => NOW });
-    await off.refresh();
-    expect([off.current()?.source, off.lastError(), off.gapBps()]).toEqual(["pyth", null, null]);
+  test("Pyth's price; a failed read keeps the last good price and names the error", async () => {
     let up = true;
-    const both = createPrice({
-      coingecko: async () => (up ? at("150.00", NOW) : Promise.reject(new PriceSourceError("Status500"))),
-      pyth: async () => (up ? at("149.00", NOW) : Promise.reject(new PriceSourceError("NoAccount"))),
+    const price = createPrice({
+      pyth: async () => (up ? at("147.00", NOW - 30n) : Promise.reject(new PriceSourceError("NoAccount"))),
       now: () => NOW,
     });
-    await both.refresh();
+    await price.refresh();
+    expect([price.current(), price.lastError()]).toEqual([
+      { usd: "147.00", publishedAt: NOW - 30n, source: "pyth", fetchedAt: NOW },
+      null,
+    ]);
     up = false;
-    await both.refresh();
-    expect([both.current()?.usd, both.lastError()]).toEqual(["150.00", "coingecko:Status500 pyth:NoAccount"]);
+    await price.refresh();
+    expect([price.current()?.usd, price.lastError()]).toEqual(["147.00", "pyth:NoAccount"]);
   });
 
   test("the route: 503 before a first price, then its source, time, staleness and attribution; no parameters", async () => {
-    const price = createPrice({
-      coingecko: async () => at("150.00", NOW - 700n),
-      pyth: failing("NoAccount"),
-      now: () => NOW,
-    });
-    const handle = createHandler(store, { corsOrigin: "*", cluster: "devnet", price, now: () => NOW });
+    const none = createPrice({ pyth: failing("NoAccount"), now: () => NOW });
+    const handle = createHandler(store, { corsOrigin: "*", cluster: "devnet", price: none, now: () => NOW });
     expect((await handle(new Request("http://api.test/api/v1/price"))).status).toBe(503);
-    const fresh = createPrice({
-      coingecko: async () => at("150.00", NOW - 60n),
-      pyth: failing("NoAccount"),
-      now: () => NOW,
-    });
-    await fresh.refresh();
-    const ok = createHandler(store, { corsOrigin: "*", cluster: "devnet", price: fresh, now: () => NOW + 600n });
+    const price = createPrice({ pyth: async () => at("147.00", NOW - 60n), now: () => NOW });
+    await price.refresh();
+    const ok = createHandler(store, { corsOrigin: "*", cluster: "devnet", price, now: () => NOW + 600n });
     const answer = await body(await ok(new Request("http://api.test/api/v1/price")));
-    expect(answer.price).toMatchObject({
-      usd: "150.00",
-      source: "coingecko",
+    expect(answer.price).toEqual({
+      asset: "SOL",
+      currency: "USD",
+      usd: "147.00",
+      source: "pyth",
       published_at: String(NOW - 60n),
+      fetched_at: String(NOW),
       stale: true,
-      attribution: "Powered by CoinGecko",
+      attribution: "Pyth Network SOL/USD",
+      use: "display only; the program charges at the Pyth price it reads on-chain",
     });
-    expect(answer.price.attribution_url).toBe("https://www.coingecko.com/en/api");
     expect((await ok(new Request("http://api.test/api/v1/price?vs=eur"))).status).toBe(400);
-    // No price older than a day is served (CoinGecko's terms, §6.1.1; the legal review, F3).
-    const late = createHandler(store, { corsOrigin: "*", cluster: "devnet", price: fresh, now: () => NOW + 86_400n });
+    // No price older than a day is served.
+    const late = createHandler(store, { corsOrigin: "*", cluster: "devnet", price, now: () => NOW + 86_400n });
     expect(await body(await late(new Request("http://api.test/api/v1/price")))).toEqual({
       error: { code: "no_recent_price", message: "no price of the last day" },
     });
-    const health = await body(await ok(new Request("http://api.test/api/v1/health")));
-    expect([health.price_source, health.price_error]).toEqual(["coingecko", "pyth:NoAccount"]);
-  });
-
-  test("CoinGecko's request per plan: the key in its header, never in the URL; its answers checked", async () => {
-    const demo = coingeckoRequest("demo-key", "demo");
-    expect(demo.url.startsWith("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd")).toBe(
-      true,
-    );
-    expect(demo.headers["x-cg-demo-api-key"]).toBe("demo-key");
-    const pro = coingeckoRequest("pro-key", "pro");
-    expect(pro.url.startsWith("https://pro-api.coingecko.com/api/v3/")).toBe(true);
-    expect(pro.headers["x-cg-pro-api-key"]).toBe("pro-key");
-    const keyless = coingeckoRequest(null, "pro");
-    expect(keyless.url.startsWith("https://api.coingecko.com/")).toBe(true);
-    expect(Object.keys(keyless.headers)).toEqual(["accept"]);
-    for (const r of [demo, pro]) expect(r.url.includes("key")).toBe(false);
-    const answer = (status: number, json: unknown) => async () => new Response(JSON.stringify(json), { status });
-    const read = (f: () => Promise<Response>) => coingeckoSource({ key: null, plan: "demo", fetch: f as never })();
-    expect(await read(answer(200, { solana: { usd: 152.34, last_updated_at: 1_800_000_000 } }))).toEqual({
-      usd: "152.34",
-      publishedAt: 1_800_000_000n,
-    });
-    expect(await read(answer(200, { solana: { usd: 1e-7, last_updated_at: 1 } }))).toEqual({
-      usd: "0.00000010",
-      publishedAt: 1n,
-    });
-    for (const [res, name] of [
-      [answer(429, {}), "Status429"],
-      [answer(200, { solana: { usd: "152" } }), "BadPrice"],
-      [answer(200, { solana: { usd: 152 } }), "BadTime"],
-    ] as const)
-      await expect(read(res)).rejects.toThrow(name);
+    await none.refresh();
+    const health = await body(await handle(new Request("http://api.test/api/v1/health")));
+    expect([health.price_source, health.price_error, "price_gap_bps" in health]).toEqual([
+      null,
+      "pyth:NoAccount",
+      false,
+    ]);
   });
 
   test("Pyth's SOL/USD, from the captured devnet account, decoded by the SDK", async () => {
