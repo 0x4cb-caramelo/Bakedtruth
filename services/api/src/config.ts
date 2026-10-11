@@ -2,10 +2,11 @@
  * Purpose: the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only),
  *          the port and host (loopback by default), the refresh interval, the CORS origin for the site, how many
  *          program transactions a refresh reads for the leaderboard, and the file of wallets left out of it (Sprint
- *          13).
- * Version: 0.2.0
+ *          13); the names file, and the display price's interval and CoinGecko settings, its key a secret (Sprint 08).
+ * Version: 0.3.0
  * Sprint:  08 (indexer and API, hackathon MVP)
  */
+import { fileURLToPath } from "node:url";
 
 export type ApiConfig = {
   rpcUrl: string;
@@ -20,6 +21,15 @@ export type ApiConfig = {
   hiddenFile: string | null;
   /** The RPC the leaderboard's history reads through, when it should not share the snapshot's (a secret too). */
   historyRpcUrl: string | null;
+  /** The reviewed account names (Sprint 08): the repository's content/account-names.json unless set. */
+  namesFile: string;
+  /** How often the display price is read (Sprint 08), in milliseconds. */
+  priceRefreshMs: number;
+  /** CoinGecko for the display price, or Pyth only (Sprint 08, D-e; off while its terms are checked). */
+  coingecko: boolean;
+  /** The CoinGecko key (a secret; null: the keyless API) and the plan it belongs to. */
+  coingeckoKey: string | null;
+  coingeckoPlan: "demo" | "pro";
 };
 
 type Env = Record<string, string | undefined>;
@@ -45,7 +55,26 @@ export function loadApiConfig(env: Env = process.env): ApiConfig {
     historyPerRefresh: positive(env.API_HISTORY_PER_REFRESH, 200, "API_HISTORY_PER_REFRESH"),
     hiddenFile: env.API_LEADERBOARD_HIDDEN?.trim() || null,
     historyRpcUrl: url(env.API_HISTORY_RPC_URL, "API_HISTORY_RPC_URL"),
+    namesFile:
+      env.API_NAMES_FILE?.trim() || fileURLToPath(new URL("../../../content/account-names.json", import.meta.url)),
+    priceRefreshMs: positive(env.API_PRICE_REFRESH_MS, 180_000, "API_PRICE_REFRESH_MS"),
+    coingecko: onOff(env.API_COINGECKO, true, "API_COINGECKO"),
+    coingeckoKey: env.API_COINGECKO_KEY?.trim() || null,
+    coingeckoPlan: plan(env.API_COINGECKO_PLAN),
   };
+}
+
+function onOff(raw: string | undefined, fallback: boolean, name: string): boolean {
+  const value = raw?.trim();
+  if (!value) return fallback;
+  if (value !== "on" && value !== "off") throw new Error(`${name} must be on or off`);
+  return value === "on";
+}
+
+function plan(raw: string | undefined): "demo" | "pro" {
+  const value = raw?.trim() || "demo";
+  if (value !== "demo" && value !== "pro") throw new Error("API_COINGECKO_PLAN must be demo or pro");
+  return value;
 }
 
 /** An optional URL: unset or empty is null; anything else must parse. */

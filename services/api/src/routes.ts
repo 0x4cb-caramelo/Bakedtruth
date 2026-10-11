@@ -1,14 +1,17 @@
 /**
  * Purpose: the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged),
- *          /api/v1/campaigns/:address and, since Sprint 13, /api/v1/leaderboard (leaderboard.ts). Every answer is JSON
- *          with CORS for the site; errors are {"error": {"code", "message"}}, never a stack trace. Reads only what is
- *          in memory: the chain snapshot and the program's history.
- * Version: 0.2.0 (Sprint 13: the leaderboard)
+ *          /api/v1/campaigns/:address, since Sprint 13 /api/v1/leaderboard (leaderboard.ts), and since Sprint 08's
+ *          second part /api/v1/names and /api/v1/price. Every answer is JSON with CORS for the site; errors are
+ *          {"error": {"code", "message"}}, never a stack trace. Reads only what is in memory: the chain snapshot, the
+ *          program's history, the names and the last display price.
+ * Version: 0.3.0 (Sprint 08: names and price)
  * Sprint:  08 (indexer and API, hackathon MVP); 13
  */
 import type { Hidden } from "./hidden";
 import type { History } from "./history";
 import { createBoard, leaderboardOf, parseLeaderboardQuery } from "./leaderboard";
+import type { Names } from "./names";
+import { priceBody, type Price } from "./price";
 import { BadQuery, parseListQuery } from "./query";
 import { toCampaign } from "./dto";
 import type { Store } from "./store";
@@ -17,7 +20,16 @@ import type { Store } from "./store";
  * `history` is the program's own history for the leaderboard (without it the route answers 503); `hidden`, the wallets
  * left out of it at their owner's request.
  */
-export type RouteOptions = { corsOrigin: string; cluster: string; history?: History; hidden?: Hidden };
+export type RouteOptions = {
+  corsOrigin: string;
+  cluster: string;
+  history?: History;
+  hidden?: Hidden;
+  /** Sprint 08: the reviewed names and the listed feeds, and the display price; the server's clock for its age. */
+  names?: Names;
+  price?: Price;
+  now?: () => bigint;
+};
 
 const json = (body: unknown, status: number, cors: string) =>
   new Response(
@@ -50,6 +62,10 @@ export function createHandler(store: Store, options: RouteOptions) {
           last_refresh_error: store.lastError(),
           leaderboard_complete: options.history?.ready() ? options.history.complete() : null,
           leaderboard_skipped: options.history?.ready() ? options.history.skipped() : null,
+          names_error: options.names ? options.names.lastError() : null,
+          price_source: options.price?.current()?.source ?? null,
+          price_error: options.price ? options.price.lastError() : null,
+          price_gap_bps: options.price ? options.price.gapBps() : null,
         },
         snap ? 200 : 503,
         cors,
@@ -89,6 +105,19 @@ export function createHandler(store: Store, options: RouteOptions) {
         if (error instanceof BadQuery) return fail(400, "bad_query", error.message, cors);
         throw error;
       }
+    }
+    // Sprint 08: two routes with no parameters; any query is a 400, as an unknown parameter is everywhere.
+    if (url.pathname === "/api/v1/names" || url.pathname === "/api/v1/price") {
+      if (url.search) return fail(400, "bad_query", "this route takes no parameters", cors);
+      const chainTime = snap ? snap.chain.unixTimestamp : null;
+      if (url.pathname === "/api/v1/names") {
+        if (!options.names) return fail(503, "starting", "the names have not been read yet", cors);
+        return json({ chain_time: chainTime, names: options.names.names(), feeds: options.names.feeds() }, 200, cors);
+      }
+      const price = options.price?.current();
+      if (!price) return fail(503, "starting", "no price has been read yet", cors);
+      const now = options.now ? options.now() : BigInt(Math.floor(Date.now() / 1_000));
+      return json({ chain_time: chainTime, price: priceBody(price, now) }, 200, cors);
     }
     const detail = url.pathname.match(/^\/api\/v1\/campaigns\/([1-9A-HJ-NP-Za-km-z]{32,44})$/);
     if (detail) {

@@ -1,9 +1,9 @@
 /**
  * Purpose: the read API's entry point. Reads its settings, takes a chain snapshot at start and then every
  *          API_REFRESH_MS, reads the program's new history and the hide list for the leaderboard on a loop of their own
- *          (Sprint 13), and serves /api/v1 on the loopback address. Logs one JSON line per refresh, never the RPC URL
- *          or a wallet.
- * Version: 0.3.0 (the Sprint 13 adversarial review: the history on its own loop, so it can never hold the snapshot)
+ *          (Sprint 13), the names file with it and the display price on a loop of its own (Sprint 08), and serves
+ *          /api/v1 on the loopback address. Logs one JSON line per refresh, never the RPC URL, a key or a wallet.
+ * Version: 0.4.0 (Sprint 08: names and price; 0.3.0, the history on its own loop)
  * Sprint:  08 (indexer and API, hackathon MVP); 13
  *
  * Run: API_RPC_URL=... bun services/api/src/main.ts
@@ -13,8 +13,14 @@ import { rpcFor } from "@brot/sdk/read";
 import { loadApiConfig } from "./config";
 import { createHidden } from "./hidden";
 import { createHistory } from "./history";
+import { createNames } from "./names";
+import { createPrice } from "./price";
+import { coingeckoSource, pythSource } from "./price-sources";
 import { createHandler } from "./routes";
 import { createStore } from "./store";
+
+/** A gap between CoinGecko and Pyth above this is logged as "price-gap", for the alert path (TP §3.5) [AC]. */
+const PRICE_GAP_ALERT_BPS = 200;
 
 const config = loadApiConfig();
 const rpc = rpcFor(config.rpcUrl);
@@ -24,7 +30,22 @@ const history = createHistory(config.historyRpcUrl ? rpcFor(config.historyRpcUrl
   perRefresh: config.historyPerRefresh,
 });
 const hidden = createHidden(config.hiddenFile);
-const handle = createHandler(store, { corsOrigin: config.corsOrigin, cluster: config.cluster, history, hidden });
+const names = await createNames(config.namesFile);
+const unixNow = () => BigInt(Math.floor(Date.now() / 1_000));
+const price = createPrice({
+  coingecko: config.coingecko ? coingeckoSource({ key: config.coingeckoKey, plan: config.coingeckoPlan }) : null,
+  pyth: pythSource(rpc),
+  now: unixNow,
+});
+const handle = createHandler(store, {
+  corsOrigin: config.corsOrigin,
+  cluster: config.cluster,
+  history,
+  hidden,
+  names,
+  price,
+  now: unixNow,
+});
 
 Bun.serve({ hostname: config.host, port: config.port, fetch: handle });
 console.log(JSON.stringify({ ts: new Date().toISOString(), event: "start", host: config.host, port: config.port }));
@@ -53,6 +74,7 @@ async function snapshotLoop() {
 async function historyLoop() {
   for (;;) {
     hidden.refresh();
+    names.refresh();
     const error = await history.refresh().then(
       () => null,
       (caught: unknown) => (caught instanceof Error ? caught.name : "Error"),
@@ -70,5 +92,22 @@ async function historyLoop() {
   }
 }
 
+/** The display price, every API_PRICE_REFRESH_MS: its source, a named error and the gap between the sources. */
+async function priceLoop() {
+  for (;;) {
+    await price.refresh();
+    const gapBps = price.gapBps();
+    log({
+      event: price.lastError() ? "price-error" : "price",
+      source: price.current()?.source ?? null,
+      error: price.lastError(),
+      gapBps,
+    });
+    if (gapBps !== null && gapBps > PRICE_GAP_ALERT_BPS) log({ event: "price-gap", gapBps });
+    await new Promise((done) => setTimeout(done, config.priceRefreshMs));
+  }
+}
+
 void snapshotLoop();
 void historyLoop();
+void priceLoop();
