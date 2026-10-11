@@ -3,7 +3,7 @@
  *          display, the dark theme's colours and the icons scripts/pwa-icons.ts draws. No service worker, which would
  *          bring back the stale-file problem the landing already hit (commit 8e4684d): an installed site loads the
  *          network's current files every time. Served from the site's own origin (the CSP's default-src 'self').
- * Version: 0.1.0
+ * Version: 0.1.1 (the brand's dark page colour, 2026-10-10)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import type { MetadataRoute } from "next";
@@ -11,7 +11,7 @@ import type { MetadataRoute } from "next";
 import { BRAND } from "@/lib/brand";
 
 /** The dark theme's page colour (app/styles/tokens.css, `--bg`); dark is the default theme. */
-const DARK = "#10141b";
+const DARK = "#10151c";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
