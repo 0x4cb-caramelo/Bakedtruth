@@ -52,6 +52,7 @@ const sentence = (data: PageData) =>
     target: data.campaign.target.toString(),
     priceExponent: data.campaign.priceExponent,
     metricAccount: data.campaign.metricAccount,
+    epoch: data.campaign.epoch.toString(),
   });
 
 export function CampaignPage({

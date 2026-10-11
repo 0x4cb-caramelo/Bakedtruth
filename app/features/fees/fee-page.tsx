@@ -4,9 +4,10 @@
  *          (example.ts), the one-sided pot, the void and its opening fee, the opening's 90/10, the refund policy, and
  *          rent and network fees, the Economic Viability Rule's refund included. Drawn on the server; no script runs
  *          here.
- * Version: 0.1.1 (the Sprint 13 reviews: the too-small refund and the opening's rent)
- * Sprint:  13 (site: ranking, notices and copy)
+ * Version: 0.1.2 (Sprint 19: the opening links the creation box; 0.1.1, the Sprint 13 reviews)
+ * Sprint:  13 (site: ranking, notices and copy); 19
  */
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { Card } from "@/components/ui/card";
@@ -116,7 +117,12 @@ export function FeePage() {
         <p className="m-0 text-sm">{FEES.openingMax}</p>
         <p className="m-0 text-sm">{FEES.openingRent}</p>
         <p className="m-0 text-sm">{FEES.openingFree}</p>
-        <p className="m-0 text-xs text-muted">{FEES.openingSite}</p>
+        <p className="m-0 text-xs text-muted">
+          {FEES.openingSite}{" "}
+          <Link href="/abrir" className="underline">
+            {FEES.openingLink}
+          </Link>
+        </p>
       </Box>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Box title={FEES.refundTitle}>

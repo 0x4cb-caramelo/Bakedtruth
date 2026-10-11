@@ -1,6 +1,6 @@
 # Brot Markets — Technical Plan
 
-**Version:** 0.1.6 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
+**Version:** 0.1.7 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
 todo em ingles") from the architecture proposal 0.4 the founder approved that day ("sim para todos") and from BP
 v0.0.4, merged into `main` with PR #35 on 2026-10-08; v0.1.1 aligns it with what Sprint 02 built and measured
 (`docs/sprints/sprint-02-pot-core.md`, "TP to align"); v0.1.2 aligns it with what Sprint 03 built and to the founder's
@@ -9,7 +9,8 @@ answers of 2026-10-09 (`docs/sprints/sprint-03-readers-resolution.md`, "Record a
 v0.1.4 with Sprint 05 (§3.4.19); v0.1.5 records what Sprint 13 built (§3.5 points, §3.6 routes, §6, §7.2, §7.3), what
 its reviews deferred (§7.4), its privacy review (§8.2), a new economic risk (§13) and C13 (§14.4); v0.1.6 records
 the founder's answers to Sprint 13's twelve questions, given after its merge (§3.4.7, §3.5 points, §3.6, §7.4, §8.2,
-§13, §14.2) · **Date:**
+§13, §14.2); v0.1.7 records what Sprint 19 built (§3.6, the creation box), what its reviews deferred (§7.5) and its
+privacy review (§8.3) · **Date:**
 2026-10-10 · **Supersedes:** v0.0.1 of 2026-10-05,
 written in Portuguese, approved by the founder ("docs aprovados, podemos dar início"). Its last text, with §8.1, is in
 git history at commit `2089b81` (`git show 2089b81:docs/technical/TECHNICAL-PLAN.md`), the last commit that changed it;
@@ -1403,6 +1404,33 @@ system of Sprint -1; it replaces the provisional `services/landing` on `127.0.0.
 - `/abrir` accepts a prefill by template id and slots; a link never signs anything (proposal §3.8).
 - **Gap:** the approved prototype and `DESIGN-DIRECTION.md` have no creation screen. Under D8 (a) (Summary), Sprint -1
   designs it at web and phone widths and Sprint 19 builds it.
+- **Built in Sprint 19 (2026-10-10) [F]** (`app/features/open-campaign/`, `docs/sprints/sprint-19-site-open-campaign.md`):
+  the four sections of the approved design, the typed slots parsed as text into the SDK's `OpeningChoice` with no
+  float, the account check through the SDK's readers, `checkBox` running `validateOpenCampaign` on every change with
+  one message per refusal (`copy-refusals.ts`), the SDK's A-3 preparation with the guard's id, and the opening watched
+  to `finalized`. The sentence is template v1 (`app/features/campaigns/sentence.ts`, one template per kind), the same
+  function every page uses. Where it departs from the bullets above, each until the piece it needs exists:
+  - **Names** come from `content/account-names.json` (empty until the team adds a reviewed name) and Pyth's pinned
+    feed list, read on the server: `/api/v1/names` (Sprint 08) is not built.
+  - **The US$ shown** is the opening's own amounts (US$500 or more, split 90/10 as a whole) and the Pyth price the
+    program charges at, with its publish time: `/api/v1/price` (CoinGecko, D-e) is not built. The box prices an
+    opening from its amount alone, from the first screen, and says "Not priced yet" while the SOL/USD price does not
+    allow it; only a team key reads "Free".
+  - **Reads go through the site's RPC** (the public devnet one), not `/rpc`; `docs/technical/relay-allowlist.md` lists
+    what the box calls. `brot-rpc`'s country refusal of an opening waits for the relay.
+  - **The retry guard's record** is written when "Sign in wallet" hands the transaction over, never before; a refusal in
+    the wallet and a landed opening delete it at once; a failed or expired one is kept, so a retry reuses its id; the
+    box deletes any record saved more than a day before when it loads (`retry-guard.ts`; the legal review, M6).
+  - **The retry guard's second witness** reads the wallet's own recent transactions from the chain (pages of 25
+    signatures, at most four, back to the last half hour; at most 20 transactions read; before a paid opening with no
+    record in flight), since the indexer does not exist. It reads newest first and stops at the first opening, so a
+    busy wallet's retry still finds it; when it found none and could not read everything, the creator is told so and
+    chooses (`recent.ts`; the adversarial review, H2).
+  - **A link never sets the amount** (the adversarial review, M6): `usd` is not a prefill key; the creator picks it.
+  - **`max_lamports`** is the quote plus 1% (`MARGIN_BPS`), the approved design's "quote + 1%" (T25).
+  - **The share-card preview** waits for the share card itself (Sprint 10, carried); the preview shows the list card.
+  - **A team key opens free** only, as the DoD says (no `opening_usd`): a team key's prize (C44), which the program
+    accepts, has neither a screen nor a script yet (`scripts/team/open.ts` opens free too).
 
 **The share card** (proposal §2.9) **[DP]**.
 
@@ -1996,10 +2024,32 @@ what they found was fixed in the sprint (`docs/sprints/sprint-13-site-notices-co
 | Once contests exist, the history would score a closed contested campaign by its first outcome (`CampaignFinalized` carries none) | Wrong points for contested campaigns | 14 (with the contest's events) |
 | The history reads at `finalized` and lags the snapshot (`confirmed`): until it reads a reopened campaign's `CampaignOpened`, the live account is matched to the old opening; until it reads a just-finalized YES price campaign's `LateTallied`, a late join counts. A transaction skipped after five tries leaves its events out (a closed campaign's creator then unknown, so its wallet can score) while `complete` stays true (the review of the 3a follow-up, 2026-10-10) | A wrong point for seconds to a minute after a reopen or a finalize, longer after an API restart; a skipped opening can let its creator score | 08 (the indexer: match a live account to its opening by `opens_at`, count a final result only once the history holds the event that made it final, and say when a transaction could not be read) |
 
+### 7.5 Deferred in Sprint 19
+
+The copy, legal and adversarial reviews of Sprint 19 (2026-10-10) found two high findings in the box (the review sheet
+read the draft, not the signed arguments; the guard's second witness failed open), fixed in the sprint with most of the
+rest; the coordinator's gate listed what was left (`docs/sprints/sprint-19-site-open-campaign.md`, record). Deferred on
+purpose:
+
+| Finding | Risk while open | Sprint |
+|---|---|---|
+| The box and the SDK's preparation use the real schedule (`REAL_SCHEDULE`); a drill build on devnet would need `build.schedule` passed (the adversarial review, L13) | With a drill build, the entries-close time, the 3-day floor and the box's 10-minute margin shown would be wrong | 06, if a drill build is ever deployed |
+| "90%", "10%" and "US$500" are written in the box's labels, while the admin can change the opening's fee and prize share (`set_creation_params`) (the copy review, NIT 10) | After such a change, labels would disagree with the quote until the copy follows; `CreationParamsChanged` still protects the signature | Before the first change of the creation parameters |
+| `StakeAtLeast` stays closed: opening it needs the vote account's epoch stake (`getVoteAccounts`) passed to the box and the SDK (L9) | None while closed; turned on as is, the box's check would throw | When `StakeAtLeast` opens, after its devnet YES |
+| `script-src 'unsafe-inline'` (§7.2): an injected script could read the browser's opening record or change what the sheet shows (the legal review, N13) | As §7.2 | 16 |
+| The guard's record is keyed by wallet and program, not by cluster, and a record's deadline is not checked against the chain it came from (the adversarial review, L3) | Only if one origin served two clusters with the same program id; each cluster has its own build and origin today | 18 (mainnet: one origin per cluster, or the genesis hash in the key) |
+| No status line while the recent-openings look-up runs; the button reads "Checking your opening…" (the legal review, N12) | A creator waits a few seconds without being told why | 08 (the indexer answers the look-up instead) |
+| The creator notice is not made more prominent when the account came from a link (the adversarial review, M6); the box says a link filled it, and who else can move the number | A careless creator on a shared link may still miss it | 17, with B1 below |
+| Nobody has looked at the review sheet at 640 CSS px or wider in a browser (the copy review, O3); the smoke runs at 1280 and 412 | A layout problem at tablet widths | The phones' checklist run (founder item 5 of Sprint 19) |
+| The reads go through the public devnet RPC, not the `/rpc` relay; the relay's country refusal of an opening (C-11) waits for it | The RPC operator sees the wallet with the IP (§8.3) | 08 |
+| Before mainnet (the legal review, B1 to B12): creator-controlled outcomes (a notice on devnet; entries by the creator, creator duties or KYB on mainnet), the paid opening as a consumer purchase (withdrawal, the fee kept on a house failure with no entry), the creator's 1% and partner labels, age assurance, screening and licensing of paid openings, unlisting a paid campaign said before paying, the prominence of risk text in the sheet, marks and named third parties, token units next to raw units, and the policy's legal basis per purpose | Devnet only: test SOL, no value | 17 (L0) and the audits |
+
 ## 8. Privacy and compliance baseline
 
-Joining or opening a campaign collects no personal data, and the KPIs are computed without it (K-04) **[FD]** (TP
-v0.0.1 §8; P2 §6.3). Three points remain, each answered with the nine questions of `.claude/rules/privacy-audit.md`.
+Joining or opening a campaign sends Brot's servers no personal data, and the KPIs are computed without it (K-04)
+**[FD]** (TP v0.0.1 §8; P2 §6.3). The visitor's browser keeps a few notes of its own, and the RPC provider sees the
+wallet with the IP (§7.3; for the creation box, §8.3). Three points remain, each answered with the nine questions of
+`.claude/rules/privacy-audit.md`.
 v0.0.1's fourth column, the X username shown on the suggestions page, leaves with that page (P1 §4.1).
 
 | Question | Wallet address | Visitor IP address and country | The Android app's device data **[INF]** |
@@ -2126,6 +2176,28 @@ deleted after a request to leave the ranking. docs.brot.markets, which also desc
 and linked from the site (9a, prepared; live once the landing is deployed), and who holds the X login recorded (8a,
 done). Report channel: PASS, its X-login condition met (8a). Nothing blocked the merge; the condition left is deploying
 9a's pages.
+
+### 8.3 Sprint 19: the creation box
+
+The nine questions for what the creation box (`/abrir`) adds, answered before the merge (the legal review of
+2026-10-10, applied to the code as merged). Nothing new reaches Brot's servers; what is new is a record in the visitor's
+browser and what the RPC provider sees **[F]**.
+
+| Question | The opening's record in the browser | What the RPC provider sees | What the chain shows |
+|---|---|---|---|
+| 1. What data | One record per wallet and program: the wallet address (in the key and the record), the campaign id drawn for it, an attempt id, the transaction's signature and last valid block height, its state and the device time it was saved. Never an amount, a key or a search | The IP with the wallet address: the balance, the transaction the page simulates before the wallet signs it and its status after, and, before a paid opening with no record in flight, the wallet's signatures of the last half hour (pages of 25, at most four) and up to 20 of its transactions; the accounts checked in the box | The creator's wallet, the campaign, what it paid; the campaign's page labels the creator and, on every kind but price, the creator's own entries |
+| 2. Why, and on what basis | So a retry cannot charge the opening twice (T17, A-9). Legitimate interest or steps at the user's request are the working readings (L0) **[Q]** | Checking every rule before signing (A-10), pricing and confirming the opening; the recent read is the guard's second witness when storage was cleared | How the program works; the creator label is BR-26 |
+| 3. Where | `localStorage`, mirrored in the page's memory; never sent to Brot | The RPC operator's systems (on devnet, Solana's public RPC), location not known | Solana, public and permanent; the read API's copy in memory |
+| 4. Who can access | Whoever uses that browser profile, and scripts of the site's own origin (the CSP blocks third-party scripts; `unsafe-inline` is §7.5's) | The RPC operator | Anyone |
+| 5. Control | Same-origin storage; no copy on a server | Bounded reads, decoded in the browser and discarded | None: it is public |
+| 6. Retention | Written at the hand-off to the wallet, never before; deleted when the campaign opens, when the wallet refuses it, or when another wallet holds the id; a failed or expired record is kept so a retry reuses its id, until the creation box next loads a day or more after it was saved; clearing the site's data deletes it | The operator's own rules | Forever |
+| 7. Logs | None | The operator's own rules; the box logs nothing | — |
+| 8. Deletion and export | Clearing the site's data; Brot holds nothing to delete or export | Not Brot's | The chain cannot be changed; the policy says so |
+| 9. Document or consent | `docs/legal/PRIVACY-POLICY.md` (this PR) names the record, when it is written and deleted, the RPC's reads and that clearing the site's data deletes it; the sheet says the id is saved when "Sign in wallet" is pressed, and that an opening is public and permanent. No consent asked: the record is strictly needed for the opening the person asked for (L0 confirms) | The policy names the RPC service and what it sees | The sheet's public-opening notice |
+
+**Verdict.** PASS, with one condition before `/abrir` is reachable at a public address: the founder deploys the
+landing with this text, a new date and the post on X its section 8 promises (answer 9a; the legal review, M8;
+confirmed by Sprint 19's answer 2a, 2026-10-11).
 
 ## 9. Testing strategy
 

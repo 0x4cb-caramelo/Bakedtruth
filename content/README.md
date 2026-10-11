@@ -4,11 +4,12 @@ Public files the site reads on its server when it is built. Each changes only by
 (there is no CODEOWNERS file yet, so the second review is a team rule until Sprint 16). The site finds this folder or
 fails its build (`app/lib/content.ts`); a change appears once it is merged and the site is built and deployed again.
 
-| File            | What it is                                                                                     | Page                                   |
-| --------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `void-log/`     | The team's public text for each void it records, and corrections (its own README)              | `/record`, and the campaign's page     |
-| `powers.md`     | Who holds each key and the limit of each power (BR-41); Sprint 16 updates it with the multisig | `/record`                              |
-| `unlisted.json` | Campaigns the team took off the home page after a report (C-10)                                | The home page, and the campaign's page |
+| File                 | What it is                                                                                     | Page                                   |
+| -------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `void-log/`          | The team's public text for each void it records, and corrections (its own README)              | `/record`, and the campaign's page     |
+| `powers.md`          | Who holds each key and the limit of each power (BR-41); Sprint 16 updates it with the multisig | `/record`                              |
+| `unlisted.json`      | Campaigns the team took off the home page after a report (C-10)                                | The home page, and the campaign's page |
+| `account-names.json` | Reviewed names of accounts a campaign can read (A-11); empty until the team adds one           | The creation box at `/abrir`           |
 
 ## Unlisting a campaign after a report
 
@@ -32,3 +33,22 @@ stays on-chain with its link, and its entries, result and payouts do not change.
 
 A malformed file fails the build, so a mistake never unlists the wrong campaign silently. The campaign page reads the
 file on each request and keeps working without it if it cannot be read.
+
+## Naming an account
+
+A name helps a creator find an account in the creation box (`/abrir`); it is not a gate (D-i). An account with no
+name still opens a campaign and shows its shortened address with an explorer link. Price accounts are named by Pyth's
+list, which the program compiles, never here.
+
+1. Read the account on an explorer: its owner is the kind's program (SPL Token for a burn, Meteora DAMM v2 for a lock,
+   SPL Stake Pool for a stake pool, Vote for a validator), and the name is the one its own project publishes.
+2. Add one entry to `account-names.json`:
+
+   ```json
+   { "address": "<base58 address>", "kind": "burn", "name": "<short public name>" }
+   ```
+
+   `kind` is `burn`, `lock`, `pool` or `stake`; `name` is 1 to 32 plain characters (letters, digits, spaces, `.`,
+   `$`, `-`, `/`), never a link, an @handle or a person.
+
+3. Open a pull request; a second person reviews the address and the name; merge; build and deploy the site.

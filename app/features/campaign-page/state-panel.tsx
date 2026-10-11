@@ -5,7 +5,7 @@
  *          one-sided refund rule or the empty pot; voided with the public reason, the team's note when the void log has
  *          one, and what returns to whoever opened. Every state after the result says where to report a wrong one
  *          (L-13). The words are copy-states.ts; the values are states.ts, from the chain's time (A-7).
- * Version: 0.2.0 (Sprint 12: every public state; 0.1.0 was Sprint 11's state card)
+ * Version: 0.2.1 (Sprint 19: burn and lock numbers with their unit; 0.2.0, Sprint 12: every public state)
  * Sprint:  12 (site: my entries and campaign states)
  */
 "use client";
@@ -16,7 +16,7 @@ import { SettleMode } from "@/lib/brot";
 import { explorerAddress } from "@/lib/config";
 import { PANEL } from "@/features/entry/copy";
 import { clockText, REPORT, STATES, VOID_REASON } from "./copy-states";
-import { utc, valueText } from "./format";
+import { utc, valueWithUnit } from "./format";
 import type { PageData } from "./load";
 import type { Proof } from "./proof";
 import { pageStateOf, type StateView } from "./states";
@@ -90,10 +90,10 @@ function Body({ data, proof, state, note }: { data: PageData; proof: Proof; stat
           {state.result === "VOID" ? <Line>{VOID_REASON[state.reason]}</Line> : null}
           <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
             <dt className="text-muted">{STATES.valueRead}</dt>
-            <dd className="m-0 tabular-nums">{valueText(proof.kind, state.observed, c.priceExponent)}</dd>
+            <dd className="m-0 tabular-nums">{valueWithUnit(proof.kind, state.observed, c.priceExponent)}</dd>
             <dt className="text-muted">{STATES.target}</dt>
             <dd className="m-0 tabular-nums">
-              {proof.comparator} {valueText(proof.kind, c.target, c.priceExponent)}
+              {proof.comparator} {valueWithUnit(proof.kind, c.target, c.priceExponent)}
             </dd>
             <dt className="text-muted">{STATES.accountRead}</dt>
             <dd className="m-0 truncate">

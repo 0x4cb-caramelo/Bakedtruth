@@ -3,10 +3,13 @@
  *          plain words, the proof's labels, the price facts and the screen when no fresh price exists (L-22), the
  *          re-check panel, the creator notice (BR-26, BP-14's recommendation, still open in P-9), the pot, the activity
  *          and the state card. The entry panel's words are in features/entry/copy.ts.
- * Version: 0.2.0 (Sprint 12: the closed account; the state words moved to copy-states.ts)
+ * Version: 0.2.1 (Sprint 19: the burn and lock rules and units; 0.2.0, Sprint 12: the closed account)
  * Sprint:  11 (site: campaign page and entry); 12
  */
 import type { KindName } from "./proof";
+
+/** The unit a burn or a lock number is read in (the Sprint 19 copy review, M8): the program compares raw values. */
+export const RAW_UNIT: Partial<Record<KindName, string>> = { burn: "raw units", lock: "liquidity units" };
 
 export const KIND_NAME: Record<KindName, string> = {
   price: "Price",
@@ -37,8 +40,8 @@ export function ruleText(a: {
 }): string {
   const rules: Record<KindName, string> = {
     price: `YES if Pyth's ${a.name} price reaches ${a.target} ${a.below ? "or less" : "or more"}, with its whole confidence band past it, at any moment before ${a.deadline}; that resolves YES at once and locks entries. It counts once a signed Pyth price showing it is posted on-chain within 60 seconds of publication, so a touch of a few seconds may not count. NO if the deadline passes without one; a touch after it does not count. If the price feed stops updating before the deadline, the campaign is voided and every entry is refunded.`,
-    burn: `YES if the total supply of the mint ${a.name} is at or below ${a.target} before ${a.deadline}. Its mint authority is revoked, so the supply cannot grow back; entries lock the moment the target is reached. ${BEFORE}`,
-    lock: `YES if the Meteora pool ${a.name} has at least ${a.target} of liquidity locked for good before ${a.deadline}. Locked liquidity only grows; entries lock the moment the target is reached. ${BEFORE}`,
+    burn: `YES if the total supply of the mint ${a.name} is at or below ${a.target} raw units (the token's smallest unit) before ${a.deadline}. Its mint authority is revoked, so the supply cannot grow back; entries lock the moment the target is reached. ${BEFORE}`,
+    lock: `YES if the Meteora pool ${a.name} has at least ${a.target} liquidity units locked for good before ${a.deadline}. Locked liquidity only grows; entries lock the moment the target is reached. ${BEFORE}`,
     pool: `YES if the stake pool ${a.name} records at least ${a.target} at the start of epoch ${a.epoch}. NO if less. ${EPOCH}`,
     stake: `YES if the vote account ${a.name} has at least ${a.target} of active stake in epoch ${a.epoch}. NO if less. ${EPOCH}`,
   };

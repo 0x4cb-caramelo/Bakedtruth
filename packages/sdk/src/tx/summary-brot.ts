@@ -5,7 +5,7 @@
  *          a signer's wallet: a join names its campaign, side, amount, guards and rents; an opening names its
  *          target in the feed's units, its deadline, its creator, what it pays, the SOL price below which the
  *          payment is refused, and the terms it binds (review, M3 and L7).
- * Version: 0.1.0
+ * Version: 0.1.1 (Sprint 19: the creator's share is of the entries, as the site says; "creation rules", not "terms")
  * Sprint:  05 (SDK)
  *
  * The context (the campaign a join points at; an opening's price exponent and terms) is what the screen read
@@ -97,9 +97,9 @@ function payment(usd: bigint, maxLamports: bigint): string {
 }
 
 function terms(version: number, paid: boolean, t: SummaryContext["terms"]): string {
-  if (!t || t.version !== version) return `under creation terms version ${version}`;
+  if (!t || t.version !== version) return `under creation rules version ${version}`;
   const prize = paid ? `; ${formatBps(t.openingPrizeBps)} of the payment becomes the prize` : "";
-  return `under creation terms version ${version}: Brot's fee ${formatBps(t.feeBps)} of the losing side; the creator's share ${formatBps(t.creatorShareBps)} of the pot (none for a team key); a one-sided pot's fee ${formatBps(t.oneSidedFeeBps)}; entries from ${formatSol(t.minEntryLamports)} SOL${prize}`;
+  return `under creation rules version ${version}: Brot's fee ${formatBps(t.feeBps)} of the losing side; the creator's share ${formatBps(t.creatorShareBps)} of the entries (none for a team key); a one-sided pot's fee ${formatBps(t.oneSidedFeeBps)}; entries from ${formatSol(t.minEntryLamports)} SOL${prize}`;
 }
 
 type Parsed = ReturnType<typeof parseBrotMarketsInstruction>;

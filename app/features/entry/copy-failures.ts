@@ -6,7 +6,7 @@
  *          was built (the page reloads after a back-off), or a site that does not know its program's version. Each
  *          says what happened, what it cost and the way out; the program's own message (from the SDK's error map) is
  *          shown under it. D-m words; English (L-01).
- * Version: 0.2.0 (A-8, 2026-10-10)
+ * Version: 0.2.1 (A-8, 2026-10-10; Sprint 19: the program's line without "Row N:")
  * Sprint:  11 (site: campaign page and entry)
  */
 import type { FailureKey } from "./failures";
@@ -132,7 +132,9 @@ export const COST = {
   unknown: "If the transaction reached the chain and failed, only its network fee moved.",
 } as const;
 
-export const programLine = (code: number, name: string, message: string) => `Program error ${code} ${name}: ${message}`;
+/** The program's own line, without the plan's row number or code quotes (the Sprint 19 copy review, M3). */
+export const programLine = (code: number, name: string, message: string) =>
+  `Program error ${code} ${name}: ${message.replace(/^Row \d+: /, "").replaceAll("`", "")}`;
 
 export const ACTIONS: Record<WayOut, string> = {
   again: "Review again",

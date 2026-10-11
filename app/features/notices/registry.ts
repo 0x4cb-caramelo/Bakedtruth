@@ -5,9 +5,9 @@
  *          copy files: this list adds none. P1 §4.6's line on an automatic payout at the end of the 6-hour window is
  *          not here: on devnet nothing pays out by itself yet, so the founder replaced it (2026-10-10) with the review
  *          rule and "Waiting for payout", which promise no time.
- * Version: 0.2.2 (the founder, 2026-10-10: the footer's age line; 0.2.1, answer 9a: the footer's privacy link; 0.2.0,
- *          the Sprint 13 adversarial review: each notice names the screen that mounts it; the leaderboard's leave line)
- * Sprint:  13 (site: ranking, notices and copy)
+ * Version: 0.3.0 (Sprint 19: the creation box's notices, registry-open.ts; 0.2.2, the footer's age line; 0.2.1,
+ *          answer 9a: the footer's privacy link; 0.2.0, the Sprint 13 adversarial review)
+ * Sprint:  13 (site: ranking, notices and copy); 19
  */
 import { AGE_NOTICE, AUDIT_NOTICE, PRIVACY_LABEL, TEST_NOTICE } from "../../components/copy-site";
 import { CREATOR_NOTICE } from "../campaign-page/copy";
@@ -16,6 +16,7 @@ import { LOCK_NOTICE, NOTICES, SHEET } from "../entry/copy";
 import { PRINCIPLE } from "../how/copy";
 import { BOARD, POINTS_WORTH } from "../leaderboard/copy";
 import { REPORT_CAMPAIGN } from "../report/copy";
+import { OPEN_NOTICES } from "./registry-open";
 
 export type MandatoryNotice = {
   id: string;
@@ -174,4 +175,5 @@ export const MANDATORY_NOTICES: readonly MandatoryNotice[] = [
     screens: "the leaderboard",
     drawnBy: [{ file: "features/leaderboard/leaderboard.tsx", uses: "BOARD.how" }],
   },
+  ...OPEN_NOTICES,
 ];

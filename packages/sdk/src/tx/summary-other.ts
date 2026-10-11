@@ -3,7 +3,7 @@
  *          admin, team and settlement instructions), each with the values it signs: the new admin, the fee
  *          recipient, the team keys, every creation parameter. Also the exact data size of every instruction,
  *          so a summary never describes bytes the program would refuse as `BadInstructionData`.
- * Version: 0.1.1
+ * Version: 0.1.2 (Sprint 19: the creator's share is of the entries)
  * Sprint:  05 (SDK)
  */
 import * as G from "../idl/generated/instructions";
@@ -58,7 +58,7 @@ export function paramsText(p: Params): string {
     `paid openings US$${p.openingFeeUsd}, ${formatBps(p.openingPrizeBps)} of the payment as prize`,
     `Brot's fee ${formatBps(p.feeBps)} of the losing side`,
     `a one-sided pot's fee ${formatBps(p.oneSidedFeeBps)}`,
-    `the creator's share ${formatBps(p.creatorShareBps)} of the pot`,
+    `the creator's share ${formatBps(p.creatorShareBps)} of the entries`,
     `at most ${p.maxOpenCampaigns} open campaigns`,
     `entries from ${formatSol(p.minEntryLamports)} SOL`,
     `SOL/USD feed ${bytesToHex(p.solUsdFeedId).slice(0, 8)}…`,

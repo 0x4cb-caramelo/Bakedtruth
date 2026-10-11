@@ -5,8 +5,8 @@
  *          itself yet: no line promises an automatic payout or a time (the founder's answer, 2026-10-10). Every rule
  *          follows the program, the Economic Viability Rule included (2026-10-09, TP §3.4.18): a pot splits only when
  *          its losing side can pay Brot's fee and the creator's 1%; otherwise every entry is refunded.
- * Version: 0.2.0 (the Sprint 13 copy and legal reviews: the viability rule, the late-entry refund, shorter sentences)
- * Sprint:  13 (site: ranking, notices and copy)
+ * Version: 0.2.2 (Sprint 19: opening from the site, in the box's words; 0.2.0, the Sprint 13 copy and legal reviews)
+ * Sprint:  13 (site: ranking, notices and copy); 19
  */
 export const FEES = {
   kicker: "Fees · in SOL",
@@ -16,7 +16,7 @@ export const FEES = {
   keepsTitle: "What Brot keeps",
   keeps: [
     "10% of the losing side, when YES or NO wins and the losing side can pay the fees. The pot's fee comes only from the losing side.",
-    "The opening fee: 10% of the US$500 a paid opening costs.",
+    "The opening fee: 10% of what a paid opening costs, US$50 on the minimum of US$500.",
     "1% of each entry in a refunded pot (one side only, or a losing side too small to pay the fees), except the first wallet's.",
     "Nothing from the entries of a voided campaign. The opening fee follows the cause (below).",
   ],
@@ -67,13 +67,14 @@ export const FEES = {
 
   openingTitle: "Opening a campaign",
   opening:
-    "A wallet opens a campaign for US$500, paid in SOL at the Pyth SOL/USD price the transaction reads; on devnet that is test SOL. 90% (US$450) becomes the prize, in the pot on neither side. 10% (US$50) is Brot's opening fee, held in the campaign until it settles.",
+    "A wallet opens a campaign for US$500 or more, paid in SOL at the Pyth SOL/USD price the transaction reads, less Pyth's confidence band; on devnet that is test SOL. 90% becomes the prize, in the pot on no side (US$450 on US$500); 10% is Brot's opening fee (US$50 on US$500), held in the campaign until it settles.",
   openingMax:
-    "The wallet signs a maximum in SOL. If the price moves past it before the transaction lands, the opening fails: the US$500 is not taken, only the network fee.",
+    "The wallet signs a maximum in SOL, the quote plus 1%. If the price moves past it before the transaction lands, the opening fails: the opening payment is not taken, only the network fee.",
   openingRent:
     "Opening also needs a deposit for the campaign's two accounts (Solana's rent). It goes back to whoever opened when the campaign closes.",
   openingFree: "The team and launch partners open for free: no prize and no creator share.",
-  openingSite: "Opening a campaign from this site is not available yet.",
+  openingSite: "Any wallet can open a campaign from this site, under the rules above:",
+  openingLink: "Open a campaign",
 
   refundTitle: "Refund policy",
   refunds: [
