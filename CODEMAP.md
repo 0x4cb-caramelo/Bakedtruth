@@ -8,8 +8,8 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **924** |
-| Acima de 200 linhas | **41** ⚠️ |
+| Arquivos mapeados | **932** |
+| Acima de 200 linhas | **40** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -56,7 +56,6 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `tests/brot/slot-matrix.gen.ts` — 428 linhas
 - `tests/e2e/site-pages.e2e.ts` — 201 linhas
 - `tests/e2e/smoke.e2e.ts` — 202 linhas
-- `tests/indexer/cycles.test.ts` — 233 linhas
 
 ---
 
@@ -489,7 +488,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`account-names.ts`](packages/sdk/src/schemas/account-names.ts) | the reviewed account names of `content/account-names.json` (A-11; TP §3.4.10 "Display names"): a JSON array of `{ "address", "kind", "name" }`, each address onc | 45 |
-| [`index.ts`](packages/sdk/src/schemas/index.ts) | `@brot/sdk/schemas`, the zod 4 schemas the site, the app and the services share: the opening's input; the public format of a void-log record (Sprint 12); the re | 13 |
+| [`index.ts`](packages/sdk/src/schemas/index.ts) | `@brot/sdk/schemas`, the zod 4 schemas the site, the app and the services share: the opening's input; the public format of a void-log record (Sprint 12); the re | 14 |
+| [`indexer.ts`](packages/sdk/src/schemas/indexer.ts) | the indexer's read routes as zod schemas (TP §6, Appendix B; Sprint 08, slice 2), shared by the indexer that serves them, the site and the app that read them, a | 128 |
 | [`open-campaign.ts`](packages/sdk/src/schemas/open-campaign.ts) | the zod schema of an opening's input (TP Appendix B, written here as Sprint 05 must), shared by the SDK, the site, the app and the preview: what a creator may c | 117 |
 | [`void-log.ts`](packages/sdk/src/schemas/void-log.ts) | the public format of a `content/void-log/` record (TP §3.4.7, BR-45; Sprint 12 gives it its public format, which Sprint 05's `scripts/team/void.ts` started): a  | 135 |
 
@@ -1155,14 +1155,22 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`campaign-row.ts`](services/indexer/src/campaign-row.ts) | one opening of a campaign as a `campaigns` row (TP §4; Sprint 08), folded from its events in `seq` order the way the program moves its account (state/transition | 146 |
 | [`codec.ts`](services/indexer/src/codec.ts) | how the indexer keeps an event (Sprint 08): its payload as JSON for readers (amounts as decimal strings, bytes as hex, enums as their numbers) and its own bytes | 53 |
-| [`config.ts`](services/indexer/src/config.ts) | the indexer's settings, from its environment only (Sprint 08): the RPC URL of its own account (a secret, never logged), the SQLite file (no default, so a run ne | 37 |
+| [`config.ts`](services/indexer/src/config.ts) | the indexer's settings, from its environment only (Sprint 08): the RPC URL of its own account (a secret, never logged), the SQLite file (no default, so a run ne | 49 |
 | [`ingest.ts`](services/indexer/src/ingest.ts) | the ingest (proposal §2.7; Sprint 08 DoD), the indexer's one writer. A refresh lists the program's new signatures at `finalized` back to the checkpoint (listing | 175 |
 | [`listing.ts`](services/indexer/src/listing.ts) | the ingest's listing (proposal §2.7; Sprint 08): an address's signatures at `finalized`, newest first, paged back to a known signature or to the first page that | 80 |
 | [`live.ts`](services/indexer/src/live.ts) | the campaign accounts that still exist, read for the points rule (Sprint 08): each address whose latest opening the events do not show closed, through `getMulti | 76 |
-| [`main.ts`](services/indexer/src/main.ts) | the indexer's entry point (Sprint 08, slice 1): opens its SQLite file and runs the ingest every INDEXER_POLL_MS, logging one JSON line per refresh with counts a | 32 |
+| [`main.ts`](services/indexer/src/main.ts) | the indexer's entry point (Sprint 08): opens its SQLite file, serves its read routes on its loopback port (slice 2, api/), and runs the ingest every INDEXER_POL | 35 |
 | [`points.ts`](services/indexer/src/points.ts) | the `points` table (Q7, the founder's answer 3a; Sprint 08): the SDK's own rule (`pointsTable`) over every stored event in chain order and what the live account | 35 |
 | [`project.ts`](services/indexer/src/project.ts) | the projections of one campaign address (TP §4; Sprint 08), rebuilt whole from its stored events each time one of them lands, so a transaction read late or agai | 127 |
 | [`rebuild.ts`](services/indexer/src/rebuild.ts) | the rebuild (proposal §2.7; Sprint 08 DoD, X1.3): the program's whole history replayed into a new file, from its first signature, through the same ingest; the r | 48 |
+
+## `services/indexer/src/api/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`queries.ts`](services/indexer/src/api/queries.ts) | the indexer's read routes as queries over its SQLite file (TP §6; Sprint 08, slice 2), each row shaped as @brot/sdk/schemas says: one campaign's activity in cha | 197 |
+| [`routes.ts`](services/indexer/src/api/routes.ts) | the indexer's read routes (TP §6; Sprint 08, slice 2), all GET (HEAD too): a campaign's activity and the history of its split (`/api/v1/campaigns/:address/activ | 106 |
+| [`server.ts`](services/indexer/src/api/server.ts) | serves the indexer's read routes (routes.ts) on its loopback port (TP §3.5; Sprint 08, slice 2), from the same SQLite handle the ingest writes: bun:sqlite answe | 27 |
 
 ## `services/indexer/src/db/`
 
@@ -1175,8 +1183,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
+| [`api.test.ts`](services/indexer/tests/api.test.ts) | the indexer's read routes over a hand-built file (Sprint 08, slice 2), each answer checked against its schema in @brot/sdk/schemas (the contract): a campaign's  | 169 |
 | [`fake-chain.ts`](services/indexer/tests/fake-chain.ts) | the indexer's no-cluster tests' chain (Sprint 08): the program's own events, encoded by the generated client and wrapped as a node writes a landed transaction ( | 138 |
 | [`ingest.test.ts`](services/indexer/tests/ingest.test.ts) | the ingest against a scripted RPC (Sprint 08), no cluster: pages shorter than asked, chain order and the checkpoint, a node that ignores `until`, each transacti | 130 |
+| [`server.test.ts`](services/indexer/tests/server.test.ts) | the indexer's settings and its server (Sprint 08, slice 2): the read routes listen on loopback port 4201 unless told otherwise, a bad port is refused at start,  | 41 |
 | [`store.test.ts`](services/indexer/tests/store.test.ts) | the indexer's SQLite adapter (Sprint 08) with no cluster: a new file gets the schema, WAL mode and its version; it opens again as it is; a file of another versi | 90 |
 
 ## `services/keeper/src/`
@@ -1457,7 +1467,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`cycles.test.ts`](tests/indexer/cycles.test.ts) | the indexer against the program in LiteSVM behind the recording RPC (Sprint 08 DoD, X1.3): whole cycles run through the SDK's builders (a paid two-sided campaig | 233 |
+| [`api-cycles.test.ts`](tests/indexer/api-cycles.test.ts) | the indexer's read routes over whole cycles in LiteSVM (Sprint 08, slice 2): every answer passes its schema in @brot/sdk/schemas on real chain data; each live c | 77 |
+| [`cycles-world.ts`](tests/indexer/cycles-world.ts) | the whole cycles the indexer's LiteSVM tests share (Sprint 08): a paid two-sided campaign paid out and closed, a one-sided pot refunded, a stale-feed void and a | 91 |
+| [`cycles.test.ts`](tests/indexer/cycles.test.ts) | the indexer against the program in LiteSVM behind the recording RPC (Sprint 08 DoD, X1.3): whole cycles run through the SDK's builders (a paid two-sided campaig | 185 |
 
 ## `tests/ops/`
 

@@ -70,3 +70,22 @@
   ranking e o `content/partners.json`, os KPIs, o `feed_history` com a cópia noturna, os alertas e a unidade.
 - A mescla com o PR #69 vai conflitar no `session-log/INDEX.md`, no `CHANGELOG.md` e no `bun.lock` (as duas branches
   acrescentam no mesmo lugar): manter as duas entradas e rodar `bun install` e `node scripts/codemap.js`.
+
+## A segunda fatia: as rotas de leitura (mesmo dia, depois das mesclas)
+
+- **Por onde voltou.** Depois do PR #71, o Ronaldo confirmou, com as próprias palavras, "Yes, both": mesclar o #71 e
+  retomar o indexador numa branch fresca. As três partes da fatia 1 foram repassadas sobre a `main` (`92f86f7`); os
+  conflitos foram só de registros e do mapa do código, e a base antiga ficou guardada como `sprint-08-indexer-5bf3636`.
+  A branch foi enviada e virou o PR #72, em rascunho.
+- **Onde as rotas moram.** O plano põe a API dentro do indexador (`services/indexer/src/api/`), mas a API que está no
+  ar é a `services/api`, e a rota do túnel manda `/api/v1` para ela. As quatro rotas novas ficaram no indexador, como o
+  plano pede, na porta 4201. Como o público chega a elas fica para o Ronaldo decidir: a API de leitura chama o indexador
+  por dentro para esses quatro caminhos, ou o túnel ganha uma rota para a porta 4201.
+- **Pelo endereço, não pelo id.** A API no ar já usa o endereço da campanha; um id fechado pode abrir de novo, então a
+  rota pega a abertura mais recente, e `?opening=` escolhe outra.
+- **A ordem da cadeia é (slot, lugar, instrução, interna).** Um slot tem muitas transações, e uma assinatura listada
+  tarde por causa de um buraco fica no slot certo mesmo com um lugar maior.
+- **O `as_of_slot` é o último slot lido inteiro.** Uma assinatura pendente segura o número, para a resposta nunca
+  prometer o que ainda não foi lido.
+- **O que o teste achou:** as entradas recentes saíam da mais velha para a mais nova, porque um `DESC` só vira a última
+  coluna da ordem. Agora cada coluna desce.

@@ -6,12 +6,10 @@
  *          pools; the closed one is closed, and each baker's settlement row is what reached the wallet; a rebuild into
  *          a new file equals the live one; a second refresh changes nothing; the points equal what the read API's
  *          leaderboard computes over the same chain. Filter: `bun test tests/indexer`.
- * Version: 0.1.0
+ * Version: 0.1.1 (slice 2: the cycles in cycles-world.ts, shared)
  * Sprint:  08 (indexer, API, relay and points)
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createSolanaRpc, type Address } from "@solana/kit";
 import {
@@ -28,30 +26,24 @@ import {
 } from "@brot/sdk/read";
 
 import { createHistory } from "../../services/api/src/history";
-import { dump, openStore, type Store } from "../../services/indexer/src/db/store";
-import { createIngest, type IngestReport } from "../../services/indexer/src/ingest";
+import { dump, type Store } from "../../services/indexer/src/db/store";
+import type { IngestReport } from "../../services/indexer/src/ingest";
 import { rebuild } from "../../services/indexer/src/rebuild";
-import { openingWorld, type OpeningWorld } from "../brot/opening";
+import type { OpeningWorld } from "../brot/opening";
 import * as P from "../brot/program";
-import { setPriceAccount } from "../brot/setup";
-import { runCycle, SOL, type Cycle } from "../site/cycle-run";
-import { startFakeChain, type FakeChain } from "../site/fake-chain";
+import { SOL } from "../site/cycle-run";
+import type { FakeChain } from "../site/fake-chain";
 import { rawOf } from "../site/support";
+import { indexedCycles, type CyclesWorld } from "./cycles-world";
 
-const dir = mkdtempSync(join(tmpdir(), "brot-indexer-cycles-"));
+let world: CyclesWorld;
 let w: OpeningWorld;
 let chain: FakeChain;
 let store: Store;
-let ingest: ReturnType<typeof createIngest>;
+let ingest: CyclesWorld["ingest"];
 let first: IngestReport;
-const cycles = {} as Record<"paid" | "oneSided" | "voided" | "review", Cycle>;
-
-/** A later cycle opens a paid campaign after the clock moved: both price accounts are written fresh again. */
-function freshPrices() {
-  const publishTime = w.client.svm.getClock().unixTimestamp - 5n;
-  setPriceAccount(w.client, P.SOL_USD_ACCOUNT, "pyth-sol-usd-devnet", { publishTime });
-  setPriceAccount(w.client, P.BTC_USD_ACCOUNT, "pyth-btc-usd-devnet", { publishTime });
-}
+let cycles: CyclesWorld["cycles"];
+let dir: string;
 
 /** The row of the latest opening at `at`. */
 const rowOf = (at: Address) =>
@@ -61,51 +53,11 @@ const rowOf = (at: Address) =>
   >;
 
 beforeAll(async () => {
-  w = await openingWorld();
-  chain = startFakeChain(w);
-  const two = { how: "no", chain } as const;
-  cycles.paid = await runCycle(
-    w,
-    (b) => [
-      { who: b[0], side: Side.Yes, amount: SOL },
-      { who: b[1], side: Side.No, amount: SOL },
-    ],
-    { ...two, stopAt: "closed" },
-  );
-  freshPrices();
-  cycles.oneSided = await runCycle(w, (b) => [{ who: b[0], side: Side.No, amount: SOL }], {
-    ...two,
-    stopAt: "settling",
-  });
-  freshPrices();
-  cycles.voided = await runCycle(
-    w,
-    (b) => [
-      { who: b[0], side: Side.Yes, amount: SOL },
-      { who: b[1], side: Side.No, amount: SOL / 2n },
-    ],
-    { how: "stale", chain, stopAt: "settling" },
-  );
-  freshPrices();
-  cycles.review = await runCycle(
-    w,
-    (b) => [
-      { who: b[0], side: Side.Yes, amount: SOL / 4n },
-      { who: b[1], side: Side.No, amount: SOL },
-      { who: b[2], side: Side.No, amount: SOL / 10n },
-    ],
-    { ...two, stopAt: "review" },
-  );
-  store = openStore(join(dir, "live.sqlite"));
-  ingest = createIngest(createSolanaRpc(chain.url), store);
-  first = await ingest.refresh();
+  world = await indexedCycles();
+  ({ w, chain, store, ingest, first, cycles, dir } = world);
 }, 180_000);
 
-afterAll(() => {
-  chain.close();
-  store.close();
-  rmSync(dir, { recursive: true, force: true });
-});
+afterAll(() => world.close());
 
 describe("the indexer over whole cycles", () => {
   test("one refresh reads the whole history: nothing skipped, no gap, the points computed", () => {

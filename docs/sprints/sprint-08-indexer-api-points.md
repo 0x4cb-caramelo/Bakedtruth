@@ -48,7 +48,10 @@ only path from a client to a paid RPC account, and it relays only what Brot's cl
       activity across campaigns (`/api/v1/activity`), a wallet's entries, the leaderboard, `/names`, `/price` and
       `/health`, under the D6 names. DTOs are zod schemas in the SDK's own `schemas` entry point
       (`@brot/sdk/schemas`; `read` and `tx` never import zod, a lint rule since Sprint 05), with contract tests. Every response carries `chain_time`; lists carry `as_of_slot`; `/health`
-      returns `program_last_deploy_slot`, `schema_version`, `cluster` and `entries_allowed`.
+      returns `program_last_deploy_slot`, `schema_version`, `cluster` and `entries_allowed`. **Slice 2 (2026-10-11),
+      in the indexer:** a campaign's activity and chance, `/api/v1/activity` and a wallet's entries, with their zod
+      schemas in `@brot/sdk/schemas` (`indexer.ts`) and contract tests; the campaign list, the leaderboard, names,
+      price and health stay in `services/api` until the indexer takes them over.
 - [ ] Amounts are lamport strings, addresses base58, times Unix seconds in UTC. An unknown query parameter returns 400.
       An error returns `{ "error": { "code", "message" } }`, never a stack trace.
 - [x] **`/api/v1/price`** serves SOL's price in US$, fetched every few minutes, with its source and time. It never
@@ -275,3 +278,25 @@ CoinGecko's answer.
   first entry, so the open entries are counted by wallet.
 - **Not in this slice:** the `/api/v1` routes over the file, the zod DTOs, the ranking and `content/partners.json`, the
   KPIs and the partner report, `feed_history` and the nightly snapshot, the alerts, `logsSubscribe` and the unit.
+
+### Slice 2: the read routes (2026-10-11, same branch, after the merges of #69, #70 and #71)
+
+- **The branch, replayed.** Slice 1's three commits were replayed on `main` after PR #71 (`92f86f7`); the old base is
+  kept locally as `sprint-08-indexer-5bf3636`. Draft PR #72.
+- **The schemas** (`packages/sdk/src/schemas/indexer.ts`): an entry, a settlement and any other event as one
+  discriminated union; a campaign's activity; the split after each entry; the recent entries; a wallet's entries; the
+  error. The read API's conventions: lamports and slots as decimal strings, addresses base58, `as_of_slot` and
+  `chain_time` on every answer.
+- **The queries** (`services/indexer/src/api/queries.ts`): chain order is (slot, place, instruction, inner), so a
+  signature listed late for a gap still sorts by its slot; the other events are those that are neither an entry nor a
+  settlement row; `as_of_slot` is the last slot read in full (a pending signature holds it back).
+- **The routes and the server** (`routes.ts`, `server.ts`): GET only; an unknown parameter, a bad address or number is
+  a 400, an unknown campaign or opening a 404, never cached; answers cached 5 s at the edge (`s-maxage=5`); served from
+  the ingest's own handle on `127.0.0.1:4201`, with `/healthz`.
+- **Tests:** the routes over a hand-built file, each answer parsed by its schema (the contract), every refusal; the
+  settings and the running server; and on LiteSVM, the routes over the four cycles (each live split ends at its
+  account's pools, each activity opens with `CampaignOpened` and holds each entry once, each baker's entries and what
+  reached it). The hand-built test found the recent entries coming oldest first: a single `DESC` turned only the last
+  column of the order. The cycles moved to `tests/indexer/cycles-world.ts`, shared by both LiteSVM files.
+- **Open:** who reaches the routes from outside. The live read API (`services/api`, `brot.markets/api/v1`) does not
+  serve them yet: it can call the indexer on loopback for these four paths, or the tunnel can send them to port 4201.

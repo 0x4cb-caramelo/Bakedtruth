@@ -27,6 +27,12 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **Sprint 08, terceira parte, segunda fatia: as rotas de leitura do indexador** (mesma branch, PR #72 em rascunho,
+  11/10/2026; construídas e testadas, não implantadas): a atividade de uma campanha e a divisão depois de cada entrada,
+  as entradas recentes de todas as campanhas e as entradas de uma carteira, com os esquemas em `@brot/sdk/schemas` e
+  testes de contrato; servidas pelo próprio indexador em `127.0.0.1:4201`. O teste pegou as entradas recentes saindo
+  da mais velha para a mais nova. Falta decidir como elas chegam ao público (pela API de leitura ou por uma rota do
+  túnel).
 - **Sprint 08, terceira parte: o indexador em SQLite, primeira fatia** (branch `sprint-08-indexer`, 11/10/2026;
   `services/indexer`; `docs/sprints/sprint-08-indexer-api-points.md`; construído e testado, não implantado).
   - **A ingestão:** as assinaturas do programa em `finalized`, listadas até o ponto de controle e guardadas com o lugar
