@@ -1,0 +1,89 @@
+/* Purpose: the mascot's sprite, shadow and speech bubble, as live on brot.markets. Copied from services/landing/public/styles.css (.bk-pet). On phones the mascot stands at 60% (js/mascot/mascot.js); js/mascot/body.js keeps the bubble inside the window. From prototype-lab/campaigns/css/mascot.css (Sprint -1, approved 2026-10-10), as is, in the `components` layer;
+   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.0 · Sprint 09 (the UI overhaul) */
+@layer components {
+.bk-pet {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 80;
+  pointer-events: none;
+  will-change: transform;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.bk-pet.is-on {
+  opacity: 1;
+}
+.bk-pet-flip,
+.bk-pet-squash,
+.bk-pet-body {
+  position: absolute;
+  inset: 0;
+}
+.bk-pet-flip {
+  transition: transform 0.16s;
+}
+.bk-pet-squash,
+.bk-pet-body {
+  transform-origin: 50% 100%;
+}
+.bk-pet-body {
+  animation: bk-pet-breathe 3.4s ease-in-out infinite;
+}
+.bk-pet-body img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  user-select: none;
+}
+.bk-pet-body img.is-on {
+  opacity: 1;
+}
+.bk-pet-shadow {
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  bottom: -2%;
+  height: 8%;
+  border-radius: 50%;
+  background: var(--pet-shadow);
+  filter: blur(3px);
+}
+.bk-pet-say {
+  position: absolute;
+  left: 50%;
+  bottom: 102%;
+  transform: translate(calc(-50% + var(--say-dx, 0px)), 6px);
+  padding: 7px 10px;
+  border-radius: var(--r-sm);
+  background: var(--say-bg);
+  color: var(--say-fg);
+  font: 600 12px/1.2 var(--body);
+  white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transition:
+    opacity 0.18s,
+    transform 0.18s;
+}
+.bk-pet-say.is-on {
+  opacity: 1;
+  transform: translate(calc(-50% + var(--say-dx, 0px)), 0);
+}
+.bk-pet-say.is-below {
+  bottom: auto;
+  top: 104%;
+}
+@keyframes bk-pet-breathe {
+  50% {
+    transform: scaleY(1.03) scaleX(0.988);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bk-pet-body { animation: none; }
+  .bk-pet-flip { transition: none; }
+}
+}

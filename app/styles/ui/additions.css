@@ -1,0 +1,12 @@
+/* Purpose: what the site needs on top of the approved prototype's styles (the other files here, ported as is): the
+   primary button's orbiting edge on the app's own keyframes (Tailwind's `spin` rotates the whole element and wins over
+   the prototype's `spin`), and the phone label of the wallet button when no wallet is installed, so the top bar never
+   overflows 412 px.
+   Version: 0.1.0 · Sprint 09 (the UI overhaul) */
+@layer components {
+.cta { animation-name: brot-spin; }
+.wallet .cta .short { display: none; }
+@media (max-width: 700px) {
+  .wallet .cta .long { display: none; } .wallet .cta .short { display: inline; }
+}
+}

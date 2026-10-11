@@ -50,6 +50,9 @@ test.describe("site pages and notices", () => {
 
   test("How it works opens from the top bar, and the mascot's bubble stays on the screen", async ({ page }, info) => {
     await page.goto("/");
+    // Under 1180 px the top bar's links live in the menu (the approved prototype's phone sheet).
+    if (!(await page.getByRole("navigation", { name: "Main" }).isVisible()))
+      await page.getByRole("button", { name: "Menu" }).click();
     await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "How it works" }).click();
     await expect(page.getByRole("heading", { name: "Six steps, from opening to payout" })).toBeVisible();
     for (const step of ["Open", "Join", "Entries close", "The chain is read", "6-hour review", "Payout"])
@@ -98,7 +101,7 @@ test.describe("site pages and notices", () => {
     const { wallet } = await openCampaign(page, (await control<{ id: string }>("/state", { name: "closed" })).id);
     await page.goto("/leaderboard");
     await page.getByRole("button", { name: "Use Installed Wallet" }).first().click();
-    await expect(page.getByRole("button", { name: "Disconnect" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Wallet / })).toBeVisible(); // the top bar's chip, once connected
     const row = page.locator(`tr[data-wallet='${wallet}']`);
     await expect(row).toBeVisible();
     await expect(row).toContainText("You");

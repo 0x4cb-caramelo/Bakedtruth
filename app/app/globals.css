@@ -1,5 +1,17 @@
 @import "tailwindcss";
 @import "../styles/tokens.css";
+/* The approved prototype's styles (prototype-lab/campaigns), layered under Tailwind's utilities. */
+@import "../styles/ui/base.css";
+@import "../styles/ui/components.css";
+@import "../styles/ui/chrome.css";
+@import "../styles/ui/card.css";
+@import "../styles/ui/cards.css";
+@import "../styles/ui/campaign.css";
+@import "../styles/ui/entry.css";
+@import "../styles/ui/open.css";
+@import "../styles/ui/pages.css";
+@import "../styles/ui/mascot.css";
+@import "../styles/ui/additions.css";
 
 /* The light theme as a variant: light:bg-panel applies only when data-theme="light" is set on <html>. */
 @custom-variant light ([data-theme="light"] &);
@@ -111,11 +123,6 @@
   }
 }
 
-body {
-  background: var(--color-page);
-  color: var(--color-ink);
-  font-family: var(--font-grotesk), system-ui, sans-serif;
-}
 
 /* Jersey 15 has a single weight: never fake a bold. */
 .font-display {
