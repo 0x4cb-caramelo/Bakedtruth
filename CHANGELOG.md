@@ -27,6 +27,22 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **A revisão visual do site: as telas aprovadas da Sprint -1 no `app/`** (branch `feat/full-ui-overhaul`, 11/10/2026,
+  a pedido do Ronaldo; `docs/product/DESIGN-DIRECTION.md`, "Status em 2026-10-11"). O PR #67 tinha trazido só as
+  cores da marca; agora o site tem a estrutura do protótipo aprovado (`prototype-lab/campaigns/`, servido em
+  `/dev0x/`).
+  - **Os estilos do protótipo** foram para `app/styles/ui/` como estão, em camadas de CSS, com as cores da marca.
+  - **Mudaram de estrutura:** a moldura (faixa, barra do topo com o Baked, busca, carteira com menu, menu do celular,
+    rodapé), a página inicial (topo com o custo da abertura agora, o carrossel "Open now" com a leitura na cadeia,
+    "Closing soon", "Answered recently", os passos, a barra de filtros, a grade), o cartão de campanha com a leitura
+    de agora contra o alvo, a página da campanha e o painel de entrada, a caixa de abertura, Minhas entradas e o
+    ranking; Fees, How it works e o registro ganharam a cabeça e os títulos do protótipo.
+  - **Nada mudou no que o site faz:** as mesmas leituras, regras, textos que o teste na web confere e fluxos. Duas
+    expectativas do teste mudaram com o desenho: no celular, "How it works" fica no menu; ligada a carteira, o sinal é
+    o chip com o endereço e o saldo (o "Disconnect" fica no menu dela).
+  - **Ainda fora:** o cartão de compartilhar, o painel "About this campaign", a linha do tempo com a campanha aberta,
+    a lista densa de todas as campanhas, a barra fixa de entrada do celular e o selo de parceiro.
+
 - **Sprint 19: a caixa de abertura em `/abrir`; qualquer carteira abre uma campanha pelo site** (branch
   `sprint-19-site-open-campaign`, 10/10/2026; `docs/sprints/sprint-19-site-open-campaign.md`; mesclada na `main` pelo
   PR #68 em 11/10/2026, a pedido do Ronaldo, com a tag `sprint-19`).

@@ -213,3 +213,32 @@ product. **Resolved by D-q:** it is deleted here, not rewritten, and `OPENROUTER
 ## Record and retrospective
 
 Filled in during the sprint and at closure.
+
+### The UI overhaul (2026-10-11, branch `feat/full-ui-overhaul`)
+
+Sprint -1's code items, which its closure moved here, built on 2026-10-11 at Ronaldo's request: the site now has the
+structure of the approved screens (`prototype-lab/campaigns/`, served at `/dev0x/`), not only their colours (PR #67).
+
+- **The prototype's styles,** as they are, in `app/styles/ui/`, inside the `base` and `components` cascade layers so
+  Tailwind's utilities still win; their colours come from `app/styles/tokens.css` (BRAND.md §5), whose variables carry
+  the prototype's names. `additions.css` holds what the site needs on top.
+- **Rebuilt on the prototype's markup:**
+  - the frame (strip, top bar with Baked, search, wallet chip and menu, the menu under 1180 px, footer);
+  - the whole home page, with a batched live reading on every card;
+  - the campaign page and its entry panel;
+  - the creation box's sections;
+  - my entries and the leaderboard.
+
+  The content pages took the prototype's page head and titles.
+- **Kept from the site where its words are newer:** "Use Installed Wallet" (S1), the full notices at every width, the
+  devnet payout lines, Sprint 19's kind labels.
+- **Tests:** two web-smoke expectations follow the design (the phone menu holds "How it works"; the wallet chip, not a
+  visible "Disconnect", says the wallet is connected); the notice registry points at the new footer.
+- **Not built yet:**
+  - the share card;
+  - "About this campaign";
+  - the open campaign's timeline;
+  - the dense list of every campaign;
+  - the phone's fixed join bar;
+  - the partner seal;
+  - Baked's lines per screen.

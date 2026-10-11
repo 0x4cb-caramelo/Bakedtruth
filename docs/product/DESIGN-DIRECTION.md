@@ -12,6 +12,38 @@
   [`BRAND.md`](BRAND.md) §5, tiradas da página `/5` que o Lucas aprovou em 9/10: azul-marinho e laranja no escuro,
   creme e ferrugem no claro, nenhum azul. A estrutura, a tipografia, os componentes e o resto da direção Ledger²
   continuam valendo. A troca e as escolhas que ela pediu estão em [Cores](#cores); a tabela antiga ficou como histórico.
+- **Status em 2026-10-11: o site tem a estrutura das telas aprovadas, não só as cores** (a revisão visual, branch
+  `feat/full-ui-overhaul`, a pedido do Ronaldo). As telas da Sprint -1 (`prototype-lab/campaigns/`, servidas em
+  `/dev0x/`, aprovadas pelo fundador em 10/10) passaram para `app/`:
+  - **Os estilos do protótipo** estão em `app/styles/ui/` como estão (dez arquivos), dentro das camadas `base` e
+    `components`, para os utilitários do Tailwind valerem onde os dois se encontram. As cores vêm de
+    `app/styles/tokens.css`, cujas variáveis têm os nomes do protótipo, então o azul do Ledger² vira o laranja da marca
+    sem tocar nos arquivos portados. `additions.css` guarda só o que o site precisa a mais.
+  - **O que ganhou a estrutura do protótipo:**
+    - a moldura: a faixa da devnet, a barra do topo com o Baked, as três abas, a busca, "Open a campaign", o tema, a
+      carteira (o chip com saldo e o menu) e, abaixo de 1180 px, o menu com todas as rotas; o rodapé;
+    - a página inicial inteira: a linha de topo com o custo da abertura agora, o carrossel "Open now" com o painel de
+      leitura, "Closing soon", "Answered recently", os passos e os princípios, a barra de filtros e a grade;
+    - o cartão de campanha, com a leitura de agora contra o alvo, lida em lote;
+    - a página da campanha e o painel de entrada;
+    - a caixa de abertura (números em círculo, as letras dos tipos, a direção em duas metades, o "$" do alvo, as
+      faixas de valor);
+    - Minhas entradas e o ranking.
+
+    Fees, How it works e o registro ganharam a cabeça de página e os títulos do protótipo.
+  - **Onde ficaram as palavras do site, e não as do protótipo:**
+    - o botão da carteira segue "Use Installed Wallet" (S1);
+    - a faixa diz os dois avisos inteiros em qualquer largura;
+    - o terceiro princípio diz que no devnet o pagamento ainda não é automático (o protótipo dizia "No claim button");
+    - os rótulos dos tipos na caixa de abertura são os da Sprint 19.
+  - **Ainda não estão no site:**
+    - o cartão de compartilhar (BR-33);
+    - o painel "About this campaign";
+    - a linha do tempo "Where it is" enquanto a campanha está aberta;
+    - a lista densa de `#/campaigns` (no site, o interruptor "All campaigns, unlisted too" da grade);
+    - a barra fixa de entrada do celular na página da campanha (no site, o painel vai na coluna);
+    - o selo de parceiro (não há `content/partners.json`);
+    - as falas próprias do Baked em cada tela.
 
 | Identificador | `ledger2-d-n` |
 |---|---|
