@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **906** |
+| Arquivos mapeados | **907** |
 | Acima de 200 linhas | **40** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -78,7 +78,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`eslint.config.mjs`](app/eslint.config.mjs) | Override default ignores of eslint-config-next | 19 |
-| [`next.config.ts`](app/next.config.ts) | the site's Next.js settings: the security headers and the Content-Security-Policy (Sprint 09, X2.5). The policy allows the page's own origin, the one RPC origin | 106 |
+| [`next.config.ts`](app/next.config.ts) | the site's Next.js settings: the security headers and the Content-Security-Policy (Sprint 09, X2.5). The policy allows the page's own origin, the one RPC origin | 122 |
 | [`postcss.config.mjs`](app/postcss.config.mjs) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 8 |
 
 ## `app/app/`
@@ -86,7 +86,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09), in the approved prototype's frame (prototype-lab/campaigns): the two fonts the site serves itself, the theme script in <head | 52 |
-| [`manifest.ts`](app/app/manifest.ts) | the installable PWA, manifest only (Sprint 13 DoD, S2; TP §3.6): the name, the start page, standalone display, the dark theme's colours and the icons scripts/pw | 33 |
+| [`manifest.ts`](app/app/manifest.ts) | the installable PWA, manifest only (Sprint 13 DoD, S2; TP §3.6): the name, the start page, standalone display, the dark theme's colours and the icons scripts/pw | 35 |
 | [`page.tsx`](app/app/page.tsx) | the home route (Sprint 10), in the approved prototype's layout since the UI overhaul (features/home): the top line, the "Open now" carousel with "Closing soon"  | 15 |
 
 ## `app/app/abrir/`
@@ -137,12 +137,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`copy-site.ts`](app/components/copy-site.ts) | the words every screen shows above any campaign or entry (BR-47; P1 §4.6), in English per L-01: the test-money notice and the not-audited notice, while each is  | 24 |
 | [`header-search.tsx`](app/components/header-search.tsx) | the top bar's campaign search (the approved prototype's `.search`): what you type filters the home grid by title, asset, kind, address, creator or state (featur | 42 |
-| [`mascot.tsx`](app/components/mascot.tsx) | Mounts the mascot once for the whole app. Each page decides where it may stand with | 31 |
+| [`mascot.tsx`](app/components/mascot.tsx) | Mounts the mascot once for the whole app. Each page decides where it may stand with | 32 |
 | [`phone-menu.tsx`](app/components/phone-menu.tsx) | the menu under 1180 px (the approved prototype's `.phone-nav` sheet): the campaign search (the top bar's field hides on a phone), every route, the theme switch  | 64 |
 | [`pointer-effects.tsx`](app/components/pointer-effects.tsx) | the approved prototype's pointer effects (prototype-lab/campaigns/js/effects.js, whose styles came over in base.css and card.css): the dot field behind every pa | 91 |
 | [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 44 |
 | [`site-footer.tsx`](app/components/site-footer.tsx) | the footer of every screen, in the approved prototype's style (prototype-lab/campaigns, `.foot`): the links, then the legal lines the site must carry: BRAND.md' | 60 |
-| [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): Baked and the wordmark, the three main links with the current one unde | 111 |
+| [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): Baked and the wordmark, the three main links with the current one unde | 117 |
 | [`site-notice.tsx`](app/components/site-notice.tsx) | the strip above every screen (Sprint 09, BR-47, P1 §4.6), in the approved prototype's place and style (prototype-lab/campaigns, `.status`): the devnet mark, the | 27 |
 | [`toast.tsx`](app/components/toast.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 71 |
 | [`wallet-button.tsx`](app/components/wallet-button.tsx) | the top bar's wallet control (Sprint 09, S1), in the approved prototype's look (prototype-lab/campaigns, ui/wallet.js): "Connect" as the primary button connects | 121 |
@@ -264,7 +264,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`copy.ts`](app/features/home/copy.ts) | the home page's words (the UI overhaul), from the approved prototype (prototype-lab/campaigns, home.js and home-mosaic.js) where they hold on devnet, and change | 86 |
-| [`home-empty.tsx`](app/features/home/home-empty.tsx) | the home page's empty block (the approved prototype's `.empty`): Baked sulking, one sentence and at most one way out ("No campaigns here." [Clear filters]) | 21 |
+| [`home-empty.tsx`](app/features/home/home-empty.tsx) | the home page's empty block (the approved prototype's `.empty`): Baked sulking, one sentence and at most one way out ("No campaigns here." [Clear filters]) | 23 |
 | [`home-feature.tsx`](app/features/home/home-feature.tsx) | the home page's "Open now" carousel (the approved prototype's `.home-feature`, home-mosaic.js): the top-ranked listed campaigns that take entries, up to five, a | 174 |
 | [`home-how.tsx`](app/features/home/home-how.tsx) | the home page's "How it works" (the approved prototype's `.home-how`): the six steps told in three, with the link to every step, fee and refund, then the three  | 70 |
 | [`home-lead.tsx`](app/features/home/home-lead.tsx) | the home page's top line (the approved prototype's `.home-lead`): what this is, and what a US$500 opening costs in SOL right now at Pyth's SOL/USD price (4a: US | 41 |
@@ -356,7 +356,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`use-open-box.ts`](app/features/open-campaign/use-open-box.ts) | the creation box's data in React: the draft, the chain as the box reads it (once, then every 15 seconds while the tab is visible), the draft's own accounts (the | 154 |
 | [`use-open-flow.ts`](app/features/open-campaign/use-open-flow.ts) | an opening's steps in React, around submit.ts (A-3, A-8, A-9; T17): "Review and sign" takes the guard's id (the saved one, or the page's for this wallet), then  | 197 |
 | [`watch.ts`](app/features/open-campaign/watch.ts) | watching an opening after the wallet, by polling and never a WebSocket (proposal §2.6): the signature's status (`getSignatureStatuses`), the finalized block hei | 135 |
-| [`what-list.tsx`](app/features/open-campaign/what-list.tsx) | the suggestions under "What should the chain answer?" (the approved prototype's `.op-drop`, open-slots.js): grouped by kind, the most relevant group first, each | 106 |
+| [`what-list.tsx`](app/features/open-campaign/what-list.tsx) | the suggestions under "What should the chain answer?" (the approved prototype's `.op-drop`, open-slots.js): grouped by kind, the most relevant group first, each | 107 |
 | [`what-section.tsx`](app/features/open-campaign/what-section.tsx) | section 1 of the creation box, "What" (spec 3.12; TP §3.6): the combobox "What should the chain answer?" over the templates, the pinned Pyth feeds and the revie | 143 |
 
 ## `app/features/record/`
@@ -385,7 +385,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`copy.ts`](app/features/wallet/copy.ts) | the words of the "Connect a wallet" list (the approved prototype's connectDialog, ui/wallet.js): its title, what each wallet's state says, the reassurance under | 19 |
 | [`mwa-chain.test.ts`](app/features/wallet/mwa-chain.test.ts) | X2.1. The chain the wallet registers for (from the site's cluster setting) equals the chain for the cluster the read API reports in /api/v1/health. Registration | 54 |
-| [`register-mwa.ts`](app/features/wallet/register-mwa.ts) | the explicit Mobile Wallet Adapter registration (S1, proposal §3.4). Registers the MWA wallet once, for the chain of the site's cluster (never the RPC URL's), w | 46 |
+| [`register-mwa.ts`](app/features/wallet/register-mwa.ts) | the explicit Mobile Wallet Adapter registration (S1, proposal §3.4). Registers the MWA wallet once, for the chain of the site's cluster (never the RPC URL's), w | 49 |
 | [`sol-balance-provider.tsx`](app/features/wallet/sol-balance-provider.tsx) | the connected wallet's SOL balance, one reading for the whole site, so the top bar's chip, the entry panel and the creation box always show the same number. It  | 65 |
 | [`use-installed-wallet.ts`](app/features/wallet/use-installed-wallet.ts) | "Connect" (S1, proposal §3.4 rule 3): connect only from a person's click. Shared by the top bar's button, the entry panel and the creation box, so all three con | 23 |
 | [`use-sol-balance.ts`](app/features/wallet/use-sol-balance.ts) | the connected wallet's SOL balance in lamports, from the site's one reading (sol-balance-provider.tsx). `null` while it loads, when nothing is connected or when | 24 |
@@ -399,6 +399,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`api-client.test.ts`](app/lib/api-client.test.ts) | the read API client with a fake fetch: the URLs and query it builds, the body on 200 and on health's 503, the named ApiError on other answers, the unreachable c | 89 |
 | [`api-client.ts`](app/lib/api-client.ts) | a read-only client for the read API (`services/api`, /api/v1): health, the campaign list, one campaign and, since Sprint 13, the devnet leaderboard. Typed from  | 150 |
+| [`base-path.ts`](app/lib/base-path.ts) | the path the site is served under, from NEXT_PUBLIC_BASE_PATH at build time (`/dev0x` on brot.markets, where the tunnel sends it; empty locally and in the web s | 13 |
 | [`brand.ts`](app/lib/brand.ts) | Product name and copy in one place. The name is Brot Markets; Baked is the mascot. Only the copy the site shows lives | 13 |
 | [`brot.ts`](app/lib/brot.ts) | the site's one door to the Brot Markets SDK (Sprint 09, A-6): the read half (constants, PDAs, decoding, public state) and the tx half (the transaction builders  | 17 |
 | [`config.ts`](app/lib/config.ts) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 19 |
@@ -1185,7 +1186,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`server.mjs`](services/landing/server.mjs) | HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API), of the unlisted campaign preview under /dev0x/ and of docs.brot.markets (the docs. ho | 189 |
+| [`server.mjs`](services/landing/server.mjs) | HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API), of the unlisted campaign preview under /prototype/ and of docs.brot.markets (the docs | 190 |
 
 ## `services/landing/history/pitch-1/`
 
@@ -1232,7 +1233,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`api.mjs`](services/landing/lib/api.mjs) | the two waitlist endpoints of the "coming soon" site: join (POST /api/leads) and leave (/api/leads/remove) | 120 |
-| [`campaigns.mjs`](services/landing/lib/campaigns.mjs) | serves the Sprint -1 campaign screens under /dev0x/ (the team's preview, unlisted: noindex, no link from the site) from prototype-lab/campaigns, with a CSP that | 68 |
+| [`campaigns.mjs`](services/landing/lib/campaigns.mjs) | serves the Sprint -1 campaign screens under /prototype/ (the team's preview, unlisted: noindex, no link from the site) from prototype-lab/campaigns, with a CSP  | 70 |
 | [`leads.mjs`](services/landing/lib/leads.mjs) | waitlist store for the "coming soon" page: validates an email and keeps one line per lead in a JSONL file | 91 |
 | [`rate-limit.mjs`](services/landing/lib/rate-limit.mjs) | in-memory request limiter per visitor address, so one address cannot flood the waitlist endpoint | 40 |
 | [`static.mjs`](services/landing/lib/static.mjs) | serves the files under public/ for the "coming soon" site, with clean URLs and no way out of that folder | 104 |
@@ -1279,10 +1280,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`dev0x.test.mjs`](services/landing/tests/dev0x.test.mjs) | tests the unlisted campaign preview under /dev0x/ over real HTTP: redirects, noindex, its CSP, the files it needs, the refusal of paths out of its folder, and t | 151 |
 | [`docs.test.mjs`](services/landing/tests/docs.test.mjs) | tests docs.brot.markets: each generated page says what its text in docs/wiki says, every page is in the menu, every link and file a page points at exists, the s | 176 |
 | [`leads.test.mjs`](services/landing/tests/leads.test.mjs) | tests the waitlist store and the request limiter of the "coming soon" site (node --test) | 125 |
 | [`pages.test.mjs`](services/landing/tests/pages.test.mjs) | tests what the pages of the "coming soon" site promise without a browser: every file they point at exists, the suggestion draft keeps its mention and hashtag, t | 229 |
+| [`prototype.test.mjs`](services/landing/tests/prototype.test.mjs) | tests the unlisted campaign preview under /prototype/ over real HTTP: redirects, noindex, its CSP, the files it needs, the refusal of paths out of its folder, a | 153 |
 | [`server.test.mjs`](services/landing/tests/server.test.mjs) | tests the "coming soon" site over real HTTP: waitlist API rules, static files, headers and /pitch | 193 |
 | [`two.test.mjs`](services/landing/tests/two.test.mjs) | tests /2, the home page in the pitch deck's look: it says exactly what the home page says (only the look may differ), the mascot perches and moods are the same, | 53 |
 

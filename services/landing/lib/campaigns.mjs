@@ -1,16 +1,17 @@
 /**
- * Purpose: serves the Sprint -1 campaign screens under /dev0x/ (the team's preview, unlisted: noindex, no link from the
- *          site) from prototype-lab/campaigns, with a CSP that allows only what that prototype uses.
- * Version: 0.1.0 · Sprint: -1 (design system preview for the team), 2026-10-10
+ * Purpose: serves the Sprint -1 campaign screens under /prototype/ (the team's preview, unlisted: noindex, no link
+ *          from the site) from prototype-lab/campaigns, with a CSP that allows only what that prototype uses.
+ * Version: 0.2.0 · Sprint: -1 (design system preview for the team), 2026-10-10; moved from /dev0x/ on 2026-10-11, when
+ *          the site (app/) took /dev0x
  */
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { resolveStatic, serveStatic } from "./static.mjs";
 
-export const PREFIX = "/dev0x";
+export const PREFIX = "/prototype";
 
-/** True for /dev0x and everything under it. */
+/** True for /prototype and everything under it. */
 export function isCampaigns(path) {
   return path === PREFIX || path.startsWith(`${PREFIX}/`);
 }
@@ -46,8 +47,9 @@ export function campaignsCsp(root) {
 }
 
 /**
- * Answers /dev0x and the files under it. The prototype's links are relative, so /dev0x goes to /dev0x/ (302) and a
- * folder without its slash goes to the slash (308). Paths are checked by resolveStatic, which keeps them under root.
+ * Answers /prototype and the files under it. The prototype's links are relative, so /prototype goes to /prototype/
+ * (302) and a folder without its slash goes to the slash (308). Paths are checked by resolveStatic, which keeps them
+ * under root.
  */
 export function serveCampaigns(req, res, path, root) {
   if (path === PREFIX) {

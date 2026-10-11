@@ -14,7 +14,8 @@
   continuam valendo. A troca e as escolhas que ela pediu estão em [Cores](#cores); a tabela antiga ficou como histórico.
 - **Status em 2026-10-11: o site tem a estrutura das telas aprovadas, não só as cores** (a revisão visual, branch
   `feat/full-ui-overhaul`, a pedido do Ronaldo). As telas da Sprint -1 (`prototype-lab/campaigns/`, servidas em
-  `/dev0x/`, aprovadas pelo fundador em 10/10) passaram para `app/`:
+  `/dev0x/` até 11/10, quando o site passou a responder ali e a prévia foi para `/prototype/`; aprovadas pelo fundador
+  em 10/10) passaram para `app/`:
   - **Os estilos do protótipo** estão em `app/styles/ui/` como estão (dez arquivos), dentro das camadas `base` e
     `components`, para os utilitários do Tailwind valerem onde os dois se encontram. As cores vêm de
     `app/styles/tokens.css`, cujas variáveis têm os nomes do protótipo, então o azul do Ledger² vira o laranja da marca

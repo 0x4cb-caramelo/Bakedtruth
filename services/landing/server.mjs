@@ -1,9 +1,10 @@
 /**
  * Purpose: HTTP entry of the "coming soon" site (landing page, /pitch, waitlist API), of the unlisted campaign preview
- *          under /dev0x/ and of docs.brot.markets (the docs. host, from docs-site/), bound to localhost behind the
+ *          under /prototype/ and of docs.brot.markets (the docs. host, from docs-site/), bound to localhost behind the
  *          project's Cloudflare tunnel. The docs host is offline (`docsOffline`) until the docs describe the campaign
  *          product: the founder took it down on 2026-10-10.
- * Version: 0.4.0 · Sprint: out of band (landing page), 2026-10-05; docs host 2026-10-08; /dev0x, sweep, docs down 10-10
+ * Version: 0.4.1 · Sprint: out of band (landing page), 2026-10-05; docs host 2026-10-08; the preview, sweep, docs down
+ *          10-10; the preview moved to /prototype/ on 10-11, when the site took /dev0x (the tunnel sends it there)
  *
  * Run: `node services/landing/server.mjs`. No dependencies. Configuration comes from the environment
  * (see .env.example): PORT, HOST, SITE_ORIGIN, LEADS_FILE.

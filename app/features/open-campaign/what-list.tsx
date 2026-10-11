@@ -8,6 +8,7 @@
  * Sprint:  19 (site: open a campaign), in the UI overhaul
  */
 import { KindTile } from "@/components/ui/kind-tile";
+import { asset } from "@/lib/base-path";
 import { KIND_NAME } from "../campaign-page/copy";
 import { WHAT } from "./copy";
 import { templateOf } from "./kinds";
@@ -59,7 +60,7 @@ export function WhatList(props: {
       {result.outside ? (
         <div className="op-out">
           {/* eslint-disable-next-line @next/next/no-img-element -- Baked's sprite, already sized */}
-          <img src="/mascot/skeptical.png" alt="" width={64} height={40} />
+          <img src={asset("/mascot/skeptical.png")} alt="" width={64} height={40} />
           <p>
             <b>{WHAT.outsideTitle}</b> {WHAT.outsideNext}
           </p>

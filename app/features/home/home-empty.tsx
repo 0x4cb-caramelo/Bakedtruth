@@ -6,12 +6,14 @@
  */
 import type { ReactNode } from "react";
 
+import { asset } from "@/lib/base-path";
+
 export function HomeEmpty({ text, action }: { text: string; action?: ReactNode }) {
   return (
     <div className="home-empty">
       <div className="empty" data-perch="empty" data-perch-pose="sulking">
         {/* eslint-disable-next-line @next/next/no-img-element -- Baked's sprite, already sized */}
-        <img src="/mascot/sulking.png" alt="Baked, sulking" width={150} height={95} />
+        <img src={asset("/mascot/sulking.png")} alt="Baked, sulking" width={150} height={95} />
         <p>{text}</p>
         {action}
       </div>

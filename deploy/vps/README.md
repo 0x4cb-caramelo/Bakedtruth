@@ -119,3 +119,126 @@ none is done. In this order:
 secret, change the Cloudflare rule at the same moment), then `sudo systemctl restart brot-rpc`. **Upgrading Bun:** the
 relay's copy does not follow the keeper's; install the new pinned binary at both paths, compare them with `cmp`, and
 restart both units.
+
+## The site under /dev0x, `brot-site` and `brot-api` (not installed)
+
+The campaign site (`app/`) at `https://brot.markets/dev0x`, and the read API it needs at `https://brot.markets/api/v1`
+(the site takes no entry while `/api/v1/health` is not `ok`, K-11). The domain's root stays the landing
+(`brot-landing`, port 4200): the tunnel sends the two paths to their units first and everything else to the landing,
+as today. The team's prototype preview, which lived at `/dev0x/`, is served by the landing at `/prototype/` from this
+release on. Decided by Ronaldo on 2026-10-11: the tunnel and systemd (no Nginx, no PM2), the API on the same host.
+
+| What | Where on the server | Owner, mode | Notes |
+|---|---|---|---|
+| Release (site and API, one per commit) | `/srv/brot-markets/site/releases/<commit>`, `current` links to it | `root:brot-web`, 0750 | `git archive` of the commit, `bun install --frozen-lockfile --ignore-scripts`, the site built with `site-build.conf` |
+| Bun 1.4.2 | `/usr/local/lib/brot-web/bun` | `root:brot-web`, 0750 | A copy of the keeper's pinned binary, compared with `cmp` |
+| Next's cache | `<release>/app/.next/cache` | `brot-site`, 0750 | The only place the site writes |
+| API settings | `/etc/brot-markets/api.env` | `root`, 0600 | From `services/api/.env.example`; no secret with the public RPC |
+| Units | `/etc/systemd/system/brot-api.service`, `brot-site.service` | `root`, 0644 | Copies of the files here; ports 4220 and 4230 on loopback |
+
+1. **Look first.** The two ports are free, and the landing's folder is noted for step 7.
+
+   ```bash
+   ss -ltn | grep -E '127\.0\.0\.1:(4220|4230)\b' || echo "4220 and 4230 are free"
+   systemctl cat brot-landing | grep -E 'WorkingDirectory|ExecStart'
+   ```
+
+2. **The users.** Two users with no login, one per unit, so the site's process cannot read the API's settings, and a
+   group for the release and the Bun copy.
+
+   ```bash
+   sudo groupadd --system brot-web
+   sudo useradd --system --user-group --groups brot-web --home-dir /nonexistent --no-create-home --shell /usr/sbin/nologin brot-site
+   sudo useradd --system --user-group --groups brot-web --home-dir /nonexistent --no-create-home --shell /usr/sbin/nologin brot-api
+   ```
+
+3. **Their Bun**, a root-owned copy of the pinned binary (the keeper's stays in `brot`'s home, 0750).
+
+   ```bash
+   sudo install -d -o root -g brot-web -m 0750 /usr/local/lib/brot-web
+   sudo install -o root -g brot-web -m 0750 /var/lib/brot-markets/bun/bun /usr/local/lib/brot-web/bun
+   sudo cmp /var/lib/brot-markets/bun/bun /usr/local/lib/brot-web/bun && echo same
+   ```
+
+4. **The release.** On your machine, from a checkout of the repository:
+
+   ```bash
+   git fetch origin && COMMIT=$(git rev-parse --short=12 origin/main)
+   git archive --format=tar.gz -o "/tmp/brot-$COMMIT.tar.gz" origin/main
+   scp "/tmp/brot-$COMMIT.tar.gz" <server>:/tmp/ && echo "$COMMIT"
+   ```
+
+   On the server, with the same twelve characters. The build prints `A-8: this build is for the program deploy at
+   slot …`; a build that cannot read it does not sign, so build again then.
+
+   ```bash
+   COMMIT=<the twelve characters>
+   R=/srv/brot-markets/site/releases/$COMMIT
+   sudo install -d -o root -g brot-web -m 0750 /srv/brot-markets/site /srv/brot-markets/site/releases "$R"
+   sudo tar -xzf "/tmp/brot-$COMMIT.tar.gz" -C "$R"
+   cd "$R" && sudo /usr/local/lib/brot-web/bun install --frozen-lockfile --ignore-scripts
+   cd "$R/app" && sudo bash -c 'set -a && . ../deploy/vps/site-build.conf && set +a && /usr/local/lib/brot-web/bun --bun node_modules/.bin/next build'
+   sudo chown -R root:brot-web "$R" && sudo chmod -R g+rX,o-rwx "$R"
+   sudo install -d -o brot-site -g brot-site -m 0750 "$R/app/.next/cache" && sudo chown -R brot-site:brot-site "$R/app/.next/cache"
+   sudo ln -sfn "$R" /srv/brot-markets/site/current
+   ```
+
+5. **The API's settings.** The public devnet RPC needs no key. It answers 429 under load: if the demo needs more, a
+   provider's URL goes in `API_RPC_URL` here (the file stays root-only) and never into the repository.
+
+   ```bash
+   sudo install -o root -g root -m 0600 /dev/null /etc/brot-markets/api.env
+   printf '%s\n' API_RPC_URL=https://api.devnet.solana.com API_CLUSTER=devnet API_HOST=127.0.0.1 API_PORT=4220 \
+     API_REFRESH_MS=15000 API_CORS_ORIGIN=https://brot.markets API_HISTORY_PER_REFRESH=200 \
+     API_PRICE_REFRESH_MS=180000 | sudo tee /etc/brot-markets/api.env >/dev/null
+   ```
+
+6. **The units.** The API first: the site waits for it.
+
+   ```bash
+   sudo install -o root -g root -m 0644 "$R/deploy/vps/brot-api.service" "$R/deploy/vps/brot-site.service" /etc/systemd/system/
+   sudo systemctl daemon-reload
+   systemd-analyze security brot-api.service brot-site.service | grep -i overall
+   sudo systemctl start brot-api && sleep 20 && curl -s http://127.0.0.1:4220/api/v1/health; echo
+   sudo systemctl start brot-site && sleep 5 && curl -sI http://127.0.0.1:4230/dev0x | grep -iE '^HTTP|x-robots-tag'
+   sudo systemctl enable brot-api brot-site
+   ```
+
+   Expected: the health says `"status":"ok"` once the first snapshot is read, and the site answers `200` with
+   `x-robots-tag: noindex, nofollow, noarchive` (the demo stays out of search engines, as the preview at `/dev0x/` was).
+
+7. **The landing**, so the preview moves to `/prototype/`: bring its folder (`<landing-root>`, from step 1) to this
+   commit's `services/landing/` and `prototype-lab/campaigns/`. Its waitlist lives in `/var/lib/brot-markets/leads`,
+   outside both.
+
+   ```bash
+   sudo rsync -a --delete "$R/services/landing/" <landing-root>/services/landing/
+   sudo rsync -a --delete "$R/prototype-lab/campaigns/" <landing-root>/prototype-lab/campaigns/
+   sudo systemctl restart brot-landing && curl -sI http://127.0.0.1:4200/prototype/ | head -1
+   ```
+
+8. **The tunnel's two routes**, in the Cloudflare dashboard (Zero Trust → Networks → Tunnels → `brot-markets` →
+   Public hostnames). The tunnel takes the first rule that matches, so both go above the landing's:
+
+   | Order | Subdomain | Domain | Path | Service |
+   |---|---|---|---|---|
+   | 1 | (empty) | `brot.markets` | `^/dev0x(/.*)?$` | HTTP, `127.0.0.1:4230` |
+   | 2 | (empty) | `brot.markets` | `^/api/v1/` | HTTP, `127.0.0.1:4220` |
+   | 3 (exists) | (empty) | `brot.markets` | (empty) | HTTP, `127.0.0.1:4200` |
+
+9. **From outside.** The root is the landing as before; `/dev0x` is the site; the API and the preview answer.
+
+   ```bash
+   curl -sI https://brot.markets/ | grep -iE '^HTTP|content-security-policy' | head -2
+   curl -sI https://brot.markets/dev0x | grep -iE '^HTTP|x-robots-tag'
+   curl -s https://brot.markets/api/v1/health; echo
+   curl -sI https://brot.markets/prototype/ | head -1
+   ```
+
+   Then in a browser: `https://brot.markets/dev0x`, a wallet connected, a campaign's page shows "Review entry" (not
+   "Entries are not taken on this site right now").
+
+**Rolling back:** delete the two routes in the dashboard (the landing then answers both paths with 404) and
+`sudo systemctl disable --now brot-site brot-api`; or point `current` at the previous release and
+`sudo systemctl restart brot-api brot-site`. **A new release:** step 4 with the new commit, then
+`sudo systemctl restart brot-api brot-site`. Build again after every program upgrade (A-8).
