@@ -152,7 +152,16 @@ recomendado (1a a 12a).
   supply falls to 1,000"). A frase de preço não mudou. **A privacidade** ganhou o registro da abertura que o navegador
   guarda enquanto ela está a caminho e a leitura das transações recentes da carteira antes de uma abertura paga; a
   página no ar só muda quando o fundador publicar a landing.
-
+- **O site novo nas cores da marca** (10/10/2026, pedido do Ronaldo; branch `feat/apply-deck-ui`). As cores do
+  `BRAND.md` §5, tiradas da página `/5` que o Lucas aprovou (branch `feat/site-3-original-com-cores-do-deck`), entram
+  em `app/styles/tokens.css`: azul-marinho e laranja no escuro, creme e ferrugem no claro, nenhum azul. O escuro segue
+  como tema de abertura. Duas cores ficam diferentes da marca de propósito (o `--raised` do escuro, um passo acima do
+  painel, e o fundo das caixas de informação no escuro, que na marca é o mesmo verde do YES), e as que a marca não
+  define (estados, tipos, barras, aviso, borda de campo) saem da mesma paleta. Todo texto passa de 4,5 e toda borda de
+  campo e barra de 3, nos dois temas; um teste novo (`tests/site/tokens.test.ts`) recalcula a leitura, barra o azul de
+  volta e confere as cores da marca. A troca mostrou dois defeitos, corrigidos: o anel do botão principal nunca
+  aparecia, e o botão principal desligado ficava com o texto invisível no escuro. O manifesto e os ícones do PWA foram
+  para o novo fundo escuro. O `DESIGN-DIRECTION.md` e o `BRAND.md` registram a troca. Nenhum texto mudou.
 - **Os detalhes do fundador na privacidade, a linha de 18 anos e o docs.brot.markets fora do ar** (10/10/2026, depois
   da mescla do PR #65; branch `fix/privacy-details-docs-down`). A privacidade passa a dar o contato gm@brot.markets,
   dizer que os backups da Hostinger guardam o arquivo da lista por até 30 dias e que a Cloudflare guarda os registros
