@@ -68,6 +68,17 @@ recomendado (1a a 12a).
   - **O saldo da carteira acompanha as entradas.** O da barra do topo era lido uma vez, ao conectar, e ficava parado:
     depois de uma entrada de 0,5 SOL ele ainda dizia 5,0 SOL. Agora o site tem uma leitura só do saldo, refeita quando
     uma entrada ou uma abertura entra na cadeia, a cada 20 s com a página à vista e quando a pessoa volta para a aba.
+  - **A página da campanha mais enxuta:**
+    - o título pergunta: "SOL/USD reaches $150?";
+    - a regra cabe numa linha, só com a condição, o alvo e o prazo; a regra inteira fica em "Full rules", fechada;
+    - na prova na cadeia, o preço de agora, o alvo e o "If read now" ficam à vista; o resto (quando o preço foi
+      publicado, a conta lida, o dono conferido, as datas e a resolução) fica em "Proof details", fechado; um aviso de
+      preço velho ou perto do alvo continua à vista;
+    - "Re-check it yourself" ficou mais fino, e a caixa da estimativa tem o tamanho do que ela diz;
+    - as notas do painel de entrada ficam em "Read before you enter", na cor de destaque da marca; o aviso do
+      travamento continua à vista, e a folha antes de assinar mostra todas as notas abertas;
+    - o botão de entrar não mudou: "Review entry" quando a carteira cobre a entrada, e "Get devnet SOL" só quando não
+      cobre.
   - **O balão do Baked no celular:** encaixado na tela de novo sempre que o Baked se move enquanto fala. Antes, um
     toque no meio de um pulo podia deixá-lo cortado na borda; o defeito é anterior e o desenho novo o expôs.
 

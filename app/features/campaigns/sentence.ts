@@ -7,8 +7,8 @@
  *          stores; a stake pool or a stake target is SOL. The other kinds name their account by its shortened address:
  *          no creator-supplied text, and no name unless two people reviewed it. The creation box at /abrir writes its
  *          preview with this same function, so the sentence a creator reads is the one every page shows.
- * Version: 0.4.0 (the UI overhaul: "$" before a price in US$; 0.3.0, the Sprint 19 copy review: units on burn and
- *          lock, the measured epoch; 0.2.0, the five templates)
+ * Version: 0.4.0 (the UI overhaul: "$" before a price in US$, the page's title as a question; 0.3.0, the Sprint 19
+ *          copy review: units on burn and lock, the measured epoch; 0.2.0, the five templates)
  * Sprint:  10 (site: campaign list); 19
  */
 import { feedSymbol, ReaderKind, shortAddress } from "@brot/sdk/read";
@@ -120,8 +120,18 @@ function epochOf(input: SentenceInput): SentencePart[] {
   return ["epoch ", { slot: "epoch", value: input.epoch }];
 }
 
+const joined = (parts: SentencePart[]) =>
+  parts.map((part) => (typeof part === "string" ? part : (part.value ?? `(${part.slot})`))).join("");
+
 export function sentenceOf(input: SentenceInput): string {
-  return sentenceParts(input)
-    .map((part) => (typeof part === "string" ? part : (part.value ?? `(${part.slot})`)))
-    .join("");
+  return joined(sentenceParts(input));
+}
+
+/**
+ * The campaign page's title asks the sentence (Ronaldo, 2026-10-11): "SOL/USD reaches $150?". A campaign outside the
+ * templates ("Price campaign 7Avi…HmyE") is a name, not a question, and takes no mark.
+ */
+export function questionOf(input: SentenceInput): string {
+  const parts = sentenceParts(input);
+  return joined(parts) + (parts.some((p) => typeof p !== "string" && p.slot === "target") ? "?" : "");
 }

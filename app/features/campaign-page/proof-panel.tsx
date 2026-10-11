@@ -2,15 +2,16 @@
  * Purpose: the campaign page's proof (BR-23; spec 3.5): the value read now through the SDK's copy of the program's
  *          reader against the target, "if read now", the distance, and on a price campaign the price facts: the price
  *          and its confidence, when it was published and posted, the campaign's maximum price age (30 s floor), and what
- *          the screen says when no fresh price exists (L-22) or the price sits within 1% of the target. Then the account
- *          read with its explorer link, the owner checked first, and entries close and the deadline in UTC and local time.
- * Version: 0.2.0 (the UI overhaul: the approved prototype's `.cp-proof`; 0.1.1, Sprint 19's units)
+ *          the screen says when no fresh price exists (L-22) or the price sits within 1% of the target. Then, folded
+ *          under "Proof details" (Ronaldo, 2026-10-11), when the price was published, the account read with its
+ *          explorer link, the owner checked first, and entries close and the deadline in UTC and local time.
+ * Version: 0.3.0 (the details folded; 0.2.0, the UI overhaul: the approved prototype's `.cp-proof`)
  * Sprint:  11 (site: campaign page and entry)
  */
 "use client";
 
 import type { ReactNode } from "react";
-import { ArrowUpRight, Eye } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Eye } from "lucide-react";
 
 import { cx } from "@/components/ui/cx";
 import { Outcome, shortAddress } from "@/lib/brot";
@@ -89,62 +90,78 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
       {proof.kind === "stake" && proof.measuredEpoch !== null ? (
         <p className="m-0 mt-3 text-sm text-muted">{PROOF.stakeNote(proof.measuredEpoch.toString())}</p>
       ) : null}
-      {before && proof.price ? <PriceFacts proof={proof} maxAge={c.maxAge} /> : null}
-      <dl className="rows cp-rows">
-        <Row label={PROOF.account}>
-          <a
-            href={explorerAddress(proof.account)}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 font-mono underline"
-            title={proof.account}
-          >
-            {shortAddress(proof.account)}
-            <ArrowUpRight className="size-3" aria-hidden="true" />
-          </a>
-        </Row>
-        <Row label={PROOF.owner}>
-          {reader.owner}{" "}
-          <span className="font-mono text-xs text-muted" title={reader.ownerId}>
-            {shortAddress(reader.ownerId)}
-          </span>
-        </Row>
-        <Row label={now < c.entriesCloseAt ? PROOF.entriesClose : PROOF.entriesClosed}>
-          <When at={c.entriesCloseAt} />
-        </Row>
-        <Row label={now < c.deadlineAt ? PROOF.deadline : PROOF.deadlinePassed}>
-          <When at={c.deadlineAt} />
-        </Row>
-        <Row label={PROOF.resolution}>{PROOF.resolutionText}</Row>
-      </dl>
-      {proof.price ? (
-        <p className="m-0 mt-2 text-xs text-muted">{PROOF.read(`at chain slot ${grouped(data.chain.slot)}`)}</p>
-      ) : null}
+      {before && proof.price ? <PriceWarning proof={proof} maxAge={c.maxAge} /> : null}
+      <details className="fold cp-proof-more">
+        <summary>
+          {PROOF.details}
+          <ChevronDown className="size-3.5" aria-hidden="true" />
+        </summary>
+        {before && proof.price ? <PriceTimes proof={proof} maxAge={c.maxAge} /> : null}
+        <dl className="rows cp-rows">
+          <Row label={PROOF.account}>
+            <a
+              href={explorerAddress(proof.account)}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 font-mono underline"
+              title={proof.account}
+            >
+              {shortAddress(proof.account)}
+              <ArrowUpRight className="size-3" aria-hidden="true" />
+            </a>
+          </Row>
+          <Row label={PROOF.owner}>
+            {reader.owner}{" "}
+            <span className="font-mono text-xs text-muted" title={reader.ownerId}>
+              {shortAddress(reader.ownerId)}
+            </span>
+          </Row>
+          <Row label={now < c.entriesCloseAt ? PROOF.entriesClose : PROOF.entriesClosed}>
+            <When at={c.entriesCloseAt} />
+          </Row>
+          <Row label={now < c.deadlineAt ? PROOF.deadline : PROOF.deadlinePassed}>
+            <When at={c.deadlineAt} />
+          </Row>
+          <Row label={PROOF.resolution}>{PROOF.resolutionText}</Row>
+        </dl>
+        {proof.price ? (
+          <p className="m-0 mt-2 text-xs text-muted">{PROOF.read(`at chain slot ${grouped(data.chain.slot)}`)}</p>
+        ) : null}
+      </details>
     </section>
   );
 }
 
-function PriceFacts({ proof, maxAge }: { proof: Proof; maxAge: number }) {
+/** What a price this old or this close means for an entry: always in view, never folded. */
+function PriceWarning({ proof, maxAge }: { proof: Proof; maxAge: number }) {
   const p = proof.price!;
-  const ahead = p.ageSeconds < 0n;
+  if (!p.fresh)
+    return (
+      <p role="status" className="notice warn mt-3">
+        {p.ageSeconds < 0n ? PRICE.ahead : PRICE.stale(p.symbol ?? "feed's", ageText(p.ageSeconds), maxAge)}
+      </p>
+    );
+  if (p.tooClose && proof.ifReadNow === "NO")
+    return (
+      <p role="status" className="notice warn mt-3">
+        {PRICE.tooClose}
+      </p>
+    );
+  return null;
+}
+
+/** When the price was published and posted, and the campaign's age limit: in the folded details. */
+function PriceTimes({ proof, maxAge }: { proof: Proof; maxAge: number }) {
+  const p = proof.price!;
   return (
-    <div className="mt-3 space-y-2 text-[12.5px]">
+    <div className="mb-2 space-y-1 text-[12.5px]">
       <p className="m-0 text-muted">
         {PRICE.published(
-          ahead ? "ahead of the cluster's clock" : `${ageText(p.ageSeconds)} ago`,
+          p.ageSeconds < 0n ? "ahead of the cluster's clock" : `${ageText(p.ageSeconds)} ago`,
           grouped(p.postedSlot),
         )}
       </p>
       <p className="m-0 text-muted">{PRICE.maxAge(maxAge)}</p>
-      {!p.fresh ? (
-        <p role="status" className="notice warn">
-          {ahead ? PRICE.ahead : PRICE.stale(p.symbol ?? "feed's", ageText(p.ageSeconds), maxAge)}
-        </p>
-      ) : p.tooClose && proof.ifReadNow === "NO" ? (
-        <p role="status" className="notice warn">
-          {PRICE.tooClose}
-        </p>
-      ) : null}
     </div>
   );
 }

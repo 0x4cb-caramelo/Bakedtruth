@@ -159,6 +159,30 @@ O Ronaldo pediu mais duas coisas olhando uma campanha aberta na porta 3100:
   com a página à vista e quando a pessoa volta para a aba. Uma leitura que falha depois da primeira mantém o último
   saldo, em vez de piscar para "desconhecido". O teste na web confere que o chip cai depois das entradas.
 
+## A página da campanha mais enxuta
+
+O pedido chegou num texto colado, com sete itens. O Ronaldo confirmou com as próprias palavras e corrigiu o sétimo: o
+botão de entrar que tinha virado "Get devnet SOL" já estaria certo, então era só conferir, sem mudar nada à toa.
+
+- **O botão (item 7) não mudou.** A regra está certa: "Review entry" sempre que a carteira cobre a entrada, o aluguel
+  das contas e a taxa; "Get devnet SOL" só quando não cobre, como foi desenhado na Sprint 11. Os dois casos estão no
+  teste na web e passam. Quem digita um valor maior do que o saldo vê o link da torneira, que é o certo.
+- **O título pergunta** ("SOL/USD reaches $150?"), só na página da campanha. Os cartões e a folha antes de assinar
+  continuam com a frase afirmada, e uma campanha fora dos modelos ("Price campaign 7Avi…HmyE") não ganha "?", porque
+  é um nome, não uma pergunta.
+- **A regra numa linha.** Fica só o que decide: a condição, o alvo e o prazo. Nada foi apagado: a regra inteira foi
+  para "Full rules", fechada, porque ela tem cláusulas que importam (a faixa de confiança, os 60 segundos, quando a
+  campanha é anulada).
+- **A prova.** O preço de agora, o alvo e o "If read now" ficam à vista. O resto foi para "Proof details". Fui um
+  pouco além do "da conta lida para baixo" do pedido: as linhas de quando o preço foi publicado e do limite de idade
+  ficavam entre o "If read now" e a conta lida, são técnicas, e foram para dentro também. Os avisos de preço velho ou
+  perto do alvo continuam à vista, porque decidem se dá para entrar.
+- **As notas da entrada** ficam em "Read before you enter", na cor de destaque da marca. O aviso de que a entrada
+  fica travada (as palavras do fundador, L-03) continua à vista, e a folha "Check before you sign" mostra todas as
+  notas abertas: é ali que a pessoa decide.
+- **O espaço.** A caixa da estimativa tinha altura mínima de 96 px, e era isso que sobrava embaixo. "Re-check it
+  yourself" perdeu metade do espaço de cima e de baixo.
+
 ## O que fica
 
 - O cartão de compartilhar, o painel "About this campaign", a linha do tempo "Where it is" com a campanha aberta, a

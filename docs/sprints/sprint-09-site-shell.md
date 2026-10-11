@@ -274,6 +274,22 @@ structure of the approved screens (`prototype-lab/campaigns/`, served at `/dev0x
   bar's chip only when the wallet connected. One reading now serves the whole site (`sol-balance-provider.tsx`): read
   on connect, after any landed entry or opening, every 20 s while the page is visible, and on return to the tab. The
   smoke checks that the chip drops after the entries.
+- **A compact campaign page** (Ronaldo, 2026-10-11). Secondary text is folded with `.fold`, a quiet line with a
+  chevron, closed by default:
+  - the title asks the sentence ("SOL/USD reaches $150?", `questionOf`); a campaign outside the templates keeps its
+    name without a mark;
+  - the rule is one line with the condition, the target and the deadline (`ruleShort`); the whole rule is folded
+    under "Full rules";
+  - the proof keeps the price now, the target and "If read now" in view; when the price was published, the account,
+    the owner, the dates and the resolution are folded under "Proof details"; a stale or near-target price warning
+    stays in view;
+  - "Re-check it yourself" is thinner, and the estimate box no longer holds 96 px whatever it says;
+  - the panel's notes are folded under "Read before you enter", in the brand's accent. The lock notice (the founder's
+    L-03 words) stays in view, and the sheet before the wallet still shows every note, open.
+
+  The entry button was checked, not changed: "Review entry" whenever the wallet covers the entry, its rent and the
+  fee; "Get devnet SOL" only when it does not, as designed (both in the smoke). Tests:
+  `tests/site/campaign-head.test.ts`, and a smoke scene that opens each fold.
 - **Baked's bubble on a phone** is fitted to the screen again whenever Baked moves while it shows (Sprint 13's rule:
   it never cuts). A tap mid-hop used to leave it past the edge after the landing; the new layout exposed it.
 - **Tests:** two web-smoke expectations follow the design (the phone menu holds "How it works"; the wallet chip, not a

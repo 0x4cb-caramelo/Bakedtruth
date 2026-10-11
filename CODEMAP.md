@@ -8,8 +8,8 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **885** |
-| Acima de 200 linhas | **40** ⚠️ |
+| Arquivos mapeados | **886** |
+| Acima de 200 linhas | **41** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -55,6 +55,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `tests/brot/resolve-support.ts` — 205 linhas
 - `tests/brot/slot-matrix-fixtures.ts` — 267 linhas
 - `tests/brot/slot-matrix.gen.ts` — 428 linhas
+- `tests/e2e/site-pages.e2e.ts` — 201 linhas
 - `tests/e2e/smoke.e2e.ts` — 201 linhas
 
 ---
@@ -173,16 +174,16 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`activity-panel.tsx`](app/features/campaign-page/activity-panel.tsx) | the recent entries and the chance history (L-23, answered yes), read from the chain's `EntryAdded` events (activity.ts) once per page view and again after an en | 80 |
 | [`activity.ts`](app/features/campaign-page/activity.ts) | the campaign's recent activity and its chance history (L-23, answered yes), read from the chain until the indexer serves them (Sprint 08's activity route is not | 79 |
-| [`campaign-header.tsx`](app/features/campaign-page/campaign-header.tsx) | the campaign page's header (spec 3.5 of Sprint -1): the way back, the kind, the public state from chain time (A-7), the team chip, the sentence as the page's on | 78 |
-| [`campaign-page.tsx`](app/features/campaign-page/campaign-page.tsx) | the campaign page at /c/[id] (Sprint 11; spec 3.5 of Sprint -1): the header, the proof, the pot, the recent entries, the re-check panel, and the entry panel, or | 175 |
+| [`campaign-header.tsx`](app/features/campaign-page/campaign-header.tsx) | the campaign page's header (spec 3.5 of Sprint -1): the way back, the kind, the public state from chain time (A-7), the team chip, the sentence as the page's on | 86 |
+| [`campaign-page.tsx`](app/features/campaign-page/campaign-page.tsx) | the campaign page at /c/[id] (Sprint 11; spec 3.5 of Sprint -1): the header, the proof, the pot, the recent entries, the re-check panel, and the entry panel, or | 176 |
 | [`chance-chart.tsx`](app/features/campaign-page/chance-chart.tsx) | the chance history (L-23): the YES share of the entries after each entry, as a step line (a share changes only when an entry goes in), one series in the design' | 89 |
 | [`copy-states.ts`](app/features/campaign-page/copy-states.ts) | the words of the campaign states (Sprint 12; D-m vocabulary; English per L-01): closed and why, in review with the six-hour window, contested (L-04, answered "C | 128 |
-| [`copy.ts`](app/features/campaign-page/copy.ts) | the campaign page's words (BR-23, BR-26, BR-27; D-m vocabulary; English per L-01): the rule of each kind in plain words, the proof's labels, the price facts and | 157 |
+| [`copy.ts`](app/features/campaign-page/copy.ts) | the campaign page's words (BR-23, BR-26, BR-27; D-m vocabulary; English per L-01): the rule of each kind in plain words, the proof's labels, the price facts and | 182 |
 | [`format.ts`](app/features/campaign-page/format.ts) | how the campaign page writes what it read: a value in its field's units (a price in the feed's exponent, a supply or a liquidity as a whole number, a pool or a  | 76 |
 | [`load.ts`](app/features/campaign-page/load.ts) | what the campaign page reads, through the SDK over RPC (the read API has no account bytes, no entries and no metric reading): the campaign at the route's id, th | 131 |
 | [`payout-panel.tsx`](app/features/campaign-page/payout-panel.tsx) | the connected wallet's own lines on the campaign page (Sprint 12): "Your entry" with its sides and what it returns, as an estimate while the pot or the result c | 168 |
 | [`pot-panel.tsx`](app/features/campaign-page/pot-panel.tsx) | the split and the pot (P1 §3.1–3.2; spec 3.5): each side's chance (its share of the entries; none for an empty pot, L-05) and its total in SOL, the bar, the pri | 61 |
-| [`proof-panel.tsx`](app/features/campaign-page/proof-panel.tsx) | the campaign page's proof (BR-23; spec 3.5): the value read now through the SDK's copy of the program's reader against the target, "if read now", the distance,  | 151 |
+| [`proof-panel.tsx`](app/features/campaign-page/proof-panel.tsx) | the campaign page's proof (BR-23; spec 3.5): the value read now through the SDK's copy of the program's reader against the target, "if read now", the distance,  | 168 |
 | [`proof.ts`](app/features/campaign-page/proof.ts) | the proof a campaign page shows (BR-23; P1 §4.4): the value read now from the account the campaign reads, through the SDK's copy of the program's readers (owner | 159 |
 | [`recheck-commands.ts`](app/features/campaign-page/recheck-commands.ts) | the re-check panel's commands (BR-23, "Anyone can re-check. Same account, same answer"; proposal §2.9): one JSON-RPC request that fetches the bytes the reader r | 68 |
 | [`recheck-panel.tsx`](app/features/campaign-page/recheck-panel.tsx) | the re-check panel (BR-23; P1 §4.4 "Anyone can re-check. Same account, same answer"; spec 3.7): the account, its owner, the field the reader reads, the raw valu | 152 |
@@ -207,7 +208,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`readings.ts`](app/features/campaigns/readings.ts) | what a card and the home page's proof panel say about the account a campaign reads, now (the UI overhaul; the approved prototype's `card-read` and `home-proof`) | 85 |
 | [`saved.ts`](app/features/campaigns/saved.ts) | the "Saved" list of campaigns, kept in this browser's localStorage (Sprint 10: a per-viewer convenience, never state anyone else needs). Every read and write is | 45 |
 | [`search-store.ts`](app/features/campaigns/search-store.ts) | the campaign search the top bar types into and the home grid filters by (the UI overhaul: the prototype's search lives in the top bar, `.search`), held in memor | 29 |
-| [`sentence.ts`](app/features/campaigns/sentence.ts) | the campaign's sentence, template v1 (the program stores `template_version` 1, the SDK's `CAMPAIGN_TEMPLATE_VERSION`; D-j and A-11), from its stored fields only | 128 |
+| [`sentence.ts`](app/features/campaigns/sentence.ts) | the campaign's sentence, template v1 (the program stores `template_version` 1, the SDK's `CAMPAIGN_TEMPLATE_VERSION`; D-j and A-11), from its stored fields only | 138 |
 | [`state-line.ts`](app/features/campaigns/state-line.ts) | a card's line for its state (Sprint 12: "the states of the card"), from the read API's fields: the chip (contested apart from in review, L-04), and one line aft | 54 |
 | [`use-campaigns.ts`](app/features/campaigns/use-campaigns.ts) | the campaign list's data (Sprint 10): every campaign the read API lists, read in pages, with each card's values computed from the chain time the API reports. A  | 48 |
 | [`use-readings.ts`](app/features/campaigns/use-readings.ts) | the live reading of every campaign a page shows (the UI overhaul; the approved prototype's "Now … / YES ≥ …" line on each card): their metric accounts in batche | 58 |
@@ -228,11 +229,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`amount-field.tsx`](app/features/entry/amount-field.tsx) | the amount of an entry, in SOL: a decimal field (exact lamports, amount.ts), quick amounts, "Max" (the balance less the rents and the network fee, in 0.01 SOL s | 96 |
 | [`amount.ts`](app/features/entry/amount.ts) | the amount a baker types, as lamports, exactly: no floating point between the text and the bigint the transaction carries. Accepts a dot or a comma, at most nin | 36 |
 | [`copy-failures.ts`](app/features/entry/copy-failures.ts) | one message for each way an entry can fail (the Sprint 11 list: entries closed, outcome already known, no fresh price, pause, below the minimum, not enough SOL, | 152 |
-| [`copy.ts`](app/features/entry/copy.ts) | the entry panel's words (BR-12, BR-27; D-m vocabulary): the panel, the five notices a baker reads before signing (the estimate, a large entry, the lock, the fee | 132 |
+| [`copy.ts`](app/features/entry/copy.ts) | the entry panel's words (BR-12, BR-27; D-m vocabulary): the panel, the five notices a baker reads before signing (the estimate, a large entry, the lock, the fee | 134 |
 | [`entry-action.tsx`](app/features/entry/entry-action.tsx) | the entry panel's one button, the one that fits the moment: entries paused, waiting for a fresh price, "Connect", the devnet faucet when the wallet cannot cover | 66 |
 | [`entry-estimate.tsx`](app/features/entry/entry-estimate.tsx) | the live estimate under the amount (BR-09), in a polite live region: what the entry returns if its side wins, net of Brot's fee and the creator's share, with th | 77 |
-| [`entry-notices.tsx`](app/features/entry/entry-notices.tsx) | the notices a baker reads before signing (Sprint 11 DoD; BR-12, P1 §3.2, P1 §4.6): the return is an estimate that changes until entries close; a large entry low | 51 |
-| [`entry-panel.tsx`](app/features/entry/entry-panel.tsx) | the entry panel of the campaign page (Sprint 11; spec 3.6 of Sprint -1): YES or NO, the amount in SOL (the campaign's minimum, 0.01 SOL under P-5), the estimate | 191 |
+| [`entry-notices.tsx`](app/features/entry/entry-notices.tsx) | the notices a baker reads before signing (Sprint 11 DoD; BR-12, P1 §3.2, P1 §4.6): the return is an estimate that changes until entries close; a large entry low | 68 |
+| [`entry-panel.tsx`](app/features/entry/entry-panel.tsx) | the entry panel of the campaign page (Sprint 11; spec 3.6 of Sprint -1): YES or NO, the amount in SOL (the campaign's minimum, 0.01 SOL under P-5), the estimate | 190 |
 | [`entry-review.tsx`](app/features/entry/entry-review.tsx) | the sheet "Check before you sign" (A-3): what the transaction carries, from the SDK's preparation of it — side, amount, the estimate net of the fee and the crea | 153 |
 | [`entry-sheet.tsx`](app/features/entry/entry-sheet.tsx) | the one dialog of an entry, from "Review entry" to the result: the review (entry-review.tsx), the signing steps, the receipt and the failures (entry-status.tsx) | 79 |
 | [`entry-status.tsx`](app/features/entry/entry-status.tsx) | the sheet after "Sign in wallet": the signing steps (the wallet, then confirming by polling, or checking a transaction the wallet never answered for, with the b | 166 |
@@ -1385,7 +1386,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`open.e2e.ts`](tests/e2e/open.e2e.ts) | "open a campaign" in the web smoke (Sprint 19 DoD; `bun run e2e -- --grep "open a campaign"`): the creation box at /abrir in Chromium at desktop width and at 41 | 99 |
 | [`playwright.config.ts`](tests/e2e/playwright.config.ts) | the web smoke's Playwright configuration (Sprint 11; @playwright/test 1.63.0, pinned in package.json, whose Chromium is build 1243): the site built against the  | 27 |
 | [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 65 |
-| [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 185 |
+| [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 201 |
 | [`smoke.e2e.ts`](tests/e2e/smoke.e2e.ts) | the web smoke (Sprint 11 DoD; `bun run e2e`): the built site in Chromium at desktop width and at 412 CSS px, with an injected Wallet Standard test wallet, again | 201 |
 | [`states.e2e.ts`](tests/e2e/states.e2e.ts) | "campaign states" in the web smoke (Sprint 12 DoD; `bun run e2e -- --grep "campaign states"`): the built site in Chromium against the program in LiteSVM. Every  | 80 |
 | [`upgrade.e2e.ts`](tests/e2e/upgrade.e2e.ts) | A-8 in the web smoke (the founder's answer of 2026-10-10): the program is upgraded while a page built for its previous deploy is open (the site was built agains | 92 |
@@ -1473,6 +1474,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`amount.test.ts`](tests/site/amount.test.ts) | the amount a baker types becomes lamports exactly (no floating point), with a dot or a comma and at most nine decimals; anything else is refused, never guessed. | 54 |
+| [`campaign-head.test.ts`](tests/site/campaign-head.test.ts) | the campaign page's head made compact (Ronaldo, 2026-10-11): the title asks the sentence ("…$150?") and a campaign outside the templates keeps its name without  | 50 |
 | [`campaign-load.test.ts`](tests/site/campaign-load.test.ts) | what the campaign page reads through the RPC, against the program in LiteSVM: the campaign at the route's u64 id (nothing at an unknown one), its public state a | 101 |
 | [`campaign-proof.test.ts`](tests/site/campaign-proof.test.ts) | the campaign page's proof (BR-23) for each kind, from the program's own campaign accounts and real captured bytes of the accounts they read: the value read now  | 120 |
 | [`copy-vocabulary.test.ts`](tests/site/copy-vocabulary.test.ts) | the site's words follow D-m (campaign, entry, baker, creator, pot, YES/NO) and never the D6 table's old copy (proposal 0.4 §5.2: "mercado", "aposta", "apostar", | 143 |

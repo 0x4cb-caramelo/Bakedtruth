@@ -7,9 +7,9 @@
  *          the chain; every campaign page has "Report this campaign"; after a whole cycle the leaderboard ranks the test
  *          wallet as "You", from the read API's own route; the site sends its security headers (X2.5), loads no
  *          third-party script (K-10) and serves the PWA manifest with its icons and no service worker; the dot field
- *          behind the page brightens around the pointer (the UI overhaul).
- * Version: 0.2.3 (the UI overhaul: the dot field; 0.2.2, the founder, 2026-10-10: the age line; 0.2.1, answer 9a: the
- *          privacy link; 0.2.0, Sprint 13)
+ *          behind the page brightens around the pointer, and a campaign page folds what is secondary (the UI overhaul).
+ * Version: 0.2.4 (the UI overhaul: the folds; 0.2.3, the dot field; 0.2.2, the founder, 2026-10-10: the age line;
+ *          0.2.1, answer 9a: the privacy link; 0.2.0, Sprint 13)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { expect, test, type Page } from "@playwright/test";
@@ -162,6 +162,22 @@ test.describe("site pages and notices", () => {
     expect(manifest).toMatchObject({ name: "Brot Markets", start_url: "/", display: "standalone" });
     for (const icon of manifest.icons) expect((await request.get(icon.src)).status()).toBe(200);
     expect(await page.evaluate(() => navigator.serviceWorker?.getRegistrations().then((r) => r.length) ?? 0)).toBe(0);
+  });
+
+  test("a campaign page folds what is secondary: the full rule, the proof's details and the notes", async ({
+    page,
+  }) => {
+    const { id } = await control<{ id: string }>("/campaign");
+    await page.goto(`/c/${id}`);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(/ reaches \$[\d,.]+\?$/);
+    const account = page.locator(".cp-proof").getByText("Account read", { exact: true });
+    await expect(account).toBeHidden();
+    await page.getByText("Proof details", { exact: true }).click();
+    await expect(account).toBeVisible();
+    const notes = panel(page).getByText(/^Estimate, not a promise/);
+    await expect(notes).toBeHidden();
+    await panel(page).getByText("Read before you enter", { exact: true }).click();
+    await expect(notes).toBeVisible();
   });
 
   test("the dot field behind the page brightens around the pointer, as in the approved prototype", async ({ page }) => {

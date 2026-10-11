@@ -150,11 +150,10 @@ export function EntryPanel({
         context={context}
       />
       {rent !== null ? (
-        <p className="en-rent">
-          {data.mine ? PANEL.rentAgain(sol4(rent, "up")) : PANEL.rentFirst(sol4(rent, "up"))}
-        </p>
+        <p className="en-rent">{data.mine ? PANEL.rentAgain(sol4(rent, "up")) : PANEL.rentFirst(sol4(rent, "up"))}</p>
       ) : null}
       <EntryNotices
+        folded
         feeBps={c.feeBps}
         creatorShareBps={c.creatorShareBps}
         oneSidedFeeBps={c.oneSidedFeeBps}

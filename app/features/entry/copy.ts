@@ -21,6 +21,8 @@ export const LOCK_NOTICE =
 export const pct = (bps: number): string => `${(bps / 100).toLocaleString("en-US", { maximumFractionDigits: 2 })}%`;
 
 export const NOTICES = {
+  /** The panel folds the notes under this line (Ronaldo, 2026-10-11); the sheet before signing shows them all. */
+  readBefore: "Read before you enter",
   estimate:
     "Estimate, not a promise: it is net of Brot's fee and the creator's share, and it changes with every entry until entries close.",
   largeEntry: "Your own entry counts in the pot: the more you put on a side, the lower that side's return per 1.",

@@ -44,6 +44,9 @@
       prova, os cartões); um feed de razão (SSOL/SOL.RR) fica sem "$";
     - os efeitos do protótipo que seguem o mouse (`effects.js`): o campo de pontos atrás da página, que acende em volta
       do cursor, e a luz sobre os cartões da grade;
+    - a página da campanha mais enxuta: o título como pergunta ("…$150?"), a regra numa linha com a inteira em "Full
+      rules", os detalhes da prova em "Proof details", as notas da entrada em "Read before you enter" (na cor de
+      destaque), "Re-check it yourself" mais fino e a estimativa sem espaço sobrando;
     - "question" virou "campaign" no texto do site;
     - a regra do vocabulário segue inteira, sem exceção.
   - **Onde ficaram as palavras do site, e não as do protótipo:**
