@@ -63,6 +63,12 @@ export function parseTarget(unit: TargetUnit, text: string, priceExponent: numbe
   return parseScaled(text, unit === "sol" ? 9 : 0);
 }
 
+/** A moment `days` after `chainNow`, rounded up to the minute, so the date and time fields show a whole minute. */
+export const daysFrom = (chainNow: bigint, days: number) => {
+  const at = chainNow + BigInt(days) * DAY_SECONDS;
+  return at % 60n === 0n ? at : at + 60n - (at % 60n);
+};
+
 /** A deadline given in days becomes a moment once the chain's clock is known (A-7: never the device's). */
 export function resolveDeadline(deadline: Draft["deadline"], chainNow: bigint | null): bigint | null {
   if (deadline === null) return null;

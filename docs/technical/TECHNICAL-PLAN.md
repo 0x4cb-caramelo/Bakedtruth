@@ -1403,6 +1403,25 @@ system of Sprint -1; it replaces the provisional `services/landing` on `127.0.0.
 - `/abrir` accepts a prefill by template id and slots; a link never signs anything (proposal §3.8).
 - **Gap:** the approved prototype and `DESIGN-DIRECTION.md` have no creation screen. Under D8 (a) (Summary), Sprint -1
   designs it at web and phone widths and Sprint 19 builds it.
+- **Built in Sprint 19 (2026-10-10) [F]** (`app/features/open-campaign/`, `docs/sprints/sprint-19-site-open-campaign.md`):
+  the four sections of the approved design, the typed slots parsed as text into the SDK's `OpeningChoice` with no
+  float, the account check through the SDK's readers, `checkBox` running `validateOpenCampaign` on every change with
+  one message per refusal (`copy-refusals.ts`), the SDK's A-3 preparation with the guard's id, and the opening watched
+  to `finalized`. The sentence is template v1 (`app/features/campaigns/sentence.ts`, one template per kind), the same
+  function every page uses. Where it departs from the bullets above, each until the piece it needs exists:
+  - **Names** come from `content/account-names.json` (empty until the team adds a reviewed name) and Pyth's pinned
+    feed list, read on the server: `/api/v1/names` (Sprint 08) is not built.
+  - **The US$ shown** is the opening's own terms (US$500, 450, 50) and the Pyth price the program charges at, with its
+    publish time: `/api/v1/price` (CoinGecko, D-e) is not built.
+  - **Reads go through the site's RPC** (the public devnet one), not `/rpc`; `docs/technical/relay-allowlist.md` lists
+    what the box calls. `brot-rpc`'s country refusal of an opening waits for the relay.
+  - **The retry guard's second witness** reads the wallet's own recent transactions from the chain (at most 20
+    signatures and 5 transactions of the last half hour, before a paid opening with no saved record), since the
+    indexer does not exist.
+  - **`max_lamports`** is the quote plus 1% (`MARGIN_BPS`), the approved design's "quote + 1%" (T25).
+  - **The share-card preview** waits for the share card itself (Sprint 10, carried); the preview shows the list card.
+  - **A team key opens free** only, as the DoD says (no `opening_usd`): a team key's prize (C44), which the program
+    accepts, has neither a screen nor a script yet (`scripts/team/open.ts` opens free too).
 
 **The share card** (proposal §2.9) **[DP]**.
 

@@ -174,8 +174,13 @@ export async function checkBox(a: BoxInputs): Promise<BoxCheck> {
     const name = verdict.refusal.errorName;
     const copy = refusalCopy(name);
     const t = templateOf(draft.kind);
-    const text = copy.text({ owner: t.owner, kind: KIND_NAME[draft.kind] });
-    issues.push({ place: copy.place, level: "refuse", text, tag: copy.tag, refusal: name, row: rowOf(name) });
+    // The program reads an address with no account as the System Program's, empty: say there is none, not whose it is.
+    const none =
+      copy.place === "account" && draft.kind !== "price" && a.accounts !== null && a.accounts.metric === null;
+    const [text, tag] = none
+      ? ISSUES.noAccount
+      : [copy.text({ owner: t.owner, kind: KIND_NAME[draft.kind] }), copy.tag];
+    issues.push({ place: copy.place, level: "refuse", text, tag, refusal: name, row: rowOf(name) });
   } else if (made.choice.deadlineAt - world.clock.unixTimestamp < 3n * DAY_SECONDS + LAND_MARGIN_SECONDS) {
     issues.push(issue("deadline", "refuse", ISSUES.margin));
   }

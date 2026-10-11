@@ -5,8 +5,8 @@
  *          itself yet: no line promises an automatic payout or a time (the founder's answer, 2026-10-10). Every rule
  *          follows the program, the Economic Viability Rule included (2026-10-09, TP §3.4.18): a pot splits only when
  *          its losing side can pay Brot's fee and the creator's 1%; otherwise every entry is refunded.
- * Version: 0.2.0 (the Sprint 13 copy and legal reviews: the viability rule, the late-entry refund, shorter sentences)
- * Sprint:  13 (site: ranking, notices and copy)
+ * Version: 0.2.1 (Sprint 19: opening from the site; 0.2.0, the Sprint 13 copy and legal reviews)
+ * Sprint:  13 (site: ranking, notices and copy); 19
  */
 export const FEES = {
   kicker: "Fees · in SOL",
@@ -73,7 +73,8 @@ export const FEES = {
   openingRent:
     "Opening also needs a deposit for the campaign's two accounts (Solana's rent). It goes back to whoever opened when the campaign closes.",
   openingFree: "The team and launch partners open for free: no prize and no creator share.",
-  openingSite: "Opening a campaign from this site is not available yet.",
+  openingSite: "Any wallet opens one from this site, inside these rules:",
+  openingLink: "Open a campaign",
 
   refundTitle: "Refund policy",
   refunds: [

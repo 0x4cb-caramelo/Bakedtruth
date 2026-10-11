@@ -86,6 +86,9 @@ The campaign site keeps a few notes in your browser's storage, on your device. I
 - the campaigns you saved;
 - while an entry is on its way, a record of it (its wallet, campaign, side and amount), so trying again can't enter
   twice. It is deleted once the entry lands, or a day after it was refused or could no longer land;
+- while a campaign you open is on its way, a record of it (its wallet, the campaign number drawn for it, and the
+  transaction's signature and expiry), so trying again can't open it twice. It is deleted once the campaign opens, or
+  a day after it was refused or could no longer land;
 - for the open tab only, how many times the page reloaded to wait out an update of the program.
 
 ## 3. Who else touches your data
@@ -102,8 +105,8 @@ The campaign site keeps a few notes in your browser's storage, on your device. I
 - **Solana, and the wallet you choose** (Phantom or another), handle your transactions under their own rules. We don't
   control them.
 - **The Solana RPC service** the campaign site reads the chain through (on devnet, Solana's public one,
-  api.devnet.solana.com) sees your IP address and, when the page reads your balance or your entries, your wallet
-  address, under its own rules.
+  api.devnet.solana.com) sees your IP address and, when the page reads your balance, your entries or, before you pay to
+  open a campaign, your wallet's recent transactions, your wallet address, under its own rules.
 - **X** carries what you send us there, such as a report about a campaign or a request to leave the leaderboard. It
   stays on X, under X's rules. Asking on X ties your X account to your wallet in our messages there, until we delete
   the conversation once your request is done.

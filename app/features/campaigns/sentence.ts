@@ -52,33 +52,51 @@ export function solTarget(lamports: bigint): string {
   return groupedDigits(BigInt(whole)) + (trimmed ? `.${trimmed}` : "");
 }
 
-export function sentenceOf(input: {
+/** A piece of a sentence: fixed words, or a slot with its value (`null` while the creator has not filled it). */
+export type SentencePart = string | { slot: "asset" | "account" | "target"; value: string | null };
+
+/** The fields a sentence is written from; `null` marks a slot the creation box has not filled yet. */
+export type SentenceInput = {
   kind: string;
   direction: string;
-  feedIdHex: string;
+  feedIdHex: string | null;
   target: string | null;
-  priceExponent: number;
-  metricAccount: string;
-}): string {
+  priceExponent: number | null;
+  metricAccount: string | null;
+};
+
+/** Template v1 as parts, so the creation box can show its gaps; `sentenceOf` joins the same parts. */
+export function sentenceParts(input: SentenceInput): SentencePart[] {
   const raw = input.target === null ? null : BigInt(input.target);
-  const account = shortAddress(input.metricAccount);
+  const account = { slot: "account" as const, value: input.metricAccount ? shortAddress(input.metricAccount) : null };
+  const target = (format: (value: bigint) => string) => ({
+    slot: "target" as const,
+    value: raw === null ? null : format(raw),
+  });
   switch (input.kind) {
     case ReaderKind[ReaderKind.PriceTouch]: {
-      const asset = assetOf(input.feedIdHex);
-      const value = raw === null ? "?" : formatTarget(raw, input.priceExponent);
-      if (asset === null) return `${KIND_LABEL.PriceTouch} campaign ${account}`;
-      const verb = input.direction === "Below" ? "falls to" : "reaches";
-      return `${asset} ${verb} ${value}`;
+      const asset = input.feedIdHex === null ? null : assetOf(input.feedIdHex);
+      if (input.feedIdHex !== null && asset === null) return [`${KIND_LABEL.PriceTouch} campaign `, account];
+      const exponent = input.priceExponent;
+      const value = raw === null || exponent === null ? null : formatTarget(raw, exponent);
+      const verb = input.direction === "Below" ? " falls to " : " reaches ";
+      return [{ slot: "asset", value: asset }, verb, { slot: "target", value }];
     }
     case ReaderKind[ReaderKind.SupplyAtMost]:
-      return `${account} supply falls to ${raw === null ? "?" : groupedDigits(raw)}`;
+      return [account, " supply falls to ", target(groupedDigits)];
     case ReaderKind[ReaderKind.DammV2LockedAtLeast]:
-      return `Meteora pool ${account} reaches ${raw === null ? "?" : groupedDigits(raw)} liquidity locked for good`;
+      return ["Meteora pool ", account, " reaches ", target(groupedDigits), " liquidity locked for good"];
     case ReaderKind[ReaderKind.StakePoolTvlAtLeast]:
-      return `Stake pool ${account} reaches ${raw === null ? "?" : solTarget(raw)} SOL`;
+      return ["Stake pool ", account, " reaches ", target(solTarget), " SOL"];
     case ReaderKind[ReaderKind.StakeAtLeast]:
-      return `Validator ${account} reaches ${raw === null ? "?" : solTarget(raw)} SOL staked`;
+      return ["Validator ", account, " reaches ", target(solTarget), " SOL staked"];
     default:
-      return `${KIND_LABEL[input.kind] ?? input.kind} campaign ${account}`;
+      return [`${KIND_LABEL[input.kind] ?? input.kind} campaign `, account];
   }
+}
+
+export function sentenceOf(input: SentenceInput): string {
+  return sentenceParts(input)
+    .map((part) => (typeof part === "string" ? part : (part.value ?? "?")))
+    .join("");
 }

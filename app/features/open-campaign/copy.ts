@@ -48,6 +48,7 @@ export const SLOTS = {
   asset: "Asset · Pyth feeds on the program's list",
   assetHelp: "Each feed is read live; one that isn't fresh or verified right now can't back a campaign.",
   noAccount: "No price account",
+  otherFeeds: (n: number) => `${n} more listed feeds, not usable right now`,
   fresh: (age: string) => `Fresh · ${age} ago`,
   direction: "Direction",
   above: "Reaches or goes above",
@@ -98,15 +99,42 @@ export const PREVIEW = {
   decidedAtEpoch: "Decided at the epoch's start",
   noTarget: "No target yet",
   rule: "The rule",
-  asItAppears: "As it will appear",
+  asItAppears: "As it will appear in the list",
   cardWhenFilled: "The card appears once every slot is filled.",
   creatorNotice: `Your campaign will show: "${CREATOR_NOTICE}"`,
-  shareImage: "The image a post on X shows, from the campaign's page.",
+  money: "The money",
+  theAsset: "The asset",
+  theAccount: "The account",
+  priceAccount: (symbol: string) => `Pyth's ${symbol} price account`,
+  accountOf: (name: string | null, owner: string) => `${name ?? "No reviewed name"}, ${owner}`,
+  /** The rule's words for a slot not filled yet. */
+  gaps: { asset: "the asset", target: "the target", deadline: "the deadline", epoch: "the chosen epoch" },
+  labels: {
+    reads: "Reads",
+    rule: "YES and NO",
+    deadline: "Deadline",
+    closes: "Entries close",
+    oneSided: "Refunds",
+    voided: "Voided",
+    noEntry: "No entry",
+    who: "Who decides",
+  },
+  /** The fee page's refund policy, in the same words (features/fees/copy.ts). */
+  oneSided:
+    "One side only, or a losing side too small to pay the fees: every entry back, the first wallet's in full and the others less 1%, whichever side was right. The prize back to whoever opened.",
+  voided:
+    "Every entry is refunded in full and the prize returns to whoever opened; the opening fee too, only if Brot's service caused the void.",
+  who: (principle: string) =>
+    `${principle} The program reads the account; Brot's team can only confirm or void a result during the review window.`,
+  opening: (sol: string, usd: string, prize: string, fee: string) =>
+    `Opening: ${sol} SOL, for ${usd}: ${prize} becomes the prize, ${fee} is Brot's opening fee`,
+  most: (sol: string) => `Most you'll pay for it (max_lamports): ${sol} SOL`,
 } as const;
 
 export const MONEY = {
   charge: (usd: string, sol: string, price: string, at: string) =>
     `${usd} = ${sol} SOL at Pyth SOL/USD ${price}, its price minus its confidence band, published ${at}`,
+  opening: "Opening",
   prize: "Prize in the pot (90%)",
   prizeNote: "On no side. Returns to you if the pot ends one-sided or the campaign is voided",
   fee: "Opening fee (10%)",
@@ -138,6 +166,13 @@ export const TEAM = {
   note: "Team key: this opening is free, with no prize and no creator share. A launch partner's campaign is linked to the partner by Brot's team, apart from this box.",
 } as const;
 
+export const ACTION = {
+  review: "Review and sign",
+  ready: "Nothing is signed until your wallet asks.",
+  wait: "The program checks every rule again when you sign.",
+  also: (tags: string) => `Also: ${tags}`,
+} as const;
+
 /** What the box stops on its own before the program would, each with a short tag for the button. */
 export const ISSUES = {
   connect: ["Connect a wallet to open.", "Connect wallet"],
@@ -147,6 +182,7 @@ export const ISSUES = {
   feed: ["Pick an asset.", "Pick an asset"],
   account: ["Paste an account's address, or pick a known name.", "Pick an account"],
   accountWait: ["Reading the account…", "Checking the account"],
+  noAccount: ["No account at this address on this network.", "No account there"],
   target: ["Set a target.", "Set a target"],
   targetFormat: ["Write the target as a plain number, with a dot for decimals.", "Check the target"],
   epoch: ["Pick an epoch.", "Pick an epoch"],

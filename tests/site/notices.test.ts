@@ -4,10 +4,11 @@
  *          site's React on the server: the two notices of every screen in the layout; the lock, estimate, fee and
  *          one-sided notices before signing; the creator notice on a burn campaign's page and not on a price
  *          campaign's; the review rule and "Waiting for payout" in their states; BP-5's line on How it works; L-09's on
- *          the leaderboard. No notice promises an automatic payout or a time. The web smoke checks the same on the
- *          built site. Filter: `bun test tests/ -t "every mandatory notice is on its screen"`.
- * Version: 0.1.0
- * Sprint:  13 (site: ranking, notices and copy)
+ *          the leaderboard; since Sprint 19, the creation box's preview (the creator notice on a burn campaign and not on
+ *          a price one, the no-entry rule, no taking it back). No notice promises an automatic payout or a time. The web
+ *          smoke checks the same on the built site. Filter: `bun test tests/ -t "every mandatory notice is on its screen"`.
+ * Version: 0.2.0 (Sprint 19: the creation box)
+ * Sprint:  13 (site: ranking, notices and copy); 19
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -16,6 +17,8 @@ import { createSolanaRpc } from "@solana/kit";
 import { MANDATORY_NOTICES } from "../../app/features/notices/registry";
 import { loadCampaignPage, type PageData } from "../../app/features/campaign-page/load";
 import { proofOf } from "../../app/features/campaign-page/proof";
+import { EMPTY_DRAFT } from "../../app/features/open-campaign/draft";
+import { previewFacts } from "../../app/features/open-campaign/preview";
 import { openingWorld, type OpeningWorld } from "../brot/opening";
 import * as P from "../brot/program";
 import * as R from "../brot/readers";
@@ -57,6 +60,7 @@ beforeAll(async () => {
     CampaignHeader: (await import(site("features/campaign-page/campaign-header.tsx"))).CampaignHeader,
     HowPage: (await import(site("features/how/how-page.tsx"))).HowPage,
     LeaderboardPage: (await import(site("features/leaderboard/leaderboard.tsx"))).LeaderboardPage,
+    PreviewSection: (await import(site("features/open-campaign/preview-section.tsx"))).PreviewSection,
   };
   w = await openingWorld();
   chain = startFakeChain(w);
@@ -126,6 +130,20 @@ describe("every mandatory notice is on its screen", () => {
       expect(`${n.id}: ${/paid automatically|in minutes|within \d+ (hours|minutes)/i.test(n.text)}`).toBe(
         `${n.id}: false`,
       );
+  });
+
+  test("the creation box: the creator notice on a burn campaign's preview, not on a price one's; the no-entry rule", () => {
+    const preview = (kind: "burn" | "price") => {
+      const draft = { ...EMPTY_DRAFT, kind, account: kind === "burn" ? P.SOL_USD_ACCOUNT : "" };
+      const slot = { status: "checking" } as const;
+      const facts = previewFacts({ draft, check: null, world: null, slot, names: [], wallet: null });
+      return render(C.PreviewSection, { facts, footer: null });
+    };
+    const burn = preview("burn");
+    expect(burn).toContain(notice("creator-opening"));
+    expect(notice("creator-opening")).toContain(notice("creator"));
+    expect(preview("price")).not.toContain(notice("creator"));
+    for (const id of ["no-entry", "no-take-back"]) expect(`${id}: ${burn.includes(notice(id))}`).toBe(`${id}: true`);
   });
 
   test("How it works says BP-5's line; the leaderboard says what points are worth (L-09)", () => {

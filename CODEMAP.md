@@ -16,6 +16,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 A regra diz "under 200 lines where practical". Estes passaram — vale checar se dá pra separar:
 
+- `app/features/open-campaign/check.ts` — 203 linhas
 - `app/lib/mascot/engine.ts` — 304 linhas
 - `programs/brot-markets/src/error.rs` — 328 linhas
 - `programs/brot-markets/src/instructions/campaigns/open_campaign.rs` — 210 linhas
@@ -55,7 +56,6 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `tests/brot/resolve-support.ts` — 205 linhas
 - `tests/brot/slot-matrix-fixtures.ts` — 267 linhas
 - `tests/brot/slot-matrix.gen.ts` — 428 linhas
-- `tests/site/open-refusals.test.ts` — 214 linhas
 
 ---
 
@@ -93,7 +93,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`page.tsx`](app/app/abrir/page.tsx) | The creation route (the creation box, Sprint 19). A shell for Sprint 09: the route exists and says, in the fee page's words, that opening from the site is not t | 17 |
+| [`page.tsx`](app/app/abrir/page.tsx) | the creation route (the creation box, Sprint 19; TP §3.6): any wallet opens an On-Chain Campaign inside the rules. The server passes only the reviewed account n | 35 |
 
 ## `app/app/c/[id]/`
 
@@ -198,7 +198,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`model.test.ts`](app/features/campaigns/model.test.ts) | the card values: the chance (none for an empty pot), the estimated return from the SDK's math, the 24-hour listing rule, and the sentence of a price campaign fr | 117 |
 | [`model.ts`](app/features/campaigns/model.ts) | a campaign's card values, from the read API's fields and the SDK's math (Sprint 10): the pot in lamports, the chance per side (none for an empty pot, L-05), the | 119 |
 | [`saved.ts`](app/features/campaigns/saved.ts) | the "Saved" list of campaigns, kept in this browser's localStorage (Sprint 10: a per-viewer convenience, never state anyone else needs). Every read and write is | 45 |
-| [`sentence.ts`](app/features/campaigns/sentence.ts) | the campaign's sentence, template v1 (the program stores `template_version` 1, the SDK's `CAMPAIGN_TEMPLATE_VERSION`; D-j and A-11), from its stored fields only | 85 |
+| [`sentence.ts`](app/features/campaigns/sentence.ts) | the campaign's sentence, template v1 (the program stores `template_version` 1, the SDK's `CAMPAIGN_TEMPLATE_VERSION`; D-j and A-11), from its stored fields only | 103 |
 | [`state-line.ts`](app/features/campaigns/state-line.ts) | a card's line for its state (Sprint 12: "the states of the card"), from the read API's fields: the chip (contested apart from in review, L-04), and one line aft | 54 |
 | [`use-campaigns.ts`](app/features/campaigns/use-campaigns.ts) | the campaign list's data (Sprint 10): every campaign the read API lists, read in pages, with each card's values computed from the chain time the API reports. A  | 48 |
 
@@ -241,9 +241,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`copy.ts`](app/features/fees/copy.ts) | the words of the fee page (BR-32; P1 §1.2, §3.3–§3.5, §3.7; D-m vocabulary; English per L-01): what Brot keeps, what the creator gets, the worked example, the o | 95 |
+| [`copy.ts`](app/features/fees/copy.ts) | the words of the fee page (BR-32; P1 §1.2, §3.3–§3.5, §3.7; D-m vocabulary; English per L-01): what Brot keeps, what the creator gets, the worked example, the o | 96 |
 | [`example.ts`](app/features/fees/example.ts) | the fee page's worked examples (BR-32), every number computed by the SDK's mirror of the program: the split of P1 §1.2 (6 SOL on YES and 4 SOL on NO, YES wins)  | 72 |
-| [`fee-page.tsx`](app/features/fees/fee-page.tsx) | the fee page (BR-32; spec 3.10 of Sprint -1, prototype-lab/campaigns/js/screens/fees.js): what Brot keeps and what the creator gets, the worked example of P1 §1 | 132 |
+| [`fee-page.tsx`](app/features/fees/fee-page.tsx) | the fee page (BR-32; spec 3.10 of Sprint -1, prototype-lab/campaigns/js/screens/fees.js): what Brot keeps and what the creator gets, the worked example of P1 §1 | 138 |
 
 ## `app/features/how/`
 
@@ -280,18 +280,18 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`registry.ts`](app/features/notices/registry.ts) | every mandatory notice that holds on devnet (BR-47; P1 §4.6; TP §3.6 "Notices and copy"; Sprint 13 DoD), each with the screens that must show it and the compone | 178 |
+| [`registry.ts`](app/features/notices/registry.ts) | every mandatory notice that holds on devnet (BR-47; P1 §4.6; TP §3.6 "Notices and copy"; Sprint 13 DoD), each with the screens that must show it and the compone | 180 |
 
 ## `app/features/open-campaign/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`account-check.ts`](app/features/open-campaign/account-check.ts) | the account check of the creation box (D-i: any address; TP §3.4.10 rows 2 and 4), live, through the SDK's copies of the program's readers, owner first and then | 125 |
-| [`check.ts`](app/features/open-campaign/check.ts) | the creation box's verdict on every change (Sprint 19 DoD; A-10, X0.7): the draft turned into the exact arguments the transaction will carry (`OpenArgs`, with t | 198 |
+| [`check.ts`](app/features/open-campaign/check.ts) | the creation box's verdict on every change (Sprint 19 DoD; A-10, X0.7): the draft turned into the exact arguments the transaction will carry (`OpenArgs`, with t | 203 |
 | [`copy-refusals.ts`](app/features/open-campaign/copy-refusals.ts) | one message for each refusal of `user_open_campaign` (TP §3.4.10, rows 1 to 10; D-m vocabulary; English per L-01), keyed by the program's error name, with the s | 144 |
-| [`copy-sheet.ts`](app/features/open-campaign/copy-sheet.ts) | the words of an opening's sheet, from "Review and sign" to the campaign's link (spec 3.12 of Sprint -1; A-3; T17; D-m vocabulary; English per L-01): "Check befo | 126 |
-| [`copy.ts`](app/features/open-campaign/copy.ts) | the creation box's words (spec 3.12 of Sprint -1; BR-01, BR-02, BR-26; D-m vocabulary; English per L-01): the four sections, the slots and their help, the accou | 159 |
-| [`draft.ts`](app/features/open-campaign/draft.ts) | what the creator fills in the creation box, and the exact `OpeningChoice` the SDK prepares from it (D-j: the kind, the account, the target, the deadline, the ep | 122 |
+| [`copy-sheet.ts`](app/features/open-campaign/copy-sheet.ts) | the words of an opening's sheet, from "Review and sign" to the campaign's link (spec 3.12 of Sprint -1; A-3; T17; D-m vocabulary; English per L-01): "Check befo | 130 |
+| [`copy.ts`](app/features/open-campaign/copy.ts) | the creation box's words (spec 3.12 of Sprint -1; BR-01, BR-02, BR-26; D-m vocabulary; English per L-01): the four sections, the slots and their help, the accou | 195 |
+| [`draft.ts`](app/features/open-campaign/draft.ts) | what the creator fills in the creation box, and the exact `OpeningChoice` the SDK prepares from it (D-j: the kind, the account, the target, the deadline, the ep | 128 |
 | [`kinds.ts`](app/features/open-campaign/kinds.ts) | the five templates of the creation box (D-k; P1 §4.2; TP §3.4.10 row 1), one per kind: its reader kind, the template id a link may name, what the account slot i | 101 |
 | [`names.ts`](app/features/open-campaign/names.ts) | the reviewed account names (A-11; TP §3.4.10 "Display names"), read on the server from content/account-names.json when the site is built: a list of `{ "address" | 55 |
 | [`prefill.ts`](app/features/open-campaign/prefill.ts) | the creation box's prefill (proposal §3.8; TP §3.6 "Links"): `/abrir` accepts a template id and slot values in the URL — `t` (or `template`), `kind`, `feed` (a  | 74 |
@@ -1319,8 +1319,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`chain.ts`](tests/e2e/chain.ts) | the web smoke's chain (Sprint 11, `bun run e2e`): the program in LiteSVM (CI's binary in target/deploy) with the founder's config, a team key and a paying creat | 85 |
 | [`control-states.ts`](tests/e2e/control-states.ts) | the web smoke's control routes for Sprint 12 ("campaign states"): a campaign written in any public state (tests/site/state-world.ts); a whole cycle with the smo | 97 |
-| [`control.ts`](tests/e2e/control.ts) | the web smoke's control endpoint (loopback, test only): what the Playwright runner asks of the chain. Sign the bytes the injected wallet was handed with the tes | 164 |
-| [`helpers.ts`](tests/e2e/helpers.ts) | what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page opened with the injected wallet and the runner's answer f | 75 |
+| [`control.ts`](tests/e2e/control.ts) | the web smoke's control endpoint (loopback, test only): what the Playwright runner asks of the chain. Sign the bytes the injected wallet was handed with the tes | 167 |
+| [`helpers.ts`](tests/e2e/helpers.ts) | what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page opened with the injected wallet and the runner's answer f | 79 |
 | [`playwright.config.ts`](tests/e2e/playwright.config.ts) | the web smoke's Playwright configuration (Sprint 11; @playwright/test 1.63.0, pinned in package.json, whose Chromium is build 1243): the site built against the  | 27 |
 | [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 65 |
 | [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 161 |
@@ -1421,16 +1421,16 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`fee-example.test.ts`](tests/site/fee-example.test.ts) | the fee page's worked example is the SDK's math, and it is P1 §1.2's case (Sprint 13 DoD; BR-32): 600 on YES and 400 on NO (here 6 and 4 SOL) give a fee of 40,  | 64 |
 | [`manifest.test.ts`](tests/site/manifest.test.ts) | the PWA is the manifest and its icons only (Sprint 13 DoD, S2): the manifest names the site, opens at "/" standalone in the dark theme's colour, and lists icons | 43 |
 | [`my-entries.test.ts`](tests/site/my-entries.test.ts) | the rows of "My entries" through a whole cycle, read the way the page reads them (the chain behind the recording RPC, the wallet's history): while settling, eac | 150 |
-| [`notices.test.ts`](tests/site/notices.test.ts) | every mandatory notice is on its screen (Sprint 13 DoD; BR-47, P1 §4.6): each notice of app/features/notices/registry.ts is drawn by the component it names, and | 138 |
+| [`notices.test.ts`](tests/site/notices.test.ts) | every mandatory notice is on its screen (Sprint 13 DoD; BR-47, P1 §4.6): each notice of app/features/notices/registry.ts is drawn by the component it names, and | 156 |
 | [`open-draft.test.ts`](tests/site/open-draft.test.ts) | the creation box's pure pieces (Sprint 19): one sentence template per kind (template v1, the same function every page uses); the slots parsed exactly into the S | 143 |
 | [`open-quote.test.ts`](tests/site/open-quote.test.ts) | the creation box's quote against the program's own charge (Sprint 19 DoD; I14; TP §3.4.16): the box reads Pyth's SOL/USD account through the site's RPC and quot | 128 |
-| [`open-refusals.test.ts`](tests/site/open-refusals.test.ts) | A-10 and X0.7, the creation box's half (Sprint 19 DoD): every refusal of TP §3.4.10 rows 1 to 10 has its own message in the box's copy; then each refused case t | 214 |
+| [`open-refusals.test.ts`](tests/site/open-refusals.test.ts) | A-10 and X0.7, the creation box's half (Sprint 19 DoD): every refusal of TP §3.4.10 rows 1 to 10 has its own message in the box's copy; then each refused case t | 95 |
 | [`open-retry.test.ts`](tests/site/open-retry.test.ts) | the opening's retry guard end to end (T17, A-9; TP §3.4.10 row 10), against the program in LiteSVM behind a local RPC: the id is drawn once and saved before the | 168 |
 | [`page-format.test.ts`](tests/site/page-format.test.ts) | how the campaign page writes what it read: exact grouped integers, a value in its kind's units, an age, the visitor's local time (built with options a browser a | 37 |
 | [`powers.test.ts`](tests/site/powers.test.ts) | the powers table (BR-41, Sprint 13 DoD): content/powers.md is published on /record with who holds each key and the limit of each power (P4 §4.2), its four roles | 122 |
 | [`received.test.ts`](tests/site/received.test.ts) | what "my entries" says a wallet received equals the program's settlement events for that wallet, and the SOL that actually reached it (Sprint 12 DoD), on whole  | 172 |
 | [`recheck-commands.test.ts`](tests/site/recheck-commands.test.ts) | the re-check panel's commands fetch the bytes the program's readers read (BR-23): on real captured accounts, the byte range each command asks for decodes to the | 79 |
-| [`relay-trace.test.ts`](tests/site/relay-trace.test.ts) | the relay's allowlist is taken from a trace of the real client (Sprint 11 DoD; proposal §2.6): the campaign page's reads, the entry's preparation, the hand-off  | 111 |
+| [`relay-trace.test.ts`](tests/site/relay-trace.test.ts) | the relay's allowlist is taken from a trace of the real client (Sprint 11 DoD; proposal §2.6): the campaign page's reads, the entry's preparation, the hand-off  | 148 |
 | [`report.test.ts`](tests/site/report.test.ts) | "Report this campaign" (C-10, Sprint 13 DoD): the link goes where reports go (the founder's [Q], built as recommended: the same X account as L-13), as a plain l | 82 |
 | [`retry-guard-rules.test.ts`](tests/site/retry-guard-rules.test.ts) | the retry guard's rules (A-9), without a chain: what a record means given the chain now (a signature's confirmed status decides; without one, the entry total; p | 170 |
 | [`retry-guard.test.ts`](tests/site/retry-guard.test.ts) | the site's retry guard (A-9; proposal §3.4 rule 6) end to end, against the program in LiteSVM behind a local RPC: the record is saved before the wallet sees the | 141 |

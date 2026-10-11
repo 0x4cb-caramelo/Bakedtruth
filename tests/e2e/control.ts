@@ -4,9 +4,10 @@
  *          `signAndSendTransaction`); open a campaign; an entry by another baker or by the test wallet itself; the
  *          team's pause and the admin's resume; a price of a given age; the clock; the block height; a wallet's
  *          balance; the program's last deploy (ProgramData's slot, A-8); the SDK's estimate for an entry (to compare
- *          with the screen); and the RPC methods seen so far. Sprint 12's routes are in control-states.ts.
- * Version: 0.3.0 (Sprint 12: the campaign states' routes; 0.2.0, A-8)
- * Sprint:  11 (site: campaign page and entry)
+ *          with the screen); and the RPC methods seen so far. Sprint 12's routes are in control-states.ts, Sprint 19's
+ *          (opening a campaign) in control-open.ts.
+ * Version: 0.4.0 (Sprint 19: the opening's routes; 0.3.0, Sprint 12: the campaign states' routes; 0.2.0, A-8)
+ * Sprint:  11 (site: campaign page and entry); 19
  */
 import {
   createSolanaRpc,
@@ -39,6 +40,7 @@ import * as P from "../brot/program";
 import { expectOk, fundedWallet, send, setPriceAccount, setTime, setUpgradeAuthority } from "../brot/setup";
 import type { FakeChain } from "../site/fake-chain";
 import { chainOf, rawOf } from "../site/support";
+import { openRoutes } from "./control-open";
 import { stateRoutes } from "./control-states";
 
 type Body = Record<string, string>;
@@ -144,6 +146,7 @@ export function startControl(a: {
     },
     "/methods": () => ({ methods: chain.methods }),
     ...stateRoutes({ w, chain, wallet }),
+    ...openRoutes({ w, wallet }),
     "/now": () => ({ unix: w.client.svm.getClock().unixTimestamp.toString() }),
   };
   return Bun.serve({

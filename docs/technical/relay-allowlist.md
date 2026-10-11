@@ -46,6 +46,22 @@ this table, a subscription, or `getProgramAccounts`. A wallet's history has no o
 `getSignaturesForAddress` on any address, bounded by `limit`, and `getTransaction` on any signature, since both answer
 public ledger data; the page decodes only this program's events, under the SDK's rules.
 
+**Sprint 19 (2026-10-10).** The creation box at `/abrir` adds callers and arguments, not methods; the third test of
+`tests/site/relay-trace.test.ts` runs its reads, an opening, the retry guard's recent opening and the watch:
+
+- `getAccountInfo`: the EpochSchedule sysvar (`SysvarEpochSchedu1e111111111111111111111111`, the epoch kinds'
+  opening rule), the config, and the campaign's address at the drawn id, which does not exist yet (`null`, row 10).
+- `getMultipleAccounts`: the config, Pyth's sponsored SOL/USD account and every listed feed's sponsored account in
+  one call (19 accounts on devnet: the config, SOL/USD and the 17 listed feeds); then the campaign's address, its
+  vault and the account the creator put in the slot, which can be any address (D-i). The relay's owner rule answers
+  `null` for an account of another program, and the box then says no account is there instead of naming the owner:
+  still refused, never accepted. The relay may answer such an account's owner and length only, with no data.
+- `simulateTransaction`: one transaction whose only top-level instruction is the program's `user_open_campaign`.
+- `getMinimumBalanceForRentExemption`: 512 bytes (a `Campaign`) and 0 bytes (its vault).
+- `getSignaturesForAddress`: the connected wallet's own address, `limit` 20, and `getTransaction` on at most five of
+  the signatures of the last half hour, only before a paid opening with no saved record (the guard's recent opening).
+- `getSignatureStatuses`: the opening's signature, polled until `finalized`. `getBlockHeight` as for an entry.
+
 ## Not on the list
 
 Every `*Subscribe` method (no WebSocket), `getProgramAccounts` (the read API lists campaigns, not the browser),
@@ -59,7 +75,7 @@ it for the keeper), and batches (one method per request).
   security review). The short-TTL cache is for the campaign, the config and the metric accounts.
 
 - Account reads are allowed by owner, as the proposal says (D-i: no list of accounts): the relay returns an account only
-  when its owner is the program, a reader's program, or a sysvar the client reads (Clock), and `null` when it does not
+  when its owner is the program, a reader's program, or a sysvar the client reads (Clock; EpochSchedule since Sprint 19), and `null` when it does not
   exist. One exception, by address: the program's ProgramData (A-8).
 - **ProgramData (A-8, added 2026-10-10):** before every preparation and again right before the wallet, the client reads
   the program's last-deploy slot from the ProgramData account, owner the upgradeable loader

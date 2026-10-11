@@ -27,6 +27,8 @@ export const SHEET = {
   deadline: "Deadline",
   closes: "Entries close",
   opening: (usd: string) => `Opening · ${usd}`,
+  openingNote: (price: string, published: string, raw: string, exponent: number) =>
+    `At Pyth SOL/USD ${price}, its price minus its confidence band, published ${published} (${raw} at exponent ${exponent})`,
   openingFree: "Opening",
   free: "Free (team key)",
   freeNote: "No prize, no creator share",
@@ -82,8 +84,10 @@ export const TAKEN = {
 
 export const RECENT = {
   title: "You opened a campaign a moment ago",
-  text: (id: string, minutes: string) =>
-    `This wallet opened campaign ${id} ${minutes} ago. If that was this campaign, go to it instead of paying again.`,
+  text: (id: string, ago: string) =>
+    `This wallet opened campaign ${id} ${ago} ago. If that was this campaign, go to it instead of paying again.`,
+  /** How long ago, by the chain's clock. */
+  ago: (seconds: bigint) => (seconds < 60n ? "less than a minute" : `${seconds / 60n} min`),
   go: "Go to it",
   anyway: "Open a new one",
 } as const;

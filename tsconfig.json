@@ -8,7 +8,8 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    "paths": { "@/*": ["./app/*"] }
   },
   "include": ["tests/**/*.ts", "scripts/**/*.ts", "packages/**/*.ts"]
 }
