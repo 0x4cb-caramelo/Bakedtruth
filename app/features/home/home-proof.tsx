@@ -2,7 +2,7 @@
  * Purpose: the "On-chain read" panel of a home slide (the approved prototype's `.home-proof`, where the old chart was):
  *          the value read now against the target, "if read now" with the distance, who opened the campaign, the
  *          account, who reads it, the two moments in UTC, and the creator notice on burn, lock and stake campaigns.
- * Version: 0.1.0
+ * Version: 0.1.1 (a price in US$ with "$")
  * Sprint:  10 (campaign list), in the UI overhaul
  */
 import { AlertTriangle, Eye } from "lucide-react";
@@ -28,7 +28,9 @@ function IfNow({ card, reading }: { card: Card; reading: Reading | null | undefi
   return (
     <p className="home-ifnow">
       If read now: <b className={met ? "y" : "n"}>{met ? "YES" : "NO"}</b>
-      {met ? "" : ` · ${valueText(kind, gap, reading.exponent)} to go${share ? ` (${up ? "+" : "−"}${share}%)` : ""}`}
+      {met
+        ? ""
+        : ` · ${valueText(kind, gap, reading.exponent, card.asset)} to go${share ? ` (${up ? "+" : "−"}${share}%)` : ""}`}
     </p>
   );
 }
@@ -48,18 +50,22 @@ export function HomeProof({ card, reading, now }: { card: Card; reading: Reading
       <div className="read-values">
         <div>
           <small>{field}</small>
-          <b className="num">{reading ? valueText(kind, reading.value, reading.exponent) : "—"}</b>
+          <b className="num">{reading ? valueText(kind, reading.value, reading.exponent, card.asset) : "—"}</b>
         </div>
         <div>
           <small>YES if {comparator(card) === "≥" ? "at or above" : "at or below"}</small>
-          <b className="num dim">{card.target === null ? "—" : valueText(kind, card.target, card.priceExponent)}</b>
+          <b className="num dim">
+            {card.target === null ? "—" : valueText(kind, card.target, card.priceExponent, card.asset)}
+          </b>
         </div>
       </div>
       <IfNow card={card} reading={reading} />
       <dl className="rows home-facts">
         <div>
           <dt>Opened by</dt>
-          <dd>{card.creatorIsTeam ? "Brot team (free)" : <span className="mono">{short(card.creator)} (paid)</span>}</dd>
+          <dd>
+            {card.creatorIsTeam ? "Brot team (free)" : <span className="mono">{short(card.creator)} (paid)</span>}
+          </dd>
         </div>
         <div>
           <dt>Account</dt>

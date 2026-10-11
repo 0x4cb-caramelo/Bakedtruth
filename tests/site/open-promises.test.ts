@@ -42,7 +42,7 @@ describe("the creation box keeps its promises", () => {
       names: [],
     });
     expect([price.sentence, price.target, price.account.label]).toEqual([
-      "BTC/USD reaches 93,733.57",
+      "BTC/USD reaches $93,733.57",
       "US$93,733.57",
       "Pyth's BTC/USD price account",
     ]);

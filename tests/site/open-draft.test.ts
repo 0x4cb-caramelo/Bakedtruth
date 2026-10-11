@@ -31,6 +31,7 @@ import * as P from "../brot/program";
 
 const BTC = bytesToHex(P.BTC_USD_FEED_ID);
 const MINT = "So11111111111111111111111111111111111111112";
+const SSOL_RR = "add6499a420f809bbebc0b22fbf68acb8c119023897f6ea801688e0d6e391af4";
 const FEEDS = [
   { hex: BTC, symbol: "BTC/USD" },
   { hex: "ef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d", symbol: "SOL/USD" },
@@ -40,8 +41,11 @@ const at = (kind: string, target: string, direction = "Above", epoch?: string | 
 
 describe("open campaign box: templates and slots", () => {
   test("one sentence template per kind, from the stored fields only", () => {
-    expect(at("PriceTouch", "12000000000000")).toBe("BTC/USD reaches 120,000");
-    expect(at("PriceTouch", "5000000000000", "Below")).toBe("BTC/USD falls to 50,000");
+    expect(at("PriceTouch", "12000000000000")).toBe("BTC/USD reaches $120,000");
+    expect(at("PriceTouch", "5000000000000", "Below")).toBe("BTC/USD falls to $50,000");
+    // "$" only where the feed is quoted in US$: a ratio feed's target is a plain number.
+    const ratio = { direction: "Above", target: "125000000", priceExponent: -8, metricAccount: null };
+    expect(sentenceOf({ ...ratio, kind: "PriceTouch", feedIdHex: SSOL_RR })).toBe("SSOL/SOL.RR reaches 1.25");
     // Burn and lock targets are raw units, said so (the copy review, M8); the epoch kinds name their epoch (S6).
     expect(at("SupplyAtMost", "812400000000000")).toBe("So11…1112 supply falls to 812,400,000,000,000 raw units");
     expect(at("DammV2LockedAtLeast", "340282366920938463463374607431768211455")).toBe(

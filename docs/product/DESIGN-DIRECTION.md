@@ -40,6 +40,10 @@
     - a busca da caixa de abertura completa o que se digita, como a do protótipo (`open-slots.js`): a frase inteira de
       cada campanha sugerida, agrupada por tipo, com a direção, o prazo e o alvo lidos do texto; nunca um alvo já
       atingido; exemplos na caixa vazia; e o Baked desconfiado fora do que a cadeia confere;
+    - "$" antes do preço, como no protótipo: na frase ("SOL/USD reaches $150") e nos outros preços em US$ (a regra, a
+      prova, os cartões); um feed de razão (SSOL/SOL.RR) fica sem "$";
+    - os efeitos do protótipo que seguem o mouse (`effects.js`): o campo de pontos atrás da página, que acende em volta
+      do cursor, e a luz sobre os cartões da grade;
     - "question" virou "campaign" no texto do site;
     - a regra do vocabulário segue inteira, sem exceção.
   - **Onde ficaram as palavras do site, e não as do protótipo:**

@@ -3,7 +3,7 @@
  *          units of its kind, against the side of the target YES needs, and for a price the distance in percent.
  *          "Now …" while the first read is on its way, "No reading" when the account is missing or its bytes are
  *          refused, and for a validator's stake the moment it is read, since its value is not in any account's bytes.
- * Version: 0.1.0
+ * Version: 0.1.1 (a price in US$ with "$")
  * Sprint:  10 (campaign list), in the UI overhaul
  */
 import { Eye } from "lucide-react";
@@ -14,7 +14,7 @@ import { comparator, distanceText, kindName, type Reading } from "./readings";
 
 export function ReadLine({ card, reading }: { card: Card; reading: Reading | null | undefined }) {
   const kind = kindName(card);
-  const target = card.target === null ? "—" : valueText(kind, card.target, card.priceExponent);
+  const target = card.target === null ? "—" : valueText(kind, card.target, card.priceExponent, card.asset);
   const gap = kind === "price" && reading && card.target !== null ? distanceText(reading, card.target) : null;
   return (
     <p className="card-read">
@@ -28,7 +28,7 @@ export function ReadLine({ card, reading }: { card: Card; reading: Reading | nul
           "No reading"
         ) : (
           <>
-            Now <b>{valueText(kind, reading.value, reading.exponent)}</b>
+            Now <b>{valueText(kind, reading.value, reading.exponent, card.asset)}</b>
           </>
         )}
       </span>

@@ -16,7 +16,7 @@ import { formatSol, shortAddress } from "@/lib/brot";
 import { sol4 } from "@/features/entry/amount";
 import { KINDS } from "@/features/campaigns/card-parts";
 import { CREATOR_NOTICE, KIND_NAME, PAGE, creatorHasEntry, ruleText } from "./copy";
-import { local, stateChip, utc, valueText } from "./format";
+import { local, priceAsset, stateChip, utc, valueText } from "./format";
 import type { PageData } from "./load";
 import type { Proof } from "./proof";
 
@@ -26,7 +26,7 @@ export function CampaignHeader({ data, proof, sentence }: { data: PageData; proo
   const rule = ruleText({
     kind: proof.kind,
     name,
-    target: valueText(proof.kind, c.target, c.priceExponent),
+    target: valueText(proof.kind, c.target, c.priceExponent, priceAsset(proof.kind, c.feedId)),
     below: proof.comparator === "≤" && proof.kind === "price",
     deadline: `${utc(c.deadlineAt)} (${local(c.deadlineAt)})`,
     epoch: c.epoch.toString(),

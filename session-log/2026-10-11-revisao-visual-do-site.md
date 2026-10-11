@@ -136,6 +136,29 @@ do protótipo para esses botões. Agora ele aparece. O teste na web da cena nova
 erro do próprio teste: a frase "We can't check this on-chain." aparece duas vezes, na tela e no aviso para leitor de
 tela, e o localizador pegava as duas.
 
+## O "$" na frase e os pontos que seguem o mouse
+
+O Ronaldo pediu mais duas coisas olhando uma campanha aberta na porta 3100:
+
+- **"$" antes do preço.** A frase dizia "SOL/USD reaches 150"; agora diz "SOL/USD reaches $150", como o protótipo
+  aprovado escreve. A mudança fica no modelo v1 da frase, a mesma função de todas as páginas, então vale para os
+  cartões, a página da campanha, a caixa de abrir e as sugestões da busca. Um feed de razão (SSOL/SOL.RR, por exemplo)
+  continua sem "$": o alvo dele não é em dólar, e "$1.25" diria uma coisa falsa. O que a campanha guarda na cadeia não
+  muda, só o jeito de escrever um alvo em US$. Na mesma página, a regra, a prova ("111.75", "≥ 150") e a leitura dos
+  cartões ainda escreviam o preço sem moeda logo abaixo do título com "$150"; o protótipo põe "$" neles também, e eles
+  ganharam o "$" pela mesma regra. A prévia da caixa de abrir manteve o "US$" que a revisão de texto da Sprint 19
+  escolheu.
+- **O efeito do mouse do `/dev0x/`.** O protótipo tem um campo de pontos atrás da página, que acende em volta do
+  cursor, e uma luz que segue o cursor sobre os cartões. Os estilos dos dois tinham vindo na revisão visual, mas o
+  script que desenha os pontos e move a luz não. Agora veio. Os pontos são redesenhados só quando o cursor se move, a
+  janela muda de tamanho ou o tema troca, e ficam parados quando o sistema pede menos movimento. O teste na web confere
+  que o ponto debaixo do cursor acende e um distante não.
+- **O saldo que não mudava.** Depois de entrar no NO com 0,5 SOL, a barra do topo ainda dizia 5,0 SOL. Cada parte do
+  site lia o saldo por conta própria: o painel de entrada relia depois de uma entrada, mas o chip da barra só lia ao
+  conectar. Agora há uma leitura só para o site inteiro, refeita depois de qualquer entrada ou abertura, a cada 20 s
+  com a página à vista e quando a pessoa volta para a aba. Uma leitura que falha depois da primeira mantém o último
+  saldo, em vez de piscar para "desconhecido". O teste na web confere que o chip cai depois das entradas.
+
 ## O que fica
 
 - O cartão de compartilhar, o painel "About this campaign", a linha do tempo "Where it is" com a campanha aberta, a

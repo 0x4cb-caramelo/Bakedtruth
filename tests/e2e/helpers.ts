@@ -1,9 +1,9 @@
 /**
  * Purpose: what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page
  *          opened with the injected wallet and the runner's answer for it (sign and send, refuse, send and never
- *          answer, never answer), the entry panel and the sheet as locators, and the per-1 figure written as the panel
- *          writes it, to compare the screen with the SDK's estimate.
- * Version: 0.2.0 (Sprint 19: any page with the wallet, for the creation box)
+ *          answer, never answer), the entry panel and the sheet as locators, the per-1 figure written as the panel
+ *          writes it, to compare the screen with the SDK's estimate, and the top bar's balance as its chip says it.
+ * Version: 0.2.1 (the UI overhaul: the top bar's balance; 0.2.0, Sprint 19: any page with the wallet)
  * Sprint:  11 (site: campaign page and entry); 19
  */
 import { expect, type Page } from "@playwright/test";
@@ -65,6 +65,12 @@ export async function connect(page: Page) {
   await panel(page).getByRole("button", { name: "Connect", exact: true }).click();
   await pickWallet(page);
   await expect(panel(page).getByText(/^Balance \d/)).toBeVisible();
+}
+
+/** The top bar's balance, from the wallet chip's label ("Wallet Ab1…xyz, 4.9973 SOL"); NaN while it loads. */
+export async function chipSol(page: Page): Promise<number> {
+  const label = (await page.locator("header.top .wallet-on").getAttribute("aria-label")) ?? "";
+  return Number(/, ([\d.,]+) SOL$/.exec(label)?.[1]?.replace(/,/g, "") ?? Number.NaN);
 }
 
 /** Picks a side and an amount in the panel. */

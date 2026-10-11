@@ -258,6 +258,22 @@ structure of the approved screens (`prototype-lab/campaigns/`, served at `/dev0x
   on to the account or the target. The query still stays in the page (D-j); a pick fills only the slots, checked as
   typed ones. Tests: `tests/site/open-search.test.ts` and a scene in `tests/e2e/open.e2e.ts`. The chosen deadline chip
   shows as chosen again (the prototype's `.op-days` style, which the overhaul had left out).
+- **"$" before a price** (Ronaldo, 2026-10-11): "SOL/USD reaches $150", as the prototype writes it (`dollars()` and
+  `value(v, "$")`), wherever template v1 shows (the cards, the campaign page, the creation box, the search's
+  suggestions) and on the other US$ prices of the page and the cards: the rule, the proof's price now, target and
+  confidence, the cards' read line and the home page's read panel (`priceText` in `sentence.ts`, through `valueText`).
+  A ratio feed (SSOL/SOL.RR) keeps a plain number, since its value is not in dollars. What a campaign stores and means
+  does not change. The creation box's own preview keeps its "US$" (Sprint 19's copy review).
+- **The prototype's pointer effects** (Ronaldo, 2026-10-11): their styles had come over in the overhaul, but not
+  `effects.js`. `app/components/pointer-effects.tsx` now draws the dot field behind every page, brightening within
+  190 px of the pointer, and moves the spotlight across the card grid; with prefers-reduced-motion the dots stay still
+  and the spotlight is off. The top bar's border on scroll was already the header's. A web-smoke scene reads the
+  canvas: the dot under the pointer lights up, a far one does not.
+- **The wallet's balance follows the entries** (Ronaldo, 2026-10-11: after a NO entry of 0.5 SOL the top bar still said
+  5.0 SOL). Each component read the balance once on its own: the entry panel read it again after a landing, but the top
+  bar's chip only when the wallet connected. One reading now serves the whole site (`sol-balance-provider.tsx`): read
+  on connect, after any landed entry or opening, every 20 s while the page is visible, and on return to the tab. The
+  smoke checks that the chip drops after the entries.
 - **Baked's bubble on a phone** is fitted to the screen again whenever Baked moves while it shows (Sprint 13's rule:
   it never cuts). A tap mid-hop used to leave it past the edge after the landing; the new layout exposed it.
 - **Tests:** two web-smoke expectations follow the design (the phone menu holds "How it works"; the wallet chip, not a

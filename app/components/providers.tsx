@@ -10,6 +10,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import { ToastProvider } from "@/components/toast";
 import { CLUSTER, RPC_URL } from "@/lib/config";
 import { registerMwaOnce } from "@/features/wallet/register-mwa";
+import { SolBalanceProvider } from "@/features/wallet/sol-balance-provider";
 import { WalletPickerProvider } from "@/features/wallet/wallet-picker";
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -30,7 +31,10 @@ export function Providers({ children }: { children: ReactNode }) {
       <WalletProvider wallets={wallets}>
         <WalletModalProvider>
           <WalletPickerProvider>
-            <ToastProvider>{children}</ToastProvider>
+            {/* One balance for the whole site, refreshed after a landing, on a timer and on return to the tab. */}
+            <SolBalanceProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </SolBalanceProvider>
           </WalletPickerProvider>
         </WalletModalProvider>
       </WalletProvider>

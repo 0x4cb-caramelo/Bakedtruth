@@ -16,7 +16,7 @@ import { cx } from "@/components/ui/cx";
 import { Outcome, shortAddress } from "@/lib/brot";
 import { explorerAddress } from "@/lib/config";
 import { PRICE, PROOF, RAW_UNIT } from "./copy";
-import { ageText, grouped, local, utc, valueText, valueWithUnit } from "./format";
+import { ageText, grouped, local, priceAsset, utc, valueText, valueWithUnit } from "./format";
 import type { PageData } from "./load";
 import { READER, type Proof } from "./proof";
 
@@ -39,7 +39,8 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
   const now = data.chain.unixTimestamp;
   const before = data.view.state === "Open" || data.view.state === "Closed";
   const exponent = proof.price?.exponent ?? c.priceExponent;
-  const value = proof.value === null ? null : valueText(proof.kind, proof.value, exponent);
+  const asset = priceAsset(proof.kind, c.feedId);
+  const value = proof.value === null ? null : valueText(proof.kind, proof.value, exponent, asset);
   const reader = READER[proof.kind];
   const unit = RAW_UNIT[proof.kind];
   return (
@@ -51,7 +52,7 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
       {c.outcome === Outcome.Yes || c.outcome === Outcome.No ? (
         <p className="cp-recorded">
           {PROOF.recorded}:{" "}
-          <b className="tabular-nums">{valueWithUnit(proof.kind, c.observedValue, c.priceExponent)}</b> ·{" "}
+          <b className="tabular-nums">{valueWithUnit(proof.kind, c.observedValue, c.priceExponent, asset)}</b> ·{" "}
           {utc(c.resolvedAt)}
         </p>
       ) : null}
@@ -61,21 +62,19 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
           <b>{value ?? "—"}</b>
           {value && unit ? <small className="mt-1">{unit}</small> : null}
           {proof.price ? (
-            <small className="mt-1">{PRICE.confidence(valueText("price", proof.price.conf, exponent))}</small>
+            <small className="mt-1">{PRICE.confidence(valueText("price", proof.price.conf, exponent, asset))}</small>
           ) : null}
         </div>
         <div>
           <small>{PROOF.target}</small>
           <b className="dim">
-            {proof.comparator} {valueText(proof.kind, c.target, c.priceExponent)}
+            {proof.comparator} {valueText(proof.kind, c.target, c.priceExponent, asset)}
           </b>
           {unit ? <small className="mt-1">{unit}</small> : null}
         </div>
       </div>
       {proof.problem ? (
-        <p className="cp-gap is-off">
-          {proof.problem === "missing" ? PROOF.missing : PROOF.problem(proof.problem)}
-        </p>
+        <p className="cp-gap is-off">{proof.problem === "missing" ? PROOF.missing : PROOF.problem(proof.problem)}</p>
       ) : null}
       {before && proof.ifReadNow ? (
         <p className="cp-ifnow">

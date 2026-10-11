@@ -52,12 +52,22 @@ recomendado (1a a 12a).
     pelo clique e o erro da carteira à vista. Antes ele ligava a primeira carteira instalada e engolia o erro, e o
     botão parecia morto.
   - **A busca da caixa de abrir completa o que se digita**, como uma barra de busca e como o protótipo aprovado
-    (`/dev0x/`): cada sugestão é a frase inteira da campanha que ela abriria ("BTC/USD reaches 120,000"), agrupada por
+    (`/dev0x/`): cada sugestão é a frase inteira da campanha que ela abriria ("BTC/USD reaches $120,000"), agrupada por
     tipo. Ela lê a direção ("falls to", "reaches"), o prazo ("in 30 days", "2 weeks") e o alvo com "k" ("120k"). Com o
     preço da Pyth lido agora, nunca sugere um alvo já atingido, que o programa recusaria, e a caixa vazia começa com
     exemplos a uma distância justa do preço. Fora do que a cadeia confere, o Baked desconfiado diz "We can't check
     this on-chain." e mostra os três tipos mais próximos. Enter pega a primeira sugestão, e o cursor vai para o campo
     que falta. O que se digita continua só na página (D-j). O botão do prazo escolhido voltou a aparecer marcado.
+  - **"$" antes do preço:** "SOL/USD reaches $150", como o protótipo aprovado escreve, na frase da campanha (cartões,
+    página da campanha, caixa de abrir, sugestões da busca) e nos outros preços em US$ da página e dos cartões: a regra,
+    a prova na cadeia (preço de agora, alvo e confiança), a leitura dos cartões e o painel da página inicial. Um feed
+    de razão, como SSOL/SOL.RR, continua sem "$", porque o valor dele não é em dólar.
+  - **O campo de pontos do protótipo atrás da página:** os pontos acendem em volta do cursor, e a luz segue o cursor
+    sobre os cartões da grade. Com "reduzir movimento" ligado no sistema, os pontos ficam parados e a luz dos cartões
+    não aparece.
+  - **O saldo da carteira acompanha as entradas.** O da barra do topo era lido uma vez, ao conectar, e ficava parado:
+    depois de uma entrada de 0,5 SOL ele ainda dizia 5,0 SOL. Agora o site tem uma leitura só do saldo, refeita quando
+    uma entrada ou uma abertura entra na cadeia, a cada 20 s com a página à vista e quando a pessoa volta para a aba.
   - **O balão do Baked no celular:** encaixado na tela de novo sempre que o Baked se move enquanto fala. Antes, um
     toque no meio de um pulo podia deixá-lo cortado na borda; o defeito é anterior e o desenho novo o expôs.
 

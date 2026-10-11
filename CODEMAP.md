@@ -8,8 +8,8 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **883** |
-| Acima de 200 linhas | **39** ⚠️ |
+| Arquivos mapeados | **885** |
+| Acima de 200 linhas | **40** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -55,6 +55,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `tests/brot/resolve-support.ts` — 205 linhas
 - `tests/brot/slot-matrix-fixtures.ts` — 267 linhas
 - `tests/brot/slot-matrix.gen.ts` — 428 linhas
+- `tests/e2e/smoke.e2e.ts` — 201 linhas
 
 ---
 
@@ -84,7 +85,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09), in the approved prototype's frame (prototype-lab/campaigns): the two fonts the site serves itself, the theme script in <head | 48 |
+| [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09), in the approved prototype's frame (prototype-lab/campaigns): the two fonts the site serves itself, the theme script in <head | 52 |
 | [`manifest.ts`](app/app/manifest.ts) | the installable PWA, manifest only (Sprint 13 DoD, S2; TP §3.6): the name, the start page, standalone display, the dark theme's colours and the icons scripts/pw | 33 |
 | [`page.tsx`](app/app/page.tsx) | the home route (Sprint 10), in the approved prototype's layout since the UI overhaul (features/home): the top line, the "Open now" carousel with "Closing soon"  | 15 |
 
@@ -138,7 +139,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`header-search.tsx`](app/components/header-search.tsx) | the top bar's campaign search (the approved prototype's `.search`): what you type filters the home grid by title, asset, kind, address, creator or state (featur | 42 |
 | [`mascot.tsx`](app/components/mascot.tsx) | Mounts the mascot once for the whole app. Each page decides where it may stand with | 31 |
 | [`phone-menu.tsx`](app/components/phone-menu.tsx) | the menu under 1180 px (the approved prototype's `.phone-nav` sheet): the campaign search (the top bar's field hides on a phone), every route, the theme switch  | 64 |
-| [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 40 |
+| [`pointer-effects.tsx`](app/components/pointer-effects.tsx) | the approved prototype's pointer effects (prototype-lab/campaigns/js/effects.js, whose styles came over in base.css and card.css): the dot field behind every pa | 91 |
+| [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 44 |
 | [`site-footer.tsx`](app/components/site-footer.tsx) | the footer of every screen, in the approved prototype's style (prototype-lab/campaigns, `.foot`): the links, then the legal lines the site must carry: BRAND.md' | 60 |
 | [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): Baked and the wordmark, the three main links with the current one unde | 111 |
 | [`site-notice.tsx`](app/components/site-notice.tsx) | the strip above every screen (Sprint 09, BR-47, P1 §4.6), in the approved prototype's place and style (prototype-lab/campaigns, `.status`): the devnet mark, the | 27 |
@@ -176,11 +178,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`chance-chart.tsx`](app/features/campaign-page/chance-chart.tsx) | the chance history (L-23): the YES share of the entries after each entry, as a step line (a share changes only when an entry goes in), one series in the design' | 89 |
 | [`copy-states.ts`](app/features/campaign-page/copy-states.ts) | the words of the campaign states (Sprint 12; D-m vocabulary; English per L-01): closed and why, in review with the six-hour window, contested (L-04, answered "C | 128 |
 | [`copy.ts`](app/features/campaign-page/copy.ts) | the campaign page's words (BR-23, BR-26, BR-27; D-m vocabulary; English per L-01): the rule of each kind in plain words, the proof's labels, the price facts and | 157 |
-| [`format.ts`](app/features/campaign-page/format.ts) | how the campaign page writes what it read: a value in its field's units (a price in the feed's exponent, a supply or a liquidity as a whole number, a pool or a  | 71 |
+| [`format.ts`](app/features/campaign-page/format.ts) | how the campaign page writes what it read: a value in its field's units (a price in the feed's exponent, a supply or a liquidity as a whole number, a pool or a  | 76 |
 | [`load.ts`](app/features/campaign-page/load.ts) | what the campaign page reads, through the SDK over RPC (the read API has no account bytes, no entries and no metric reading): the campaign at the route's id, th | 131 |
 | [`payout-panel.tsx`](app/features/campaign-page/payout-panel.tsx) | the connected wallet's own lines on the campaign page (Sprint 12): "Your entry" with its sides and what it returns, as an estimate while the pot or the result c | 168 |
 | [`pot-panel.tsx`](app/features/campaign-page/pot-panel.tsx) | the split and the pot (P1 §3.1–3.2; spec 3.5): each side's chance (its share of the entries; none for an empty pot, L-05) and its total in SOL, the bar, the pri | 61 |
-| [`proof-panel.tsx`](app/features/campaign-page/proof-panel.tsx) | the campaign page's proof (BR-23; spec 3.5): the value read now through the SDK's copy of the program's reader against the target, "if read now", the distance,  | 152 |
+| [`proof-panel.tsx`](app/features/campaign-page/proof-panel.tsx) | the campaign page's proof (BR-23; spec 3.5): the value read now through the SDK's copy of the program's reader against the target, "if read now", the distance,  | 151 |
 | [`proof.ts`](app/features/campaign-page/proof.ts) | the proof a campaign page shows (BR-23; P1 §4.4): the value read now from the account the campaign reads, through the SDK's copy of the program's readers (owner | 159 |
 | [`recheck-commands.ts`](app/features/campaign-page/recheck-commands.ts) | the re-check panel's commands (BR-23, "Anyone can re-check. Same account, same answer"; proposal §2.9): one JSON-RPC request that fetches the bytes the reader r | 68 |
 | [`recheck-panel.tsx`](app/features/campaign-page/recheck-panel.tsx) | the re-check panel (BR-23; P1 §4.4 "Anyone can re-check. Same account, same answer"; spec 3.7): the account, its owner, the field the reader reads, the raw valu | 152 |
@@ -199,13 +201,13 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`campaign-list.tsx`](app/features/campaigns/campaign-list.tsx) | the home page's toolbar and grid (Sprint 10), in the approved prototype's layout (`.home-toolbar`, `.grid-cards`): the five states and "Saved" as chips (Open by | 147 |
 | [`card-parts.tsx`](app/features/campaigns/card-parts.tsx) | the small pieces the approved prototype's cards, rows and slides share (ui/parts.js): the kind tile with its letter on the kind's colour ($, B, L, P, V), the ki | 49 |
 | [`card-row.tsx`](app/features/campaigns/card-row.tsx) | a campaign on one line (the approved prototype's `.card-row`), for the home page's "Closing soon" and "Answered recently": the kind tile, the sentence and its k | 30 |
-| [`model.test.ts`](app/features/campaigns/model.test.ts) | the card values: the chance (none for an empty pot), the estimated return from the SDK's math, the 24-hour listing rule, and the sentence of a price campaign fr | 117 |
+| [`model.test.ts`](app/features/campaigns/model.test.ts) | the card values: the chance (none for an empty pot), the estimated return from the SDK's math, the 24-hour listing rule, the sentence of a price campaign from a | 127 |
 | [`model.ts`](app/features/campaigns/model.ts) | a campaign's card values, from the read API's fields and the SDK's math (Sprint 10): the pot in lamports, the chance per side (none for an empty pot, L-05), the | 134 |
 | [`read-line.tsx`](app/features/campaigns/read-line.tsx) | a card's one line about the account it reads (the approved prototype's `.card-read`): the value now, in the units of its kind, against the side of the target YE | 42 |
 | [`readings.ts`](app/features/campaigns/readings.ts) | what a card and the home page's proof panel say about the account a campaign reads, now (the UI overhaul; the approved prototype's `card-read` and `home-proof`) | 85 |
 | [`saved.ts`](app/features/campaigns/saved.ts) | the "Saved" list of campaigns, kept in this browser's localStorage (Sprint 10: a per-viewer convenience, never state anyone else needs). Every read and write is | 45 |
 | [`search-store.ts`](app/features/campaigns/search-store.ts) | the campaign search the top bar types into and the home grid filters by (the UI overhaul: the prototype's search lives in the top bar, `.search`), held in memor | 29 |
-| [`sentence.ts`](app/features/campaigns/sentence.ts) | the campaign's sentence, template v1 (the program stores `template_version` 1, the SDK's `CAMPAIGN_TEMPLATE_VERSION`; D-j and A-11), from its stored fields only | 118 |
+| [`sentence.ts`](app/features/campaigns/sentence.ts) | the campaign's sentence, template v1 (the program stores `template_version` 1, the SDK's `CAMPAIGN_TEMPLATE_VERSION`; D-j and A-11), from its stored fields only | 128 |
 | [`state-line.ts`](app/features/campaigns/state-line.ts) | a card's line for its state (Sprint 12: "the states of the card"), from the read API's fields: the chip (contested apart from in review, L-04), and one line aft | 54 |
 | [`use-campaigns.ts`](app/features/campaigns/use-campaigns.ts) | the campaign list's data (Sprint 10): every campaign the read API lists, read in pages, with each card's values computed from the chain time the API reports. A  | 48 |
 | [`use-readings.ts`](app/features/campaigns/use-readings.ts) | the live reading of every campaign a page shows (the UI overhaul; the approved prototype's "Now … / YES ≥ …" line on each card): their metric accounts in batche | 58 |
@@ -265,7 +267,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`home-how.tsx`](app/features/home/home-how.tsx) | the home page's "How it works" (the approved prototype's `.home-how`): the six steps told in three, with the link to every step, fee and refund, then the three  | 70 |
 | [`home-lead.tsx`](app/features/home/home-lead.tsx) | the home page's top line (the approved prototype's `.home-lead`): what this is, and what a US$500 opening costs in SOL right now at Pyth's SOL/USD price (4a: US | 41 |
 | [`home-page.tsx`](app/features/home/home-page.tsx) | the home page (the UI overhaul; the approved prototype's home.js): the top line with the opening's cost, the mosaic ("Open now" and the two side boxes), how it  | 76 |
-| [`home-proof.tsx`](app/features/home/home-proof.tsx) | the "On-chain read" panel of a home slide (the approved prototype's `.home-proof`, where the old chart was): the value read now against the target, "if read now | 106 |
+| [`home-proof.tsx`](app/features/home/home-proof.tsx) | the "On-chain read" panel of a home slide (the approved prototype's `.home-proof`, where the old chart was): the value read now against the target, "if read now | 112 |
 | [`home-side.tsx`](app/features/home/home-side.tsx) | the two boxes beside the home page's carousel (the approved prototype's `.home-side`): "Closing soon", the four listed campaigns whose entries close first, and  | 113 |
 | [`home-slide.tsx`](app/features/home/home-slide.tsx) | one slide of the home page's "Open now" carousel (the approved prototype's `.home-slide`): the kind, the sentence, each side's share in large type, the pot bar  | 110 |
 | [`use-opening-now.ts`](app/features/home/use-opening-now.ts) | what a US$500 opening costs right now, for the home page's top line (the approved prototype's `.home-open`): the creation box's own reads (open-campaign/reads.t | 45 |
@@ -382,8 +384,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`copy.ts`](app/features/wallet/copy.ts) | the words of the "Connect a wallet" list (the approved prototype's connectDialog, ui/wallet.js): its title, what each wallet's state says, the reassurance under | 19 |
 | [`mwa-chain.test.ts`](app/features/wallet/mwa-chain.test.ts) | X2.1. The chain the wallet registers for (from the site's cluster setting) equals the chain for the cluster the read API reports in /api/v1/health. Registration | 54 |
 | [`register-mwa.ts`](app/features/wallet/register-mwa.ts) | the explicit Mobile Wallet Adapter registration (S1, proposal §3.4). Registers the MWA wallet once, for the chain of the site's cluster (never the RPC URL's), w | 46 |
+| [`sol-balance-provider.tsx`](app/features/wallet/sol-balance-provider.tsx) | the connected wallet's SOL balance, one reading for the whole site, so the top bar's chip, the entry panel and the creation box always show the same number. It  | 65 |
 | [`use-installed-wallet.ts`](app/features/wallet/use-installed-wallet.ts) | "Connect" (S1, proposal §3.4 rule 3): connect only from a person's click. Shared by the top bar's button, the entry panel and the creation box, so all three con | 23 |
-| [`use-sol-balance.ts`](app/features/wallet/use-sol-balance.ts) | the connected wallet's SOL balance in lamports, read from the site's connection. `null` while it loads or when nothing is connected. A failed read leaves `null` | 33 |
+| [`use-sol-balance.ts`](app/features/wallet/use-sol-balance.ts) | the connected wallet's SOL balance in lamports, from the site's one reading (sol-balance-provider.tsx). `null` while it loads, when nothing is connected or when | 24 |
 | [`wallet-picker.tsx`](app/features/wallet/wallet-picker.tsx) | "Connect" opens this list (the approved prototype's "Connect a wallet" dialog, ui/wallet.js): every wallet the browser has, detected ones first and the missing  | 113 |
 | [`wallet-state.test.ts`](app/features/wallet/wallet-state.test.ts) | the wallet's view: disconnected, connected with a balance, no SOL (faucet on devnet only), the balance still loading, and the SOL formatting (four decimals, tru | 54 |
 | [`wallet-state.ts`](app/features/wallet/wallet-state.ts) | the wallet's view, as pure logic: disconnected; connected with its address and SOL balance; connected with no SOL, which offers the devnet faucet only on devnet | 36 |
@@ -1376,14 +1379,14 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`control-open.ts`](tests/e2e/control-open.ts) | the web smoke's control routes for Sprint 19 ("open a campaign"): make the smoke's test wallet a team key, or take that away again (the admin's `admin_set_team` | 53 |
 | [`control-states.ts`](tests/e2e/control-states.ts) | the web smoke's control routes for Sprint 12 ("campaign states"): a campaign written in any public state (tests/site/state-world.ts); a whole cycle with the smo | 97 |
 | [`control.ts`](tests/e2e/control.ts) | the web smoke's control endpoint (loopback, test only): what the Playwright runner asks of the chain. Sign the bytes the injected wallet was handed with the tes | 167 |
-| [`helpers.ts`](tests/e2e/helpers.ts) | what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page opened with the injected wallet and the runner's answer f | 88 |
+| [`helpers.ts`](tests/e2e/helpers.ts) | what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page opened with the injected wallet and the runner's answer f | 94 |
 | [`open-guard.e2e.ts`](tests/e2e/open-guard.e2e.ts) | "open a campaign: refusals and the retry guard" in the web smoke (Sprint 19 DoD), once at desktop width: three refusals each with its own message on the box (a  | 149 |
 | [`open-helpers.ts`](tests/e2e/open-helpers.ts) | what the creation box's smoke tests share (Sprint 19): the link that prefills a paid BTC/USD opening, the box and its button as locators, the connection through | 68 |
 | [`open.e2e.ts`](tests/e2e/open.e2e.ts) | "open a campaign" in the web smoke (Sprint 19 DoD; `bun run e2e -- --grep "open a campaign"`): the creation box at /abrir in Chromium at desktop width and at 41 | 99 |
 | [`playwright.config.ts`](tests/e2e/playwright.config.ts) | the web smoke's Playwright configuration (Sprint 11; @playwright/test 1.63.0, pinned in package.json, whose Chromium is build 1243): the site built against the  | 27 |
 | [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 65 |
-| [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 165 |
-| [`smoke.e2e.ts`](tests/e2e/smoke.e2e.ts) | the web smoke (Sprint 11 DoD; `bun run e2e`): the built site in Chromium at desktop width and at 412 CSS px, with an injected Wallet Standard test wallet, again | 198 |
+| [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 185 |
+| [`smoke.e2e.ts`](tests/e2e/smoke.e2e.ts) | the web smoke (Sprint 11 DoD; `bun run e2e`): the built site in Chromium at desktop width and at 412 CSS px, with an injected Wallet Standard test wallet, again | 201 |
 | [`states.e2e.ts`](tests/e2e/states.e2e.ts) | "campaign states" in the web smoke (Sprint 12 DoD; `bun run e2e -- --grep "campaign states"`): the built site in Chromium against the program in LiteSVM. Every  | 80 |
 | [`upgrade.e2e.ts`](tests/e2e/upgrade.e2e.ts) | A-8 in the web smoke (the founder's answer of 2026-10-10): the program is upgraded while a page built for its previous deploy is open (the site was built agains | 92 |
 | [`wallet.ts`](tests/e2e/wallet.ts) | the web smoke's injected wallet: a Wallet Standard wallet ("E2E Test Wallet") registered in the page before its own scripts run, the way a browser extension reg | 66 |
@@ -1483,7 +1486,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`my-entries.test.ts`](tests/site/my-entries.test.ts) | the rows of "My entries" through a whole cycle, read the way the page reads them (the chain behind the recording RPC, the wallet's history): while settling, eac | 150 |
 | [`notices.test.ts`](tests/site/notices.test.ts) | every mandatory notice is on its screen (Sprint 13 DoD; BR-47, P1 §4.6): each notice of app/features/notices/registry.ts is drawn by the component it names, and | 199 |
 | [`open-cases.ts`](tests/site/open-cases.ts) | the cases of tests/site/open-refusals.test.ts (A-10, X0.7; Sprint 19): a paid BTC/USD draft as the creation box builds it, the box's verdict on a draft read thr | 153 |
-| [`open-draft.test.ts`](tests/site/open-draft.test.ts) | the creation box's pure pieces (Sprint 19): one sentence template per kind (template v1, the same function every page uses); the slots parsed exactly into the S | 178 |
+| [`open-draft.test.ts`](tests/site/open-draft.test.ts) | the creation box's pure pieces (Sprint 19): one sentence template per kind (template v1, the same function every page uses); the slots parsed exactly into the S | 182 |
 | [`open-kinds.test.ts`](tests/site/open-kinds.test.ts) | A-10 for the box's other kinds and its price refusals past row 4's staleness (the Sprint 19 adversarial review, M7): a stake pool opened on its measured epoch,  | 166 |
 | [`open-promises.test.ts`](tests/site/open-promises.test.ts) | three promises of the creation box, each tested on its own (the Sprint 19 coordinator review, S-2 and S-3): "Check before you sign" writes its sentence, account | 125 |
 | [`open-quote.test.ts`](tests/site/open-quote.test.ts) | the creation box's quote against the program's own charge (Sprint 19 DoD; I14; TP §3.4.16): the box reads Pyth's SOL/USD account through the site's RPC and quot | 128 |

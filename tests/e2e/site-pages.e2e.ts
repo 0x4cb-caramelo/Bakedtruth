@@ -6,8 +6,10 @@
  *          mascot's bubble stays inside the screen; the record publishes the powers table and checks its keys against
  *          the chain; every campaign page has "Report this campaign"; after a whole cycle the leaderboard ranks the test
  *          wallet as "You", from the read API's own route; the site sends its security headers (X2.5), loads no
- *          third-party script (K-10) and serves the PWA manifest with its icons and no service worker.
- * Version: 0.2.2 (the founder, 2026-10-10: the age line; 0.2.1, answer 9a: the privacy link; 0.2.0, Sprint 13)
+ *          third-party script (K-10) and serves the PWA manifest with its icons and no service worker; the dot field
+ *          behind the page brightens around the pointer (the UI overhaul).
+ * Version: 0.2.3 (the UI overhaul: the dot field; 0.2.2, the founder, 2026-10-10: the age line; 0.2.1, answer 9a: the
+ *          privacy link; 0.2.0, Sprint 13)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { expect, test, type Page } from "@playwright/test";
@@ -160,5 +162,23 @@ test.describe("site pages and notices", () => {
     expect(manifest).toMatchObject({ name: "Brot Markets", start_url: "/", display: "standalone" });
     for (const icon of manifest.icons) expect((await request.get(icon.src)).status()).toBe(200);
     expect(await page.evaluate(() => navigator.serviceWorker?.getRegistrations().then((r) => r.length) ?? 0)).toBe(0);
+  });
+
+  test("the dot field behind the page brightens around the pointer, as in the approved prototype", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("canvas#dots")).toHaveAttribute("aria-hidden", "true");
+    // The canvas's alpha at a dot's centre: dots sit every 24 px from 12 px, so (108, 300) and (300, 876) are dots.
+    const alphaAt = (x: number, y: number) =>
+      page.evaluate(
+        ([px, py]) => {
+          const canvas = document.querySelector<HTMLCanvasElement>("canvas#dots")!;
+          const dpr = canvas.width / window.innerWidth;
+          return canvas.getContext("2d")!.getImageData(Math.floor(px * dpr), Math.floor(py * dpr), 1, 1).data[3];
+        },
+        [x, y],
+      );
+    await page.mouse.move(108, 300);
+    await expect.poll(() => alphaAt(108, 300)).toBeGreaterThan(100);
+    expect(await alphaAt(300, 876)).toBeLessThan(40);
   });
 });

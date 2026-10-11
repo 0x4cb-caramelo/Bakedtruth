@@ -1,14 +1,15 @@
 /**
  * Purpose: the card values: the chance (none for an empty pot), the estimated return from the SDK's math, the 24-hour
- *          listing rule, and the sentence of a price campaign from a pinned feed.
- * Version: 0.1.0
+ *          listing rule, the sentence of a price campaign from a pinned feed, and "$" on a price in US$.
+ * Version: 0.1.1 (the UI overhaul: "$")
  * Sprint:  10 (site: campaign list)
  */
 import { describe, expect, test } from "bun:test";
 
 import type { Campaign } from "@/lib/api-client";
 import { toCard } from "./model";
-import { formatTarget, sentenceOf } from "./sentence";
+import { valueText } from "../campaign-page/format";
+import { formatTarget, priceText, sentenceOf } from "./sentence";
 
 const BTC = "e62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43";
 const NOW = 1_800_000_000n;
@@ -76,7 +77,7 @@ describe("the sentence", () => {
   test("a price campaign names its feed and target in the feed's units", () => {
     const card = toCard(campaign(), NOW);
     expect(card.asset).toBe("BTC/USD");
-    expect(card.title).toBe("BTC/USD reaches 83,660.42");
+    expect(card.title).toBe("BTC/USD reaches $83,660.42");
   });
 
   test("a below campaign reads as a fall", () => {
@@ -89,7 +90,7 @@ describe("the sentence", () => {
         priceExponent: -8,
         metricAccount: "APgzQGGdv2qCgBkX6aHVkrGePtBVDDg68GiqaM7rmtf5",
       }),
-    ).toBe("BTC/USD falls to 83,660.42");
+    ).toBe("BTC/USD falls to $83,660.42");
   });
 
   test("an unknown feed falls back to the kind's name and the shortened account", () => {
@@ -112,5 +113,14 @@ describe("the sentence", () => {
   test("a target below 1 keeps six significant digits instead of rounding to 0 (Sprint 11)", () => {
     expect(formatTarget(2_150n, -8)).toBe("0.0000215");
     expect(formatTarget(123_456_789n, -9)).toBe("0.123457");
+  });
+
+  test('a price in US$ reads with "$" on the cards and the page; a ratio feed\'s value stays a plain number', () => {
+    expect(priceText(15_000_000_000n, -8, "SOL/USD")).toBe("$150");
+    expect(priceText(125_000_000n, -8, "SSOL/SOL.RR")).toBe("1.25");
+    expect(valueText("price", 11_175_000_000n, -8, "SOL/USD")).toBe("$111.75");
+    // Before the feed is known nothing says it is in dollars.
+    expect(valueText("price", 11_175_000_000n, -8)).toBe("111.75");
+    expect(valueText("burn", 900_000n, 0, "SOL/USD")).toBe("900,000");
   });
 });

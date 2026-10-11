@@ -116,9 +116,9 @@ describe("open campaign search", () => {
   });
 
   test("each suggestion says the campaign it would start, in template v1, the target in the kind's unit", () => {
-    expect(said(first("SOL falls to 90"))).toBe("SOL/USD falls to 90");
-    expect(said(first("BTC 120k"))).toBe("BTC/USD reaches 120,000");
-    expect(said({ kind: "price", feedHex: SOL, target: "0.85", direction: "above" })).toBe("SOL/USD reaches 0.85");
+    expect(said(first("SOL falls to 90"))).toBe("SOL/USD falls to $90");
+    expect(said(first("BTC 120k"))).toBe("BTC/USD reaches $120,000");
+    expect(said({ kind: "price", feedHex: SOL, target: "0.85", direction: "above" })).toBe("SOL/USD reaches $0.85");
     expect(said({ kind: "burn", account: MINT, name: "CRMB", target: "1000000" })).toBe(
       "CRMB supply falls to 1,000,000 raw units",
     );

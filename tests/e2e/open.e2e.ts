@@ -22,7 +22,7 @@ test.describe("open a campaign", () => {
     await expect(
       box(page).getByText("Filled from a link. Check every field: a link never signs anything."),
     ).toBeVisible();
-    await expect(page.getByTestId("open-sentence")).toHaveText("BTC/USD reaches 93,733.57");
+    await expect(page.getByTestId("open-sentence")).toHaveText("BTC/USD reaches $93,733.57");
     await connectBox(page);
     await expect(reviewButton(page)).toBeEnabled();
     const quoted = await box(page).getByTestId("charge-line").locator("b").innerText();
@@ -41,7 +41,7 @@ test.describe("open a campaign", () => {
     expect(quoted).toBe(`${exact(stored.paid)} SOL`);
     await sheet(page).getByRole("link", { name: "Go to the campaign" }).click();
     await expect(page).toHaveURL(new RegExp(`/c/${id}$`));
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("BTC/USD reaches 93,733.57");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("BTC/USD reaches $93,733.57");
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     expect(sockets).toEqual([]);
   });
@@ -76,20 +76,20 @@ test.describe("open a campaign", () => {
     const query = box(page).getByRole("combobox", { name: "What should the chain answer?" });
     await query.click();
     // An empty box starts with an example a fair way off the live price: BTC/USD is at 85,212 on this chain.
-    await expect(box(page).getByRole("option", { name: /BTC\/USD reaches 110,000/ })).toBeVisible();
+    await expect(box(page).getByRole("option", { name: /BTC\/USD reaches \$110,000/ })).toBeVisible();
     await query.fill("BTC 120k in 30 days");
     const top = box(page).getByRole("option").first();
-    await expect(top).toContainText("BTC/USD reaches 120,000");
+    await expect(top).toContainText("BTC/USD reaches $120,000");
     await expect(top).toContainText("deadline in 30 days");
     await query.press("Enter");
-    await expect(page.getByTestId("open-sentence")).toHaveText("BTC/USD reaches 120,000");
+    await expect(page.getByTestId("open-sentence")).toHaveText("BTC/USD reaches $120,000");
     const target = box(page).getByLabel("Target (US$)");
     await expect(target).toBeFocused();
     await expect(target).toHaveValue("120000");
     await expect(box(page).getByRole("button", { name: "30 days" })).toHaveAttribute("aria-pressed", "true");
     // A target the price already passed is offered the one way it can open.
     await query.fill("BTC reaches 50000");
-    await expect(box(page).getByRole("option").first()).toContainText("BTC/USD falls to 50,000");
+    await expect(box(page).getByRole("option").first()).toContainText("BTC/USD falls to $50,000");
     await query.fill("will it rain tomorrow");
     await expect(box(page).getByText("We can't check this on-chain.", { exact: true })).toBeVisible();
     await expect(box(page).getByRole("option")).toHaveCount(3);
