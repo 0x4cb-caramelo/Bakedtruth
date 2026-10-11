@@ -2,7 +2,7 @@
  * Purpose: the explicit Mobile Wallet Adapter registration (S1, proposal §3.4). Registers the MWA wallet once, for
  *          the chain of the site's cluster (never the RPC URL's), with a relative icon. `register` is injectable so
  *          the chain can be tested without a browser; the default is the package's `registerMwa`.
- * Version: 0.1.0
+ * Version: 0.1.1 (the icon under the base path)
  * Sprint:  09 (site shell, theme and wallet)
  */
 import {
@@ -11,6 +11,8 @@ import {
   createDefaultWalletNotFoundHandler,
   registerMwa,
 } from "@solana-mobile/wallet-standard-mobile";
+
+import { asset } from "@/lib/base-path";
 
 export type SolanaChain = "solana:devnet" | "solana:localnet";
 export type RegisterFn = typeof registerMwa;
@@ -31,7 +33,8 @@ export function createMwaRegistrar(register: RegisterFn = registerMwa) {
     if (done) return done;
     const chain = chainOf(cluster);
     register({
-      appIdentity: { name: "Brot Markets", uri: origin, icon: "favicon.ico" },
+      // The icon is relative to the origin: under the base path (/dev0x), the root's favicon is the landing's.
+      appIdentity: { name: "Brot Markets", uri: origin, icon: asset("/favicon.ico").slice(1) },
       authorizationCache: createDefaultAuthorizationCache(),
       chains: [chain],
       chainSelector: createDefaultChainSelector(),

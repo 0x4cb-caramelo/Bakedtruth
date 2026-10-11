@@ -1,0 +1,55 @@
+# Purpose: brot-site, the campaign site (app/, Next.js) at brot.markets/dev0x: `next start` under the pinned Bun on
+#          127.0.0.1:4230, for the tunnel's /dev0x route, which sits above the landing's catch-all route.
+# Installs: the shared VPS. NOT INSTALLED yet. The steps are in deploy/vps/README.md ("The site under /dev0x"): the
+#           users and the group brot-web, the root-owned copy of the pinned Bun, the release built with
+#           deploy/vps/site-build.conf, this unit and brot-api's, then the tunnel's two routes. Check with
+#           `systemd-analyze security brot-site.service` and one start before enabling.
+# Secrets: none. The build's NEXT_PUBLIC_* values ship to every browser, and the build refuses an RPC URL with a key.
+
+[Unit]
+Description=Brot Markets site (app/, Next.js) at /dev0x
+After=network-online.target brot-api.service
+Wants=network-online.target
+
+[Service]
+User=brot-site
+Group=brot-site
+SupplementaryGroups=brot-web
+WorkingDirectory=/srv/brot-markets/site/current/app
+# The build's own settings, loaded again at start: `next start` reads next.config.ts anew, and without the base path
+# there it would answer at the root and 404 at /dev0x (the local rehearsal caught it, 2026-10-11).
+EnvironmentFile=/srv/brot-markets/site/current/deploy/vps/site-build.conf
+Environment=NODE_ENV=production
+# Its own home, created by systemd (Bun's caches); nothing of the site's is kept there.
+StateDirectory=brot-site
+Environment=HOME=/var/lib/brot-site
+# The release is read-only to this user; Next writes its cache here at run time (created by the install step).
+ReadWritePaths=/srv/brot-markets/site/current/app/.next/cache
+# The command the web smoke runs under Bun (E2E_RUNTIME=bun, X2.4).
+ExecStart=/usr/local/lib/brot-web/bun --bun node_modules/.bin/next start -H 127.0.0.1 -p 4230
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+# Limits: this server is shared with other projects.
+MemoryMax=512M
+CPUQuota=50%
+TasksMax=64
+
+# Sandboxing, as the keeper's unit.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

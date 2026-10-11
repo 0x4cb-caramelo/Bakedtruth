@@ -1,7 +1,8 @@
 /**
- * Purpose: tests the unlisted campaign preview under /dev0x/ over real HTTP: redirects, noindex, its CSP, the files it
- *          needs, the refusal of paths out of its folder, and that the site, /pitch and robots.txt are unchanged.
- * Version: 0.1.0 · Sprint: -1 (design system preview for the team), 2026-10-10
+ * Purpose: tests the unlisted campaign preview under /prototype/ over real HTTP: redirects, noindex, its CSP, the files
+ *          it needs, the refusal of paths out of its folder, and that the site, /pitch and robots.txt are unchanged.
+ * Version: 0.2.0 · Sprint: -1 (design system preview for the team), 2026-10-10; at /prototype/ since 2026-10-11, when
+ *          the site took /dev0x
  */
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
@@ -23,7 +24,7 @@ const ORIGIN = "https://brot.markets";
 const CSP_BASE = "default-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
 const CSP_SITE = `${CSP_BASE}; style-src 'self'; script-src 'self'`;
 const CSP_PITCH = `${CSP_BASE}; style-src 'self' 'unsafe-inline'; script-src 'self'`;
-const leadsFile = join(mkdtempSync(join(tmpdir(), "brot-dev0x-")), "leads.jsonl");
+const leadsFile = join(mkdtempSync(join(tmpdir(), "brot-prototype-")), "leads.jsonl");
 let server;
 let base;
 
@@ -58,30 +59,30 @@ const raw = (path) =>
 
 const get = (path) => fetch(base + path, { redirect: "manual" });
 
-/** Every file in the prototype's folder, as URL paths under /dev0x/. */
+/** Every file in the prototype's folder, as URL paths under /prototype/. */
 function files(dir = CAMPAIGNS) {
   return readdirSync(dir).flatMap((name) => {
     const full = join(dir, name);
     if (statSync(full).isDirectory()) return files(full);
-    return [`/dev0x/${relative(CAMPAIGNS, full).split("\\").join("/")}`];
+    return [`/prototype/${relative(CAMPAIGNS, full).split("\\").join("/")}`];
   });
 }
 
-test("/dev0x answers 302 to /dev0x/, the prototype's links are relative", async () => {
-  const res = await get("/dev0x");
+test("/prototype answers 302 to /prototype/, the prototype's links are relative", async () => {
+  const res = await get("/prototype");
   assert.equal(res.status, 302);
-  assert.equal(res.headers.get("location"), "/dev0x/");
+  assert.equal(res.headers.get("location"), "/prototype/");
 });
 
-test("/dev0x/ serves the prototype, out of search engines and archives", async () => {
-  const res = await get("/dev0x/");
+test("/prototype/ serves the prototype, out of search engines and archives", async () => {
+  const res = await get("/prototype/");
   assert.equal(res.status, 200);
   assert.equal(res.headers.get("x-robots-tag"), "noindex, nofollow, noarchive");
   assert.match(await res.text(), /Brot Markets · On-Chain Campaigns/);
 });
 
 test("the CSP allows the prototype's one inline script by its hash, and no other script or remote host", async () => {
-  const res = await get("/dev0x/");
+  const res = await get("/prototype/");
   const csp = res.headers.get("content-security-policy");
   const html = await res.text();
   const inline = html.match(/<script>([\s\S]*?)<\/script>/);
@@ -97,14 +98,14 @@ test("the CSP allows the prototype's one inline script by its hash, and no other
   assert.ok(csp.includes("frame-ancestors 'self'"), csp);
 });
 
-test("every file the prototype's index references exists under /dev0x/", async () => {
+test("every file the prototype's index references exists under /prototype/", async () => {
   const html = readFileSync(join(CAMPAIGNS, "index.html"), "utf8");
   const refs = [...html.matchAll(/\s(?:href|src)="([^"]+)"/g)]
     .map((m) => m[1])
     .filter((ref) => !/^(#|https?:|mailto:|\/\/)/.test(ref));
   assert.ok(refs.length >= 10, "the index references its stylesheets, scripts, fonts and icon");
   for (const ref of refs) {
-    const res = await get(`/dev0x/${ref}`);
+    const res = await get(`/prototype/${ref}`);
     assert.equal(res.status, 200, ref);
     await res.arrayBuffer();
   }
@@ -119,25 +120,26 @@ test("every file in the prototype's folder answers 200, its fonts and images inc
 });
 
 test("a path out of the prototype's folder is refused", async () => {
-  for (const path of ["/dev0x/%2e%2e%2fserver.mjs", "/dev0x/%2e%2e%2f%2e%2e%2fpackage.json", "/dev0x/..%2flib%2fstatic.mjs"]) {
+  const outside = ["%2e%2e%2fserver.mjs", "%2e%2e%2f%2e%2e%2fpackage.json", "..%2flib%2fstatic.mjs"];
+  for (const path of outside.map((p) => `/prototype/${p}`)) {
     const res = await raw(path);
     assert.equal(res.status, 404, path);
     assert.equal(res.body, "Not found", path);
   }
 });
 
-test("an unknown file under /dev0x answers 404", async () => {
-  const res = await get("/dev0x/no-such-screen.js");
+test("an unknown file under /prototype answers 404", async () => {
+  const res = await get("/prototype/no-such-screen.js");
   assert.equal(res.status, 404);
 });
 
-test("the home page and /pitch do not link to /dev0x, and robots.txt says nothing about it", async () => {
+test("the home page and /pitch do not link to /prototype, and robots.txt says nothing about it", async () => {
   for (const path of ["/", "/pitch/"]) {
     const body = await (await get(path)).text();
-    assert.ok(!body.includes("dev0x"), `${path} must not link to the preview`);
+    assert.ok(!body.includes("prototype"), `${path} must not link to the preview`);
   }
   const robots = readFileSync(join(ROOT, "robots.txt"), "utf8");
-  assert.ok(!robots.includes("dev0x"));
+  assert.ok(!robots.includes("prototype"));
 });
 
 test("the home page and /pitch keep their headers", async () => {

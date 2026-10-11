@@ -27,6 +27,20 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **O site em `brot.markets/dev0x`, pronto para o servidor** (branch `feat/dev0x-deploy`, 11/10/2026, a pedido do
+  Ronaldo; `deploy/vps/README.md`, "The site under /dev0x"; não implantado). A raiz do domínio continua sendo a página
+  de espera.
+  - **O caminho base.** O site responde só sob `NEXT_PUBLIC_BASE_PATH` (`/dev0x`, em `deploy/vps/site-build.conf`;
+    vazio aqui e no teste na web). Os arquivos que o Next não prefixa sozinho (o Baked, os ícones do manifesto, o
+    ícone da carteira do celular) passam por `app/lib/base-path.ts`. Sob o caminho base o site manda `noindex`, como a
+    prévia que estava ali.
+  - **No servidor, túnel e systemd** (sem Nginx e sem PM2, decisão do Ronaldo): `brot-site` (o Next, sob o Bun fixado,
+    em `127.0.0.1:4230`) e `brot-api` (a API de leitura, em `127.0.0.1:4220`), cada uma com seu usuário; duas rotas do
+    túnel, `/dev0x` e `/api/v1`, acima da rota do landing.
+  - **A prévia do protótipo** saiu de `/dev0x/` para `/prototype/`, no próprio landing.
+  - **Ensaiado aqui**: o pacote do commit, a instalação sem scripts, o build sob o Bun com `/dev0x`, a API e o site
+    rodando dessa cópia, conferidos num navegador. O ensaio pegou um defeito: sem o caminho base também no
+    `next start`, o site respondia na raiz e dava 404 em `/dev0x`; a unidade agora carrega o mesmo arquivo do build.
 - **Sprint 08, segunda parte: os nomes, o preço e o relay `brot-rpc`** (branch `sprint-08-price-names-relay`, PR #69,
   11/10/2026; `docs/sprints/sprint-08-indexer-api-points.md`; construídos e testados, não implantados).
   - **`/api/v1/names`** na API de leitura: os nomes revisados de `content/account-names.json`, com as regras que saíram

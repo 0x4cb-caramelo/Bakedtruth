@@ -18,6 +18,7 @@ import { HeaderSearch } from "@/components/header-search";
 import { PhoneMenu } from "@/components/phone-menu";
 import { cx } from "@/components/ui/cx";
 import { WalletButton } from "@/components/wallet-button";
+import { asset } from "@/lib/base-path";
 import { applyTheme, type Theme } from "@/lib/theme";
 
 const MAIN = [
@@ -52,7 +53,7 @@ export function SiteHeader() {
     <header className={cx("top", scrolled && "scrolled")}>
       <Link className="brand" href="/" aria-label="Brot Markets, home">
         {/* eslint-disable-next-line @next/next/no-img-element -- a 52 px sprite of Baked, already sized */}
-        <img src="/mascot/deadpan.png" alt="" width={52} height={33} />
+        <img src={asset("/mascot/deadpan.png")} alt="" width={52} height={33} />
         <span>
           brot<b className="tld">.markets</b>
         </span>
@@ -72,7 +73,12 @@ export function SiteHeader() {
             Open a campaign
           </span>
         </Link>
-        <button className="icon-btn search-btn" type="button" aria-label="Search campaigns" onClick={() => setMenu("search")}>
+        <button
+          className="icon-btn search-btn"
+          type="button"
+          aria-label="Search campaigns"
+          onClick={() => setMenu("search")}
+        >
           <Search className="size-[18px]" aria-hidden="true" />
         </button>
         <button

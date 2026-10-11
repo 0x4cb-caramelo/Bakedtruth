@@ -2,8 +2,10 @@
  * Purpose: the site's Next.js settings: the security headers and the Content-Security-Policy (Sprint 09, X2.5). The
  *          policy allows the page's own origin, the one RPC origin the browser reads from (NEXT_PUBLIC_RPC_URL), and the
  *          read API (NEXT_PUBLIC_API_URL); nothing else. No third-party script and no framing by another origin. And
- *          A-8: the program deploy a build is for, baked into the bundle as NEXT_PUBLIC_PROGRAM_DEPLOY_SLOT.
- * Version: 0.4.0 (Sprint 11: A-8's deploy slot; the build refuses an RPC URL with a key, A-5)
+ *          A-8: the program deploy a build is for, baked into the bundle as NEXT_PUBLIC_PROGRAM_DEPLOY_SLOT. And the path
+ *          the site is served under (NEXT_PUBLIC_BASE_PATH, `/dev0x` on brot.markets; none locally), with the noindex
+ *          the unlisted preview at that path always had.
+ * Version: 0.5.0 (the /dev0x deploy: the base path; 0.4.0, Sprint 11: A-8's deploy slot; no RPC URL with a key, A-5)
  * Sprint:  09 (site shell, theme and wallet)
  */
 import type { NextConfig } from "next";
@@ -45,6 +47,16 @@ const apiOrigin = (() => {
   }
 })();
 
+// The path the site is served under: `/dev0x` on brot.markets, where the tunnel sends it (deploy/vps/README.md, "The
+// site under /dev0x"); none locally and in the web smoke. Inlined in the bundle at build time (lib/base-path.ts).
+const basePath = (() => {
+  const raw = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+  if (raw !== "" && !/^(\/[a-z0-9-]+)+$/.test(raw)) {
+    throw new Error("NEXT_PUBLIC_BASE_PATH must look like /dev0x: a leading slash and no trailing one");
+  }
+  return raw;
+})();
+
 const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
@@ -59,6 +71,7 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  ...(basePath ? { basePath } : {}),
   async headers() {
     return [
       {
@@ -69,6 +82,9 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          // Under a base path the site is the unlisted demo that took /dev0x's place: out of search engines, as the
+          // preview there always was, until the founder decides otherwise.
+          ...(basePath ? [{ key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" }] : []),
         ],
       },
     ];

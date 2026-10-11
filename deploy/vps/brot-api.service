@@ -1,0 +1,48 @@
+# Purpose: brot-api, the read API (services/api) on 127.0.0.1:4220, for the tunnel's /api/v1 route: the campaign
+#          list, health, the leaderboard, names and the display price the site at /dev0x reads. Read-only; the site
+#          refuses entries while its /api/v1/health is not "ok" (K-11), so this unit runs before the site's.
+# Installs: the shared VPS. NOT INSTALLED yet. The steps are in deploy/vps/README.md ("The site under /dev0x"): it runs
+#           from the site's release, as its own user, so the site's process cannot read this one's settings.
+# Secrets: none by default (the public devnet RPC). If API_RPC_URL ever carries a provider's key, the env file stays
+#          root-only (systemd reads it before dropping privileges), and the key never goes into the repository.
+
+[Unit]
+Description=Brot Markets read API (/api/v1)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=brot-api
+Group=brot-api
+SupplementaryGroups=brot-web
+WorkingDirectory=/srv/brot-markets/site/current/services/api
+EnvironmentFile=/etc/brot-markets/api.env
+StateDirectory=brot-api
+Environment=HOME=/var/lib/brot-api
+ExecStart=/usr/local/lib/brot-web/bun src/main.ts
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+# Limits: the API keeps its snapshot in memory and writes nothing.
+MemoryMax=256M
+CPUQuota=50%
+TasksMax=64
+
+# Sandboxing, as the keeper's unit.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target
