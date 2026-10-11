@@ -8,8 +8,8 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **907** |
-| Acima de 200 linhas | **40** ⚠️ |
+| Arquivos mapeados | **924** |
+| Acima de 200 linhas | **41** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -56,6 +56,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `tests/brot/slot-matrix.gen.ts` — 428 linhas
 - `tests/e2e/site-pages.e2e.ts` — 201 linhas
 - `tests/e2e/smoke.e2e.ts` — 202 linhas
+- `tests/indexer/cycles.test.ts` — 233 linhas
 
 ---
 
@@ -428,9 +429,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`events.ts`](packages/sdk/src/read/events.ts) | the program's events: each name with its discriminator and the Codama decoder of its payload, and the decoding of one event's inner-instruction data `[0xFF, dis | 99 |
 | [`feeds.ts`](packages/sdk/src/read/feeds.ts) | the compiled lists of Pyth feeds a price campaign may name, one per cluster, as programs/brot-markets/src/feeds.rs compiles them (founder answer 1, 2026-10-09;  | 113 |
 | [`format.ts`](packages/sdk/src/read/format.ts) | exact, deterministic display of the program's units: lamports as SOL with all nine decimals (no floating point), Unix seconds as a UTC date, basis points as a p | 54 |
-| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 37 |
+| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 38 |
 | [`knowable.ts`](packages/sdk/src/read/knowable.ts) | the join lock (BR-06) as the program applies it, for a client that wants to know whether a join can still go in: `outcomeKnowable` per kind (the price band reac | 66 |
 | [`pdas.ts`](packages/sdk/src/read/pdas.ts) | every program-derived address a client needs: the config, the fee vault, a campaign and its vault, an entry, a join, the event authority, the program's ProgramD | 68 |
+| [`points-now.ts`](packages/sdk/src/read/points-now.ts) | what a live campaign account says now for the points rule (`CampaignNow`, points.ts): its result is final once no key can change it and nothing is left to count | 47 |
 | [`points.ts`](packages/sdk/src/read/points.ts) | devnet points (BR-29; TP §3.5 "Points"; Q7 answered a, narrowed by the founder's answer 3a): 1 point per campaign a wallet entered on the side that won, once th | 166 |
 | [`program-data.ts`](packages/sdk/src/read/program-data.ts) | the program's last deploy (A-8), read from its ProgramData account under the upgradeable loader (loader v3), whose first 45 bytes are `[state u32 = 3 (ProgramDa | 86 |
 | [`quote.ts`](packages/sdk/src/read/quote.ts) | what an opening pays (row 7 of TP 3.4.10): US$ at the sponsored Pyth SOL/USD price charged at `price − conf`, the 90/10 split, the `max_lamports` the creator si | 146 |
@@ -1125,7 +1127,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`dto.ts`](services/api/src/dto.ts) | the JSON shape of a campaign for the site. Amounts are lamport strings, addresses base58, times Unix seconds (strings for the big integers). The state is the SD | 58 |
 | [`hidden.ts`](services/api/src/hidden.ts) | the wallets left out of the public leaderboard at their owner's request (Sprint 13, the privacy review, TP §8.2 question 8): a JSON array of base58 addresses in | 61 |
 | [`history.ts`](services/api/src/history.ts) | the program's own history, read for the leaderboard (Sprint 13) until Sprint 08's indexer exists: every signature of the program through `getSignaturesForAddres | 152 |
-| [`leaderboard.ts`](services/api/src/leaderboard.ts) | `GET /api/v1/leaderboard` (TP §6; Sprint 13, BR-29): devnet points from the program's events (history.ts) and the live campaign accounts (the snapshot), through | 118 |
+| [`leaderboard.ts`](services/api/src/leaderboard.ts) | `GET /api/v1/leaderboard` (TP §6; Sprint 13, BR-29): devnet points from the program's events (history.ts) and the live campaign accounts (the snapshot), through | 75 |
 | [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, reads the program's new history and the hide list | 105 |
 | [`names.ts`](services/api/src/names.ts) | what /api/v1/names serves (TP §6; A-11; Sprint 08): the reviewed account names of content/account-names.json, checked by the SDK's `parseAccountNames` (the rule | 55 |
 | [`price-source.ts`](services/api/src/price-source.ts) | the display price's source (D-f; Sprint 08): Pyth's SOL/USD sponsored account, read through the API's RPC and decoded by the SDK, the account the program prices | 33 |
@@ -1146,6 +1148,36 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`leaderboard-pot.test.ts`](services/api/tests/leaderboard-pot.test.ts) | what the leaderboard route reads from a live account for the founder's answer 3a (2026-10-10), with fake data and no cluster: whether a final pot splits (the mo | 49 |
 | [`leaderboard.test.ts`](services/api/tests/leaderboard.test.ts) | the leaderboard route's contract with fake data and no cluster (Sprint 13): 503 until the program's history has been read (or with no history at all), what heal | 91 |
 | [`names-price.test.ts`](services/api/tests/names-price.test.ts) | /api/v1/names and /api/v1/price with fake data and no cluster (Sprint 08): the names file read with the SDK's rules and the listed feeds with their sponsored ac | 132 |
+
+## `services/indexer/src/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`campaign-row.ts`](services/indexer/src/campaign-row.ts) | one opening of a campaign as a `campaigns` row (TP §4; Sprint 08), folded from its events in `seq` order the way the program moves its account (state/transition | 146 |
+| [`codec.ts`](services/indexer/src/codec.ts) | how the indexer keeps an event (Sprint 08): its payload as JSON for readers (amounts as decimal strings, bytes as hex, enums as their numbers) and its own bytes | 53 |
+| [`config.ts`](services/indexer/src/config.ts) | the indexer's settings, from its environment only (Sprint 08): the RPC URL of its own account (a secret, never logged), the SQLite file (no default, so a run ne | 37 |
+| [`ingest.ts`](services/indexer/src/ingest.ts) | the ingest (proposal §2.7; Sprint 08 DoD), the indexer's one writer. A refresh lists the program's new signatures at `finalized` back to the checkpoint (listing | 175 |
+| [`listing.ts`](services/indexer/src/listing.ts) | the ingest's listing (proposal §2.7; Sprint 08): an address's signatures at `finalized`, newest first, paged back to a known signature or to the first page that | 80 |
+| [`live.ts`](services/indexer/src/live.ts) | the campaign accounts that still exist, read for the points rule (Sprint 08): each address whose latest opening the events do not show closed, through `getMulti | 76 |
+| [`main.ts`](services/indexer/src/main.ts) | the indexer's entry point (Sprint 08, slice 1): opens its SQLite file and runs the ingest every INDEXER_POLL_MS, logging one JSON line per refresh with counts a | 32 |
+| [`points.ts`](services/indexer/src/points.ts) | the `points` table (Q7, the founder's answer 3a; Sprint 08): the SDK's own rule (`pointsTable`) over every stored event in chain order and what the live account | 35 |
+| [`project.ts`](services/indexer/src/project.ts) | the projections of one campaign address (TP §4; Sprint 08), rebuilt whole from its stored events each time one of them lands, so a transaction read late or agai | 127 |
+| [`rebuild.ts`](services/indexer/src/rebuild.ts) | the rebuild (proposal §2.7; Sprint 08 DoD, X1.3): the program's whole history replayed into a new file, from its first signature, through the same ingest; the r | 48 |
+
+## `services/indexer/src/db/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`schema.ts`](services/indexer/src/db/schema.ts) | the indexer's SQLite schema (TP §4, Appendix B, D6 names; Sprint 08) and the version a file must carry (`PRAGMA user_version`). The projections of the program's | 82 |
+| [`store.ts`](services/indexer/src/db/store.ts) | the indexer's SQLite file behind a small adapter (TP §3.5, §4; Sprint 08): bun:sqlite in WAL mode with `synchronous = NORMAL` and a busy timeout; the schema cre | 65 |
+
+## `services/indexer/tests/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`fake-chain.ts`](services/indexer/tests/fake-chain.ts) | the indexer's no-cluster tests' chain (Sprint 08): the program's own events, encoded by the generated client and wrapped as a node writes a landed transaction ( | 138 |
+| [`ingest.test.ts`](services/indexer/tests/ingest.test.ts) | the ingest against a scripted RPC (Sprint 08), no cluster: pages shorter than asked, chain order and the checkpoint, a node that ignores `until`, each transacti | 130 |
+| [`store.test.ts`](services/indexer/tests/store.test.ts) | the indexer's SQLite adapter (Sprint 08) with no cluster: a new file gets the schema, WAL mode and its version; it opens again as it is; a file of another versi | 90 |
 
 ## `services/keeper/src/`
 
@@ -1420,6 +1452,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`states.e2e.ts`](tests/e2e/states.e2e.ts) | "campaign states" in the web smoke (Sprint 12 DoD; `bun run e2e -- --grep "campaign states"`): the built site in Chromium against the program in LiteSVM. Every  | 83 |
 | [`upgrade.e2e.ts`](tests/e2e/upgrade.e2e.ts) | A-8 in the web smoke (the founder's answer of 2026-10-10): the program is upgraded while a page built for its previous deploy is open (the site was built agains | 92 |
 | [`wallet.ts`](tests/e2e/wallet.ts) | the web smoke's injected wallet: a Wallet Standard wallet ("E2E Test Wallet") registered in the page before its own scripts run, the way a browser extension reg | 66 |
+
+## `tests/indexer/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`cycles.test.ts`](tests/indexer/cycles.test.ts) | the indexer against the program in LiteSVM behind the recording RPC (Sprint 08 DoD, X1.3): whole cycles run through the SDK's builders (a paid two-sided campaig | 233 |
 
 ## `tests/ops/`
 
