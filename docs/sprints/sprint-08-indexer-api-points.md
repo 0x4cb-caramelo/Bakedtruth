@@ -219,6 +219,11 @@ and the JSON Schemas, the `.env.example` files, `CODEMAP.md`.
 - **The relay's health check** answered 403 once the tunnel's secret was set, so step 6 of the server procedure could
   not pass without typing the secret. `GET /healthz` now answers on the server without it, and never a request that
   came through Cloudflare (`cf-connecting-ip` set).
+- **The relay's Bun binary.** The security review's fix (M5) gave the relay the keeper's binary through a shared
+  group, but that binary sits in `brot`'s home, `/var/lib/brot-markets` (`0750`, with the waitlist), which the
+  relay's user cannot enter: the unit would not have started. The relay now runs its own root-owned copy of the pinned
+  binary (`/usr/local/lib/brot-rpc/bun`, compared byte for byte with `cmp`), and nothing of the running keeper
+  changes.
 
 **Reviews:** the legal and privacy review (`docs/legal/2026-10-11-sprint-08-legal-review.md`) turned CoinGecko off by
 default and asked for the relay's timed sweep (R1), both applied; its policy text waits for the day the site moves to
@@ -227,6 +232,7 @@ applied: a hostile option value (or, in the read API, `?state=constructor`) coul
 stack trace (now typed options, a catch-all and `development: false`, the keeper's health server too); a local process
 could forge Cloudflare's headers (now a secret header the tunnel adds); one source could spend the shared daily budget
 (now a /48 bucket and a reserve for the signing path, with Cloudflare's rate rule a precondition of the route); the
-unit could not run the Bun binary as its own user, and its key sat in the environment (now a shared `brot-bun` group
-and `LoadCredential=`). Its four low items too: typed options, the 8 KB socket limit, no `*` CORS origin, a cap on
+unit could not run the Bun binary as its own user, and its key sat in the environment (now `LoadCredential=`, and the
+relay's own root-owned copy of the pinned binary; the shared group first written could not reach the keeper's, as
+above). Its four low items too: typed options, the 8 KB socket limit, no `*` CORS origin, a cap on
 CoinGecko's answer.

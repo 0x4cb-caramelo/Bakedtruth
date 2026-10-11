@@ -53,11 +53,6 @@ o teste olhar. É uma corrida que o teste quase sempre ganha: a cena tinha passa
 delas sem o relay. A cena agora confere o que fica: a parte paga e nenhum botão. O código do site não mudou, e o CI
 não roda o teste na web.
 
-Relendo os passos do servidor, vi que o `/healthz` do relay respondia 403 assim que o segredo do túnel entrava: o
-passo 6 do `deploy/vps/README.md` não passaria sem digitar o segredo no terminal, onde ele ficaria no histórico. Agora
-o `/healthz` responde no servidor sem o segredo, só com contagens, e nunca a um pedido que veio pelo Cloudflare (que
-sempre traz o `cf-connecting-ip`).
-
 ## As revisões
 
 - **A jurídica e de privacidade** (`docs/legal/2026-10-11-sprint-08-legal-review.md`) leu os termos do CoinGecko de
@@ -76,11 +71,24 @@ sempre traz o `cf-connecting-ip`).
   balde por /48, uma reserva do orçamento para assinar, o grupo `brot-bun` e as credenciais pelo `LoadCredential=`. A
   regra de limite do Cloudflare em `/rpc` virou pré-condição da rota.
 
+## Relendo os passos do servidor
+
+- **O `/healthz` do relay** respondia 403 assim que o segredo do túnel entrava: o passo 6 do `deploy/vps/README.md`
+  não passaria sem digitar o segredo no terminal, onde ele ficaria no histórico. Agora o `/healthz` responde no
+  servidor sem o segredo, só com contagens, e nunca a um pedido que veio pelo Cloudflare (que sempre traz o
+  `cf-connecting-ip`).
+- **O Bun do relay.** A correção da revisão de segurança (M5) dava ao relay o Bun do keeper por um grupo
+  compartilhado, o `brot-bun`. Mas esse binário fica na pasta pessoal do `brot`, `/var/lib/brot-markets` (0750, com a
+  lista de espera dentro), onde o usuário do relay não entra: a unidade não teria subido. Agora o relay roda uma cópia
+  própria do mesmo Bun, de root, em `/usr/local/lib/brot-rpc/bun`, conferida byte a byte com `cmp`, e nada do keeper
+  que está no ar muda.
+
 ## O que fica com o fundador
 
 - Seguir os passos de `deploy/vps/README.md` ("The relay"): a conta de RPC do relay com limite de gasto (D4), o usuário
-  e o grupo `brot-bun`, os dois arquivos de credencial, as duas regras do Cloudflare (o limite por IP em `/rpc` e o
-  cabeçalho `x-brot-tunnel`), a unidade, a rota `/rpc` do túnel por último, e o texto da privacidade no mesmo dia.
+  `brot-rpc` e a cópia própria do Bun, os dois arquivos de credencial, as duas regras do Cloudflare (o limite por IP em
+  `/rpc` e o cabeçalho `x-brot-tunnel`), a unidade, a rota `/rpc` do túnel por último, e o texto da privacidade no
+  mesmo dia.
 - O CoinGecko (D4): escrever ao suporte deles sobre a cláusula de "gambling" e sobre mostrar o preço por uma API
   própria, ou tirar o CoinGecko do plano e ficar com a Pyth.
 - Conferir no servidor se o `CF-IPCountry` chega pelo túnel (C9), antes de qualquer país entrar na lista.

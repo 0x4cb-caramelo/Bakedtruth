@@ -84,10 +84,18 @@ none is done. In this order:
 
 1. **The account.** A provider account for the relay alone (T14), with a hard spending limit at the provider (D4).
    Read its privacy policy and data terms first (the legal review, R3): the site's privacy page names it.
-2. **The user and the binary.** A system user `brot-rpc`, and a group `brot-bun` holding both it and `brot`. The pinned
-   Bun binary becomes `root:brot-bun`, mode `0750`, so both can run it without sharing an identity; its SHA-256 stays
-   the one in `bun-1.4.2.sha256`. (Or a copy of the same binary owned by `brot-rpc`.) Keep `User=brot-rpc`: running
-   it as `brot` would undo the separate identity the unit's sandbox relies on (the security review, M5).
+2. **The user and its Bun.** A system user `brot-rpc`, with no login, and its own root-owned copy of the pinned Bun
+   binary, which the unit runs. The keeper's binary and folders stay as they are: `/var/lib/brot-markets` is `brot`'s
+   home (`0750`) and holds the waitlist, so the relay's user cannot enter it, and should not.
+
+   ```bash
+   sudo install -d -o root -g brot-rpc -m 0750 /usr/local/lib/brot-rpc
+   sudo install -o root -g brot-rpc -m 0750 /var/lib/brot-markets/bun/bun /usr/local/lib/brot-rpc/bun
+   sudo cmp /var/lib/brot-markets/bun/bun /usr/local/lib/brot-rpc/bun && echo same
+   ```
+
+   Keep `User=brot-rpc`: running it as `brot` would undo the separate identity the unit's sandbox relies on (the
+   security review, M5).
 3. **The release.** `/srv/brot-markets/rpc/releases/<commit>`, `current` linking to it, `root:brot-rpc`, `0750`,
    installed with `bun install --frozen-lockfile --ignore-scripts --filter @brot/rpc`.
 4. **The settings and the credentials.** `/etc/brot-markets/rpc.env` (`root:brot-rpc`, `0640`) from
@@ -101,10 +109,13 @@ none is done. In this order:
    secret of step 4 on every `/rpc` request (set, not add, so a visitor's own header is overwritten): with it the
    relay refuses any local caller posing as a visitor (M4).
 6. **The unit.** Copy `brot-rpc.service` to `/etc/systemd/system/`, `systemd-analyze security brot-rpc.service`, start
-   it once and check `curl -s http://127.0.0.1:4202/healthz` and the start line's `"tunnelSecret": true`; then enable it.
+   it once and check `curl -s http://127.0.0.1:4202/healthz` (on the server it needs no tunnel header) and the start
+   line's `"tunnelSecret": true`; then enable it.
 7. **The route.** The tunnel's main host routes `/rpc` to `127.0.0.1:4202` (TP §12). Then the site's
    `NEXT_PUBLIC_RPC_URL` points at it, and the privacy page's relay text goes live the same day, before the switch
    (`docs/legal/2026-10-11-sprint-08-legal-review.md`, section (c)).
 
 **Rotating** the provider's key or the tunnel's secret: write the new value to its credential file as root (for the
-secret, change the Cloudflare rule at the same moment), then `sudo systemctl restart brot-rpc`.
+secret, change the Cloudflare rule at the same moment), then `sudo systemctl restart brot-rpc`. **Upgrading Bun:** the
+relay's copy does not follow the keeper's; install the new pinned binary at both paths, compare them with `cmp`, and
+restart both units.

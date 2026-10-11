@@ -47,9 +47,9 @@ recomendado (1a a 12a).
     (`docs/legal/2026-10-11-sprint-08-legal-review.md`), com o texto da privacidade para o dia em que o site passar a
     usar o relay. A de segurança achou um caminho para a API de leitura responder com a pilha do erro
     (`?state=constructor`), corrigido junto.
-  - **Esperando o fundador:** a conta de RPC do relay com limite de gasto, o grupo e as credenciais no servidor, as
-    duas regras do Cloudflare, a unidade, a rota `/rpc` e o texto da privacidade (`deploy/vps/README.md`); a decisão
-    sobre o CoinGecko.
+  - **Esperando o fundador:** a conta de RPC do relay com limite de gasto, o usuário, o Bun e as credenciais no
+    servidor, as duas regras do Cloudflare, a unidade, a rota `/rpc` e o texto da privacidade (`deploy/vps/README.md`);
+    a decisão sobre o CoinGecko.
 
 - **Sprint 19: a caixa de abertura em `/abrir`; qualquer carteira abre uma campanha pelo site** (branch
   `sprint-19-site-open-campaign`, 10/10/2026; `docs/sprints/sprint-19-site-open-campaign.md`; mesclada na `main` pelo
