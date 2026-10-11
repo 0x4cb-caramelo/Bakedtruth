@@ -256,6 +256,10 @@ html .wallet-adapter-modal-wrapper {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  /* BRAND.md §10: whoever asks for less motion sees neither the button's edge turn nor the mascot breathe. */
+  .animate-brot-spin {
+    animation: none;
+  }
   .bk-pet-body {
     animation: none;
   }

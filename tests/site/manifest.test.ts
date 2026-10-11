@@ -2,7 +2,7 @@
  * Purpose: the PWA is the manifest and its icons only (Sprint 13 DoD, S2): the manifest names the site, opens at "/"
  *          standalone in the dark theme's colour, and lists icons that exist at the sizes it says; no service worker is
  *          registered anywhere in the site. Filter: `bun test tests/ -t "pwa manifest only"`.
- * Version: 0.1.0
+ * Version: 0.1.1 (the brand's dark page colour, 2026-10-10)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { describe, expect, test } from "bun:test";
@@ -20,7 +20,7 @@ describe("pwa manifest only", () => {
   test("the manifest opens the site standalone, dark, with icons that exist at their stated sizes", async () => {
     const manifest = (await import(site("app/manifest.ts"))).default();
     expect(manifest).toMatchObject({ name: "Brot Markets", start_url: "/", display: "standalone" });
-    expect(manifest.theme_color).toBe("#10141b");
+    expect(manifest.theme_color).toBe("#10151c");
     expect(readFileSync(site("styles/tokens.css"), "utf8")).toContain(`--bg: ${manifest.theme_color};`);
     for (const icon of manifest.icons) {
       const file = site(`public${icon.src}`);

@@ -157,7 +157,7 @@ IDL copy (`app/lib/idl`), used by the current app until Sprint 09; no script or 
 
 **Frontend** (`app/`): Next.js App Router, Tailwind v4, wallet-adapter. The UI follows the approved design direction in
 `docs/product/DESIGN-DIRECTION.md` (Ledger²: lab direction D in dark and N in light, consolidated in `prototype-lab/prototype-n/`,
-with the Baked mascot). The app still renders the earlier direction C ("Tape") until the design-system sprint (-1)
+with the Baked mascot), in the brand's colours of `docs/product/BRAND.md` §5 since 2026-10-10 (`app/styles/tokens.css`). The app still renders the earlier direction C ("Tape") until the design-system sprint (-1)
 and the site sprints (09 to 13) replace it. A generic dashboard look was rejected. `app/AGENTS.md`
 (loaded via `app/CLAUDE.md`) says this Next.js version has breaking changes: read `app/node_modules/next/dist/docs/`
 before writing app code.

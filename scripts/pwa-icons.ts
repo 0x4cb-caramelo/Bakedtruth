@@ -3,7 +3,7 @@
  *          deadpan pose on the dark theme's page colour: 192 and 512 px for the manifest, a 512 px maskable one with the
  *          mascot inside the safe zone, and the 180 px apple-icon for an iPhone's home screen. Drawn by the web smoke's
  *          pinned Chromium (@playwright/test 1.63.0), so it runs again the same way; the PNGs are committed.
- * Version: 0.1.0
+ * Version: 0.1.1 (the brand's dark page colour, 2026-10-10)
  * Sprint:  13 (site: ranking, notices and copy)
  *
  * Run: bun run scripts/pwa-icons.ts
@@ -12,7 +12,7 @@ import { readFileSync } from "node:fs";
 import { chromium } from "@playwright/test";
 
 /** The dark theme's page colour (app/styles/tokens.css, `--bg`). */
-export const ICON_BACKGROUND = "#10141b";
+export const ICON_BACKGROUND = "#10151c";
 const POSE = `data:image/png;base64,${readFileSync("app/public/mascot/deadpan.png").toString("base64")}`;
 
 /** `inset` is the share of the side the mascot may fill: a maskable icon keeps it inside the central 80% safe zone. */
