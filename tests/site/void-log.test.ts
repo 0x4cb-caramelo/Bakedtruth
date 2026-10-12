@@ -17,7 +17,7 @@ import { join } from "node:path";
 import { generateKeyPairSigner } from "@solana/kit";
 
 import { hexToBytes } from "@brot/sdk/read";
-import { parseVoidLog, VoidLogRecord } from "@brot/sdk/schemas";
+import { parseVoidLog, personalDataIn, VoidLogRecord } from "@brot/sdk/schemas";
 
 import { noteFor } from "../../app/features/campaign-page/void-note";
 import { loadVoidLog } from "../../app/features/record/load-void-log";
@@ -82,6 +82,16 @@ describe("void log", () => {
   });
 
   test("personal data, a reason no team key sends, and a file named for another campaign are refused", async () => {
+    const bad = ["Ask ana@example.com", "Thanks @someone", "See https://example.com"];
+    // Sprint 13 (TP §7.3): a one-letter handle, a handle after punctuation, and a bare domain.
+    bad.push("Thanks @x", "Reported by [@x]", "Asked on (@someone)", "See brot.markets for more", "From x.com/abc");
+    for (const text of bad) expect(personalDataIn(text)).not.toBeNull();
+    for (const fine of [
+      "The feed stopped at 12:00 UTC.",
+      "BTC/USD fell 1.5% (e.g. a pause).",
+      "Version v1.2 of the keeper.",
+    ])
+      expect(personalDataIn(fine)).toBeNull();
     for (const bad of ["Ask ana@example.com", "Thanks @someone", "See https://example.com"]) {
       const r = await written("TeamOutsideCause", bad);
       expect(parseVoidLog(r.file, new TextDecoder().decode(r.bytes), sha(r.bytes)).ok).toBe(false);

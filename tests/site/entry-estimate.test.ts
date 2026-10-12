@@ -1,16 +1,18 @@
 /**
  * Purpose: the entry panel's estimate is the SDK's (BR-09; P1 §3.2): the number `checkJoin` gives for the pot with the
- *          baker's own amount added, which is the number `prepareJoin` signs `min_return_bps` against. P1 §3.2's table
+ *          baker's own amount added, which is the number `prepareJoin` signs `min_return_bps` against; since Sprint 13
+ *          the panel shows what finalize would pay (`shownReturnBps`), the refund when the other side is too small to
+ *          pay the fees, and keeps the program's number for the floor (`checkedBps`). P1 §3.2's table
  *          is reproduced on a real campaign read from the program: 300 on YES and 700 on NO with no prize pay YES
  *          3.10 per 1, and 3.067 with the creator's 1% (the panel writes the SDK's 3.0666 exactly, never rounded up).
  *          Filter: `bun test tests/ -t "entry panel estimate matches sdk"`.
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ * Version: 0.2.0 (Sprint 13: the shown return, refund-aware; the program's estimate kept for the floor)
+ * Sprint:  11 (site: campaign page and entry); 13
  */
 import { afterEach, describe, expect, test } from "bun:test";
 import { createSolanaRpc } from "@solana/kit";
 
-import { estimateReturnBps, OperatingLevel } from "@brot/sdk/read";
+import { estimateReturnBps, OperatingLevel, shownReturnBps, splitsIfWins } from "@brot/sdk/read";
 
 import { chance, estimateEntry, lowersItsSide, perOne, type JoinInputs } from "../../app/features/entry/estimate";
 import { prepareEntry } from "../../app/features/entry/submit";
@@ -52,7 +54,7 @@ describe("entry panel estimate matches sdk", () => {
     expect(bps(estimateEntry(withPot(inputs, 300n * SOL, 600n * SOL, 100), "no", 100n * SOL))).toBe(13_714n);
   });
 
-  test("the panel's number equals the SDK's estimate for any pot, the baker's amount added on its side", async () => {
+  test("the panel shows what finalize would pay for any pot; the program's estimate stays the floor's", async () => {
     const w = await openingWorld();
     const inputs = await inputsOf(w, (await openedCampaign(w, w.creator)).campaign);
     const c = inputs.campaign;
@@ -67,7 +69,7 @@ describe("entry panel estimate matches sdk", () => {
         for (const side of ["yes", "no"] as const) {
           const pot = { ...inputs, campaign: { ...c, poolYes: yes, poolNo: no } };
           const [mine, other] = side === "yes" ? [yes, no] : [no, yes];
-          const sdk = estimateReturnBps({
+          const joined = {
             amount,
             sideAfter: mine + amount,
             other,
@@ -76,8 +78,14 @@ describe("entry panel estimate matches sdk", () => {
             oneSidedFeeBps: c.oneSidedFeeBps,
             creatorShareBps: c.creatorShareBps,
             isFirst: yes + no === 0n,
-          });
-          expect(bps(estimateEntry(pot, side, amount))).toBe(sdk);
+          };
+          const e = estimateEntry(pot, side, amount);
+          if (!e.ok) throw new Error(e.refusal);
+          // The program's own estimate is kept for the floor; the screen shows the shown return, which differs only
+          // when the other side is too small to pay the fees (the Economic Viability Rule: the pot would not split).
+          expect(e.checkedBps).toBe(estimateReturnBps(joined));
+          expect(e.bps).toBe(shownReturnBps(joined));
+          expect(e.mode).toBe(other === 0n ? "onesided" : splitsIfWins(joined) ? "split" : "toosmall");
         }
       }
     }
@@ -98,7 +106,8 @@ describe("entry panel estimate matches sdk", () => {
         amount: 2n * SOL,
       }),
     );
-    expect(shown.ok && shown.bps).toBe(prepared.check.estimateBps);
+    expect(shown.ok && shown.checkedBps).toBe(prepared.check.estimateBps);
+    expect(shown.ok && shown.bps).toBe(prepared.check.estimateBps); // this pot splits: the two agree
     expect(BigInt(prepared.minReturnBps)).toBe((prepared.check.estimateBps * 9_900n) / 10_000n);
   });
 

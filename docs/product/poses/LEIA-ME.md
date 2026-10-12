@@ -48,9 +48,10 @@ As oito poses anteriores e as duas peças prontas foram trazidas para as mesmas 
 
 **As nove do modo foguete (10/10/2026).** Os desenhos da lambo, do capacete, do foguete e da lua não seguem o padrão
 desta pasta: são quadros quadrados de 1254 px, guardados como vieram em `docs/product/tothemoon/` (fora do Git).
-No deck estão em `services/landing/public/pitch/img/`, de `20-lambo-ao-lado` a `28-batendo-na-lua`, em WebP de
+No deck estão em `services/landing/public/pitch/img/`, de `20-lambo-ao-lado` a `28-batendo-na-lua-feliz`, em WebP de
 836 px com o fundo transparente; o nome de cada um no código, o tamanho no slide e o ponto de apoio estão em
-`public/pitch/moon.js`.
+`public/pitch/moon.js`. Em 11/10/2026 o último foi redesenhado pelo fundador (`Mascote Laranja Colide com a Lua.png`,
+na mesma pasta): o mascote bate na lua rindo, no mesmo enquadramento do desenho anterior.
 
 **O que não está aqui.** O `manifest.json`, o `prompts.json` e a prévia em GIF citados acima não vieram com as
 imagens. Os pontos de encaixe usados pelas cenas (o punho na pose pendurada, o punho na corda da cortina) foram

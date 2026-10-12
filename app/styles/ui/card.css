@@ -1,0 +1,59 @@
+/* Purpose: the campaign card and the one-line campaign row: kind, state, sentence, live value against the target, each side's share, the pot bar, the per-side return of 1 SOL, the status line past entries, and the footer. The spotlight follows the pointer (js/effects.js). From prototype-lab/campaigns/css/card.css (Sprint -1, approved 2026-10-10), as is, in the `components` layer;
+   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.0 · Sprint 09 (the UI overhaul) */
+@layer components {
+.card { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 15px; border: var(--bw) solid var(--line);
+  border-radius: var(--r); background: var(--panel); box-shadow: var(--shadow); isolation: isolate; }
+.card::before, .card::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 0.25s; }
+.card::before { z-index: -1; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), var(--spot), transparent 70%); }
+.card::after { padding: 1px; background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), var(--spot-edge), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+.grid-cards:hover .card::before, .grid-cards:hover .card::after { opacity: 1; }
+.card-top { display: flex; align-items: center; gap: 10px; }
+.card-kind { display: flex; flex-direction: column; min-width: 0; font-size: 11.5px; color: var(--muted); }
+.card-kind b { color: var(--text); font-weight: 600; font-size: 12px; } .card-kind span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.card-chips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; margin-left: auto; }
+.card-title { min-height: 57px; color: var(--text); font-size: 14px; font-weight: 600; line-height: 1.38; }
+.card-title:hover { color: var(--accent-hover); text-decoration: none; }
+.card-read { display: flex; justify-content: space-between; gap: 8px; margin: 0; padding: 8px 10px; border-radius: var(--r-sm); background: var(--raised);
+  color: var(--muted); font-size: 12px; }
+.card-read b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.card-read > span { display: inline-flex; align-items: center; gap: 5px; } .card-read .gap { color: var(--muted); font-weight: 500; }
+.card-creator { align-self: flex-start; background: var(--note-bg); color: var(--note-fg); cursor: help; }
+.side-btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; filter: none; }
+.card-chance { display: flex; justify-content: space-between; align-items: end; }
+.card-chance small { display: block; color: var(--muted); font-size: 11px; font-weight: 600; }
+.card-chance strong { font-size: 30px; line-height: 0.95; } .card-chance .y strong { color: var(--yes-fg); }
+.card-chance .n { text-align: right; } .card-chance .n strong { color: var(--no-fg); }
+.card-sides { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.card-sides .side-btn { text-decoration: none; } .card-sides .per { font-weight: 500; font-size: 11.5px; opacity: 0.92; font-variant-numeric: tabular-nums; }
+.card-note { margin: -4px 0 0; color: var(--muted); font-size: 11.5px; }
+.card-status { display: flex; align-items: center; gap: 7px; margin: 0; min-height: 40px; padding: 9px 11px; border-radius: var(--r-sm);
+  background: var(--raised); color: var(--text); font-size: 12px; font-weight: 600; }
+.card-status.paid { background: var(--st-paid-bg); color: var(--st-paid-fg); } .card-status.void { background: var(--st-void-bg); color: var(--st-void-fg); }
+.card-status.paid.yes { background: var(--yes-bg); color: var(--yes-fg); } .card-status.paid.no { background: var(--no-bg); color: var(--no-fg); }
+.card-status.review { background: var(--st-review-bg); color: var(--st-review-fg); } .card-status.contested { background: var(--st-contest-bg); color: var(--st-contest-fg); }
+.card-foot { display: flex; align-items: center; gap: 6px; margin-top: auto; color: var(--muted); font-size: 11.5px; }
+.card-foot b { color: var(--text); font-weight: 600; } .card-foot .soon, .card-row-right em.soon { color: var(--warn); }
+.save { display: grid; place-items: center; width: 32px; height: 32px; margin-left: auto; border-radius: var(--r-sm); color: var(--muted); }
+.save:hover { color: var(--text); background: var(--row-hover); }
+.save[aria-pressed="true"] { color: var(--crust); } .save[aria-pressed="true"] path { fill: currentColor; }
+
+/* The one-line row of side lists ("Closing soon", "Just resolved") and of my entries. */
+.card-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 0; border-top: var(--bw) solid var(--line); color: var(--text); }
+.card-row:first-child { border-top: 0; } .card-row:hover { text-decoration: none; } .card-row:hover b { color: var(--accent-hover); }
+.card-row-text { flex: 1; min-width: 0; } .card-row-text b { display: block; overflow: hidden; font-size: 12.5px; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+.card-row-text span { color: var(--muted); font-size: 11px; }
+.card-row-right { text-align: right; } .card-row-right strong { display: block; font-size: 20px; line-height: 1; color: var(--yes-fg); }
+.card-row-right em { color: var(--muted); font-size: 11px; font-style: normal; white-space: nowrap; }
+
+/* Partner seal, placement B: a band on top of the card (placement A is the chip next to the state). */
+.card-band { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin: -15px -15px 0; padding: 7px 15px;
+  border-radius: var(--r) var(--r) 0 0; background: color-mix(in srgb, var(--crust) 16%, var(--panel)); color: var(--crust-ink); font-size: 11.5px; }
+.card-band b { font-weight: 700; } .card-band span:last-child { margin-left: auto; color: var(--muted); }
+
+@media (max-width: 700px) {
+  .card { padding: 14px; } .card-band { margin: -14px -14px 0; padding: 7px 14px; } .card-title { min-height: 0; font-size: 15px; }
+  .save { width: var(--tap); height: var(--tap); margin-right: -8px; }
+  .card-sides .side-btn { min-height: var(--tap); }
+}
+}

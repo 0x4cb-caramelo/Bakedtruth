@@ -9,6 +9,68 @@ Quando uma resposta posterior muda uma anterior, vale a posterior. A seção 1 t
 
 ## 1. Estado consolidado (vale este)
 
+### Decisões de 11 de outubro de 2026, sobre a revisão visual do site — prevalecem sobre tudo abaixo
+
+Dadas pelo Ronaldo, com as próprias palavras, depois de ver o site novo (o PR #70). O porquê está em
+`session-log/2026-10-11-revisao-visual-do-site.md`.
+
+- **O título e o subtítulo da página inicial** são os da capa do pitch, no vocabulário do site: "Campaigns the chain
+  resolves." e "Permissionless campaigns that turn on-chain milestones into growth, settled by the chain itself.".
+  Nas palavras dele: "Strategically and legally, framing our product as 'campaigns' rather than 'prediction markets'
+  protects us from gambling associations and perfectly fits our hackathon positioning as a growth primitive for
+  creators and protocols." A regra do vocabulário do Lucas segue "strictly intact across the entire site and tests,
+  with absolutely no exceptions".
+- **O botão da carteira diz "Connect"** ("i want only to change the 'use installed wallet' for 'connect'").
+- **"question" vira "campaign" no texto do site** ("lets change the 'questions' word for 'campaign' and
+  'campaigns'").
+### Decisões de 11 de outubro de 2026, sobre as perguntas da Sprint 08 — prevalecem sobre tudo abaixo
+
+Dadas pelo Ronaldo, num texto que ele colou e depois confirmou na sessão. As perguntas, com as opções, estão em
+`docs/legal/2026-10-11-sprint-08-legal-review.md` (seção (d)); o porquê, em
+`session-log/2026-10-11-sprint-08-nomes-preco-e-relay.md`.
+
+- **Sem CoinGecko (2b).** "Let's drop CoinGecko and just keep Pyth. It is native to Solana, avoids ToS headaches, and
+  is much better for our hackathon timeline." O preço mostrado no site e nos relatórios passa a ser o da Pyth, o mesmo
+  que o programa cobra. Substitui a decisão de 8/10 de usar a CoinGecko para mostrar preço (D-e); o preço de referência
+  das contas do BP (US$ 109,27, lido na CoinGecko em 8/10) continua como registro daquele dia.
+- **O site passa para o relay no dia em que o relay for instalado (3a):** "Switch the day the relay is installed." O
+  texto de privacidade novo entra no ar no mesmo dia.
+- **US$ só onde define um custo (4a):** "Show US$ only where it sets a cost to avoid confusion with the devnet
+  banner." No devnet, o valor em dólar aparece só na abertura, nunca como valor de um pote.
+- **Mais cedo no mesmo dia:** o bloqueio por país fica construído e vazio ("for now we dont need the country block you
+  can do this but dont block nothing yet").
+
+### Decisões de 10 de outubro de 2026, sobre as perguntas da Sprint 13 — prevalecem sobre tudo abaixo
+
+Dadas pelo Ronaldo, depois da mescla do PR #63: "Yes, 1a to 12a all as recommended". A lista, com as opções, está em
+`docs/sprints/sprint-13-site-notices-copy.md` ("Founder decisions"); o porquê, em
+`session-log/2026-10-10-respostas-do-fundador-e-mescla-da-sprint-13.md`.
+
+- **Pontos do devnet:** vêm da rota `/api/v1/leaderboard`, a partir dos eventos do programa; não são dinheiro, e nada
+  é prometido por eles depois da fase de testes (L-09). Não pontuam a carteira com entradas nos dois lados de uma
+  campanha, o pote devolvido (um lado vazio, ou um lado perdedor pequeno demais para pagar as taxas) e a carteira de
+  quem abriu uma campanha de queima, trava ou stake.
+- **O relatório do parceiro (L-24):** um arquivo de texto por campanha de parceiro, sem endereço nenhum; o parceiro que
+  não posta mantém a campanha, mas perde o destaque de 72 horas e o próximo convite.
+- **"Report this campaign"** leva à conta do X (https://x.com/brotmarkets).
+- **BP-5 e BP-11:** "No human picks the winner."; o mascote é Baked por escrito, e Cacetinho só falado.
+- **Testes de demanda:** os limites da v0.0.2 para os testes 1 e 2; o teste 3 é medido no devnet e ganha a marca antes
+  da mainnet.
+- **O login da conta do X:** "I (the CTO) hold the X account login, secured with an Authenticator app for 2FA". Um
+  pedido para sair do ranking é respondido em até 15 dias, prazo que o advogado confirma antes da mainnet.
+- **As páginas `/terms` e `/privacy` no ar:** a `/terms` sai do ar até a Sprint 17; a `/privacy` é corrigida e linkada
+  no rodapé do site antes de ele ser público.
+- **A taxa de acerto por carteira** continua fora do ranking.
+- **"Your entry back plus your share of the rest", com "when the losing side can pay the fees"**: aprovada de novo.
+- **A colheita de prêmio** (uma carteira nos dois lados de uma campanha paga em que ninguém mais entra leva o prêmio):
+  a regra se decide antes da mainnet; nada muda no devnet.
+- **Depois da mescla do PR #65 (as páginas legais), na mesma noite,** o Ronaldo respondeu as perguntas que a revisão
+  jurídica deixou: os backups da Hostinger estão ligados e guardam 30 dias ("backups are enabled and kept for 30
+  days"); o email de contato é gm@brot.markets ("Use gm@brot.markets for now"), que ele vai rotear; o prazo de 15 dias
+  vale para todo pedido; a conversa no X é apagada depois de atendido o pedido de saída do ranking; o site novo ganha
+  uma linha "18 and over" no rodapé; a Cloudflare guarda os registros básicos de acesso por até 7 dias; e o
+  docs.brot.markets sai do ar até ser reescrito ("Please take it down for now until it's rewritten").
+
 ### Decisões de 9 de outubro de 2026, sobre as perguntas das Sprints 02 a 04 — prevalecem sobre tudo abaixo
 
 Dadas pelo Ronaldo em sessão de trabalho com o assistente, em resposta às perguntas que a Sprint 03 deixou ao fundador

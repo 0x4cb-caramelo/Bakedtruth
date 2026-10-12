@@ -25,6 +25,7 @@ const card = (over: Partial<Card> & { address: string }): Card => ({
   entries: 0,
   group: 2,
   listed: true,
+  opensAt: null,
   entriesCloseAt: null,
   deadlineAt: null,
   reviewEndsAt: null,
@@ -32,6 +33,13 @@ const card = (over: Partial<Card> & { address: string }): Card => ({
   stateLine: null,
   estYesBps: null,
   estNoBps: null,
+  metricAccount: "metric",
+  feedId: "",
+  target: null,
+  direction: "Above",
+  priceExponent: -8,
+  outcome: "None",
+  resolvedAt: null,
   ...over,
 });
 

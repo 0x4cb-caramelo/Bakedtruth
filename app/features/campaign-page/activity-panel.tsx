@@ -37,11 +37,11 @@ export function ActivityPanel({ campaign, round }: { campaign: string; round: nu
   const current = loaded && loaded.campaign === campaign ? loaded : null;
   const items = current?.items;
   return (
-    <section aria-labelledby="activity-title" className="space-y-3 rounded-md border border-line bg-panel p-4">
-      <h2 id="activity-title" className="m-0 flex flex-wrap items-center gap-2 font-display text-2xl font-bold">
-        <Clock className="size-5" aria-hidden="true" />
-        <span className="flex-1">{ACTIVITY.title}</span>
-        <span className="font-sans text-xs font-normal text-muted">{ACTIVITY.hint(ACTIVITY_LIMIT)}</span>
+    <section aria-labelledby="activity-title" className="panel space-y-3">
+      <h2 id="activity-title" className="panel-head">
+        <Clock className="size-[15px]" aria-hidden="true" />
+        {ACTIVITY.title}
+        <span className="hint">{ACTIVITY.hint(ACTIVITY_LIMIT)}</span>
       </h2>
       {!current ? (
         <Skeleton className="h-40" />

@@ -1,9 +1,9 @@
 # The `/rpc` relay's allowlist, from a trace of the site
 
 Sprint 11, 2026-10-10. The Technical Plan (§3.5) and the architecture proposal (§2.6) say the relay `brot-rpc` takes its
-final allowlist "from a trace of the real client in Sprint 11". This is that trace, for Sprint 08's relay, which is not
-built yet: until it is, the browser reads the RPC named by `NEXT_PUBLIC_RPC_URL` directly (the public devnet endpoint
-by default, with no key).
+final allowlist "from a trace of the real client in Sprint 11". This is that trace, for Sprint 08's relay, built on
+2026-10-11 (below) but not deployed: until it is, the browser reads the RPC named by `NEXT_PUBLIC_RPC_URL` directly (the
+public devnet endpoint by default, with no key).
 
 **How it was taken.** `tests/site/relay-trace.test.ts` runs the site's own code against the program in LiteSVM behind
 a recording JSON-RPC endpoint (`tests/site/fake-chain.ts`): the campaign page's reads (`load.ts`), the entry's
@@ -46,20 +46,49 @@ this table, a subscription, or `getProgramAccounts`. A wallet's history has no o
 `getSignaturesForAddress` on any address, bounded by `limit`, and `getTransaction` on any signature, since both answer
 public ledger data; the page decodes only this program's events, under the SDK's rules.
 
+**Sprint 19 (2026-10-10).** The creation box at `/abrir` adds callers and arguments, not methods; the third test of
+`tests/site/relay-trace.test.ts` runs its reads, an opening, the retry guard's recent opening and the watch:
+
+- `getAccountInfo`: the EpochSchedule sysvar (`SysvarEpochSchedu1e111111111111111111111111`, the epoch kinds'
+  opening rule), the config, and the campaign's address at the drawn id, which does not exist yet (`null`, row 10).
+- `getMultipleAccounts`: the config, Pyth's sponsored SOL/USD account and every listed feed's sponsored account in
+  one call (19 accounts on devnet: the config, SOL/USD and the 17 listed feeds); then the campaign's address, its
+  vault and the account the creator put in the slot, which can be any address (D-i). The relay's owner rule answers
+  `null` for an account of another program, and the box then says no account is there instead of naming the owner:
+  still refused, never accepted. The relay may answer such an account's owner and length only, with no data.
+- `simulateTransaction`: one transaction whose only top-level instruction is the program's `user_open_campaign`.
+- `getMinimumBalanceForRentExemption`: 512 bytes (a `Campaign`) and 0 bytes (its vault).
+- `getSignaturesForAddress`: the connected wallet's own address, `limit` 25 with `before` to page back, at most four
+  pages, until the half hour is covered; and `getTransaction` on at most 20 of the landed signatures of the last half
+  hour, newest first, stopping at the first opening, only before a paid opening with no record in flight (the
+  guard's recent opening, `recent.ts`). When it found none and could not read them all, the answer is "unknown", never
+  a guess: the relay may cap these lower, and the box then asks the creator.
+- `getSignatureStatuses`: the opening's signature, polled until `finalized`. `getBlockHeight` as for an entry.
+
 ## Not on the list
 
 Every `*Subscribe` method (no WebSocket), `getProgramAccounts` (the read API lists campaigns, not the browser),
 `requestAirdrop` (the faucet is a link), `getRecentPrioritizationFees` (the SDK sets no priority fee; the proposal lists
 it for the keeper), and batches (one method per request).
 
+## Built (Sprint 08, 2026-10-11)
+
+`services/rpc/` (brot-rpc) relays exactly this table: the eleven methods, the arguments above (at most 100 accounts and
+16 statuses a call, `limit` up to 1,000, base64 for accounts and transactions, `json` for `getTransaction`) and only
+the options the client passes; `simulateTransaction`'s `accounts` option, which would return any account's data, is
+refused. Its tests send each refusal to it (`services/rpc/tests/`), and `E2E_RELAY=1 bun run e2e` runs the whole web
+smoke with the browser reaching the chain through it. What follows is how it treats what it relays.
+
 ## For the relay (Sprint 08)
 
 - **Never cache** what the retry guard decides on: signature statuses, the block height and the wallet's `Entry`. A
   stale answer there would tell a baker an entry did not land, or let the page offer a retry too early (Sprint 11
-  security review). The short-TTL cache is for the campaign, the config and the metric accounts.
+  security review). The short-TTL cache is for the metric accounts and the sysvars. Since the relay was built (Sprint
+  08), not for the campaign or the config either: the web smoke through it saw a page reloaded inside the cache's life
+  keep showing a pause that had ended.
 
 - Account reads are allowed by owner, as the proposal says (D-i: no list of accounts): the relay returns an account only
-  when its owner is the program, a reader's program, or a sysvar the client reads (Clock), and `null` when it does not
+  when its owner is the program, a reader's program, or a sysvar the client reads (Clock; EpochSchedule since Sprint 19), and `null` when it does not
   exist. One exception, by address: the program's ProgramData (A-8).
 - **ProgramData (A-8, added 2026-10-10):** before every preparation and again right before the wallet, the client reads
   the program's last-deploy slot from the ProgramData account, owner the upgradeable loader

@@ -48,6 +48,13 @@ export const EVENT_AUTHORITY_BUMP = 254;
 export const EVENT_IX_TAG = 0xff;
 
 export const SYSTEM_PROGRAM_ID = address("11111111111111111111111111111111");
+export const COMPUTE_BUDGET_PROGRAM_ID = address("ComputeBudget111111111111111111111111111111");
+/** The wallet-assertion program a wallet may add to a transaction, the same on both clusters (Sprint 03;
+ * knowledge-base/tecnologia/lighthouse.md). The relay accepts it next to this program and ComputeBudget. */
+export const LIGHTHOUSE_PROGRAM_ID = address("L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95");
+/** The first byte of an instruction's data for the two a baker or a creator signs (the relay's country gate reads
+ * them; checked against the generated client by tests/sdk/contract-relay.test.ts). */
+export const INSTRUCTION_DISCRIMINATOR = { userOpenCampaign: 8, userJoinCampaign: 9 } as const;
 export const BPF_LOADER_UPGRADEABLE_ID = address("BPFLoaderUpgradeab1e11111111111111111111111");
 export const PYTH_RECEIVER_ID = address("rec2HHDDnjLfj4kE7VyEtFA1HPGQLK33259532cRyHp");
 export const PYTH_PUSH_ORACLE_ID = address("pyt2F414BA6dPttK6RddPZUdHfapoBN24GL5wbrPCou");

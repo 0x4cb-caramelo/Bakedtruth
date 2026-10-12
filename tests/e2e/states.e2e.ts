@@ -9,8 +9,8 @@
  */
 import { expect, test, type Page } from "@playwright/test";
 
-import { exactSol } from "../../app/features/campaign-page/copy-states";
-import { control, openCampaign } from "./helpers";
+import { exactSol, OPENER } from "../../app/features/campaign-page/copy-states";
+import { control, openCampaign, pickWallet } from "./helpers";
 
 type Made = { id: string; address: string };
 
@@ -18,8 +18,9 @@ const state = (page: Page) => page.locator("section[aria-labelledby='state-title
 
 /** Connects the injected wallet from the header (a settled campaign shows no entry panel). */
 async function connectFromHeader(page: Page) {
-  await page.getByRole("button", { name: "Use Installed Wallet" }).first().click();
-  await expect(page.getByRole("button", { name: "Disconnect" })).toBeVisible();
+  await page.getByRole("button", { name: "Connect", exact: true }).first().click();
+  await pickWallet(page);
+  await expect(page.getByRole("button", { name: /^Wallet / })).toBeVisible(); // the top bar's chip, once connected
 }
 
 test.describe("campaign states", () => {
@@ -66,7 +67,10 @@ test.describe("campaign states", () => {
     const mine = page.locator("section[aria-labelledby='mine-title']");
     await expect(mine).toContainText("Kept in the vault for you");
     await mine.getByRole("button", { name: `Receive ${exactSol(BigInt(creator.reserved))} SOL` }).click();
-    await expect(mine).toContainText(`${exactSol(BigInt(creator.reserved))} SOL received, now in your wallet.`);
+    // The success line lasts only until the page reads the chain again, which can beat this check on the local chain;
+    // the paid share, with no button left, is what stays.
+    await expect(mine).toContainText(`${OPENER.share(exactSol(BigInt(creator.reserved)))} · ${OPENER.sent}`);
+    await expect(mine.getByRole("button", { name: /^Receive / })).toHaveCount(0);
 
     const { received } = await control<{ received: string }>("/received");
     expect(BigInt(received)).toBe(BigInt(baker.expected) + BigInt(creator.reserved));

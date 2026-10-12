@@ -13,7 +13,7 @@ export function Card({
   ...rest
 }: HTMLAttributes<HTMLElement> & { as?: ElementType; children: ReactNode }) {
   return (
-    <Tag className={cx("rounded-md border border-line bg-panel", className)} {...rest}>
+    <Tag className={cx("rounded-md border border-line bg-panel shadow-[var(--shadow)]", className)} {...rest}>
       {children}
     </Tag>
   );

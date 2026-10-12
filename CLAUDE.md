@@ -72,7 +72,7 @@ Surfpool 1.6.0 (CI downloads it pinned by SHA-256; a local 1.5.0 runs the same s
 bun install
 bun run build:program      # cargo build-sbf (brot-markets and the test-only cpi-proxy, into target/deploy); bun run idl
 bun run idl                # brot-markets: Shank IDL from the source into packages/sdk/src/idl, then the Codama client into idl/generated
-bun run test               # bun test tests/  (TypeScript, LiteSVM, in-process; no validator)
+bun run test               # bun test tests/ app/  (TypeScript, LiteSVM, in-process; no validator; the site's own tests too)
 bun run test:rust          # cargo test -p brot-markets --features no-entrypoint (host and Mollusk; needs the binary)
 cargo test --locked -p brot-markets --features no-entrypoint,mainnet   # the mainnet values, never the drill ones (T12)
 bun run lint               # prettier --check on tests/, scripts/ and packages/, then lint:sdk
@@ -157,7 +157,7 @@ IDL copy (`app/lib/idl`), used by the current app until Sprint 09; no script or 
 
 **Frontend** (`app/`): Next.js App Router, Tailwind v4, wallet-adapter. The UI follows the approved design direction in
 `docs/product/DESIGN-DIRECTION.md` (Ledger²: lab direction D in dark and N in light, consolidated in `prototype-lab/prototype-n/`,
-with the Baked mascot). The app still renders the earlier direction C ("Tape") until the design-system sprint (-1)
+with the Baked mascot), in the brand's colours of `docs/product/BRAND.md` §5 since 2026-10-10 (`app/styles/tokens.css`). The app still renders the earlier direction C ("Tape") until the design-system sprint (-1)
 and the site sprints (09 to 13) replace it. A generic dashboard look was rejected. `app/AGENTS.md`
 (loaded via `app/CLAUDE.md`) says this Next.js version has breaking changes: read `app/node_modules/next/dist/docs/`
 before writing app code.

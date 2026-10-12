@@ -9,7 +9,6 @@
 
 import type { RefObject } from "react";
 
-import { Button } from "@/components/ui/button";
 import { cx } from "@/components/ui/cx";
 import { LAMPORTS_PER_SOL, parseSol, sol4, solText } from "./amount";
 import { PANEL } from "./copy";
@@ -49,16 +48,14 @@ export function AmountField({
   const help = error ?? (fromLink ? PANEL.fromLink : PANEL.minimumHelp(solText(minEntry)));
   const max = spare !== null && spare >= minEntry ? (spare / STEP) * STEP : null;
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-baseline justify-between gap-2 text-xs">
-        <label htmlFor="entry-amount" className="font-medium text-muted">
-          {PANEL.amountLabel}
-        </label>
-        <span className="tabular-nums text-muted">
+    <div className="field en-amount">
+      <div className="en-amount-top">
+        <label htmlFor="entry-amount">{PANEL.amountLabel}</label>
+        <span>
           {!connected ? PANEL.connectToSee : balance === null ? PANEL.balanceUnknown : PANEL.balance(sol4(balance))}
         </span>
       </div>
-      <div className="relative">
+      <div className="input-wrap">
         <input
           ref={inputRef}
           id="entry-amount"
@@ -69,27 +66,26 @@ export function AmountField({
           onChange={(event) => onText(event.target.value)}
           aria-invalid={error ? true : undefined}
           aria-describedby="entry-amount-help"
-          className={cx(
-            "w-full min-h-11 rounded-sm border border-field-line bg-bg px-3 py-2.5 pr-14 text-base tabular-nums text-text",
-            "focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-1 aria-[invalid=true]:border-error",
-          )}
+          className="input"
         />
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted">SOL</span>
+        <span className="unit">SOL</span>
       </div>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="en-chips">
         {CHIPS.map((chip) => (
-          <Button key={chip} variant="secondary" small onClick={() => onText(chip)}>
+          <button key={chip} type="button" className="btn small" onClick={() => onText(chip)}>
             {chip}
-          </Button>
+          </button>
         ))}
-        <Button variant="secondary" small disabled={max === null} onClick={() => max !== null && onText(solText(max))}>
+        <button
+          type="button"
+          className="btn small"
+          disabled={max === null}
+          onClick={() => max !== null && onText(solText(max))}
+        >
           {PANEL.max}
-        </Button>
+        </button>
       </div>
-      <p
-        id="entry-amount-help"
-        className={cx("m-0 text-xs", error ? "text-error" : fromLink ? "text-warn" : "text-muted")}
-      >
+      <p id="entry-amount-help" className={cx("help", error ? "error" : fromLink ? "en-linked" : null)}>
         {help}
       </p>
     </div>

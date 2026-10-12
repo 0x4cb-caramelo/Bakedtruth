@@ -16,8 +16,8 @@ file's bytes**, which the program stores in the campaign (`void_note_hash`) and 
   `TeamHouseFailure` (the 10% opening fee goes back to the opener, unless nobody had entered) or `TeamOutsideCause`
   (Brot keeps it).
 - **Who acted, and nothing more about a person.** The header names the acting team key, for accountability: the same
-  key signs the void on-chain, where anyone can read it, and `content/powers.md` (Sprint 13) will say whose keys the
-  team keys are. The text explains the cause in public terms and names no person and no private wallet owner; the
+  key signs the void on-chain, where anyone can read it, and `content/powers.md` (Sprint 13) names each key by its
+  role, never by person. The text explains the cause in public terms and names no person and no private wallet owner; the
   script refuses text with an email address, an `@handle` or a URL. The record is permanent (its hash is on-chain and
   Git keeps every version), so nothing goes in that could ever need deleting.
 

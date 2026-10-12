@@ -110,3 +110,15 @@ test("the limiter bounds its memory and forgets expired keys", () => {
   assert.equal(limiter.allow("c", 2000), true, "expired keys were pruned");
   assert.equal(limiter.size(), 1);
 });
+
+test("the limiter forgets an address once its window has ended, as the privacy page says", () => {
+  const limiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
+  limiter.allow("203.0.113.7", 0);
+  limiter.allow("198.51.100.9", 30_000);
+  limiter.sweep(59_999);
+  assert.equal(limiter.size(), 2, "both windows are still open");
+  limiter.sweep(60_000);
+  assert.equal(limiter.size(), 1, "the first address is gone when its minute ends");
+  limiter.sweep(90_000);
+  assert.equal(limiter.size(), 0, "and so is the second");
+});

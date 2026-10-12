@@ -74,6 +74,14 @@
         "@solana/kit": "~8.4.0",
       },
     },
+    "services/rpc": {
+      "name": "@brot/rpc",
+      "version": "0.1.0",
+      "dependencies": {
+        "@brot/sdk": "workspace:*",
+        "@solana/kit": "~8.4.0",
+      },
+    },
   },
   "packages": {
     "@alloc/quick-lru": ["@alloc/quick-lru@5.3.0", "", {}, "sha512-U4+70Pc5ZS9osnCBCE5Jha/ciHM+Yp+CNMNC/7HvYbNRk1Ldd+f7qO65W5qfhu/TCv+/ozljlXXe9Nj8419DMA=="],
@@ -121,6 +129,8 @@
     "@brot/api": ["@brot/api@workspace:services/api"],
 
     "@brot/keeper": ["@brot/keeper@workspace:services/keeper"],
+
+    "@brot/rpc": ["@brot/rpc@workspace:services/rpc"],
 
     "@brot/sdk": ["@brot/sdk@workspace:packages/sdk"],
 

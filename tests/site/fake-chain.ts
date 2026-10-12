@@ -3,9 +3,10 @@
  *          wallet's submission (`sendTransaction`, landed in LiteSVM and recorded for `getTransaction`), the
  *          signature's status (`getSignatureStatuses`), a wallet's balance (`getBalance`), and a block height the test
  *          moves past a blockhash's `lastValidBlockHeight`. Every method a client calls is recorded in order: the trace the relay's allowlist
- *          is taken from (Sprint 11; docs/technical/relay-allowlist.md).
- * Version: 0.1.1 (a fixed port and CORS for the web smoke)
- * Sprint:  11 (site: campaign page and entry)
+ *          is taken from (Sprint 11; docs/technical/relay-allowlist.md). A landed transaction's status is `finalized`:
+ *          LiteSVM has no forks, and the creation box follows an opening to finality (Sprint 19).
+ * Version: 0.1.2 (Sprint 19: statuses are finalized; 0.1.1, a fixed port and CORS for the web smoke)
+ * Sprint:  11 (site: campaign page and entry); 19
  */
 import {
   getBase58Decoder,
@@ -105,7 +106,7 @@ export function startFakeChain(w: World, options: FakeChainOptions = {}): FakeCh
       value: (signatures as string[]).map((s) => {
         const found = statuses.get(s);
         return found
-          ? { slot: found.slot, confirmations: null, err: found.err, confirmationStatus: "confirmed" }
+          ? { slot: found.slot, confirmations: null, err: found.err, confirmationStatus: "finalized" }
           : null;
       }),
     }),

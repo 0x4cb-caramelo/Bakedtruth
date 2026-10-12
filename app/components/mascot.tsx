@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 
 import { BRAND } from "@/lib/brand";
+import { asset } from "@/lib/base-path";
 import { startMascot, type MascotHandle } from "@/lib/mascot/engine";
 
 export function Mascot() {
@@ -14,7 +15,7 @@ export function Mascot() {
   const handle = useRef<MascotHandle | null>(null);
 
   useEffect(() => {
-    handle.current = startMascot({ base: "/mascot/", size: 80, stepped: true, quips: BRAND.quips });
+    handle.current = startMascot({ base: asset("/mascot/"), size: 80, stepped: true, quips: BRAND.quips });
     return () => {
       handle.current?.stop();
       handle.current = null;

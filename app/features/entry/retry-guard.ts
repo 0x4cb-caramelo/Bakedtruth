@@ -6,7 +6,7 @@
  *          can no longer land once the finalized height passed the deadline with the total unchanged; until then, wait.
  *          Every later attempt passes the saved total back, so a join that did land makes it fail (`EntryTotalMismatch`)
  *          instead of entering twice. A record belongs to one attempt: only that attempt's watch updates or clears it.
- * Version: 0.2.0 (Sprint 11 review: a record kept in memory too, owned per attempt, a deadline that can only grow)
+ * Version: 0.2.1 (Sprint 19: an unreadable record no longer stops the clean-up; 0.2.0, the Sprint 11 review)
  * Sprint:  11 (site: campaign page and entry)
  *
  * The store is layered: a map in this page's memory, mirrored to localStorage when the browser allows it, so the
@@ -14,6 +14,8 @@
  * `expected_entry_total` check holds whatever the page remembers. Nothing here leaves the browser; a settled record is
  * deleted after a day (`pruneSettled`).
  */
+
+import { storedRecord } from "./stored-record";
 
 /** "handed": given to the wallet, answer unknown; "refused": provably not sent; "expired": it can no longer land. */
 export type PendingState = "handed" | "refused" | "expired";
@@ -183,7 +185,7 @@ export function pruneSettled(
     for (let i = 0; i < local.length; i++) {
       const key = local.key(i);
       if (!key?.startsWith("brot-pending-entry:")) continue;
-      const record = JSON.parse(local.getItem(key) ?? "null") as Partial<PendingEntry> | null;
+      const record = storedRecord<PendingEntry>(local.getItem(key)); // unreadable: none, so deleted
       const settled = record?.state === "refused" || record?.state === "expired";
       if (!record || (settled && now - (record.savedAt ?? 0) > KEEP_SETTLED_MS)) stale.push(key);
     }

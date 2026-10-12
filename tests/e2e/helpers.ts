@@ -1,10 +1,10 @@
 /**
  * Purpose: what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page
  *          opened with the injected wallet and the runner's answer for it (sign and send, refuse, send and never
- *          answer, never answer), the entry panel and the sheet as locators, and the per-1 figure written as the panel
- *          writes it, to compare the screen with the SDK's estimate.
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ *          answer, never answer), the entry panel and the sheet as locators, the per-1 figure written as the panel
+ *          writes it, to compare the screen with the SDK's estimate, and the top bar's balance as its chip says it.
+ * Version: 0.2.1 (the UI overhaul: the top bar's balance; 0.2.0, Sprint 19: any page with the wallet)
+ * Sprint:  11 (site: campaign page and entry); 19
  */
 import { expect, type Page } from "@playwright/test";
 import { getBase58Encoder } from "@solana/kit";
@@ -30,7 +30,11 @@ export type WalletMode = "answer" | "refuse" | "no-answer" | "hang";
 export type Opened = { wallet: string; mode: { current: WalletMode } };
 
 /** Opens `/c/{id}` with the test wallet installed; `mode.current` decides what the wallet does when asked to sign. */
-export async function openCampaign(page: Page, id: string, query = ""): Promise<Opened> {
+export const openCampaign = (page: Page, id: string, query = ""): Promise<Opened> =>
+  openWithWallet(page, `/c/${id}${query}`);
+
+/** Opens `path` with the test wallet installed (Sprint 19: the creation box at /abrir too). */
+export async function openWithWallet(page: Page, path: string): Promise<Opened> {
   const { address } = await control<{ address: string }>("/wallet");
   const mode = { current: "answer" as WalletMode };
   await page.exposeFunction("__e2eSignAndSend", async (wire: string) => {
@@ -41,17 +45,32 @@ export async function openCampaign(page: Page, id: string, query = ""): Promise<
     return Buffer.from(getBase58Encoder().encode(signature)).toString("base64");
   });
   await page.addInitScript(injectWallet, { address, publicKey: Array.from(getBase58Encoder().encode(address)) });
-  await page.goto(`/c/${id}${query}`);
+  await page.goto(path);
   return { wallet: address, mode };
 }
 
 export const panel = (page: Page) => page.locator("section[aria-labelledby='entry-title']");
 export const sheet = (page: Page) => page.getByRole("dialog");
 
-/** Connects through the panel's "Use Installed Wallet" and waits for the balance. */
+/** Picks the injected test wallet in the "Connect a wallet" list that every Connect button opens. */
+export async function pickWallet(page: Page) {
+  await page
+    .getByRole("dialog", { name: "Connect a wallet" })
+    .getByRole("button", { name: /E2E Test Wallet/ })
+    .click();
+}
+
+/** Connects through the panel's "Connect" and the wallet list, and waits for the balance. */
 export async function connect(page: Page) {
-  await panel(page).getByRole("button", { name: "Use Installed Wallet" }).click();
+  await panel(page).getByRole("button", { name: "Connect", exact: true }).click();
+  await pickWallet(page);
   await expect(panel(page).getByText(/^Balance \d/)).toBeVisible();
+}
+
+/** The top bar's balance, from the wallet chip's label ("Wallet Ab1…xyz, 4.9973 SOL"); NaN while it loads. */
+export async function chipSol(page: Page): Promise<number> {
+  const label = (await page.locator("header.top .wallet-on").getAttribute("aria-label")) ?? "";
+  return Number(/, ([\d.,]+) SOL$/.exec(label)?.[1]?.replace(/,/g, "") ?? Number.NaN);
 }
 
 /** Picks a side and an amount in the panel. */

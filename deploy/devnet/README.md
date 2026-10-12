@@ -115,6 +115,28 @@ authority, admin and fee recipient, and his team key as the only team key until 
 | Deploy, initialize and set the team in one session | Only the upgrade authority can initialize, so nobody can take the admin role first; but until `admin_set_team` nobody can pause entries |
 | The admin proven | A mistyped admin is permanent: no team, no pause, no parameter change until a program upgrade |
 
+## Checking an opening (Sprint 19)
+
+The creation box at `/abrir` opens a campaign from the site. Its devnet check is the founder's (every devnet write is),
+by hand, once the site is built for devnet (`cd app && bun run build`, which reads the program's last deploy for A-8):
+
+1. With a test wallet outside the team that holds no real funds (Phantom uses the same keys on every network) and
+   enough test SOL for the total the box shows (US$500 of SOL at its price, plus about 0.005 SOL of rent and fees),
+   open a paid campaign at `/abrir` (a fresh Pyth feed, a target 10% away, 7 days). The review sheet names the campaign
+   id ("Open campaign #<id> on …"). The check below prints the creator's address: leave it out of anything recorded.
+2. Read the opening back, read-only (it signs nothing):
+
+   ```bash
+   bun run scripts/team/check-opening.ts --campaign <id> --cluster devnet --url "$DEVNET_RPC_URL"
+   ```
+
+   It prints `opening_paid_lamports`, `prize_lamports` and `opening_fee_lamports` next to the formula at the price the
+   program read (`ceil(opening_usd × 10^(9 − e) ÷ p)`, split 90/10) and ends with "The opening matches the formula."
+3. With the team key's wallet, open one free: the box shows no payment and no creator share; the same check reports a
+   free opening.
+
+The wallet in-app browsers run the same steps on phones (`docs/technical/wallet-browser-checklist.md`).
+
 ## Rehearsal on this machine
 
 `solana-test-validator` 3.1.10 does not start on the development machine ("Incompatible CPU detected: missing AVX2

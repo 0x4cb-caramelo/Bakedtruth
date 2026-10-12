@@ -1,14 +1,14 @@
 /**
  * Purpose: the read API's contract with fake data and no cluster: the list's filters and paging, the 400 and 404
  *          answers, the detail route, CORS, the method refusal, the health states, the store's refresh failure (the
- *          last good snapshot is kept, and only an error name is shown), and the config's refusals.
- * Version: 0.1.0
+ *          last good snapshot is kept, and only an error name is shown). The config's refusals and defaults are
+ *          config.test.ts's.
+ * Version: 0.1.1
  * Sprint:  08 (indexer and API, hackathon MVP)
  */
 import { describe, expect, test } from "bun:test";
 import { Outcome, ReaderKind, Status, type Campaign, type PublicState } from "@brot/sdk/read";
 
-import { loadApiConfig } from "../src/config";
 import { createHandler } from "../src/routes";
 import { createStore, type Store } from "../src/store";
 import type { Snapshot, Row } from "../src/snapshot";
@@ -175,27 +175,5 @@ describe("store refresh", () => {
     expect(store.current()?.rows.length).toBe(3);
     expect(store.lastError()).toBe("TypeError");
     expect(JSON.stringify({ e: store.lastError() })).not.toContain("secret");
-  });
-});
-
-describe("config", () => {
-  test("needs the RPC URL; refuses a non-loopback host and an unknown cluster", () => {
-    expect(() => loadApiConfig({})).toThrow("API_RPC_URL is not set");
-    expect(() => loadApiConfig({ API_RPC_URL: "https://rpc.example.test", API_HOST: "0.0.0.0" })).toThrow("loopback");
-    expect(() => loadApiConfig({ API_RPC_URL: "https://rpc.example.test", API_CLUSTER: "mainnet" })).toThrow(
-      "devnet or local",
-    );
-  });
-
-  test("defaults: loopback 4220, 15 s refresh, any origin (read-only), devnet", () => {
-    const c = loadApiConfig({ API_RPC_URL: "https://rpc.example.test" });
-    expect(c).toEqual({
-      rpcUrl: "https://rpc.example.test",
-      host: "127.0.0.1",
-      port: 4220,
-      refreshMs: 15_000,
-      corsOrigin: "*",
-      cluster: "devnet",
-    });
   });
 });

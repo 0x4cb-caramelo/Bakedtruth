@@ -1,0 +1,84 @@
+/* Purpose: the frame around every screen: the devnet status strip, the sticky top bar (brand, main links, search, theme, wallet), the phone menu, the wallet menu and the footer with the legal line. Under 860 px the links move into the menu; under 700 px search becomes an icon and the wallet button shortens, so the bar never wraps. From prototype-lab/campaigns/css/chrome.css (Sprint -1, approved 2026-10-10), as is, in the `components` layer;
+   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.0 · Sprint 09 (the UI overhaul) */
+@layer components {
+.status { display: flex; justify-content: space-between; gap: 12px; padding: 7px var(--gutter); background: var(--strip-bg);
+  color: var(--strip-fg); font-size: 11.5px; letter-spacing: 0.02em; }
+.status b { font-weight: 600; color: var(--crust-ink); }
+[data-theme="light"] .status { border-bottom: var(--bw) solid var(--line); }
+.status .long { display: inline; } .status .short { display: none; }
+
+.top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 18px; min-height: 64px;
+  padding: 10px var(--gutter); background: var(--top-bg); backdrop-filter: blur(10px); border-bottom: var(--bw) solid transparent; }
+.top.scrolled { border-bottom-color: var(--line); }
+.brand { display: flex; flex-shrink: 0; align-items: center; gap: 2px; color: var(--crust-ink); font: 700 28px/1 var(--display); letter-spacing: -0.3px; }
+.brand:hover { color: var(--crust-ink); text-decoration: none; }
+.brand img { width: 52px; height: 33px; object-fit: contain; margin-left: -8px; }
+.brand b { color: var(--text); font-weight: 700; }
+.nav-links { display: flex; align-items: center; gap: 4px; }
+.nav-links a { padding: 8px 10px; border-radius: var(--r-sm); color: var(--muted); font-size: 13px; font-weight: 500; white-space: nowrap; }
+.nav-links a:hover { color: var(--text); background: var(--row-hover); text-decoration: none; }
+.nav-links a[aria-current="page"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--accent); border-radius: 0; }
+.search { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 150px; max-width: 360px; min-height: 38px; padding: 0 12px;
+  background: var(--raised); border-radius: var(--r-sm); color: var(--muted); }
+[data-theme="light"] .search { background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
+.search:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.search input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--text); font-size: 13px; }
+.search input::placeholder { color: var(--dim); }
+.top-actions { display: flex; flex-shrink: 0; align-items: center; gap: 10px; margin-left: auto; } .top-actions .btn { white-space: nowrap; }
+.theme svg { display: none; } [data-theme="light"] .theme .moon, [data-theme="dark"] .theme .sun { display: block; }
+.menu-btn, .search-btn { display: none; }
+
+/* The wallet button and its menu. The address is shown short, the SOL balance next to it. */
+.wallet { position: relative; }
+.wallet-on { display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 4px 6px 4px 10px; white-space: nowrap; border: var(--bw) solid var(--line-strong);
+  border-radius: var(--r-sm); font-size: 12.5px; font-weight: 600; }
+.wallet-on:hover { border-color: var(--muted); }
+.wallet-on .bal { padding: 4px 8px; border-radius: 5px; background: var(--raised); color: var(--text); font-variant-numeric: tabular-nums; }
+.wallet-on .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--yes-bar); }
+.wallet-on.warn .dot { background: var(--warn); }
+.wallet-on .short { display: none; }
+.wallet .menu { right: 0; top: calc(100% + 8px); }
+.menu .menu-head { padding: 8px 10px 10px; border-bottom: var(--bw) solid var(--line); margin-bottom: 6px; color: var(--muted); font-size: 12px; }
+.menu .menu-head b { display: block; color: var(--text); font-size: 13px; }
+
+/* Phone menu: a sheet with every link, the theme and the legal pages. */
+.phone-nav { display: grid; gap: 4px; }
+.phone-nav a, .phone-nav button { display: flex; align-items: center; gap: 10px; min-height: var(--tap); padding: 0 12px; border-radius: var(--r-sm);
+  color: var(--text); font-size: 15px; font-weight: 500; text-align: left; }
+.phone-nav a:hover, .phone-nav button:hover { background: var(--row-hover); text-decoration: none; }
+.phone-nav hr { margin: 6px 0; border: 0; border-top: var(--bw) solid var(--line); }
+
+/* Footer: the links, then the legal line the landing already carries. */
+.foot { max-width: var(--page-max); margin: 56px auto 0; padding: 22px var(--gutter) calc(28px + env(safe-area-inset-bottom));
+  border-top: var(--bw) solid var(--line); color: var(--muted); font-size: 12px; }
+.foot nav { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 12px; }
+.foot nav a { color: var(--muted); } .foot nav a:hover { color: var(--text); }
+.foot p { max-width: 760px; margin: 0; color: var(--dim); font-size: 11.5px; }
+
+/* Under 1180 px the three links move into the menu, so nothing in the bar ever wraps. */
+@media (max-width: 1180px) {
+  .nav-links { display: none; }
+  .menu-btn { display: inline-grid; }
+  .search { max-width: none; }
+}
+@media (max-width: 860px) {
+  .top .open-link { display: none; }
+}
+@media (max-width: 700px) {
+  .status .long { display: none; } .status .short { display: inline; }
+  .top { gap: 8px; min-height: 58px; }
+  .brand { font-size: 24px; } .brand img { width: 44px; height: 28px; } .brand .tld { display: none; }
+  .top .search { display: none; } .search-btn { display: inline-grid; }
+  .top .theme { display: none; }
+  .wallet-on .addr { display: none; }
+  .wallet .cta > span { padding: 8px 11px; }
+  .foot nav { gap: 4px 14px; }
+}
+@media (max-width: 412px) {
+  .wallet-on .long { display: none; } .wallet-on .short { display: inline; }
+  .wallet-on { gap: 6px; padding-left: 8px; }
+}
+
+/* Site-wide notices sit between the top bar and the screen, at the page's width. */
+.site-notices-in { display: grid; gap: 8px; max-width: var(--page-max); margin: 12px auto 0; padding: 0 var(--gutter); }
+}

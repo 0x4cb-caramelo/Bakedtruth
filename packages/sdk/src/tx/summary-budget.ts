@@ -11,11 +11,13 @@
  * then succeeds or not. The limit is clamped to 1,400,000; with none set, 1,400,000 is an upper bound of the
  * runtime's default, so the bound never undercounts.
  */
-import { address, type Instruction } from "@solana/kit";
+import { type Instruction } from "@solana/kit";
 
+import { COMPUTE_BUDGET_PROGRAM_ID } from "../read/constants";
 import { formatSol } from "../read/format";
 
-export const COMPUTE_BUDGET_PROGRAM_ID = address("ComputeBudget111111111111111111111111111111");
+/** Since Sprint 08 in the read half (the relay reads it, and may not import `tx`); still exported from here. */
+export { COMPUTE_BUDGET_PROGRAM_ID };
 /** The most compute units a transaction can request, and the bound used when it sets none. */
 export const MAX_COMPUTE_UNIT_LIMIT = 1_400_000n;
 /** The highest priority fee a trusted summary accepts unless the caller sets another cap: 0.001 SOL. */

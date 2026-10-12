@@ -26,6 +26,8 @@ const ALLOWED_COMMANDS = new Set([
   'pitch2', // the provisional site's second deck, served by services/landing; not a Claude command
   'my-entries', // the site's "My entries" route (Sprint 12, L-01); not a Claude command
   'record', // the site's public record route (Sprint 12, L-01); not a Claude command
+  'dev0x', // the path the site is served under on brot.markets (deploy/vps/README.md); not a Claude command
+  'prototype', // the landing's path for the Sprint -1 prototype preview (services/landing); not a Claude command
 ]);
 const ALLOWED_AGENT_WORDS = new Set([
   'multi-agent', // ordinary word ("multi-agent review"), not an agent name

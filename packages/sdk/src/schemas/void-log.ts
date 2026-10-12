@@ -9,16 +9,22 @@
  * Sprint:  12 (site: my entries and campaign states)
  *
  * The record is permanent (its hash is on-chain and Git keeps every version), so its text may hold no email address,
- * no @handle and no URL (`personalDataIn`, shared with the team script that writes it).
+ * no @handle, no URL and no domain (`personalDataIn`, shared with the team script that writes it).
  */
 import { address } from "@solana/kit";
 import { z } from "zod";
 
-/** Why `text` cannot go into a permanent public record, or `null`: no email, @handle or URL. */
+/**
+ * Why `text` cannot go into a permanent public record, or `null`: no email, @handle, URL or bare domain. Since Sprint
+ * 13 (the deferred Sprint 12 finding, TP §7.3) a handle of one letter or after any punctuation ("@x", "[@x]") and a
+ * bare domain ("brot.markets") are refused too. A word and a sentence run together without a space ("ended.The") read
+ * as a domain: add the space.
+ */
 export function personalDataIn(text: string): string | null {
   if (/[^\s@]+@[^\s@]+\.[^\s@]+/.test(text)) return "an email address";
-  if (/(^|[\s(])@\w{2,}/.test(text)) return "an @handle";
+  if (/(^|[^\w@.])@\w+/.test(text)) return "an @handle";
   if (/https?:\/\/|www\./i.test(text)) return "a URL";
+  if (/\b[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9-]+)*\.[a-z]{2,24}\b/i.test(text)) return "a domain";
   return null;
 }
 
@@ -44,13 +50,13 @@ const FileName = z.string().regex(FILE, "a void-log file name: <campaign>-<UTC t
 const PublicText = z
   .string()
   .min(1, "the team's public text")
-  .refine((text) => personalDataIn(text) === null, { message: "no email address, @handle or URL" });
+  .refine((text) => personalDataIn(text) === null, { message: "no email address, @handle, URL or domain" });
 
 const common = {
   file: FileName.describe("The record's file name in content/void-log/"),
   teamKey: Base58.describe("The team key that acted; the same key signs the void on-chain"),
   writtenAt: z.iso.datetime().describe("When the team script wrote the record, UTC"),
-  text: PublicText.describe("The team's public text: no email address, @handle or URL"),
+  text: PublicText.describe("The team's public text: no email address, @handle, URL or domain"),
   sha256: z
     .string()
     .regex(/^[0-9a-f]{64}$/, "the SHA-256 of the file's bytes, in hex")

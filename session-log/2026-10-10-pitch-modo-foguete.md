@@ -72,3 +72,36 @@ sobre fundo creme e cinco, já transparentes, da saída do carro, do capacete, d
 - **O PDF do deck** sai do modo sem movimento e não muda.
 - As pendências do v5.1 seguem: o 1% de quem abre (taxa ou pote), o "$1B+ a month" sem fonte e o slide 2 com "World,
   inside Phantom".
+
+## 11/10/2026: o desenho da batida trocado
+
+O fundador pôs um desenho novo em `docs/product/tothemoon/` (`Mascote Laranja Colide com a Lua.png`) e pediu: "para
+substituirmos o (...) 15_20_35-5.png que tem no slide 5, ao final. Vamos fazer essa troca no pitch." No desenho novo o
+mascote bate na lua rindo; no anterior, gritava.
+
+- **O enquadramento é o mesmo** (1254 px, o foguete, a lua e os cortes de baixo e da direita no mesmo lugar; só o
+  rosto e detalhes mudam), conferido medindo os dois arquivos. Por isso o tamanho no slide, o ponto de apoio, o ângulo
+  da batida e a lua que espera na borda ficaram como estavam, e a imagem passou pelos mesmos passos da anterior (a
+  borda de baixo esfumada, 836 px, WebP).
+- **O arquivo mudou de nome,** de `28-batendo-na-lua` para `28-batendo-na-lua-feliz`, e as versões dos scripts que
+  levam até ele subiram. Com o mesmo nome, quem já abriu o deck veria o desenho antigo guardado pelo navegador.
+- **O quadro anterior não mudou:** nos últimos meses do voo o foguete ainda é o do rosto em pânico, e a virada para o
+  riso acontece na batida. Não foi pedido outro desenho para esse quadro; fica dito ao fundador.
+- **Conferido:** os 47 testes do site e, num navegador de teste, os quadros do slide 5 no modo foguete (a batida nova
+  no lugar, a lua da borda casando com ela) e no modo completo (o pãozinho como antes), sem erro no console.
+
+### A publicação: só o deck
+
+A `main` já tinha as páginas legais novas (os termos fora do ar, a privacidade com o contato gm@brot.markets, que ainda
+não recebe email), e o servidor estava na versão do modo foguete (`8282d06`). Publicar a `main` levaria tudo junto. O
+fundador escolheu: "apenas a imagem do pitch, pode subir online".
+
+- **O commit da troca foi feito em cima da versão do servidor** (`bb604aa`, só os arquivos do deck) e enviado sozinho.
+  A `main` entrou depois na mesma branch, com estes registros, para o pull request; mesclado com commit de mescla, o
+  `bb604aa` vira ancestral da `main` e a próxima publicação do servidor avança sem desvio.
+- **No servidor, a cópia da landing tem uma edição à mão** em `services/landing/lib/campaigns.mjs`, de 11/10 às 20:42
+  UTC: a prévia das telas saiu de `/dev0x/` para `/prototype/`, passo 7 do roteiro do site em `/dev0x` do Ronaldo. Ela
+  foi mantida. Por causa dela, os seis testes da prévia em `/dev0x` falham lá (39 de 45 passam); nenhum é do deck.
+- **O serviço não foi reiniciado:** a landing lê os arquivos estáticos a cada pedido, e o endereço público já servia
+  os novos logo depois da atualização da cópia. Conferido de fora, num navegador de teste: a batida nova no slide 5, e
+  só o erro de sempre no console (o script de estatísticas do Cloudflare, barrado pelo site).

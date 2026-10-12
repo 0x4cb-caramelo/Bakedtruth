@@ -19,7 +19,7 @@
     "build:program": "cargo build-sbf --manifest-path programs/brot-markets/Cargo.toml --sbf-out-dir target/deploy -- --locked && cargo build-sbf --manifest-path tests/programs/cpi-proxy/Cargo.toml --sbf-out-dir target/deploy -- --locked && bun run idl",
     "idl": "bun run scripts/build-idl.ts",
     "slot-matrix": "bun scripts/slot-matrix.ts",
-    "test": "bun test tests/",
+    "test": "bun test tests/ app/",
     "test:rust": "SBF_OUT_DIR=$PWD/target/deploy cargo test -p brot-markets --features no-entrypoint",
     "e2e": "bun run tests/e2e/run.ts",
     "smoke:devnet": "bun run scripts/devnet-smoke.ts",

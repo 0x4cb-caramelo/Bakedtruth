@@ -3,8 +3,8 @@
  *          on the server from the void log: each void with its campaign, the team's reason and what it means for the
  *          opening fee, the acting team key, the time, the team's text and the SHA-256 anyone can compare with the
  *          campaign's `void_note_hash` on-chain; each correction with the record it corrects. No script runs here.
- * Version: 0.1.0
- * Sprint:  12 (site: my entries and campaign states)
+ * Version: 0.1.1 (Sprint 13: a section under the powers table, so its title is an h2)
+ * Sprint:  12 (site: my entries and campaign states); 13
  */
 import type { VoidLogRecord } from "@brot/sdk/schemas";
 import { shortAddress } from "@/lib/brot";
@@ -33,9 +33,9 @@ const Address = ({ value }: { value: string }) => (
 function Item({ record }: { record: VoidLogRecord }) {
   return (
     <li className="space-y-2 rounded-md border border-line bg-panel p-4" data-kind={record.kind}>
-      <h2 className="m-0 font-display text-2xl font-bold">
+      <h3 className="m-0 font-display text-2xl font-bold">
         {record.kind === "void" ? RECORD.void : RECORD.correction}
-      </h2>
+      </h3>
       <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
         {record.kind === "void" ? (
           <>
@@ -64,7 +64,7 @@ export function RecordList({ log }: { log: VoidLog }) {
   return (
     <div className="space-y-4">
       <header className="space-y-2">
-        <h1 className="m-0 font-display text-4xl font-bold">{RECORD.title}</h1>
+        <h2 className="t-section">{RECORD.title}</h2>
         <p className="m-0 max-w-3xl text-sm text-muted">{RECORD.intro}</p>
         <p className="m-0 max-w-3xl text-sm text-muted">{RECORD.check}</p>
         <p className="m-0 max-w-3xl text-xs text-muted">{RECORD.automatic}</p>

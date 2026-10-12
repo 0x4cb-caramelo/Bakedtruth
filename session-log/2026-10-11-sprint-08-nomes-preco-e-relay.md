@@ -1,0 +1,126 @@
+# 2026-10-11 — Sprint 08, segunda parte: os nomes, o preço e o relay
+
+## Ponto de partida
+
+- A `main` estava em `5bf3636`, a mescla da Sprint 19 (PR #68, tag `sprint-19`). A API de leitura do MVP da Sprint 08
+  (`services/api`: health, a lista, cada campanha e, desde a Sprint 13, o ranking) já estava nela, vinda da branch
+  `sprint-08-read-api`.
+- O Ronaldo pediu "as peças que faltam da Sprint 08", no recorte que eu tinha proposto: a rota dos nomes, a do preço e
+  o relay com o bloqueio por país. O indexador em SQLite fica para depois.
+- A branch `sprint-08-price-names-relay` saiu da `origin/main` sem acompanhar a `main` (o envio vai sempre pelo nome).
+
+## Decisões, e por quê
+
+- **O escopo, em três passos verdes** (o Ronaldo, 11/10): primeiro `/api/v1/names` e `/api/v1/price` na API de
+  leitura, que destravam os dois itens que a caixa de abertura esperava; depois o `services/rpc`. Implantação, túnel e
+  Cloudflare ficam com o fundador.
+- **O preço: CoinGecko com a Pyth de reserva** (o Ronaldo, 11/10), com a condição de uma checagem jurídica dos termos
+  do CoinGecko antes de rodar em público. Li a documentação do CoinGecko em 11/10: a chave do plano Demo vai no
+  cabeçalho `x-cg-demo-api-key` em `api.coingecko.com`, a do pago no `x-cg-pro-api-key` em `pro-api.coingecko.com`, e
+  existe a API sem chave, atualizada a cada 60 s. Os termos pedem "Powered by CoinGecko" em qualquer plano (o plano
+  técnico citava "Data provided by CoinGecko", da página de preços), desencorajam guardar os dados e proíbem
+  redistribuir o acesso sem contrato. A chave, quando houver, vai num cabeçalho, nunca na URL.
+- **O preço vale só para exibição.** O programa cobra a abertura pela Pyth que ele mesmo lê; a rota diz isso em cada
+  resposta (`use`). O CoinGecko com mais de dez minutos não vale; a Pyth entra no lugar. A diferença entre os dois vai
+  para o log, e acima de 2% como `price-gap`, para o caminho de alertas.
+- **As regras dos nomes foram para o SDK** (`parseAccountNames`), porque o site, a API e depois o app precisam das
+  mesmas.
+- **O bloqueio por país existe, mas vazio** (o Ronaldo, 11/10: "dont block nothing yet"). A lista
+  `GEO_BLOCK_COUNTRIES` vem vazia; uma sigla que não tenha duas letras impede o relay de subir, para um erro de
+  digitação não virar bloqueio de ninguém sem ninguém saber.
+- **Uma conta de dono que nenhum leitor aceita volta com o dono e o tamanho, sem os dados**, em vez de nula, como o
+  documento da lista do relay já permitia: assim a caixa de abertura continua dizendo de quem é a conta, e o relay não
+  serve os bytes de outro programa.
+- **O typecheck da raiz passou a cobrir `services/`.** O CI só rodava o typecheck de `tests/`, `scripts/` e
+  `packages/`; um erro de tipo na API ou no relay passaria.
+
+## O que o teste na web achou, com o relay no meio
+
+O `E2E_RELAY=1` põe o relay entre o navegador e a cadeia de teste, em todas as cenas. Na primeira rodada, 6 falharam:
+
+- **Um defeito real do relay:** o cache guardava a `GlobalConfig` por 1,5 s. Depois de despausar, a página recarregada
+  dentro desse tempo continuou dizendo "Entries are paused". O programa recusa o que estiver errado, mas a página age
+  sobre as contas do próprio programa, então o cache passou a guardar só as contas de outros programas e os sysvars,
+  nunca a config, uma campanha ou uma entrada.
+- **Um defeito do teste:** o endereço da RPC que o teste de "rede fora" corta não chegava aos processos do Playwright,
+  então o corte caía na porta errada. O executor agora passa o endereço para eles.
+- As outras quatro falhas eram consequência da segunda: o teste deixou o preço velho para os seguintes.
+
+Depois das correções, o teste sem o relay falhou uma cena da Sprint 12, a do "Receive" da parte do criador. O
+pagamento tinha saído, mas a página já mostrava "Sent to your wallet." em vez da linha de sucesso que a cena esperava.
+A linha de sucesso só dura até a página reler a cadeia; direto na cadeia local, essa releitura pode terminar antes de
+o teste olhar. É uma corrida que o teste quase sempre ganha: a cena tinha passado nas seis rodadas anteriores, quatro
+delas sem o relay. A cena agora confere o que fica: a parte paga e nenhum botão. O código do site não mudou, e o CI
+não roda o teste na web.
+
+## As revisões
+
+- **A jurídica e de privacidade** (`docs/legal/2026-10-11-sprint-08-legal-review.md`) leu os termos do CoinGecko de
+  5/9/2025: atribuição "Powered by CoinGecko" em qualquer plano, nenhum uso "for or to promote gambling", nada de
+  redistribuir o acesso sem contrato, termos de uso próprios com as cláusulas deles antes de tudo, a API sem chave fora
+  de uso em produção e o Demo para testes, com 10.000 chamadas por mês. Nenhum plano cabe hoje, então o CoinGecko ficou
+  desligado por padrão e a rota serve o preço da Pyth, o mesmo que o programa cobra. A condição que o Ronaldo pôs na
+  escolha ("uma checagem jurídica antes de ir ao ar") foi o que decidiu isso. Ela também pediu que o relay esqueça o
+  IP de quem parou de chamar em cerca de um minuto, não depois de mil chamadas: entrou uma varredura a cada 10 s. O
+  texto da privacidade para o dia em que o site passar a usar o relay está pronto no relatório, sem publicar.
+- **A de segurança** não achou nada alto e achou seis médios, todos corrigidos: um valor hostil numa opção (e, na API de
+  leitura, `?state=constructor`) fazia o serviço responder com a pilha inteira do erro; um processo local podia forjar
+  os cabeçalhos do Cloudflare; uma origem só podia gastar o orçamento diário de todos; a unidade não conseguia rodar o
+  Bun com o próprio usuário e deixava a chave no ambiente. Agora há opções tipadas, uma resposta genérica para qualquer
+  erro, `development: false` (no servidor de saúde do keeper também), um cabeçalho secreto que o túnel acrescenta, um
+  balde por /48, uma reserva do orçamento para assinar, o grupo `brot-bun` e as credenciais pelo `LoadCredential=`. A
+  regra de limite do Cloudflare em `/rpc` virou pré-condição da rota.
+
+## Relendo os passos do servidor
+
+- **O `/healthz` do relay** respondia 403 assim que o segredo do túnel entrava: o passo 6 do `deploy/vps/README.md`
+  não passaria sem digitar o segredo no terminal, onde ele ficaria no histórico. Agora o `/healthz` responde no
+  servidor sem o segredo, só com contagens, e nunca a um pedido que veio pelo Cloudflare (que sempre traz o
+  `cf-connecting-ip`).
+- **O Bun do relay.** A correção da revisão de segurança (M5) dava ao relay o Bun do keeper por um grupo
+  compartilhado, o `brot-bun`. Mas esse binário fica na pasta pessoal do `brot`, `/var/lib/brot-markets` (0750, com a
+  lista de espera dentro), onde o usuário do relay não entra: a unidade não teria subido. Agora o relay roda uma cópia
+  própria do mesmo Bun, de root, em `/usr/local/lib/brot-rpc/bun`, conferida byte a byte com `cmp`, e nada do keeper
+  que está no ar muda.
+
+## As respostas do Ronaldo, o PR e o teste no navegador
+
+- **O PR #69** abriu com a segunda parte da Sprint 08; o envio foi pelo nome da branch, que não acompanhava nada.
+- **As respostas às perguntas da revisão jurídica** chegaram num texto colado, e por isso pedi a confirmação dele com as
+  próprias palavras antes de agir ("Yes, all of it"). **2b:** sem CoinGecko ("Let's drop CoinGecko and just keep
+  Pyth"). Tirei o código inteiro, e não só a chave: a fonte, as configurações, a diferença entre as fontes no log e na
+  saúde, e o `attribution_url`. Código desligado que ninguém vai ligar é só mais coisa para revisar e um convite a
+  religar sem ler os termos. **3a:** o site passa para o relay no dia da instalação. **4a:** no devnet, US$ só onde
+  define um custo. As três foram para o registro das respostas, que prevalece sobre o resto, e o BP ficou na v0.0.4,
+  como nas decisões de 9 e 10/10.
+- **O `content/README.md`:** o Ronaldo aprovou como revisor. Como no `content/powers.md` da Sprint 19, a mudança foi
+  feita a pedido dele, então a segunda pessoa da regra do `content/` continua sendo o Lucas ou o Bernardo.
+- **O deploy em `brot.markets/dev0x`**, pedido em outro texto colado, ficou de lado: o Ronaldo explicou que queria "see
+  and test the work we did in the sprints" no navegador, sem celular por agora, e escolheu rodar aqui. O site subiu
+  nesta máquina contra o devnet, construído para o deploy do programa no slot 509389614, com a API de leitura ao lado.
+  Conferi as oito páginas num navegador sem tela. A lista abre vazia, e não por defeito: as quatro campanhas abertas no
+  devnet são da equipe, ninguém entrou nelas e já passaram de 24 horas, e a regra da Sprint 10 tira essas campanhas da
+  página inicial. Com "Show unlisted" elas aparecem. O console mostra uma folha de estilo do Google que o pacote da
+  carteira pede e que a política de segurança do site bloqueia; isso já estava na `main` e não quebra nada.
+- **O indexador** espera o teste do Ronaldo, a pedido dele.
+
+## A mescla, depois da revisão visual
+
+O pedido veio num texto colado, e o Ronaldo respondeu às perguntas da sessão: mesclar o #69 como está. A revisão visual
+(PR #70) tinha entrado na `main` antes, e a `main` entrou na branch com cinco conflitos. Quatro eram registros que os
+dois lados escreveram no mesmo lugar: a mudança, o índice das sessões, as decisões do dia e o mapa do código, gerado de
+novo. Ficaram as duas entradas, e a mais nova em cima onde o arquivo pede. O quinto era a linha de importação de um
+teste na web, que cada lado ampliou; ficaram as duas importações.
+
+O `content/README.md` foi junto com a aprovação só do Ronaldo, por decisão dele ("merge it as is"). A regra de duas
+pessoas do `content/` não foi cumprida antes da mescla: a segunda revisão (Lucas ou Bernardo) continua aberta, agora
+sobre o que já está na `main`.
+
+## O que fica com o fundador
+
+- Seguir os passos de `deploy/vps/README.md` ("The relay"): a conta de RPC do relay com limite de gasto (D4), o usuário
+  `brot-rpc` e a cópia própria do Bun, os dois arquivos de credencial, as duas regras do Cloudflare (o limite por IP em
+  `/rpc` e o cabeçalho `x-brot-tunnel`), a unidade, a rota `/rpc` do túnel por último, e o texto da privacidade no
+  mesmo dia, que é quando o site passa para o relay (3a).
+- A segunda revisão do `content/README.md` e do `content/powers.md` (o Lucas ou o Bernardo).
+- Conferir no servidor se o `CF-IPCountry` chega pelo túnel (C9), antes de qualquer país entrar na lista.
