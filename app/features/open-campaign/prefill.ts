@@ -4,9 +4,10 @@
  *          `target`, `days` (3 to 90) or `deadline` (Unix seconds), `epoch` and `account`, each checked against its
  *          field's own form, anything else dropped. The amount is never read from a link: it stays US$500 until the
  *          creator picks another. A prefilled box is labelled as such and never signs anything: a link only fills the
- *          draft, and "Review and sign" waits for the creator's click.
- * Version: 0.2.0 (the Sprint 19 adversarial review, M6: no amount from a link)
- * Sprint:  19 (site: open a campaign)
+ *          draft, and "Review and sign" waits for the creator's click. A graduation campaign takes no target from a link:
+ *          its target is its curve's threshold, read from the chain.
+ * Version: 0.3.0 (the sixth kind; 0.2.0, the Sprint 19 adversarial review, M6: no amount from a link)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
 import { isAddress } from "@solana/kit";
 import { feedsOf } from "@brot/sdk/read";
@@ -22,7 +23,7 @@ export type Prefilled = { draft: Draft; fromLink: boolean };
 /** The parameters a link may carry; any one of them present makes the box say it came from a link. */
 export const PREFILL_KEYS = ["t", "template", "kind", "feed", "dir", "target", "days", "deadline", "epoch", "account"];
 
-const KINDS: readonly KindName[] = ["price", "burn", "lock", "pool", "stake"];
+const KINDS: readonly KindName[] = ["price", "burn", "lock", "pool", "stake", "curve"];
 const one = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value)?.trim();
 
 /** A listed feed by its symbol ("BTC/USD", "btc") or its hex id, or `null`. */
@@ -46,7 +47,7 @@ export function prefillOf(query: Query): Prefilled {
   const dir = one(query.dir);
   if (dir === "above" || dir === "below") draft.direction = dir;
   const target = one(query.target);
-  if (target && /^[\d.,_]{1,48}$/.test(target)) draft.target = target;
+  if (kind !== "curve" && target && /^[\d.,_]{1,48}$/.test(target)) draft.target = target;
   const days = one(query.days);
   const deadline = one(query.deadline);
   if (days && /^\d{1,2}$/.test(days) && Number(days) >= 3 && Number(days) <= 90)

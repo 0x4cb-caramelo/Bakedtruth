@@ -4,9 +4,9 @@
  *          feeds with their state read live and the direction; for the other kinds, the account slot; the target in
  *          the kind's unit with the value now; the epoch on the epoch kinds; and the deadline, in the visitor's own time
  *          with its UTC moment and when entries close. Each slot shows its own messages; the help and the gaps are in the
- *          kind's own words and unit.
- * Version: 0.2.0 (the Sprint 19 copy review: help by unit, the gaps' words)
- * Sprint:  19 (site: open a campaign)
+ *          kind's own words and unit. A graduation campaign's target is not typed: its curve's threshold, read-only.
+ * Version: 0.3.0 (the sixth kind; 0.2.0, the Sprint 19 copy review: help by unit, the gaps' words)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
 "use client";
 
@@ -18,6 +18,7 @@ import type { SentencePart } from "../campaigns/sentence";
 import { BOX, KIND_WORDS, SLOTS } from "./copy";
 import { issuesAt, type BoxCheck } from "./check";
 import { AccountSlot } from "./account-slot";
+import { CurveTarget } from "./curve-target";
 import { DeadlineSlot } from "./deadline-slot";
 import { FeedPicker } from "./feed-picker";
 import type { Draft } from "./draft";
@@ -120,34 +121,38 @@ export function DetailsSection(p: {
           <IssueList issues={slotSaysWhy ? [] : at("account")} />
         </div>
       )}
-      <div className="space-y-1.5">
-        <label htmlFor={`${id}-target`} className="text-xs font-medium text-muted">
-          {SLOTS.target[draft.kind]}
-        </label>
-        <div className={draft.kind === "price" ? "op-num pre" : "op-num"}>
-          {draft.kind === "price" ? (
-            <span className="op-pre" aria-hidden="true">
-              $
-            </span>
-          ) : null}
-          <input
-            id={`${id}-target`}
-            data-op-next="target"
-            inputMode="decimal"
-            autoComplete="off"
-            value={draft.target}
-            onChange={(e) => setDraft((d) => ({ ...d, target: e.target.value }))}
-            aria-describedby={`${id}-target-help`}
-            aria-invalid={at("target").some((i) => i.level === "refuse")}
-            className="input"
-          />
+      {draft.kind === "curve" ? (
+        <CurveTarget read={p.slotRead} issues={at("target")} />
+      ) : (
+        <div className="space-y-1.5">
+          <label htmlFor={`${id}-target`} className="text-xs font-medium text-muted">
+            {SLOTS.target[draft.kind]}
+          </label>
+          <div className={draft.kind === "price" ? "op-num pre" : "op-num"}>
+            {draft.kind === "price" ? (
+              <span className="op-pre" aria-hidden="true">
+                $
+              </span>
+            ) : null}
+            <input
+              id={`${id}-target`}
+              data-op-next="target"
+              inputMode="decimal"
+              autoComplete="off"
+              value={draft.target}
+              onChange={(e) => setDraft((d) => ({ ...d, target: e.target.value }))}
+              aria-describedby={`${id}-target-help`}
+              aria-invalid={at("target").some((i) => i.level === "refuse")}
+              className="input"
+            />
+          </div>
+          <p id={`${id}-target-help`} className="text-xs text-muted">
+            {p.valueNow ? `${SLOTS.now(p.valueNow, below)} ` : ""}
+            {SLOTS.targetHelp[draft.kind]}
+          </p>
+          <IssueList issues={at("target")} />
         </div>
-        <p id={`${id}-target-help`} className="text-xs text-muted">
-          {p.valueNow ? `${SLOTS.now(p.valueNow, below)} ` : ""}
-          {SLOTS.targetHelp[draft.kind]}
-        </p>
-        <IssueList issues={at("target")} />
-      </div>
+      )}
       {t.epoch ? (
         <div className="space-y-1.5">
           <label htmlFor={`${id}-epoch`} className="text-xs font-medium text-muted">

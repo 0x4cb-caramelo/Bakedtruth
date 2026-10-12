@@ -6,10 +6,10 @@
  *          the box stops on its own: a missing field, the 10 minutes a transaction needs to land, the site's switch, the
  *          wallet and its balance. A paid opening is priced from its amount alone, from the first screen. Each verdict
  *          names the draft it is for, so a click acts only on the verdict of what is on screen. Pure: the program
- *          decides, the box only mirrors it.
- * Version: 0.2.0 (the Sprint 19 reviews: priced from the amount, early stops, the draft each verdict is for, a refused
- *          feed named)
- * Sprint:  19 (site: open a campaign)
+ *          decides, the box only mirrors it. A graduation campaign's target is its curve's threshold, never typed.
+ * Version: 0.3.0 (the sixth kind; 0.2.0, the Sprint 19 reviews: priced from the amount, early stops, the draft each
+ *          verdict is for, a refused feed named)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
 import {
   isTeamKey,
@@ -17,8 +17,6 @@ import {
   SYSTEM_PROGRAM_ID,
   U64_MAX,
   validateOpenCampaign,
-  type AccountShape,
-  type FetchedAccount,
   type OpenArgs,
   type OpenCampaignCheck,
   type OpeningQuote,
@@ -26,13 +24,14 @@ import {
 import type { OpeningChoice } from "@brot/sdk/tx";
 
 import { KIND_NAME } from "../campaign-page/copy";
+import { curveThresholdOf } from "./account-check";
 import { earlyIssues, feedIssue, issue, missingIssue, refusalIssue, walletIssues, type Issue } from "./check-issues";
 import { KIND_WORDS } from "./copy";
 import { ISSUES } from "./copy-money";
 import { choiceOf, DAY_SECONDS, LAND_MARGIN_SECONDS, type Draft } from "./draft";
-import { STAKE_AT_LEAST_OPENS } from "./kinds";
+import { DBC_GRADUATED_OPENS, STAKE_AT_LEAST_OPENS } from "./kinds";
 import { debitOf, quoteNow } from "./quote";
-import { FEED_CLUSTER, type BoxWorld } from "./reads";
+import { FEED_CLUSTER, type BoxWorld, type DraftAccounts } from "./reads";
 
 export type { Issue } from "./check-issues";
 
@@ -54,8 +53,8 @@ export type BoxCheck = {
 export type BoxInputs = {
   draft: Draft;
   world: BoxWorld | null;
-  /** The draft's own accounts: its metric account, and the campaign's address and vault for `id`. */
-  accounts: { metric: FetchedAccount | null; campaign: AccountShape; vault: AccountShape } | null;
+  /** The draft's own accounts: its metric account (and a curve's config), and the campaign's address and vault. */
+  accounts: DraftAccounts | null;
   readFailed: boolean;
   id: bigint;
   wallet: string | null;
@@ -121,7 +120,9 @@ export async function checkBox(a: BoxInputs): Promise<BoxCheck> {
   // A feed the reader refuses before its exponent can be read (row 4) says why, never "reading the price" (M7).
   const feedRefused = draft.kind === "price" && feed !== undefined && priceExponent === null;
   if (feedRefused) issues.push(feedIssue(feed, world, ctx));
-  const made = choiceOf(draft, { priceExponent, chainNow: world.clock.unixTimestamp, isTeam });
+  const curve = draft.kind === "curve" ? (a.accounts?.curveConfig ?? null) : null;
+  const curveThreshold = curveThresholdOf(curve?.account ?? null);
+  const made = choiceOf(draft, { priceExponent, chainNow: world.clock.unixTimestamp, isTeam, curveThreshold });
   if (!made.ok) {
     issues.push(...earlyIssues({ config, isTeam, quoted, ctx }));
     for (const slot of made.missing)
@@ -155,16 +156,19 @@ export async function checkBox(a: BoxInputs): Promise<BoxCheck> {
     solUsd: world.solUsd,
     campaignAccount: a.accounts?.campaign ?? null,
     vaultAccount: a.accounts?.vault ?? null,
-    build: { feeds: FEED_CLUSTER, stakeAtLeastOpens: STAKE_AT_LEAST_OPENS },
+    build: { feeds: FEED_CLUSTER, stakeAtLeastOpens: STAKE_AT_LEAST_OPENS, dbcGraduatedOpens: DBC_GRADUATED_OPENS },
     epochSchedule: world.epochSchedule,
     voteStake: null,
+    ...(curve ? { curveConfigAddress: curve.address, curveConfig: curve.account } : {}),
   });
   if (!verdict.ok) {
     const refused = refusalIssue(verdict.refusal.errorName, ctx);
     // The program reads an address with no account as the System Program's, empty: say there is none, not whose it is.
     const noAccount = refused.place === "account" && draft.kind !== "price" && a.accounts?.metric === null;
-    // The price kind's account is its feed's: a refusal of it shows by the asset, where the box has a field.
-    const place = draft.kind === "price" && refused.place === "account" ? "feed" : refused.place;
+    // The price kind's account is its feed's: a refusal of it shows by the asset, where the box has a field. A curve's
+    // target is its threshold, not typed: a refusal of it (completed, too full) is the pool's, shown by its slot.
+    const moved = draft.kind === "curve" && refused.place === "target" ? "account" : refused.place;
+    const place = draft.kind === "price" && refused.place === "account" ? "feed" : moved;
     issues.push(
       noAccount ? { ...refused, text: ISSUES.noAccount[0], tag: ISSUES.noAccount[1] } : { ...refused, place },
     );
