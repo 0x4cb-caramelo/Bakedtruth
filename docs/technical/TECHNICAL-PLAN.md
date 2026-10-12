@@ -1,6 +1,6 @@
 # Brot Markets — Technical Plan
 
-**Version:** 0.1.7 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
+**Version:** 0.1.8 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
 todo em ingles") from the architecture proposal 0.4 the founder approved that day ("sim para todos") and from BP
 v0.0.4, merged into `main` with PR #35 on 2026-10-08; v0.1.1 aligns it with what Sprint 02 built and measured
 (`docs/sprints/sprint-02-pot-core.md`, "TP to align"); v0.1.2 aligns it with what Sprint 03 built and to the founder's
@@ -10,8 +10,9 @@ v0.1.4 with Sprint 05 (§3.4.19); v0.1.5 records what Sprint 13 built (§3.5 poi
 its reviews deferred (§7.4), its privacy review (§8.2), a new economic risk (§13) and C13 (§14.4); v0.1.6 records
 the founder's answers to Sprint 13's twelve questions, given after its merge (§3.4.7, §3.5 points, §3.6, §7.4, §8.2,
 §13, §14.2); v0.1.7 records what Sprint 19 built (§3.6, the creation box), what its reviews deferred (§7.5) and its
-privacy review (§8.3) · **Date:**
-2026-10-10 · **Supersedes:** v0.0.1 of 2026-10-05,
+privacy review (§8.3); v0.1.8 adds the sixth kind, `DbcGraduated`, a Meteora DBC curve's graduation (§3.4.6, §3.4.8,
+§3.4.10; `docs/technical/meteora-readers-plan.md`) · **Date:**
+2026-10-12 · **Supersedes:** v0.0.1 of 2026-10-05,
 written in Portuguese, approved by the founder ("docs aprovados, podemos dar início"). Its last text, with §8.1, is in
 git history at commit `2089b81` (`git show 2089b81:docs/technical/TECHNICAL-PLAN.md`), the last commit that changed it;
 `0b40554`, the `main` before v0.1.0, holds the same text; tag `sprint-01` holds it before §8.1 was added
@@ -626,6 +627,7 @@ frozen program's guard, kept [F]). The two keepers on two providers are BR-24 (�
 | Family | Before the deadline | After the deadline |
 |---|---|---|
 | Irreversible fact (`SupplyAtMost`, `DammV2LockedAtLeast`) | Target met: `Yes`. Otherwise: refused, not resolvable yet | `No`. If the late read shows the target met, `No` with `met_late` set; the watchdog alerts and the team may void within the window |
+| Stamped fact (`DbcGraduated`, 2026-10-12) | Curve completed (stage 1 or later): `Yes`. Otherwise: refused, not resolvable yet | Completed with `finish_curve_timestamp` at or before the deadline: still `Yes`, the pool says when [F] (DBC's `process_swap.rs` stamps it from the clock). Completed later, or with no stamp: `No` with `met_late`. Not completed: `No` (`readers/shared.rs`, `stamped_resolution`) |
 | Epoch snapshot (`StakePoolTvlAtLeast`, `StakeAtLeast`) | In the measured epoch: `Yes` or `No` | Epoch missed: `Void` (`MissedWindow`). The frozen code records NO here [F] (`resolve_stake_pool`), which in a pot would pay out without a reading |
 | Price touch (`PriceTouch`) | A valid proof of a touch: `Yes` (§3.4.8) | `No`, or `Void` (`StaleFeed`) by the test below (D7, option b) |
 | Any | Unreadable account: refused | Unreadable account: `Void` (`UnreadableAccount`) |
@@ -700,6 +702,7 @@ bounds-checked `Cursor`, never by slicing [F] (`CLAUDE.md`).
 | `DammV2LockedAtLeast { shift }` | Liquidity locked on Meteora | DAMM v2, `cpamdpZC…` | Reads `permanent_lock_liquidity`, which only grows; 1,112-byte pool [F] (`tests/fixtures/index.json`) | 03 |
 | `StakePoolTvlAtLeast { epoch }` | Stake pool size | SPL Stake Pool, `SPoo1Ku8…` | Reads the snapshot the pool writes at its first update of an epoch [F] (`resolver.rs`) | 03 |
 | `StakeAtLeast { epoch }` | Validator stake | Vote program | Through `sol_get_epoch_stake`. Never returned YES in a test: LiteSVM's npm package returns zero [F] (`CLAUDE.md`); the crate's `set_epoch_stake` may allow it **[AC]**. Opens for real only after a YES checked on devnet (check 1, §3.4.10) | 03 |
+| `DbcGraduated` (byte 5, 2026-10-12) | A Meteora launch curve graduates | Meteora DBC, `dbcij3LW…` | Reads a 424-byte `VirtualPool` (a `TransferHookPool` is refused, `CurveHasTransferHook`): `quote_reserve` at 240, `migration_progress` at 308, `finish_curve_timestamp` at 344. The opening also reads the pool's own `PoolConfig` (1,048 bytes) passed after the nine slots: priced in wSOL (`CurveNotInSol`), threshold at least `DBC_MIN_GRADUATION_LAMPORTS`, 85 SOL (1 SOL in `drill`; `CurveTooSmall`); the target is that threshold (`TargetNotThreshold`), and at least 10% of it is still missing (`TargetTooClose`). Entries lock at stage 1. YES can be bought: whoever pays the rest of the curve completes it. Offsets checked on 12 mainnet accounts [F] (`tests/fixtures/dbc-*`); `readers/dbc_graduation.rs` | after 05 |
 
 **Kept out [FD]** (P1 §4.3): single-key outcomes (mint or freeze authority revoked, immutable program, immutable
 metadata), locked tokens, Token-2022 for now, small-token prices (three steps, later), opinion, sports (phase 2).
@@ -794,7 +797,7 @@ the program (X0.7); the SDK mirrors them for the preview and must refuse at leas
 
 | # | Check | Rule | Source | Sprint |
 |---|---|---|---|---|
-| 1 | The kind is one of five; four open. `StakeAtLeast` opens only in a build with the feature `stake-at-least`, which no build enables until a devnet YES (Sprint 05) | Closed `ReaderKind`; `ReaderKindNotOpen` | P1 §4.2; D-k | 02 (price), 03 |
+| 1 | The kind is one of six; four open everywhere. `StakeAtLeast` opens only in a build with the feature `stake-at-least`, which no build enables until a devnet YES (Sprint 05); `DbcGraduated` opens in every build but `mainnet` (`DBC_GRADUATED_OPENS`, until the audits cover it) | Closed `ReaderKind`; `ReaderKindNotOpen` | P1 §4.2; D-k; the Meteora plan, M-7 | 02 (price), 03 |
 | 2 | The account fits the kind: owner, size, discriminator, through the reader's `validate_at_creation` | With no list, the only gate on the account (D-i), except the price kind's feed list (row 4) | P1 §4.2; D-i, D-k | 02, 03 |
 | 3 | The target is not met yet and sits a minimum distance from the current value. Built (Sprint 03): a target already met, including zero or less on an "at least" kind, is `TargetAlreadyTouched`; a negative supply target and a `Below` price target at or below zero are `TargetUnreachable`; the minimum distance is 1% of the current value for each non-price kind (`MIN_DISTANCE_BPS_*`), and for the price kind it is measured from the edge of the confidence band **[AC]** | Otherwise the campaign is decided at birth | proposal §2.4.3 (OCR) | 02, 03 |
 | 4 | Price kind: `feed_id` is on the program's compiled feed list (founder answer 1, 2026-10-09; day one: Pyth's official sponsored list, 62 feeds on mainnet and 17 on devnet on that date, built in Sprint 04); the sponsored account of `feed_id` exists, owner `rec2HH…`, Full, fresh, confidence ≤ 0.5% of the price | §3.4.8, §3.4.1 | P1 §4.2; proposal §2.5 | 02; 04 (list) |

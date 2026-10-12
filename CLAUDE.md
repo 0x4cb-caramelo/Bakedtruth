@@ -83,6 +83,7 @@ cargo fmt --all -- --check
 cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint -- -D warnings
 cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint,mainnet -- -D warnings
 bun run scripts/surfpool/price-touch.ts   # the price reader on Surfpool's mainnet fork (needs the binary)
+bun run scripts/surfpool/dbc-graduation.ts   # the graduation reader on a real Meteora DBC curve, opening to payout (fork)
 node scripts/codemap.js --check && node scripts/ci-secret-scan.js origin/main
 bunx tsc --noEmit          # typecheck tests/scripts
 bun run dev                # Next.js app (cp app/.env.example app/.env.local first)
@@ -125,11 +126,13 @@ still renders the old program's devnet deployment through `app/lib` until Sprint
   `prize_lamports`) are bookkept, never read from a vault (I15); vaults are data-less program-owned PDAs.
 - `checks.rs` (and `checks/top_level.rs`): every check Anchor made, written by hand, each with its own error and a
   negative test; `scripts/checks-mutation.mjs` (X0.9) shows each check's tests fail without it.
-- `readers/`: the closed `ReaderKind`, five kinds, one file each, no generic reader: `price_touch.rs` (with
+- `readers/`: the closed `ReaderKind`, six kinds, one file each, no generic reader: `price_touch.rs` (with
   `price_update.rs` and `price_touch/`), `spl_mint.rs`, `damm_v2.rs`, `stake_pool.rs`, `vote_stake.rs` (with
-  `epoch.rs`). Each exposes `validate_at_creation`, `outcome_knowable` (the join lock) and `try_resolve`, checks owner
-  and layout before a byte, reads options and strings through the bounds-checked `Cursor`, and is tested on real
-  mainnet bytes; `shared.rs` holds the irreversible-fact table of TP §3.4.6 and row 3's minimum distance.
+  `epoch.rs`), `dbc_graduation.rs` (with `dbc_graduation/config.rs`; the sixth, appended on 2026-10-12, a Meteora DBC
+  curve's graduation judged by the pool's own `finish_curve_timestamp`). Each exposes `validate_at_creation`,
+  `outcome_knowable` (the join lock) and `try_resolve`, checks owner and layout before a byte, reads options and
+  strings through the bounds-checked `Cursor`, and is tested on real mainnet bytes; `shared.rs` holds the
+  irreversible-fact table of TP §3.4.6 (with its stamped row) and row 3's minimum distance.
 - `instructions/`: admin and team; `user_open_campaign` (the ten rows of TP §3.4.10); `user_join_campaign`;
   `resolve_campaign` (any wallet, top level only, never by CPI: YES, NO or Void into `InReview` with the review window);
   the team's window (`team_confirm_result`, `team_void_campaign`, `team_open_contest`, refused until Sprint 14); and
@@ -138,7 +141,8 @@ still renders the old program's devnet deployment through `app/lib` until Sprint
 - `events/`: one event per instruction by self-CPI, signed by the `["__event_authority"]` PDA, with a contiguous `seq`
   per campaign. `error.rs`: codes from 6000, appended, never reused.
 - Features: `drill` (devnet drill values), `mainnet` (refuses `drill` and `stake-at-least` at compile time),
-  `stake-at-least` (opens `StakeAtLeast`; off in every build until a devnet YES is recorded).
+  `stake-at-least` (opens `StakeAtLeast`; off in every build until a devnet YES is recorded). `DbcGraduated` opens in
+  every build but `mainnet` (`DBC_GRADUATED_OPENS`); its floor is 85 SOL, 1 SOL under `drill`.
 
 **Client library** (`packages/sdk`, `@brot/sdk`): the one library the site, the app, the services, the scripts and the
 tests import (A-6). `read`: constants, PDAs, account and event decoding with the decoder rules, the money math (a mirror
@@ -189,6 +193,9 @@ and `app/lib/chat.ts` are gone, and `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` 
   0.14.0). Mollusk 0.14 injects epoch stake (`mollusk.epoch_stake`), which is how the `StakeAtLeast` YES is tested:
   LiteSVM's npm package and Surfpool both answer 0 to `sol_get_epoch_stake`.
 - Rust tests need `--features no-entrypoint`: the Mollusk tests load the SBF binary, not the library's entrypoint.
+- A `DbcGraduated` opening passes the pool's `PoolConfig` as a tenth account, after the nine the IDL lists (no other
+  kind takes one; `NotEnoughAccountKeys` without it). The SDK's builder adds it, and its signed-bytes summary accepts
+  exactly that one read-only extra account, for that kind only.
 - LiteSVM (npm) runs the instruction tests (no bankrun). It starts at a nonzero slot and the kit warps to slot 1, so a
   captured price account's posted slot is far ahead of the clock; the slot bound counts that as posted now. The app
   still uses `@anchor-lang/core` (never `@coral-xyz/anchor`) for the old program until Sprint 09.
@@ -196,8 +203,8 @@ and `app/lib/chat.ts` are gone, and `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` 
   account), not the account's previous write; nothing reads it.
 - Worktrees that share one `CARGO_TARGET_DIR` compile `brot-markets` to the same unit hash, so cargo can reuse another
   worktree's library: give each worktree its own target dir, or touch the sources before building (Sprint 03).
-- Third-party account layouts (Pyth, SPL mints, stake pools, DAMM v2, vote accounts) are tested on real mainnet bytes in
-  `tests/fixtures`, captured by `scripts/capture-fixtures.ts`. Re-run it after an upstream upgrade and read the diff.
+- Third-party account layouts (Pyth, SPL mints, stake pools, DAMM v2, DBC pools and configs, vote accounts) are tested on
+  real mainnet bytes in `tests/fixtures`, captured by `scripts/capture-fixtures.ts`. Re-run it after an upstream upgrade and read the diff.
   `index.json` records each file's SHA-256 and `tests/fixtures.test.ts` checks it, so never edit a `.bin` by hand.
   Read their fields by copying bytes at pinned offsets; Anchor discriminators are name-derived and collide across
   programs, so check the owner first.
