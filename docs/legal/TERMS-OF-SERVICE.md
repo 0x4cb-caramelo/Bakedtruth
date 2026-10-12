@@ -3,6 +3,10 @@
 > **Not published since 10 October 2026.** The founder's answer 9a took `brot.markets/terms` down until Sprint 17
 > writes the terms of the campaign product: this text describes the earlier product (USDC, automatic payouts, other
 > team powers) and is kept only as the record of what was published from 8 October 2026. Nothing builds it into a page.
+>
+> **Edited 12 October 2026, still not published.** Section 4 now lists six kinds of question: the sixth, a Meteora
+> launch curve's graduation, was built that day. The rest of the text is unchanged. **This text needs a final legal
+> review** before any of it is published again, the new kind included (Sprint 17 writes the campaign product's terms).
 
 **Brot Markets** · Last updated: 8 October 2026
 
@@ -47,7 +51,12 @@ them. You sign every transaction yourself and pay Solana's network fees.
 > **The crumb:** a question, a pot, and a program that reads the answer.
 
 - **Only questions the chain can answer.** At launch: a large asset's price (from the Pyth oracle; YES if it touches
-  the target at any moment), a token burn, locked liquidity on Meteora, a stake pool's size and a validator's stake.
+  the target at any moment), a token burn, locked liquidity on Meteora, a stake pool's size, a validator's stake and,
+  since 12 October 2026, a Meteora launch curve's graduation (Meteora's Dynamic Bonding Curve, DBC). That sixth kind
+  takes only curves priced in SOL, of 85 SOL or more, with at least 10% still to raise when the question opens; its
+  target is the curve's own threshold; YES if the curve completes by the end date, judged by the second the curve's
+  own account recorded. **YES can be bought:** anyone who pays the rest of the curve completes it at once, and the
+  token's own team is the one best placed to do so. It opens on devnet only, until the audits cover its reader.
   No opinions, no politics, no sports.
 - **Entries** are USDC on YES or NO, as many as you like, recorded in your wallet's name.
 - **Entries close** when 5% of the market's time is left (at least 24 hours, at most 7 days before the end), or the
