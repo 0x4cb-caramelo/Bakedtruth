@@ -1315,7 +1315,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`accounts.ts`](services/rpc/src/accounts.ts) | what an account read may return through brot-rpc (TP §3.5, by owner, since there is no list of accounts, D-i): an account owned by the program, one of the five  | 62 |
+| [`accounts.ts`](services/rpc/src/accounts.ts) | what an account read may return through brot-rpc (TP §3.5, by owner, since there is no list of accounts, D-i): an account owned by the program, one of the six r | 64 |
 | [`allowlist.ts`](services/rpc/src/allowlist.ts) | the methods brot-rpc relays and the arguments each may carry (docs/technical/relay-allowlist.md, the trace of Sprints 11 to 19; TP §3.5, §6): eleven methods, ea | 161 |
 | [`config.ts`](services/rpc/src/config.ts) | brot-rpc's settings, read from its environment only (TP §3.5, T14; Sprint 08): the upstream RPC of its own account (a secret: logs never show it), a loopback bi | 107 |
 | [`limits.ts`](services/rpc/src/limits.ts) | brot-rpc's limits (TP §3.5; Sprint 08), all in memory, none written to a disk or a log: whose request it is (Cloudflare's `cf-connecting-ip`, an IPv6 address by | 128 |
@@ -1330,7 +1330,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`gates.test.ts`](services/rpc/tests/gates.test.ts) | brot-rpc's gates on transactions and clients (Sprint 08; X1.7): a transaction carries only this program, ComputeBudget and Lighthouse at its top level, never a  | 130 |
 | [`hardening.test.ts`](services/rpc/tests/hardening.test.ts) | the fixes of the Sprint 08 security review, each tested: a hostile option value is refused, never converted (M1, L1), and any throw is a JSON-RPC error with no  | 128 |
 | [`kit.ts`](services/rpc/tests/kit.ts) | what the relay's tests share (Sprint 08): settings as the defaults give them with a fake upstream URL, a relay wired to an in-process fake upstream that records | 103 |
-| [`relay.test.ts`](services/rpc/tests/relay.test.ts) | brot-rpc's refusals and its account rule, with an in-process fake upstream (Sprint 08; X1.7): a batch, an oversized body, a method off the allowlist, a subscrip | 154 |
+| [`relay.test.ts`](services/rpc/tests/relay.test.ts) | brot-rpc's refusals and its account rule, with an in-process fake upstream (Sprint 08; X1.7): a batch, an oversized body, a method off the allowlist, a subscrip | 163 |
 
 ## `tests/`
 
