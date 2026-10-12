@@ -48,6 +48,17 @@ describe("the opening's input schema", () => {
     expect(toOpenArgs(free, 0).args).toMatchObject({ openingUsd: 0n, maxLamports: 0n });
   });
 
+  test("a graduation input names its pool and takes the curve's threshold as its target", () => {
+    const params = { kind: "DbcGraduated", pool, deadlineAt: "1800000000" };
+    const input = OpenCampaignInput.parse({ id: "9", params });
+    const { args, metricAccount } = toOpenArgs(input, 2, 85_000_000_000n);
+    expect(args).toMatchObject({ kind: ReaderKind.DbcGraduated, target: 85_000_000_000n, direction: 0, epoch: 0n });
+    expect(metricAccount as string | null).toBe(pool);
+    expect(() => toOpenArgs(input, 2)).toThrow("DbcGraduated takes the curve's threshold as its target");
+    // The target is the curve's, never typed: an input that carries one is refused.
+    expect(OpenCampaignInput.safeParse({ id: "9", params: { ...params, target: "1" } }).success).toBe(false);
+  });
+
   test("refused before anything is built", () => {
     const price = {
       kind: "PriceTouch",

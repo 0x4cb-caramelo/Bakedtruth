@@ -3,7 +3,7 @@
  *          preview: from the arguments, the config, the chain's clock and the accounts the opening
  *          reads, the first refusal the program would return, in its order, with its error and row; or
  *          what the opening will store and charge. The program decides (A-10).
- * Version: 0.1.0
+ * Version: 0.1.1 (the sixth kind: the curve config after the nine slots, its build switch and floor)
  * Sprint:  05 (SDK)
  *
  * Order, as programs/brot-markets/src/instructions/campaigns/open_campaign.rs runs it: the argument
@@ -13,7 +13,14 @@
  * the slot and data-format ones aside (the SDK's builders cannot produce them).
  */
 import { BrotRefusal, isRefusal, refuse } from "../errors";
-import { OperatingLevel, PROGRAM_ID, ReaderKind, SOL_USD_ACCOUNT, SYSTEM_PROGRAM_ID } from "../constants";
+import {
+  DBC_MIN_GRADUATION_LAMPORTS,
+  OperatingLevel,
+  PROGRAM_ID,
+  ReaderKind,
+  SOL_USD_ACCOUNT,
+  SYSTEM_PROGRAM_ID,
+} from "../constants";
 import { isTeamKey, type GlobalConfig } from "../accounts";
 import { sponsoredPriceAddress } from "../pdas";
 import { MAINNET_EPOCH_SCHEDULE, type EpochSchedule } from "../chain/epoch";
@@ -45,11 +52,24 @@ export type OpenCampaignCheckInput = {
   /** The campaign PDA and its vault as they stand now (row 10). */
   campaignAccount: AccountShape;
   vaultAccount: AccountShape;
-  /** The build of the target cluster: its feed list, whether `StakeAtLeast` opens, its schedule. */
-  build?: { feeds?: FeedCluster; stakeAtLeastOpens?: boolean; schedule?: ScheduleConstants };
+  /**
+   * The build of the target cluster: its feed list, whether `StakeAtLeast` opens, whether `DbcGraduated` opens (every
+   * build but mainnet's, the default here), its floor on a curve's threshold (85 SOL; 1 SOL in a drill build), its
+   * schedule.
+   */
+  build?: {
+    feeds?: FeedCluster;
+    stakeAtLeastOpens?: boolean;
+    dbcGraduatedOpens?: boolean;
+    dbcMinGraduationLamports?: bigint;
+    schedule?: ScheduleConstants;
+  };
   epochSchedule?: EpochSchedule;
   /** `StakeAtLeast` only: the vote account's stake in the current epoch. */
   voteStake?: bigint | null;
+  /** `DbcGraduated` only: the account placed after the nine slots (the pool's config), as fetched (`null`: absent). */
+  curveConfigAddress?: string;
+  curveConfig?: FetchedAccount | null;
 };
 
 /** What the opening will store and charge, or the first refusal with its row of TP 3.4.10. */
@@ -71,7 +91,7 @@ async function check(input: OpenCampaignCheckInput): Promise<Extract<OpenCampaig
   const { args, config, clock } = input;
   const build = input.build ?? {};
   checkArgumentSizes(args);
-  const kind = openingKind(args.kind, build.stakeAtLeastOpens ?? false);
+  const kind = openingKind(args.kind, build.stakeAtLeastOpens ?? false, build.dbcGraduatedOpens ?? true);
   const direction = canonicalArguments(kind, args, build.feeds ?? "devnet");
   if (config === null) return refuse("WrongOwner");
   if (config.operatingLevel === OperatingLevel.EntriesHalted) refuse("OpenWhilePaused");
@@ -93,6 +113,9 @@ async function check(input: OpenCampaignCheckInput): Promise<Extract<OpenCampaig
     clock,
     epochSchedule: input.epochSchedule ?? MAINNET_EPOCH_SCHEDULE,
     voteStake: input.voteStake ?? null,
+    curveConfig:
+      input.curveConfigAddress === undefined ? null : (input.curveConfig ?? absent(input.curveConfigAddress)),
+    dbcMinGraduationLamports: build.dbcMinGraduationLamports ?? DBC_MIN_GRADUATION_LAMPORTS.real,
   });
   const isTeam = isTeamKey(config, input.signer);
   const payment = chargeOpening({

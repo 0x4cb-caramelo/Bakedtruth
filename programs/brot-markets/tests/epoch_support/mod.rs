@@ -142,6 +142,7 @@ pub fn validate(
         epoch,
         deadline_at,
         time,
+        curve_config: None,
     };
     readers::validate_at_creation(kind, &context)
 }

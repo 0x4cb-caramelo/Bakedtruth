@@ -22,6 +22,7 @@ export * from "./chain/price-update";
 export * from "./chain/price-rules";
 export * from "./quote";
 export * from "./chain/accounts";
+export * from "./chain/dbc";
 export * from "./chain/epoch";
 export * from "./validate/open-campaign";
 export { measuredByEpoch } from "./validate/open-rules";

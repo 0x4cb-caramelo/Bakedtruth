@@ -83,7 +83,7 @@ describe("resolve refuses", () => {
 
   test("UnknownReaderKind: a stored kind no reader has", async () => {
     const { w, c } = await resolvable();
-    const unknown = await campaignOn(w, 5, c.metric, 1_000_000n);
+    const unknown = await campaignOn(w, 6, c.metric, 1_000_000n);
     await expectRefused(w, unknown, resolveIx(unknown), "UnknownReaderKind");
   });
 

@@ -3149,6 +3149,9 @@
           },
           {
             "name": "StakeAtLeast"
+          },
+          {
+            "name": "DbcGraduated"
           }
         ]
       }
@@ -3549,7 +3552,7 @@
     {
       "code": 6044,
       "name": "ReaderKindNotOpen",
-      "msg": "Row 1: this kind does not open yet (`StakeAtLeast` until a devnet YES is recorded)"
+      "msg": "Row 1: this kind does not open in this build (`StakeAtLeast` until a devnet YES is recorded; `DbcGraduated` not on mainnet)"
     },
     {
       "code": 6045,
@@ -3975,6 +3978,31 @@
       "code": 6147,
       "name": "CutoffNotMovable",
       "msg": "The proof does not move the cut-off back: not earlier, not a YES price result, or a tally has started"
+    },
+    {
+      "code": 6148,
+      "name": "CurveHasTransferHook",
+      "msg": "Row 2: the DBC pool is a transfer-hook pool, which this kind does not accept"
+    },
+    {
+      "code": 6149,
+      "name": "CurveConfigMismatch",
+      "msg": "Row 2: the config account passed after the nine slots is not the DBC pool's own"
+    },
+    {
+      "code": 6150,
+      "name": "CurveNotInSol",
+      "msg": "Row 2: the curve is not priced in SOL: its config's quote mint is not wSOL"
+    },
+    {
+      "code": 6151,
+      "name": "CurveTooSmall",
+      "msg": "Row 2: the curve's graduation threshold is below `DBC_MIN_GRADUATION_LAMPORTS`"
+    },
+    {
+      "code": 6152,
+      "name": "TargetNotThreshold",
+      "msg": "Row 3: the target is not the curve's graduation threshold (`migration_quote_threshold`)"
     }
   ],
   "metadata": {

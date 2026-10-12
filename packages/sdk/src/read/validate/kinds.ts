@@ -1,15 +1,16 @@
 /**
- * Purpose: rows 2 and 3 of TP 3.4.10 (and the epoch kinds' part of row 5) for each of the five kinds:
+ * Purpose: rows 2 and 3 of TP 3.4.10 (and the epoch kinds' part of row 5) for each of the six kinds:
  *          the metric account fits the kind and the target is neither met nor too close, refused with
  *          the program's errors in the program's order. Mirrors each reader's `validate_at_creation`
  *          (programs/brot-markets/src/readers/*.rs).
- * Version: 0.1.0
+ * Version: 0.1.1 (the sixth kind, `DbcGraduated`, and the curve config it reads)
  * Sprint:  05 (SDK)
  */
 import { refuse } from "../errors";
-import { Direction, MIN_DISTANCE_BPS, PRICE_RULES, ReaderKind } from "../constants";
+import { Direction, MIN_DISTANCE_BPS, PRICE_RULES, ReaderKind, WSOL_MINT } from "../constants";
 import { i128 } from "../math/integers";
 import { readLockedLiquidity, readMint, readStakePool, readVoteAccount } from "../chain/accounts";
+import { curveGraduated, readCurveConfig, readCurvePool } from "../chain/dbc";
 import { checkEpochForOpening, type EpochSchedule } from "../chain/epoch";
 import { checkFreshAndTight, checkPriceTarget, minDistance, postedWithin } from "../chain/price-rules";
 import { readPriceUpdate } from "../chain/price-update";
@@ -32,6 +33,10 @@ export type KindContext = {
   epochSchedule: EpochSchedule;
   /** `StakeAtLeast`: the vote account's stake in the current epoch (RPC `getVoteAccounts`), when known. */
   voteStake: bigint | null;
+  /** `DbcGraduated`: the account after the nine slots (the pool's `PoolConfig`) as fetched, or `null` when none. */
+  curveConfig: { address: string; owner: string; data: Uint8Array } | null;
+  /** `DbcGraduated`: the build's floor on the curve's threshold (`DBC_MIN_GRADUATION_LAMPORTS`). */
+  dbcMinGraduationLamports: bigint;
 };
 
 /** Rows 2 and 3 for `ctx.kind`; returns the price exponent to store (0 for the other kinds). */
@@ -50,6 +55,9 @@ export function validateKind(ctx: KindContext): number {
       return 0;
     case ReaderKind.StakeAtLeast:
       validateVoteStake(ctx);
+      return 0;
+    case ReaderKind.DbcGraduated:
+      validateGraduation(ctx);
       return 0;
     default:
       return refuse("UnknownReaderKind");
@@ -103,4 +111,22 @@ function validateVoteStake(ctx: KindContext): void {
   checkEpochForOpening(ctx.epoch, ctx.deadlineAt, ctx.clock, ctx.epochSchedule);
   if (ctx.voteStake === null) throw new RangeError("StakeAtLeast needs the vote account's current epoch stake");
   validateAbove(ctx.voteStake, ctx.target, MIN_DISTANCE_BPS.stake);
+}
+
+/**
+ * `dbc_graduation::validate_at_creation`: the pool; its own config, priced in SOL, at least the floor; the target at
+ * the threshold; a curve still open with at least 10% of the threshold missing. The program refuses a missing config
+ * with `NotEnoughAccountKeys`, which has no code: the SDK's builder always passes it, so here it is the caller's error.
+ */
+function validateGraduation(ctx: KindContext): void {
+  const pool = readCurvePool(ctx.metric.owner, ctx.metric.data);
+  if (ctx.curveConfig === null) throw new RangeError("DbcGraduated needs the pool's config account");
+  if (ctx.curveConfig.address !== pool.config) refuse("CurveConfigMismatch");
+  const config = readCurveConfig(ctx.curveConfig.owner, ctx.curveConfig.data);
+  if (config.quoteMint !== WSOL_MINT) refuse("CurveNotInSol");
+  if (config.threshold < ctx.dbcMinGraduationLamports) refuse("CurveTooSmall");
+  if (ctx.target !== config.threshold) refuse("TargetNotThreshold");
+  if (curveGraduated(pool)) refuse("TargetAlreadyTouched");
+  const missing = config.threshold - pool.quoteReserve;
+  if (missing < minDistance(config.threshold, MIN_DISTANCE_BPS.dbc)) refuse("TargetTooClose");
 }

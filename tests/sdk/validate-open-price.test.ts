@@ -19,7 +19,7 @@ import { expectParity } from "./open-parity";
 describe("sdk refuses at least what the program refuses", () => {
   test("rows 1 and 4: a kind byte past the five, a direction byte past the two", async () => {
     const w = await openingWorld();
-    for (const kind of [5, 255]) await expectParity(w, w.creator, "UnknownReaderKind", { kind });
+    for (const kind of [6, 255]) await expectParity(w, w.creator, "UnknownReaderKind", { kind });
     await expectParity(w, w.creator, "InvalidDirection", { direction: 2 });
     await expectParity(w, w.creator, "UnusedArgumentNotZero", { epoch: 1n });
   });

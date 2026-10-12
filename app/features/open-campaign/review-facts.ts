@@ -11,7 +11,7 @@ import { bytesToHex, Direction, formatScaled, ReaderKind } from "@brot/sdk/read"
 import type { OpeningChoice } from "@brot/sdk/tx";
 
 import { assetOf, groupedDigits, sentenceOf } from "../campaigns/sentence";
-import { KIND_OF } from "../campaign-page/proof";
+import { kindOf } from "../campaign-page/proof";
 import { KIND_WORDS, PREVIEW } from "./copy";
 import { templateOf } from "./kinds";
 import type { KnownName } from "./names";
@@ -34,7 +34,7 @@ export function reviewFacts(a: {
   names: readonly KnownName[];
 }): ReviewFacts {
   const { choice } = a;
-  const kind = KIND_OF[choice.kind as ReaderKind];
+  const kind = kindOf(choice.kind as ReaderKind);
   const feedHex = typeof choice.feedId === "string" ? choice.feedId : bytesToHex(choice.feedId ?? new Uint8Array(32));
   const isPrice = kind === "price";
   const sentence = sentenceOf({

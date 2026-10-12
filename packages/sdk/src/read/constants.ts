@@ -2,8 +2,8 @@
  * Purpose: the program's address and the constants compiled into it that a client needs: seeds, other
  *          programs, code ceilings, price and reader bounds, account sizes, and the enums. Mirrors
  *          programs/brot-markets/src/constants.rs; tests/sdk/contract-source.test.ts compares the two.
- * Version: 0.1.1 (the event authority of the new program id 5Rx8…n8o)
- * Sprint:  05 (SDK)
+ * Version: 0.1.2 (Meteora DBC, wSOL and the graduation kind's floor and distance)
+ * Sprint:  05 (SDK); the sixth kind (`DbcGraduated`)
  *
  * The program address is read from the IDL, which shank-cli writes from `declare_id!` (Sprint 00's
  * carried item: "the SDK takes the program address from the IDL"). The time constants that differ in
@@ -62,6 +62,10 @@ export const PYTH_SHARD = 0;
 export const SPL_TOKEN_PROGRAM_ID = address("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 export const TOKEN_2022_PROGRAM_ID = address("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
 export const DAMM_V2_PROGRAM_ID = address("cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG");
+/** Meteora Dynamic Bonding Curve: owner of the graduation kind's pool and config (the same on both clusters). */
+export const DBC_PROGRAM_ID = address("dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN");
+/** Wrapped SOL: the graduation kind accepts only a curve whose config quotes it. */
+export const WSOL_MINT = address("So11111111111111111111111111111111111111112");
 export const STAKE_POOL_PROGRAM_ID = address("SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy");
 export const VOTE_PROGRAM_ID = address("Vote111111111111111111111111111111111111111");
 export const CLOCK_SYSVAR_ID = address("SysvarC1ock11111111111111111111111111111111");
@@ -111,9 +115,14 @@ export const PRICE_RULES = {
   staleFeedMinSeconds: 600n,
 } as const;
 
-/** Row 3's minimum distance, bps of the current value, per kind; and the epoch rule's slow slot. */
-export const MIN_DISTANCE_BPS = { price: 100, supply: 100, damm: 100, stakePool: 100, stake: 100 } as const;
+/**
+ * Row 3's minimum distance, bps of the current value, per kind (the graduation kind's: of the curve's threshold, which
+ * must still be at least that far from being met); and the epoch rule's slow slot.
+ */
+export const MIN_DISTANCE_BPS = { price: 100, supply: 100, damm: 100, stakePool: 100, stake: 100, dbc: 1_000 } as const;
 export const EPOCH_START_SLOW_SLOT_MS = 500n;
+/** The smallest curve threshold a graduation campaign may name, in lamports: 85 SOL; 1 SOL in a `drill` build. */
+export const DBC_MIN_GRADUATION_LAMPORTS = { real: 85_000_000_000n, drill: 1_000_000_000n } as const;
 
 /** Account sizes and type tags (state/*.rs; pinned by programs/brot-markets/tests/layout.rs). */
 export const ACCOUNT_LEN = { globalConfig: 400, campaign: 512, entry: 116, join: 96, vault: 0, feeVault: 0 } as const;

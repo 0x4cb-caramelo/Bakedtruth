@@ -1,7 +1,9 @@
 //! Purpose: what the readers share: the outcome a reader decides and the reading behind it, the
-//!          deadline test, the irreversible-fact table and row 3's minimum distance.
-//! Version: 0.0.3
-//! Sprint: 03 (readers and resolution); frozen at the sprint's opening
+//!          deadline test, the irreversible-fact table (and its row for a fact the account stamps
+//!          with the time it happened) and row 3's minimum distance.
+//! Version: 0.0.4
+//! Sprint: 03 (readers and resolution); frozen at the sprint's opening; the stamped fact for the
+//!         sixth kind (`DbcGraduated`)
 
 use pinocchio::{error::ProgramError, AccountView, Address};
 
@@ -120,6 +122,45 @@ pub fn fact_resolution(
         (true, false) => Resolution::Decided(Decision::yes(reading)),
         (false, false) => Resolution::NotYet,
         (met, true) => Resolution::Decided(Decision::no(reading, met)),
+    })
+}
+
+/// What a stamped fact's reader reads: the value to record and, once the fact is met, the Unix
+/// second the account itself stamped it (`Some(0)`: met, with no stamp).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Stamped {
+    pub observed: i128,
+    pub met_at: Option<u64>,
+}
+
+/// An irreversible fact the account stamps with its time (`DbcGraduated`), a new row of TP section
+/// 3.4.6. Up to the deadline, met is YES and not met is `NotYet`. After it, not met is NO; met with
+/// a stamp at or before the deadline is still YES, however late the resolution; met with a later
+/// stamp, or with none (zero), is NO flagged `met_late`, since nothing shows it was in time. An
+/// unreadable account is refused up to the deadline and voids (`UnreadableAccount`) after.
+pub fn stamped_resolution(
+    read: Result<Stamped, ProgramError>,
+    ctx: &ReadContext,
+) -> Result<Resolution, ProgramError> {
+    let after = after_deadline(ctx.campaign, &ctx.time);
+    let stamped = match read {
+        Ok(stamped) => stamped,
+        Err(_) if after => {
+            let reading = Reading::of(ctx.metric, 0);
+            let void = Decision::void(VoidReason::UnreadableAccount, reading);
+            return Ok(Resolution::Decided(void));
+        }
+        Err(error) => return Err(error),
+    };
+    let reading = Reading::of(ctx.metric, stamped.observed);
+    let deadline = ctx.campaign.deadline_at.get();
+    let in_time = |at: u64| at != 0 && i64::try_from(at).is_ok_and(|at| at <= deadline);
+    Ok(match (stamped.met_at, after) {
+        (None, false) => Resolution::NotYet,
+        (None, true) => Resolution::Decided(Decision::no(reading, false)),
+        (Some(_), false) => Resolution::Decided(Decision::yes(reading)),
+        (Some(at), true) if in_time(at) => Resolution::Decided(Decision::yes(reading)),
+        (Some(_), true) => Resolution::Decided(Decision::no(reading, true)),
     })
 }
 

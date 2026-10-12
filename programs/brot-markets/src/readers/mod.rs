@@ -1,15 +1,18 @@
 //! Purpose: the closed set of readers that turn an on-chain account into a YES/NO answer, and the
 //!          interface each one exposes: `validate_at_creation`, `outcome_knowable`, `try_resolve`.
-//! Version: 0.0.3
+//! Version: 0.0.4
 //! Sprint: 00 (setup); the price read in 01; the interface in 02; Sprint 03 ports the four other
-//!         kinds, the join lock and resolution, with these signatures frozen at its opening.
+//!         kinds, the join lock and resolution, with these signatures frozen at its opening; the
+//!         sixth kind, `DbcGraduated`, adds its reader and the curve config of the opening.
 //!
 //! One reader per file. Each checks the owner and the layout of its account before it reads a
 //! single field, and returns an error, never a panic, when the bytes are not what it expects.
-//! `ReaderKind` is closed at five (TP section 3.4.8): there is no generic reader.
+//! `ReaderKind` is closed at six (TP section 3.4.8 and the Meteora plan): there is no generic
+//! reader.
 
 pub mod cursor;
 pub mod damm_v2;
+pub mod dbc_graduation;
 pub mod epoch;
 pub mod price_touch;
 pub mod price_update;
@@ -29,7 +32,10 @@ use crate::state::{
     enums::{Direction, ReaderKind},
 };
 
-pub use shared::{after_deadline, fact_resolution, min_distance, Decision, Reading, Resolution};
+pub use shared::{
+    after_deadline, fact_resolution, min_distance, stamped_resolution, Decision, Reading,
+    Resolution, Stamped,
+};
 
 /// The cluster's clock, as the readers need it. Built from `Clock` on-chain; a host test builds
 /// it by hand.
@@ -65,6 +71,9 @@ pub struct CreationContext<'a> {
     /// The deadline the creator passed, already within 3 to 90 days (row 5).
     pub deadline_at: i64,
     pub time: ChainTime,
+    /// The account passed after the nine slots, if any: the graduation kind reads its pool's
+    /// `PoolConfig` there; no other kind reads it.
+    pub curve_config: Option<&'a AccountView>,
 }
 
 /// What a reader reports at opening, for the campaign to store.
@@ -98,6 +107,7 @@ pub fn validate_at_creation(
         ReaderKind::DammV2LockedAtLeast => damm_v2::validate_at_creation(ctx),
         ReaderKind::StakePoolTvlAtLeast => stake_pool::validate_at_creation(ctx),
         ReaderKind::StakeAtLeast => vote_stake::validate_at_creation(ctx),
+        ReaderKind::DbcGraduated => dbc_graduation::validate_at_creation(ctx),
     }
 }
 
@@ -110,6 +120,7 @@ pub fn outcome_knowable(kind: ReaderKind, ctx: &ReadContext) -> Result<bool, Pro
         ReaderKind::DammV2LockedAtLeast => damm_v2::outcome_knowable(ctx),
         ReaderKind::StakePoolTvlAtLeast => stake_pool::outcome_knowable(ctx),
         ReaderKind::StakeAtLeast => vote_stake::outcome_knowable(ctx),
+        ReaderKind::DbcGraduated => dbc_graduation::outcome_knowable(ctx),
     }
 }
 
@@ -121,5 +132,6 @@ pub fn try_resolve(kind: ReaderKind, ctx: &ReadContext) -> Result<Resolution, Pr
         ReaderKind::DammV2LockedAtLeast => damm_v2::try_resolve(ctx),
         ReaderKind::StakePoolTvlAtLeast => stake_pool::try_resolve(ctx),
         ReaderKind::StakeAtLeast => vote_stake::try_resolve(ctx),
+        ReaderKind::DbcGraduated => dbc_graduation::try_resolve(ctx),
     }
 }

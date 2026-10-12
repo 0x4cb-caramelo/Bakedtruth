@@ -1,7 +1,7 @@
 //! Purpose: the one-byte enums stored in accounts and passed in instruction data, with their
 //!          checked conversion from a raw byte.
-//! Version: 0.0.3
-//! Sprint: 02 (pot core on Pinocchio); `measured_by_epoch` in 03
+//! Version: 0.0.4
+//! Sprint: 02 (pot core on Pinocchio); `measured_by_epoch` in 03; `DbcGraduated` appended after 05
 //!
 //! Stored as `u8` in the layouts and tagged by position, as Borsh would: a new variant is
 //! appended, never inserted or reordered (CLAUDE.md). Each enum is written out in full, not
@@ -11,7 +11,8 @@ use shank::ShankType;
 
 use crate::error::BrotError;
 
-/// The five kinds of on-chain reading a campaign can ask about (TP section 3.4.8). Closed on
+/// The six kinds of on-chain reading a campaign can ask about (TP section 3.4.8, and the sixth,
+/// a Meteora DBC curve's graduation, in docs/technical/meteora-readers-plan.md). Closed on
 /// purpose: there is no generic reader.
 #[derive(ShankType, Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
@@ -21,6 +22,7 @@ pub enum ReaderKind {
     DammV2LockedAtLeast = 2,
     StakePoolTvlAtLeast = 3,
     StakeAtLeast = 4,
+    DbcGraduated = 5,
 }
 
 impl ReaderKind {
@@ -146,7 +148,7 @@ macro_rules! try_from_u8 {
 
 try_from_u8! {
     ReaderKind => BrotError::UnknownReaderKind =>
-        [PriceTouch, SupplyAtMost, DammV2LockedAtLeast, StakePoolTvlAtLeast, StakeAtLeast];
+        [PriceTouch, SupplyAtMost, DammV2LockedAtLeast, StakePoolTvlAtLeast, StakeAtLeast, DbcGraduated];
     Status => BrotError::BadAccountData => [Open, InReview, Contested, Settling, Settled];
     Outcome => BrotError::BadAccountData => [Unresolved, Yes, No, Void];
     SettleMode => BrotError::BadAccountData => [Unset, Split, OneSided, Refund];

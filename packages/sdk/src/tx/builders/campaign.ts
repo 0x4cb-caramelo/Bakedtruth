@@ -2,13 +2,13 @@
  * Purpose: the instructions of a campaign's open life, built by the Codama client with every program
  *          address derived here: opening (`user_open_campaign`), joining (`user_join_campaign`) and
  *          resolving (`resolve_campaign`); and the random campaign id the retry guard needs (T17).
- * Version: 0.1.0
+ * Version: 0.1.1 (the sixth kind: a graduation opening carries its pool's config after the nine slots)
  * Sprint:  05 (SDK)
  *
  * A builder checks nothing a program rule decides: ../../read/validate/open-campaign.ts mirrors the
  * opening's rules for the preview, and the program decides (A-10).
  */
-import { type Address, type Instruction, type TransactionSigner } from "@solana/kit";
+import { AccountRole, type Address, type Instruction, type TransactionSigner } from "@solana/kit";
 
 import {
   getResolveCampaignInstruction,
@@ -51,20 +51,24 @@ const feedBytes = (feedId: Uint8Array | string | undefined) =>
 
 /**
  * `user_open_campaign`. The metric account defaults to the feed's sponsored account for the price
- * kind, the only one the program accepts there; the other kinds must name theirs.
+ * kind, the only one the program accepts there; the other kinds must name theirs. `DbcGraduated`
+ * also passes its pool's `PoolConfig`, read-only, after the nine listed accounts; no other kind does.
  */
 export async function buildOpenCampaign(a: {
   creator: TransactionSigner;
   args: OpenCampaignArgs;
   metricAccount?: Address;
+  curveConfig?: Address;
 }): Promise<Instruction> {
   const feedId = feedBytes(a.args.feedId);
   if (feedId.length !== 32) throw new RangeError("feedId must be 32 bytes");
   const metricAccount =
     a.metricAccount ?? (a.args.kind === ReaderKind.PriceTouch ? await sponsoredPriceAddress(feedId) : undefined);
   if (!metricAccount) throw new RangeError("this kind needs its metric account");
+  const graduation = a.args.kind === ReaderKind.DbcGraduated;
+  if (graduation !== (a.curveConfig !== undefined)) throw new RangeError("only DbcGraduated takes a curve config");
   const campaign = await campaignAddress(a.args.id);
-  return getUserOpenCampaignInstruction({
+  const ix = getUserOpenCampaignInstruction({
     creator: a.creator,
     config: await configAddress(),
     campaign,
@@ -82,6 +86,8 @@ export async function buildOpenCampaign(a: {
     epoch: a.args.epoch ?? 0n,
     expectedParamsVersion: a.args.expectedParamsVersion,
   });
+  if (!a.curveConfig) return ix;
+  return { ...ix, accounts: [...ix.accounts, { address: a.curveConfig, role: AccountRole.READONLY }] };
 }
 
 /** `user_join_campaign`. `joinIndex` is the baker's `join_count` before this join (0 for the first). */
