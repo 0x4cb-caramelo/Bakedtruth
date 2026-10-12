@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **921** |
+| Arquivos mapeados | **923** |
 | Acima de 200 linhas | **41** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -1079,6 +1079,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`campaign.ts`](scripts/surfpool/campaign.ts) | the program's steps the price-touch run takes on a surfnet, with the test kit's builders and layouts: funded throwaway wallets, the config and the team, a free  | 111 |
+| [`dbc-graduation.ts`](scripts/surfpool/dbc-graduation.ts) | the Surfpool run of the graduation kind (`DbcGraduated`) on a real Meteora DBC curve: on a mainnet fork, a team campaign opens on a stage-0 pool priced in SOL w | 186 |
+| [`dbc.ts`](scripts/surfpool/dbc.ts) | what the graduation run needs of Meteora DBC on a surfnet: a pool and its config read through the SDK's readers, with the vaults and the base mint its swap name | 144 |
 | [`install.ts`](scripts/surfpool/install.ts) | install the brot-markets binary on a surfnet at the id the program declares, with no keypair: its ProgramData account (naming an upgrade authority the caller ho | 63 |
 | [`price-touch.ts`](scripts/surfpool/price-touch.ts) | the Surfpool run of the price reader, the criterion Sprint 01 carried to Sprint 03: on a mainnet fork, a team campaign is opened on SOL/USD's sponsored account; | 140 |
 | [`pyth-model.ts`](scripts/surfpool/pyth-model.ts) | drive Surfpool's Pyth `PriceUpdateV2` model on the upgraded receiver's accounts: read an account's fields, give the model's IDL to `rec2HH…`, and schedule overr | 177 |
