@@ -54,11 +54,10 @@ Do Lucas, em 12/10/2026, sobre a página inicial do `brot.markets` (o site provi
 - Num navegador sem tela, com o servidor local: a página inicial nos dois temas, no celular (390 px, sem rolagem
   lateral) e a `/2` nos dois temas; os quatro exemplos passaram em sequência com os números certos; nenhum erro no
   console e nenhum arquivo faltando, com a política de segurança do site ligada.
-- Não conferido: o `/dev0x` com o ícone novo (precisa do build do Next), e um celular de verdade.
+- Não conferido nesse momento: o `/dev0x` com o ícone novo (conferido depois, na seção do ícone), e um celular de verdade.
 
 ## Em aberto
 
-- O ícone do `/dev0x` só aparece depois de um build novo do site no servidor (`brot-site`), que é do Ronaldo.
 - A página ainda diz "Coming soon" e "Get an email when campaigns open on devnet", e a faixa nova diz que o devnet já
   está no ar. O texto do formulário é o que as pessoas consentiram; mudar é decisão do Lucas.
 - A faixa leva o público ao `/dev0x`, que mostra o ranking e a abertura de campanhas, antes de a página de privacidade
@@ -79,6 +78,28 @@ alterando depois o changelog, sessions e memories, commit e push."
 - **Conferido de fora, em `https://brot.markets/`:** a página, o estilo, o script e o pão respondem 200; a faixa aponta
   para `/dev0x`, que responde 200; num navegador sem tela os quatro exemplos rodaram nos dois temas. O único erro no
   console é o script de estatísticas do Cloudflare, bloqueado pela política do site como em todas as páginas.
-- **O ícone do `/dev0x` não foi publicado.** Está no repositório; aparece quando o site de lá for reconstruído.
 - **Um tropeço no caminho:** o servidor local que eu tinha deixado aberto para o Lucas ver a página segurava o arquivo
   `index.html`, e a troca de versão na cópia de trabalho travou. Desliguei o servidor local e refiz o passo.
+
+## O ícone do `/dev0x` no ar (12/10, 18h06 UTC)
+
+O Lucas escreveu: "vamos fazer o favicon do dev0x vir pro ar."
+
+- **Seguido o roteiro do Ronaldo** (`deploy/vps/README.md`, "The site under /dev0x", "A new release"). Entre a versão no
+  ar (`92f86f7d0d6b`) e a `main` (`6a52505c9aba`), a única diferença em tudo o que o site usa era o `favicon.ico`.
+- **A versão nova foi montada ao lado da atual,** com o site no ar: o pacote da `main`, a instalação sem scripts, o
+  build do Next sob o Bun fixado. O build leu a implantação do programa no devnet (slot 509389614, o mesmo da versão
+  anterior); sem essa leitura o site não assinaria nada, e a troca não seria feita.
+- **Testada antes da troca,** por trinta segundos numa porta interna à parte (4239): as páginas e o ícone novo
+  responderam.
+- **A troca:** o atalho `current` apontado para a versão nova e os dois serviços reiniciados (`brot-api` e
+  `brot-site`), às 18h06min49s UTC. A API voltou a dizer "ok" em seis segundos.
+- **O que deu errado, e passou sozinho:** nos dois minutos seguintes a API teve duas leituras recusadas pela RPC
+  pública do devnet (18h07min50s e 18h08min20s), enquanto relia o histórico depois do reinício. Nesse intervalo uma
+  página de campanha mostrou "Entries are not taken on this site right now". Nas duas horas antes do reinício não
+  havia nenhuma recusa, e depois das 18h08min40s também não.
+- **Conferido de fora:** o ícone servido em `brot.markets/dev0x` é, byte a byte, o arquivo novo; as seis páginas, a
+  API e os 18 arquivos da página respondem 200; num navegador sem tela, duas campanhas mostram o painel de entrada com
+  o campo de valor e sem o aviso, e a página de abertura mostra a caixa. Não conferido: uma carteira ligada.
+- **Para voltar atrás:** apontar `current` para `releases/92f86f7d0d6b` e reiniciar os dois serviços. A versão antiga
+  ficou no servidor.
