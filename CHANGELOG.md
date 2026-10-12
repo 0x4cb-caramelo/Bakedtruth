@@ -28,7 +28,7 @@ recomendado (1a a 12a).
 ### Added
 
 - **A página inicial "ainda assando"** (branch `feat/landing-still-baking`, 12/10/2026, a pedido do Lucas;
-  `session-log/2026-10-12-pagina-inicial-ainda-assando.md`). A página inicial foi publicada no mesmo dia, sozinha; o ícone do `/dev0x` espera o próximo build de lá.
+  `session-log/2026-10-12-pagina-inicial-ainda-assando.md`). A página inicial foi publicada no mesmo dia, sozinha; o ícone do `/dev0x` entrou no ar à tarde, numa versão nova do site (`6a52505c9aba`).
   - **A marca da barra do topo** é o pão simples (`img/brot-loaf.webp`), como o `BRAND.md` diz; o Baked segue andando
     pela página.
   - **A faixa "Still baking."**, nas cores da casca, entre a barra do topo e a página: inteira um link para `/dev0x`,
