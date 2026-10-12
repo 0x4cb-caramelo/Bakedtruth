@@ -27,6 +27,18 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **A página inicial "ainda assando"** (branch `feat/landing-still-baking`, 12/10/2026, a pedido do Lucas;
+  `session-log/2026-10-12-pagina-inicial-ainda-assando.md`). A página inicial foi publicada no mesmo dia, sozinha; o ícone do `/dev0x` espera o próximo build de lá.
+  - **A marca da barra do topo** é o pão simples (`img/brot-loaf.webp`), como o `BRAND.md` diz; o Baked segue andando
+    pela página.
+  - **A faixa "Still baking."**, nas cores da casca, entre a barra do topo e a página: inteira um link para `/dev0x`,
+    dizendo que lá se entra e se abre campanha com SOL de teste, sem valor.
+  - **Quatro exemplos novos rodando no topo** (`examples.js`, `live.css`), com a mecânica do demo do deck: um ponteiro
+    entra num lado, a cadeia resolve, e o cartão mostra para onde foi o pote. Preço, stake pool, queima e liquidez
+    travada; dois acertos e dois erros; a conta é a do programa (10% do lado perdedor e 1% das entradas, tirados do
+    pote), e não a do deck. A `/2` recebeu o mesmo, porque diz o que a página inicial diz.
+  - **O ícone da aba do `/dev0x`** (`app/app/favicon.ico`) deixou de ser o triângulo do Next e é o do `brot.markets`.
+  - 51 testes no site provisório (4 novos, `tests/home.test.mjs`); conferido num navegador nos dois temas e no celular.
 - **O site em `brot.markets/dev0x`, pronto para o servidor** (branch `feat/dev0x-deploy`, 11/10/2026, a pedido do
   Ronaldo; `deploy/vps/README.md`, "The site under /dev0x"; não implantado). A raiz do domínio continua sendo a página
   de espera.
