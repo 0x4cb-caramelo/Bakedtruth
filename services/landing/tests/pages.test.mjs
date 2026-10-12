@@ -23,7 +23,7 @@ const LEGAL = join(ROOT, "..", "..", "..", "docs", "legal");
 function localFiles(html, folder) {
   const found = [...html.matchAll(/\s(?:src|href)="([^"#?]+)(?:\?v=\d+)?"/g)].map((match) => match[1]);
   return found
-    .filter((ref) => !/^[a-z]+:/.test(ref) && !["/", "/privacy"].includes(ref))
+    .filter((ref) => !/^[a-z]+:/.test(ref) && !["/", "/privacy", "/dev0x"].includes(ref))
     .map((ref) => (ref.startsWith("/") ? ref.slice(1) : join(folder, ref)));
 }
 

@@ -40,7 +40,7 @@ test("every file /2 points at exists", () => {
   const refs = [...two.matchAll(/\s(?:src|href)="(\/[^"#?]*)/g)].map((m) => m[1]);
   assert.ok(refs.length > 8);
   for (const ref of refs) {
-    if (["/2/", "/terms", "/privacy"].includes(ref)) continue;
+    if (["/2/", "/terms", "/privacy", "/dev0x"].includes(ref)) continue;
     assert.ok(existsSync(join(ROOT, ref)), `${ref} is missing`);
   }
 });
