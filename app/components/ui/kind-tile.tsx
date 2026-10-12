@@ -1,11 +1,11 @@
 /**
- * Purpose: the campaign's kind as a letter tile on the kind's own colour, with its name beside it in the screens. The five kinds (P1 §4.2) map from the program's reader kinds in the SDK's TP table.
+ * Purpose: the campaign's kind as a letter tile on the kind's own colour, with its name beside it in the screens. The six kinds (P1 §4.2, and the Meteora graduation) map from the program's reader kinds in the SDK's TP table.
  * Version: 0.1.0
  * Sprint:  09 (site shell, theme and wallet; the design of Sprint -1)
  */
 import { cx } from "./cx";
 
-export type KindName = "price" | "burn" | "lock" | "pool" | "stake";
+export type KindName = "price" | "burn" | "lock" | "pool" | "stake" | "curve";
 
 const TONE: Record<KindName, string> = {
   price: "bg-k-price-bg text-k-price-fg",
@@ -13,10 +13,11 @@ const TONE: Record<KindName, string> = {
   lock: "bg-k-lock-bg text-k-lock-fg",
   pool: "bg-k-pool-bg text-k-pool-fg",
   stake: "bg-k-stake-bg text-k-stake-fg",
+  curve: "bg-k-curve-bg text-k-curve-fg",
 };
 
 // The approved prototype's letters (prototype-lab/campaigns, ui/parts.js): $ for a price, P for a pool, V for a validator.
-const LETTER: Record<KindName, string> = { price: "$", burn: "B", lock: "L", pool: "P", stake: "V" };
+const LETTER: Record<KindName, string> = { price: "$", burn: "B", lock: "L", pool: "P", stake: "V", curve: "G" };
 
 export function KindTile({ kind, small, className }: { kind: KindName; small?: boolean; className?: string }) {
   return (

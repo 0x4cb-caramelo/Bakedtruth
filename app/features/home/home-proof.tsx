@@ -1,19 +1,28 @@
 /**
  * Purpose: the "On-chain read" panel of a home slide (the approved prototype's `.home-proof`, where the old chart was):
  *          the value read now against the target, "if read now" with the distance, who opened the campaign, the
- *          account, who reads it, the two moments in UTC, and the creator notice on burn, lock and stake campaigns.
- * Version: 0.1.1 (a price in US$ with "$")
- * Sprint:  10 (campaign list), in the UI overhaul
+ *          account, who reads it, the two moments in UTC, and the creator notice on burn, lock and stake campaigns; on
+ *          a graduation campaign, the share of its curve filled and the risk that anyone may pay the rest of it.
+ * Version: 0.2.0 (the sixth kind; 0.1.1, a price in US$ with "$")
+ * Sprint:  10 (campaign list), in the UI overhaul; the sixth kind's site
  */
 import { AlertTriangle, Eye } from "lucide-react";
 
-import { CREATOR_NOTICE } from "@/features/campaign-page/copy";
+import { BOUGHT, CREATOR_NOTICE } from "@/features/campaign-page/copy";
+import { filledText } from "@/features/campaign-page/curve";
 import { utc, valueText } from "@/features/campaign-page/format";
 import type { Card } from "@/features/campaigns/model";
 import { comparator, kindName, type Reading } from "@/features/campaigns/readings";
 import { relative } from "@/features/campaigns/when";
 
-const FIELD = { price: "price now", burn: "Supply now", lock: "Locked now", pool: "Pool total now", stake: "Stake" };
+const FIELD = {
+  price: "price now",
+  burn: "Supply now",
+  lock: "Locked now",
+  pool: "Pool total now",
+  stake: "Stake",
+  curve: "Raised now",
+};
 const short = (address: string) => `${address.slice(0, 4)}…${address.slice(-4)}`;
 
 function IfNow({ card, reading }: { card: Card; reading: Reading | null | undefined }) {
@@ -25,12 +34,17 @@ function IfNow({ card, reading }: { card: Card; reading: Reading | null | undefi
   const gap = card.target > reading.value ? card.target - reading.value : reading.value - card.target;
   const share = reading.value === 0n ? null : ((Number(gap) / Number(reading.value)) * 100).toFixed(1);
   const up = comparator(card) === "≥";
+  // A curve's distance is the share of it filled, not the gap over what it raised (+400,000% on a new curve).
+  const bps = kind === "curve" && card.target > 0n ? Number((reading.value * 10_000n) / card.target) : null;
+  const filled = bps === null ? null : filledText(Math.min(bps, 10_000));
   return (
     <p className="home-ifnow">
       If read now: <b className={met ? "y" : "n"}>{met ? "YES" : "NO"}</b>
       {met
         ? ""
-        : ` · ${valueText(kind, gap, reading.exponent, card.asset)} to go${share ? ` (${up ? "+" : "−"}${share}%)` : ""}`}
+        : ` · ${valueText(kind, gap, reading.exponent, card.asset)} to go${
+            filled ? ` (${filled} filled)` : share ? ` (${up ? "+" : "−"}${share}%)` : ""
+          }`}
     </p>
   );
 }
@@ -103,7 +117,7 @@ export function HomeProof({ card, reading, now }: { card: Card; reading: Reading
       {kind !== "price" ? (
         <p className="home-creator">
           <AlertTriangle className="size-3.5" aria-hidden="true" />
-          <span>{CREATOR_NOTICE}</span>
+          <span>{kind === "curve" ? BOUGHT : CREATOR_NOTICE}</span>
         </p>
       ) : null}
     </div>

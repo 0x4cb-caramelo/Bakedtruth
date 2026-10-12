@@ -27,7 +27,7 @@ export const priceAsset = (kind: KindName, feedId: Parameters<typeof bytesToHex>
 /** A value read or a target, in the units its kind reads; a price with "$" when its feed (`asset`) is in US$. */
 export function valueText(kind: KindName, value: bigint, exponent: number, asset: string | null = null): string {
   if (kind === "price") return priceText(value, exponent, asset);
-  if (kind === "pool" || kind === "stake") return `${sol4(value)} SOL`;
+  if (kind === "pool" || kind === "stake" || kind === "curve") return `${sol4(value)} SOL`;
   return grouped(value);
 }
 
