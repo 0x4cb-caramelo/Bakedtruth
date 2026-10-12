@@ -19,8 +19,10 @@
          the home page would look for them under /2/. -->
     <script src="/app.js?v=2"></script>
     <script type="module" src="/mascot.js?v=3"></script>
+    <script type="module" src="/examples.js?v=1"></script>
     <link rel="stylesheet" href="/2/base.css?v=2" />
     <link rel="stylesheet" href="/2/home.css?v=2" />
+    <link rel="stylesheet" href="/live.css?v=1" />
   </head>
   <body>
     <div class="strip">
@@ -29,7 +31,7 @@
     <header class="top">
       <div class="wrap">
         <a class="brand" href="/2/" aria-label="Brot Markets, home">
-          <img src="/img/baked-deadpan.webp" alt="" width="58" height="37" />
+          <img src="/img/brot-loaf.webp" alt="" width="58" height="35" />
           <span>brot<b>.markets</b></span>
         </a>
         <a class="top-link" href="https://x.com/brotmarkets" rel="noopener">@brotmarkets on X</a>
@@ -44,6 +46,17 @@
         </button>
       </div>
     </header>
+
+    <div class="wrap">
+      <a class="baking" href="/dev0x" data-mood="tapping">
+        <b>Still baking.</b>
+        <span class="baking-text">
+          This page is still in the oven. The devnet site is out already: join or open a campaign with test SOL, which
+          has no real value.
+        </span>
+        <span class="baking-go">Try it on devnet →</span>
+      </a>
+    </div>
 
     <main>
       <div class="wrap">
@@ -81,30 +94,99 @@
 
           <aside
             class="read"
-            aria-label="Example campaign"
+            aria-label="Example campaigns"
             data-perch="read"
             data-perch-x="0.84"
             data-perch-pose="skeptical"
             data-perch-say="It's a read. Not a vote."
+            data-examples
           >
-            <p class="kicker">Example · not a live campaign</p>
-            <h2>Does SOL touch $300 by Dec 31?</h2>
-            <div class="sides">
-              <div class="side yes" data-mood="approve">Yes <b>30%</b></div>
-              <div class="side no" data-mood="skeptical">No <b>70%</b></div>
+            <div class="ex-stack">
+              <article class="ex ex-a is-on" data-ex data-yes="12" data-no="7.5" data-pick="no" data-outcome="no">
+                <p class="kicker">Example 1 of 4 · Price · not a live campaign</p>
+                <h2>Does ETH fall to $2,000 by Nov 30?</h2>
+                <div class="sides">
+                  <div class="side yes" data-side="yes" data-mood="approve">Yes <b>62%</b></div>
+                  <div class="side no" data-side="no" data-mood="skeptical">No <b>38%</b></div>
+                </div>
+                <div class="bar"><i></i></div>
+                <div class="ex-foot">
+                  <p class="ex-line" data-ex-line>Read from Pyth's ETH/USD price account</p>
+                  <div class="ex-result">
+                    <img data-ex-face src="/img/baked-approve.webp" alt="" width="64" height="41" />
+                    <p class="ex-words">
+                      <span class="ex-stamp">Resolved by the chain · ETH never fell to $2,000</span>
+                      <b class="ex-amount" data-ex-amount></b>
+                      <span class="ex-pot" data-ex-pot></span>
+                    </p>
+                  </div>
+                </div>
+              </article>
+              <article class="ex ex-b" data-ex data-yes="6.5" data-no="3" data-pick="yes" data-outcome="no">
+                <p class="kicker">Example 2 of 4 · Stake pool · not a live campaign</p>
+                <h2>Does $POOL's stake pool reach 1M SOL by the last epoch of 2026?</h2>
+                <div class="sides">
+                  <div class="side yes" data-side="yes" data-mood="approve">Yes <b>68%</b></div>
+                  <div class="side no" data-side="no" data-mood="skeptical">No <b>32%</b></div>
+                </div>
+                <div class="bar"><i></i></div>
+                <div class="ex-foot">
+                  <p class="ex-line" data-ex-line>Read from the stake pool's own account</p>
+                  <div class="ex-result">
+                    <img data-ex-face src="/img/baked-approve.webp" alt="" width="64" height="41" />
+                    <p class="ex-words">
+                      <span class="ex-stamp">Resolved by the chain · the pool held less</span>
+                      <b class="ex-amount" data-ex-amount></b>
+                      <span class="ex-pot" data-ex-pot></span>
+                    </p>
+                  </div>
+                </div>
+              </article>
+              <article class="ex ex-c" data-ex data-yes="8.5" data-no="6" data-pick="yes" data-outcome="yes">
+                <p class="kicker">Example 3 of 4 · Burn · not a live campaign</p>
+                <h2>Does $TOKEN's supply fall to 900M by Dec 15?</h2>
+                <div class="sides">
+                  <div class="side yes" data-side="yes" data-mood="approve">Yes <b>59%</b></div>
+                  <div class="side no" data-side="no" data-mood="skeptical">No <b>41%</b></div>
+                </div>
+                <div class="bar"><i></i></div>
+                <div class="ex-foot">
+                  <p class="ex-line" data-ex-line>Read from the token's mint account</p>
+                  <div class="ex-result">
+                    <img data-ex-face src="/img/baked-approve.webp" alt="" width="64" height="41" />
+                    <p class="ex-words">
+                      <span class="ex-stamp">Resolved by the chain · the supply fell to 900M</span>
+                      <b class="ex-amount" data-ex-amount></b>
+                      <span class="ex-pot" data-ex-pot></span>
+                    </p>
+                  </div>
+                </div>
+              </article>
+              <article class="ex ex-d" data-ex data-yes="5" data-no="4.5" data-pick="no" data-outcome="yes">
+                <p class="kicker">Example 4 of 4 · Lock · not a live campaign</p>
+                <h2>Does $TOKEN lock 500k of Meteora liquidity for good by Jan 15?</h2>
+                <div class="sides">
+                  <div class="side yes" data-side="yes" data-mood="approve">Yes <b>53%</b></div>
+                  <div class="side no" data-side="no" data-mood="skeptical">No <b>47%</b></div>
+                </div>
+                <div class="bar"><i></i></div>
+                <div class="ex-foot">
+                  <p class="ex-line" data-ex-line>Read from the Meteora pool's account</p>
+                  <div class="ex-result">
+                    <img data-ex-face src="/img/baked-approve.webp" alt="" width="64" height="41" />
+                    <p class="ex-words">
+                      <span class="ex-stamp">Resolved by the chain · the liquidity is locked</span>
+                      <b class="ex-amount" data-ex-amount></b>
+                      <span class="ex-pot" data-ex-pot></span>
+                    </p>
+                  </div>
+                </div>
+              </article>
             </div>
-            <div class="bar"><i></i></div>
-            <dl class="facts">
-              <div>
-                <dt>Pot</dt>
-                <dd>3 on Yes · 7 on No (SOL)</dd>
-              </div>
-              <div>
-                <dt>Resolved by</dt>
-                <dd>Reading the Pyth price account on Solana</dd>
-              </div>
-            </dl>
-            <p class="fine">The percentages are the share of the pot on each side.</p>
+            <span class="ex-cursor" data-ex-cursor aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-2 6z" fill="#fff" stroke="#10151c" stroke-width="1.6" stroke-linejoin="round" /></svg>
+            </span>
+            <p class="fine">Made-up examples, in test SOL. The percentages are each side's share of the pot.</p>
           </aside>
         </section>
 
