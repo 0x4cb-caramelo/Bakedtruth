@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **923** |
+| Arquivos mapeados | **924** |
 | Acima de 200 linhas | **41** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -1407,6 +1407,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`price-proof.test.ts`](tests/brot/price-proof.test.ts) | the price kind's YES proof window in LiteSVM (TP sections 3.4.6 and 3.4.8; Q4; D7): a touch proven from any address resolves YES inside `[opens_at, deadline]` w | 143 |
 | [`price-support.ts`](tests/brot/price-support.ts) | what the price kind's LiteSVM tests share: a captured update's fields read from its bytes, a fresh address holding a price update (the YES proof slot accepts an | 53 |
 | [`program.ts`](tests/brot/program.ts) | the program's addresses for the LiteSVM tests: ids, seeds, discriminators, PDAs and the known outside accounts (Pyth, the loader). Mirrors programs/brot-markets | 140 |
+| [`readers-dbc-adversarial.test.ts`](tests/brot/readers-dbc-adversarial.test.ts) | the graduation kind (`DbcGraduated`) against the two attacks of the audit of 2026-10-12, sent to the program in LiteSVM on the Meteora DBC accounts captured fro | 141 |
 | [`readers-dbc.test.ts`](tests/brot/readers-dbc.test.ts) | the graduation kind (`DbcGraduated`) in the program, on the Meteora DBC pool and config captured from mainnet (tests/fixtures/dbc-*): a team key opens a campaig | 134 |
 | [`readers-epoch.test.ts`](tests/brot/readers-epoch.test.ts) | the two epoch kinds through the program in LiteSVM, on the captured JitoSOL pool and mainnet vote account: the stake pool opening at its edges, resolution with  | 194 |
 | [`readers-facts.test.ts`](tests/brot/readers-facts.test.ts) | the two fact readers in the program, on the mainnet accounts of tests/fixtures: a team key opens `SupplyAtMost` and `DammV2LockedAtLeast` campaigns on the real  | 199 |
