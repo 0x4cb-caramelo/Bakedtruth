@@ -57,7 +57,8 @@ mesmo ticker, mas não o mesmo pool, e o sufixo está sempre lá para quem não 
 - **A lista revisada aceita curvas**: o tipo `curve` e um nome que pode começar com `$` (`packages/sdk/src/schemas/
   account-names.ts`); a busca da caixa acha "$BROT" digitando "brot" e nunca propõe uma meta para uma curva.
 - **O relay serve inteiras as contas da Metaplex e do Token-2022** (`services/rpc/src/accounts.ts`). Sem isso, pelo
-  relay os metadados viriam vazios e toda curva seria `Token (…7Dny)`. Vale no próximo deploy do relay.
+  relay os metadados viriam vazios e toda curva seria `Token (…7Dny)`. O relay ainda não está no ar (o site lê a RPC
+  pública do devnet direto, `deploy/vps/site-build.conf`); quando entrar, já entra servindo os metadados.
 - **Os botões de lado** (`side-picker.tsx`, `entry.css`): o botão só com a palavra, centralizada, em 21 px; embaixo, a
   chance e a estimativa ("62% · est. 2.8826 per 1", ou "refund if alone") no texto neutro, ligadas ao botão por
   `aria-describedby`, para o leitor de tela ouvir as duas coisas juntas.
@@ -87,7 +88,12 @@ mesmo ticker, mas não o mesmo pool, e o sufixo está sempre lá para quem não 
   fundador confirmar.
 - **O token do pool de demonstração se chama "TEST" na cadeia.** A lista revisada o chama de `$BROT`, como o pedido
   mandou. Para a cadeia e para o explorador, o token continua "TEST".
-- **O relay de produção precisa de deploy** para servir os metadados; até lá, pelo relay, toda curva não revisada
-  aparece como `Token (…7Dny)`.
+- **O relay ainda não está no ar.** Hoje o site lê a RPC pública do devnet, que serve os metadados; o relay só passa a
+  importar quando for publicado, e a versão desta branch já os serve.
+- **Conferido num navegador**, com o site rodando localmente contra o devnet: a 1280 e a 412 px, os botões só com a
+  palavra e a linha embaixo; a campanha de demonstração com `$BROT` no título, no nome e na regra, e o pool e o mint na
+  prova; a lista da página inicial com `$BROT`; e, com a lista revisada esvaziada só durante o teste, `$TEST (…7Dny)`
+  lido da cadeia na caixa de abertura e no título. O aviso de hidratação que o modo de desenvolvimento mostra vem do
+  botão da carteira no topo e já existia.
 - **O dono de um token pode mudar o símbolo depois** que a campanha abriu (metadados mutáveis). O site lê de novo a
   cada visita; o sufixo e os endereços da prova não mudam.

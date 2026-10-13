@@ -38,7 +38,8 @@ recomendado (1a a 12a).
     metadados da Metaplex ou a extensão do Token-2022, dono primeiro. O SDK o limpa (`tickerOf`, a mesma regra para o
     site e o app): só de 1 a 10 letras e dígitos ASCII, e nada que imite SOL, WSOL, USDC, USDT ou BROT.
   - **Os endereços ficam na prova**: o pool e o mint do token ("Token mint (CA)"), com link e botão de copiar.
-  - **O relay serve inteiras as contas da Metaplex e do Token-2022**; vale no próximo deploy dele.
+  - **O relay serve inteiras as contas da Metaplex e do Token-2022**, pronto para quando ele entrar no ar (hoje o site
+    lê a RPC pública do devnet direto).
   - **Os botões SIM e NÃO** levam só a palavra; a chance e a estimativa ficam embaixo de cada um, no texto neutro.
   - **Testes**: 13 novos (`tests/sdk/token-symbol.test.ts`, `tests/site/curve-name.test.ts`,
     `tests/site/panels-render.test.ts`), em contas reais da mainnet; dois testes antigos passam a esperar

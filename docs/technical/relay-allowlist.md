@@ -29,7 +29,7 @@ Sprint 09.
 | Method | Called by | What it may read or carry |
 |---|---|---|
 | `getAccountInfo` | Page, SDK preparation, guard, recheck, A-8, claim, the creation box (a curve's config) | The program's accounts (`Campaign`, `GlobalConfig`, `Entry`, owner `5Rx8…n8o`); the Clock sysvar; a metric account whose owner is one of the six readers' programs (Pyth receiver `rec2HH…`, SPL Token, Meteora DAMM v2, SPL Stake Pool, Vote, Meteora DBC; for a graduation campaign, the pool and the config it names); an `Entry` that does not exist yet answers `null`; and the program's ProgramData (A-8: below), only as a `dataSlice` of offset 0 and length 45. Encoding `base64`, commitment `confirmed` |
-| `getMultipleAccounts` | Page, my entries | The same accounts, up to three per call on the campaign page (campaign and config; then metric, the wallet's entry, the creator's entry); on "My entries" (Sprint 12) up to 100 per call: each campaign with the wallet's `Entry`, then the metric accounts of the open ones |
+| `getMultipleAccounts` | Page, my entries, list, creation box | The same accounts, up to three per call on the campaign page (campaign and config; then metric, the wallet's entry, the creator's entry); on "My entries" (Sprint 12) up to 100 per call: each campaign with the wallet's `Entry`, then the metric accounts of the open ones. Since 2026-10-13, a graduation curve's name (A-11's exception, `app/features/campaigns/curve-tokens.ts`): the pools not reviewed, then each pool's base mint with its Metaplex metadata account (owner Token Metadata `metaqbx…`; a Token-2022 mint keeps its own), up to 100 per call, once per pool and page view |
 | `getLatestBlockhash` | SDK preparation, claim | Commitment `confirmed`; its `lastValidBlockHeight` is what the retry guard saves first |
 | `simulateTransaction` | SDK preparation, claim | One transaction whose top-level instructions are the program's (`user_join_campaign`; `settle_creator_share` for the claim of a reserved share, Sprint 12); `sigVerify: false`, `replaceRecentBlockhash: true`, `innerInstructions: true`, encoding `base64` |
 | `getMinimumBalanceForRentExemption` | SDK preparation, claim | The sizes of a `Join` (96 bytes) and an `Entry` (116 bytes); 0 bytes for the claim's wallet floor (Sprint 12) |
@@ -89,7 +89,8 @@ smoke with the browser reaching the chain through it. What follows is how it tre
 
 - Account reads are allowed by owner, as the proposal says (D-i: no list of accounts): the relay returns an account only
   when its owner is the program, a reader's program, or a sysvar the client reads (Clock; EpochSchedule since Sprint 19), and `null` when it does not
-  exist. One exception, by address: the program's ProgramData (A-8).
+  exist. Since 2026-10-13 also the two owners that hold a token's symbol, Metaplex Token Metadata and Token-2022, for a
+  graduation curve's name (A-11's exception, TP §3.4.10). One exception, by address: the program's ProgramData (A-8).
 - **ProgramData (A-8, added 2026-10-10):** before every preparation and again right before the wallet, the client reads
   the program's last-deploy slot from the ProgramData account, owner the upgradeable loader
   `BPFLoaderUpgradeab1e11111111111111111111111`. On devnet its address is
