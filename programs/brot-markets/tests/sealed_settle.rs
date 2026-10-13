@@ -38,7 +38,11 @@ fn finalized(mode: SettleMode, reason: VoidReason) -> Vec<u8> {
 
 /// `settle_sealed_fee` on the sponsor's SealedFee (holding the fee and `extra` lamports) of `campaign`.
 fn settle(world: &World, campaign: Vec<u8>, extra: u64) -> InstructionResult {
-    let sealed_fee = funded(world, sealed_fee_data(&SPONSOR, FEE, |_| {}), FEE + extra);
+    let sealed_fee = funded(
+        world,
+        sealed_fee_data(&SPONSOR, FEE, |_| {}),
+        sum(&[FEE, extra]),
+    );
     let ix = settle_ix(world, sealed_fee_address(&SPONSOR).0, SPONSOR);
     world.run(&ix, &settle_accounts(world, sealed_fee, campaign))
 }
@@ -74,7 +78,7 @@ fn the_fee_goes_to_the_sponsor_only_on_a_void_the_house_caused() {
     for (mode, reason, refunded) in cases {
         let result = settle(&world, finalized(mode, reason), 0);
         let expected = if refunded {
-            (rent + FEE, 0)
+            (sum(&[rent, FEE]), 0)
         } else {
             (rent, FEE)
         };
@@ -95,7 +99,10 @@ fn lamports_sent_by_hand_go_to_the_fee_vault() {
         finalized(SettleMode::Refund, VoidReason::MissedWindow),
         7 * SOL,
     );
-    assert_eq!(gains(&world, &refund), (rent + FEE, 7 * SOL, 0, true));
+    assert_eq!(
+        gains(&world, &refund),
+        (sum(&[rent, FEE]), 7 * SOL, 0, true)
+    );
     let split = settle(
         &world,
         finalized(SettleMode::Split, VoidReason::None),

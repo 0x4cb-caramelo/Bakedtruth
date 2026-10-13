@@ -107,10 +107,19 @@ pub fn sealed_fee_data(sponsor: &Pubkey, fee: u64, edit: impl FnOnce(&mut Sealed
         campaign_address().0,
         *sponsor,
     );
-    (s.fee_lamports, s.entry_lamports) = (LeU64::new(fee), LeU64::new(9 * fee));
+    let entry = fee.checked_mul(9).expect("the entry part of a 90/10 split");
+    (s.fee_lamports, s.entry_lamports) = (LeU64::new(fee), LeU64::new(entry));
     (s.usd_total, s.sealed_count) = (LeU64::new(500), LeU32::new(1));
     edit(s);
     data
+}
+
+/// `parts` added with checked math (the crate denies unchecked arithmetic in its tests too).
+pub fn sum(parts: &[u64]) -> u64 {
+    parts
+        .iter()
+        .try_fold(0u64, |total, part| total.checked_add(*part))
+        .expect("lamports")
 }
 
 /// An account the program owns holding `data`, with its rent and `extra` lamports.

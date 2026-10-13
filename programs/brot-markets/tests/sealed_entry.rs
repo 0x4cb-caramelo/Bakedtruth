@@ -44,11 +44,11 @@ fn a_sealed_entry_holds_its_fee_in_a_new_sealed_fee_and_puts_its_entry_in_the_va
     assert_ok(&result);
     let world = World::new();
     let vault = after(&result, &vault_address().0).lamports;
-    assert_eq!(vault, world.rent(0) + PRIZE + OPENING_FEE + entry);
+    assert_eq!(vault, sum(&[world.rent(0), PRIZE, OPENING_FEE, entry]));
     let sealed = after(&result, &sealed_fee_address(&SPONSOR).0);
     assert_eq!(
         (sealed.owner, sealed.lamports),
-        (ID, world.rent(SealedFee::LEN) + fee)
+        (ID, sum(&[world.rent(SealedFee::LEN), fee]))
     );
     let s = SealedFee::from_bytes(&sealed.data).unwrap();
     assert_eq!(
