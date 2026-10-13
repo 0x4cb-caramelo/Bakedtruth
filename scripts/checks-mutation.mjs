@@ -28,7 +28,7 @@ const DEPLOY = join(ROOT, "target/deploy");
 const SO = join(DEPLOY, "brot_markets.so");
 const SAVED = join(ROOT, "target/checks-mutation/brot_markets.so");
 const JUNIT = join(ROOT, "target/checks-mutation/junit.xml");
-const RUST_TARGETS = ["checks_mollusk", "checks_mollusk_init", "referral_link", "referral_refusals", "contest_mollusk_open", "contest_mollusk_reread", "contest_mollusk_decide"];
+const RUST_TARGETS = ["checks_mollusk", "checks_mollusk_init", "referral_link", "referral_refusals", "contest_mollusk_open", "contest_mollusk_reread", "contest_mollusk_decide", "contest_mollusk_bounds"];
 const TS_FILES = [
   "tests/brot/checks.test.ts",
   "tests/brot/checks-init.test.ts",
@@ -39,6 +39,7 @@ const TS_FILES = [
   "tests/brot/contest-reread.test.ts",
   "tests/brot/contest-decide.test.ts",
   "tests/brot/contest-worst-case.test.ts",
+  "tests/brot/contest-proof.test.ts",
 ];
 const PATH = `${process.env.HOME}/.bun/bin:${process.env.PATH}`;
 // Mollusk and LiteSVM both run the binary this script builds; logs off and no colours to parse.
@@ -103,8 +104,10 @@ contest_status        fail  contest_status_refuses_a_decision_on_a_campaign_not_
 contest_stage         fail  contest_stage_refuses_a_reread_at_stage_two | contest reread: each refusal has its own error and writes nothing
 contest_stage         fail  contest_stage_refuses_a_decision_at_stage_one | contest decide: each refusal has its own error and writes nothing
 decide_deadline       fail  decide_deadline_refuses_from_the_deadline_on | contest decide: each refusal has its own error and writes nothing
-lapse_stage           fail  lapse_stage_refuses_a_campaign_at_stage_one | contest lapse: finalize takes stage 2 from its deadline on, with the stored result, never at stage 1
-lapse_deadline        fail  lapse_deadline_refuses_one_second_before | contest worst case is 55 hours: resolution to payout, and refused one second earlier
+lapse_stage           fail  lapse_stage_refuses_a_contest_with_no_stage | -
+reread_proof          fail  reread_proof_offered_and_refused_by_the_reader_refuses_the_reread | contest proof: an offered proof the reader refuses refuses the re-read with the reader's error
+lapse_deadline        fail  lapse_deadline_refuses_one_second_before | contest worst case is 55 hours with the keeper down for a week: the unread stage 1 lapses
+lapse_deadline        fail  lapse_of_an_unread_stage_one_comes_48_hours_after_its_deadline | contest lapse: finalize takes stage 2 from its deadline on, and an unread stage 1 48 hours after its own
 decide_admin          fail  decide_admin_refuses_a_team_key_and_a_stranger | contest decide: a stranger and a team key cannot decide
 decide_confirm_reason fail  decide_arguments_are_refused_each_with_its_own_error | contest decide: each refusal has its own error and writes nothing
 decide_void_reason    fail  decide_arguments_are_refused_each_with_its_own_error | contest decide: each refusal has its own error and writes nothing

@@ -527,14 +527,14 @@ the same effect whoever calls it: the second keeper to arrive gets an error and 
 | `user_open_campaign(id, params, opening_usd, max_lamports)` | Any wallet (pays); a team key (pays nothing unless it adds a prize) | The ten checks of §3.4.10; creates `Campaign` and the vault; moves the payment into the vault, bookkept as prize and held opening fee; increments `open_campaigns` | `CampaignOpened` | 02 (price kind); 03 (the other four) |
 | `user_join_campaign(side, amount, min_return_bps, expected_entry_total)` | Any wallet | `Open`, before `entries_close_at`, outcome not knowable, pause off, `amount ≥ min_entry_lamports`, `expected_entry_total` matches, estimate ≥ `min_return_bps`; no cap (D-h). Creates `Entry` on the first join; moves the lamports into the vault by System Program CPI signed by the baker (§3.4.4) | `EntryAdded` | 02 |
 | `resolve_campaign` | Any wallet, top level only | §3.4.6: reads the locked metric account (and, for price, the proof account), writes `outcome`, `observed_value`, `met_late` or the void reason, opens the window | `CampaignResolved` | 03 |
-| `finalize_campaign` | Any wallet | `InReview` with `now ≥ review_ends_at`: snapshots the totals, sets `settle_mode`, computes the fee, the creator share and `distributable` (§3.4.16), decrements `open_campaigns` | `CampaignFinalized` | 04 |
+| `finalize_campaign` | Any wallet | `InReview` with `now ≥ review_ends_at`, or `Contested` once the contest lapsed (stage 2's deadline, or 48 hours after an unread stage 1's; Sprint 14): snapshots the totals, sets `settle_mode`, computes the fee, the creator share and `distributable` (§3.4.16), decrements `open_campaigns` | `CampaignFinalized` | 04 |
 | `settle_entry` | Any wallet | `Settling`: pays one `Entry` its computed amount and closes it in the same instruction, rent to the baker (§3.4.5) | `EntrySettled` | 04 |
 | `settle_creator_share` | Any wallet | `Split` only, once: credits `creator_share` to `creator` | `CreatorShareSettled` | 04 |
 | `collect_fee` | Any wallet | `Settled`: moves what Brot keeps (house fee net of `from_fee`, one-sided fees, the opening fee unless refunded) to the fee vault | `FeeCollected` | 04 |
 | `settle_prize` | Any wallet | `OneSided` or `Refund`: returns `prize_lamports` to `creator`, plus `opening_fee_lamports` on a house-failure void (P-4). In `Split` the prize is inside `distributable` and this is marked settled at finalize | `PrizeSettled` | 04 |
 | `close_campaign` | Any wallet | `Settled`, with fee, prize and creator share settled: moves dust and hand-sent surplus to the fee vault, returns the rent of `Campaign` and vault to `rent_payer`, zeroes the data and reassigns both accounts to the System Program | `CampaignClosed` | 04 |
 | `sweep_fees` | Any wallet | Moves the fee vault's lamports above its rent-exempt minimum to `GlobalConfig.fee_recipient`, and nowhere else | `FeesSwept` | 04 |
-| `reread_campaign` | Any wallet | Contest stage 1 (§3.4.7) | `ContestClosed` or stage-2 `ContestOpened` | 14 |
+| `reread_campaign` | Any wallet, top level only | Contest stage 1 (§3.4.7): runs the kind's reading again and compares it exactly with the stored result. The same reading runs the snapshot with the stored outcome; a different one, or a reader that cannot decide now, opens stage 2 until `min(now, stage 1's deadline) + 48 h`. A proof the caller offers and the reader refuses refuses the call (built 2026-10-13; the founder's question D2 on the same reading is open) | `CampaignReread`, then `CampaignFinalized` when it pays | 14 |
 | `user_link_referrer(referrer)` | The referee | Creates `ReferralLink` once (§3.4.11) | `ReferralLinked` | 14 |
 | The sealed entry | The sponsor | A join that also charges the 10% (§3.4.12) | `EntryAdded` | 15 |
 | `sponsor_add_prize(lamports, disclosed)` | A third party | Only if the founder keeps it **[Q]** (P1 §3.7; §3.4.12) | — | 15, if kept |
@@ -757,9 +757,9 @@ sponsored account, and older ones are skipped; only the push oracle writes it [E
 | Upgrade the program; act as `admin` | Devnet: a file key held for the company; Lucas and Ronaldo hold the keys, and which of them holds the upgrade key on deploy day is set in Sprint 05 (Q12). Mainnet: the 2-of-3 multisig on hardware devices, with the three partners, and a public wait of 24 to 48 hours before an upgrade takes effect [FD] (P4 §4.1) | Verifiable build (Sprint 16); two-step `admin` change |
 | Open a campaign, paying | Any wallet | Six kinds (`DbcGraduated` off in the mainnet build, M-7); an account the reader accepts; 3 to 90 days; fees from config; US$500 at the Pyth price (§3.4.10) |
 | Open without paying | One team key, for the team or a launch partner | `creator_share_bps = 0`; no prize unless the team adds one (P-3). Every team-key opening raises an alert (§3.5) |
-| Confirm, void, contest | One team key | Only in `InReview`; never inverts |
+| Confirm, void, contest | One team key | Only in `InReview`; never inverts; void only an automatic void (2026-10-09); a contest only once every entry is tallied. Since Sprint 14, one team key can hold a payout up to about 49 hours by contesting (an honest re-read can escalate it), and with `admin` it can void a contested result |
 | Pause | One team key, to be fast | Only `Normal` → `EntriesHalted` |
-| Resume; creation parameters; team keys; fee recipient; decide a contest | `admin` | Code ceilings; an open campaign's fee and share never change |
+| Resume; creation parameters; team keys; fee recipient; decide a contest | `admin` | Code ceilings; an open campaign's fee and share never change; a contest only at stage 2, before its deadline, confirm or void with a team reason, never invert |
 | Move the fees | Anyone calls `sweep_fees` | Only to `GlobalConfig.fee_recipient` |
 | Resolve, settle, pay | Any wallet (Q1, B) | Destination and amount fixed by the program |
 | Move a baker's entry | Nobody, by instruction | No instruction exists, and no emergency withdrawal. The upgrade key can still replace the program, and with it any rule (Sprint 02 review, finding 9); the powers page says so (BR-41) |
@@ -876,6 +876,8 @@ to the TP; kept by the proposal, K-05).
 | Part | Where it lives |
 |---|---|
 | Who referred whom | `ReferralLink`, signed by the referee, once, immutable |
+| "Before the first entry", as built (2026-10-13) | Chain order, not time: (slot, the transaction's place in the block, the instruction) of `ReferralLinked` against the referee's first `EntryAdded`; in one transaction the instruction order decides; a slot shared with the first entry is resolved by reading that block once (`getBlock`), and until then the link earns nothing |
+| The payout's evidence, as built | A ledger in its own SQLite file (a rebuilt indexer never erases what was paid); each transfer carries the memo `brot-referral:<batch>:<index>`, so a line is never paid twice; the routine prepares a signing file and never signs (founder answer of 2026-10-13); a wallet below the RPC's rent minimum waits for the next week |
 | "Before the first entry" | Checked by the indexer: both times are on-chain |
 | The fee Brot actually received on each winning entry of the referee ("a taxa que o Brot de fato recebeu", P1 §3.9) | `(fee_total − from_fee) × entry ÷ V`, where `from_fee` is the part of the creator share taken from the fee (§3.4.16); from the events, checked against the `Campaign` |
 | 20% of that fee for 90 days, to the referrer [FD] (P1 §3.9) | Weekly routine from the operations wallet, with a public report |
@@ -2282,6 +2284,34 @@ where the full tables are) **[F]**:
 - **`/api/v1/price`:** PASS: it takes nothing from a visitor; only the server reads the RPC (no CoinGecko since 2b).
 - **`/api/v1/names`:** PASS: no person is named today; "never a person" is the two reviewers' check, since the code
   cannot see a person's name (a validator named after a person stays unnamed).
+
+### 8.5 Sprint 14: the referral data (gate 5)
+
+The nine questions of `.claude/rules/privacy-audit.md`, answered on 2026-10-13 for the referral link, the indexer's
+referral tables, the weekly routine and its public report.
+
+1. **Data.** Wallet addresses; who referred whom (on-chain, permanent); the referee's entries and what Brot earned on
+   them; the payout ledger (wallet, amount, status, signature, balance, preparation time); the public report (wallet
+   and amount). No IP, email or name.
+2. **Why.** To pay the referrer's 20% and the referee's rebate (P1 §3.9), keep evidence of each payment (A-4) and
+   publish the transparency report.
+3. **Where.** The indexer's SQLite file (rebuildable from the public chain); the ledger, in a file of its own so a
+   rebuilt indexer can never erase what was paid; the signing files under the operator's `--out`; the published
+   report; later the snapshot on VM 2.
+4. **Who.** The indexer's operating-system user; the person who signs the weekly batch (wallets and amounts); the
+   public (the report only). No read route exposes the referral tables.
+5. **How access is controlled.** File modes (summary 0640, signing script 0750, report 0644), the loopback-only API,
+   SSH to the server.
+6. **Retention.** Open [Q]: payment records may carry accounting duties (L0, the accountant). Signing files can be
+   deleted once their batch is recorded.
+7. **Logs.** Counts and error names only; the commands print wallets and amounts to the operator's terminal and never
+   the RPC URL.
+8. **Deletion and export.** The link account, the events and the memo'd transfers are public and permanent; indexer
+   rows return on every refresh unless an exclusion list is added; deleting from the ledger may conflict with
+   record-keeping [Q]. An export is a query; no command is built.
+9. **Notice.** Before the referee signs, the site must say that the link is public and permanent, that each payout
+   carries a public memo (`brot-referral:<batch>:<index>`), and that the weekly report lists wallets and amounts. The
+   privacy page gains the same lines before referral goes live (the founder, then the lawyer).
 
 ## 9. Testing strategy
 

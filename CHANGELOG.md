@@ -27,6 +27,29 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **Sprint 14, indicação e disputa em duas etapas** (branch `sprint-14-referral-second-read`, 13/10/2026; construída
+  e testada, não publicada no devnet; `docs/sprints/sprint-14-referral-second-read.md`,
+  `session-log/2026-10-13-sprint-14-indicacao-e-disputa.md`). Base: o andaime das Sprints 14 e 15 (cinco instruções
+  novas, os erros 6153–6175, os eventos 18–22, as contas `ReferralLink` e `SealedFee`) e o indexador da Sprint 08.
+  - **O vínculo de indicação** (`user_link_referrer`): o indicado assina uma vez, com o próprio aluguel, e nada muda
+    nem fecha o vínculo depois; recusa o endereço zero e o próprio indicado; um endereço pago antes é completado; nunca
+    pausado. 66 casos provam que nenhuma instrução altera um vínculo.
+  - **A disputa em duas etapas**: `team_open_contest` ligado (só depois de toda entrada contada), `reread_campaign`
+    (qualquer carteira, só no nível de cima: a mesma leitura paga com o resultado gravado; outra leva à etapa 2, de 48
+    horas; nunca grava um resultado), `admin_decide_contest` (o admin confirma ou anula, nunca inverte: conferido em
+    todas as 65.536 combinações de argumentos) e o fim da etapa 2 no `finalize_campaign`. A aresta Contested → Settled
+    para a campanha sem entrada, e o erro 6175 para a confirmação com motivo de anulação.
+  - **A indicação fora do programa** (`services/indexer`, `scripts/referral/`): as tabelas de indicação, "antes da
+    primeira entrada" pela ordem da cadeia, a base `(taxa − parte da taxa do criador) × entrada ÷ V` conferida contra o
+    snapshot da campanha, os 20% por 90 dias e a devolução até 0,05 SOL; a rotina semanal prepara o lote para uma
+    pessoa assinar (nenhuma chave no servidor), registra o que pousou pela marca no memo e publica o relatório só com
+    carteiras e valores.
+  - **O teste de dinheiro** (I1 a I15) agora sorteia vincular, contestar, reler, decidir e deixar vencer a etapa 2, e
+    confere o contador de campanhas abertas em toda saída; os scripts da equipe usam a contestação de verdade.
+  - **A revisão adversária** não achou caminho para mandar SOL ao lugar errado nem para inverter um resultado; achou um
+    problema de desenho grave, a releitura igual que paga um resultado contestado (D2, com o fundador), e as correções
+    menores aplicadas antes do PR.
+
 - **Sprint 08, a terceira fatia do indexador** (branch `sprint-08-indexer`, PR #72, 13/10/2026; construída e testada,
   não implantada; o registro em `docs/sprints/sprint-08-indexer-api-points.md`). A ordem da página inicial calculada
   no indexador e servida em `/api/v1/ranking` (X1.9); os KPIs e o relatório do parceiro sem endereço nenhum; o

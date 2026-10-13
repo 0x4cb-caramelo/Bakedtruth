@@ -139,7 +139,9 @@ pub enum BrotInstruction {
     #[account(4, name = "program", desc = "This program")]
     TeamVoidCampaign(TeamVoidCampaignArgs),
 
-    /// Enters Contested inside the window: payout paused. Nothing leaves Contested before Sprint 14.
+    /// Enters Contested inside the window, once every entry is tallied: payout paused, stage 1 starts.
+    /// It leaves by reread_campaign (the same reading pays, a different one opens stage 2),
+    /// admin_decide_contest (stage 2) or finalize_campaign (the lapse).
     #[account(0, signer, name = "team_member", desc = "A key in GlobalConfig.team")]
     #[account(1, name = "config", desc = "GlobalConfig, read")]
     #[account(2, writable, name = "campaign", desc = "Campaign, InReview")]
@@ -148,8 +150,9 @@ pub enum BrotInstruction {
     TeamOpenContest,
 
     /// Snapshots the totals, the mode and the creator share of a reviewed campaign, once the window
-    /// has closed. Any wallet. Decrements the open count for a paid campaign only (I7).
-    #[account(0, writable, name = "campaign", desc = "Campaign, InReview, window closed")]
+    /// has closed, or of a contested one once its contest lapsed (stage 2's deadline, or 48 hours
+    /// after an unread stage 1's). Any wallet. Decrements the open count for a paid campaign only (I7).
+    #[account(0, writable, name = "campaign", desc = "Campaign, InReview with its window closed, or Contested and lapsed")]
     #[account(1, writable, name = "config", desc = "GlobalConfig: the open count")]
     #[account(2, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
     #[account(3, name = "program", desc = "This program")]

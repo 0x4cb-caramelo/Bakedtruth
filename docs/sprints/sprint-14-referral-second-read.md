@@ -1,6 +1,6 @@
 # Sprint 14 — Referral and second read
 
-**Status:** planned · **Branch:** `sprint-14-referral-second-read` · **Dates:** none, by the founder's decision
+**Status:** in progress: the program, the SDK, the referral routine and the randomized test built and tested (2026-10-13); blocked by the founder's D2 (the review's high finding), the referral readings, the merge and the devnet redeploy · **Branch:** `sprint-14-referral-second-read` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -20,42 +20,55 @@ without the other.
 
 **Half A, the referral.**
 
-- [ ] The `ReferralLink` account (`["referral", referee]`) and the `user_link_referrer` instruction exist, one file
+- [x] The `ReferralLink` account (`["referral", referee]`) and the `user_link_referrer` instruction exist, one file
       each under the house rules: signed by the referee, once, immutable. The event is `ReferralLinked`. Every check
       the instruction uses has a negative test that fails without it (T24).
-- [ ] The indexer gains the `referrals` table. "Before the first entry" is checked from the two on-chain times. The
+      *Done 2026-10-13:* `instructions/referral/`; 23 refusal tests; 66 cases show no instruction changes a link.
+- [x] The indexer gains the `referrals` table. "Before the first entry" is checked from the two on-chain times. The
       basis of each winning entry of the referee is the fee Brot actually kept, `(fee − from_fee) × entry ÷ V`, from
       the events and checked against the `Campaign` (P1 §3.9, "a taxa que o Brot de fato recebeu"; TP §3.4.16).
-- [ ] The weekly routine pays the referrer 20% of that basis for 90 days from the referee's first entry (TP v0.0.1 Q9,
+      *Done:* "before the first entry" by chain order, not time (the record says why); the basis checked against the snapshot.
+- [x] The weekly routine pays the referrer 20% of that basis for 90 days from the referee's first entry (TP v0.0.1 Q9,
       answered b). It refunds the referee the fee on the first US$50 of entries once they pass US$250, capped at
       0.05 SOL (P-6, open; built as recommended). The thresholds are SOL constants: 0.4576 and 2.2879 SOL at the
       reference price (P1 §3.9, inference).
-- [ ] The routine reads finalized rows only. Each payout is written to the `referral_payouts` evidence table, which is
+      *Done* as the founder answered on 2026-10-13 ("as recommended"); five readings of the rules wait for his confirmation.
+- [x] The routine reads finalized rows only. Each payout is written to the `referral_payouts` evidence table, which is
       snapshotted nightly to VM 2 (K-05, A-4). A public report lists wallets and amounts only.
-- [ ] A transfer that would leave an empty wallet below the rent-exempt minimum (650,240 lamports) is not sent; it
+      *Done;* the nightly snapshot to VM 2 is a hook only (VM 2 is a D4 purchase).
+- [x] A transfer that would leave an empty wallet below the rent-exempt minimum (650,240 lamports) is not sent; it
       carries to the next week and shows as pending **[INF]** (proposal §2.4.6; P-6's "small rebates may hit the
       reserve path").
+      *Done:* the minimum read from the RPC (650,240 lamports on the clusters).
 - [ ] The site accepts `?ref=<address>`, records nothing until the new baker signs `user_link_referrer` before their
       first entry (proposal §3.8), and shows the referral balance where L-10 says.
+      *Not built:* the site part waits for the site lane, and the balance's place for L-10 (founder).
 
 **Half B, the dispute.**
 
-- [ ] `reread_campaign`: the same reading pays; a different one goes to stage 2, with 48 hours. `admin_decide_contest`
+- [x] `reread_campaign`: the same reading pays; a different one goes to stage 2, with 48 hours. `admin_decide_contest`
       only confirms or voids and never inverts. The event is `ContestClosed`.
-- [ ] Stage 1 completes within 1 hour of `team_open_contest`. The worst case, 55 hours from resolution to payout, is a
+      *Done;* the founder's question D2 on the same reading is open (the review's high finding F1).
+- [x] Stage 1 completes within 1 hour of `team_open_contest`. The worst case, 55 hours from resolution to payout, is a
       test case (P1 §4.5).
+      *Done:* the 55-hour bound holds on-chain even with the keeper down (`contest-worst-case.test.ts`).
 - [ ] On a price campaign, the second read fetches the proof transaction at `posted_slot` through RPC B, on the
       standby (Sprint 07; proposal §2.5). On the other kinds, it re-reads the account and compares it with
       `observed_value`.
-- [ ] The decision is published, with its reason, on the public record route (`content/void-log/`).
+      *Partly:* the standby's second read through RPC B is built (PR #88); the keeper calling `reread_campaign` is not wired yet.
+- [x] The decision is published, with its reason, on the public record route (`content/void-log/`).
+      *Done:* `scripts/team/decide.ts` writes the void's public record to `content/void-log/` (its schema has no admin form yet).
 
 **Both halves.**
 
-- [ ] The seeded randomized test, extended with the new instructions, keeps I1 to I15. The pause list of I10′ does not
+- [x] The seeded randomized test, extended with the new instructions, keeps I1 to I15. The pause list of I10′ does not
       grow: linking and contesting are never paused.
-- [ ] Two users: wallet A cannot create, change or remove B's link.
+      *Done:* fixed seed plus 35 others, every exit from Contested, I7 on each.
+- [x] Two users: wallet A cannot create, change or remove B's link.
+      *Done:* `referral-link.test.ts`.
 - [ ] The IDL, the generated client and the SDK are regenerated; the program is redeployed to devnet from the CI
       artifact.
+      *The IDL, the client and the SDK: done. The devnet redeploy: blocked by D2, the merge and Ronaldo's words.*
 - [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
 ## Deliverables
@@ -140,4 +153,39 @@ The program and service files listed under Deliverables, an example payout repor
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+**2026-10-13, built in the lead's parallel run** (branch `sprint-14-referral-second-read`; the scaffold `fd67706`
+shared with Sprint 15, the lead's addendum `a038f0b`, the Sprint 08 indexer merged in, then the lanes L14A, L14B and
+L14R and the randomized test's extension). Not on devnet: a redeploy needs the merge into `main` (CI publishes the
+artifact only from there) and Ronaldo's words.
+
+**Half A, the referral.** `user_link_referrer` (instructions/referral/): signed by the referee once, with the
+referee's rent; never changed or closed (66 cases over every writable slot of every instruction); the zero address and
+the referee itself refused (`InvalidReferrer`); a pre-funded address topped up; never paused. The indexer's referral
+tables decide "before the first entry" by chain order (slot, the transaction's place in the block, the instruction);
+the basis of each winning entry is `(fee − from_fee) × entry ÷ V`, checked against the campaign's snapshot before
+anything is owed; 20% for 90 days from the referee's first entry; the rebate on the first US$50 after US$250, capped at
+0.05 SOL, with the thresholds as SOL constants; only winning entries count. The weekly routine (`scripts/referral/`)
+reads finalized rows only, prepares a signing file for a person (no key on the server), records what landed by the
+memo `brot-referral:<batch>:<index>` into a ledger in its own file, carries a transfer below the RPC's rent minimum to
+the next week, and publishes a report of wallets and amounts only. The privacy audit is TP §8.5.
+
+**Half B, the dispute.** `team_open_contest` enabled (inside the window, every entry tallied first); `reread_campaign`
+(any wallet, top level only; the same reading pays with the stored outcome, a different one opens stage 2; it never
+writes a result); `admin_decide_contest` (confirm or void with a team reason, never inverts, checked over all 65,536
+argument pairs); the stage-2 lapse in `finalize_campaign`; the 55-hour worst case enforced on-chain; the
+(Contested, Settled) edge for a pot with no entry. The site's contested state and `content/void-log/` publication of the
+admin's decision are a later site step.
+
+**Both halves.** The randomized test (I1 to I15) draws link, contest, re-read, decide and the lapse, and checks the
+open count on every exit (fixed seed plus 24 seeds at 2,000 operations); the pause list did not grow; the IDL, the
+Codama client and the SDK are regenerated; the team scripts use the real contest; the negative suite on Surfpool refused
+all 416 cases with their own errors. The mutation proof covers every new check.
+
+**Open, with owners.**
+- **The founder: D2** (the review's high finding F1: any wallet can close a team's contest with a same re-read and pay
+  the contested result; a [swap, re-read] transaction can build the equality on a curve). No deploy before it.
+- **The founder:** the five readings of the referral rules (see the session log); the notice text before the referee
+  signs and on the privacy page; the ledger's retention.
+- **The lead, after the merge:** the devnet redeploy with Ronaldo; the keeper calling `reread_campaign` in stage 1 and
+  `finalize_campaign` after a lapse; the site's `?ref=` link, the referral balance (L-10) and the contested state.
+- **Sprint 16:** the partial-tally cut-off defect the randomized test reproduced in Sprint 04 code (audit item O-3).
