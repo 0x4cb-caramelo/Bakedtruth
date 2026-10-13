@@ -23,7 +23,7 @@ v0.0.1 or the approved proposal. **[Q]** founder question. **[AC]** to verify. *
 
 ## Summary for the founder
 
-There are 24 sprints in seven groups: 00 to 03 are done, and 20 remain. The order is the one you asked for: the
+There are 24 sprints in seven groups. On 2026-10-13 (the roadmap audit): 00 to 05, 11, 12, 13 and 19 are closed and tagged; -1, 06, 07, 09 and 10 are built and wait for their tags or outside items; 08, 14 to 18 are in progress; 20 to 22 wait for the Track B trade. The order is the one you asked for: the
 program and the services on devnet, then the site, then mainnet. The Android app is a separate track.
 
 | Group | Sprints | What comes to exist |
@@ -77,8 +77,8 @@ demonstrable on devnet.
 on devnet; the Surfpool read it asked for was done in Sprint 03. Sprint 02 ran on 2026-10-08 with the D6 names and was
 merged into `main` with PR #35, together with this plan's PR #27 (tag `sprint-02`). Sprint 03 ran on 2026-10-09: the
 five readers, the opening of every kind, the join lock, `resolve_campaign`, the Surfpool scenario, and the frozen
-program and Anchor gone from the workspace; it was merged with PR #40 (tag `sprint-03`). The next is 04, which also
-builds the founder's answers of 2026-10-09 (section 5).
+program and Anchor gone from the workspace; it was merged with PR #40 (tag `sprint-03`). Sprints 04 and 05 followed (tags `sprint-04`, `sprint-05`); the
+final state of every sprint, as the roadmap audit of 2026-10-13 found it, is in the table below and in each file.
 
 **Outside the roadmap: the provisional site.** At the founder's request, `brot.markets` serves `services/landing`: a
 "coming soon" page with a waitlist, a privacy page and the decks at `/pitch` and `/pitch2`. It is not a sprint and
@@ -89,7 +89,7 @@ mainnet line, which still says "and a cap" and whose new wording waits for the f
 
 | # | Sprint | TP block | Depends on |
 |---|---|---|---|
-| -1 | [Design system, the opening screen and phone layouts](sprints/sprint--1-design-system.md) | Prerequisite of B8 and M | 00 |
+| -1 | [Design system, the opening screen and phone layouts](sprints/sprint--1-design-system.md) **Final (2026-10-13): blocked by the founder's go-ahead to tag, with a carry list.** | Prerequisite of B8 and M | 00 |
 | 00 | [Setup](sprints/sprint-00-setup.md) (closed) | B0 | — |
 | 01 | [Foundation: price reader proof](sprints/sprint-01-foundation.md) (closed) | B1 | 00 |
 | 02 | [Pot core on Pinocchio: config, paid opening, vault, entries](sprints/sprint-02-pot-core.md) (merged, PR #35, tag `sprint-02`) | B2 | 00 |
@@ -99,20 +99,20 @@ mainnet line, which still says "and a cap" and whose new wording waits for the f
 | 06 | [Server and primary keeper (Bun check first)](sprints/sprint-06-keeper-server.md) (closed 2026-10-10 for the Hackathon MVP by the founder's decision; the real resolve not yet observed) | B6 | 05 |
 | 07 | [Standby keeper and watchdog](sprints/sprint-07-standby-watchdog.md) (closed 2026-10-10 for the Hackathon MVP; the standby and D4 deferred to Post-Hackathon; the primary's restart endpoint live on the server) | B6 | 06 |
 | 08 | [Indexer, API, relay and points](sprints/sprint-08-indexer-api-points.md) (hackathon MVP: the read API only, `services/api`, in progress) | B7 | 05; 06 to publish |
-| 09 | [Site: shell, theme and wallet](sprints/sprint-09-site-shell.md) (closed 2026-10-10 for the Hackathon MVP; server and mobile items deferred to the end of the Hackathon) | B8 | 05, 06, 08, -1 |
-| 10 | [Site: campaign list](sprints/sprint-10-site-campaign-list.md) | B8 | 09 |
-| 11 | [Site: campaign page and entry](sprints/sprint-11-site-campaign-entry.md) (merged 2026-10-10, PR #60, tag `sprint-11`; A-8 built on the founder's answer; the founder's Phantom entry reported, its devnet transaction not found yet) | B8 | 09, 10 |
-| 12 | [Site: my entries and campaign states](sprints/sprint-12-site-my-entries-states.md) (merged 2026-10-10, PR #61, tag `sprint-12`; the five-campaign devnet rehearsal is the founder's) | B8 | 11, 06 |
-| 13 | [Site: ranking, notices and copy (closes the devnet MVP)](sprints/sprint-13-site-notices-copy.md) (merged 2026-10-10, PR #63, tag `sprint-13`; the founder's twelve answers the same day, 3a's points rule in a follow-up pull request; waiting: the partner report (L-24 answered, Sprint 08), the full devnet cycle through the site (needs 19 and the founder's devnet writes), X2.2 on real phones, and the corrected legal pages (9a: merged with PR #65 and its follow-up; the founder deploys the landing)) | B8 | 12, 08, 07, 19 |
+| 09 | [Site: shell, theme and wallet](sprints/sprint-09-site-shell.md) (closed 2026-10-10 for the Hackathon MVP; server and mobile items deferred to the end of the Hackathon) **Final (2026-10-13): blocked by the founder's go-ahead to tag, with a carry list (server half done by PR #71).** | B8 | 05, 06, 08, -1 |
+| 10 | [Site: campaign list](sprints/sprint-10-site-campaign-list.md) **Final (2026-10-13): blocked by the founder's go-ahead to tag, with a carry list.** | B8 | 09 |
+| 11 | [Site: campaign page and entry](sprints/sprint-11-site-campaign-entry.md) (merged 2026-10-10, PR #60, tag `sprint-11`; A-8 built on the founder's answer; the founder's Phantom entry reported, its devnet transaction not found yet) **Final (2026-10-13): closed (tagged); items carried.** | B8 | 09, 10 |
+| 12 | [Site: my entries and campaign states](sprints/sprint-12-site-my-entries-states.md) (merged 2026-10-10, PR #61, tag `sprint-12`; the five-campaign devnet rehearsal is the founder's) **Final (2026-10-13): closed (tagged); the rehearsal is the founder's.** | B8 | 11, 06 |
+| 13 | [Site: ranking, notices and copy (closes the devnet MVP)](sprints/sprint-13-site-notices-copy.md) (merged 2026-10-10, PR #63, tag `sprint-13`; the founder's twelve answers the same day, 3a's points rule in a follow-up pull request; waiting: the partner report (L-24 answered, Sprint 08), the full devnet cycle through the site (needs 19 and the founder's devnet writes), X2.2 on real phones, and the corrected legal pages (9a: merged with PR #65 and its follow-up; the founder deploys the landing)) **Final (2026-10-13): closed (tagged); the legal pages are not live (landing release needed).** | B8 | 12, 08, 07, 19 |
 | 14 | [Referral and second read](sprints/sprint-14-referral-second-read.md) | B9 | 04, 07, 08, 12 |
 | 15 | [Sponsorship: the sealed entry](sprints/sprint-15-sponsorship.md) | B9 | 04, 05, 12 |
 | 16 | [Hardening (multisig, pause, incident plan, creation rules frozen)](sprints/sprint-16-hardening.md) | B9 (TP §7, §7.1) | 14, 15, 07 |
 | 17 | [Audits and fixes](sprints/sprint-17-audit-fixes.md) | B9 (TP §7, §8) | 16 |
 | 18 | [Mainnet](sprints/sprint-18-mainnet.md) (in progress: the runbook and its Surfpool rehearsal built 2026-10-13, never executed; blocked by 17, the company, L0, P-7, D4 and the hardware multisig) | B9 (TP §7, §12) | 17 |
-| 19 | [Site: open a campaign (the creation box, `/abrir`)](sprints/sprint-19-site-open-campaign.md) (built 2026-10-10; merged 2026-10-11, PR #68, tag `sprint-19`; waiting: the founder's devnet openings (1a, after the merge), the landing deploy before `/abrir` is public (2a), the phones (X2.2, Ronaldo by hand), a second review of `content/powers.md` (Lucas or Bernardo), the US$ price route, the names route, the relay's country refusal, `content/partners.json` and the share card) | B8 | 11, -1 |
-| 20 | [Android app: design pass and skeleton (M-1)](sprints/sprint-20-android-skeleton.md) | M (TP §3.7) | 13, 05 |
-| 21 | [Android app: money flows on devnet (M-2)](sprints/sprint-21-android-money-flows.md) | M (TP §3.7) | 20 |
-| 22 | [Android app: dApp Store release (M-3)](sprints/sprint-22-android-release.md) | M (TP §3.7) | 21, 18; the company exists; L0 |
+| 19 | [Site: open a campaign (the creation box, `/abrir`)](sprints/sprint-19-site-open-campaign.md) (built 2026-10-10; merged 2026-10-11, PR #68, tag `sprint-19`; waiting: the founder's devnet openings (1a, after the merge), the landing deploy before `/abrir` is public (2a), the phones (X2.2, Ronaldo by hand), a second review of `content/powers.md` (Lucas or Bernardo), the US$ price route, the names route, the relay's country refusal, `content/partners.json` and the share card) **Final (2026-10-13): closed (tagged); items carried.** | B8 | 11, -1 |
+| 20 | [Android app: design pass and skeleton (M-1)](sprints/sprint-20-android-skeleton.md) **Final (2026-10-13): blocked by the Track B trade, X2 and D4.** | M (TP §3.7) | 13, 05 |
+| 21 | [Android app: money flows on devnet (M-2)](sprints/sprint-21-android-money-flows.md) **Final (2026-10-13): blocked by 20.** | M (TP §3.7) | 20 |
+| 22 | [Android app: dApp Store release (M-3)](sprints/sprint-22-android-release.md) **Final (2026-10-13): blocked by 21, 18, the company and L0.** | M (TP §3.7) | 21, 18; the company exists; L0 |
 
 ## 3. Dependency map
 

@@ -2,6 +2,8 @@
 
 **Status:** closed 2026-10-10 for the Hackathon MVP, by the founder's decision; the server and mobile items are deferred to the end of the Hackathon · **Branch:** `sprint-09-site-shell` · **Dates:** none, by the founder's decision
 
+**Final state (audit of 2026-10-13):** blocked by the founder's go-ahead to tag it with a carry list. Evidence: merged by PRs #52–#54 (`368a76a`); the deferred server half done since in another shape (PR #71, 2026-10-11: `brot-site` under Bun behind the tunnel at `/dev0x`, so D-p is Bun); no tag. Carried: the Android emulator check (A); Phantom and Solflare on real phones (a person); the `/rpc` route (the server owner, an RPC account with a cap, Cloudflare); the waitlist's fate (Lucas); Cloudflare's analytics injection (founder).
+
 ## Founder decisions of 2026-10-10 (blocks answered)
 
 - **L-01:** English. **Dark theme** official and default. **Notices:** standard minimal warnings.
