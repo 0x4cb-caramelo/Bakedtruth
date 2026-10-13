@@ -276,7 +276,6 @@ export const overrideOf = (key: string, generic: string) => OVERRIDES[key]?.expe
  */
 export const DISABLED: Record<string, string> = {
   TeamOpenContest: "ContestExitDisabled",
-  UserLinkReferrer: "UnknownInstruction",
   RereadCampaign: "UnknownInstruction",
   AdminDecideContest: "UnknownInstruction",
   SponsorJoinCampaign: "UnknownInstruction",

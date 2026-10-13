@@ -218,7 +218,8 @@ pub enum BrotInstruction {
     #[account(4, name = "program", desc = "This program")]
     TallyLateJoins,
 
-    /// Sprint 14 (lane L14A; a stub until then): the referee records, once, the wallet that referred it.
+    /// Sprint 14: the referee records, once and for good, the wallet that referred it. No instruction
+    /// changes or closes a link; linking is never paused.
     #[account(0, writable, signer, name = "referee", desc = "The signing wallet; pays the rent")]
     #[account(1, writable, name = "referral_link", desc = "ReferralLink, PDA [\"referral\", referee], created")]
     #[account(2, name = "system_program", desc = "System Program")]
