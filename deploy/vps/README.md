@@ -31,6 +31,25 @@ the change is wanted; then restart the unit. Check with `curl -s http://127.0.0.
 `sudo systemctl stop brot-keeper` (or `disable --now` to keep it off after a reboot). The other units (`brot-landing`,
 `brot-tunnel`) are not affected.
 
+## The keeper since 2026-10-13: release `88a00f9`, settlement on, the Helius RPC
+
+**Settlement on.** At Ronaldo's request, `brot-keeper` runs release `88a00f9` (`main` at PR #88) since 2026-10-13 at
+19:03 UTC, with `KEEPER_SETTLE=on`, under the existing unit (`User=brot`,
+`EnvironmentFile=/etc/brot-markets/keeper.env`). The release was installed in
+`/srv/brot-markets/keeper/releases/88a00f9` and tested with a dry run on port 4239 before `current` was switched; the
+setting was appended to `keeper.env`. The env as it was before is backed up in
+`/etc/brot-markets/bak-20261013/keeper.env`.
+Rollback: point `current` back to `releases/cc87637`, restore the env backup, then
+`sudo systemctl restart brot-keeper`. The unit with the keeper's own identity is not installed (the server owner).
+
+**The RPC is Helius devnet.** Later the same day, at Ronaldo's request, `KEEPER_RPC_URL` in
+`/etc/brot-markets/keeper.env` (`root:brot`, 0640) was pointed at Helius's devnet endpoint with the API key, the
+founder's D4 choice of 2026-10-10. It replaced the public devnet RPC, which answered 429s. The key is never written in
+the repository, a log or a chat; the keeper logs only the origin, `https://devnet.helius-rpc.com`. The env as it was
+before the switch is backed up in `/etc/brot-markets/bak-20261013/keeper.env.before-helius`. To rotate the key, write
+the new URL to that line as root and restart `brot-keeper`. After the switch: the unit active, 0 errors and 0 429s in
+the first cycles, settlement on with nothing pending.
+
 ## Sprint 07: the standby, the restart and the alerts (closed for the Hackathon MVP, 2026-10-10)
 
 On the server, as the founder authorised on 2026-10-10: `brot-keeper` runs release `cc87637` (`main` at PR #48), with
