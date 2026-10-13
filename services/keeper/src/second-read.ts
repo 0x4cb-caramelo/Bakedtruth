@@ -3,14 +3,17 @@
  *          read through the primary's RPC and through RPC B, each through the SDK's price reader (owner first, then
  *          the bytes), and the price, confidence, exponent, publish time and feed are compared. A difference is a
  *          mismatch for the review queue. Other kinds are out of this slice (their metric re-read is not built).
- * Version: 0.1.0
+ * Version: 0.1.1 (superseded in the standby's pass by second-check.ts, which reads the proof transaction itself)
  * Sprint:  07 (standby keeper and watchdog)
+ *
+ * Since the Sprint 07 carry-over the standby's pass no longer calls this: it compares a resolution with the signed
+ * message of the transaction that wrote its proof, and the other kinds through the SDK's `recheck`. This comparison
+ * of two providers' current reading of an account stays, with its tests, as a probe of provider agreement.
  *
  * Caveat: the feed publishes about every 62 s, so two reads can see different publish times for honest reasons. A
  * different publish time is therefore `match: null` (not checked), never a mismatch. With the same publish time, a
  * difference is re-read at B once after `retryMs`; only a difference that survives is a mismatch. A decode refusal
  * or a missing account is also `match: null`.
- * Not built here: the proof transaction at `posted_slot` (it needs a transaction lookup by slot).
  */
 import { getBase64Encoder, type Address } from "@solana/kit";
 import { ReaderKind, readPriceUpdate, type PriceReading, type SolanaRpc } from "@brot/sdk/read";

@@ -3,20 +3,33 @@
  *          window, so a stuck condition does not flood the log. Email is not wired: the provider is a founder
  *          decision (D4), so today the only transport is the journal, and every line says so. Detail values are
  *          the caller's to choose; a detail key that names a secret, a token or a URL is refused by name, never echoed.
- * Version: 0.1.0
+ *          The line's own fields (ts, event, kind, key, transports) always win: a detail key with one of those names
+ *          is written as `detail_<name>` instead, so a caller can never relabel an alert, and nothing is lost.
+ * Version: 0.2.1 (the line's own fields win over a colliding detail key; relayed from the indexer lane's review)
  * Sprint:  07 (standby keeper and watchdog)
  */
 
-export type AlertKind =
-  | "primary_down"
-  | "standby_took_over"
-  | "keeper_sol_low"
-  | "met_late_no"
-  | "second_read_mismatch"
-  | "campaign_idle"
-  | "open_campaigns_high"
-  | "restart_requested"
-  | "restart_failed";
+/** Each kind has its runbook in deploy/vps/runbooks/, the kind's name with dashes (tests/runbooks.test.ts checks). */
+export const ALERT_KINDS = [
+  "primary_down",
+  "standby_took_over",
+  "keeper_sol_low",
+  "met_late_no",
+  "second_read_mismatch",
+  "second_read_unchecked",
+  "campaign_idle",
+  "open_campaigns_high",
+  "openings_per_hour_high",
+  "team_key_opening",
+  "exposure_high",
+  "reserved_credit_old",
+  "sol_usd_stale",
+  "pyth_program_changed",
+  "restart_requested",
+  "restart_failed",
+] as const;
+
+export type AlertKind = (typeof ALERT_KINDS)[number];
 
 export type AlertDetail = Record<string, string | number | boolean | null>;
 
@@ -29,6 +42,13 @@ export const TRANSPORTS: readonly string[] = ["journal"];
 
 const DEFAULT_DEDUPE_MS = 15 * 60_000;
 const SECRET_LIKE = /secret|token|password|keypair|private|api.?key|url|query/i;
+/** The line's own fields: a detail key with one of these names is renamed, never allowed to overwrite it. */
+const OWN_FIELDS = new Set(["ts", "event", "kind", "key", "transports"]);
+
+const renamed = (detail: AlertDetail): AlertDetail =>
+  Object.fromEntries(
+    Object.entries(detail).map(([name, value]) => [OWN_FIELDS.has(name) ? `detail_${name}` : name, value]),
+  );
 
 export function createAlerter(
   options: { now?: () => number; emit?: (line: string) => void; dedupeMs?: number } = {},
@@ -50,12 +70,12 @@ export function createAlerter(
       lastEmitted.set(id, at);
       emit(
         JSON.stringify({
+          ...renamed(detail),
           ts: new Date(at).toISOString(),
           event: "alert",
           kind,
           key,
           transports: TRANSPORTS.join(","),
-          ...detail,
         }),
       );
       return true;

@@ -1,9 +1,11 @@
 /**
- * Purpose: GET /healthz on a loopback address only: the keeper's last full cycle (open campaigns, what it tried,
- *          its SOL balance), the cycle count and the last cycle's error, if any. Read-only; it never triggers work.
- *          POST /restart is routed only when a restart handler is given (the primary in Sprint 07); every other
- *          path answers 404.
- * Version: 0.2.1 (Sprint 08 security review: no development error page)
+ * Purpose: GET /healthz on a loopback address only (TP §3.5, "Health"): the keeper's last full cycle (what it tried,
+ *          its SOL balance, the pending settlement work, `open_campaigns` against `max_open_campaigns`, the SOL held
+ *          in the vaults, Pyth's programs), the mode and the settlement switch, the cycle count and the last cycle's
+ *          error, if any. Every number that can pass 2^53 is a string, so the JSON never loses a lamport. Read-only;
+ *          it never triggers work. POST /restart is routed only when a restart handler is given (the primary in
+ *          Sprint 07); every other path answers 404.
+ * Version: 0.3.0 (Sprint 07 carry-over: the pending items and max_open_campaigns usage, Sprint 06 DoD)
  * Sprint:  07 (standby keeper and watchdog)
  */
 import type { CycleReport } from "./cycle";
@@ -15,6 +17,10 @@ export type KeeperState = {
   cycles: number;
   last: CycleReport | null;
   lastError: string | null;
+  /** primary or standby. */
+  mode?: string;
+  /** KEEPER_SETTLE: whether this keeper settles and pays (off by default). */
+  settle?: "on" | "off";
 };
 
 export function startHealth(
