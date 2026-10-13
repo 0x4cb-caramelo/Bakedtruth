@@ -1,13 +1,14 @@
 /**
  * Purpose: the team's escalation on the binary (the founder's answer to D2, 2026-10-13): during stage 1's 24 hours a
- *          team key calls `team_open_contest` again and the contest goes to stage 2 for 48 hours, `ContestOpened`
+ *          team key calls `team_open_contest(2)` and the contest goes to stage 2 for 48 hours, `ContestOpened`
  *          (decoded through the SDK) saying stage 2; each refusal with its own error and nothing written (anyone but
  *          a team key first, a contest at stage 2 already, stage 1's deadline passed); the pause never blocks it; then
  *          the re-read is closed, and the admin decides or stage 2 lapses. Filter: `bun test tests/ -t "contest escalate"`.
- * Version: 0.1.0
+ * Version: 0.1.1 (the escalation is byte 2, the second review's S1)
  * Sprint:  14 (lane L14B, D2). Needs target/deploy/brot_markets.so.
  */
 import { describe, expect, test } from "bun:test";
+import type { Address, KeyPairSigner } from "@solana/kit";
 
 import { buildPauseEntries } from "@brot/sdk/tx";
 
@@ -20,14 +21,16 @@ import { expectOk, send } from "./setup";
 
 /** Stage 1's deadline: twenty hours after `NOW`, its 24 hours still running. */
 const ENDS = C.NOW + 20n * C.HOUR;
-const contestIx = IS.teamOpenContestIx;
+/** The escalation's raw bytes: byte 2 (the second review's S1). */
+const contestIx = (signer: KeyPairSigner, config: Address, campaign: Address) =>
+  IS.teamOpenContestIx(signer, config, campaign, 2);
 
 describe("contest escalate", () => {
   test("contest escalate: a team key sends a contest at stage 1 to the admin, and ContestOpened says stage 2", async () => {
     const cw = await C.contestWorld();
     const c = await C.contested(cw, 1, ENDS);
     const before = snapshot(cw.w, c);
-    const sent = expectOk(await C.openContest(cw, c));
+    const sent = expectOk(await C.escalate(cw, c));
     // Decoded by the SDK as an indexer decodes it (the kit lays out no `ContestOpened` of its own: camelCase).
     expect(sent.events).toEqual([
       {
@@ -70,18 +73,18 @@ describe("contest escalate", () => {
     const cw = await C.contestWorld();
     expectOk(await send(cw.w, [await buildPauseEntries({ teamMember: cw.team })]));
     const c = await C.contested(cw, 1, ENDS);
-    expectOk(await C.openContest(cw, c));
+    expectOk(await C.escalate(cw, c));
     expect(readCampaign(cw.w, c.campaign).contest_stage).toBe(2);
   });
 
   test("contest escalate: then the admin decides, or stage 2 lapses at its deadline with the stored result", async () => {
     const cw = await C.contestWorld();
     const decided = await C.contested(cw, 1, ENDS);
-    expectOk(await C.openContest(cw, decided));
+    expectOk(await C.escalate(cw, decided));
     expectOk(await C.decide(cw, decided, P.ContestDecision.Void, P.VoidReason.TeamOutsideCause));
     expect(readCampaign(cw.w, decided.campaign)).toMatchObject({ status: P.Status.Settling, outcome: P.Outcome.Void });
     const lapsed = await C.contested(cw, 1, ENDS);
-    expectOk(await C.openContest(cw, lapsed));
+    expectOk(await C.escalate(cw, lapsed));
     const lapse = C.NOW + C.STAGE2_SECONDS;
     at(cw.w, lapse - 1n);
     await expectRefused(cw.w, lapsed, IS.finalizeCampaignIx(lapsed.campaign, cw.config), "ContestNotLapsed");

@@ -292,7 +292,7 @@ export const BROT_MARKETS_ERROR__NOT_CONTESTED = 0x1810; // 6160
 export const BROT_MARKETS_ERROR__WRONG_CONTEST_STAGE = 0x1811; // 6161
 /** ContestDeadlinePassed: The contest stage's deadline has passed */
 export const BROT_MARKETS_ERROR__CONTEST_DEADLINE_PASSED = 0x1812; // 6162
-/** ContestNotLapsed: Stage 2 of the contest has not lapsed yet */
+/** ContestNotLapsed: The contest has not lapsed yet: stage 2 lapses at its deadline, an unread stage 1 48 hours after its own */
 export const BROT_MARKETS_ERROR__CONTEST_NOT_LAPSED = 0x1813; // 6163
 /** InvalidContestDecision: The contest decision is neither Confirm nor Void */
 export const BROT_MARKETS_ERROR__INVALID_CONTEST_DECISION = 0x1814; // 6164
@@ -312,6 +312,8 @@ export const BROT_MARKETS_ERROR__WRONG_SPONSOR = 0x181e; // 6174
 export const BROT_MARKETS_ERROR__CONFIRM_WITH_VOID_REASON = 0x181f; // 6175
 /** RereadBeforeTimelock: A matching re-read pays only after stage 1's 24-hour wait */
 export const BROT_MARKETS_ERROR__REREAD_BEFORE_TIMELOCK = 0x1820; // 6176
+/** ContestAlreadyOpen: The campaign is already Contested: an opening (stage 1) never escalates it; stage 2 is its own byte */
+export const BROT_MARKETS_ERROR__CONTEST_ALREADY_OPEN = 0x1821; // 6177
 
 export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY
@@ -328,6 +330,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_SETTLED
   | typeof BROT_MARKETS_ERROR__CONFIRM_WITH_VOID_REASON
+  | typeof BROT_MARKETS_ERROR__CONTEST_ALREADY_OPEN
   | typeof BROT_MARKETS_ERROR__CONTEST_DEADLINE_PASSED
   | typeof BROT_MARKETS_ERROR__CONTEST_EXIT_DISABLED
   | typeof BROT_MARKETS_ERROR__CONTEST_NOT_LAPSED
@@ -481,9 +484,10 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN]: `The campaign is not \`Open\``,
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_SETTLED]: `The campaign's fee, prize and creator share are not all settled`,
     [BROT_MARKETS_ERROR__CONFIRM_WITH_VOID_REASON]: `A Confirm decision carries no void reason: its void_reason must be None`,
+    [BROT_MARKETS_ERROR__CONTEST_ALREADY_OPEN]: `The campaign is already Contested: an opening (stage 1) never escalates it; stage 2 is its own byte`,
     [BROT_MARKETS_ERROR__CONTEST_DEADLINE_PASSED]: `The contest stage's deadline has passed`,
     [BROT_MARKETS_ERROR__CONTEST_EXIT_DISABLED]: `Contests are disabled until Sprint 14: a contest would freeze the pot`,
-    [BROT_MARKETS_ERROR__CONTEST_NOT_LAPSED]: `Stage 2 of the contest has not lapsed yet`,
+    [BROT_MARKETS_ERROR__CONTEST_NOT_LAPSED]: `The contest has not lapsed yet: stage 2 lapses at its deadline, an unread stage 1 48 hours after its own`,
     [BROT_MARKETS_ERROR__CONTEST_OUTSIDE_REVIEW]: `A contest opens only inside the review window`,
     [BROT_MARKETS_ERROR__CREATION_PARAMS_CHANGED]: `The creation parameters changed since the client read them (\`expected_params_version\`)`,
     [BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING]: `\`creator_share_bps\` is above \`MAX_CREATOR_SHARE_BPS\``,

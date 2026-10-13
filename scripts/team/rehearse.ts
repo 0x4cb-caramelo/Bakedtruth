@@ -3,9 +3,10 @@
  *          admin sets the team and the creation parameters; a team key pauses and the admin resumes; a stranger
  *          and a team key acting as admin are refused before anything is built; a team key opens free campaigns;
  *          a void of a YES is refused by the program (simulated, nothing written); a team key confirms a YES a baker
- *          joined, its late-join tally first; the contest (rehearse-contest.ts): a re-read that pays after stage 1's
- *          24 hours, a stage 2 the admin confirms and one a team key escalated that the admin voids; and, after the
- *          deadline, the team voids an automatic void with its record's hash on-chain.
+ *          joined, its late-join tally first; the contest (rehearse-contest.ts): a retried opening refused, a re-read
+ *          that pays after stage 1's 24 hours, a stage 2 the admin confirms, one a team key escalated that the admin
+ *          voids, and an opening with its escalation in one transaction; and, after the deadline, the team voids an
+ *          automatic void with its record's hash on-chain.
  * Version: 0.2.0 (Sprint 14: the contest is real; the confirm tallies first)
  * Sprint:  05 (SDK and the devnet cycle), lane OPS; 14 (lane INV14)
  *

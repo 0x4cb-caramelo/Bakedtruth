@@ -28,7 +28,7 @@ const DEPLOY = join(ROOT, "target/deploy");
 const SO = join(DEPLOY, "brot_markets.so");
 const SAVED = join(ROOT, "target/checks-mutation/brot_markets.so");
 const JUNIT = join(ROOT, "target/checks-mutation/junit.xml");
-const RUST_TARGETS = ["checks_mollusk", "checks_mollusk_init", "referral_link", "referral_refusals", "contest_mollusk_open", "contest_mollusk_reread", "contest_mollusk_decide", "contest_mollusk_bounds", "contest_mollusk_escalate"];
+const RUST_TARGETS = ["checks_mollusk", "checks_mollusk_init", "referral_link", "referral_refusals", "contest_mollusk_open", "contest_mollusk_reread", "contest_mollusk_decide", "contest_mollusk_bounds", "contest_mollusk_escalate", "contest_mollusk_act"];
 const TS_FILES = [
   "tests/brot/checks.test.ts",
   "tests/brot/checks-init.test.ts",
@@ -41,6 +41,7 @@ const TS_FILES = [
   "tests/brot/contest-worst-case.test.ts",
   "tests/brot/contest-proof.test.ts",
   "tests/brot/contest-escalate.test.ts",
+  "tests/brot/contest-act.test.ts",
 ];
 const PATH = `${process.env.HOME}/.bun/bin:${process.env.PATH}`;
 // Mollusk and LiteSVM both run the binary this script builds; logs off and no colours to parse.
@@ -117,6 +118,12 @@ contest_team_key      fail  escalation_refuses_anyone_but_a_team_key_first | -
 reread_timelock       fail  reread_timelock_refuses_a_matching_reread_before_stage_one_ends | contest reread: a matching re-read is refused before stage 1's 24 hours end, and pays at their end
 escalate_stage        fail  escalate_stage_refuses_a_contest_at_stage_two_already | contest escalate: each refusal has its own error and writes nothing
 escalate_deadline     fail  escalate_deadline_refuses_from_stage_one_deadline_on | contest escalate: each refusal has its own error and writes nothing
+contest_act           fail  contest_act_refuses_any_other_byte_and_any_other_length | contest act: any other byte or data length is BadInstructionData and writes nothing
+contest_already_open  fail  contest_already_open_refuses_a_retried_opening_at_either_stage | contest act: a retried or duplicate opening is refused with ContestAlreadyOpen and writes nothing
+contest_not_open      fail  contest_not_open_refuses_an_escalation_of_a_campaign_not_contested | contest act: byte 2 on a campaign not contested is refused with NotContested and writes nothing
+contest_act           fail  contest_act_is_the_byte_and_fits_the_campaign_on_the_host | -
+contest_already_open  fail  contest_act_is_the_byte_and_fits_the_campaign_on_the_host | -
+contest_not_open      fail  contest_act_is_the_byte_and_fits_the_campaign_on_the_host | -
 `;
 
 const args = process.argv.slice(2);

@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **1093** |
+| Arquivos mapeados | **1096** |
 | Acima de 200 linhas | **44** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -18,10 +18,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 - `app/lib/mascot/engine.ts` — 312 linhas
 - `programs/brot-markets/src/constants.rs` — 204 linhas
-- `programs/brot-markets/src/error.rs` — 376 linhas
+- `programs/brot-markets/src/error.rs` — 379 linhas
 - `programs/brot-markets/src/instructions/campaigns/open_campaign.rs` — 209 linhas
 - `programs/brot-markets/src/instructions/entries/join_campaign.rs` — 212 linhas
-- `programs/brot-markets/src/instructions/interface.rs` — 281 linhas
+- `programs/brot-markets/src/instructions/interface.rs` — 284 linhas
 - `programs/brot-markets/src/math/snapshot.rs` — 208 linhas
 - `programs/brot-markets/tests/contest_mollusk_decide.rs` — 207 linhas
 - `programs/brot-markets/tests/epoch_support/mod.rs` — 201 linhas
@@ -36,7 +36,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `prototype-lab/shared/ledger.js` — 238 linhas
 - `prototype-lab/shared/mascot.js` — 379 linhas
 - `prototype-lab/shared/mock-data.js` — 290 linhas
-- `scripts/checks-mutation.mjs` — 250 linhas
+- `scripts/checks-mutation.mjs` — 257 linhas
 - `scripts/codemap.js` — 223 linhas
 - `scripts/devnet-clock-probe.ts` — 201 linhas
 - `scripts/os-self-test.js` — 406 linhas
@@ -468,7 +468,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`codes.ts`](packages/sdk/src/read/errors/codes.ts) | the program's custom error codes by name (programs/brot-markets/src/error.rs), so a client names the exact refusal. Codes are appended there and here, never reu | 181 |
+| [`codes.ts`](packages/sdk/src/read/errors/codes.ts) | the program's custom error codes by name (programs/brot-markets/src/error.rs), so a client names the exact refusal. Codes are appended there and here, never reu | 182 |
 | [`index.ts`](packages/sdk/src/read/errors/index.ts) | one message per program error code, read from the IDL, and the refusal the SDK throws when its mirror of a program rule refuses (math, creation checks), carryin | 79 |
 
 ## `packages/sdk/src/read/math/`
@@ -524,11 +524,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`prepare.ts`](packages/sdk/src/tx/prepare.ts) | A-3 for a join: re-read the campaign, the config, the baker's entry, the metric account and the chain's clock through the RPC; check them with the SDK's mirror  | 126 |
 | [`reread.ts`](packages/sdk/src/tx/reread.ts) | `reread_campaign`, stage 1 of a contest (TP 3.4.7), built by the Codama client: any wallet, at the top level only, runs the campaign's reading again. The same r | 35 |
 | [`simulate.ts`](packages/sdk/src/tx/simulate.ts) | simulate a transaction before the wallet signs it (A-3): the cluster runs it on its current state, unsigned, with the latest blockhash, and the SDK reports the  | 90 |
-| [`summary-brot.ts`](packages/sdk/src/tx/summary-brot.ts) | the summary of this program's own instructions (A-3). The structure is checked against the IDL first: the exact data size, the exact account count, each slot's  | 188 |
+| [`summary-brot.ts`](packages/sdk/src/tx/summary-brot.ts) | the summary of this program's own instructions (A-3). The structure is checked against the IDL first: the exact data size, the exact account count, each slot's  | 190 |
 | [`summary-budget.ts`](packages/sdk/src/tx/summary-budget.ts) | the summary's reading of compute-budget instructions (Sprint 05 review, H1): the unit limit and the unit price decoded, the priority fee they allow bounded and  | 89 |
-| [`summary-contest.ts`](packages/sdk/src/tx/summary-contest.ts) | what the summary says for a contest's opening or escalation, its re-read and the admin's stage-2 decision (Sprint 14), from the bytes signed and, when the scree | 91 |
-| [`summary-other.ts`](packages/sdk/src/tx/summary-other.ts) | what the summary says for the instructions that move no money out of a signer's wallet (the admin, team and settlement instructions), each with the values it si | 159 |
-| [`summary.ts`](packages/sdk/src/tx/summary.ts) | the deterministic summary of a transaction before the wallet signs it (A-3). `summarizeMessage` reads the very bytes the wallet signs: the compiled message, dec | 173 |
+| [`summary-contest.ts`](packages/sdk/src/tx/summary-contest.ts) | what the summary says for a contest's opening or escalation, its re-read and the admin's stage-2 decision (Sprint 14), from the bytes signed and, when the scree | 129 |
+| [`summary-other.ts`](packages/sdk/src/tx/summary-other.ts) | what the summary says for the instructions that move no money out of a signer's wallet (the admin, team and settlement instructions), each with the values it si | 163 |
+| [`summary.ts`](packages/sdk/src/tx/summary.ts) | the deterministic summary of a transaction before the wallet signs it (A-3). `summarizeMessage` reads the very bytes the wallet signs: the compiled message, dec | 179 |
 
 ## `packages/sdk/src/tx/builders/`
 
@@ -536,7 +536,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`admin.ts`](packages/sdk/src/tx/builders/admin.ts) | the admin and team-configuration instructions, built by the Codama client from the Shank IDL with every program address derived here: initialisation, the team k | 98 |
 | [`campaign.ts`](packages/sdk/src/tx/builders/campaign.ts) | the instructions of a campaign's open life, built by the Codama client with every program address derived here: opening (`user_open_campaign`), joining (`user_j | 142 |
-| [`review.ts`](packages/sdk/src/tx/builders/review.ts) | the team's acts inside a campaign's review window, built by the Codama client: confirm the result, void it with a reason and the hash of its public note, open a | 60 |
+| [`review.ts`](packages/sdk/src/tx/builders/review.ts) | the team's acts inside a campaign's review window, built by the Codama client: confirm the result, void it with a reason and the hash of its public note, open a | 70 |
 | [`settlement.ts`](packages/sdk/src/tx/builders/settlement.ts) | the permissionless settlement instructions, built by the Codama client with every program address derived here: finalize, the late-join tally, an entry's payout | 104 |
 
 ## `programs/brot-markets/src/`
@@ -546,7 +546,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`checks.rs`](programs/brot-markets/src/checks.rs) | every account check Anchor used to make, written by hand in one place (TP 3.4.17), each with its own error and a negative test that fails without it (T24, X0.9) | 172 |
 | [`constants.rs`](programs/brot-markets/src/constants.rs) | seeds, program ids, code ceilings and the duration and window constants compiled into the program, with the devnet-only drill values behind the `drill` feature | 204 |
 | [`entrypoint.rs`](programs/brot-markets/src/entrypoint.rs) | the instruction dispatcher: the first byte of the instruction data picks the handler, the rest is that handler's arguments | 97 |
-| [`error.rs`](programs/brot-markets/src/error.rs) | every refusal the program can return, one code per cause, as custom program errors | 376 |
+| [`error.rs`](programs/brot-markets/src/error.rs) | every refusal the program can return, one code per cause, as custom program errors | 379 |
 | [`events.rs`](programs/brot-markets/src/events.rs) | the events, one per instruction, and how they leave the program: a self-CPI signed by the event-authority PDA, so they survive log truncation (T4) | 106 |
 | [`feeds.rs`](programs/brot-markets/src/feeds.rs) | the compiled list of Pyth feeds a price campaign may name (founder answer 1, 2026-10-09; TP 3.4.1, 3.4.10). One list per cluster, chosen by the `mainnet` featur | 147 |
 | [`layout.rs`](programs/brot-markets/src/layout.rs) | zero-copy byte layouts shared by accounts, instruction arguments and events: the little-endian field types and the one place where bytes become a typed view | 126 |
@@ -578,7 +578,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`interface.rs`](programs/brot-markets/src/instructions/interface.rs) | the program's interface for the Shank IDL (T9): the `BrotInstruction` enum, with each instruction's accounts in order and its arguments | 281 |
+| [`interface.rs`](programs/brot-markets/src/instructions/interface.rs) | the program's interface for the Shank IDL (T9): the `BrotInstruction` enum, with each instruction's accounts in order and its arguments | 284 |
 | [`mod.rs`](programs/brot-markets/src/instructions/mod.rs) | the program's interface: every instruction with its discriminator, its accounts in order and its arguments, for the dispatcher and for the Shank IDL (T9) | 73 |
 
 ## `programs/brot-markets/src/instructions/admin/`
@@ -640,12 +640,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`admin_decide_contest.rs`](programs/brot-markets/src/instructions/resolution/admin_decide_contest.rs) | `admin_decide_contest(decision, void_reason, note_hash)`: stage 2 of a contest (TP section 3.4.7; BP v0.0.4 part 1 section 4.5). Before its deadline the admin ( | 117 |
 | [`contest_decision.rs`](programs/brot-markets/src/instructions/resolution/contest_decision.rs) | what the admin's decision at stage 2 of a contest may record (TP section 3.4.7; BP v0.0.4 part 1 section 4.5): `Confirm` keeps the stored result and carries no  | 44 |
 | [`contest_reread.rs`](programs/brot-markets/src/instructions/resolution/contest_reread.rs) | what `reread_campaign` compares and does (TP section 3.4.7): the stored result against the reading run now, exactly (outcome, void reason, `met_late`, observed  | 128 |
-| [`contest_rules.rs`](programs/brot-markets/src/instructions/resolution/contest_rules.rs) | the contest's rules (TP section 3.4.7; BP v0.0.4 part 1 section 4.5) as pure functions, each refusal with its own error: who opens a contest and when, the team' | 165 |
+| [`contest_rules.rs`](programs/brot-markets/src/instructions/resolution/contest_rules.rs) | the contest's rules (TP section 3.4.7; BP v0.0.4 part 1 section 4.5) as pure functions, each refusal with its own error: the act a team key's signed byte names  | 194 |
 | [`mod.rs`](programs/brot-markets/src/instructions/resolution/mod.rs) | the instructions that decide a campaign's outcome: `resolve_campaign` (Sprint 03), and the team's acts inside the review window: confirming, voiding and contest | 21 |
 | [`reread_campaign.rs`](programs/brot-markets/src/instructions/resolution/reread_campaign.rs) | `reread_campaign`: stage 1 of a contest (TP section 3.4.7; BP v0.0.4 part 1 section 4.5). Any wallet, at the top level only, runs the campaign's reading again N | 151 |
 | [`resolve_campaign.rs`](programs/brot-markets/src/instructions/resolution/resolve_campaign.rs) | `resolve_campaign`: any wallet records the outcome the campaign's reader reads, at the top level only, and opens the six-hour review window (TP sections 3.4.2,  | 98 |
 | [`team_confirm_result.rs`](programs/brot-markets/src/instructions/resolution/team_confirm_result.rs) | `team_confirm_result`: a team key ends the review window now and the outcome stands; the snapshot runs at once, so the campaign is `Settling` (TP sections 3.4.3 | 78 |
-| [`team_open_contest.rs`](programs/brot-markets/src/instructions/resolution/team_open_contest.rs) | `team_open_contest`: a team key contests a result inside its review window (TP sections 3.4.2, 3.4.7; BP v0.0.4 part 1 section 4.5). The campaign becomes `Conte | 98 |
+| [`team_open_contest.rs`](programs/brot-markets/src/instructions/resolution/team_open_contest.rs) | `team_open_contest(stage)`: a team key contests a result inside its review window, or sends a contest to the admin (TP sections 3.4.2, 3.4.7; BP v0.0.4 part 1 s | 119 |
 | [`team_shared.rs`](programs/brot-markets/src/instructions/resolution/team_shared.rs) | what the three team instructions share: the team-key check, the event number each event takes from the campaign, and the refusal of a status that is not the sto | 31 |
 | [`team_void_campaign.rs`](programs/brot-markets/src/instructions/resolution/team_void_campaign.rs) | `team_void_campaign(reason, note_hash)`: a team key voids a campaign inside the review window with a reason it may choose and the hash of its note; the snapshot | 102 |
 | [`void_reason.rs`](programs/brot-markets/src/instructions/resolution/void_reason.rs) | the class of each `VoidReason` (TP section 3.4.7, P-4): a house failure refunds the 10% opening fee, an outside cause keeps it; which reasons a team key may cho | 43 |
@@ -759,9 +759,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`checks_mollusk.rs`](programs/brot-markets/tests/checks_mollusk.rs) | the checks negatives on the program's SBF binary in Mollusk, through `admin_set_team`: the config under another owner, unsigned and read-only slots, a wrong tag | 158 |
 | [`config_params.rs`](programs/brot-markets/tests/config_params.rs) | the floors and ceilings of the creation parameters (TP section 3.4.1, C43): the founder's values pass, every bound passes, and one step past a bound fails with  | 192 |
 | [`contest_decision.rs`](programs/brot-markets/tests/contest_decision.rs) | the admin's decision at stage 2 of a contest on the host (Sprint 14, lane L14B): the reason must fit the decision, and "decide contest never inverts": no stored | 111 |
+| [`contest_mollusk_act.rs`](programs/brot-markets/tests/contest_mollusk_act.rs) | the act of `team_open_contest` is its signed byte (the second review's S1, 2026-10-13), on the host and on the program's SBF binary in Mollusk: byte 1 on a camp | 101 |
 | [`contest_mollusk_bounds.rs`](programs/brot-markets/tests/contest_mollusk_bounds.rs) | the re-read's two bounds from the Sprint 14 red-team review, on the program's SBF binary in Mollusk: a late re-read adds no time, since stage 2 counts from stag | 117 |
 | [`contest_mollusk_decide.rs`](programs/brot-markets/tests/contest_mollusk_decide.rs) | stage 2 of a contest on the program's SBF binary in Mollusk (Sprint 14, lane L14B): the admin confirms (the stored outcome is snapshotted) or voids with a team  | 207 |
-| [`contest_mollusk_escalate.rs`](programs/brot-markets/tests/contest_mollusk_escalate.rs) | the team's escalation on the program's SBF binary in Mollusk (the founder's answer to D2, 2026-10-13): a team key calls `team_open_contest` again on a contest s | 95 |
+| [`contest_mollusk_escalate.rs`](programs/brot-markets/tests/contest_mollusk_escalate.rs) | the team's escalation on the program's SBF binary in Mollusk (the founder's answer to D2, 2026-10-13): a team key calls `team_open_contest(2)` on a contest stil | 99 |
 | [`contest_mollusk_open.rs`](programs/brot-markets/tests/contest_mollusk_open.rs) | `team_open_contest` on the program's SBF binary in Mollusk (Sprint 14, lane L14B): a team key contests a campaign in review inside its window, and stage 1 start | 91 |
 | [`contest_mollusk_reread.rs`](programs/brot-markets/tests/contest_mollusk_reread.rs) | `reread_campaign` on the program's SBF binary in Mollusk (Sprint 14, lane L14B): the same reading pays with the stored outcome once stage 1's 24 hours are over  | 194 |
 | [`contest_reread.rs`](programs/brot-markets/tests/contest_reread.rs) | the re-read's comparison and acts on the host (Sprint 14, lane L14B): "the same reading" is the stored outcome, void reason, `met_late` and observed value exact | 191 |
@@ -853,7 +854,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`calls.rs`](programs/brot-markets/tests/contest_support/calls.rs) | the contest's four instructions for the Mollusk tests (Sprint 14, lane L14B), in the frozen slot order with every account they name (open, re-read, decide, and  | 184 |
+| [`calls.rs`](programs/brot-markets/tests/contest_support/calls.rs) | the contest's four instructions for the Mollusk tests (Sprint 14, lane L14B), in the frozen slot order with every account they name (open, re-read, decide, and  | 188 |
 | [`data.rs`](programs/brot-markets/tests/contest_support/data.rs) | the accounts of the contest's Mollusk tests (Sprint 14, lane L14B): a paid `SupplyAtMost` campaign on a synthetic SPL mint, resolved NO after its deadline and i | 116 |
 | [`mod.rs`](programs/brot-markets/tests/contest_support/mod.rs) | the Mollusk world of the contest tests (Sprint 14, lane L14B): the accounts (`data.rs`) and the contest's four instructions (`calls.rs`), run on the program's S | 12 |
 
@@ -1084,7 +1085,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`capture-fixtures-dbc.ts`](scripts/capture-fixtures-dbc.ts) | the Meteora Dynamic Bonding Curve (DBC) accounts the graduation kind (`DbcGraduated`) is tested on, for scripts/capture-fixtures.ts: a `VirtualPool` at each mig | 73 |
 | [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party programs actually write instead of a layout someone typed f | 185 |
 | [`check-content-schema.ts`](scripts/check-content-schema.ts) | the JSON Schema check of content/ (TP §4 "Content files", §3.1's data contracts; Sprint 08 DoD): every `content/<name>.json` beside a `content/<name>.schema.jso | 81 |
-| [`checks-mutation.mjs`](scripts/checks-mutation.mjs) | the X0.9 evidence for the checks module: removes each check of programs/brot-markets/src/checks.rs and its submodules (checks/top_level.rs) in turn, rebuilds th | 250 |
+| [`checks-mutation.mjs`](scripts/checks-mutation.mjs) | the X0.9 evidence for the checks module: removes each check of programs/brot-markets/src/checks.rs and its submodules (checks/top_level.rs) in turn, rebuilds th | 257 |
 | [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns | 74 |
 | [`codama-spike.ts`](scripts/codama-spike.ts) | the Codama spike (T9): renders a Kit client from the Shank IDL of brot-markets into packages/sdk/src/idl/generated. T9, decided in Sprint 05: the generated clie | 61 |
 | [`codemap.js`](scripts/codemap.js) | let an AI locate the right file without reading every file. Pairs with the 200-line limit in .claude/rules/code-style.md — small files plus a one-line index mea | 223 |
@@ -1174,13 +1175,13 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`check-opening.ts`](scripts/team/check-opening.ts) | a read-only check of an opening (Sprint 19 DoD: "the `Campaign` account shows `opening_paid_lamports` equal to the quote's formula at the price read, split as ` | 84 |
 | [`common.ts`](scripts/team/common.ts) | what the team scripts share (Sprint 05 DoD, `scripts/team/`): your own key from TEAM_KEYPAIR (each person uses theirs; nobody shares one), the cluster named on  | 86 |
 | [`confirm.ts`](scripts/team/confirm.ts) | `team_confirm_result` with your own team key: ends a campaign's review window now; the snapshot runs at once and payouts can start (TP §3.4.7). Only inside the  | 38 |
-| [`contest.ts`](scripts/team/contest.ts) | `team_open_contest` with your own team key (TP §3.4.7; BP v0.0.4 part 1 §4.5): inside the review window, a team key contests the stored result; the campaign bec | 54 |
+| [`contest.ts`](scripts/team/contest.ts) | `team_open_contest(stage)` with your own team key (TP §3.4.7; BP v0.0.4 part 1 §4.5). The act is the signed byte (the second review's S1), never the campaign's  | 64 |
 | [`decide.ts`](scripts/team/decide.ts) | `admin_decide_contest(decision, void_reason, note_hash)`, stage 2 of a contest (TP §3.4.7; BP v0.0.4 part 1 §4.5), with the admin's key (TEAM_KEYPAIR holding it | 91 |
 | [`open.ts`](scripts/team/open.ts) | `user_open_campaign` with your own TEAM key, free (`opening_usd` 0): for the team or a launch partner, with no prize and no creator share (P-3; TP §3.4.10). Out | 92 |
 | [`pause.ts`](scripts/team/pause.ts) | `team_pause_entries` with your own team key: stops joins and openings at once, never payouts or refunds (TP §3.4.9). One team key is enough, to be fast; only th | 21 |
 | [`record.ts`](scripts/team/record.ts) | a void's public record and its sending (TP §3.4.7, BR-45), shared by the team's void (void.ts) and the admin's void at stage 2 of a contest (decide.ts): the byt | 90 |
-| [`rehearse-contest.ts`](scripts/team/rehearse-contest.ts) | the contest's part of the team rehearsal (Sprint 14; TP §3.4.7), on the local offline surfnet of rehearse.ts: a team key contests a YES in review; a re-read of  | 115 |
-| [`rehearse.ts`](scripts/team/rehearse.ts) | rehearse every team script on a local offline surfnet, inside a loopback-only network namespace: the admin sets the team and the creation parameters; a team key | 194 |
+| [`rehearse-contest.ts`](scripts/team/rehearse-contest.ts) | the contest's part of the team rehearsal (Sprint 14; TP §3.4.7), on the local offline surfnet of rehearse.ts: a team key contests a YES in review, and the same  | 137 |
+| [`rehearse.ts`](scripts/team/rehearse.ts) | rehearse every team script on a local offline surfnet, inside a loopback-only network namespace: the admin sets the team and the creation parameters; a team key | 195 |
 | [`reread.ts`](scripts/team/reread.ts) | `reread_campaign`, stage 1 of a contest (TP §3.4.7): any wallet (here your own key from TEAM_KEYPAIR, as the keeper would) runs the campaign's reading again now | 52 |
 | [`resolution-post.ts`](scripts/team/resolution-post.ts) | the text of a resolution post (BR-33; TP §3.6 "The share card"; Sprint 13 DoD), written from scripts/team/resolution-post.template.txt for a person to post on X | 154 |
 | [`resume.ts`](scripts/team/resume.ts) | `admin_resume_entries` with the admin's key: ends a pause (`EntriesHalted` to `Normal`). The admin's act, not a team key's (TP §3.4.9); on mainnet it is the 2-o | 21 |
@@ -1218,7 +1219,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`negative-price.ts`](scripts/validator/negative-price.ts) | rewrite a sponsored Pyth account on the surfnet with one field changed, from the captured devnet bytes (the .bin files are never edited): price, confidence, exp | 56 |
 | [`negative-run.ts`](scripts/validator/negative-run.ts) | the slot matrix and one paid opening on a local validator (Sprint 05 DoD: "the negative tests, the slot tests and one paid opening run once on a real validator" | 146 |
 | [`negative-world.ts`](scripts/validator/negative-world.ts) | run the test kit's account injectors and the slot matrix's mutations against a surfnet, unchanged: a recording stand-in for the three synchronous LiteSVM calls  | 107 |
-| [`rpc.ts`](scripts/validator/rpc.ts) | talk to a cluster over JSON-RPC for the ops scripts: the cluster guard (a non-local URL is refused unless the caller names the cluster on purpose; the genesis h | 186 |
+| [`rpc.ts`](scripts/validator/rpc.ts) | talk to a cluster over JSON-RPC for the ops scripts: the cluster guard (a non-local URL is refused unless the caller names the cluster on purpose; the genesis h | 192 |
 | [`simulate.ts`](scripts/validator/simulate.ts) | simulate a transaction before sending it, so an ops script shows what the program would answer (its custom error by name, the logs, the compute units) without w | 53 |
 | [`spl-token.ts`](scripts/validator/spl-token.ts) | the few System Program and classic SPL Token instructions the ops scripts need to make a burn campaign's mint (`SupplyAtMost`): create an account, transfer SOL, | 115 |
 | [`surfnet.ts`](scripts/validator/surfnet.ts) | start and stop a local OFFLINE Surfpool surfnet for the ops rehearsals: no datasource (`--offline`), bound to 127.0.0.1 on two free ports in 4200-4299, run from | 95 |
@@ -1542,12 +1543,13 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`close-revival.test.ts`](tests/brot/close-revival.test.ts) | the revival of a closed campaign, in one transaction: close_campaign, a System Program transfer into the closed address, then a program instruction on it. The l | 63 |
 | [`close-sweep.test.ts`](tests/brot/close-sweep.test.ts) | close_campaign and sweep_fees on the binary: the rent of the campaign and its vault goes back to the stored rent payer, the vault's surplus goes to the fee vaul | 86 |
 | [`codama-spike.test.ts`](tests/brot/codama-spike.test.ts) | the Codama spike (T9): the Kit client rendered from the Shank IDL (packages/sdk/src/idl/generated) against the hand-written kit. Without the program: every inst | 263 |
+| [`contest-act.test.ts`](tests/brot/contest-act.test.ts) | the act of `team_open_contest` is its signed byte (the second review's S1, 2026-10-13), on the binary. The S1 sequence (an opening that landed, sent again as th | 82 |
 | [`contest-decide.test.ts`](tests/brot/contest-decide.test.ts) | stage 2 of a contest on the binary (Sprint 14, lane L14B): the admin confirms or voids (`ContestClosed`, then `CampaignFinalized`), the opening fee following th | 201 |
-| [`contest-escalate.test.ts`](tests/brot/contest-escalate.test.ts) | the team's escalation on the binary (the founder's answer to D2, 2026-10-13): during stage 1's 24 hours a team key calls `team_open_contest` again and the conte | 93 |
-| [`contest-open.test.ts`](tests/brot/contest-open.test.ts) | `team_open_contest` on the binary (Sprint 14, lane L14B): a team key contests a result inside its window, stage 1 starts for 24 hours (D2), and `ContestOpened`  | 110 |
+| [`contest-escalate.test.ts`](tests/brot/contest-escalate.test.ts) | the team's escalation on the binary (the founder's answer to D2, 2026-10-13): during stage 1's 24 hours a team key calls `team_open_contest(2)` and the contest  | 96 |
+| [`contest-open.test.ts`](tests/brot/contest-open.test.ts) | `team_open_contest` on the binary (Sprint 14, lane L14B): a team key contests a result inside its window, stage 1 starts for 24 hours (D2), and `ContestOpened`  | 113 |
 | [`contest-proof.test.ts`](tests/brot/contest-proof.test.ts) | a contested price YES re-read inside its proof window, on the binary (Sprint 14 red-team review, fix F4): a proof the caller offers and the reader refuses (a wa | 100 |
 | [`contest-reread.test.ts`](tests/brot/contest-reread.test.ts) | `reread_campaign` on the binary (Sprint 14, lane L14B): a re-read forwarded by another program is refused (`checks::top_level`, rerun per mutant by scripts/chec | 194 |
-| [`contest-support.ts`](tests/brot/contest-support.ts) | what the contest's LiteSVM tests share (Sprint 14, lane L14B): a world with the founder's config, the admin, one team key and a stranger; a `SupplyAtMost` campa | 132 |
+| [`contest-support.ts`](tests/brot/contest-support.ts) | what the contest's LiteSVM tests share (Sprint 14, lane L14B): a world with the founder's config, the admin, one team key and a stranger; a `SupplyAtMost` campa | 136 |
 | [`contest-worst-case.test.ts`](tests/brot/contest-worst-case.test.ts) | the dispute's worst case on the binary (Sprint 14, lane L14B; BP v0.0.4 part 1 section 4.5; TP 3.4.7): a paid price campaign with two entries resolves NO at t0  | 145 |
 | [`cutoff-reproof.test.ts`](tests/brot/cutoff-reproof.test.ts) | the earlier-proof re-proof (decision of 2026-10-09): a campaign already in review moves its cut-off back to an earlier valid YES price proof, and to no later on | 43 |
 | [`errors.ts`](tests/brot/errors.ts) | the program's custom error codes by name, so tests assert the exact refusal (X0.7). The map moved to the SDK in Sprint 05 (packages/sdk/src/read/errors/codes.ts | 9 |
@@ -1557,17 +1559,17 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`idl.test.ts`](tests/brot/idl.test.ts) | the drift check (X0.6): the hand-written test kit (struct layouts, events, instruction builders, error codes) against the Shank IDL that `bun run idl` writes fr | 271 |
 | [`idl.ts`](tests/brot/idl.ts) | the Shank IDL (packages/sdk/src/idl/brot_markets.json) in the test kit's terms: struct fields as layouts.ts types, enums as one byte, names as Shank writes them | 127 |
 | [`instructions-14-15.ts`](tests/brot/instructions-14-15.ts) | builders for the five instructions of Sprints 14 and 15, with the accounts in the order of programs/brot-markets/src/instructions/interface.rs. The program refu | 92 |
-| [`instructions-settlement.ts`](tests/brot/instructions-settlement.ts) | builders for the ten instructions of Sprint 04, with the accounts in the frozen order of programs/brot-markets/src/instructions/interface.rs. The bodies are lan | 81 |
+| [`instructions-settlement.ts`](tests/brot/instructions-settlement.ts) | builders for the ten instructions of Sprint 04, with the accounts in the frozen order of programs/brot-markets/src/instructions/interface.rs. The bodies are lan | 91 |
 | [`instructions.ts`](tests/brot/instructions.ts) | builders for every instruction of the program, with the accounts in the frozen order of programs/brot-markets/src/instructions/mod.rs, and helpers that tamper w | 170 |
 | [`invariant-checks.ts`](tests/brot/invariant-checks.ts) | the money invariants I1 to I15 (TP section 3.4.13) as small functions of the model state and the chain state. The randomized test runs them after every operatio | 198 |
-| [`invariant-contest.ts`](tests/brot/invariant-contest.ts) | the randomized test's contest (Sprint 14; TP section 3.4.7): a team key opens it inside the review window (stage 1, 24 hours) and, until stage 1's deadline, may | 146 |
+| [`invariant-contest.ts`](tests/brot/invariant-contest.ts) | the randomized test's contest (Sprint 14; TP section 3.4.7): a team key opens it inside the review window (stage 1, 24 hours, byte 1) and, until stage 1's deadl | 157 |
 | [`invariant-decide.ts`](tests/brot/invariant-decide.ts) | the randomized test's stage 2 of a contest (Sprint 14; TP section 3.4.7): the admin confirms or voids before stage 2's deadline, never inverting, with the progr | 70 |
 | [`invariant-harness.ts`](tests/brot/invariant-harness.ts) | the world of the randomized test: a seeded generator, the wallets, the price accounts the operations refresh, the reference model of every campaign and of every | 190 |
 | [`invariant-model.ts`](tests/brot/invariant-model.ts) | the reference model of one campaign's money, the state the randomized test expects the program to hold (TP sections 3.4.7, 3.4.13, 3.4.16): the money, the resul | 200 |
 | [`invariant-open.ts`](tests/brot/invariant-open.ts) | the randomized test's opening and joining operations: a paid opening (the 10% fee and the prize), a team opening (free), a join on either side, the pause, each  | 183 |
 | [`invariant-ops.ts`](tests/brot/invariant-ops.ts) | the randomized test's operations: the dispatch of every operation to its planner, the money moved by hand and by the wallets (drain, fund, sweep), and the draw  | 180 |
 | [`invariant-payouts.ts`](tests/brot/invariant-payouts.ts) | what each payout of the reference model pays once the snapshot is taken (TP sections 3.4.7, 3.4.16): an entry (its early share by mode, plus its late refund), t | 72 |
-| [`invariant-phase.ts`](tests/brot/invariant-phase.ts) | the lifecycle draws of the randomized test (Sprint 04, X0.1). A uniform draw over the kinds mostly names an operation the campaign's phase refuses, so the run w | 147 |
+| [`invariant-phase.ts`](tests/brot/invariant-phase.ts) | the lifecycle draws of the randomized test (Sprint 04, X0.1). A uniform draw over the kinds mostly names an operation the campaign's phase refuses, so the run w | 154 |
 | [`invariant-program.test.ts`](tests/brot/invariant-program.test.ts) | the money rules run through the program, with the Sprint 04 instructions on injected states: a one-sided pot's rows, the pause never blocking a payout (I10′), t | 236 |
 | [`invariant-reader.ts`](tests/brot/invariant-reader.ts) | the price reader's decision on the harness's own BTC/USD account, for the contest's re-read (TP sections 3.4.6, 3.4.7): the account a re-read finds (the stored  | 61 |
 | [`invariant-referral.ts`](tests/brot/invariant-referral.ts) | the randomized test's referral links (Sprint 14; TP section 3.4.11): a referee links its referrer once, at any phase and paused or not (I10′), paying only the t | 152 |
@@ -1624,7 +1626,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`slot-matrix-mutate.ts`](tests/brot/slot-matrix-mutate.ts) | the mutations of the slot matrix: one slot of a valid instruction changed (unsigned, read-only, a stranger, an account of another type, or an alias of an earlie | 75 |
 | [`slot-matrix.gen.ts`](tests/brot/slot-matrix.gen.ts) | every slot case of the matrix: each signer unsigned (MissingSignature), each writable slot read-only (NotWritable), a stranger, an account of each other type, a | 564 |
 | [`slot-matrix.test.ts`](tests/brot/slot-matrix.test.ts) | runs every case of the slot matrix (tests/brot/slot-matrix.gen.ts) against the binary: each refused with its own BrotError, and no lamport of the instruction's  | 58 |
-| [`structs-14-15.ts`](tests/brot/structs-14-15.ts) | the structs of Sprints 14 and 15 as layouts, in the field order of their Rust structs: the `ReferralLink` and `SealedFee` accounts and the arguments of `user_li | 52 |
+| [`structs-14-15.ts`](tests/brot/structs-14-15.ts) | the structs of Sprints 14 and 15 as layouts, in the field order of their Rust structs: the `ReferralLink` and `SealedFee` accounts and the arguments of `user_li | 54 |
 | [`structs.ts`](tests/brot/structs.ts) | the program's structs as layouts: accounts (GlobalConfig, Campaign, Entry), instruction arguments and events, each in the field order of its Rust struct | 174 |
 | [`team-window-events.test.ts`](tests/brot/team-window-events.test.ts) | what the team's confirm and void emit, on the binary (TP sections 3.4.3, 3.4.14): their own event (`ResultConfirmed`, `CampaignVoided`) with the campaign's next | 119 |
 | [`team-window.test.ts`](tests/brot/team-window.test.ts) | the team's acts in the review window, on the binary: confirm, void (an automatic void only: a team key never voids a YES or NO, decision of 2026-10-09), and con | 187 |
@@ -1702,8 +1704,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`boundaries.test.ts`](tests/sdk/boundaries.test.ts) | every import rule of `.dependency-cruiser.cjs` fires (Sprint 05 review): the SDK is copied into a temporary folder with the configuration, one violation of each | 67 |
-| [`builders.test.ts`](tests/sdk/builders.test.ts) | every builder of `@brot/sdk/tx` against the test kit's hand-written builder of the same instruction (which tests/brot/idl.test.ts checks against the IDL and eve | 137 |
-| [`contest-sdk.test.ts`](tests/sdk/contest-sdk.test.ts) | the contest in `@brot/sdk` (Sprint 14, lane L14B): the decision builder refuses what the program refuses from the arguments alone; the summary trusts the re-rea | 181 |
+| [`builders.test.ts`](tests/sdk/builders.test.ts) | every builder of `@brot/sdk/tx` against the test kit's hand-written builder of the same instruction (which tests/brot/idl.test.ts checks against the IDL and eve | 141 |
+| [`contest-act-sdk.test.ts`](tests/sdk/contest-act-sdk.test.ts) | the contest's act in `@brot/sdk` is its signed byte (the second review's S1, 2026-10-13): the builder takes stage 1 or 2 and nothing else; the summary names the | 104 |
+| [`contest-sdk.test.ts`](tests/sdk/contest-sdk.test.ts) | the contest in `@brot/sdk` (Sprint 14, lane L14B): the decision builder refuses what the program refuses from the arguments alone; the summary trusts the re-rea | 155 |
 | [`contest-view.test.ts`](tests/sdk/contest-view.test.ts) | a contested campaign's public view (Sprint 14, lane L14B; TP 3.4.2): still "In review", with its stage, the stage's deadline, stage 1's wait before a matching r | 102 |
 | [`contract-events.test.ts`](tests/sdk/contract-events.test.ts) | the SDK's event table and addresses against the program: each event's discriminator and size as events.rs and events/*.rs declare them, the event decoder's refu | 108 |
 | [`contract-relay.test.ts`](tests/sdk/contract-relay.test.ts) | the read half's hand-written values the relay depends on (Sprint 08), checked so they cannot drift: the two instruction discriminators of the country gate again | 30 |

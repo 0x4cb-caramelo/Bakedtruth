@@ -3,7 +3,7 @@
  *          unless the caller names the cluster on purpose; the genesis hash is printed before anything is
  *          sent), account bytes and the Clock, and a transaction sent, landed and read back with its custom
  *          error code, its logs and the program's events decoded by the SDK (decoder rules of TP 3.4.14).
- * Version: 0.1.2 (a landed transaction also reports its compute units and its wire size)
+ * Version: 0.1.3 (a transaction not confirmed in the wait may still land: say so; S1. Its compute units, wire size)
  * Sprint:  05 (SDK and the devnet cycle), lane OPS
  *
  * Transactions go out with `skipPreflight`, so a refusal lands as a failed transaction whose error is read
@@ -146,7 +146,13 @@ export async function send(rpc: Rpc, payer: TransactionSigner, ixs: Instruction[
     await sleep(250);
     landed = await rpc.call<any>("getTransaction", [signature, options]);
   }
-  if (!landed) throw new Error(`transaction ${signature} never landed`);
+  if (!landed) {
+    // Not confirmed within the wait does not mean it never lands: until its blockhash expires it still may. Check
+    // this signature (getSignatureStatuses) before any retry, or a retry can do the act twice.
+    throw new Error(
+      `transaction ${signature} not confirmed within the wait; it may still land: check this signature before any retry`,
+    );
+  }
   const err = landed.meta.err;
   const code = customErrorCode(err);
   return {

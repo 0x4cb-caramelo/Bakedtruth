@@ -1,9 +1,9 @@
 //! Purpose: the team's escalation on the program's SBF binary in Mollusk (the founder's answer to D2, 2026-10-13): a
-//!          team key calls `team_open_contest` again on a contest still at stage 1, before stage 1's deadline, and the
+//!          team key calls `team_open_contest(2)` on a contest still at stage 1, before stage 1's deadline, and the
 //!          contest goes to stage 2 for 48 hours, the result untouched; refused to anyone but a team key
 //!          (`NotTeamMember`, first), at stage 2 already (`WrongContestStage`), and from stage 1's deadline on
 //!          (`ContestDeadlinePassed`); the pause never blocks it.
-//! Version: 0.0.1
+//! Version: 0.0.2 (the escalation is its own byte, the second review's S1)
 //! Sprint: 14 (lane L14B, D2). Runs after the SBF build (`BROT_MARKETS_SO`, else `target/deploy/brot_markets.so`).
 
 #[allow(unused_imports)]
@@ -40,11 +40,12 @@ fn escalated_at_now() -> Vec<u8> {
 #[test]
 fn escalation_sends_a_stage_one_contest_to_the_admin_and_keeps_the_result() {
     let mut w = World::new();
-    let result = open_contest(&w, TEAM, contest_at(ContestStage::Stage1)).at(&mut w, NOW);
+    let result = open_contest(&w, TEAM, ESCALATE, contest_at(ContestStage::Stage1)).at(&mut w, NOW);
     assert_ok(&result);
     assert_eq!(stored(&result), escalated_at_now());
     // The second before stage 1's deadline is still before it.
-    let last = open_contest(&w, TEAM, contest_at(ContestStage::Stage1)).at(&mut w, ENDS - 1);
+    let last =
+        open_contest(&w, TEAM, ESCALATE, contest_at(ContestStage::Stage1)).at(&mut w, ENDS - 1);
     assert_ok(&last);
     let c = contested_data(
         ContestStage::Stage2,
@@ -60,7 +61,8 @@ fn escalation_sends_a_stage_one_contest_to_the_admin_and_keeps_the_result() {
 fn escalation_runs_while_entries_are_paused() {
     let mut w = World::new();
     let paused = config_data(&w, OperatingLevel::EntriesHalted);
-    let call = open_contest(&w, TEAM, contest_at(ContestStage::Stage1)).with_config(&w, paused);
+    let call =
+        open_contest(&w, TEAM, ESCALATE, contest_at(ContestStage::Stage1)).with_config(&w, paused);
     let result = call.at(&mut w, NOW);
     assert_ok(&result);
     assert_eq!(stored(&result), escalated_at_now());
@@ -71,7 +73,8 @@ fn escalation_refuses_anyone_but_a_team_key_first() {
     let mut w = World::new();
     let admin = w.admin;
     for signer in [STRANGER, admin] {
-        let result = open_contest(&w, signer, contest_at(ContestStage::Stage1)).at(&mut w, NOW);
+        let result =
+            open_contest(&w, signer, ESCALATE, contest_at(ContestStage::Stage1)).at(&mut w, NOW);
         assert_refused(&result, BrotError::NotTeamMember);
     }
 }
@@ -79,7 +82,7 @@ fn escalation_refuses_anyone_but_a_team_key_first() {
 #[test]
 fn escalate_stage_refuses_a_contest_at_stage_two_already() {
     let mut w = World::new();
-    let result = open_contest(&w, TEAM, contest_at(ContestStage::Stage2)).at(&mut w, NOW);
+    let result = open_contest(&w, TEAM, ESCALATE, contest_at(ContestStage::Stage2)).at(&mut w, NOW);
     assert_refused(&result, BrotError::WrongContestStage);
 }
 
@@ -88,7 +91,8 @@ fn escalate_deadline_refuses_from_stage_one_deadline_on() {
     // From stage 1's deadline a matching re-read may pay, and a different one escalates by itself.
     let mut w = World::new();
     for at in [ENDS, ENDS + 1] {
-        let result = open_contest(&w, TEAM, contest_at(ContestStage::Stage1)).at(&mut w, at);
+        let result =
+            open_contest(&w, TEAM, ESCALATE, contest_at(ContestStage::Stage1)).at(&mut w, at);
         assert_refused(&result, BrotError::ContestDeadlinePassed);
     }
 }

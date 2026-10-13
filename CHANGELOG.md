@@ -40,6 +40,17 @@ recomendado (1a a 12a).
   segurança e o caminho de volta estão no README. A unidade com identidade própria continua não instalada: depende do
   dono do servidor.
 
+- **Sprint 14: as correções da segunda revisão adversária** (13/10/2026; `docs/sprints/sprint-14-referral-second-read.md`,
+  "Record"). A revisão não achou como pagar cedo, ou para o lado errado, um resultado contestado, nem como travar um
+  pote. **S1:** o `team_open_contest` escolhia abrir ou escalar pelo estado gravado, e uma abertura repetida (um 429
+  depois de ela pousar, ou dois membros da equipe no mesmo alerta) escalava a disputa; agora o ato é o byte assinado
+  (`1` abre, `2` escala), com `ContestAlreadyOpen` (6177) e `NotContested`, o resumo do SDK lê o ato do byte, e
+  `scripts/team/contest.ts --escalate` escala, ou abre e escala na mesma transação (faixa L14B, `9d8df7c` a
+  `9f19d88`). **R1 a R4 e I1**, na rotina semanal da indicação e no indexador: o arquivo de assinatura roda uma vez e
+  confere o memo de cada linha na cadeia antes de enviar; uma linha que não pode ser creditada (um sysvar, por
+  exemplo) fica presa para uma pessoa e as outras são simuladas no preparo; a numeração dos lotes nunca se repete; o
+  arquivo confere o hash de gênese da rede e lê a URL da RPC de um arquivo; o indexador lê a anulação do admin (faixa
+  L14R, `0db32d1`, `f9480d7`, `d3372bc`).
 - **Sprint 14: a resposta do fundador ao D2, construída** (13/10/2026, faixa L14B, `3d524c9` a `05fe0d8`). O Ronaldo
   respondeu (a), com uma etapa 1 de 24 horas: a releitura igual só paga depois delas (`RereadBeforeTimelock`, erro
   6176), e nesse prazo uma chave da equipe leva a disputa à etapa 2 chamando `team_open_contest` de novo. O pior caso,

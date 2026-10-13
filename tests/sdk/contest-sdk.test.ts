@@ -4,7 +4,7 @@
  *          and says what each signs (a matching re-read's 24-hour wait, the team's opening or escalation, the decision,
  *          its reason and what happens to the 10% opening fee); a changed role, a decision byte no variant has, or a
  *          hand-built pair the program refuses is flagged. Needs no binary. Filter: `bun test tests/ -t "contest sdk"`.
- * Version: 0.1.2 (D2: the wait and the escalation; review fixes F6, the fee's branch, and F9, no proof by default)
+ * Version: 0.1.3 (the act from the byte, S1; D2: the wait and the escalation; F6, the fee's branch; F9, no proof)
  * Sprint:  14 (lane L14B)
  */
 import { describe, expect, test } from "bun:test";
@@ -139,42 +139,16 @@ describe("contest sdk", () => {
     expect(item(trailing).text).toContain("carries accounts the instruction does not take");
   });
 
-  test("contest sdk: the contest's text says the payout pauses and the result is never inverted", async () => {
+  test("contest sdk: the opening's text says the payout pauses and the result is never inverted", async () => {
     const { campaign } = await world();
     const team = await generateKeyPairSigner();
-    const open = item(await T.buildTeamOpenContest({ teamMember: team, campaign }));
+    const open = item(await T.buildTeamOpenContest({ teamMember: team, campaign, stage: ContestStage.Stage1 }));
     expect(open).toMatchObject({ name: "TeamOpenContest", trusted: true });
+    expect(open.text).toStartWith(`Contest the result of campaign ${campaign} (stage 1, 24 hours): `);
     expect(open.text).toContain("its payout pauses until the reading is run again");
     expect(open.text).toContain(
-      "only after stage 1's 24 hours, during which a team key may send the contest to stage 2",
+      "only after stage 1's 24 hours, during which a team key may send the contest to the admin",
     );
     expect(open.text).toContain("never to invert");
-  });
-
-  test("contest sdk: the same call opens a contest or sends one at stage 1 to the admin, named by the campaign read (D2)", async () => {
-    const { campaign } = await world();
-    const built = await T.buildTeamOpenContest({ teamMember: await generateKeyPairSigner(), campaign });
-    const text = (read?: Campaign) =>
-      T.summarizeInstructions([built], { context: read && { campaigns: new Map([[campaign, read]]) } }).items[0].text;
-    const escalate =
-      "the re-read closes and the admin has 48 hours to confirm or void the stored result, never to invert it";
-    // Not read: both branches.
-    expect(text()).toContain(
-      `; on a contest still at stage 1, before its deadline, the same call sends it to stage 2: ${escalate}`,
-    );
-    // In review: the opening alone.
-    const review = text(stored({ status: Status.InReview }));
-    expect(review.startsWith(`Contest the result of campaign ${campaign}: `)).toBe(true);
-    expect(review).not.toContain("the same call sends it");
-    // At stage 1: the escalation, with stage 1's deadline dated, and the refusal from it on.
-    const atStage1 = stored({ status: Status.Contested, contestStage: ContestStage.Stage1, contestEndsAt: 86_400n });
-    expect(text(atStage1)).toBe(
-      `Send the contest of campaign ${campaign} to stage 2 before stage 1's deadline (1970-01-02 00:00:00 UTC), from which the program refuses it (ContestDeadlinePassed): ${escalate} (with no decision by then, it pays out as stored)`,
-    );
-    // At stage 2: the refusal.
-    const atStage2 = stored({ status: Status.Contested, contestStage: ContestStage.Stage2, contestEndsAt: 86_400n });
-    expect(text(atStage2)).toBe(
-      `Send the contest of campaign ${campaign} to stage 2, which the program refuses: it is at stage 2 already (WrongContestStage)`,
-    );
   });
 });
