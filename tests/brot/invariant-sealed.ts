@@ -2,23 +2,24 @@
  * Purpose: the randomized test's sealed entry (Sprint 15; TP section 3.4.12) and SOL sent by hand to a SealedFee, each
  *          with its expected refusal and balance changes, and their draws. A sealed entry is a join on the sponsor's
  *          Entry (the first-baker rule applies) whose 10% is held in the sponsor's SealedFee, never in the vault. The
- *          refusals follow the program's order: sponsor_join_campaign.rs, join_core.rs, then sealed_charge.rs.
- * Version: 0.0.1
- * Sprint:  15 (the lead's harness, lane INV15)
+ *          refusals follow the program's order: sponsor_join_campaign.rs, join_core.rs, then sealed_charge.rs. The
+ *          floor, the split, the SOL/USD bounds and the signed version are the config's at planning time.
+ * Version: 0.0.2
+ * Sprint:  15 (the lead's harness, lane INV15; the creation rules' version signed, red team L2 of lane L15)
  */
-import type { BrotErrorName } from "./errors";
+import { readConfig } from "./flows";
 import { sponsorJoinCampaignIx } from "./instructions-14-15";
 import { clock, refreshBase, refreshSol, type Harness, type Plan, type Rng } from "./invariant-harness";
 import { sumOf } from "./invariant-model";
 import {
   blankSealed,
-  CONF_BPS,
   eventSeq,
   expectFields,
-  FLOOR_USD,
   liveSealed,
   sealedAt,
   sealedPrice,
+  sealedRefusal,
+  sealedTerms,
   type HandSealedOp,
   type SealedOp,
   type SealedQuirk,
@@ -26,20 +27,6 @@ import {
 import { systemTransferIx } from "./join-campaign-support";
 import * as P from "./program";
 import { balance, setPriceAccount, type Sent } from "./setup";
-
-/** The program's refusal of a sealed entry, in its order: the join's rules, the pause before the price (I10′), the charge. */
-function refusal(h: Harness, op: SealedOp, t: bigint, paid: bigint, max: bigint): BrotErrorName | undefined {
-  const c = h.camps[op.c];
-  if (c.phase !== "Open") return "CampaignNotOpen";
-  if (t >= c.entriesCloseAt) return "EntriesClosed";
-  if (h.paused) return "JoinWhilePaused";
-  if (op.usd < FLOOR_USD) return "SealedEntryBelowFloor";
-  if (op.quirk === "stale") return "SolUsdStale";
-  if (op.quirk === "wide") return "SolUsdConfidenceTooWide";
-  if (paid > max) return "SealedEntryAboveMaxLamports";
-  // The campaign's minimum cannot refuse a US$500 entry part; the signed entry total is checked at the Entry.
-  return op.quirk === "total" ? "EntryTotalMismatch" : undefined;
-}
 
 export async function planSealed(h: Harness, op: SealedOp): Promise<Plan> {
   const c = h.camps[op.c];
@@ -49,7 +36,10 @@ export async function planSealed(h: Harness, op: SealedOp): Promise<Plan> {
   const mine = c.joins.filter((j) => j.baker === sponsor.address);
   const address = await sealedAt(campaign, sponsor.address);
   const before = c.sealed.get(sponsor.address);
-  const { charged, paid, entry, fee } = sealedPrice(op.usd, op.price, op.conf);
+  const terms = sealedTerms(await readConfig(h.w));
+  const bound = (op.price * terms.confBps) / 10_000n;
+  const conf = op.quirk === "wide" ? bound + 1n : (bound * op.confShare) / 1_000n;
+  const { charged, paid, entry, fee } = sealedPrice(op.usd, op.price, conf, terms.prizeBps);
   const max = op.quirk === "under" ? paid - 1n : op.quirk === "exact" ? paid : 100n * P.SOL;
   // The SealedFee is created on the sponsor's first sealed entry, topped up to its rent when funded in advance.
   const create = before?.state !== "live";
@@ -61,18 +51,19 @@ export async function planSealed(h: Harness, op: SealedOp): Promise<Plan> {
     return { ixs: [], deltas: new Map(), tag: "skipped", apply: () => undefined };
   }
   refreshBase(h.w);
-  const publish = op.quirk === "stale" ? t - 121n : t - 5n;
+  const publish = op.quirk === "stale" ? t - terms.maxAge - 1n : t - 5n;
   setPriceAccount(h.w.client, P.SOL_USD_ACCOUNT, "pyth-sol-usd-devnet", {
     price: op.price,
-    conf: op.conf,
+    conf,
     publishTime: publish,
   });
-  const error = refusal(h, op, t, paid, max);
+  const error = sealedRefusal(h, op, t, terms, paid, max);
   const ix = await sponsorJoinCampaignIx(sponsor, campaign, P.BTC_USD_ACCOUNT, {
     side: op.side,
     entryUsd: op.usd,
     maxLamports: max,
     expectedEntryTotal: sumOf(mine) + (op.quirk === "total" ? 1n : 0n),
+    expectedParamsVersion: terms.version + (op.quirk === "version" ? 1 : 0),
     joinIndex: mine.length,
   });
   const seq = error === undefined ? eventSeq(h, campaign) : 0n;
@@ -158,6 +149,7 @@ const QUIRKS: [number, SealedQuirk][] = [
   [0.25, "under"],
   [0.3, "exact"],
   [0.38, "total"],
+  [0.43, "version"],
 ];
 
 /** A sealed entry: most go to a campaign still taking entries; a third carry a quirk the program refuses. */
@@ -167,7 +159,6 @@ export function drawSealed(h: Harness, r: Rng, open: number[]): SealedOp | null 
   const pool = taking.length > 0 && r.next() < 0.85 ? taking : open;
   if (pool.length === 0) return null;
   const price = r.big(80n * 10n ** 8n, 300n * 10n ** 8n);
-  const tight = (price * CONF_BPS) / 10_000n;
   const roll = r.next();
   const quirk = QUIRKS.find(([below]) => roll < below)?.[1] ?? "none";
   return {
@@ -177,7 +168,7 @@ export function drawSealed(h: Harness, r: Rng, open: number[]): SealedOp | null 
     side: r.next() < 0.5 ? 0 : 1,
     usd: r.next() < 0.1 ? r.pick([0n, 1n, 499n]) : r.big(500n, 1_500n),
     price,
-    conf: quirk === "wide" ? tight + 1n : r.big(0n, tight),
+    confShare: r.big(0n, 1_000n),
     quirk,
   };
 }

@@ -30,6 +30,7 @@ export const OPERATIONS = 1_200;
 export const MUST_REACH = [
   /^sealed ok$/,
   /^sealed JoinWhilePaused$/,
+  /^sealed CreationParamsChanged$/,
   /^sealed SealedEntryBelowFloor$/,
   /^sealed SolUsdStale$/,
   /^sealed SolUsdConfidenceTooWide$/,

@@ -27,12 +27,16 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
       if (t < c.deadline && r.next() < 0.3) return { k: "resolveYes", c: index, back: r.big(0n, 50n) };
       if (t > c.deadline + PROOF_DELAY) return { k: r.next() < 0.35 ? "resolveStale" : "resolveNo", c: index };
       return null;
-    case "InReview":
+    case "InReview": {
       if (t >= c.reviewEndsAt) return { k: "finalize", c: index };
-      // A team key acts on most automatic voids, the house's failure more often than not; on a YES or NO it is refused.
-      if (r.next() < (c.outcome === "Void" ? 0.8 : 0.15))
-        return { k: "void", c: index, member: r.int(0, h.team.length - 1), reason: r.pick([1, 4, 4, 3, 5]) };
+      // A team key acts on most automatic voids, the house's failure more often than not; it confirms some YES and
+      // NO results inside the window, and its try to void one is refused.
+      const [roll, member] = [r.next(), r.int(0, h.team.length - 1)];
+      const voids = c.outcome === "Void" ? roll < 0.8 : roll < 0.15;
+      if (voids) return { k: "void", c: index, member, reason: r.pick([1, 4, 4, 3, 5]) };
+      if (c.outcome !== "Void" && roll < 0.4) return { k: "confirm", c: index, member };
       return r.next() < 0.5 ? { k: "advance", seconds: c.reviewEndsAt - t + 1n } : null;
+    }
     case "Settling":
       if (unsettled.length > 0 && r.next() < 0.8) {
         const who = r.pick(unsettled);
