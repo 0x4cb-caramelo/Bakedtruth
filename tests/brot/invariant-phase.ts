@@ -33,8 +33,9 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
   switch (c.phase) {
     case "Open":
       if (t < c.deadline && r.next() < 0.5) return { k: "resolveYes", c: index, back: r.big(0n, 50n) };
-      // After the proof window: mostly NO, sometimes the feed went stale (an automatic void the team may void).
-      if (t > c.deadline + PROOF_DELAY) return { k: r.next() < 0.2 ? "resolveStale" : "resolveNo", c: index };
+      // After the proof window: mostly NO, sometimes the feed went stale (an automatic void the team may void; with
+      // a house reason, a sponsor's held fee goes back, Sprint 15).
+      if (t > c.deadline + PROOF_DELAY) return { k: r.next() < 0.3 ? "resolveStale" : "resolveNo", c: index };
       return null;
     case "InReview": {
       if (t >= c.reviewEndsAt) return { k: "finalize", c: index };
@@ -44,8 +45,12 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
       const x = r.next();
       if (pending.length > 0 && x < 0.2) return { k: "tally", c: index, baker: bakerIndex(h, r.pick(pending)) };
       const tally = r.next() < 0.85;
-      if (x < 0.55) return { k: "contest", c: index, member, tally };
-      if (x < 0.7) return { k: "void", c: index, member, reason: r.pick(TEAM_REASONS), tally };
+      // On an automatic void the team mostly records its cause (a house reason sends a held sponsor fee back, Sprint
+      // 15); on a YES or NO it mostly contests, and its void is refused.
+      const [first, second] = c.outcome === "Void" ? (["void", "contest"] as const) : (["contest", "void"] as const);
+      const act = x < 0.55 ? first : x < 0.7 ? second : null;
+      if (act === "contest") return { k: "contest", c: index, member, tally };
+      if (act === "void") return { k: "void", c: index, member, reason: r.pick(TEAM_REASONS), tally };
       if (x < 0.8) return { k: "confirm", c: index, member, tally };
       return r.next() < 0.5 ? { k: "advance", seconds: c.reviewEndsAt - t + 1n } : null;
     }

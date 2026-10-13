@@ -151,7 +151,7 @@ const QUIRKS: [number, SealedQuirk][] = [
   [0.25, "under"],
   [0.3, "exact"],
   [0.38, "total"],
-  [0.43, "version"],
+  [0.46, "version"],
 ];
 
 /** A sealed entry: most go to a campaign still taking entries; a third carry a quirk the program refuses. */
