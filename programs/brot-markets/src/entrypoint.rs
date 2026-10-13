@@ -1,14 +1,15 @@
 //! Purpose: the instruction dispatcher: the first byte of the instruction data picks the handler,
 //!          the rest is that handler's arguments.
-//! Version: 0.0.3
-//! Sprint: 02 (pot core on Pinocchio); `resolve_campaign` in 03
+//! Version: 0.0.4
+//! Sprint: 02 (pot core on Pinocchio); `resolve_campaign` in 03; the five stubs of the scaffold of
+//!         Sprints 14–15 (2026-10-13)
 
 use pinocchio::{AccountView, Address, ProgramResult};
 
 use crate::{
     error::BrotError,
     events,
-    instructions::{admin, campaigns, entries, ix, resolution, settlement},
+    instructions::{admin, campaigns, entries, ix, referral, resolution, settlement},
 };
 
 pub fn process_instruction(
@@ -73,6 +74,21 @@ pub fn process_instruction(
         ix::SWEEP_FEES => settlement::sweep_fees::sweep_fees(program_id, accounts, args),
         ix::TALLY_LATE_JOINS => {
             settlement::tally_late_joins::tally_late_joins(program_id, accounts, args)
+        }
+        ix::USER_LINK_REFERRER => {
+            referral::link_referrer::user_link_referrer(program_id, accounts, args)
+        }
+        ix::REREAD_CAMPAIGN => {
+            resolution::reread_campaign::reread_campaign(program_id, accounts, args)
+        }
+        ix::ADMIN_DECIDE_CONTEST => {
+            resolution::admin_decide_contest::admin_decide_contest(program_id, accounts, args)
+        }
+        ix::SPONSOR_JOIN_CAMPAIGN => {
+            entries::sponsor_join_campaign::sponsor_join_campaign(program_id, accounts, args)
+        }
+        ix::SETTLE_SEALED_FEE => {
+            settlement::settle_sealed_fee::settle_sealed_fee(program_id, accounts, args)
         }
         ix::EMIT_EVENT => events::process_event_instruction(accounts),
         _ => Err(BrotError::UnknownInstruction.into()),

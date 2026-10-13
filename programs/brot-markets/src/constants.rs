@@ -1,7 +1,8 @@
 //! Purpose: seeds, program ids, code ceilings and the duration and window constants compiled
 //!          into the program, with the devnet-only drill values behind the `drill` feature.
-//! Version: 0.0.5 (Meteora DBC and the graduation kind's floor and distance)
-//! Sprint: 02 (pot core on Pinocchio); 03 adds the readers' programs and rules; DBC its own
+//! Version: 0.0.6 (the seeds of `ReferralLink` and `SealedFee`)
+//! Sprint: 02 (pot core on Pinocchio); 03 adds the readers' programs and rules; DBC its own; the
+//!         scaffold of Sprints 14–15 (2026-10-13) its two seeds
 //!
 //! Values marked [AC] were chosen by the team where the sources give none (TP section 3.4.1,
 //! C43); the session logs of 2026-10-08 (Sprint 02) and 2026-10-09 (Sprint 03) record why. Money
@@ -25,6 +26,10 @@ pub const ENTRY_SEED: &[u8] = b"entry";
 
 /// `["join", campaign, baker, index]`: one account per join (founder decision, 2026-10-09).
 pub const JOIN_SEED: &[u8] = b"join";
+/// `["referral", referee]`: one `ReferralLink` per referee, signed once (Sprint 14).
+pub const REFERRAL_SEED: &[u8] = b"referral";
+/// `["sealed", campaign, sponsor]`: one `SealedFee` per sponsor and campaign (Sprint 15).
+pub const SEALED_FEE_SEED: &[u8] = b"sealed";
 /// The PDA that signs the program's self-CPI events (T4): `["__event_authority"]`.
 pub const EVENT_AUTHORITY_SEED: &[u8] = b"__event_authority";
 

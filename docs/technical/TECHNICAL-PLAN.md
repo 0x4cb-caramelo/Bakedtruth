@@ -380,6 +380,7 @@ of rent on devnet and mainnet), `Campaign` 512 (3,251,200), `Entry` 100 (1,158,2
 | `Campaign` | `["campaign", id]` | Everything about one campaign | `rent_payer`: the creator, or the team key that opened it | 02 |
 | Campaign vault | `["vault", campaign]` | Data-less, program-owned; lamports only: entries, prize, held opening fee | `rent_payer` | 02 |
 | `Entry` | `["entry", campaign, baker]` | One baker's entry, both sides | The baker; returned at `settle_entry` | 02 |
+| `SealedFee` | `["sealed", campaign, sponsor]` | Brot's 10% of one sponsor's sealed entries on one campaign, held until the outcome (§3.4.12) | The sponsor; returned at `settle_sealed_fee` | 15 |
 | `ReferralLink` | `["referral", referee]` | Who referred whom | The referee | 14 |
 
 **Removed [FD].** `CapState` and `max_pot` (D-h); `AcceptedAccount` and proposal 0.3's duplicate-guard account (D-i,
@@ -431,7 +432,7 @@ ceilings.
 | Pot | `pool_yes`, `pool_no`, `first_baker`, `entries_open` (u32), `event_seq` (u64) | Bookkept, never read from the vault balance. `entries_open` counts `Entry` accounts not yet settled |
 | Fees | `fee_bps`, `one_sided_fee_bps` | Copied at opening; never change |
 | Result | `status`, `outcome`, `observed_value` (i128), `met_late`, `resolved_at`, `review_ends_at`, `contest_stage`, `contest_ends_at`, `void_reason`, `void_note_hash` ([u8; 32]) | §3.4.2, §3.4.6, §3.4.7 |
-| Settlement | `settle_mode`, `winning_total`, `losing_total`, `distributable`, `fee_total`, `creator_share`, `creator_share_from_fee`, `paid_out_total`, `creator_share_settled`, `fee_collected`, `prize_settled` | Snapshotted at finalize; no payout reads the live vault balance |
+| Settlement | `settle_mode`, `winning_total`, `losing_total`, `distributable`, `fee_total`, `creator_share`, `creator_share_from_fee`, `paid_out_total`, `creator_share_settled`, `fee_collected`, `prize_settled`, `sealed_fees_open` (Sprint 15, from the reserve) | Snapshotted at finalize; no payout reads the live vault balance |
 | Bookkeeping | `bump`, `vault_bump`, `_reserved` | |
 
 Gone from v0.0.1's question account: the proposer, the approver and the text hash (no approval, no text: D-j); the
@@ -538,7 +539,8 @@ the same effect whoever calls it: the second keeper to arrive gets an error and 
 | `sweep_fees` | Any wallet | Moves the fee vault's lamports above its rent-exempt minimum to `GlobalConfig.fee_recipient`, and nowhere else | `FeesSwept` | 04 |
 | `reread_campaign` | Any wallet | Contest stage 1 (§3.4.7) | `ContestClosed` or stage-2 `ContestOpened` | 14 |
 | `user_link_referrer(referrer)` | The referee | Creates `ReferralLink` once (§3.4.11) | `ReferralLinked` | 14 |
-| The sealed entry | The sponsor | A join that also charges the 10% (§3.4.12) | `EntryAdded` | 15 |
+| `sponsor_join_campaign(side, entry_usd, max_lamports, min_return_bps, expected_entry_total, expected_params_version)` | The sponsor | The sealed entry (§3.4.12): at least `opening_fee_usd` at the SOL/USD price, the creation rules' version bound; 90% joins the pot through the join's own path, 10% is held in the sponsor's `SealedFee` | `EntryAdded`, then `SealedFeeHeld` | 15 |
+| `settle_sealed_fee` | Any wallet | The campaign finalized: the held fee back to the sponsor on a house-failure void, to the fee vault in every other case; hand-sent lamports to the fee vault; the account closed, its rent to the sponsor; `close_campaign` waits for every held fee | `SealedFeeSettled` | 15 |
 | `sponsor_add_prize(lamports, disclosed)` | A third party | Only if the founder keeps it **[Q]** (P1 §3.7; §3.4.12) | — | 15, if kept |
 
 Gone [FD]: the three proposal and approval instructions of v0.0.1 (replaced by `user_open_campaign`), the cap setter
@@ -591,7 +593,7 @@ The USDC mint, the token-account vault, `transfer_checked` and the `mainnet` fea
 
 | Question | Answer |
 |---|---|
-| Who sends | The keeper calls `settle_entry` for every `Entry` of a campaign in `Settling`, then `settle_creator_share`, `collect_fee`, `settle_prize`, `close_campaign` and `sweep_fees` (proposal §1.7). Any wallet may call each one (Q1, §3.4.6) |
+| Who sends | The keeper calls `settle_entry` for every `Entry` of a campaign in `Settling`, then `settle_creator_share`, `collect_fee`, `settle_prize`, `settle_sealed_fee` for every held sealed fee (Sprint 15; `close_campaign` waits for them), `close_campaign` and `sweep_fees` (proposal §1.7). Any wallet may call each one (Q1, §3.4.6) |
 | How much, to whom | The program computes the amount from the snapshot of §3.4.16 and credits `Entry.baker` (or `creator`, or the fee vault) directly. The caller chooses neither the amount nor the destination |
 | Never twice | `settle_entry` pays and closes the `Entry` in the same instruction. An `Entry` is born only while the campaign is `Open`, so it cannot be recreated after settlement |
 | Network fee and rent | The keeper pays the network fee, 0.000005 SOL per transaction (P1 §3.10, citing a technical report). The `Entry` rent returns to the baker, losers included: a losing entry goes through the same instruction with a payout of zero |
@@ -687,9 +689,9 @@ house, refunded to whoever opened on a house failure (P-4, P4 §4.6).
 
 | Reason | Written by | Class | The 10% opening fee | Source of the class |
 |---|---|---|---|---|
-| `MissedWindow` | `resolve_campaign` | House failure | Refunded | P1 §3.5: "a janela de leitura foi perdida por falha do serviço" |
+| `MissedWindow` | `resolve_campaign`; a team key may also choose it (`team_may_choose`) | House failure | Refunded | P1 §3.5: "a janela de leitura foi perdida por falha do serviço" |
 | `UnreadableAccount` | `resolve_campaign` | Outside cause | Kept | P1 §3.5: the account can no longer be read |
-| `StaleFeed` | `resolve_campaign` | Outside cause (founder answer 9, 2026-10-09) | Kept | Answer recorded in `session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`: the house keeps the US$ 50 |
+| `StaleFeed` | `resolve_campaign`; a team key may also choose it (`team_may_choose`) | Outside cause (founder answer 9, 2026-10-09) | Kept | Answer recorded in `session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`: the house keeps the US$ 50 |
 | `TeamHouseFailure` | `team_void_campaign`, `admin_decide_contest` | House failure | Refunded | P1 §3.5: the review found the reading wrong through our fault |
 | `TeamOutsideCause` | `team_void_campaign`, `admin_decide_contest` | Outside cause | Kept | P4 §4.6 |
 
@@ -812,7 +814,7 @@ the program (X0.7); the SDK mirrors them for the preview and must refuse at leas
 | 5 | `deadline_at − now` is between 3 and 90 days; `entries_close_at` computed by `math/schedule.rs` | Duration chosen by the creator | P1 §3.6; D-k | 02 |
 | 6 | Fee, one-sided fee, creator share and `min_entry_lamports` copied from `GlobalConfig`; the creator passes none of them; share 0 for a team key | Fixed fees; the minimum entry is kept by the campaign (founder answer 5, 2026-10-09) | P1 §4.2; D-k, P-3, P-5 | 02; 04 (minimum entry) |
 | 7 | A non-team signer pays `opening_usd ≥ opening_fee_usd` at the SOL/USD price minus its confidence (`p − conf`, founder answer 2), at most `max_lamports`, all of it into the vault: 90% prize, 10% opening fee held (T23, T25). The SOL/USD feed id is a compiled constant (founder answer 3) | §3.4.16 | D-b, D-f | 02; 04 |
-| 8 | The pause is off. A non-team signer needs `open_campaigns < max_open_campaigns`; a team key's opening is outside that valve, with no limit (founder answer 4). The terms the creator read are checked by `expected_params_version` (in `OpenCampaignArgs`, Sprint 03), refused as `CreationParamsChanged` (6090) when the version has moved | A valve on the services' work (T18); the terms check covers the fee, the one-sided fee, the creator share, the prize split, the opening price and the join's price age | proposal §2.4.3; Sprint 03 decision | 02; 03; 04 |
+| 8 | The pause is off. A non-team signer needs `open_campaigns < max_open_campaigns`; a team key's opening is outside that valve, with no limit (founder answer 4). The terms the creator read are checked by `expected_params_version` (in `OpenCampaignArgs`, Sprint 03), refused as `CreationParamsChanged` (6090) when the version has moved | A valve on the services' work (T18); the terms check covers the fee, the one-sided fee, the creator share, the prize split, the opening price and the join's price age The sealed entry binds the same version (`expected_params_version`, its args 33 bytes): `CreationParamsChanged` after the pause, before the price (Sprint 15) | proposal §2.4.3; Sprint 03 decision | 02; 03; 04 |
 | 9 | No argument is a string; the sentence is rendered by template `template_version` from the stored fields | No free text | D-j | 02 |
 | 10 | The `Campaign` account for `id` does not exist yet; creation tolerates a pre-funded address | Retry guard (T17) | proposal §2.4.3 | 02 |
 
@@ -902,11 +904,19 @@ and its self-cancel (proposal §2.4.8). v0.0.1's four sponsorship instructions a
 - **An undisclosed sponsor** is allowed only with a neutral prize, which an opening's prize always is; the naming is
   off-chain. On mainnet it goes only through the Cloak page (P4 §2.2; Sprint 15, BR-17), once Cloak is checked to
   work with SOL (P-8).
-- **The sealed entry** (`SponsorEntry` in the D6 table) is the sponsor's money on one side, under its name: a
-  `user_join_campaign` that also charges the 10%, held in the vault until the outcome like the opening fee (Q6, a; T23).
+- **The sealed entry** (`SponsorEntry` in the D6 table) is the sponsor's money on one side, under its name. **As built
+  (Sprint 15, 2026-10-13):** its own instruction, `sponsor_join_campaign`, which calls the join's core (the same checks, in
+  the same order, with the same errors as `user_join_campaign`). It pays at least `opening_fee_usd` (US$500, founder
+  answer of 2026-10-13) at the SOL/USD price through the opening's own `charge`, bounded by `max_lamports` and bound to
+  the creation rules' version (`CreationParamsChanged`); 90% (`opening_prize_bps`) is the entry, 10% Brot's fee. The fee
+  waits until the outcome like the opening fee (Q6, a; T23), but in the sponsor's own account, `SealedFee`
+  (`["sealed", campaign, sponsor]`), not in the campaign's vault: the `Campaign` had only four spare bytes, now
+  `sealed_fees_open`, and keeping the fee out of the vault leaves the vault's bookkeeping and its assertion (I1, I15)
+  untouched. `settle_sealed_fee` sends it back to the sponsor on a house-failure void and to the fee vault in every
+  other case; `close_campaign` waits until every held fee is settled. A late sealed entry (after the YES proof) gets its
+  90% back whole, and Brot keeps its 10% (the founder's answer of 2026-10-13, pinned by a test).
   It follows the common entry rule in a one-sided pot and on a void (Q5, a). The name and seal live in
-  `content/partners.json`. Whether it is a flag on the join or an instruction of its own, and its minimum, are set in
-  Sprint 15 **[AC]**.
+  `content/partners.json`. Its shape (its own instruction) and its minimum (US$500) were set in Sprint 15 (C50).
 - **Launch partners need none of this:** a team key opens their campaigns, with no prize and no creator share.
 - **[Q] P1 §3.7:** may a third party add a prize to someone else's campaign? It is the only reason to keep
   `sponsor_add_prize(lamports, disclosed)`, at the same 90/10. If kept, it is the third instruction the pause blocks
@@ -941,6 +951,13 @@ winner's wallet, closing (Sprint 04; roadmap gate 1) **[DP]**. V and P are the w
 | I14 | A paid opening moves exactly `opening_paid_lamports` from the signer into the vault, split as `prize_lamports + opening_fee_lamports`; a team opening moves nothing unless it adds a prize (P-3). Rent is separate and returns to `rent_payer` at close |
 | I15 | The vault's lamports minus its rent-exempt minimum are at least the bookkept balance not yet paid. The difference is SOL sent by hand: never an entry, never a change in the chance, swept to the fee vault at close and from there to `fee_recipient` |
 
+**Sprint 15's additions (2026-10-13), checked by the randomized test after every operation:** each `SealedFee` holds
+exactly its rent, its bookkept `fee_lamports` and any SOL sent to it by hand (I1, I15 for that account); `sealed_fees_open`
+equals the number of live `SealedFee` accounts of the campaign, and none is left at close (I6); a held fee goes only to
+its stored sponsor (on a house-failure void) or to the fee vault (I5, I8); the creator share's base holds entry parts,
+never fees (I12); `sponsor_join_campaign` joins the instructions the pause refuses, and `settle_sealed_fee` never pauses
+(I10′).
+
 I3′ and I10′ replace v0.0.1's I3 and I10, which named instructions that no longer exist; I11 to I15 are the proposal's
 (proposal §2.4.4).
 
@@ -972,6 +989,8 @@ indexer notices a gap; admin and config events carry none (X0.4). Amounts are la
 | `FeeCollected`, `PrizeSettled` | `collect_fee`, `settle_prize` | Amounts and destination; the opening fee kept or refunded | 04 |
 | `CampaignClosed` | `close_campaign` | Rent returned, surplus swept | 04 |
 | `FeesSwept` | `sweep_fees` | Amount, `fee_recipient` | 04 |
+| `SealedFeeHeld` | `sponsor_join_campaign` (after its `EntryAdded`) | Campaign, `seq`, sponsor, US$, paid, entry and fee lamports, the account's fee total, the SOL/USD price | 15 |
+| `SealedFeeSettled` | `settle_sealed_fee` | Campaign, `seq`, sponsor, fee lamports, refunded or not | 15 |
 | `ReferralLinked` | `user_link_referrer` | Referee, referrer | 14 |
 
 v0.0.1's proposal, cancellation and four sponsorship events are gone; the old names map to these per D6.
@@ -2568,6 +2587,7 @@ The business risks are in P4 §7. These are the plan's. Severities marked "(P4 �
 | L0 | The team lawyer's written review (an action, D-s) | Classification first (is a pot inside MP 1.394, or CMN 5.298, or another regime?), then open creation, the US$500 opening, SOL, no caps and no list, the dApp Store, the C-items of §3.7. An outside reader stays a BP proposal (P4 §5.1) | D5; C-06; Sprint 22; the mainnet date (18) |
 | D4 | Budget: RPC accounts, VM 2, email, the Pyth plan, a Seeker and another Android phone. Includes v0.0.1's Q8 | Devnet below about US$150 a month **[INF]**: Helius Developer (US$49) for the keeper, free tiers elsewhere **[AC]**. Pyth: paid openings need no plan; keyed proofs for mainnet price campaigns need Hermes Starter, US$500 a month [E51], or price campaigns wait. CoinGecko: dropped on 2026-10-11 (2b), since the Sprint 08 legal review found no plan that fits (attribution on every plan, no gambling use, no re-distributed access, binding user terms first; §3.5); the display price is Pyth's [E79] | 06; 07; 08; 16 (Pyth); 20 (devices) |
 | D5 | Attestation of each entry, and wallet screening | (a) None on devnet: gates live in the site, the app and `brot-rpc`. Decide after L0, before Sprint 14. (b) and (c) see wallets with IPs or send addresses to a third party (K-04) | 14 |
+| S15-L1 | A late sealed entry (after the YES proof): its 90% comes back whole; is its 10% kept or refunded? | **Answered 2026-10-13 (Ronaldo): kept**, pinned by `tests/brot/sealed-late.test.ts` | 15 (and the audit scope) |
 | P-6 | Ceiling of the referral rebate | 0.05 SOL; the US$50 and US$250 thresholds also in SOL (0.4576 and 2.2879 SOL at the reference price **[INF]**, P1 §3.9) | 14 |
 | P-7 | The treasury, with a SOL-only platform | The platform receives and pays in SOL; the company converts monthly what it needs, outside it; `fee_recipient` under the multisig | 06 (runbook); 18 |
 | P-8 | Do Cloak and SODAX work with SOL? | Check before use | 15 (the Cloak page for undisclosed sponsors, BR-17); 17 (the SODAX page) |
@@ -2745,7 +2765,7 @@ Closed in Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`; `session-log/
 | C47 | The exact `StaleFeed` test, and the slot bound on a YES proof (§3.4.6, §3.4.8) | 03 |
 | C48 | Closed 2026-10-09: nothing leaves `Contested` until Sprint 14 (§3.4.2); entry through `team_open_contest` is allowed | 04 |
 | C49 | Whether `close_campaign` waits for a reserved creator share or pays it with the rent when the creator is the rent payer (§3.4.5) | 04 |
-| C50 | The sealed entry: a flag on the join or an instruction of its own, and its minimum (§3.4.12) | 15 |
+| C50 | The sealed entry: a flag on the join or an instruction of its own, and its minimum (§3.4.12). **Settled 2026-10-13:** its own instruction, `sponsor_join_campaign`; the US$500 floor (founder answer) | 15 |
 
 ## Appendix A — Requirement traceability (BR-xx → BP source → component → sprint)
 

@@ -1,8 +1,9 @@
 /**
  * Purpose: the program's custom error codes by name (programs/brot-markets/src/error.rs), so a client
  *          names the exact refusal. Codes are appended there and here, never reused.
- * Version: 0.1.0
- * Sprint:  05 (SDK); moved from tests/brot/errors.ts, which now re-exports it
+ * Version: 0.1.1
+ * Sprint:  05 (SDK); moved from tests/brot/errors.ts, which now re-exports it; the scaffold of Sprints 14–15
+ *          (2026-10-13) appends 6153 and 6160 to 6174
  *
  * The messages are not here: they come from the IDL (`./index.ts`), which shank-cli writes from the
  * `#[error("...")]` of each variant, so a code and its message cannot drift apart. The test
@@ -156,6 +157,21 @@ export const BROT_ERROR_CODES = {
   CurveNotInSol: 6150,
   CurveTooSmall: 6151,
   TargetNotThreshold: 6152,
+  // Sprint 14, referral (error.rs, from 6153)
+  InvalidReferrer: 6153,
+  // Sprint 14, the dispute (error.rs, from 6160)
+  NotContested: 6160,
+  WrongContestStage: 6161,
+  ContestDeadlinePassed: 6162,
+  ContestNotLapsed: 6163,
+  InvalidContestDecision: 6164,
+  RereadNotTopLevel: 6165,
+  // Sprint 15, the sealed entry (error.rs, from 6170)
+  SealedEntryBelowFloor: 6170,
+  SealedEntryAboveMaxLamports: 6171,
+  SealedFeesOpen: 6172,
+  SealedFeeMismatch: 6173,
+  WrongSponsor: 6174,
 } as const;
 
 /** The name of a program error, as error.rs and the IDL spell it. */

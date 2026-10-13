@@ -2,13 +2,14 @@
 //!          dust and hand-sent surplus to the fee vault, returns the rent of the campaign and the vault to
 //!          `rent_payer`, zeroes both accounts and gives them back to the System Program (TP sections 3.4.4,
 //!          3.4.17, I6, I14). Any wallet may call; every destination is stored or the fee vault.
-//! Version: 0.0.1
-//! Sprint: 04 (lane D). Accounts frozen at the sprint's opening.
+//! Version: 0.0.2
+//! Sprint: 04 (lane D). Accounts frozen at the sprint's opening. 15 (lane L15): close waits for every
+//!         sponsor's held fee to be settled (`SealedFeesOpen`).
 //!
 //! Order: no arguments (`BadInstructionData`); the six slots (`NotEnoughAccountKeys`); the four writable
 //! slots; the event slots; a campaign that is the System Program's and empty is `AlreadyClosed` (a second
 //! call; close zeroes both); the campaign loaded; `Settled` with no entry open and the three flags set
-//! (`CampaignNotSettled`); the rent payer is the stored one (`RentPayerNotStored`); the vault's PDA and the
+//! (`CampaignNotSettled`); no `SealedFee` of the campaign still open (`SealedFeesOpen`); the rent payer is the stored one (`RentPayerNotStored`); the vault's PDA and the
 //! fee vault's address; `paying_vault` and `distinct` before the first move. The rent of an empty account
 //! comes from the Rent sysvar, read only after every refusal above. Then the moves, `checks::close_account`
 //! on both accounts (their lamports must be gone), and `CampaignClosed`.
@@ -50,6 +51,7 @@ pub fn close_campaign(
     let key = *campaign.address();
     let stored = Campaign::load_mut(campaign, program_id)?;
     require_closable(&stored)?;
+    require_no_sealed_fee(&stored)?;
     checks::require(
         rent_payer.address() == &stored.rent_payer,
         BrotError::RentPayerNotStored,
@@ -123,5 +125,16 @@ fn require_closable(stored: &Campaign) -> ProgramResult {
     checks::require(
         settled && flags && stored.entries_open.get() == 0,
         BrotError::CampaignNotSettled,
+    )
+}
+
+/// Every sponsor's held fee is settled (`SealedFeesOpen`, Sprint 15). A SealedFee holds no lamport of the
+/// vault, but `settle_sealed_fee` reads the campaign's outcome to know where the fee goes, so the campaign
+/// stays until the last one is settled.
+fn require_no_sealed_fee(stored: &Campaign) -> ProgramResult {
+    // X0.9 sealed_fees_open
+    checks::require(
+        stored.sealed_fees_open.get() == 0,
+        BrotError::SealedFeesOpen,
     )
 }

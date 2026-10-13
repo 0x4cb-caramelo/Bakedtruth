@@ -1,7 +1,8 @@
 //! Purpose: the program's interface for the Shank IDL (T9): the `BrotInstruction` enum, with each
 //!          instruction's accounts in order and its arguments.
-//! Version: 0.0.1
-//! Sprint: 04 (contract freeze: the ten settlement instructions appended; moved out of `mod.rs`)
+//! Version: 0.0.2
+//! Sprint: 04 (contract freeze: the ten settlement instructions appended; moved out of `mod.rs`); the
+//!         scaffold of Sprints 14–15 (2026-10-13) appends five (22 to 26), stubs until their lanes
 //!
 //! One enum, so one file: Shank reads a single definition, and splitting it would split the IDL.
 //! It is longer than the 200-line guide on purpose; the variants are documentation and layout.
@@ -14,8 +15,11 @@ use super::{
         set_team::SetTeamArgs, transfer_admin::TransferAdminArgs,
     },
     campaigns::open_campaign::OpenCampaignArgs,
-    entries::join_campaign::JoinCampaignArgs,
-    resolution::team_void_campaign::TeamVoidCampaignArgs,
+    entries::{join_campaign::JoinCampaignArgs, sponsor_join_campaign::SponsorJoinArgs},
+    referral::link_referrer::LinkReferrerArgs,
+    resolution::{
+        admin_decide_contest::DecideContestArgs, team_void_campaign::TeamVoidCampaignArgs,
+    },
 };
 use crate::state::config::CreationParams;
 
@@ -213,4 +217,57 @@ pub enum BrotInstruction {
     #[account(3, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
     #[account(4, name = "program", desc = "This program")]
     TallyLateJoins,
+
+    /// Sprint 14 (lane L14A; a stub until then): the referee records, once, the wallet that referred it.
+    #[account(0, writable, signer, name = "referee", desc = "The signing wallet; pays the rent")]
+    #[account(1, writable, name = "referral_link", desc = "ReferralLink, PDA [\"referral\", referee], created")]
+    #[account(2, name = "system_program", desc = "System Program")]
+    #[account(3, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
+    #[account(4, name = "program", desc = "This program")]
+    UserLinkReferrer(LinkReferrerArgs),
+
+    /// Sprint 14 (lane L14B; a stub until then): in stage 1 of a contest, runs the reading again and
+    /// compares it with the stored result. Any wallet, top level only.
+    #[account(0, writable, name = "campaign", desc = "Campaign, Contested, stage 1")]
+    #[account(1, writable, name = "config", desc = "GlobalConfig: the open count")]
+    #[account(2, name = "metric_account", desc = "Campaign.metric_account")]
+    #[account(3, name = "proof_account", desc = "Price kind: a proof, any Full account of the feed; other kinds: not read")]
+    #[account(4, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
+    #[account(5, name = "program", desc = "This program")]
+    RereadCampaign,
+
+    /// Sprint 14 (lane L14B; a stub until then): in stage 2 of a contest, before its deadline, the
+    /// admin confirms the stored result or voids the campaign; never inverts it.
+    #[account(0, signer, name = "admin", desc = "GlobalConfig.admin")]
+    #[account(1, writable, name = "config", desc = "GlobalConfig: the open count")]
+    #[account(2, writable, name = "campaign", desc = "Campaign, Contested, stage 2")]
+    #[account(3, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
+    #[account(4, name = "program", desc = "This program")]
+    AdminDecideContest(DecideContestArgs),
+
+    /// Sprint 15 (lane L15; a stub until then): a sealed entry, priced in US$ at the SOL/USD price;
+    /// the entry joins the pot, the fee is held in the sponsor's SealedFee.
+    #[account(0, writable, signer, name = "sponsor", desc = "The joining wallet; pays the entry, the fee and the rents")]
+    #[account(1, name = "config", desc = "GlobalConfig: the pause, the minimum and the price rules")]
+    #[account(2, writable, name = "campaign", desc = "Campaign")]
+    #[account(3, writable, name = "vault", desc = "The campaign's vault")]
+    #[account(4, writable, name = "entry", desc = "Entry, PDA [\"entry\", campaign, sponsor], created on the first join")]
+    #[account(5, name = "metric_account", desc = "Campaign.metric_account, read by the join lock")]
+    #[account(6, writable, name = "join", desc = "Join, PDA [\"join\", campaign, sponsor, index], created: one per join")]
+    #[account(7, name = "sol_usd_price", desc = "The sponsored SOL/USD account of SOL_USD_FEED_ID")]
+    #[account(8, writable, name = "sealed_fee", desc = "SealedFee, PDA [\"sealed\", campaign, sponsor], created on the first sealed entry, then topped up")]
+    #[account(9, name = "system_program", desc = "System Program")]
+    #[account(10, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
+    #[account(11, name = "program", desc = "This program")]
+    SponsorJoinCampaign(SponsorJoinArgs),
+
+    /// Sprint 15 (lane L15; a stub until then): once the campaign is finalized, the held fee goes to
+    /// the sponsor (a house-failure refund) or to the fee vault, and the SealedFee is closed. Any wallet.
+    #[account(0, writable, name = "sealed_fee", desc = "SealedFee, closed")]
+    #[account(1, writable, name = "campaign", desc = "Campaign, Settling or Settled: sealed_fees_open decremented")]
+    #[account(2, writable, name = "sponsor", desc = "SealedFee.sponsor: receives the refund and the rent")]
+    #[account(3, writable, name = "fee_vault", desc = "The fee vault, PDA [\"fee_vault\"]")]
+    #[account(4, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
+    #[account(5, name = "program", desc = "This program")]
+    SettleSealedFee,
 }

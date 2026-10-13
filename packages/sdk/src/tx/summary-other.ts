@@ -3,16 +3,20 @@
  *          admin, team and settlement instructions), each with the values it signs: the new admin, the fee
  *          recipient, the team keys, every creation parameter. Also the exact data size of every instruction,
  *          so a summary never describes bytes the program would refuse as `BadInstructionData`.
- * Version: 0.1.2 (Sprint 19: the creator's share is of the entries)
- * Sprint:  05 (SDK)
+ * Version: 0.1.4 (no size, so never trusted, for the scaffold's stubs until their lanes; the sealed entry's two
+ *          instructions sized, lane L15)
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 15 (lane L15)
  */
 import * as G from "../idl/generated/instructions";
 import { BrotMarketsInstruction as B } from "../idl/generated/programs";
 import { bytesToHex, type Bytes } from "../read/bytes";
 import { formatBps, formatSol } from "../read/format";
 
-/** Each instruction's data size, discriminator included, from the generated decoders. */
-export const DATA_SIZE: Record<B, number> = {
+/**
+ * Each instruction's data size, discriminator included, from the generated decoders. The scaffold's stubs of Sprints
+ * 14–15 have none until their lanes write their summary, so the summary never trusts them.
+ */
+export const DATA_SIZE: Partial<Record<B, number>> = {
   [B.AdminInitializeConfig]: G.getAdminInitializeConfigInstructionDataDecoder().fixedSize,
   [B.AdminSetTeam]: G.getAdminSetTeamInstructionDataDecoder().fixedSize,
   [B.AdminSetCreationParams]: G.getAdminSetCreationParamsInstructionDataDecoder().fixedSize,
@@ -35,6 +39,9 @@ export const DATA_SIZE: Record<B, number> = {
   [B.CloseCampaign]: G.getCloseCampaignInstructionDataDecoder().fixedSize,
   [B.SweepFees]: G.getSweepFeesInstructionDataDecoder().fixedSize,
   [B.TallyLateJoins]: G.getTallyLateJoinsInstructionDataDecoder().fixedSize,
+  // Lane L15 (Sprint 15): the sealed entry (said by ./summary-sealed.ts) and its fee's settlement.
+  [B.SponsorJoinCampaign]: G.getSponsorJoinCampaignInstructionDataDecoder().fixedSize,
+  [B.SettleSealedFee]: G.getSettleSealedFeeInstructionDataDecoder().fixedSize,
 };
 
 type Slots = Record<string, { address: string }>;
@@ -115,6 +122,8 @@ export function describeOther(type: B, a: Slots, d: Record<string, any>): string
       return `Sweep the fee vault to ${a.feeRecipient.address}`;
     case B.TallyLateJoins:
       return `Tally ${a.baker.address}'s joins in campaign ${campaign}`;
+    case B.SettleSealedFee:
+      return `Settle ${a.sponsor.address}'s held fee on campaign ${campaign}: back to that sponsor on a void the house caused, else to Brot's fee vault; the SealedFee closes, its rent back to the sponsor`;
     default:
       return `Brot Markets instruction ${B[type]}`;
   }

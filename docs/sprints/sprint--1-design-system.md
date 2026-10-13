@@ -2,7 +2,7 @@
 
 **Status:** closed 2026-10-10 by the founder's approval of the design (the approved screens are in `prototype-lab/campaigns/`, served at `/dev0x/`). The code items of this sprint are not built in `app/` and move to Sprint 09 (see "Closure") · **Branch:** `sprint--1-design-system` · **Dates:** none, by the founder's decision
 
-**Final state (audit of 2026-10-13):** blocked by the founder's go-ahead to tag it with a carry list. Evidence: the design approved 2026-10-10; its code built on `main` by PRs #53, #67 and #70 (`app/styles/tokens.css`, `app/components/ui/`, `tests/site/tokens.test.ts`); no tag. Carried: `docs/product/DESIGN-DIRECTION.md` still describes USDC and has no creation-screen or phone section (A); the approved share card, timeline, dense list and phone join bar are not built (A); a screen-reader pass (a person). Draft PR #36 is obsolete as code; its four session logs are to be copied to `main` before it closes (founder).
+**Final state (audit of 2026-10-13):** closed with a carry list: tag `sprint--1` at `635c77a`, pushed on 2026-10-13 at 18:41 UTC on Ronaldo's word. Evidence: the design approved 2026-10-10; its code built on `main` by PRs #53, #67 and #70 (`app/styles/tokens.css`, `app/components/ui/`, `tests/site/tokens.test.ts`). Carried: `docs/product/DESIGN-DIRECTION.md` still describes USDC and has no creation-screen or phone section (A); the approved share card, timeline, dense list and phone join bar are not built (A); a screen-reader pass (a person). Draft PR #36 is obsolete as code; its four session logs are to be copied to `main` before it closes (founder).
 
 ## Closure (2026-10-10, founder's decisions)
 

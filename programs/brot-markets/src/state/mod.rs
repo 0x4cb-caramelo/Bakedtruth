@@ -1,17 +1,21 @@
 //! Purpose: the accounts the program owns: their type tags, layout version and the one loader
 //!          that runs the owner, length, tag and PDA checks before any field is read.
-//! Version: 0.0.2
-//! Sprint: 02 (pot core on Pinocchio)
+//! Version: 0.0.3
+//! Sprint: 02 (pot core on Pinocchio); scaffold of Sprints 14–15, 2026-10-13: `ReferralLink` and
+//!         `SealedFee`
 //!
 //! Every account the program owns starts with a one-byte tag and a one-byte layout version, has a
 //! fixed little-endian layout read in place, and ends with a reserved area for later sprints (TP
-//! section 3.4.1). The vaults hold no data at all: they are checked by owner and PDA only.
+//! section 3.4.1; the Campaign's is used up since Sprint 15). The vaults hold no data at all: they
+//! are checked by owner and PDA only.
 
 pub mod campaign;
 pub mod config;
 pub mod entry;
 pub mod enums;
 pub mod join;
+pub mod referral;
+pub mod sealed_fee;
 pub mod transitions;
 
 use pinocchio::{
@@ -23,15 +27,18 @@ use pinocchio::{
 use crate::{checks, error::BrotError, layout::ZeroCopy};
 
 /// The type of an account the program owns, in its first byte. `0` is never written, so a zeroed
-/// account fails the tag check. `ReferralLink` (4) arrives in Sprint 14.
+/// account fails the tag check. Tags are positional: appended, never reused.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum AccountTag {
     GlobalConfig = 1,
     Campaign = 2,
     Entry = 3,
-    /// Tag 4 is reserved for `ReferralLink` (Sprint 14).
+    /// Sprint 14: who referred a wallet (`state/referral.rs`).
+    ReferralLink = 4,
     Join = 5,
+    /// Sprint 15: the fee a sponsor's sealed entries hold on a campaign (`state/sealed_fee.rs`).
+    SealedFee = 6,
 }
 
 /// The layout version every Sprint 02 account is written with.

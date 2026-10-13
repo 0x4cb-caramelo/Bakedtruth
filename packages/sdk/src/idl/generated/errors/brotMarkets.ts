@@ -284,6 +284,30 @@ export const BROT_MARKETS_ERROR__CURVE_NOT_IN_SOL = 0x1806; // 6150
 export const BROT_MARKETS_ERROR__CURVE_TOO_SMALL = 0x1807; // 6151
 /** TargetNotThreshold: Row 3: the target is not the curve's graduation threshold (`migration_quote_threshold`) */
 export const BROT_MARKETS_ERROR__TARGET_NOT_THRESHOLD = 0x1808; // 6152
+/** InvalidReferrer: The referrer is the zero address or the referee itself */
+export const BROT_MARKETS_ERROR__INVALID_REFERRER = 0x1809; // 6153
+/** NotContested: The campaign is not Contested */
+export const BROT_MARKETS_ERROR__NOT_CONTESTED = 0x1810; // 6160
+/** WrongContestStage: The contest is not at the stage this instruction acts on */
+export const BROT_MARKETS_ERROR__WRONG_CONTEST_STAGE = 0x1811; // 6161
+/** ContestDeadlinePassed: The contest stage's deadline has passed */
+export const BROT_MARKETS_ERROR__CONTEST_DEADLINE_PASSED = 0x1812; // 6162
+/** ContestNotLapsed: Stage 2 of the contest has not lapsed yet */
+export const BROT_MARKETS_ERROR__CONTEST_NOT_LAPSED = 0x1813; // 6163
+/** InvalidContestDecision: The contest decision is neither Confirm nor Void */
+export const BROT_MARKETS_ERROR__INVALID_CONTEST_DECISION = 0x1814; // 6164
+/** RereadNotTopLevel: reread_campaign must run at the transaction's top level, never by CPI */
+export const BROT_MARKETS_ERROR__REREAD_NOT_TOP_LEVEL = 0x1815; // 6165
+/** SealedEntryBelowFloor: The sealed entry is below the US$ floor (the config's opening_fee_usd) */
+export const BROT_MARKETS_ERROR__SEALED_ENTRY_BELOW_FLOOR = 0x181a; // 6170
+/** SealedEntryAboveMaxLamports: The sealed entry would cost more lamports than max_lamports */
+export const BROT_MARKETS_ERROR__SEALED_ENTRY_ABOVE_MAX_LAMPORTS = 0x181b; // 6171
+/** SealedFeesOpen: A sponsor's held fee on this campaign is not settled yet */
+export const BROT_MARKETS_ERROR__SEALED_FEES_OPEN = 0x181c; // 6172
+/** SealedFeeMismatch: The SealedFee account does not belong to this campaign and sponsor */
+export const BROT_MARKETS_ERROR__SEALED_FEE_MISMATCH = 0x181d; // 6173
+/** WrongSponsor: The account is not the SealedFee's stored sponsor */
+export const BROT_MARKETS_ERROR__WRONG_SPONSOR = 0x181e; // 6174
 
 export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY
@@ -299,7 +323,9 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_IN_REVIEW
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_SETTLED
+  | typeof BROT_MARKETS_ERROR__CONTEST_DEADLINE_PASSED
   | typeof BROT_MARKETS_ERROR__CONTEST_EXIT_DISABLED
+  | typeof BROT_MARKETS_ERROR__CONTEST_NOT_LAPSED
   | typeof BROT_MARKETS_ERROR__CONTEST_OUTSIDE_REVIEW
   | typeof BROT_MARKETS_ERROR__CREATION_PARAMS_CHANGED
   | typeof BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING
@@ -327,7 +353,9 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__FEE_RECIPIENT_IS_FEE_VAULT
   | typeof BROT_MARKETS_ERROR__FEE_RECIPIENT_MISMATCH
   | typeof BROT_MARKETS_ERROR__ILLEGAL_TRANSITION
+  | typeof BROT_MARKETS_ERROR__INVALID_CONTEST_DECISION
   | typeof BROT_MARKETS_ERROR__INVALID_DIRECTION
+  | typeof BROT_MARKETS_ERROR__INVALID_REFERRER
   | typeof BROT_MARKETS_ERROR__INVALID_SIDE
   | typeof BROT_MARKETS_ERROR__INVARIANT_VIOLATED
   | typeof BROT_MARKETS_ERROR__JOIN_ACCOUNTS_MISMATCH
@@ -345,6 +373,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__NO_PENDING_ADMIN
   | typeof BROT_MARKETS_ERROR__NO_PROOF_TIME
   | typeof BROT_MARKETS_ERROR__NOT_ADMIN
+  | typeof BROT_MARKETS_ERROR__NOT_CONTESTED
   | typeof BROT_MARKETS_ERROR__NOT_FINALIZED
   | typeof BROT_MARKETS_ERROR__NOTHING_TO_SWEEP
   | typeof BROT_MARKETS_ERROR__NOT_PAUSED
@@ -380,10 +409,15 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__READER_NOT_READY
   | typeof BROT_MARKETS_ERROR__READER_WRONG_OWNER
   | typeof BROT_MARKETS_ERROR__RENT_PAYER_NOT_STORED
+  | typeof BROT_MARKETS_ERROR__REREAD_NOT_TOP_LEVEL
   | typeof BROT_MARKETS_ERROR__RESERVE_NOT_CLAIMABLE
   | typeof BROT_MARKETS_ERROR__RESOLVE_NOT_TOP_LEVEL
   | typeof BROT_MARKETS_ERROR__RETURN_BELOW_MINIMUM
   | typeof BROT_MARKETS_ERROR__REVIEW_NOT_ENDED
+  | typeof BROT_MARKETS_ERROR__SEALED_ENTRY_ABOVE_MAX_LAMPORTS
+  | typeof BROT_MARKETS_ERROR__SEALED_ENTRY_BELOW_FLOOR
+  | typeof BROT_MARKETS_ERROR__SEALED_FEE_MISMATCH
+  | typeof BROT_MARKETS_ERROR__SEALED_FEES_OPEN
   | typeof BROT_MARKETS_ERROR__SNAPSHOT_INCONSISTENT
   | typeof BROT_MARKETS_ERROR__SOL_USD_ACCOUNT_MISMATCH
   | typeof BROT_MARKETS_ERROR__SOL_USD_BAD_LAYOUT
@@ -411,6 +445,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__UPGRADE_AUTHORITY_MISMATCH
   | typeof BROT_MARKETS_ERROR__VOID_REASON_NOT_FOR_TEAM
   | typeof BROT_MARKETS_ERROR__WRONG_BAKER
+  | typeof BROT_MARKETS_ERROR__WRONG_CONTEST_STAGE
   | typeof BROT_MARKETS_ERROR__WRONG_CREATOR
   | typeof BROT_MARKETS_ERROR__WRONG_EVENT_AUTHORITY
   | typeof BROT_MARKETS_ERROR__WRONG_LAYOUT_VERSION
@@ -418,6 +453,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__WRONG_OWNER
   | typeof BROT_MARKETS_ERROR__WRONG_PROGRAM_ACCOUNT
   | typeof BROT_MARKETS_ERROR__WRONG_PROGRAM_DATA
+  | typeof BROT_MARKETS_ERROR__WRONG_SPONSOR
   | typeof BROT_MARKETS_ERROR__WRONG_SYSTEM_PROGRAM
   | typeof BROT_MARKETS_ERROR__WRONG_TAG
   | typeof BROT_MARKETS_ERROR__ZERO_ADDRESS;
@@ -438,7 +474,9 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_IN_REVIEW]: `The campaign is not InReview, so it cannot be finalized`,
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN]: `The campaign is not \`Open\``,
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_SETTLED]: `The campaign's fee, prize and creator share are not all settled`,
+    [BROT_MARKETS_ERROR__CONTEST_DEADLINE_PASSED]: `The contest stage's deadline has passed`,
     [BROT_MARKETS_ERROR__CONTEST_EXIT_DISABLED]: `Contests are disabled until Sprint 14: a contest would freeze the pot`,
+    [BROT_MARKETS_ERROR__CONTEST_NOT_LAPSED]: `Stage 2 of the contest has not lapsed yet`,
     [BROT_MARKETS_ERROR__CONTEST_OUTSIDE_REVIEW]: `A contest opens only inside the review window`,
     [BROT_MARKETS_ERROR__CREATION_PARAMS_CHANGED]: `The creation parameters changed since the client read them (\`expected_params_version\`)`,
     [BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING]: `\`creator_share_bps\` is above \`MAX_CREATOR_SHARE_BPS\``,
@@ -466,7 +504,9 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__FEE_RECIPIENT_IS_FEE_VAULT]: `The fee recipient is the fee vault itself`,
     [BROT_MARKETS_ERROR__FEE_RECIPIENT_MISMATCH]: `The fee recipient is not the one GlobalConfig stores`,
     [BROT_MARKETS_ERROR__ILLEGAL_TRANSITION]: `The transition is not in the table of TP 3.4.2`,
+    [BROT_MARKETS_ERROR__INVALID_CONTEST_DECISION]: `The contest decision is neither Confirm nor Void`,
     [BROT_MARKETS_ERROR__INVALID_DIRECTION]: `Row 4: the direction byte is neither \`Above\` nor \`Below\``,
+    [BROT_MARKETS_ERROR__INVALID_REFERRER]: `The referrer is the zero address or the referee itself`,
     [BROT_MARKETS_ERROR__INVALID_SIDE]: `The side byte is neither \`Yes\` nor \`No\``,
     [BROT_MARKETS_ERROR__INVARIANT_VIOLATED]: `A money invariant (I1 to I15) does not hold`,
     [BROT_MARKETS_ERROR__JOIN_ACCOUNTS_MISMATCH]: `The join accounts passed do not match the entry's joins, in order`,
@@ -484,6 +524,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__NO_PENDING_ADMIN]: `No admin transfer is pending`,
     [BROT_MARKETS_ERROR__NO_PROOF_TIME]: `The campaign has no YES proof publish time, so its late entries cannot be told apart`,
     [BROT_MARKETS_ERROR__NOT_ADMIN]: `The signer is not the config's admin`,
+    [BROT_MARKETS_ERROR__NOT_CONTESTED]: `The campaign is not Contested`,
     [BROT_MARKETS_ERROR__NOT_FINALIZED]: `The campaign is not finalized yet`,
     [BROT_MARKETS_ERROR__NOTHING_TO_SWEEP]: `The fee vault holds nothing above its rent-exempt minimum`,
     [BROT_MARKETS_ERROR__NOT_PAUSED]: `Entries are not paused`,
@@ -519,10 +560,15 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__READER_NOT_READY]: `Unused since Sprint 03: the reader methods returned it before they were ported`,
     [BROT_MARKETS_ERROR__READER_WRONG_OWNER]: `Account is not owned by the program this reader trusts`,
     [BROT_MARKETS_ERROR__RENT_PAYER_NOT_STORED]: `The rent payer is not the one stored at opening`,
+    [BROT_MARKETS_ERROR__REREAD_NOT_TOP_LEVEL]: `reread_campaign must run at the transaction's top level, never by CPI`,
     [BROT_MARKETS_ERROR__RESERVE_NOT_CLAIMABLE]: `The wallet is still below its rent-exempt minimum; the reserved credit cannot be claimed yet`,
     [BROT_MARKETS_ERROR__RESOLVE_NOT_TOP_LEVEL]: `\`resolve_campaign\` must be a top-level instruction, never called through a CPI`,
     [BROT_MARKETS_ERROR__RETURN_BELOW_MINIMUM]: `The estimated return is below the signed \`min_return_bps\``,
     [BROT_MARKETS_ERROR__REVIEW_NOT_ENDED]: `The review window has not ended yet`,
+    [BROT_MARKETS_ERROR__SEALED_ENTRY_ABOVE_MAX_LAMPORTS]: `The sealed entry would cost more lamports than max_lamports`,
+    [BROT_MARKETS_ERROR__SEALED_ENTRY_BELOW_FLOOR]: `The sealed entry is below the US$ floor (the config's opening_fee_usd)`,
+    [BROT_MARKETS_ERROR__SEALED_FEE_MISMATCH]: `The SealedFee account does not belong to this campaign and sponsor`,
+    [BROT_MARKETS_ERROR__SEALED_FEES_OPEN]: `A sponsor's held fee on this campaign is not settled yet`,
     [BROT_MARKETS_ERROR__SNAPSHOT_INCONSISTENT]: `The snapshot's totals disagree with each other`,
     [BROT_MARKETS_ERROR__SOL_USD_ACCOUNT_MISMATCH]: `Row 7: the SOL/USD slot is not the sponsored account of \`sol_usd_feed_id\``,
     [BROT_MARKETS_ERROR__SOL_USD_BAD_LAYOUT]: `Row 7: the SOL/USD account does not have the \`PriceUpdateV2\` layout`,
@@ -550,6 +596,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__UPGRADE_AUTHORITY_MISMATCH]: `The signer is not the program's upgrade authority`,
     [BROT_MARKETS_ERROR__VOID_REASON_NOT_FOR_TEAM]: `A team key cannot void with this reason`,
     [BROT_MARKETS_ERROR__WRONG_BAKER]: `The entry's stored baker is not the recipient`,
+    [BROT_MARKETS_ERROR__WRONG_CONTEST_STAGE]: `The contest is not at the stage this instruction acts on`,
     [BROT_MARKETS_ERROR__WRONG_CREATOR]: `The recipient is not the stored creator`,
     [BROT_MARKETS_ERROR__WRONG_EVENT_AUTHORITY]: `The event-authority slot is not this program's event authority`,
     [BROT_MARKETS_ERROR__WRONG_LAYOUT_VERSION]: `The account's layout version is not the one this program reads`,
@@ -557,6 +604,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__WRONG_OWNER]: `An account the program treats as its own belongs to another program`,
     [BROT_MARKETS_ERROR__WRONG_PROGRAM_ACCOUNT]: `The program slot is not this program`,
     [BROT_MARKETS_ERROR__WRONG_PROGRAM_DATA]: `The ProgramData account is not this program's, or records no upgrade authority`,
+    [BROT_MARKETS_ERROR__WRONG_SPONSOR]: `The account is not the SealedFee's stored sponsor`,
     [BROT_MARKETS_ERROR__WRONG_SYSTEM_PROGRAM]: `The System Program slot holds another account`,
     [BROT_MARKETS_ERROR__WRONG_TAG]: `The account's type tag is not the one this slot expects (a zeroed account included)`,
     [BROT_MARKETS_ERROR__ZERO_ADDRESS]: `An address that must name a key is all zeros`,

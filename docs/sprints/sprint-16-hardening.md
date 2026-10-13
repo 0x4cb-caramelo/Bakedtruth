@@ -31,8 +31,13 @@ release candidate. The version that leaves this sprint is the one the two firms 
 - [ ] **The creation rules are frozen (BP-17):** the release candidate carries `user_open_campaign` with the ten
       checks of TP §3.4.10, the Pyth-priced opening with `max_lamports`, the creator share per P-2, `VoidReason`
       with the 10% path (T23), and every creation parameter under its code ceiling. The audit's scope names each.
-- [ ] **No cap:** the code has no `CapState` and no `max_pot`. The exposure alert (SOL held in all open vaults,
-      proposal §2.11) fires in a devnet test, and so does the alert at 80% of `max_open_campaigns`.
+- [x] **No cap:** the code has no `CapState` and no `max_pot`. The exposure alert (SOL held in all open vaults,
+      proposal §2.11) fires in a devnet test, and so does the alert at 80% of `max_open_campaigns`. **Done
+      (2026-10-13):** no `CapState` or `max_pot` anywhere in the program or the SDK; the keeper of `main` (`5eacb70`),
+      run read-only against devnet with `KEEPER_DRY_RUN=1`, a key holding no SOL and the thresholds lowered
+      (`KEEPER_EXPOSURE_ALERT_LAMPORTS=1`, `KEEPER_OPEN_CAMPAIGNS_ALERT_BPS=1`), raised `exposure_high` (27.87 SOL in
+      seven vaults) and `open_campaigns_high` (4 of 1,000) at 20:07 UTC. The approved thresholds (100 SOL, 80%) are
+      the defaults.
 - [ ] **The pause:** I10′ runs with every instruction of the version. Only `user_join_campaign`, `user_open_campaign`,
       the sealed entry and, if kept, `sponsor_add_prize` fail; resolution, payout and refund work with the pause on;
       only `admin` resumes.
@@ -165,7 +170,10 @@ binary (and failing on a drill build), gitleaks over the 510 commits of history 
 **Blocked by the founder:** the provenance attestation (`actions/attest-build-provenance`) needs a public repository or
 an Enterprise Cloud organisation; options: (a) make the repository public before mainnet, which `verify-from-repo` needs
 anyway (recommended), (b) GitHub Pro (branch protection and CODEOWNERS, no attestation), (c) an Enterprise
-organisation, (d) stay as is. Branch protection on `main` follows the same choice.
+organisation, (d) stay as is. Branch protection on `main` follows the same choice. **Answered 2026-10-13 (Ronaldo):
+(a)**, the repository goes public before mainnet; the attestation job runs from then (making it public is his act).
+The team-key opening alert is built and unit-tested, but was not seen on devnet: it fires for a team opening inside its
+one-hour look-back, so it needs an opening by a team key during a run.
 
 **Still to build here, after Sprints 14 and 15:** the pause (I10′) with every instruction; the exposure alert, the
 80% alert and the team-key opening alert under test (the keeper lane is building them); `content/powers.md` (needs the

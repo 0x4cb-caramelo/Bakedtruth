@@ -3,8 +3,8 @@
  *          as events.rs and events/*.rs declare them, the event decoder's refusals of near misses, every
  *          PDA against the test kit's own derivation, and the account decoders' loader checks (owner,
  *          size, tag, layout version). Needs no binary.
- * Version: 0.1.0
- * Sprint:  05 (SDK)
+ * Version: 0.1.1
+ * Sprint:  05 (SDK); the referral link's and the sealed fee's PDAs (scaffold of Sprints 14–15, 2026-10-13)
  */
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
@@ -58,6 +58,8 @@ describe("sdk events and addresses match the program", () => {
       await R.vaultAddress(campaign),
       await R.entryAddress(campaign, baker),
       await R.joinAddress(campaign, baker, 3),
+      await R.referralLinkAddress(baker),
+      await R.sealedFeeAddress(campaign, baker),
       await R.programDataAddress(),
       await R.sponsoredPriceAddress(P.SOL_USD_FEED_ID),
       await R.sponsoredPriceAddress(R.SOL_USD_FEED_HEX),
@@ -68,6 +70,8 @@ describe("sdk events and addresses match the program", () => {
       await P.vaultPda(campaign),
       await P.entryPda(campaign, baker),
       await P.joinPda(campaign, baker, 3),
+      await P.referralLinkPda(baker),
+      await P.sealedFeePda(campaign, baker),
       await P.programDataPda(),
       P.SOL_USD_ACCOUNT,
       R.SOL_USD_ACCOUNT,
@@ -97,6 +101,7 @@ describe("sdk events and addresses match the program", () => {
       ["campaign", 512],
       ["entry", 116],
       ["join", 96],
+      ["sealedFee", 112],
     ]);
   });
 });

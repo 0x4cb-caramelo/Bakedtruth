@@ -1,7 +1,8 @@
 //! Purpose: every refusal the program can return, one code per cause, as custom program errors.
-//! Version: 0.0.4
+//! Version: 0.0.5
 //! Sprint: 02 (pot core on Pinocchio); reader errors from 01 keep their codes; 03 appends 6071 on;
-//!         the sixth kind (`DbcGraduated`) appends 6148 to 6152
+//!         the sixth kind (`DbcGraduated`) appends 6148 to 6152; the scaffold of Sprints 14–15
+//!         (2026-10-13) appends 6153 and 6160 to 6174
 //!
 //! Codes start at 6000 so they never collide with the System Program's own custom errors, which
 //! a failed CPI passes through. A code, once assigned, never changes meaning. Each variant's
@@ -325,7 +326,34 @@ pub enum BrotError {
         "Row 3: the target is not the curve's graduation threshold (`migration_quote_threshold`)"
     )]
     TargetNotThreshold = 6152,
-    // New codes are appended here, from 6153, never reusing a number.
+    // Sprint 14, referral (numbers from 6153).
+    #[error("The referrer is the zero address or the referee itself")]
+    InvalidReferrer = 6153,
+    // Sprint 14, the dispute (numbers from 6160).
+    #[error("The campaign is not Contested")]
+    NotContested = 6160,
+    #[error("The contest is not at the stage this instruction acts on")]
+    WrongContestStage = 6161,
+    #[error("The contest stage's deadline has passed")]
+    ContestDeadlinePassed = 6162,
+    #[error("Stage 2 of the contest has not lapsed yet")]
+    ContestNotLapsed = 6163,
+    #[error("The contest decision is neither Confirm nor Void")]
+    InvalidContestDecision = 6164,
+    #[error("reread_campaign must run at the transaction's top level, never by CPI")]
+    RereadNotTopLevel = 6165,
+    // Sprint 15, the sealed entry (numbers from 6170).
+    #[error("The sealed entry is below the US$ floor (the config's opening_fee_usd)")]
+    SealedEntryBelowFloor = 6170,
+    #[error("The sealed entry would cost more lamports than max_lamports")]
+    SealedEntryAboveMaxLamports = 6171,
+    #[error("A sponsor's held fee on this campaign is not settled yet")]
+    SealedFeesOpen = 6172,
+    #[error("The SealedFee account does not belong to this campaign and sponsor")]
+    SealedFeeMismatch = 6173,
+    #[error("The account is not the SealedFee's stored sponsor")]
+    WrongSponsor = 6174,
+    // New codes are appended here, from 6175, never reusing a number.
 }
 
 impl From<BrotError> for ProgramError {

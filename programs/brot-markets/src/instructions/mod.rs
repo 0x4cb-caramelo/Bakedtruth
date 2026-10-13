@@ -1,8 +1,8 @@
 //! Purpose: the program's interface: every instruction with its discriminator, its accounts in
 //!          order and its arguments, for the dispatcher and for the Shank IDL (T9).
-//! Version: 0.0.3
+//! Version: 0.0.4
 //! Sprint: 02 (pot core on Pinocchio); frozen at the sprint's opening; 03 appends
-//!         `resolve_campaign`
+//!         `resolve_campaign`; the scaffold of Sprints 14–15 (2026-10-13) appends 22 to 26
 //!
 //! Instruction data is `[discriminator, arguments]`; the arguments are a fixed little-endian
 //! layout of exactly their size (no string, no optional field: D-j). Shank numbers the variants
@@ -14,6 +14,7 @@ pub mod admin;
 pub mod campaigns;
 pub mod entries;
 pub mod interface;
+pub mod referral;
 pub mod resolution;
 pub mod settlement;
 
@@ -47,6 +48,11 @@ pub mod ix {
     pub const CLOSE_CAMPAIGN: u8 = 19;
     pub const SWEEP_FEES: u8 = 20;
     pub const TALLY_LATE_JOINS: u8 = 21;
+    pub const USER_LINK_REFERRER: u8 = 22;
+    pub const REREAD_CAMPAIGN: u8 = 23;
+    pub const ADMIN_DECIDE_CONTEST: u8 = 24;
+    pub const SPONSOR_JOIN_CAMPAIGN: u8 = 25;
+    pub const SETTLE_SEALED_FEE: u8 = 26;
     /// Not an instruction: the self-CPI that carries an event (`events::EVENT_IX_TAG`).
     pub const EMIT_EVENT: u8 = crate::events::EVENT_IX_TAG;
 }

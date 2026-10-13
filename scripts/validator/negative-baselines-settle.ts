@@ -30,7 +30,11 @@ async function reviewed(env: Env, outcome: number, endsIn: bigint, extra: Record
 }
 
 /** A settling campaign whose vault holds its pools, with a snapshot. */
-async function settling(env: Env, snapshot: Parameters<typeof injectSettling>[3], extra: Record<string, unknown> = {}) {
+export async function settling(
+  env: Env,
+  snapshot: Parameters<typeof injectSettling>[3],
+  extra: Record<string, unknown> = {},
+) {
   const c = await base(env.rpc, { extra: { publish_time: await nowOf(env), ...extra } });
   const { campaign, vault } = await injectSettling(env.sw.w.client, c, P.Outcome.Yes, snapshot);
   await env.sw.flush();

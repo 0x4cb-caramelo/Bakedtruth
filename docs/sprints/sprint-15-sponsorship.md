@@ -1,6 +1,6 @@
 # Sprint 15 — Sponsorship: the sealed entry
 
-**Status:** planned · **Branch:** `sprint-15-sponsorship` · **Dates:** none, by the founder's decision
+**Status:** in progress: the program and the SDK built and tested (2026-10-13); blocked by the founder (the late sealed entry's 10%, the perks BP-3, the screens L-11 and L-18, Cloak P-8), the merge into `main` and Ronaldo's words for the devnet redeploy · **Branch:** `sprint-15-sponsorship` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -22,14 +22,17 @@ outcome. If the founder says yes, a third party can also add a prize to a campai
 
 ## Definition of done
 
-- [ ] **The sealed entry** (`SponsorEntry` in the D6 table) is an entry on YES or NO that also charges 10% (proposal
+- [x] **The sealed entry** (`SponsorEntry` in the D6 table) is an entry on YES or NO that also charges 10% (proposal
       §2.4.8). Whether it is a variant of `user_join_campaign` or its own instruction file is recorded at the sprint's
       opening; either way one instruction lives in one file. Of the amount paid, 90% becomes the entry and 10% the
       sponsor fee **[INF]** (P1 §3.7's 90/10, applied to the entry as TP v0.0.1 §3.4.12 applied 70/30).
-- [ ] The 10% waits in the campaign vault, bookkept, until the outcome (TP v0.0.1 Q6, answered a; the same path as the
+      *Done 2026-10-13:* its own instruction, `sponsor_join_campaign`, calling the join's core (`join_core.rs`).
+- [x] The 10% waits in the campaign vault, bookkept, until the outcome (TP v0.0.1 Q6, answered a; the same path as the
       opening's 10%, T23). Then it is swept to `fee_recipient`, or refunded on a house-failure void (`VoidReason`).
-- [ ] The sealed entry follows the common rule of any entry in a one-sided pot and on a void (TP v0.0.1 Q5, answered
+      *Done 2026-10-13, with one deviation:* held in the sponsor's `SealedFee`, not the vault (the record says why); swept by `settle_sealed_fee`.
+- [x] The sealed entry follows the common rule of any entry in a one-sided pot and on a void (TP v0.0.1 Q5, answered
       a): refunded without fee on a void; charged 1% in a one-sided pot unless it is the first baker.
+      *Done:* `sealed-outcomes.test.ts`.
 - [ ] The seal, the sponsor's name and its link live in `content/partners.json`, reviewed by two people; the card and
       the campaign page show them (BR-18). The perks beyond seal, name and link follow BP-3 (P-9, open).
 - [ ] A sealed entry is disclosed by definition. An undisclosed sponsor gives only a neutral prize ("quem não mostra o
@@ -40,15 +43,20 @@ outcome. If the founder says yes, a third party can also add a prize to a campai
       later prize on an existing campaign, at the same 90/10; the prize returns whole to that sponsor in a one-sided
       pot and on a void, and its 10% follows the cause, as P-4 rules for the opening **[INF]**; it stays outside the
       creator share's base (P-1, I12). If the answer is no, it is not built and the reason is recorded.
-- [ ] With the pause on, the sealed entry and, if kept, `sponsor_add_prize` fail; resolution, payouts and refunds work
+      *Not built: the founder deferred it on 2026-10-13 (he talks with his partners); nothing is reserved for it.*
+- [x] With the pause on, the sealed entry and, if kept, `sponsor_add_prize` fail; resolution, payouts and refunds work
       (I10′).
-- [ ] Two users: wallet A cannot settle, redirect or refund B's sealed entry or added prize.
+      *Done:* `sealed-pause.test.ts`; the randomized test (I10′).
+- [x] Two users: wallet A cannot settle, redirect or refund B's sealed entry or added prize.
+      *Done:* `sealed-settle.test.ts`.
 - [ ] **The Cloak page (BR-17):** its own route, with no Cloak code on the entry page (K-10), built only if P-8
       confirms Cloak works with SOL. On devnet it is a demonstration.
-- [ ] The seeded randomized test, extended with the sealed entry and, if kept, the added prize, keeps I1 to I15 (I3′
+- [x] The seeded randomized test, extended with the sealed entry and, if kept, the added prize, keeps I1 to I15 (I3′
       and I15 with the sponsor fee in the bookkeeping).
+      *Done:* 35 seeds green (the record).
 - [ ] The IDL, the generated client and the SDK are regenerated; the program is redeployed to devnet from the CI
       artifact.
+      *The IDL, the client and the SDK: done. The devnet redeploy: blocked by the merge into `main` and Ronaldo's words.*
 - [ ] Common closure (`docs/SPRINTS.md`, section 4).
 
 ## Deliverables
@@ -67,11 +75,12 @@ the opening, which already is the US$500 sponsorship (Sprint 02).
 
 ## Founder decisions that block the sprint
 
-- **[Q]** May a third party add a prize to someone else's campaign (P1 §3.7, "Continua sem regra")? It is the only
-  reason to keep `sponsor_add_prize`.
-- **[Q]** The sealed entry's minimum: the US$500 floor of the pitch ("From $500") and of BP-3, or none. If the floor
-  applies, the program prices it at the Pyth SOL/USD price with `max_lamports`, reusing the opening's conversion (TP
-  §3.4.16).
+- **[Q], deferred 2026-10-13 by Ronaldo** ("i need too talk with my partners"): may a third party add a prize to
+  someone else's campaign (P1 §3.7)? It is the only reason to keep `sponsor_add_prize`.
+- **Answered 2026-10-13 (Ronaldo):** the sealed entry's minimum is the US$500 floor, priced at the Pyth SOL/USD price with
+  `max_lamports`, reusing the opening's conversion (TP §3.4.16).
+- **Answered 2026-10-13 (Ronaldo):** a LATE sealed entry (after the YES proof) gets its 90% back whole and Brot keeps
+  its 10% (today's rule, pinned by `tests/brot/sealed-late.test.ts`).
 - **BP-3** (P-9, open): the perks; recommended: seal, name and link for all, posts and highlight case by case.
 - **P-8** (open): whether Cloak works with SOL.
 - **L-11 and L-18** (Product Brief v0.0.1 gaps): the screens of the sealed entry and of the Cloak page.
@@ -99,9 +108,9 @@ export PATH="$HOME/.bun/bin:$PATH"
 bun run build:program && bun run test && bun run test:rust
 cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint -- -D warnings
 cargo clippy --locked -p brot-markets --all-targets --features no-entrypoint,mainnet -- -D warnings
-bun test tests/ -t "sealed entry holds its 10 percent until the outcome"   # to add
-bun test tests/ -t "sealed entry follows the common rule"                  # to add: one-sided, void by cause
-bun test tests/ -t "added prize returns to its sponsor"                    # to add, only if kept
+bun test tests/ -t "sealed entry holds its 10 percent until the outcome"
+bun test tests/ -t "sealed entry follows the common rule"                  # one-sided, void by cause
+bun test tests/ -t "added prize returns to its sponsor"                    # only if kept (deferred)
 bun test tests/ -t "paused campaign refuses new money, never payouts"      # I10′, extended
 node scripts/codemap.js --check && node scripts/ci-secret-scan.js origin/main
 ```
@@ -128,4 +137,33 @@ IDL and generated client, `CODEMAP.md`.
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+**2026-10-13, built in the lead's parallel run** (branch `sprint-15-sponsorship`: the scaffold `fd67706` shared with
+Sprint 14, lane L15, the lead's integration, the randomized test's extension). Founder answers of 2026-10-13: the US$500
+floor priced on-chain (yes); `sponsor_add_prize` deferred (not built, nothing reserved; if kept, appended later).
+
+- **The shape, recorded at the sprint's opening as the DoD asked:** its own instruction, `sponsor_join_campaign`, calling
+  the join's core, which was extracted from `join_campaign.rs` without changing a single plain-join test. The 10% is
+  held in the sponsor's `SealedFee` (`["sealed", campaign, sponsor]`), not in the campaign vault: the `Campaign` had
+  four spare bytes, now `sealed_fees_open`, and the vault's bookkeeping and assertion stay untouched (TP §3.4.12).
+- **The rules as built:** at least `opening_fee_usd` at the SOL/USD price through the opening's `charge` (the row-7
+  codes kept; the floor and the bound renamed `SealedEntryBelowFloor` and `SealedEntryAboveMaxLamports`); the creation
+  rules' version bound (`CreationParamsChanged`, added after the red-team review); 90/10 by `opening_prize_bps`; the
+  entry follows the common rule in a one-sided pot and on a void; `settle_sealed_fee` refunds the fee to the sponsor on
+  a house-failure void and sends it to the fee vault otherwise; `close_campaign` waits for every held fee; the pause
+  refuses the sealed entry and never the settlement.
+- **Evidence:** the brief's named tests ("sealed entry holds its 10 percent until the outcome", "sealed entry follows
+  the common rule", "paused campaign refuses new money, never payouts"), two-user tests, the SDK's parity with the
+  program on every refusal, the randomized test green on 35 seeds, the negative suite on Surfpool (461 of 461 refused
+  with their own error), the mutation proof of the ten new checks (each one's Mollusk and LiteSVM tests fail without it; the existing
+  `distinct` check gained a new test), and a red-team review with no critical or high finding: its medium finding (the
+  randomized test) and L2 to L5 were fixed before the PR, a second focused pass reviewed those fixes, L1 (the late
+  sealed entry's 10%) is the founder's and pinned by a test, and I3 (settle returns the current rent, not the rent
+  paid) and I4 (a sponsor address that cannot be credited) are noted, neither new exposure. The negative suite ran on
+  the binary built from this branch after the merge of `fd69f0a`.
+- **Not built here:** the site's sealed-entry screens (L-11, open), the seal on cards and pages (needs the partner data
+  and BP-3), the Cloak page (P-8, open), the devnet redeploy (after the merge, Ronaldo's key).
+
+**Open, with owners.** The founder: BP-3 (perks); L-11 and L-18
+(screens); P-8 (Cloak with SOL); `sponsor_add_prize`. The lead, after the merge: the devnet redeploy with Ronaldo; the
+keeper's settlement must call `settle_sealed_fee` before `close_campaign` once the keeper (PR #88) and this sprint are
+both on `main`.

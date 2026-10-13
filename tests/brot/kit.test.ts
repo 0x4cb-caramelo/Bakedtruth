@@ -1,9 +1,9 @@
 /**
  * Purpose: checks the test kit itself, without the program binary: addresses, layout sizes against
  *          the Rust structs, the codec, and the instruction shapes of the frozen contract.
- * Version: 0.0.4 (ProgramData and config of the new program id)
+ * Version: 0.0.5 (the sizes of the scaffold of Sprints 14–15, 2026-10-13)
  * Sprint:  02 (pot core on Pinocchio); the Sprint 03 sizes and `resolve_campaign`; Sprint 04's three events of a
- *          team-finalized campaign
+ *          team-finalized campaign; the two accounts, three argument layouts and five events of Sprints 14–15
  */
 import { describe, expect, test } from "bun:test";
 import { AccountRole, generateKeyPairSigner } from "@solana/kit";
@@ -14,6 +14,7 @@ import { decode, encode, layoutSize, offsetOf } from "./layouts";
 import * as P from "./program";
 import { EVENTS } from "./events";
 import * as S from "./structs";
+import * as SL from "./structs-14-15";
 
 describe("test kit", () => {
   test("derives the program's and Pyth's addresses", async () => {
@@ -33,6 +34,11 @@ describe("test kit", () => {
     expect(layoutSize(S.SET_TEAM_ARGS)).toBe(161);
     expect(layoutSize(S.OPEN_CAMPAIGN_ARGS)).toBe(94);
     expect(layoutSize(S.JOIN_CAMPAIGN_ARGS)).toBe(21);
+    expect(layoutSize(SL.REFERRAL_LINK)).toBe(96);
+    expect(layoutSize(SL.SEALED_FEE)).toBe(112);
+    expect(layoutSize(SL.LINK_REFERRER_ARGS)).toBe(32);
+    expect(layoutSize(SL.DECIDE_CONTEST_ARGS)).toBe(34);
+    expect(layoutSize(SL.SPONSOR_JOIN_ARGS)).toBe(33); // 29 + expected_params_version (lane L15, red team L2)
     const events = Object.fromEntries(Object.entries(EVENTS).map(([n, e]) => [n, layoutSize(e.layout)]));
     expect(events).toEqual({
       ConfigInitialized: 166,
@@ -45,6 +51,11 @@ describe("test kit", () => {
       ResultConfirmed: 73,
       CampaignVoided: 105,
       CampaignFinalized: 97,
+      ReferralLinked: 80,
+      CampaignReread: 77,
+      ContestClosed: 106,
+      SealedFeeHeld: 132,
+      SealedFeeSettled: 81,
     });
     expect(offsetOf(S.CAMPAIGN, "id")).toBe(16);
   });

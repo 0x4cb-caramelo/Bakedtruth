@@ -2,9 +2,10 @@
  * Purpose: the program's addresses for the LiteSVM tests: ids, seeds, discriminators, PDAs and
  *          the known outside accounts (Pyth, the loader). Mirrors programs/brot-markets/src
  *          (constants.rs, instructions/mod.rs).
- * Version: 0.0.4 (the sixth kind: Meteora DBC, wSOL, its distance and floor)
+ * Version: 0.0.5 (the scaffold of Sprints 14–15: five discriminators, `ContestDecision`, two PDAs)
  * Sprint:  02 (pot core on Pinocchio); Sprint 03 adds `resolve_campaign`, the outcome enums, the
- *          readers' programs and constants, frozen at its opening; the sixth kind its own
+ *          readers' programs and constants, frozen at its opening; the sixth kind its own; the scaffold of
+ *          Sprints 14–15 (2026-10-13) its own
  */
 import { address, getAddressEncoder, getProgramDerivedAddress, type Address } from "@solana/kit";
 
@@ -82,6 +83,11 @@ export const IX = {
   CLOSE_CAMPAIGN: 19,
   SWEEP_FEES: 20,
   TALLY_LATE_JOINS: 21,
+  USER_LINK_REFERRER: 22,
+  REREAD_CAMPAIGN: 23,
+  ADMIN_DECIDE_CONTEST: 24,
+  SPONSOR_JOIN_CAMPAIGN: 25,
+  SETTLE_SEALED_FEE: 26,
   EMIT_EVENT: 0xff,
 } as const;
 
@@ -107,6 +113,7 @@ export const Side = { Yes: 0, No: 1 } as const;
 export const Direction = { Above: 0, Below: 1 } as const;
 export const OperatingLevel = { Normal: 0, EntriesHalted: 1 } as const;
 export const ConfigChange = { Team: 0, CreationParams: 1, FeeRecipient: 2, PendingAdmin: 3, Admin: 4 } as const;
+export const ContestDecision = { Confirm: 0, Void: 1 } as const;
 export const AccountTag = { GlobalConfig: 1, Campaign: 2, Entry: 3 } as const;
 
 const text = (s: string) => new TextEncoder().encode(s);
@@ -132,6 +139,9 @@ export const joinPda = (campaign: Address, baker: Address, index: number) => {
   new DataView(b.buffer).setUint32(0, index, true);
   return pda([text("join"), key(campaign), key(baker), b]);
 };
+/** `["referral", referee]` (Sprint 14) and `["sealed", campaign, sponsor]` (Sprint 15). */
+export const referralLinkPda = (referee: Address) => pda([text("referral"), key(referee)]);
+export const sealedFeePda = (campaign: Address, sponsor: Address) => pda([text("sealed"), key(campaign), key(sponsor)]);
 export const eventAuthorityPda = () => pda([text("__event_authority")]);
 /** The program's ProgramData account under the upgradeable loader. */
 export const programDataPda = () => pda([key(PROGRAM_ID)], LOADER_V3_ID);

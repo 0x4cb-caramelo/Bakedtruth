@@ -2,7 +2,7 @@
 
 **Status:** built for the Hackathon MVP (2026-10-10), by the AI on the founder's decision (Lucas's UI is not in the repository; the founder's 2026-10-10 plan gives the list to the AI, with `/5` and `/dev0x/` as references) · **Branch:** `sprint-10-site-campaign-list` · **Dates:** none, by the founder's decision
 
-**Final state (audit of 2026-10-13):** blocked by the founder's go-ahead to tag it with a carry list. Evidence: merged by PR #56 (`b4f3b55`) on 2026-10-10; no tag. Since then the indexer serves the home ranking (`/api/v1/ranking`, PR #72, not deployed). Carried: the share card and its intent button, the proof bar's written disposition, three named tests (A); the partner seal's data (founder, two-person review of `content/partners.json`).
+**Final state (audit of 2026-10-13):** closed with a carry list: tag `sprint-10` at `b4f3b55`, pushed on 2026-10-13 at 18:41 UTC on Ronaldo's word. Evidence: merged by PR #56 (`b4f3b55`) on 2026-10-10; no tag. Since then the indexer serves the home ranking (`/api/v1/ranking`, PR #72, not deployed). Carried: the share card and its intent button, the proof bar's written disposition, three named tests (A); the partner seal's data (founder, two-person review of `content/partners.json`).
 
 ## Record (2026-10-10)
 

@@ -13,8 +13,9 @@ import type { ModelCampaign } from "./invariant-model";
 import { decode, layoutSize } from "./layouts";
 import * as P from "./program";
 import type { BrotErrorName } from "./errors";
-import { balance, createWorld, fundedWallet, now, rentFor, setPriceAccount, type World } from "./setup";
+import { balance, createWorld, fundedWallet, now, rentFor, setPriceAccount, type Sent, type World } from "./setup";
 import { CAMPAIGN, ENTRY, JOIN } from "./structs";
+import { SEALED_FEE } from "./structs-14-15";
 
 /** A seeded generator (mulberry32): the same seed gives the same operations on every machine. */
 export function seededRandom(seed: number) {
@@ -42,6 +43,10 @@ export type Plan = {
   apply: () => void;
   /** Runs after the transaction whether it succeeded or not (a price put back, for one). */
   after?: () => void;
+  /** Runs after a success, with its events: throws when they are not what the model expects (Sprint 15). */
+  check?: (sent: Extract<Sent, { ok: true }>) => void;
+  /** Added to the trace line of a success, or the line of an operation that waits ("skipped", "refunded"). */
+  tag?: string;
 };
 
 export type Harness = {
@@ -58,8 +63,9 @@ export type Harness = {
   max: number;
   feeVault: Address;
   feeVaultModel: bigint;
-  /** Rent of the 512-byte campaign, of the data-less vault, of an Entry and of a data-less wallet (the reserve). */
-  rent: { campaign: bigint; vault: bigint; entry: bigint; wallet: bigint; join: bigint };
+  /** Rent of the 512-byte campaign, of the data-less vault, of an Entry, of a data-less wallet (the reserve), of a
+   * Join and of a sponsor's SealedFee (Sprint 15). */
+  rent: { campaign: bigint; vault: bigint; entry: bigint; wallet: bigint; join: bigint; sealed: bigint };
   drained: Set<string>;
   nextId: bigint;
   trace: string[];
@@ -83,6 +89,7 @@ export async function makeHarness(): Promise<Harness> {
     entry: rentFor(w, layoutSize(ENTRY)),
     join: rentFor(w, layoutSize(JOIN)),
     wallet: rentFor(w, 0),
+    sealed: rentFor(w, layoutSize(SEALED_FEE)),
   };
   const feeVaultModel = balance(w, feeVault);
   refreshBase(w);
@@ -137,12 +144,25 @@ export type ChainView = {
   feeVault: bigint;
 };
 
-export async function chainView(h: Harness, index: number): Promise<ChainView> {
+/** Each PDA the run derives again and again, derived once: the checks read every campaign after every operation. */
+const derived = new Map<string, Promise<Address>>();
+export function derivedOnce(key: string, derive: () => Promise<Address>): Promise<Address> {
+  const known = derived.get(key);
+  if (known) return known;
+  const address = derive();
+  derived.set(key, address);
+  return address;
+}
+export const entryAt = (campaign: Address, baker: Address) =>
+  derivedOnce(`entry ${campaign} ${baker}`, () => P.entryPda(campaign, baker));
+
+/** The chain side of campaign `index`; `config` is read once per round of checks, not once per campaign. */
+export async function chainView(h: Harness, index: number, config?: Record<string, any>): Promise<ChainView> {
   const { campaign, vault } = h.addrs[index];
   const c = h.w.client.svm.getAccount(campaign);
   const entries = new Map<string, { amount_yes: bigint; amount_no: bigint }>();
   for (const baker of h.bakers) {
-    const entry = await P.entryPda(campaign, baker.address);
+    const entry = await entryAt(campaign, baker.address);
     const account = h.w.client.svm.getAccount(entry);
     if (account.exists) {
       const d = decode(ENTRY, account.data);
@@ -153,7 +173,7 @@ export async function chainView(h: Harness, index: number): Promise<ChainView> {
     vault: balance(h.w, vault),
     campaign: c.exists ? decode(CAMPAIGN, c.data) : null,
     entries,
-    config: await readConfig(h.w),
+    config: config ?? (await readConfig(h.w)),
     feeVault: balance(h.w, h.feeVault),
   };
 }
