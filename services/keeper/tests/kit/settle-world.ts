@@ -21,7 +21,7 @@ import {
   type Campaign,
 } from "@brot/sdk/read";
 
-import { BTC_PRICE, initConfig, join, setTeam } from "../../../../tests/brot/flows";
+import { BTC_PRICE, DEFAULT_PARAMS, initConfig, join, setTeam } from "../../../../tests/brot/flows";
 import * as P from "../../../../tests/brot/program";
 import {
   balance,
@@ -45,9 +45,10 @@ export type KeeperWorld = World & {
   chain: ChainRpc;
 };
 
-export async function keeperWorld(): Promise<KeeperWorld> {
+/** The world; `params` (snake_case, over the founder's defaults) when a test needs other creation parameters. */
+export async function keeperWorld(params: Record<string, unknown> = {}): Promise<KeeperWorld> {
   const w = await createWorld();
-  const { admin, feeRecipient } = await initConfig(w);
+  const { admin, feeRecipient } = await initConfig(w, { ...DEFAULT_PARAMS, ...params });
   const [team] = await setTeam(w, admin, 1);
   const creator = await fundedWallet(w);
   const keeper = await fundedWallet(w, 10n);
