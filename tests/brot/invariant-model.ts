@@ -53,6 +53,8 @@ export type ModelCampaign = {
   feeMoved: boolean;
   prizeSettled: boolean;
   shareSettled: boolean;
+  /** A creator share kept in the vault for a wallet it would have left below rent (TP 3.4.5, the reserve path). */
+  reserved: bigint;
   handSent: bigint;
   handSentCampaign: bigint;
   paidOut: bigint;
@@ -70,7 +72,8 @@ export const ONE_SIDED_BPS = 100n;
 
 /** Void reasons (P.VoidReason): the house's own failures refund the 10%; the others keep it. */
 export const HOUSE_REASONS = new Set([1, 4]);
-const TEAM_REASONS = new Set([4, 5]);
+/** A team key may also choose MissedWindow and StaleFeed (resolution/void_reason.rs, `team_may_choose`). */
+const TEAM_REASONS = new Set([1, 3, 4, 5]);
 
 export type CampaignSetup = Pick<
   ModelCampaign,
@@ -91,6 +94,7 @@ export function newCampaign(p: CampaignSetup): ModelCampaign {
     feeMoved: false,
     prizeSettled: false,
     shareSettled: false,
+    reserved: 0n,
     handSent: 0n,
     handSentCampaign: 0n,
     paidOut: 0n,
@@ -137,10 +141,10 @@ export function snapshotOf(c: ModelCampaign): Snapshot {
   const split = { winning, losing, prize: c.prize, feeBps: FEE_BPS, creatorBps: c.team ? 0n : CREATOR_BPS };
   // One side empty, or a losing side too small to pay its fees (the Economic Viability Rule): one-sided.
   if (yes === 0n || no === 0n || !splitIsViable(split)) {
-    const oneSidedFees = early.reduce((n, j) => {
-      const isFirst = j.baker === firstBaker;
-      return n + oneSidedFee(j.amount, ONE_SIDED_BPS, isFirst);
-    }, 0n);
+    // Taken on each Entry's early total, never join by join (settlement/rules.rs, `entry_payout`).
+    const byBaker = new Map<string, bigint>();
+    for (const j of early) byBaker.set(j.baker, (byBaker.get(j.baker) ?? 0n) + j.amount);
+    const oneSidedFees = [...byBaker].reduce((n, [b, x]) => n + oneSidedFee(x, ONE_SIDED_BPS, b === firstBaker), 0n);
     const totals = yes === 0n || no === 0n ? { winning: yes + no, losing: 0n } : { winning, losing };
     return { ...blank("OneSided", late, firstBaker), ...totals, oneSidedFees };
   }
@@ -192,13 +196,16 @@ export function entryPayout(c: ModelCampaign, baker: string): bigint {
   return payoutOf(won, s.distributable, s.winning) + late;
 }
 
+/** A void the house caused returns the opening fee, unless no entry ever landed (founder answer 8: kept). */
+const opensBack = (c: ModelCampaign) => HOUSE_REASONS.has(c.voidReason) && c.joins.length > 0;
+
 /** What `collect_fee` moves to the fee vault. */
 export function collectDue(c: ModelCampaign): bigint {
   const s = c.snapshot;
   if (!s) return 0n;
   if (s.mode === "Split") return s.fee - s.fromFee + c.openingFee;
   if (s.mode === "OneSided") return s.oneSidedFees + c.openingFee;
-  return HOUSE_REASONS.has(c.voidReason) ? 0n : c.openingFee;
+  return opensBack(c) ? 0n : c.openingFee;
 }
 
 /** What `settle_prize` pays the opener (Split: none, the prize is in the distributable). */
@@ -206,7 +213,7 @@ export function prizeDue(c: ModelCampaign): bigint {
   const s = c.snapshot;
   if (!s || s.mode === "Split") return 0n;
   if (s.mode === "OneSided") return c.prize;
-  return c.prize + (HOUSE_REASONS.has(c.voidReason) ? c.openingFee : 0n);
+  return c.prize + (opensBack(c) ? c.openingFee : 0n);
 }
 
 /** The creator's share (P-1: none on a void, a one-sided pot or a team opening). */

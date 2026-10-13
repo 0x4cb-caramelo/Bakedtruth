@@ -2,8 +2,8 @@
  * Purpose: the randomized test of the money (Sprint 04, gate 1, X0.1): a fixed seed draws operations over
  *          the whole sprint, and I1 to I15 are checked after each one against the reference model.
  *          Needs the program binary (target/deploy/brot_markets.so): run it at integration.
- * Version: 0.0.1
- * Sprint:  04 (contract freeze, lane E)
+ * Version: 0.0.2
+ * Sprint:  04 (contract freeze, lane E); 15 (the cases a success reached, apart from the refusals; lane INV15)
  */
 import { describe, expect, test } from "bun:test";
 
@@ -31,6 +31,14 @@ async function checkAll(h: Harness) {
   return h.camps.length;
 }
 
+/** `name n, name n, …` of a count map, sorted. */
+const histogram = (counts: Map<string, number>, separator = ", ") =>
+  [...counts]
+    .sort()
+    .map(([k, n]) => `${k} ${n}`)
+    .join(separator);
+const count = (counts: Map<string, number>, key: string) => counts.set(key, (counts.get(key) ?? 0) + 1);
+
 describe("money invariants", () => {
   test("randomized invariants", async () => {
     const h = await makeHarness();
@@ -39,45 +47,33 @@ describe("money invariants", () => {
     let checks = 0;
     for (let i = 0; i < OPERATIONS; i++) {
       const op = drawOp(h, r);
-      kinds.set(op.k, (kinds.get(op.k) ?? 0) + 1);
+      count(kinds, op.k);
       try {
         await runOp(h, op);
         checks += await checkAll(h);
       } catch (error) {
         const tail = h.trace.slice(-8).join("\n  ");
         throw new Error(
-          `seed ${SEED}, operation ${i + 1} of ${OPERATIONS} (${op.k}): ${(error as Error).message}\n  ${tail}`,
+          `seed ${SEED} (0x${SEED.toString(16)}), operation ${i + 1} of ${OPERATIONS} (${op.k}): ${(error as Error).message}\n  ${tail}`,
         );
       }
     }
-    const histogram = [...kinds]
-      .sort()
-      .map(([k, n]) => `${k} ${n}`)
-      .join(", ");
-    console.log(`randomized invariants: seed ${SEED}, ${OPERATIONS} operations, ${checks} campaign checks`);
-    console.log(`operations: ${histogram}`);
-    const succeeded = new Map<string, number>();
+    const [succeeded, cases, refusals] = [new Map<string, number>(), new Map<string, number>(), new Map()];
     for (const line of h.trace) {
-      const [k, outcome] = line.split(" ");
-      if (outcome === "ok") succeeded.set(k, (succeeded.get(k) ?? 0) + 1);
-    }
-    const okHistogram = [...succeeded]
-      .sort()
-      .map(([k, n]) => `${k} ${n}`)
-      .join(", ");
-    console.log(`succeeded: ${okHistogram}`);
-    const refusals = new Map<string, number>();
-    for (const line of h.trace) {
-      const [k, ...rest] = line.split(" ");
-      const outcome = rest.join(" ");
-      if (outcome !== "ok") refusals.set(`${k}: ${outcome}`, (refusals.get(`${k}: ${outcome}`) ?? 0) + 1);
+      const [k, outcome, ...tag] = line.split(" ");
+      if (outcome !== "ok") count(refusals, `${k}: ${[outcome, ...tag].join(" ")}`);
+      else {
+        count(succeeded, k);
+        if (tag.length > 0) count(cases, `${k} ${tag.join(" ")}`);
+      }
     }
     console.log(
-      `refusals: ${[...refusals]
-        .sort()
-        .map(([k, n]) => `${k} ${n}`)
-        .join(" | ")}`,
+      `randomized invariants: seed ${SEED} (0x${SEED.toString(16)}), ${OPERATIONS} operations, ${checks} campaign checks`,
     );
+    console.log(`operations: ${histogram(kinds)}`);
+    console.log(`succeeded: ${histogram(succeeded)}`);
+    console.log(`cases: ${histogram(cases)}`);
+    console.log(`refusals: ${histogram(refusals, " | ")}`);
     expect(h.camps.length).toBeGreaterThan(0);
   }, 600_000);
 });

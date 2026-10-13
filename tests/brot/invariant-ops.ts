@@ -91,9 +91,10 @@ function planDrain(h: Harness, creatorIndex: number): Plan {
   };
 }
 
+/** Enough for a paid opening (about 4.3 SOL at the captured price): a drained creator can open again (Sprint 15 fix). */
 function planFund(h: Harness, creatorIndex: number): Plan {
   const creator = h.creators[creatorIndex];
-  const amount = P.SOL;
+  const amount = 10n * P.SOL;
   return {
     ixs: [systemTransferIx(h.bank, creator.address, amount)],
     deltas: new Map<string, bigint>([
@@ -130,7 +131,7 @@ export async function runOp(h: Harness, op: Op): Promise<void> {
   const before = addrs.map((a) => balance(h.w, a));
   if (plan.ixs.length === 0) {
     plan.apply();
-    h.trace.push(`${op.k} ok`);
+    h.trace.push(`${op.k} ${plan.tag ?? "ok"}`);
     return;
   }
   const sent = await send(h.w, plan.ixs);
@@ -149,7 +150,7 @@ export async function runOp(h: Harness, op: Op): Promise<void> {
     plan.apply();
   }
   plan.after?.();
-  h.trace.push(`${op.k} ${plan.error ?? "ok"}`);
+  h.trace.push(`${op.k} ${plan.error ?? "ok"}${!plan.error && plan.tag ? ` ${plan.tag}` : ""}`);
 }
 
 /** The draw of the next operation: its kind by weight, then the campaign or wallet it names (seeded). */

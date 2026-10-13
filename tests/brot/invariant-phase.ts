@@ -18,7 +18,7 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
   switch (c.phase) {
     case "Open":
       if (t < c.deadline && r.next() < 0.5) return { k: "resolveYes", c: index, back: r.big(0n, 50n) };
-      if (t >= c.deadline + PROOF_DELAY) return { k: "resolveNo", c: index };
+      if (t > c.deadline + PROOF_DELAY) return { k: "resolveNo", c: index };
       return null;
     case "InReview":
       if (t >= c.reviewEndsAt) return { k: "finalize", c: index };

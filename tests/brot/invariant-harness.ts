@@ -42,6 +42,8 @@ export type Plan = {
   apply: () => void;
   /** Runs after the transaction whether it succeeded or not (a price put back, for one). */
   after?: () => void;
+  /** Added to the trace line of a success, or the line of an operation that waits ("skipped", "reserved"). */
+  tag?: string;
 };
 
 export type Harness = {

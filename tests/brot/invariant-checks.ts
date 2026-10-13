@@ -95,7 +95,8 @@ const i6: Check = (c, v, h) => {
     return v.feeVault === h.feeVaultModel ? null : `fee vault ${v.feeVault}, the model ${h.feeVaultModel}`;
   }
   if (c.phase !== "Settled" || !c.feeMoved || !c.prizeSettled || (shareDue(c) > 0n && !c.shareSettled)) return null;
-  const dust = booked(c);
+  // A reserved creator share is still the creator's (close pays it with the rent): it is not dust.
+  const dust = booked(c) - c.reserved;
   if (dust < 0n) return `dust ${dust} is negative`;
   if (c.snapshot?.mode !== "Split") return dust === 0n ? null : `dust ${dust} outside Split`;
   return dust < BigInt(Math.max(1, winnersOf(c))) ? null : `dust ${dust} not below ${winnersOf(c)} winners`;
@@ -140,6 +141,7 @@ const i13: Check = (c, v) => {
   if (ledgerTo(c, "share").some((l) => l.to !== c.creator)) return "the share went to someone else";
   if (v.campaign && v.campaign.creator_share_from_fee > v.campaign.fee_total) return "from_fee above the fee";
   if (v.campaign && v.campaign.creator_share_settled !== c.shareSettled) return "creator_share_settled disagrees";
+  if (v.campaign && v.campaign.creator_share_reserved !== c.reserved) return "creator_share_reserved disagrees";
   return null;
 };
 

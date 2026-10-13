@@ -1,21 +1,17 @@
 /**
  * Purpose: the randomized test's settlement operations: the payouts out of order and twice, the fee, the prize,
  *          the creator share and the close, each with its expected refusal and balance changes; the draw of
- *          every settlement operation. The review operations are in invariant-review.ts.
- * Version: 0.0.1
- * Sprint:  04 (contract freeze, lane E)
+ *          every settlement operation. The review operations are in invariant-review.ts, the creator share and
+ *          the close in invariant-close.ts.
+ * Version: 0.0.2
+ * Sprint:  04 (contract freeze, lane E); 15 (the creator share's reserve, moved to invariant-close.ts; lane INV15)
  */
 import { type Address } from "@solana/kit";
 
-import { booked, collectDue, entryPayout, prizeDue, shareDue, type ModelCampaign } from "./invariant-model";
-import {
-  closeCampaignIx,
-  collectFeeIx,
-  settleCreatorShareIx,
-  settleEntryIx,
-  settlePrizeIx,
-} from "./instructions-settlement";
+import { collectDue, entryPayout, prizeDue, type ModelCampaign } from "./invariant-model";
+import { collectFeeIx, settleEntryIx, settlePrizeIx } from "./instructions-settlement";
 import type { BrotErrorName } from "./errors";
+import { credit, planClose, planShare } from "./invariant-close";
 import { clock, type Harness, type Plan, type Rng } from "./invariant-harness";
 import { planReview, REVIEW_KINDS, type ReviewOp } from "./invariant-review";
 import * as P from "./program";
@@ -30,11 +26,6 @@ export type PayoutOp =
   | { k: "prize"; c: number }
   | { k: "close"; c: number };
 export type SettleOp = ReviewOp | PayoutOp;
-
-/** A payment that clears the reserve (Q2) frees a drained wallet; one below it stays reserved and is refused. */
-function credit(h: Harness, address: string, amount: bigint) {
-  if (amount > 0n && h.drained.has(address) && amount >= h.rent.wallet) h.drained.delete(address);
-}
 
 /** Plans one settlement operation: a review step, or a payment. The refusals follow the program's order of checks. */
 export async function planSettle(h: Harness, op: SettleOp): Promise<Plan> {
@@ -97,27 +88,8 @@ async function planPayout(
         },
       };
     }
-    case "share": {
-      const amount = shareDue(c);
-      const error: BrotErrorName | undefined =
-        notFinal ??
-        (c.shareSettled || amount === 0n ? "CreatorShareNotDue" : undefined) ??
-        (h.drained.has(c.creator) && amount < h.rent.wallet ? "ReserveNotClaimable" : undefined);
-      return {
-        ixs: [settleCreatorShareIx(campaign, vault, c.creator as Address)],
-        error,
-        deltas: new Map<string, bigint>([
-          [vault, -amount],
-          [c.creator, amount],
-        ]),
-        apply: () => {
-          c.shareSettled = true;
-          c.ledger.push({ to: c.creator, amount, kind: "share" });
-          c.paidOut += amount;
-          credit(h, c.creator, amount);
-        },
-      };
-    }
+    case "share":
+      return planShare(h, c, campaign, vault, notFinal);
     case "prize": {
       const amount = prizeDue(c);
       return {
@@ -138,32 +110,6 @@ async function planPayout(
     case "close":
       return planClose(h, c, campaign, vault);
   }
-}
-
-/** `close_campaign`: once settled, the rent goes to rent_payer; the dust and any hand-sent SOL go to the fee vault. */
-function planClose(h: Harness, c: ModelCampaign, campaign: Address, vault: Address): Plan {
-  const dust = booked(c);
-  const waiting = shareDue(c) > 0n && !c.shareSettled;
-  const payer = c.creator;
-  return {
-    ixs: [closeCampaignIx(campaign, vault, payer as Address, h.feeVault)],
-    error: c.phase !== "Settled" || !c.feeMoved || !c.prizeSettled || waiting ? "CampaignNotSettled" : undefined,
-    deltas: new Map<string, bigint>([
-      [vault, -(h.rent.vault + dust + c.handSent)],
-      [campaign, -(h.rent.campaign + c.handSentCampaign)],
-      [payer, h.rent.campaign + h.rent.vault],
-      [h.feeVault, dust + c.handSent + c.handSentCampaign],
-    ]),
-    apply: () => {
-      const surplus = dust + c.handSent + c.handSentCampaign;
-      c.ledger.push({ to: "fee", amount: surplus, kind: "close" });
-      c.paidOut += dust + c.handSent;
-      h.feeVaultModel += surplus;
-      c.closed = true;
-      c.phase = "Closed";
-      credit(h, payer, h.rent.campaign);
-    },
-  };
 }
 
 export type AdvanceOp = { k: "advance"; seconds: bigint };

@@ -33,7 +33,7 @@ export async function planOpenPaid(h: Harness, creatorIndex: number, days: numbe
   // run keeps going without a refusal the model does not name.
   const needed = paid + h.rent.campaign + h.rent.vault + 10_000_000n;
   if (balance(h.w, creator.address) < needed) {
-    return { ixs: [], deltas: new Map(), apply: () => undefined };
+    return { ixs: [], deltas: new Map(), tag: "skipped", apply: () => undefined };
   }
   refreshBase(h.w);
   refreshSol(h.w);
