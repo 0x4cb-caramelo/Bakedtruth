@@ -40,14 +40,18 @@ On `INDEXER_API_HOST:INDEXER_API_PORT` (loopback only, port 4201; TP §3.5), all
 
 | Route | Returns |
 |---|---|
-| `/api/v1/campaigns/:address/activity` | Every entry, settlement and other event of one opening, in chain order |
-| `/api/v1/campaigns/:address/chance` | The YES/NO split after each entry, in basis points |
+| `/api/v1/campaigns/:address/activity?limit=&before=` | Every entry, settlement and other event of one opening, in its `seq` order, a page at a time |
+| `/api/v1/campaigns/:address/chance?limit=&before=` | The YES/NO split after each entry, in basis points, a page at a time |
 | `/api/v1/activity?limit=` | The newest entries across campaigns (20, or 1 to 100) |
-| `/api/v1/wallets/:address/entries` | One wallet's entries, one row per opening, with what reached it as a baker |
+| `/api/v1/wallets/:address/entries?limit=&before=` | One wallet's entries, one row per opening, with what reached it as a baker, a page at a time |
 | `/api/v1/ranking?listed=&limit=&offset=` | The live openings in the home page's order: address, opening, id, rank, listed |
 
-A campaign route takes the latest opening at the address unless `?opening=` names one. An unknown query parameter, a
-bad address or a bad number answers 400; an unknown campaign or opening 404; errors are `{ error: { code, message } }`,
+A campaign route takes the latest opening at the address unless `?opening=` names one. The three paged lists answer at
+most `limit` items (100 by default, 1 to 500, well under the read API's 1 MB cap), the newest first: a campaign's by
+its `seq` (the order the program wrote them, so items of one slot never tie), each page oldest first; a wallet's
+newest first by its first entry in each opening (`<slot>:<signature>:<instruction>:<inner>`). Each answer carries
+`next_before`, the `?before=` of the page before it, or null on the last page. An unknown query parameter, a bad
+address, a bad number or a malformed cursor answers 400; an unknown campaign or opening 404; errors are `{ error: { code, message } }`,
 never cached and never a stack trace. `/healthz` answers the server's own check: freshness, the last refresh's time
 and error name, the wake-up's state, the feeds' and the partners file's error names. The public reaches these routes
 through the read API, which forwards them to this port (`services/api`, `API_INDEXER_URL`; the founder's routing answer
