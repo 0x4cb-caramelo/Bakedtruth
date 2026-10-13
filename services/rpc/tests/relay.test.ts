@@ -2,10 +2,11 @@
  * Purpose: brot-rpc's refusals and its account rule, with an in-process fake upstream (Sprint 08; X1.7): a batch, an
  *          oversized body, a method off the allowlist, a subscription, an argument or an option the trace never used —
  *          each refused before the upstream sees it; an account under an owner no reader accepts comes back with its
- *          owner and no data; ProgramData only as its first 45 bytes; the cache holding a reader's account, never
- *          the program's own (config, campaign, entry), a missing account or a signature status; the upstream's busy, failed and error answers. Filter: `bun test services/rpc`.
- * Version: 0.1.0
- * Sprint:  08 (indexer, API, relay and points)
+ *          owner and no data, while a token's metadata comes whole; ProgramData only as its first 45 bytes; the cache
+ *          holding a reader's account, never the program's own (config, campaign, entry), a missing account or a
+ *          signature status; the upstream's busy, failed and error answers. Filter: `bun test services/rpc`.
+ * Version: 0.1.1 (a token's metadata comes whole)
+ * Sprint:  08 (indexer, API, relay and points); the sixth kind's site
  */
 import { describe, expect, test } from "bun:test";
 import {
@@ -14,6 +15,8 @@ import {
   DBC_PROGRAM_ID,
   PROGRAM_ID,
   SPL_TOKEN_PROGRAM_ID,
+  TOKEN_2022_PROGRAM_ID,
+  TOKEN_METADATA_PROGRAM_ID,
 } from "@brot/sdk/read";
 
 import { CODE } from "../src/relay";
@@ -74,6 +77,8 @@ describe("brot-rpc's account rule and cache", () => {
       a: "Fore1gnProgram11111111111111111111111111111",
       b: SPL_TOKEN_PROGRAM_ID,
       c: DBC_PROGRAM_ID,
+      d: TOKEN_METADATA_PROGRAM_ID,
+      e: TOKEN_2022_PROGRAM_ID,
     };
     const r = setup({
       answer: (c) => ({
@@ -83,11 +88,14 @@ describe("brot-rpc's account rule and cache", () => {
         },
       }),
     });
-    const { json } = await r.call("getMultipleAccounts", [[ADDR, ADDR, ADDR], B64]);
+    const { json } = await r.call("getMultipleAccounts", [[ADDR, ADDR, ADDR, ADDR, ADDR], B64]);
     expect(json.result.value[0]).toMatchObject({ owner: owners.a, data: ["", "base64"], space: 4 });
     expect(json.result.value[1]).toEqual(account(SPL_TOKEN_PROGRAM_ID));
     // The graduation kind's pools and configs (Meteora DBC) come whole, as the other readers' accounts do.
     expect(json.result.value[2]).toEqual(account(DBC_PROGRAM_ID));
+    // So do the two places a token keeps its symbol, which names a graduation campaign's curve.
+    expect(json.result.value[3]).toEqual(account(TOKEN_METADATA_PROGRAM_ID));
+    expect(json.result.value[4]).toEqual(account(TOKEN_2022_PROGRAM_ID));
   });
 
   test("ProgramData only as its first 45 bytes, owned by the upgradeable loader, and never cached", async () => {
