@@ -4,9 +4,9 @@
  *          deadline in UTC and local time and the whole rule folded under "Full rules", who opened it (a link to the
  *          opening transaction on Solscan, once found), and the creator
  *          notice on burn, lock and stake campaigns (BR-26) with the creator's own entry when the creator's wallet has
- *          one.
- * Version: 0.3.1 (Ronaldo, 2026-10-11: the rule in one line, the rest folded, the opening linked on Solscan; 0.2.0,
- *          the approved prototype's `.cp-head`)
+ *          one. A graduation curve is named by its ticker, never by its address alone (the address is in the proof).
+ * Version: 0.3.2 (the curve's name; 0.3.1, Ronaldo, 2026-10-11: the rule in one line, the rest folded, the opening
+ *          linked on Solscan; 0.2.0, the approved prototype's `.cp-head`)
  * Sprint:  11 (site: campaign page and entry)
  */
 "use client";
@@ -27,9 +27,20 @@ import type { PageData } from "./load";
 import { openingSignature } from "./opening";
 import type { Proof } from "./proof";
 
-export function CampaignHeader({ data, proof, sentence }: { data: PageData; proof: Proof; sentence: string }) {
+/** `accountName`: a graduation curve's name (its ticker with the pool's last characters), in place of the address. */
+export function CampaignHeader({
+  data,
+  proof,
+  sentence,
+  accountName = null,
+}: {
+  data: PageData;
+  proof: Proof;
+  sentence: string;
+  accountName?: string | null;
+}) {
   const c = data.campaign;
-  const name = proof.price?.symbol ?? shortAddress(c.metricAccount);
+  const name = proof.price?.symbol ?? accountName ?? shortAddress(c.metricAccount);
   const terms = {
     kind: proof.kind,
     name,

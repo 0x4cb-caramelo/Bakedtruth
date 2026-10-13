@@ -2,22 +2,46 @@
  * Purpose: "My entries" at /my-entries (Sprint 12; route name confirmed with L-01): the connected wallet's totals,
  *          received (from its settlement events only) and waiting for payout (final amounts not yet sent), its rows,
  *          how far back its history was read, with "Read older transactions", and what is missing when a read fails.
- *          Everything is read from the chain in the browser; the read API only lists which campaigns exist now.
- * Version: 0.1.0
- * Sprint:  12 (site: my entries and campaign states)
+ *          Everything is read from the chain in the browser; the read API only lists which campaigns exist now. A
+ *          graduation campaign's row names its curve by its token's ticker (curve-names.tsx).
+ * Version: 0.1.1 (the curves named)
+ * Sprint:  12 (site: my entries and campaign states); the sixth kind's site
  */
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { exactSol } from "@/features/campaign-page/copy-states";
+import { useCurveNames } from "@/features/campaigns/curve-names";
+import { sentenceOf } from "@/features/campaigns/sentence";
 import { MINE } from "./copy";
 import { EntryRow } from "./entry-row";
+import type { Row } from "./model";
 import { useMyEntries } from "./use-my-entries";
+
+const NO_ROWS: Row[] = [];
+const curvePool = (row: Row): string | null =>
+  row.sentence?.kind === "DbcGraduated" ? (row.sentence.metricAccount ?? null) : null;
+
+/** The rows with each graduation campaign's sentence naming its curve (curve-names.tsx). */
+function useNamedRows(rows: readonly Row[]): readonly Row[] {
+  const nameOf = useCurveNames(rows.flatMap((row) => curvePool(row) ?? []));
+  return useMemo(
+    () =>
+      rows.map((row) => {
+        const pool = curvePool(row);
+        return pool && row.sentence
+          ? { ...row, title: sentenceOf({ ...row.sentence, accountName: nameOf(pool) }) }
+          : row;
+      }),
+    [rows, nameOf],
+  );
+}
 
 function Total(props: { label: string; lamports: bigint; testId: string; note: string }) {
   return (
@@ -35,6 +59,7 @@ export function MyEntries() {
   const { publicKey } = useWallet();
   const wallet = publicKey?.toBase58() ?? null;
   const { state, reload, readOlder, readingOlder } = useMyEntries(wallet);
+  const rows = useNamedRows(state.status === "ready" ? state.summary.rows : NO_ROWS);
 
   const head = (
     <header>
@@ -100,7 +125,7 @@ export function MyEntries() {
       {history.unread.length > 0 ? (
         <p className="m-0 text-xs text-warn">{MINE.unreadable(history.unread.length)}</p>
       ) : null}
-      {summary.rows.length === 0 ? (
+      {rows.length === 0 ? (
         <EmptyState title={MINE.empty}>
           <Link href="/" className="text-accent-soft hover:underline">
             {MINE.browse}
@@ -108,7 +133,7 @@ export function MyEntries() {
         </EmptyState>
       ) : (
         <ul className="pg-entries">
-          {summary.rows.map((row) => (
+          {rows.map((row) => (
             <EntryRow key={row.campaign} row={row} onChange={reload} />
           ))}
         </ul>

@@ -103,6 +103,7 @@ export const PROOF = {
   ifNo: "the target isn't met",
   undecided: "Decided at the measured epoch's start",
   account: "Account read",
+  tokenMint: "Token mint (CA)",
   owner: "Owner checked first",
   entriesClose: "Entries close",
   entriesClosed: "Entries closed",

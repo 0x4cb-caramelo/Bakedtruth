@@ -1,14 +1,17 @@
 /**
  * Purpose: the campaign list's data (Sprint 10): every campaign the read API lists, read in pages, with each card's values
- *          computed from the chain time the API reports. A failed read is a named error, never an empty list that looks
- *          like "no campaigns".
- * Version: 0.1.0
- * Sprint:  10 (site: campaign list)
+ *          computed from the chain time the API reports, and each graduation card's curve named (curve-names.tsx). A
+ *          failed read is a named error, never an empty list that looks like "no campaigns".
+ * Version: 0.1.1 (the curves named)
+ * Sprint:  10 (site: campaign list); the sixth kind's site
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { api, type Campaign } from "@/lib/api-client";
+import { useNamedCards } from "./curve-names";
 import { toCard, type Card } from "./model";
+
+const NO_CARDS: Card[] = [];
 
 export type Loaded =
   | { status: "loading" }
@@ -43,5 +46,6 @@ export function useCampaigns(): Loaded {
       live = false;
     };
   }, []);
-  return loaded;
+  const named = useNamedCards(loaded.status === "ready" ? loaded.cards : NO_CARDS);
+  return useMemo(() => (loaded.status === "ready" ? { ...loaded, cards: named } : loaded), [loaded, named]);
 }

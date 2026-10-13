@@ -3,11 +3,11 @@
  *          its gaps (template v1), then the preview's facts, all from the draft and the arguments `checkBox` built for
  *          the transaction, never from what was typed into the search: the value now and "if resolved now", the rule in
  *          the campaign page's words, the money, the creator notice and the list card (preview-parts.ts) as it will
- *          look with no entry yet.
- * Version: 0.2.1 (the sixth kind: a curve's target is its threshold; 0.2.0, the Sprint 19 reviews: units, the team)
+ *          look with no entry yet. A curve is named by its token's ticker, as every page names it.
+ * Version: 0.2.2 (the curve's name; 0.2.1, a curve's target is its threshold; 0.2.0, the Sprint 19 reviews)
  * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
-import { Direction, entriesCloseAt, formatUtc, ReaderKind, shortAddress } from "@brot/sdk/read";
+import { Direction, entriesCloseAt, formatUtc, ReaderKind } from "@brot/sdk/read";
 
 import { sentenceOf, sentenceParts, type SentenceInput } from "../campaigns/sentence";
 import type { Card } from "../campaigns/model";
@@ -20,7 +20,8 @@ import { MONEY } from "./copy-money";
 import { accountOf, parseTarget, resolveDeadline, type Draft } from "./draft";
 import { creatorCanPush, templateOf } from "./kinds";
 import type { KnownName } from "./names";
-import { cardOf, pct, priceReading, usd, withUnit, type PriceReading, type SlotRead } from "./preview-parts";
+import { accountShown, cardOf, pct, priceReading, usd, withUnit } from "./preview-parts";
+import type { PriceReading, SlotRead } from "./preview-parts";
 import { exactSol, usdSplit } from "./quote";
 import type { BoxWorld } from "./reads";
 
@@ -53,6 +54,8 @@ type Inputs = {
   slot: SlotRead;
   names: readonly KnownName[];
   wallet: string | null;
+  /** A curve's name once the box has read its token (curve-names.tsx); "Token (…7Dny)" until then. */
+  curveName?: string | null;
 };
 
 /** The sentence's fields from the draft, with `null` for each field not filled in yet. */
@@ -70,6 +73,7 @@ export function sentenceInput(a: Inputs): SentenceInput {
     priceExponent: exponent,
     metricAccount: draft.kind === "price" ? (feed?.address ?? null) : accountOf(draft),
     epoch: t.epoch ? draft.epoch.trim() || null : undefined,
+    accountName: draft.kind === "curve" ? (a.curveName ?? null) : undefined,
   };
 }
 
@@ -104,12 +108,8 @@ export function previewFacts(a: Inputs): PreviewFacts {
           : usd(raw, input.priceExponent)
         : valueText(draft.kind, raw, 0);
   const feed = world?.feeds.find((f) => f.hex === draft.feedHex);
-  const name =
-    draft.kind === "price"
-      ? (feed?.symbol ?? PREVIEW.theAsset)
-      : input.metricAccount
-        ? shortAddress(input.metricAccount)
-        : PREVIEW.theAccount;
+  const shown = accountShown(draft.kind, input);
+  const name = draft.kind === "price" ? (feed?.symbol ?? PREVIEW.theAsset) : (shown ?? PREVIEW.theAccount);
   const shownTarget = targetText === null ? null : withUnit(draft.kind, targetText);
   const deadlineAt = resolveDeadline(draft.deadline, world?.clock.unixTimestamp ?? null);
   let entriesClose: bigint | null = check?.verdict?.ok ? check.verdict.entriesCloseAt : null;
@@ -176,10 +176,11 @@ export function previewFacts(a: Inputs): PreviewFacts {
     },
     rule: ruleText({
       kind: draft.kind,
+      // A curve's own name already holds a reviewed one; the other kinds put a reviewed name before the address.
       name:
         draft.kind === "price"
           ? (feed?.symbol ?? PREVIEW.gaps.asset)
-          : (named ?? (input.metricAccount ? shortAddress(input.metricAccount) : PREVIEW.gaps.account)),
+          : ((draft.kind === "curve" ? shown : (named ?? shown)) ?? PREVIEW.gaps.account),
       target: targetText ?? PREVIEW.gaps.target,
       below,
       deadline: deadlineAt === null ? PREVIEW.gaps.deadline : formatUtc(deadlineAt),

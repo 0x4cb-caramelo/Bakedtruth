@@ -3,8 +3,8 @@
  *          chance per side (none for an empty pot, L-05), the estimated return per side from the SDK's estimate, the listing
  *          rule (no entry 24 hours after opening leaves the home page), and the ranking groups (two-sided, one-sided, empty).
  *          Pure: it takes the chain's time as an input, so tests need no clock.
- * Version: 0.3.1 (the title as a question; 0.3.0, the UI overhaul: the metric, the target and the answer for the
- *          prototype's card; 0.2.1, Sprint 13)
+ * Version: 0.3.2 (a graduation card's title names its curve, `cardTitle`; 0.3.1, the title as a question; 0.3.0, the
+ *          UI overhaul: the metric, the target and the answer for the prototype's card; 0.2.1, Sprint 13)
  * Sprint:  10 (site: campaign list); 12; 13
  *
  * Assumption: the estimate uses one SOL on the joining side, as a first baker who is not the first of the campaign
@@ -83,6 +83,24 @@ function estimate(c: Campaign, side: "yes" | "no"): bigint | null {
   }
 }
 
+/**
+ * The card asks its sentence, as the campaign page does: "SOL/USD reaches $150?" (Ronaldo, 2026-10-11). A graduation
+ * card names its curve once the list has read it (curve-names.tsx); until then "Token (…7Dny)".
+ */
+export const cardTitle = (
+  card: Pick<Card, "kind" | "direction" | "feedId" | "target" | "priceExponent" | "metricAccount">,
+  accountName?: string,
+): string =>
+  questionOf({
+    kind: card.kind,
+    direction: card.direction,
+    feedIdHex: card.feedId,
+    target: card.target === null ? null : card.target.toString(),
+    priceExponent: card.priceExponent,
+    metricAccount: card.metricAccount,
+    accountName,
+  });
+
 export function toCard(c: Campaign, nowUnix: bigint): Card {
   const yes = big(c.pool_yes);
   const no = big(c.pool_no);
@@ -96,12 +114,11 @@ export function toCard(c: Campaign, nowUnix: bigint): Card {
     address: c.address,
     kind: c.kind,
     state: c.state,
-    // The card asks it, as the campaign page does: "SOL/USD reaches $150?" (Ronaldo, 2026-10-11).
-    title: questionOf({
+    title: cardTitle({
       kind: c.kind,
       direction: c.direction,
-      feedIdHex: c.feed_id,
-      target: c.target,
+      feedId: c.feed_id,
+      target: c.target === null ? null : BigInt(c.target),
       priceExponent: c.price_exponent,
       metricAccount: c.metric_account,
     }),

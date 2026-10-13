@@ -3,9 +3,10 @@
  *          adversarial review, H1): the sentence (template v1) written from the prepared choice, the price exponent the
  *          SDK read and the account the instruction reads; that account with its reviewed name or its owner; and the
  *          target written exactly, with no rounding, in the kind's unit. Nothing here reads the draft, which may have
- *          changed while the opening was prepared.
- * Version: 0.1.0
- * Sprint:  19 (site: open a campaign)
+ *          changed while the opening was prepared. A curve's sentence names it by the ticker read for the signed pool,
+ *          with the pool's last characters; the row below shows the pool's whole address.
+ * Version: 0.1.1 (the curve's name)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
 import { bytesToHex, Direction, formatScaled, ReaderKind } from "@brot/sdk/read";
 import type { OpeningChoice } from "@brot/sdk/tx";
@@ -32,6 +33,8 @@ export function reviewFacts(a: {
   priceExponent: number;
   metric: string;
   names: readonly KnownName[];
+  /** A curve's name, read for `metric` itself (curve-names.tsx); without it, "Token (…7Dny)". */
+  curveName?: string | null;
 }): ReviewFacts {
   const { choice } = a;
   const kind = kindOf(choice.kind as ReaderKind);
@@ -45,6 +48,7 @@ export function reviewFacts(a: {
     priceExponent: isPrice ? a.priceExponent : 0,
     metricAccount: a.metric,
     epoch: (choice.epoch ?? 0n).toString(),
+    accountName: a.curveName,
   });
   const owner = templateOf(kind).owner;
   const named = a.names.find((n) => n.address === a.metric && n.kind === kind)?.name ?? null;

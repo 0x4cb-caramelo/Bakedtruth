@@ -1,13 +1,15 @@
 /**
  * Purpose: the pieces of the creation box's preview that read what the box fetched, as pure values (Sprint 19): the
  *          listed feeds with their state read live (TP §3.4.10 row 4) and a feed's price now, a raw amount with its
- *          unit, the account slot's state (row 2; a curve's with the config its pool names), and the list card the
- *          campaign will have with no entry yet, built from the arguments the transaction carries.
- * Version: 0.3.0 (the sixth kind's curve)
+ *          unit, the account slot's state (row 2; a curve's with the config its pool names), how the preview names the
+ *          account (a curve by its ticker, never its address alone), and the list card the campaign will have with no
+ *          entry yet, built from the arguments the transaction carries.
+ * Version: 0.3.1 (the curve's name; 0.3.0, the sixth kind's curve)
  * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
-import type { OpenArgs } from "@brot/sdk/read";
+import { shortAddress, type OpenArgs } from "@brot/sdk/read";
 
+import { curveName } from "../campaigns/curve-name";
 import { formatTarget, type SentenceInput } from "../campaigns/sentence";
 import type { Card } from "../campaigns/model";
 import { ageText } from "../campaign-page/format";
@@ -59,6 +61,12 @@ export function feedOptions(world: BoxWorld | null): FeedOption[] {
     return { hex: f.hex, symbol: f.symbol, price: null, tag, usable: false };
   });
   return options.sort((a, b) => Number(b.usable) - Number(a.usable) || a.symbol.localeCompare(b.symbol));
+}
+
+/** How the preview names the draft's account: a curve as its sentence does (curve-name.ts), the others by address. */
+export function accountShown(kind: Draft["kind"], input: SentenceInput): string | null {
+  if (!input.metricAccount) return null;
+  return kind === "curve" ? (input.accountName ?? curveName(input.metricAccount)) : shortAddress(input.metricAccount);
 }
 
 /** The account slot's state: checking until the read for this exact address is back, then the reader's answer. */

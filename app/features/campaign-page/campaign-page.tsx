@@ -3,8 +3,9 @@
  *          entries, the re-check panel, and the entry panel, or the state card once entries close or when the site takes
  *          none (K-11). Two columns on a wide screen, the panel sticky on the right; under 860 px one column in the
  *          spec's phone order, so the reading order follows what is seen. Everything reads the chain through the SDK.
- * Version: 0.3.2 (the UI overhaul: the heading asks the sentence, the reads after a landing; 0.3.0, Sprint 13:
- *          "Report this campaign" in every state, C-10; 0.2.0, Sprint 12's states)
+ *          A graduation campaign's title and header name its curve by its token's ticker (curve-names.tsx).
+ * Version: 0.3.3 (the curve named; 0.3.2, the UI overhaul: the heading asks the sentence, the reads after a landing;
+ *          0.3.0, Sprint 13: "Report this campaign" in every state, C-10; 0.2.0, Sprint 12's states)
  * Sprint:  11 (site: campaign page and entry); 12 (site: my entries and campaign states); 13
  */
 "use client";
@@ -15,6 +16,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { bytesToHex, Direction, ReaderKind } from "@/lib/brot";
+import { useCurveNames } from "@/features/campaigns/curve-names";
 import { questionOf, sentenceOf, type SentenceInput } from "@/features/campaigns/sentence";
 import { EntryPanel, type Prefill } from "@/features/entry/entry-panel";
 import { SolBalance } from "@/features/wallet/sol-balance-provider";
@@ -30,7 +32,7 @@ import { proofOf } from "./proof";
 import { ProofPanel } from "./proof-panel";
 import { RecheckPanel } from "./recheck-panel";
 import { Report, StatePanel } from "./state-panel";
-import { useCampaignPage, useEntriesAllowed, useSettle } from "./use-campaign-page";
+import { useCampaignPage, useEntriesAllowed, useSettle, type PageState } from "./use-campaign-page";
 import { noteFor, type VoidNote } from "./void-note";
 
 const PHONE = "(max-width: 860px)";
@@ -46,7 +48,7 @@ const usePhone = () =>
     () => false,
   );
 
-const sentenceInput = (data: PageData): SentenceInput => ({
+const sentenceInput = (data: PageData, accountName: string | null): SentenceInput => ({
   kind: ReaderKind[data.campaign.kind],
   direction: Direction[data.campaign.direction],
   feedIdHex: bytesToHex(data.campaign.feedId),
@@ -54,7 +56,14 @@ const sentenceInput = (data: PageData): SentenceInput => ({
   priceExponent: data.campaign.priceExponent,
   metricAccount: data.campaign.metricAccount,
   epoch: data.campaign.epoch.toString(),
+  accountName,
 });
+
+/** A graduation campaign's pool, whose token's ticker names the curve (curve-names.tsx); `null` for the other kinds. */
+const curvePoolOf = (state: PageState): string | null =>
+  state.status === "ready" && state.data.campaign.kind === ReaderKind.DbcGraduated
+    ? state.data.campaign.metricAccount
+    : null;
 
 export function CampaignPage({
   idParam,
@@ -76,6 +85,9 @@ export function CampaignPage({
   const [busy, setBusy] = useState(false);
   // After a landing the split, the pot, the entries and the wallet's balance show it at once (Ronaldo, 2026-10-11).
   const { round, landed } = useSettle(reload, useContext(SolBalance).refresh);
+  const pool = curvePoolOf(state);
+  const nameOf = useCurveNames(pool ? [pool] : []);
+  const curve = pool ? nameOf(pool) : null;
 
   if (state.status === "loading") {
     return (
@@ -109,11 +121,12 @@ export function CampaignPage({
   const { data } = state;
   const proof = proofOf(data.campaign, data.metric, data.chain);
   // The heading asks it ("…$150?"); the entry's sheet states it, as the summary of what is signed.
-  const title = sentenceOf(sentenceInput(data));
+  const title = sentenceOf(sentenceInput(data, curve));
   // While an entry is under way the panel stays, so its result shows even if entries close meanwhile.
   const taking = (data.view.state === "Open" && allowed === true) || busy;
+  const question = questionOf(sentenceInput(data, curve));
   const blocks = {
-    head: <CampaignHeader key="head" data={data} proof={proof} sentence={questionOf(sentenceInput(data))} />,
+    head: <CampaignHeader key="head" data={data} proof={proof} sentence={question} accountName={curve} />,
     proof: <ProofPanel key="proof" data={data} proof={proof} />,
     pot: <PotPanel key="pot" data={data} />,
     activity: <ActivityPanel key="activity" campaign={data.address} round={round} />,

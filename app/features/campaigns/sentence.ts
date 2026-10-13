@@ -5,15 +5,18 @@
  *          pinned list and its target in the feed's exponent, "$150" when the feed is quoted in US$; a burn or a lock
  *          target is the raw amount the account stores; a stake pool, a stake or a graduation target is SOL. The other
  *          kinds name their account by its shortened address: no creator-supplied text, and no name unless two people
- *          reviewed it. The creation box at /abrir writes its preview with this same function, so the sentence a
- *          creator reads is the one every page shows.
- * Version: 0.5.0 (the sixth template: a Meteora launch curve's graduation; 0.4.0, the UI overhaul: "$" before a price
- *          in US$, the title as a question; 0.3.0, Sprint 19: units on burn and lock, the measured epoch)
+ *          reviewed it. One exception (A-11, TP §3.4.10): a graduation curve is named by the caller's `accountName`,
+ *          its reviewed name or its token's ticker always paired with the pool's last four characters, and without
+ *          one "Token (…7Dny)" (curve-name.ts). The creation box at /abrir writes its preview with this same function,
+ *          so the sentence a creator reads is the one every page shows.
+ * Version: 0.6.0 (the curve named by its ticker, never by its address alone; 0.5.0, the sixth template: a Meteora
+ *          launch curve's graduation; 0.4.0, the UI overhaul: "$" before a price in US$, the title as a question)
  * Sprint:  10 (site: campaign list); 19; the sixth kind's site
  */
 import { feedSymbol, ReaderKind, shortAddress } from "@brot/sdk/read";
 
 import { sol4 } from "../entry/amount";
+import { curveName } from "./curve-name";
 
 export const KIND_LABEL: Record<string, string> = {
   PriceTouch: "Price",
@@ -76,6 +79,8 @@ export type SentenceInput = {
   metricAccount: string | null;
   /** The epoch kinds: the epoch whose start is measured, when the caller has it (the read API's list does not). */
   epoch?: string | null;
+  /** The graduation kind: the curve's name (curve-name.ts), when the caller has read it. */
+  accountName?: string | null;
 };
 
 /** Template v1 as parts, so the creation box can show its gaps; `sentenceOf` joins the same parts. */
@@ -110,8 +115,11 @@ export function sentenceParts(input: SentenceInput): SentencePart[] {
       ];
     case ReaderKind[ReaderKind.StakeAtLeast]:
       return ["Validator ", account, " has at least ", target(solTarget), " SOL staked in ", ...epochOf(input)];
-    case ReaderKind[ReaderKind.DbcGraduated]:
-      return ["Meteora launch curve ", account, " raises its full ", target(solTarget), " SOL"];
+    case ReaderKind[ReaderKind.DbcGraduated]: {
+      const pool = input.metricAccount;
+      const curve = { slot: "account" as const, value: pool ? (input.accountName ?? curveName(pool)) : null };
+      return ["Meteora launch curve ", curve, " raises its full ", target(solTarget), " SOL"];
+    }
     default:
       return [`${KIND_LABEL[input.kind] ?? input.kind} campaign `, account];
   }
