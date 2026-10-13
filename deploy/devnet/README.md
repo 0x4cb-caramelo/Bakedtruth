@@ -4,7 +4,9 @@ Status: **run on 2026-10-09** (Sprint 05). Program `5Rx8o5c5frxqF17mZwvTFg36ZcW5
 run 38014319993 (`main` at `c20e79a`, `brot_markets.so` sha256
 `cf2359377323449bac0f67f6464f5e21dcb7ac85a9ffe07bfa52ec185b46a3a8`), initialized and its team set, in one session; the
 signatures are in `session-log/2026-10-09-sprint-05-respostas-do-deploy-e-leituras-devnet.md`. Every step was first
-rehearsed on a local, offline surfnet (`bun run deploy:rehearse`).
+rehearsed on a local, offline surfnet (`bun run deploy:rehearse`). **Upgraded on 2026-10-12** (01:08 UTC on the 13th)
+to CI's build of `main` at `91a5bed`, the sixth kind: deploy slot 510454676 ("Upgrading" below;
+`session-log/2026-10-12-upgrade-devnet-sexto-tipo.md`).
 
 **The public RPC.** `https://api.devnet.solana.com` dropped buffer writes twice that night ("Data writes to account
 failed: Max retries exceeded", then HTTP 429): each time a buffer was left holding its rent, and the upgrade authority
@@ -104,6 +106,38 @@ authority, admin and fee recipient, and his team key as the only team key until 
 | The deploy landed; the initialization did not | A program, no config | The same command with `--resume` instead of `--program-keypair`: it deploys nothing, checks the deployed bytes against the artifact, then initializes and sets the team |
 | The initialization landed; its read-back or the team did not | A config | `--resume` again: a config that holds the plan's values is left as it is and the run goes on to the team; one that differs is refused, never changed |
 | The deployed bytes are not the artifact's | A program the script will not initialize | Stop and report. An upgrade with CI's artifact is a separate, reviewed act |
+
+## Upgrading
+
+An upgrade puts CI's build of a reviewed `main` commit in place of the program, at the same id, by the upgrade key's
+holder, in one session. Done once, on 2026-10-12 (the sixth kind). The script above deploys and initializes a new id
+only, so an upgrade is these CLI steps, each command with `--url "$DEVNET_RPC_URL"` and the key passed explicitly:
+
+1. **Read first, send nothing.** `solana program show <id>`: loader v3, the expected authority, `Data Length` and
+   `Last Deployed In Slot`. The key pays a buffer the size of the binary (5,080 lamports a byte on devnet, about
+   0.83 SOL for 163,800 bytes, returned at the end) and any extension.
+2. **The artifact** by run id, `SHA256SUMS` checked, its IDL byte for byte the checkout's (as in step 2 above).
+3. **When the binary is larger than `Data Length`, extend by hand, by at least 10,240 bytes:**
+   `solana program extend <id> 10240 --keypair <upgrade authority>`. The CLI's auto-extend asks for exactly the
+   shortfall, and the loader refuses any extension under 10,240 bytes ("ExtendProgram requires a minimum of 10240
+   additional bytes"; the CLI shows only "Error processing Instruction 2: invalid program argument"). The extension
+   cannot be undone. The CLI prints no signature; `solana transaction-history <ProgramData address> --limit 1` shows it.
+   Then wait about 10 s: the extend writes its slot into ProgramData, and the loader refuses an upgrade in that slot.
+4. **Upgrade:**
+
+   ```bash
+   solana program deploy <artifact>/brot_markets.so --program-id <id> \
+     --upgrade-authority <key> --keypair <key> --url "$DEVNET_RPC_URL" \
+     --use-rpc --with-compute-unit-price 10000 --max-sign-attempts 50 --no-auto-extend
+   ```
+
+   Loader v3, never `--final`. If it dies while writing the buffer, close the buffer as in the first row of the table
+   above, then run it again.
+5. **Read back:** `solana program show <id>` (the same authority, the new `Data Length`, a new `Last Deployed In
+   Slot`), then `solana program dump <id> onchain.so` and `head -c <binary size> onchain.so | sha256sum`, which must
+   print the artifact's hash; the rest of ProgramData is zeros.
+6. **Build the site again** from a `main` that has the change (`deploy/vps/README.md`, "A new release"). Its log must
+   name the new slot: until the new build is live, the site does not sign (A-8).
 
 ## Why each rule
 

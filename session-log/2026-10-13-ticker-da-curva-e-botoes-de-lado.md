@@ -25,6 +25,13 @@ que nomes vêm só da lista revisada ou da lista da Pyth, **nunca de metadados d
 O ticker de um token é exatamente isso. Para os outros cinco tipos a regra continua: eles mostram o endereço curto ou o
 nome revisado.
 
+O registro do upgrade do devnet (`2026-10-12-upgrade-devnet-sexto-tipo.md`) tinha deixado essa escolha em aberto e
+proposto o caminho que respeita a A-11: o nome só da lista revisada; sem ele, o endereço do token (o CA) com copiar,
+explorador e o aviso de que qualquer pessoa cria um token com qualquer nome; e uma caixinha "Conferi o endereço" antes
+de assinar. O pedido de hoje escolheu o outro caminho, o que muda a A-11, e por isso pede o Lucas, como aquele
+registro já dizia. Daquela proposta entraram a lista revisada aceitando curvas e o CA na prova, com copiar e
+explorador; o aviso sobre nomes de token e a caixinha antes de assinar ficaram de fora deste trabalho.
+
 O argumento do pedido, que eu acho correto: uma curva de lançamento é um token novo por natureza, então nenhuma equipe
 consegue revisar o nome antes de alguém abrir campanha nele, e "12uL…7Dny" não diz nada a quem vai entrar. O risco que
 a A-11 evita é o de alguém se passar por outro token. A resposta a esse risco aqui é o sufixo: dois tokens podem ter o
@@ -94,8 +101,10 @@ mesmo ticker, mas não o mesmo pool, e o sufixo está sempre lá para quem não 
 
 ## O que ficou em aberto
 
-- **A A-11 é uma invariante da arquitetura aprovada pelo fundador.** A exceção está escrita como pedida; vale o
-  fundador confirmar.
+- **A A-11 é uma invariante da arquitetura aprovada pelo fundador.** A exceção está escrita como pedida, e o PR
+  (aberto no mesmo dia, depois de juntar a `main` com o upgrade do devnet) espera a confirmação do Lucas antes da
+  mescla.
+- **O aviso sobre nomes de token e a caixinha "Conferi o endereço"**, propostos no registro do upgrade, não entraram.
 - **O token do pool de demonstração se chama "TEST" na cadeia.** A lista revisada o chama de `$BROT`, como o pedido
   mandou. Para a cadeia e para o explorador, o token continua "TEST".
 - **O relay ainda não está no ar.** Hoje o site lê a RPC pública do devnet, que serve os metadados; o relay só passa a
