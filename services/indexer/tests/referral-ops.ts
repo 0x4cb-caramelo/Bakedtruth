@@ -91,7 +91,7 @@ export function routineRpc(ops: OpsWallet): SolanaRpc {
 const [R, F, R2, F2, B, D] = [wallet(1), wallet(2), wallet(5), wallet(6), wallet(3), wallet(4)];
 
 /** F earns 0.04 SOL from R's winning entry; F2 earns 700,000 lamports from R2's. */
-export async function earnings() {
+export async function earnings(path = ":memory:") {
   const chain = new Chain();
   chain.link(R, F);
   chain.link(R2, F2);
@@ -106,7 +106,7 @@ export async function earnings() {
   b.join(D, "no", 35_000_000n);
   b.finalize("yes");
   b.settle();
-  const x = await indexed(chain);
+  const x = await indexed(chain, path);
   expect([x.referral(R).referrer_share, x.referral(R2).referrer_share]).toEqual(["40000000", "700000"]);
   return { chain, x, indexer: x.store };
 }

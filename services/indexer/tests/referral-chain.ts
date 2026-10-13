@@ -133,10 +133,10 @@ export function rpcOf(chain: Chain) {
 
 type Row = Record<string, unknown>;
 
-/** The chain ingested into a new file; `refresh` reads what was added since. */
-export async function indexed(chain: Chain) {
+/** The chain ingested into a new file (in memory, or at `path`); `refresh` reads what was added since. */
+export async function indexed(chain: Chain, path = ":memory:") {
   const { rpc, blockReads } = rpcOf(chain);
-  const store = openStore(":memory:");
+  const store = openStore(path);
   const ingest = createIngest(rpc, store, { readLive: noLive });
   const refresh = async () => {
     const report = await ingest.refresh();
