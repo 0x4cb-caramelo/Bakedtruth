@@ -4,16 +4,25 @@
  *          the first one, then each landed transaction through `getTransaction`, decoded by the SDK under its four
  *          decoder rules. Only the events the points rule reads are kept, each once. In memory: a restart reads the
  *          history again, and nothing about a visitor is ever stored.
- * Version: 0.2.0 (the Sprint 13 adversarial review: every signature listed once, paging until an empty page, a capped
- *          retry per transaction, a timeout on every call, and "complete" false after a failed refresh)
- * Sprint:  13 (site: ranking, notices and copy)
+ * Version: 0.3.0 (a 429 spends no try and ends the refresh's reads; 0.2.0, the Sprint 13 adversarial review: every
+ *          signature listed once, paging until an empty page, a capped retry per transaction, a timeout on every call,
+ *          and "complete" false after a failed refresh)
+ * Sprint:  13 (site: ranking, notices and copy); the 429 fix after the 2026-10-13 release
  *
  * Incremental: a refresh asks only for signatures newer than the newest one listed (`until`), paging back until a page
  * comes back empty, and remembers every signature listed, so a node that ignores `until` costs a re-listing but never a
  * second read. At most `perRefresh` transactions are fetched per refresh, four at a time; the rest wait for the next
  * refresh. One that does not read back goes to the back of the queue, and after `MAX_TRIES` it is skipped and counted.
+ * A 429 is the node's rate limit, not the transaction's fault: it spends no try, the transaction keeps its place, and
+ * the refresh reads nothing more. The public devnet RPC allows ten `getTransaction` per ten seconds per address
+ * (`x-ratelimit-method-limit`); counted as tries, its 429s skipped 36 to 40 of the program's 70 transactions.
  */
-import { signature as toSignature, type Signature } from "@solana/kit";
+import {
+  isSolanaError,
+  signature as toSignature,
+  SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR,
+  type Signature,
+} from "@solana/kit";
 import {
   decodeTransactionEvents,
   PROGRAM_ID,
@@ -36,6 +45,10 @@ const PAGE = 1_000;
 const AT_ONCE = 4;
 const MAX_TRIES = 5;
 const TX = { encoding: "json", maxSupportedTransactionVersion: 0, commitment: "finalized" } as const;
+
+/** A 429: the node's rate limit, which says nothing about the transaction asked for. */
+const throttled = (error: unknown) =>
+  isSolanaError(error, SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR) && error.context.statusCode === 429;
 
 export type HistoryOptions = { perRefresh?: number; timeoutMs?: number };
 
@@ -90,12 +103,13 @@ export function createHistory(rpc: SolanaRpc, options: HistoryOptions = {}): His
     }
   }
 
-  async function eventsOf(sig: string): Promise<DecodedEvent[] | null> {
+  /** The kept events of `sig`; `null` when it did not read back; "throttled" when the node refused to answer. */
+  async function eventsOf(sig: string): Promise<DecodedEvent[] | null | "throttled"> {
     try {
       const tx = await rpc.getTransaction(toSignature(sig), TX).send(send());
       return tx ? decodeTransactionEvents(tx as unknown as RpcTransaction).filter((e) => KEPT.has(e.name)) : null;
-    } catch {
-      return null;
+    } catch (error) {
+      return throttled(error) ? "throttled" : null;
     }
   }
 
@@ -127,20 +141,24 @@ export function createHistory(rpc: SolanaRpc, options: HistoryOptions = {}): His
       const batch = pending.slice(0, perRefresh);
       const found: DecodedEvent[] = [];
       const again: string[] = [];
-      for (let i = 0; i < batch.length; i += AT_ONCE) {
+      const waiting: string[] = []; // refused by the node's rate limit, or not asked after a refusal
+      for (let i = 0; i < batch.length && waiting.length === 0; i += AT_ONCE) {
         const slice = batch.slice(i, i + AT_ONCE);
         const read = await Promise.all(slice.map(eventsOf));
         read.forEach((got, j) => {
           const sig = slice[j];
+          if (got === "throttled") return void waiting.push(sig);
           if (got !== null) return void (found.push(...got), tries.delete(sig));
           const n = (tries.get(sig) ?? 0) + 1;
           if (n >= MAX_TRIES) return void (skipped++, tries.delete(sig));
           tries.set(sig, n);
           again.push(sig);
         });
+        if (waiting.length > 0) waiting.push(...batch.slice(i + AT_ONCE));
       }
-      // What did not read back waits behind everything else, so it never blocks the queue.
-      pending = [...pending.slice(batch.length), ...again];
+      // What the node refused keeps its place, untried; what did not read back waits behind everything else, so it
+      // never blocks the queue.
+      pending = [...waiting, ...pending.slice(batch.length), ...again];
       if (found.length > 0) {
         events = uniqueEvents([...events, ...found]).sort(inChain);
         version++;

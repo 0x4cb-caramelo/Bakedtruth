@@ -67,8 +67,34 @@ anterior (`2026-10-12-upgrade-devnet-sexto-tipo.md`).
 - **O histórico da API** relê tudo a cada reinício e não tenta de novo, até o próximo, uma transação que não voltou
   depois de cinco tentativas. Antes da troca eram 39 puladas e 21 eventos guardados; depois, 40 e 20. Não é desta
   versão: o log da API mostra 36 a 39 puladas desde que ela entrou no ar, em 11/10. O programa tem 70 transações que
-  deram certo, e a RPC pública ainda devolve as mais antigas, então o motivo não é a janela de histórico dela. Fica
-  como pendência: o ranking pode estar deixando eventos de fora.
+  deram certo, e a RPC pública ainda devolve as mais antigas, então o motivo não é a janela de histórico dela. A causa
+  e a correção estão logo abaixo.
+
+## O histórico da API e o limite da RPC pública
+
+O Ronaldo pediu para seguir com os próximos passos, e o recomendado era descobrir por que o histórico pula
+transações.
+
+- **A causa é o limite da RPC, e não o decodificador.** As leituras da API foram refeitas daqui, uma transação por vez,
+  com o mesmo SDK. As dez primeiras voltaram e decodificaram; as outras 60 receberam HTTP 429, "Too Many Requests",
+  mesmo a uns três pedidos por segundo. Os cabeçalhos da resposta dizem o limite: `x-ratelimit-method-limit: 10` para
+  `getTransaction`, numa janela que se comporta como dez segundos (uma leitura a cada três segundos nunca foi recusada).
+- **Como isso virava transações puladas:** depois de um reinício, o histórico pede quatro de cada vez, até 200 por
+  rodada, a cada 15 segundos. Passadas as dez primeiras, a RPC recusa o resto, e o código contava cada 429 como uma
+  tentativa perdida. Na quinta recusa, a transação ficava de fora até o reinício seguinte.
+- **O tamanho do estrago:** a mesma leitura, com a correção, achou 53 eventos que o ranking conta; o ranking no ar
+  tinha 20. Mais da metade do histórico estava de fora desde 11/10.
+- **A correção** (`services/api/src/history.ts` 0.3.0): um 429 não gasta tentativa. A transação recusada guarda o
+  lugar, e a rodada para de ler até a próxima, então uma rodada recusada custa no máximo quatro chamadas. `null` e
+  qualquer outra recusa continuam contando, e a transação ainda é pulada depois de cinco. Três testes novos: os dois do
+  429 falham no código anterior, e o terceiro prende que um 503 ainda conta.
+- **Conferido contra a RPC pública,** com rodadas de 15 segundos como as da API: completo em nove rodadas, uns dois
+  minutos e quinze segundos, com 53 eventos e nenhuma pulada.
+- **Escolhido assim, e não só uma RPC com chave:** a chave tira o limite, mas o código continuaria pulando transações
+  na primeira RPC que recusasse. A correção vale para qualquer RPC. A chave (`API_HISTORY_RPC_URL`, já prevista)
+  continua sendo a forma de deixar a primeira leitura rápida, e é uma decisão à parte: de quem é a chave e quanto
+  custa.
+- **Vale no servidor só na próxima versão publicada.** Até lá o ranking no ar segue com 20 eventos.
 
 ## Para voltar atrás
 

@@ -1010,6 +1010,16 @@ recomendado (1a a 12a).
 
 ### Fixed
 
+- **O ranking da API perdia mais da metade do histórico para o limite da RPC pública** (13/10/2026, achado na
+  publicação do ticker; `session-log/2026-10-13-publicacao-do-ticker-no-dev0x.md`). A RPC pública do devnet aceita dez
+  `getTransaction` a cada dez segundos por endereço (`x-ratelimit-method-limit: 10`) e responde 429 ao resto. O
+  histórico lê quatro de cada vez, até 200 por rodada, contava cada 429 como uma tentativa perdida e, depois de cinco,
+  pulava a transação até o próximo reinício. No servidor, eram 36 a 40 puladas desde 11/10, e o ranking no ar tinha 20
+  dos 53 eventos que conta. Agora um 429 não gasta tentativa: a transação guarda o lugar e a rodada para de ler até a
+  próxima (`services/api/src/history.ts` 0.3.0). Qualquer outra recusa continua contando. Contra a RPC pública, a
+  leitura completa terminou em nove rodadas, uns dois minutos e quinze segundos, com os 53 eventos e nenhuma pulada.
+  Testes: três novos em `services/api/tests/history.test.ts`; os dois do 429 falham no código anterior. Vale no
+  servidor a partir da próxima versão publicada.
 - **`CampaignFinalized` também na confirmação e na anulação pela equipe** (9/10/2026; achado da revisão da Sprint
   05, feito como PR à parte a pedido do Ronaldo). O plano técnico (§3.4.3, §3.4.14) promete que `team_confirm_result`
   e `team_void_campaign` emitem o próprio evento e depois `CampaignFinalized`; o programa rodava o snapshot e emitia só

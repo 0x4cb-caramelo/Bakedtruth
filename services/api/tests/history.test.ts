@@ -2,13 +2,15 @@
  * Purpose: the leaderboard's history reader against a scripted RPC (Sprint 13, the adversarial review's cases): a node
  *          that ignores `until` costs a re-listing but never a second read; pages shorter than asked do not end the
  *          listing; a transaction that never reads back neither blocks the others nor keeps the history incomplete
- *          forever (it is skipped after five tries); a failed listing makes the history incomplete until one succeeds;
- *          and a call that hangs is cut by its timeout. What the events say is tests/api/leaderboard.test.ts.
- * Version: 0.1.0
+ *          forever (it is skipped after five tries); a 429 spends no try, keeps the transaction's place and ends the
+ *          refresh's reads, while any other refusal still costs a try; a failed listing makes the history incomplete
+ *          until one succeeds; and a call that hangs is cut by its timeout. What the events say is
+ *          tests/api/leaderboard.test.ts.
+ * Version: 0.2.0 (the 429 cases, after the 2026-10-13 release)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { describe, expect, test } from "bun:test";
-import { getBase58Decoder } from "@solana/kit";
+import { getBase58Decoder, SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, SolanaError } from "@solana/kit";
 import type { SolanaRpc } from "@brot/sdk/read";
 
 import { createHistory } from "../src/history";
@@ -21,11 +23,18 @@ type Script = {
   unreadable?: Set<string>;
   failList?: boolean;
   hang?: boolean;
+  /** Transactions the node answers before it refuses with `status` (429 when unset); unset, it never refuses. */
+  budget?: number;
+  status?: number;
 };
 
 /** A real-looking signature (64 bytes, base58) for a short name, and the name back. */
 const SIG = (name: string) => getBase58Decoder().decode(new Uint8Array(64).fill(name.charCodeAt(0)));
 const NAME = new Map("abcdefgu".split("").map((n) => [SIG(n), n]));
+
+/** The error Kit's HTTP transport throws for a status that is not OK. */
+const refusal = (statusCode: number) =>
+  new SolanaError(SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, { headers: new Headers(), message: "", statusCode });
 
 /**
  * A Kit-shaped RPC: `method(...).send({ abortSignal })`, scripted by short names. Each transaction reads back with no
@@ -58,6 +67,7 @@ function scripted(script: Script) {
       pending(() => {
         const name = NAME.get(sig) ?? "?";
         reads.push(name);
+        if (script.budget !== undefined && script.budget-- <= 0) throw refusal(script.status ?? 429);
         if (script.unreadable?.has(name)) return null;
         return {
           slot: 1n,
@@ -101,6 +111,46 @@ describe("history reader", () => {
     expect(h.skipped()).toBe(1);
     expect(h.complete()).toBe(true);
     expect(reads.filter((s) => s === "a").length).toBe(5);
+  });
+
+  test("a 429 ends the refresh's reads; what the node refused keeps its place, with no try spent", async () => {
+    const script: Script = { sigs: ["f", "e", "d", "c", "b", "a"], budget: 2 };
+    const { rpc, reads } = scripted(script);
+    const h = createHistory(rpc);
+    await h.refresh();
+    expect(reads).toEqual(["a", "b", "c", "d"]); // c and d refused in the first four; e and f not asked
+    expect(h.complete()).toBe(false);
+    script.budget = 2;
+    await h.refresh();
+    expect(reads.slice(4)).toEqual(["c", "d", "e", "f"]); // the refused ones first, oldest first
+    script.budget = 2;
+    await h.refresh();
+    expect(reads.slice(8)).toEqual(["e", "f"]);
+    expect(h.complete()).toBe(true);
+    expect(h.skipped()).toBe(0);
+  });
+
+  test("a rate limit longer than five refreshes skips nothing and costs one slice of calls per refresh", async () => {
+    const script: Script = { sigs: ["f", "e", "d", "c", "b", "a"], budget: 0 };
+    const { rpc, reads } = scripted(script);
+    const h = createHistory(rpc);
+    for (let i = 0; i < 7; i++) await h.refresh();
+    expect(reads.length).toBe(7 * 4);
+    expect(h.skipped()).toBe(0);
+    expect(h.complete()).toBe(false);
+    script.budget = undefined;
+    await h.refresh();
+    expect(h.complete()).toBe(true);
+    expect(h.skipped()).toBe(0);
+  });
+
+  test("any other refusal still costs a try: five 503s skip the transaction", async () => {
+    const { rpc, reads } = scripted({ sigs: ["b", "a"], budget: 0, status: 503 });
+    const h = createHistory(rpc);
+    for (let i = 0; i < 5; i++) await h.refresh();
+    expect(reads.length).toBe(5 * 2);
+    expect(h.skipped()).toBe(2);
+    expect(h.complete()).toBe(true);
   });
 
   test("a failed listing leaves the history incomplete until a listing succeeds", async () => {
