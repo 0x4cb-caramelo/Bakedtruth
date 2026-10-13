@@ -4,8 +4,8 @@
  *          recipient, the team keys, every creation parameter, the admin's decision on a contest. Also the exact
  *          data size of every instruction, so a summary never describes bytes the program would refuse as
  *          `BadInstructionData`.
- * Version: 0.1.6 (Sprint 14 review fixes: the link's rent is counted and named, F7; the contest's texts moved to
- *          ./summary-contest.ts with the campaign the screen read, F6 and F9; D2: the opening or the escalation)
+ * Version: 0.1.7 (Sprint 14 review fixes: the link's rent is counted and named, F7; the contest's texts moved to
+ *          ./summary-contest.ts with the campaign the screen read, F6 and F9; the contest's act from its byte, S1)
  * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 14 (lane L14B)
  */
 import * as G from "../idl/generated/instructions";
@@ -17,7 +17,11 @@ import type { Campaign } from "../read/accounts";
 import { contestOpenText, decisionText, rereadText } from "./summary-contest";
 
 /** The part of the summary's context these instructions read (`SummaryContext`, ./summary-brot.ts). */
-type OtherContext = { campaigns?: ReadonlyMap<string, Campaign>; linkRent?: bigint };
+type OtherContext = {
+  campaigns?: ReadonlyMap<string, Campaign>;
+  contestsOpenedEarlier?: ReadonlySet<string>;
+  linkRent?: bigint;
+};
 
 /**
  * Each instruction's data size, discriminator included, from the generated decoders. The scaffold's stubs of Sprints
@@ -127,7 +131,7 @@ export function describeOther(type: B, a: Slots, d: Record<string, any>, ctx: Ot
     case B.TeamConfirmResult:
       return `Confirm the result of campaign ${campaign} and end its review window`;
     case B.TeamOpenContest:
-      return contestOpenText(campaign, stored);
+      return contestOpenText(campaign, d.stage, stored, ctx.contestsOpenedEarlier?.has(campaign ?? "") ?? false);
     case B.RereadCampaign:
       return rereadText(campaign, a, stored);
     case B.AdminDecideContest:
