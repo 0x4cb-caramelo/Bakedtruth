@@ -6,23 +6,18 @@
  *          read from the live `Campaign` account before it closed. The weekly routine prepares the batch with the
  *          cluster's own rent minimum (LiteSVM's 890,880, read from the RPC), carries the transfer below it, and
  *          records the transfer an operations wallet then sent with its memo, by its signature; the public report
- *          lists wallets and amounts; a rebuild from the chain holds the same referral rows.
+ *          lists wallets and amounts; a rebuild from the chain holds the same referral rows. Since the second review:
+ *          each line simulated first (a sysvar's credit fails, a wallet's passes) and the cluster's genesis hash read.
  *          Filter: `bun test tests/indexer -t "referral cycle"`. Needs the SBF build.
- * Version: 0.1.0
+ * Version: 0.1.1 (the simulation and the genesis hash)
  * Sprint:  14 (referral, lane L14R)
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import {
-  createSolanaRpc,
-  generateKeyPairSigner,
-  type Address,
-  type Instruction,
-  type KeyPairSigner,
-} from "@solana/kit";
-import { decodeCampaign, Side, type Campaign } from "@brot/sdk/read";
+import { createSolanaRpc, generateKeyPairSigner, type Address, type KeyPairSigner } from "@solana/kit";
+import { decodeCampaign, Side, type Campaign, type SolanaRpc } from "@brot/sdk/read";
 import { buildJoinCampaign, buildUserLinkReferrer } from "@brot/sdk/tx";
 
 import { dump, openStore, type Store } from "../../services/indexer/src/db/store";
@@ -31,15 +26,19 @@ import { rebuild } from "../../services/indexer/src/rebuild";
 import { openLedger } from "../../services/indexer/src/referral/ledger";
 import { publicReport } from "../../services/indexer/src/referral/report";
 import { prepareBatch, recordPayouts, type Prepared } from "../../services/indexer/src/referral/routine";
+import { payoutInstructions, simulationCheck } from "../../scripts/referral/simulate";
 import { openingWorld, type OpeningWorld } from "../brot/opening";
+import * as P from "../brot/program";
 import { setClock } from "../brot/readers";
 import { balance, fundedWallet } from "../brot/setup";
-import { finalizeVia, joinVia, landVia, openVia, resolveVia, settleVia, transferIx } from "../site/cycle";
+import { finalizeVia, joinVia, landVia, openVia, resolveVia, settleVia } from "../site/cycle";
 import { startFakeChain, type FakeChain } from "../site/fake-chain";
 import { rawOf } from "../site/support";
 
 const SOL = 1_000_000_000n;
-const MEMO = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr" as Address;
+const CLOCK = "SysvarC1ock11111111111111111111111111111111" as Address;
+/** The test chain has no genesis: a stand-in the routine reads and the signing file embeds. */
+const GENESIS = "TestChainGenesis111111111111111111111111111";
 type Row = Record<string, unknown>;
 
 let w: OpeningWorld;
@@ -53,6 +52,7 @@ let [F, F2]: Address[] = [];
 let beforePayout: { A: Row[]; C: Row[] };
 let prepared: Prepared;
 let payout: string;
+let verdicts: Map<string, string>;
 const ledger = openLedger(":memory:");
 
 const referral = (s: Store, referee: Address) =>
@@ -65,11 +65,12 @@ const firstJoin = (baker: KeyPairSigner, campaign: Address, amount: bigint) =>
     ...{ baker, campaign, metricAccount: decodeCampaign(rawOf(w, campaign)).metricAccount, side: Side.No, amount },
     ...{ minReturnBps: 0, expectedEntryTotal: 0n, joinIndex: 0 },
   });
-const memo = (text: string): Instruction => ({
-  programAddress: MEMO,
-  accounts: [],
-  data: new TextEncoder().encode(text),
-});
+/** The test chain's RPC, answering the genesis hash too. */
+const withGenesis = (rpc: SolanaRpc): SolanaRpc =>
+  new Proxy(rpc, {
+    get: (target, name) =>
+      name === "getGenesisHash" ? () => ({ send: async () => GENESIS }) : Reflect.get(target, name),
+  });
 
 beforeAll(async () => {
   dir = mkdtempSync(join(tmpdir(), "brot-referral-cycle-"));
@@ -105,10 +106,12 @@ beforeAll(async () => {
   await landVia(chain, keeper, [await settled.close()]);
   expect(await ingest.refresh()).toMatchObject({ skipped: 0, gaps: [], referralError: null });
   const ops = await fundedWallet(w);
-  const rpc = createSolanaRpc(chain.url);
-  prepared = await prepareBatch({ rpc, indexer: store, ledger, ops: ops.address, dryRun: false, now: 0 });
+  const rpc = withGenesis(createSolanaRpc(chain.url));
+  const canCredit = simulationCheck(rpc, ops.address);
+  verdicts = await canCredit([CLOCK, P.PROGRAM_ID, F].map((wallet) => ({ wallet, amount: SOL })));
+  prepared = await prepareBatch({ rpc, indexer: store, ledger, ops: ops.address, dryRun: false, now: 0, canCredit });
   const line = prepared.plan.send[0];
-  payout = await landVia(chain, ops, [transferIx(ops, line.wallet as Address, line.amount), memo("brot-referral:1:1")]);
+  payout = await landVia(chain, ops, payoutInstructions(ops.address, line.wallet, line.amount, "brot-referral:1:1"));
   await recordPayouts({ rpc, ledger, ops: ops.address });
 }, 180_000);
 
@@ -155,6 +158,14 @@ describe("referral cycle in LiteSVM", () => {
     ]);
     const report = ["Brot Markets: referral payouts, in SOL", "", "Paid", `${F} 0.029702970`, "", "Pending"];
     expect(publicReport(ledger, 1)).toBe([...report, `${F2} 0.000594059`, ""].join("\n"));
+  });
+
+  test("R2: the simulation refuses a sysvar's credit and passes a wallet's; the batch's line was checked", () => {
+    // The runtime credits a program account (only the static guard, credit.ts, holds one: a program is not a wallet).
+    expect([...verdicts.keys()]).toEqual([CLOCK]);
+    expect(verdicts.get(CLOCK)).toStartWith("its transfer fails in simulation: ");
+    expect(prepared.plan).toMatchObject({ checked: true, held: [], genesis: GENESIS });
+    expect(prepared.script).toContain(`GENESIS=${GENESIS}\n`);
   });
 
   test("a rebuild from the chain holds the same referral rows; a second refresh changes nothing", async () => {

@@ -1,6 +1,6 @@
 # Brot Markets — Technical Plan
 
-**Version:** 0.1.10 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
+**Version:** 0.1.11 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
 todo em ingles") from the architecture proposal 0.4 the founder approved that day ("sim para todos") and from BP
 v0.0.4, merged into `main` with PR #35 on 2026-10-08; v0.1.1 aligns it with what Sprint 02 built and measured
 (`docs/sprints/sprint-02-pot-core.md`, "TP to align"); v0.1.2 aligns it with what Sprint 03 built and to the founder's
@@ -14,7 +14,10 @@ privacy review (§8.3); v0.1.8 adds the sixth kind, `DbcGraduated`, a Meteora DB
 §3.4.10; `docs/technical/meteora-readers-plan.md`); v0.1.9 counts six kinds where the plan still said five and
 records the sixth kind's site (§3.6: the creation box and the campaign page); v0.1.10 records A-11's one exception,
 approved by the founder on 2026-10-13: a graduation curve named by its token's ticker (§2 A-11, §3.4.10 "Display
-names", §3.5 the relay, the content table)
+names", §3.5 the relay, the content table); v0.1.11 records Sprint 14 as built (the referral, its ledger and weekly signing
+file, §3.4.11 and §8.5; the two-stage dispute with the founder's D2 answer, a 24-hour stage 1 and the team's
+escalation, §3.4.2, §3.4.3, §3.4.7, §14.2 S14-D2) and the act written in `team_open_contest`'s signed byte after the
+second red-team pass (S1)
 · **Date:** 2026-10-13 · **Supersedes:** v0.0.1 of 2026-10-05,
 written in Portuguese, approved by the founder ("docs aprovados, podemos dar início"). Its last text, with §8.1, is in
 git history at commit `2089b81` (`git show 2089b81:docs/technical/TECHNICAL-PLAN.md`), the last commit that changed it;
@@ -486,10 +489,10 @@ Open ─resolve─▶ InReview ─confirm, or 6 h elapsed─▶ Settling ─last
 | `InReview` | `Settling` | `team_confirm_result` | A team key | Inside the window | 04 |
 | `InReview` | `Settling` | `finalize_campaign` | Any wallet | `now ≥ review_ends_at` | 04 |
 | `InReview` | `Settling` (`Void`) | `team_void_campaign` | A team key | Inside the window, with a `VoidReason` | 04 |
-| `InReview` | `Contested` | `team_open_contest` | A team key | Inside the window, every entry tallied: stage 1, 24 hours (S14-D2). Entry only: nothing leaves `Contested` before Sprint 14 | 04; 14 |
+| `InReview` | `Contested` | `team_open_contest(1)` | A team key | Inside the window, every entry tallied: stage 1, 24 hours (S14-D2). Entry only: nothing leaves `Contested` before Sprint 14 | 04; 14 |
 | `Contested` | `Settling` | `reread_campaign` (same reading) | Any wallet | Stage 1, from its deadline on, 24 hours after the contest opened (`RereadBeforeTimelock` before it; S14-D2) | 14 |
 | `Contested` | `Contested` (stage 2) | `reread_campaign` (different reading) | Any wallet | Stage 1, at any time: stage 2 at once, until `min(now, stage 1's deadline) + 48 h` | 14 |
-| `Contested` | `Contested` (stage 2) | `team_open_contest` (the escalation) | A team key | Stage 1, before its deadline: stage 2 for 48 hours (S14-D2) | 14 |
+| `Contested` | `Contested` (stage 2) | `team_open_contest(2)` (the escalation) | A team key | Stage 1, before its deadline: stage 2 for 48 hours (S14-D2) | 14 |
 | `Contested` | `Settling` | `admin_decide_contest` | `admin` | Stage 2, before its deadline; confirm or void only | 14 |
 | `Contested` | `Settling` | `finalize_campaign` (the lapse) | Any wallet | Stage 2 from its deadline on, or an unread stage 1 from 48 hours after its deadline: the stored result stands | 14 |
 | `InReview`, `Contested` | `Settled` | The finalize snapshot of any exit above | As above | A pot with no entry: nothing is left to settle, so the campaign goes straight to `Settled` (from `Contested`: the lead's addendum, 2026-10-13) | 04; 14 |
@@ -522,7 +525,7 @@ the same effect whoever calls it: the second keeper to arrive gets an error and 
 | `admin_resume_entries` | `admin` | `EntriesHalted` → `Normal` | `EntriesResumed` | 02 |
 | `team_confirm_result` | A team key | `InReview`, inside the window: ends the window and runs the finalize snapshot at once ("pays now") | `ResultConfirmed`, then `CampaignFinalized` | 04 |
 | `team_void_campaign(reason, note_hash)` | A team key | `InReview`, inside the window: `outcome = Void` with a team `VoidReason` and the hash of the text in `content/void-log/`; then the finalize snapshot in `Refund` | `CampaignVoided`, then `CampaignFinalized` | 04 |
-| `team_open_contest` | A team key | `InReview`, inside the window, every entry tallied: `Contested`, payout paused, stage 1 starts for 24 hours. Called again on a contest at stage 1, before its deadline, it sends the contest to stage 2 for 48 hours (the escalation, S14-D2, built 2026-10-13) | `ContestOpened`, with the stage it opened | 04; 14 |
+| `team_open_contest(stage)` | A team key | The act is the signed byte (S1, the second red-team pass, 2026-10-13). `1`: `InReview`, inside the window, every entry tallied: `Contested`, payout paused, stage 1 starts for 24 hours; a campaign already `Contested` is refused (`ContestAlreadyOpen`, 6177), so a retried or duplicate opening never escalates. `2`: a contest at stage 1, before its deadline, goes to stage 2 for 48 hours (the escalation, S14-D2); a campaign not contested is `NotContested`, stage 2 already `WrongContestStage`, from stage 1's deadline on `ContestDeadlinePassed`. Any other byte or length: `BadInstructionData` | `ContestOpened`, with the stage it opened | 04; 14 |
 | `admin_decide_contest(confirm or void, reason)` | `admin` (the 2-of-3 on mainnet) | Stage 2 only; confirm or void, never invert | `ContestClosed`, then `CampaignFinalized` | 14 |
 
 **Bakers, creators and anyone.**
@@ -671,9 +674,9 @@ opens a contest.
 | Result read; the window opens (`review_ends_at = resolved_at + 6 h`) | Keeper, or any wallet | `resolve_campaign` |
 | Confirm, or void with a reason, inside the window | A team key | `team_confirm_result`, `team_void_campaign` |
 | Nobody reviewed and the window ended | Keeper, or any wallet | `finalize_campaign` |
-| Contest (MVP: team only) | A team key | `team_open_contest`; stage 1 lasts 24 hours (S14-D2, 2026-10-13) |
+| Contest (MVP: team only) | A team key | `team_open_contest(1)`; stage 1 lasts 24 hours (S14-D2, 2026-10-13); a retried opening is refused (`ContestAlreadyOpen`) |
 | Stage 1: the second read (B9) | Any wallet | `reread_campaign`. Same reading: payout from stage 1's deadline on (`RereadBeforeTimelock` before). Different: stage 2 at once, 48 hours |
-| Stage 1: the escalation (S14-D2) | A team key | `team_open_contest` again, before stage 1's deadline: stage 2, 48 hours |
+| Stage 1: the escalation (S14-D2) | A team key | `team_open_contest(2)`, before stage 1's deadline: stage 2, 48 hours. A reader in doubt, or a cluster halt eating the 24 hours: `scripts/team/contest.ts --escalate` opens and escalates in one transaction |
 | Stage 2: two of three (B9) | `admin`, the 2-of-3 | `admin_decide_contest` |
 
 - **Stage 2 needs no voting code.** The "two of three members" of P1 §4.5 are the multisig's signatures (v0.0.1).
@@ -888,7 +891,8 @@ to the TP; kept by the proposal, K-05).
 |---|---|
 | Who referred whom | `ReferralLink`, signed by the referee, once, immutable |
 | "Before the first entry", as built (2026-10-13) | Chain order, not time: (slot, the transaction's place in the block, the instruction) of `ReferralLinked` against the referee's first `EntryAdded`; in one transaction the instruction order decides; a slot shared with the first entry is resolved by reading that block once (`getBlock`), and until then the link earns nothing |
-| The payout's evidence, as built | A ledger in its own SQLite file (a rebuilt indexer never erases what was paid); each transfer carries the memo `brot-referral:<batch>:<index>`, so a line is never paid twice; the routine prepares a signing file and never signs (founder answer of 2026-10-13); a wallet below the RPC's rent minimum waits for the next week |
+| The payout's evidence, as built | A ledger in its own SQLite file (a rebuilt indexer never erases what was paid; ledger schema 2, and each file carries its application id, so the indexer and the ledger refuse each other's file); each transfer carries the memo `brot-referral:<batch>:<index>`, so a line is never paid twice; the routine prepares a signing file and never signs (founder answer of 2026-10-13); a wallet below the RPC's rent minimum waits for the next week |
+| The signing file, as built (second red-team pass, 2026-10-13) | Run once: it checks the chain for each line's memo before sending it, lists a failed line and goes on, and is never re-run after a stop: wait two minutes, `record` (books what landed, by memo), `record --cancel <n>` (what did not land is owed again), prepare anew. It embeds the cluster's genesis hash and refuses another cluster; the RPC URL comes from `RPC_URL_FILE` and reaches the CLI only through a private temporary config (mode 600), never a command line. At prepare, a line that cannot be credited (a sysvar, builtin or precompile id, the incinerator, an executable account, the operations wallet itself) is held for a person, and every other line is simulated; held lines never enter the script. Batch numbers never repeat, even on a new or restored ledger; a stale signing file in `--out` is refused before any row is written; `--cancel` refuses any wallet but the batch's own; recovering a lost ledger needs an RPC with the wallet's full history, and the summary prints how far back it read |
 | The fee Brot actually received on each winning entry of the referee ("a taxa que o Brot de fato recebeu", P1 §3.9) | `(fee_total − from_fee) × entry ÷ V`, where `from_fee` is the part of the creator share taken from the fee (§3.4.16); from the events, checked against the `Campaign` |
 | 20% of that fee for 90 days, to the referrer [FD] (P1 §3.9) | Weekly routine from the operations wallet, with a public report |
 | The referee's rebate: the fee charged on the first US$50 of entries, after US$250, with a ceiling | Same routine. Ceiling 0.05 SOL and the thresholds in SOL (0.4576 and 2.2879 SOL at the reference price): P-6, answered on 2026-10-13 (Ronaldo, as recommended) [FD] |
@@ -2339,7 +2343,8 @@ referral tables, the weekly routine and its public report.
 6. **Retention.** Open [Q]: payment records may carry accounting duties (L0, the accountant). Signing files can be
    deleted once their batch is recorded.
 7. **Logs.** Counts and error names only; the commands print wallets and amounts to the operator's terminal and never
-   the RPC URL.
+   the RPC URL. The signing file and its summary carry wallets and amounts, and a held line's reason names its wallet;
+   the RPC URL lives only in an operator file and in a temporary CLI config with mode 600, deleted after the run.
 8. **Deletion and export.** The link account, the events and the memo'd transfers are public and permanent; indexer
    rows return on every refresh unless an exclusion list is added; deleting from the ledger may conflict with
    record-keeping [Q]. An export is a query; no command is built.

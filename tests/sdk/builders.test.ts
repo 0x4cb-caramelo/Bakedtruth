@@ -10,6 +10,7 @@
 import { describe, expect, test } from "bun:test";
 import { generateKeyPairSigner, type Instruction } from "@solana/kit";
 
+import { ContestStage } from "@brot/sdk/read";
 import * as T from "@brot/sdk/tx";
 import { IDL } from "../brot/idl";
 import { DEFAULT_PARAMS } from "../brot/flows";
@@ -87,7 +88,10 @@ describe("sdk builders match the test kit", () => {
         T.buildTeamVoidCampaign({ teamMember: who, campaign, reason: 5, noteHash: new Uint8Array(32).fill(9) }),
         IS.teamVoidCampaignIx(who, config, campaign, { reason: 5, noteHash: new Uint8Array(32).fill(9) }),
       ],
-      [T.buildTeamOpenContest({ teamMember: who, campaign }), IS.teamOpenContestIx(who, config, campaign)],
+      [
+        T.buildTeamOpenContest({ teamMember: who, campaign, stage: ContestStage.Stage2 }),
+        IS.teamOpenContestIx(who, config, campaign, 2),
+      ],
       [T.buildFinalizeCampaign({ campaign }), IS.finalizeCampaignIx(campaign, config)],
       [
         T.buildTallyLateJoins({ campaign, baker: other, from: 1, to: 3 }),

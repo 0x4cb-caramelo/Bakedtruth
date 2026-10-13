@@ -1,12 +1,13 @@
 /**
  * Purpose: the randomized test's contest (Sprint 14; TP section 3.4.7): a team key opens it inside the review window
- *          (stage 1, 24 hours) and, until stage 1's deadline, may send it to stage 2 with the same call (D2); any wallet
+ *          (stage 1, 24 hours, byte 1) and, until stage 1's deadline, may send it to stage 2 (byte 2: D2; the wrong
+ *          byte for the campaign is refused, S1); any wallet
  *          re-reads the campaign (the same reading pays with the stored result from stage 1's deadline on, a different
  *          one opens stage 2 for 48 hours from the re-read or from stage 1's deadline if that passed, a proof the reader
  *          refuses refuses the re-read, and no re-read writes a result), and the admin confirms or voids before stage
  *          2's deadline, never inverting. Each with the program's order of refusals; none moves a lamport (I1, I15).
  *          The lapse of either stage is finalize's (invariant-window.ts).
- * Version: 0.2.0 (the founder's answer to D2; review fixes F3 and F4, lane L14B)
+ * Version: 0.3.0 (the act in its byte, the second review's S1; the founder's answer to D2; review fixes F3, F4)
  * Sprint:  14 (lane INV14)
  */
 import { planDecide, type DecideOp } from "./invariant-decide";
@@ -22,8 +23,11 @@ import * as P from "./program";
 export const CONTEST_KINDS = ["contest", "reread", "decide"] as const;
 
 export type ContestOp =
-  /** `member` −1: the admin signs, who holds no team key; `tally`: the keeper's tallies go first, same transaction. */
-  | { k: "contest"; c: number; member: number; tally?: boolean }
+  /**
+   * `stage`, the signed byte (the second review's S1): 1 opens, 2 sends a stage-1 contest to the admin, any other is
+   * refused; `member` −1: the admin signs, who holds no team key; `tally`: the keeper's tallies go first, same transaction.
+   */
+  | { k: "contest"; c: number; stage: number; member: number; tally?: boolean }
   /** The account the re-read finds: as resolution read it, moved, or (`none`) no proof offered. */
   | { k: "reread"; c: number; variant: RereadVariant; back: bigint }
   /** The admin's decision at stage 2 (invariant-decide.ts). */
@@ -48,28 +52,35 @@ export async function planContest(h: Harness, op: ContestOp): Promise<Plan> {
       const signer = op.member < 0 ? h.admin : h.team[op.member];
       const deltas = new Map(still);
       const first = await tallyFirst(h, op.c, op.tally ?? false, deltas);
-      // D2: on a contest, the team's escalation: at stage 1, before its deadline, it goes to stage 2 for the admin.
-      const escalate = c.phase === "Contested";
+      // The act is the signed byte (S1), never the status: the byte, the team key, then the act against the campaign
+      // (a retried opening is refused, never an escalation), then the act's own rules. Byte 2 is the escalation (D2).
+      const escalate = op.stage === 2;
       const error: BrotErrorName | undefined =
-        op.member < 0
-          ? "NotTeamMember"
-          : escalate
-            ? c.stage !== 1
-              ? "WrongContestStage"
-              : t >= c.contestEndsAt
-                ? "ContestDeadlinePassed"
-                : undefined
-            : c.phase !== "InReview"
-              ? "TeamKeyOutsideReview"
-              : t >= c.reviewEndsAt
-                ? "ContestOutsideReview"
-                : first.left > 0
-                  ? "NotTallied"
-                  : undefined;
+        op.stage !== 1 && op.stage !== 2
+          ? "BadInstructionData"
+          : op.member < 0
+            ? "NotTeamMember"
+            : escalate !== (c.phase === "Contested")
+              ? escalate
+                ? "NotContested"
+                : "ContestAlreadyOpen"
+              : escalate
+                ? c.stage !== 1
+                  ? "WrongContestStage"
+                  : t >= c.contestEndsAt
+                    ? "ContestDeadlinePassed"
+                    : undefined
+                : c.phase !== "InReview"
+                  ? "TeamKeyOutsideReview"
+                  : t >= c.reviewEndsAt
+                    ? "ContestOutsideReview"
+                    : first.left > 0
+                      ? "NotTallied"
+                      : undefined;
       const stage = escalate ? 2 : 1;
       const ends = t + (escalate ? STAGE2_SECONDS : STAGE1_SECONDS);
       return {
-        ixs: [...first.ixs, teamOpenContestIx(signer, config, campaign)],
+        ixs: [...first.ixs, teamOpenContestIx(signer, config, campaign, op.stage)],
         error,
         deltas,
         label: escalate ? "escalate" : undefined,

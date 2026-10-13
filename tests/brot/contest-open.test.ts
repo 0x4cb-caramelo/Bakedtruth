@@ -1,13 +1,14 @@
 /**
  * Purpose: `team_open_contest` on the binary (Sprint 14, lane L14B): a team key contests a result inside its window,
  *          stage 1 starts for 24 hours (D2), and `ContestOpened` decodes through the SDK; each refusal with its own
- *          error and nothing written (the same call on a contest is the escalation: contest-escalate.test.ts); the
- *          pause never blocks it; and while a campaign is contested, at either stage, no payout instruction moves a
- *          lamport. Filter: `bun test tests/ -t "contest opens"`.
- * Version: 0.1.1 (D2: stage 1's 24 hours)
+ *          error and nothing written (the byte's own refusals, S1: contest-act.test.ts; the escalation, byte 2:
+ *          contest-escalate.test.ts); the pause never blocks it; and while a campaign is contested, at either stage,
+ *          no payout instruction moves a lamport. Filter: `bun test tests/ -t "contest opens"`.
+ * Version: 0.1.2 (the opening is byte 1, the second review's S1; D2: stage 1's 24 hours)
  * Sprint:  14 (lane L14B). Needs target/deploy/brot_markets.so.
  */
 import { describe, expect, test } from "bun:test";
+import type { Address, KeyPairSigner } from "@solana/kit";
 
 import { buildPauseEntries } from "@brot/sdk/tx";
 
@@ -18,7 +19,9 @@ import * as P from "./program";
 import { at, expectRefused, resolveIx, snapshot } from "./resolve-support";
 import { balance, expectOk, send } from "./setup";
 
-const contestIx = IS.teamOpenContestIx;
+/** The opening's raw bytes: byte 1 (the second review's S1; its own refusals are in contest-act.test.ts). */
+const contestIx = (signer: KeyPairSigner, config: Address, campaign: Address) =>
+  IS.teamOpenContestIx(signer, config, campaign, 1);
 
 describe("contest opens", () => {
   test("contest opens: a team key contests inside the window and ContestOpened says so", async () => {
@@ -57,7 +60,7 @@ describe("contest opens", () => {
     for (const signer of [cw.outsider, cw.admin]) {
       await expectRefused(cw.w, c, contestIx(signer, cw.config, c.campaign), "NotTeamMember");
     }
-    // A Contested campaign takes the team's escalation instead (contest-escalate.test.ts).
+    // A Contested campaign refuses the opening before this rule (ContestAlreadyOpen: contest-act.test.ts).
     for (const status of [P.Status.Open, P.Status.Settling]) {
       const other = await C.reviewed(cw, { status });
       await expectRefused(cw.w, other, contestIx(cw.team, cw.config, other.campaign), "TeamKeyOutsideReview");

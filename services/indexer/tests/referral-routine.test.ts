@@ -17,7 +17,7 @@ import { ledgerCopy, openLedger } from "../src/referral/ledger";
 import { publicReport } from "../src/referral/report";
 import { prepareBatch, recordPayouts } from "../src/referral/routine";
 import { SOL, wallet } from "./referral-chain";
-import { earnings, OPS, OpsWallet, routineRpc } from "./referral-ops";
+import { earnings, GENESIS, OPS, OpsWallet, routineRpc } from "./referral-ops";
 
 const [F, F2] = [wallet(2), wallet(6)];
 
@@ -37,9 +37,9 @@ describe("referral routine", () => {
     expect(first.plan.carried.map((l) => [l.idx, l.wallet, l.amount, l.rentMin])).toEqual([
       [2, F2, 700_000n, 890_880n],
     ]);
-    expect(first.script).toContain(`OPS=${OPS}`);
-    expect(first.script).toContain(`send 1 ${F} 0.040000000`);
-    expect(first.script).toContain('--with-memo "brot-referral:1:$1"');
+    expect(first.script).toContain(`BATCH=1\nOPS=${OPS}\nGENESIS=${GENESIS}\n`);
+    expect(first.script).toContain(`send 1 ${F} 0.040000000\n`);
+    expect(first.script).toContain('local memo="brot-referral:$BATCH:$1"');
     expect(first.script).not.toContain(F2);
     expect(first.summary).toContain("as the RPC answered it: 890880 lamports");
     const rows = first.ledger.db.query("SELECT batch, idx, wallet, amount, status FROM referral_payouts ORDER BY idx");

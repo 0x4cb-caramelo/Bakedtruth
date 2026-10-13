@@ -101,3 +101,24 @@ onde aparece o saldo da indicação (L-10).
   O env anterior está em `/etc/brot-markets/bak-20261013/keeper.env.before-helius`. Depois da troca: a unidade ativa,
   nenhum erro e nenhum 429 nos primeiros ciclos, a liquidação ligada e nada pendente.
 - **Ainda não:** a unidade nova, com identidade própria, não foi instalada; depende do dono do servidor.
+
+## A segunda revisão adversária e as correções da noite
+
+Uma segunda revisão, só de leitura, passou pelo que mudou depois da primeira (F3 a F10, o D2 e a rotina da indicação):
+nenhum caminho para pagar cedo ou ao lado errado um resultado contestado, nem para travar um pote. O que ela achou foi
+corrigido na mesma noite:
+
+- **S1 (médio).** Uma instrução fazia dois atos e escolhia pelo estado gravado: uma abertura de disputa repetida virava
+  escalada. Decisão de engenharia do líder: o ato vai no byte assinado (`team_open_contest(1)` abre,
+  `team_open_contest(2)` escala). A repetição agora é recusada (`ContestAlreadyOpen`, 6177); para "não está em
+  disputa" o programa já tinha `NotContested`, e a faixa o reaproveitou em vez de criar um erro novo. O teste aleatório
+  manda o byte errado para o estado e bytes inválidos; a mutação matou os nove casos das três checagens novas.
+- **R1 e R2 (médios).** O arquivo semanal de assinatura podia pagar duas vezes uma linha depois de uma nova execução, e
+  uma linha impossível de creditar parava o lote inteiro. Agora ele roda uma vez, confere o memo de cada linha na cadeia
+  antes de enviar, segue depois de uma falha, e as linhas impossíveis ficam presas para uma pessoa já no preparo.
+- **R3, R4 e I1 (baixos).** A numeração dos lotes, a recuperação do livro, o arquivo preso à rede pelo hash de gênese,
+  a URL da RPC longe da linha de comando, e o indexador lendo a anulação do admin.
+
+Uma faixa, ao testar, rodou um `pkill` amplo demais contra o Surfpool offline; nenhum outro ensaio corria naquela hora,
+e daí em diante só se para processo pelo número.
+

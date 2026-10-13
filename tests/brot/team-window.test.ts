@@ -166,7 +166,7 @@ describe("team window", () => {
   test("team window: team_open_contest contests a result inside the window (Sprint 14 opens its exits)", async () => {
     const { w, member, config } = await teamWorld();
     const c = await reviewed(w, Yes);
-    expectOk(await send(w, [I.teamOpenContestIx(member, config, c.campaign)]));
+    expectOk(await send(w, [I.teamOpenContestIx(member, config, c.campaign, 1)]));
     // Stage 1 starts and the result stays as read; the exits are in tests/brot/contest-*.test.ts.
     expect([readCampaign(w, c.campaign).status, readCampaign(w, c.campaign).outcome]).toEqual([
       P.Status.Contested,

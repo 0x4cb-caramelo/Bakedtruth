@@ -1,9 +1,9 @@
 /**
  * Purpose: the structs of Sprints 14 and 15 as layouts, in the field order of their Rust structs: the
  *          `ReferralLink` and `SealedFee` accounts and the arguments of `user_link_referrer`,
- *          `admin_decide_contest` and `sponsor_join_campaign`. Kept apart from structs.ts, which they
- *          would push past 200 lines.
- * Version: 0.0.1
+ *          `team_open_contest`, `admin_decide_contest` and `sponsor_join_campaign`. Kept apart from
+ *          structs.ts, which they would push past 200 lines.
+ * Version: 0.0.2 (`team_open_contest`'s byte, the second review's S1)
  * Sprint:  scaffold of Sprints 14–15, 2026-10-13 (the bodies are lanes L14A, L14B and L15's)
  */
 import type { Layout } from "./layouts";
@@ -37,6 +37,8 @@ export const SEALED_FEE: Layout = [
 // --- Instruction arguments (after the one-byte discriminator) ---------------------------------
 
 export const LINK_REFERRER_ARGS: Layout = [["referrer", "pubkey"]];
+/** `team_open_contest`'s one byte (the second review's S1): the stage the call opens, 1 or 2. */
+export const TEAM_OPEN_CONTEST_ARGS: Layout = [["stage", "u8"]];
 export const DECIDE_CONTEST_ARGS: Layout = [
   ["decision", "u8"],
   ["void_reason", "u8"],

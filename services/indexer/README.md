@@ -126,13 +126,29 @@ operations wallet under a `brot-referral:<batch>:<index>` memo counts, by its si
 # On the server, as the indexer's user; the RPC URL from a credential file (REFERRAL_RPC_URL_FILE, else the indexer's).
 bun scripts/referral/prepare.ts --indexer <indexer.sqlite> --ledger <ledger.sqlite> --ops <wallet> --dry-run [--new-ledger]
 bun scripts/referral/prepare.ts --indexer <indexer.sqlite> --ledger <ledger.sqlite> --ops <wallet> --out <dir> [--new-ledger]
-# Where the operations wallet signs (a keypair file or a Ledger), never on the server:
-SIGNER=usb://ledger RPC_URL=https://... bash referral-batch-<n>.sh
-# Back on the server: record what landed (and, if the batch will not be sent, give up the rest with --cancel <n>).
+# Where the operations wallet signs (a keypair file or a Ledger), never on the server; ONCE; the URL from a file:
+SIGNER=usb://ledger RPC_URL_FILE=<file holding the RPC URL> bash referral-batch-<n>.sh
+# Back on the server, 2 minutes later: record what landed (and give up what did not with --cancel <n>).
 bun scripts/referral/record.ts --ledger <ledger.sqlite> --ops <wallet> [--cancel <n>]
 bun scripts/referral/report.ts --ledger <ledger.sqlite> --batch <n> --out <public file>   # wallets and amounts only
 bun scripts/referral/snapshot.ts <ledger.sqlite> <new file>                                # the nightly hook
+bun scripts/referral/rehearse.ts   # the signing file with the real CLI on an offline surfnet (throwaway keys)
 ```
+
+**The signing file runs once.** Each line is sent once; before it, the file looks for that line's memo in the
+operations wallet's recent history and skips a line already there; a line that fails is listed at the end and the run
+goes on. It refuses another cluster (the genesis hash read at prepare) and another signer, and passes the RPC URL to
+the CLI only through a private temporary config, never a command line. **After any stop or failure, do not run it
+again:** wait 2 minutes (a blockhash expires and the chain finalizes), run `record` (it books what landed, by memo),
+then `record --cancel <n>` (what did not land is owed again), then prepare a new batch. `--cancel` acts only with the
+operations wallet the batch was prepared for. Batch numbers never repeat, even after a new or restored ledger reads the
+old landings back, and `prepare` refuses an `--out` that already holds that batch's files before writing anything. The
+summary says how far back the wallet's history was read: on a node that keeps no full history, the oldest signature
+read is not the wallet's first, and a lost ledger could then miss an old payout.
+
+**A line that cannot be credited is held for a person**: a sysvar, a builtin program or precompile, the incinerator,
+an executable account, the operations wallet itself, or a line whose transfer fails when `prepare` simulates it. It is
+carried with the reason, listed in the summary and never written in the signing file.
 
 A transfer that would leave its wallet below the rent-exempt minimum, read from the RPC for the wallet's size (never a
 constant: devnet and mainnet answer 650,240 lamports for an empty wallet, LiteSVM 890,880), is not sent: it is

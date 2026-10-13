@@ -211,7 +211,7 @@ export const BASELINES: Record<string, () => Promise<Baseline>> = {
     const { w, admin } = await configWorld();
     const [team] = await setTeam(w, admin, 1);
     const { campaign } = await injectReviewed(w.client, await base(w), P.Outcome.Yes, now(w.client) + P.HOUR * 6n);
-    return { w, ix: S.teamOpenContestIx(team, await P.configPda(), campaign) };
+    return { w, ix: S.teamOpenContestIx(team, await P.configPda(), campaign, 1) };
   },
   FinalizeCampaign: async () => {
     const { w } = await configWorld();

@@ -1,7 +1,7 @@
 //! Purpose: the contest's four instructions for the Mollusk tests (Sprint 14, lane L14B), in the frozen slot order
 //!          with every account they name (open, re-read, decide, and the lapse through `finalize_campaign`), run on
 //!          the program's SBF binary at a clock the test sets; and what a test reads back.
-//! Version: 0.0.1
+//! Version: 0.0.2 (the opening's one byte, the second review's S1)
 //! Sprint: 14 (lane L14B)
 
 use brot_markets::{
@@ -81,8 +81,12 @@ impl Call {
     }
 }
 
-/// `team_open_contest` signed by `signer`; the config of `config_data`.
-pub fn open_contest(world: &World, signer: Pubkey, campaign: Vec<u8>) -> Call {
+/// `team_open_contest`'s one byte: open a contest (stage 1), or send one to the admin (stage 2).
+pub const OPEN: &[u8] = &[1];
+pub const ESCALATE: &[u8] = &[2];
+
+/// `team_open_contest(data)` signed by `signer`; the config of `config_data`.
+pub fn open_contest(world: &World, signer: Pubkey, data: &[u8], campaign: Vec<u8>) -> Call {
     let (address, ..) = campaign_address();
     let metas = vec![
         AccountMeta::new_readonly(signer, true),
@@ -93,7 +97,7 @@ pub fn open_contest(world: &World, signer: Pubkey, campaign: Vec<u8>) -> Call {
     let mut accounts = vec![(signer, wallet()), (world.config, world.owned(config))];
     accounts.push((address, world.owned(campaign)));
     accounts.extend(event_accounts());
-    let instruction = instruction(ix::TEAM_OPEN_CONTEST, &[], metas);
+    let instruction = instruction(ix::TEAM_OPEN_CONTEST, data, metas);
     Call {
         instruction,
         accounts,

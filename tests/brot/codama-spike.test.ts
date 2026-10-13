@@ -146,8 +146,8 @@ describe("codama client matches the test kit", () => {
         await IS.teamVoidCampaignIx(who, config, campaign, { reason: 1, noteHash: new Uint8Array(32) }),
       ],
       [
-        C.getTeamOpenContestInstruction({ teamMember: who, config, campaign }),
-        await IS.teamOpenContestIx(who, config, campaign),
+        C.getTeamOpenContestInstruction({ teamMember: who, config, campaign, stage: 2 }),
+        await IS.teamOpenContestIx(who, config, campaign, 2),
       ],
       [C.getFinalizeCampaignInstruction({ campaign, config }), IS.finalizeCampaignIx(campaign, config)],
       [

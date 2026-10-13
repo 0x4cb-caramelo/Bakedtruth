@@ -4,11 +4,12 @@
  *          deadline, written in review or contested at a stage; the mint's supply moved (a different reading); the
  *          contest's calls through the SDK's builders; a refusal that must leave the campaign and its vault as they
  *          were; and the vault funded with a prize and an opening fee for the payouts.
- * Version: 0.1.0
+ * Version: 0.1.1 (the opening and the escalation by their byte, the second review's S1)
  * Sprint:  14 (lane L14B). Needs target/deploy/brot_markets.so.
  */
 import { lamports, type Address, type KeyPairSigner } from "@solana/kit";
 
+import { ContestStage } from "@brot/sdk/read";
 import { buildAdminDecideContest, buildRereadCampaign, buildTeamOpenContest } from "@brot/sdk/tx";
 
 import { injectEntry } from "./campaigns";
@@ -112,9 +113,12 @@ export function makeUnreadable(w: World, at: Address) {
   });
 }
 
-/** The contest's calls, built by the SDK (`@brot/sdk/tx`) as a client builds them. */
+/** The contest's calls, built by the SDK (`@brot/sdk/tx`) as a client builds them: the opening is byte 1. */
 export const openContest = async (cw: ContestWorld, c: Injected, signer = cw.team) =>
-  send(cw.w, [await buildTeamOpenContest({ teamMember: signer, campaign: c.campaign })]);
+  send(cw.w, [await buildTeamOpenContest({ teamMember: signer, campaign: c.campaign, stage: ContestStage.Stage1 })]);
+/** The team's escalation (D2), byte 2: a contest still at stage 1 goes to the admin. */
+export const escalate = async (cw: ContestWorld, c: Injected, signer = cw.team) =>
+  send(cw.w, [await buildTeamOpenContest({ teamMember: signer, campaign: c.campaign, stage: ContestStage.Stage2 })]);
 
 export const rereadIx = (c: Injected, proofAccount?: Address) =>
   buildRereadCampaign({ campaign: c.campaign, metricAccount: c.metric, proofAccount });

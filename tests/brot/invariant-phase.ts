@@ -4,8 +4,9 @@
  *          phase-directed draw names the operation that moves a campaign on, most of the time: the resolution, the
  *          tally, the window's acts or a contest, the contest's stages and the lapse, the payouts and the close.
  * Version: 0.1.3 (Sprint 14: the tally, the contest, the re-read, the admin's decision and the lapse; review fix F3,
- *          the lapse of an unread stage 1 and the clock run to its edge; D2: the team's escalation, stage 1's edge;
- *          Sprint 15: a held sponsor fee settled while settling and before the close, which waits for it)
+ *          the lapse of an unread stage 1 and the clock run to its edge; D2: the escalation, stage 1's edge; S1: the
+ *          contest's byte, the wrong one for the campaign too; Sprint 15: a held sponsor fee settled while settling and
+ *          before the close, which waits for it)
  * Sprint:  04 (closure review); 14 (lane INV14; the uniform draw moved here from invariant-settle.ts); 15 (lane INV15)
  */
 import { type Harness, type Rng, clock } from "./invariant-harness";
@@ -46,10 +47,11 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
       if (pending.length > 0 && x < 0.2) return { k: "tally", c: index, baker: bakerIndex(h, r.pick(pending)) };
       const tally = r.next() < 0.85;
       // On an automatic void the team mostly records its cause (a house reason sends a held sponsor fee back, Sprint
-      // 15); on a YES or NO it mostly contests, and its void is refused.
+      // 15); on a YES or NO it mostly contests, and its void is refused. Now and then the escalation's byte on a result
+      // in review (NotContested, the second review's S1).
       const [first, second] = c.outcome === "Void" ? (["void", "contest"] as const) : (["contest", "void"] as const);
       const act = x < 0.55 ? first : x < 0.7 ? second : null;
-      if (act === "contest") return { k: "contest", c: index, member, tally };
+      if (act === "contest") return { k: "contest", c: index, stage: r.next() < 0.1 ? 2 : 1, member, tally };
       if (act === "void") return { k: "void", c: index, member, reason: r.pick(TEAM_REASONS), tally };
       if (x < 0.8) return { k: "confirm", c: index, member, tally };
       return r.next() < 0.5 ? { k: "advance", seconds: c.reviewEndsAt - t + 1n } : null;
@@ -63,8 +65,11 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
         // Stage 2's act is refused at stage 1 (WrongContestStage), and so is the lapse before its time (ContestNotLapsed).
         if (x < 0.08) return { k: "decide", c: index, decision: 0, reason: 0, signer: "admin" };
         if (x < 0.12) return { k: "finalize", c: index };
-        // D2: a team key sends it to stage 2, until stage 1's deadline (ContestDeadlinePassed from it on).
-        if (x < 0.18) return { k: "contest", c: index, member: r.next() < 0.1 ? -1 : member };
+        // D2: a team key sends it to stage 2 (byte 2), until stage 1's deadline (ContestDeadlinePassed from it on);
+        // now and then the opening is retried instead (byte 1: ContestAlreadyOpen, the second review's S1).
+        if (x < 0.18) {
+          return { k: "contest", c: index, stage: r.next() < 0.25 ? 1 : 2, member: r.next() < 0.1 ? -1 : member };
+        }
         // A matching re-read pays only from stage 1's deadline on (RereadBeforeTimelock before it): the clock runs to
         // that edge; now and then the keeper is down, and it runs to the lapse's edge (a later re-read adds no time).
         const wait = c.contestEndsAt - t + r.pick([-1n, 0n, 1n]);
@@ -86,7 +91,7 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
       // escalation (WrongContestStage).
       if (x < 0.57) return { k: "finalize", c: index };
       if (x < 0.62) return { k: "reread", c: index, variant: "same", back: 0n };
-      if (x < 0.65) return { k: "contest", c: index, member };
+      if (x < 0.65) return { k: "contest", c: index, stage: r.pick([1, 2]), member };
       // Stage 2's edges: a second before the deadline the admin still decides; at it, only the lapse remains.
       return { k: "advance", seconds: c.contestEndsAt - t + r.pick([-1n, 0n, 1n]) };
     }
@@ -130,9 +135,11 @@ export function drawSettleOp(h: Harness, r: Rng, index: number): SettleOp | Adva
       const reason = inside && r.next() < 0.3 ? r.pick([0, 2, 1, 3]) : r.pick([4, 5]);
       return { k: "void", c: index, member, reason, tally: r.next() < 0.5 };
     }
-    case "contest":
-      // Now and then the admin, who holds no team key, tries.
-      return { k: "contest", c: index, member: r.next() < 0.15 ? -1 : member, tally: r.next() < 0.5 };
+    case "contest": {
+      // Now and then the admin, who holds no team key, tries; any byte, a refused one too (S1).
+      const stage = r.pick([1, 1, 1, 2, 2, 0, 3]);
+      return { k: "contest", c: index, stage, member: r.next() < 0.15 ? -1 : member, tally: r.next() < 0.5 };
+    }
     case "reread":
       return { k: "reread", c: index, variant: r.pick(["same", "moved", "none"] as const), back: r.big(0n, 90n) };
     case "decide": {

@@ -33,6 +33,8 @@ import { describeSealedEntry } from "./summary-sealed";
 export type SummaryContext = {
   /** The campaign at each address a join or a contest's act (its opening or escalation, re-read, decision) names. */
   campaigns?: ReadonlyMap<string, Campaign>;
+  /** Set by the summary itself: the campaigns an earlier instruction of the same transaction opens a contest on. */
+  contestsOpenedEarlier?: ReadonlySet<string>;
   /** A referral link: the cluster's rent for its 96-byte account (`rentExemptMinimum`), which the referee pays. */
   linkRent?: bigint;
   /** An opening on the price kind: the price account's exponent (`validateOpenCampaign`'s `priceExponent`). */

@@ -2,11 +2,13 @@
  * Purpose: the weekly referral routine's first command (Sprint 14, lane L14R; TP §3.4.11), run on the server beside the
  *          indexer: it reads the indexer's file read-only, syncs the ledger with what the operations wallet's history
  *          shows landed, and prepares the week's batch (services/indexer/src/referral/routine.ts): the ledger's rows,
- *          and in --out the signing file and its summary, never overwriting one. With --dry-run it does the same on a
+ *          and in --out the signing file and its summary, refused before any row is committed when --out already holds
+ *          that batch's files; each line simulated first (simulate.ts), a line that cannot be credited held for a
+ *          person. With --dry-run it does the same on a
  *          throwaway copy of the ledger and prints the summary: nothing is written anywhere. A ledger is started only
  *          with --new-ledger, so a mistyped path can never hide an open batch behind an empty ledger. It holds no key
  *          and signs nothing: a person runs the signing file where the operations wallet can sign, then runs record.
- * Version: 0.1.0
+ * Version: 0.2.0 (each line simulated; a stale signing file refused before anything is written)
  * Sprint:  14 (referral, lane L14R)
  *
  * Run (as the indexer's user; the RPC URL from a credential file, never on the command line):
@@ -19,9 +21,11 @@ import type { SolanaRpc } from "@brot/sdk/read";
 
 import { openStore } from "../../services/indexer/src/db/store";
 import { ledgerCopy, openLedger } from "../../services/indexer/src/referral/ledger";
+import type { Plan } from "../../services/indexer/src/referral/batch";
 import { prepareBatch } from "../../services/indexer/src/referral/routine";
 import { scriptName, summaryName } from "../../services/indexer/src/referral/signing";
 import { existing, need, opsOf, parseFlags, rpcFromEnv, runCommand, UsageError, type Env } from "./common";
+import { simulationCheck } from "./simulate";
 
 export async function prepareCommand(argv: readonly string[], env: Env, rpcOf: (env: Env) => SolanaRpc = rpcFromEnv) {
   const flags = parseFlags(argv, ["indexer", "ledger", "ops", "out"], ["dry-run", "new-ledger"]);
@@ -37,7 +41,13 @@ export async function prepareCommand(argv: readonly string[], env: Env, rpcOf: (
   const ledger = dryRun ? ledgerCopy(existsSync(ledgerPath) ? ledgerPath : null) : openLedger(ledgerPath);
   try {
     const now = Math.floor(Date.now() / 1_000);
-    const p = await prepareBatch({ rpc, indexer, ledger, ops, dryRun, now });
+    const beforeWrite = (plan: Plan) => {
+      for (const name of [summaryName(plan.batch), scriptName(plan.batch)])
+        if (out !== null && existsSync(join(out, name)))
+          throw new UsageError(`--out already holds ${name} from another run: move it away, nothing was written`);
+    };
+    const canCredit = simulationCheck(rpc, ops);
+    const p = await prepareBatch({ rpc, indexer, ledger, ops, dryRun, now, canCredit, beforeWrite });
     if (out === null) return p.summary;
     if (!p.written) return "Nothing owed: no batch prepared.\n";
     mkdirSync(out, { recursive: true });

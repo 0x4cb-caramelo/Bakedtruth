@@ -5,8 +5,8 @@
  *          instruction is decoded from its own bytes (never from the inputs it was built from) and said in
  *          words, with the most lamports it can take from a signer, and anything this SDK did not build is
  *          flagged.
- * Version: 0.2.0
- * Sprint:  05 (SDK)
+ * Version: 0.2.1 (a contest opened earlier in the same transaction, the second review's S1)
+ * Sprint:  05 (SDK); 14 (lane L14B)
  *
  * Trusted means: this program's instructions shaped as the IDL says, and compute-unit limits and prices this
  * SDK reads, with the priority fee under the cap. Untrusted: a System Program instruction or any other
@@ -37,6 +37,7 @@ import {
   type ComputeBudget,
 } from "./summary-budget";
 import { summarizeBrot, type SummaryContext } from "./summary-brot";
+import { contestsOpened } from "./summary-contest";
 
 export type { SummaryContext } from "./summary-brot";
 
@@ -107,7 +108,12 @@ export function summarizeInstructions(
   options: SummaryOptions = {},
 ): TransactionSummary {
   const budget = readComputeBudget(instructions);
-  const items = instructions.map((ix, index) => itemOf(ix, index, budget, options));
+  // A contest opened by an earlier instruction of the same transaction is contested for the ones after it (S1).
+  const items = instructions.map((ix, index) => {
+    const opened = contestsOpened(instructions.slice(0, index));
+    const context = opened.size === 0 ? options.context : { ...options.context, contestsOpenedEarlier: opened };
+    return itemOf(ix, index, budget, { ...options, context });
+  });
   return {
     items,
     trusted: items.length > 0 && items.every((item) => item.trusted),

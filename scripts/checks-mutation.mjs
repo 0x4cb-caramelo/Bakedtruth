@@ -51,6 +51,7 @@ const RUST_TARGETS = [
   "contest_mollusk_escalate",
   "sealed_entry",
   "sealed_settle",
+  "contest_mollusk_act",
 ];
 const TS_FILES = [
   "tests/brot/checks.test.ts",
@@ -67,6 +68,7 @@ const TS_FILES = [
   "tests/brot/sealed-entry.test.ts",
   "tests/brot/sealed-settle.test.ts",
   "tests/brot/sealed-outcomes.test.ts",
+  "tests/brot/contest-act.test.ts",
 ];
 const PATH = `${process.env.HOME}/.bun/bin:${process.env.PATH}`;
 // Mollusk and LiteSVM both run the binary this script builds; logs off and no colours to parse.
@@ -154,6 +156,12 @@ sealed_fee_finalized  fail  sealed_fee_finalized_refuses_a_campaign_not_finalize
 sealed_fees_open      fail  sealed_fees_open_keeps_the_campaign_from_closing | Split: the sealed entry is paid as any winning entry, and its fee goes to the fee vault
 distinct              fail  settle_sealed_fee_refuses_its_sealed_fee_in_another_slot | -
 sealed_terms          fail  sealed_terms_refuse_an_entry_signed_under_other_creation_rules | the creation rules signed are the config's: a change between the preview and the landing refuses it
+contest_act           fail  contest_act_refuses_any_other_byte_and_any_other_length | contest act: any other byte or data length is BadInstructionData and writes nothing
+contest_already_open  fail  contest_already_open_refuses_a_retried_opening_at_either_stage | contest act: a retried or duplicate opening is refused with ContestAlreadyOpen and writes nothing
+contest_not_open      fail  contest_not_open_refuses_an_escalation_of_a_campaign_not_contested | contest act: byte 2 on a campaign not contested is refused with NotContested and writes nothing
+contest_act           fail  contest_act_is_the_byte_and_fits_the_campaign_on_the_host | -
+contest_already_open  fail  contest_act_is_the_byte_and_fits_the_campaign_on_the_host | -
+contest_not_open      fail  contest_act_is_the_byte_and_fits_the_campaign_on_the_host | -
 `;
 
 const args = process.argv.slice(2);

@@ -1,6 +1,6 @@
 # Sprint 14 — Referral and second read
 
-**Status:** in progress: the program, the SDK, the referral routine and the randomized test built and tested (2026-10-13), with the founder's answer to D2 built the same day; waiting for the second red-team pass, the merge and the devnet redeploy · **Branch:** `sprint-14-referral-second-read` · **Dates:** none, by the founder's decision
+**Status:** in progress: the program, the SDK, the referral routine and the randomized test built and tested (2026-10-13), with the founder's answer to D2 built the same day and the second red-team pass's findings fixed; waiting for the merge and the devnet redeploy · **Branch:** `sprint-14-referral-second-read` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -57,6 +57,9 @@ without the other.
       (6 + 24 + 48), is a test case.
       *Done:* the escalation and each of its refusals (`contest-escalate.test.ts`, `contest_mollusk_escalate.rs`); the
       78-hour bound holds on-chain with the keeper down for a week or re-reading a week late (`contest-worst-case.test.ts`).
+      Since the second red-team pass (S1) the act is the signed byte, `team_open_contest(1)` opens and
+      `team_open_contest(2)` escalates, so a retried or duplicate opening is refused (`ContestAlreadyOpen`, 6177) and
+      never escalates: `contest-act.test.ts`, `contest_mollusk_act.rs`.
 - [ ] On a price campaign, the second read fetches the proof transaction at `posted_slot` through RPC B, on the
       standby (Sprint 07; proposal §2.5). On the other kinds, it re-reads the account and compares it with
       `observed_value`.
@@ -144,6 +147,7 @@ bun test tests/ -t "checks refuse"                    # Sprint 02's negatives
 bun test tests/ -t "decide contest never inverts"
 bun test tests/ -t "contest worst case is 78 hours"   # 6 + 24 + 48 (D2), with the keeper down or late
 bun test tests/ -t "contest escalate"                 # a team key sends a stage-1 contest to the admin (D2)
+bun test tests/ -t "contest act"                      # the act is the signed byte: a retried opening never escalates (S1)
 bun test services/ -t "referral basis"                # the referral basis against a campaign's events
 node scripts/codemap.js --check && node scripts/ci-secret-scan.js origin/main
 ```
@@ -213,7 +217,18 @@ and 538 mainnet tests). The mutation proof covers every new check: the two refer
 37 cases, each failing as it must; the link's rows on Sprint 02's shared checks have no recorded run.
 
 **Open, with owners.**
-- **The lead:** the second red-team pass on the post-review changes: review-14-second.md (result added by the lead).
+- **Done, the second red-team pass** on the post-review changes (F3 to F10, D2 and the referral routine), 2026-10-13: no
+  way found to pay a contested result early or to the wrong side, or to freeze a pot. Its findings, all fixed the same
+  day: **S1** (medium), `team_open_contest` chose open or escalate from the stored status, so a retried opening (a 429
+  after it landed, or a second team member on the same alert) escalated a stage-1 contest: the act is now the signed
+  byte, with `ContestAlreadyOpen` (6177) and `NotContested` (lane L14B: `9d8df7c` to `9f19d88`; the summary names the
+  act from the byte; `contest.ts --escalate`, and opening plus escalating in one transaction; the mutation run killed
+  all nine cases of the three new ids). **R1** (medium), the signing file could pay a line twice after a re-run: it now
+  runs once and checks each line's memo on chain first. **R2** (medium), a referrer that cannot be credited (a sysvar)
+  stopped every batch: such a line is held for a person, every other line simulated at prepare, and a failed line no
+  longer stops the run. **R3** (low), batch numbers and ledger recovery; **R4** (low), the file bound to its cluster by
+  the genesis hash and the RPC URL kept off every command line; **I1** (low), the indexer now reads an admin Void
+  (lane L14R: `0db32d1`, `f9480d7`, `d3372bc`). Info: `ContestNotLapsed`'s message and the stale plan lines fixed.
 - **The founder:** the notice text before the referee signs and on the privacy page; the ledger's retention; where the
   referral balance shows (L-10).
 - **The lead, after the merge:** the devnet redeploy with Ronaldo; the keeper calling `reread_campaign` in stage 1 and
