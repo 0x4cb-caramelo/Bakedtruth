@@ -7,7 +7,7 @@
  *          lamports) turns that row `landed`; anything else that left the wallet under a payout memo is recorded as
  *          landed too, to whoever received it, with a note (a duplicate, a changed amount, a row this ledger never
  *          had, an irregular shape), so a lost, stale or bypassed ledger can never make the routine pay twice.
- * Version: 0.2.0 (every transfer under a payout memo counts as paid, by signature and instruction)
+ * Version: 0.3.0 (the scan keeps and reports the oldest signature it ever read)
  * Sprint:  14 (referral, lane L14R)
  *
  * Only transfers under a payout memo are read: a payout sent by hand without one is not seen, so every payout goes
@@ -41,7 +41,15 @@ export type Landing = {
   irregular: string | null;
 };
 export type Recorded = { landing: Landing; note: string | null };
-export type ScanReport = { scanned: number; recorded: Recorded[]; stoppedAt: string | null };
+export type ScanReport = {
+  scanned: number;
+  recorded: Recorded[];
+  stoppedAt: string | null;
+  /** The last signature scanned before this read, or `null` when this read began at the RPC's oldest. */
+  since: string | null;
+  /** The oldest signature this ledger ever read for the wallet. */
+  first: { signature: string; slot: number } | null;
+};
 
 type Ix = { programIdIndex: number; accounts: readonly number[]; data: string };
 const view = (bytes: Uint8Array) => new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
@@ -106,7 +114,9 @@ export function recordLanding(ledger: Store, l: Landing): string | null | undefi
 
 /**
  * Scans `ops`'s signatures newer than the last scanned, oldest first, recording each payout with the scan's place.
- * A transaction the node does not return yet stops the scan there (`stoppedAt`); a call that fails throws.
+ * A transaction the node does not return yet stops the scan there (`stoppedAt`); a call that fails throws. The report
+ * says where this read began (`since`, null for the start of the RPC's history) and the oldest signature the ledger
+ * ever read for the wallet (`first`): on a node that keeps no full history, it is not the wallet's first transaction.
  */
 export async function scanLandings(
   rpc: SolanaRpc,
@@ -115,28 +125,38 @@ export async function scanLandings(
   options: { timeoutMs?: number; pageSize?: number } = {},
 ): Promise<ScanReport> {
   const o = { timeoutMs: options.timeoutMs ?? 20_000, pageSize: options.pageSize ?? 1_000 };
-  const last = ledger.db.query("SELECT last_signature FROM scans WHERE ops_wallet = ?").get(ops) as {
-    last_signature: string;
-  } | null;
-  const listed = (await listNewer(rpc, ops, last?.last_signature ?? null, o)).reverse();
-  const report: ScanReport = { scanned: 0, recorded: [], stoppedAt: null };
+  const place = () =>
+    ledger.db.query("SELECT * FROM scans WHERE ops_wallet = ?").get(ops) as {
+      last_signature: string;
+      first_signature: string;
+      first_slot: number;
+    } | null;
+  const since = place()?.last_signature ?? null;
+  const listed = (await listNewer(rpc, ops, since, o)).reverse();
+  const report: ScanReport = { scanned: 0, recorded: [], stoppedAt: null, since, first: null };
+  const done = () => {
+    const at = place();
+    return { ...report, first: at === null ? null : { signature: at.first_signature, slot: at.first_slot } };
+  };
   for (const s of listed) {
     const tx = s.failed
       ? null
       : ((await rpc
           .getTransaction(toSignature(s.signature), TX)
           .send({ abortSignal: AbortSignal.timeout(o.timeoutMs) })) as unknown as RpcTransaction | null);
-    if (!s.failed && tx === null) return { ...report, stoppedAt: s.signature };
+    if (!s.failed && tx === null) return { ...done(), stoppedAt: s.signature };
     ledger.tx(() => {
       for (const landing of tx === null ? [] : payoutsOf(tx, ops)) {
         const note = recordLanding(ledger, landing);
         if (note !== undefined) report.recorded.push({ landing, note });
       }
-      ledger.db.run("INSERT OR REPLACE INTO scans (ops_wallet, last_signature, last_slot) VALUES (?, ?, ?)", [
-        ...[ops, s.signature, s.slot],
-      ]);
+      ledger.db.run(
+        `INSERT INTO scans (ops_wallet, last_signature, last_slot, first_signature, first_slot) VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT (ops_wallet) DO UPDATE SET last_signature = excluded.last_signature, last_slot = excluded.last_slot`,
+        [ops, s.signature, s.slot, s.signature, s.slot],
+      );
     });
     report.scanned += 1;
   }
-  return report;
+  return done();
 }

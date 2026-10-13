@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **1086** |
+| Arquivos mapeados | **1093** |
 | Acima de 200 linhas | **44** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -1138,9 +1138,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`common.ts`](scripts/referral/common.ts) | what the referral commands share (Sprint 14, lane L14R): their flags (`--name value` and `--switch`, any other argument refused), the operations wallet checked  | 88 |
-| [`prepare.ts`](scripts/referral/prepare.ts) | the weekly referral routine's first command (Sprint 14, lane L14R; TP §3.4.11), run on the server beside the indexer: it reads the indexer's file read-only, syn | 58 |
+| [`prepare.ts`](scripts/referral/prepare.ts) | the weekly referral routine's first command (Sprint 14, lane L14R; TP §3.4.11), run on the server beside the indexer: it reads the indexer's file read-only, syn | 68 |
 | [`record.ts`](scripts/referral/record.ts) | the weekly referral routine's second command (Sprint 14, lane L14R): after a person ran a batch's signing file, it reads the operations wallet's history at `fin | 48 |
+| [`rehearse.ts`](scripts/referral/rehearse.ts) | rehearse the referral signing file with the real Solana CLI (Sprint 14, lane L14R; second review, R1, R2 and R4) on a local OFFLINE surfnet inside a loopback-on | 140 |
 | [`report.ts`](scripts/referral/report.ts) | the public report of a batch (Sprint 14, lane L14R; services/indexer/src/referral/report.ts): wallets and amounts only, paid and pending, read from the ledger o | 31 |
+| [`simulate.ts`](scripts/referral/simulate.ts) | the credit check the prepare command gives the routine (Sprint 14, lane L14R; second review, R2): each line's transfer as the signing file sends it (a System Pr | 79 |
 | [`snapshot.ts`](scripts/referral/snapshot.ts) | the hook of the referral ledger's nightly snapshot (TP §3.4.11, "its ledger is an evidence table snapshotted nightly (A-4)"; Sprint 14, lane L14R), like the ind | 37 |
 
 ## `scripts/rehearsal/`
@@ -1259,7 +1261,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`alerts.ts`](services/indexer/src/alerts.ts) | the alerts the indexer feeds (TP §3.5 "Observability and alerting", the "Open creation" row; Sprint 08 DoD): an entry by the creator's own wallet on a campaign  | 106 |
-| [`campaign-row.ts`](services/indexer/src/campaign-row.ts) | one opening of a campaign as a `campaigns` row (TP §4; Sprint 08), folded from its events in `seq` order the way the program moves its account (state/transition | 147 |
+| [`campaign-row.ts`](services/indexer/src/campaign-row.ts) | one opening of a campaign as a `campaigns` row (TP §4; Sprint 08), folded from its events in `seq` order the way the program moves its account (state/transition | 162 |
 | [`codec.ts`](services/indexer/src/codec.ts) | how the indexer keeps an event (Sprint 08): its payload as JSON for readers (amounts as decimal strings, bytes as hex, enums as their numbers) and its own bytes | 53 |
 | [`config.ts`](services/indexer/src/config.ts) | the indexer's settings, from its environment only (Sprint 08): the RPC URL of its own account and its WebSocket URL (secrets: read from systemd credential files | 88 |
 | [`derived.ts`](services/indexer/src/derived.ts) | what the indexer derives after each refresh from its finalized rows and one read of the live chain (Sprint 08): the live campaign accounts and the chain's clock | 24 |
@@ -1294,26 +1296,29 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`schema.ts`](services/indexer/src/db/schema.ts) | the indexer's SQLite schema (TP §4, Appendix B, D6 names; Sprint 08) and the version a file must carry (`PRAGMA user_version`). The projections of the program's | 109 |
-| [`store.ts`](services/indexer/src/db/store.ts) | the indexer's SQLite file behind a small adapter (TP §3.5, §4; Sprint 08): bun:sqlite in WAL mode with `synchronous = NORMAL` and a busy timeout; the schema cre | 65 |
+| [`store.ts`](services/indexer/src/db/store.ts) | the indexer's SQLite file behind a small adapter (TP §3.5, §4; Sprint 08): bun:sqlite in WAL mode with `synchronous = NORMAL` and a busy timeout; the schema cre | 68 |
 
 ## `services/indexer/src/referral/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`basis.ts`](services/indexer/src/referral/basis.ts) | the basis of one referee's entry on one opening (TP §3.4.11, §3.4.16; Sprint 14, lane L14R): the fee Brot actually kept on its winning entry, `(fee − from_fee)  | 109 |
-| [`batch.ts`](services/indexer/src/referral/batch.ts) | the week's batch (Sprint 14, lane L14R; TP §3.4.11): what each wallet is owed, its earnings (earned.ts) less what the chain shows it was paid and what is still  | 140 |
+| [`batch.ts`](services/indexer/src/referral/batch.ts) | the week's batch (Sprint 14, lane L14R; TP §3.4.11): what each wallet is owed, its earnings (earned.ts) less what the chain shows it was paid and what is still  | 128 |
+| [`credit.ts`](services/indexer/src/referral/credit.ts) | whether a payout line can be credited at all (Sprint 14, lane L14R; second review, R2): a referee may name any address as its referrer, and a line the runtime a | 47 |
 | [`earned.ts`](services/indexer/src/referral/earned.ts) | what each wallet has earned from referrals as the indexer's file stands (Sprint 14, lane L14R; TP §3.4.11, "it reads finalized rows only"): the referral rows co | 63 |
 | [`facts.ts`](services/indexer/src/referral/facts.ts) | what the indexer's file says about referrals (Sprint 14, lane L14R; TP §3.4.11), from its finalized rows only: every `ReferralLinked` (the first for each refere | 162 |
-| [`landed.ts`](services/indexer/src/referral/landed.ts) | what the chain says was paid (Sprint 14, lane L14R): the operations wallet's own signatures at `finalized`, back to the last one scanned, each successful transa | 143 |
-| [`ledger.ts`](services/indexer/src/referral/ledger.ts) | the referral payouts' ledger (TP §3.4.11, "its ledger is an evidence table snapshotted nightly (A-4)"; Sprint 14, lane L14R): the `referral_payouts` evidence ta | 133 |
+| [`landed.ts`](services/indexer/src/referral/landed.ts) | what the chain says was paid (Sprint 14, lane L14R): the operations wallet's own signatures at `finalized`, back to the last one scanned, each successful transa | 163 |
+| [`ledger.ts`](services/indexer/src/referral/ledger.ts) | the referral payouts' ledger (TP §3.4.11, "its ledger is an evidence table snapshotted nightly (A-4)"; Sprint 14, lane L14R): the `referral_payouts` evidence ta | 151 |
 | [`order.ts`](services/indexer/src/referral/order.ts) | "before the first entry", decided by chain order (Sprint 14, lane L14R; the lead's rule of 2026-10-13): a referee's link counts only when its `ReferralLinked` c | 52 |
 | [`positions.ts`](services/indexer/src/referral/positions.ts) | the block positions the referral's chain order needs (Sprint 14, lane L14R; order.ts): for each slot where a referee's link and one of its first entries landed  | 46 |
 | [`project.ts`](services/indexer/src/referral/project.ts) | the referral tables (TP §3.4.11, §4; Sprint 14, lane L14R): every referee's rows computed from the indexer's finalized events (facts.ts, referee.ts) and the blo | 75 |
 | [`referee.ts`](services/indexer/src/referral/referee.ts) | one referee's referral state (TP §3.4.11; P1 §3.9; Sprint 14, lane L14R), from its link, its joins and the facts of each opening it entered: whether the link ca | 145 |
 | [`report.ts`](services/indexer/src/referral/report.ts) | the public report of a batch (Sprint 14, lane L14R; the sprint's security gate, "a public report carries wallets and amounts only"): the wallets the batch paid  | 39 |
-| [`routine.ts`](services/indexer/src/referral/routine.ts) | the weekly referral routine's two steps (TP §3.4.11; Sprint 14, lane L14R), as functions the commands in scripts/referral/ call and the tests drive. Prepare: sy | 56 |
+| [`routine.ts`](services/indexer/src/referral/routine.ts) | the weekly referral routine's two steps (TP §3.4.11; Sprint 14, lane L14R), as functions the commands in scripts/referral/ call and the tests drive. Prepare: sy | 69 |
 | [`rules.ts`](services/indexer/src/referral/rules.ts) | the referral's money rules as the founder set them (Ronaldo, 2026-10-13, "as recommended"; TP §3.4.11; BP v0.0.4 P1 §3.9; P-6), in one place: the referrer's 20% | 47 |
-| [`signing.ts`](services/indexer/src/referral/signing.ts) | what a person signs, and what they read first (Sprint 14, lane L14R; the founder's answer: the routine prepares the transfers and a person signs them from an op | 78 |
+| [`script.ts`](services/indexer/src/referral/script.ts) | the signing file a person runs ONCE where the operations wallet can sign (Sprint 14, lane L14R; the founder's answer: no payout key on the server; second review | 74 |
+| [`signing.ts`](services/indexer/src/referral/signing.ts) | what a person reads before signing, and the dry run's output (Sprint 14, lane L14R): the batch's slot and cluster (its genesis hash, which the signing file chec | 65 |
+| [`write.ts`](services/indexer/src/referral/write.ts) | a planned batch written to the ledger (Sprint 14, lane L14R; batch.ts plans it): `prepared` rows for the transfers of the signing file, `carried` rows for the l | 41 |
 
 ## `services/indexer/tests/`
 
@@ -1329,11 +1334,13 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`points.test.ts`](services/indexer/tests/points.test.ts) | the indexer's points against the SDK's rule (Q7 narrowed by the founder's answer 3a; Sprint 08 DoD "Points"), through the real ingest and decoder with no cluste | 104 |
 | [`ranking.test.ts`](services/indexer/tests/ranking.test.ts) | the home page's order (Sprint 08 DoD "Ranking and listing", X1.9) with no cluster: a partner campaign first during its highlight, only when a team key opened it | 146 |
 | [`referral-basis.test.ts`](services/indexer/tests/referral-basis.test.ts) | the referral basis over hand-built event streams, through the real ingest and a scripted RPC (Sprint 14, lane L14R; TP §3.4.11, §3.4.16), no cluster: a winning  | 171 |
-| [`referral-campaign.ts`](services/indexer/tests/referral-campaign.ts) | one campaign's life for the referral tests (Sprint 14, lane L14R): a small model of the program that lands the campaign's events as it would, numbered from seq  | 167 |
+| [`referral-campaign.ts`](services/indexer/tests/referral-campaign.ts) | one campaign's life for the referral tests (Sprint 14, lane L14R): a small model of the program that lands the campaign's events as it would, numbered from seq  | 181 |
 | [`referral-chain.ts`](services/indexer/tests/referral-chain.ts) | the chain of the referral tests (Sprint 14, lane L14R), with no cluster: each step is one landed transaction at the next slot, with a block time a test may set, | 152 |
-| [`referral-commands.test.ts`](services/indexer/tests/referral-commands.test.ts) | the referral commands (scripts/referral/; Sprint 14, lane L14R) on real files, no cluster: a dry run writes nothing; prepare writes the ledger, the signing file | 134 |
+| [`referral-commands.test.ts`](services/indexer/tests/referral-commands.test.ts) | the referral commands (scripts/referral/; Sprint 14, lane L14R) on real files, no cluster: a dry run writes nothing; prepare writes the ledger, the signing file | 154 |
+| [`referral-contest.test.ts`](services/indexer/tests/referral-contest.test.ts) | the admin's decision in the indexer's rows (Sprint 14, lane L14R; second review, I1), over hand-built event streams through the real ingest: a `ContestClosed` w | 48 |
+| [`referral-hold.test.ts`](services/indexer/tests/referral-hold.test.ts) | what the second review fixed in the weekly routine (Sprint 14, lane L14R), no cluster. R2: a line that can never be credited (a sysvar, an executable account, a | 127 |
 | [`referral-ledger.test.ts`](services/indexer/tests/referral-ledger.test.ts) | what keeps the referral routine from paying twice or paying blind (Sprint 14, lane L14R), no cluster: a batch is refused while another is open; cancel gives one | 159 |
-| [`referral-ops.ts`](services/indexer/tests/referral-ops.ts) | the operations wallet's side of the referral routine's tests (Sprint 14, lane L14R), with no cluster: the transfers a person sends from it, each a landed transa | 113 |
+| [`referral-ops.ts`](services/indexer/tests/referral-ops.ts) | the operations wallet's side of the referral routine's tests (Sprint 14, lane L14R), with no cluster: the transfers a person sends from it, each a landed transa | 144 |
 | [`referral-order.test.ts`](services/indexer/tests/referral-order.test.ts) | "before the first entry" by chain order (Sprint 14, lane L14R; the lead's rule of 2026-10-13), over hand-built event streams through the real ingest, no cluster | 98 |
 | [`referral-rebate.test.ts`](services/indexer/tests/referral-rebate.test.ts) | the referee's rebate and the referral tables' rebuild, over hand-built event streams through the real ingest (Sprint 14, lane L14R; P1 §3.9, P-6), no cluster: t | 106 |
 | [`referral-routine.test.ts`](services/indexer/tests/referral-routine.test.ts) | the weekly referral routine with no cluster (Sprint 14, lane L14R; TP §3.4.11): prepare writes the batch to the ledger, the signing file (Solana CLI transfers w | 126 |
@@ -1650,7 +1657,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`api-cycles.test.ts`](tests/indexer/api-cycles.test.ts) | the indexer's read routes over whole cycles in LiteSVM (Sprint 08, slice 2): every answer passes its schema in @brot/sdk/schemas on real chain data; each live c | 159 |
 | [`cycles-world.ts`](tests/indexer/cycles-world.ts) | the whole cycles the indexer's LiteSVM tests share (Sprint 08): a paid two-sided campaign paid out and closed, a one-sided pot refunded, a stale-feed void and a | 91 |
 | [`cycles.test.ts`](tests/indexer/cycles.test.ts) | the indexer against the program in LiteSVM behind the recording RPC (Sprint 08 DoD, X1.3): whole cycles run through the SDK's builders (a paid two-sided campaig | 185 |
-| [`referral-cycle.test.ts`](tests/indexer/referral-cycle.test.ts) | the referral end to end in LiteSVM (Sprint 14, lane L14R; TP §3.4.11): the real `user_link_referrer` and a whole campaign through the SDK's builders behind the  | 171 |
+| [`referral-cycle.test.ts`](tests/indexer/referral-cycle.test.ts) | the referral end to end in LiteSVM (Sprint 14, lane L14R; TP §3.4.11): the real `user_link_referrer` and a whole campaign through the SDK's builders behind the  | 182 |
 
 ## `tests/ops/`
 

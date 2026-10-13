@@ -149,7 +149,7 @@ describe("referral ledger", () => {
       openStore(join(dir, "indexer.sqlite")).close();
       expect(() => openLedger(join(dir, "indexer.sqlite"))).toThrow("not a referral ledger");
       openLedger(join(dir, "ledger.sqlite")).close();
-      expect(() => openStore(join(dir, "ledger.sqlite"))).toThrow("schema version 1, not 2");
+      expect(() => openStore(join(dir, "ledger.sqlite"))).toThrow("another application's id");
       expect(() => openLedger(join(dir, "ledger.sqlite"), { readonly: true }).close()).not.toThrow();
     } finally {
       rmSync(dir, { recursive: true, force: true });
