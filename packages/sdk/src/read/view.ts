@@ -2,7 +2,7 @@
  * Purpose: a campaign's public state (BR-05; TP 3.4.2): Open, Closed, In review, Paid or Void, computed
  *          by one function from what the program recorded and the CHAIN's time (the Clock sysvar, read
  *          with `readChainTime`), never the device's clock (A-7). Site, app and API all call it.
- * Version: 0.1.2 (Sprint 14 lane L14B: a contest's stage, its deadline and its lapse, an unread stage 1's included)
+ * Version: 0.1.3 (Sprint 14 lane L14B: a contest's stage, its deadline, its lapse; D2's wait and the escalation)
  * Sprint:  05 (SDK); 14 (lane L14B)
  *
  * | Public state | In the program |
@@ -16,9 +16,9 @@
  * "Closed" has no transaction: it comes from the clock and the reader. The epoch kinds know it from the
  * clock alone; the other kinds need the metric account (`outcomeKnowable`, ./knowable.ts), passed in as
  * `outcomeKnowable` by a caller that read it. A contest stays "In review" (TP 3.4.2): at stage 1 the reading
- * is run again (its deadline is the keeper's one-hour target, not a cut-off; a stage 1 nobody re-reads lapses 48
- * hours after it), at stage 2 the admin confirms or voids before the deadline, and from the lapse on the stored
- * result stands and finalize may run: at most 55 hours after the resolution.
+ * is run again (a matching re-read pays only after its 24 hours, during which a team key may send it to stage 2; a
+ * stage 1 nobody re-reads lapses 48 hours after it), at stage 2 the admin confirms or voids before the deadline, and
+ * from the lapse on the stored result stands and finalize may run: at most 78 hours after the resolution.
  */
 import { CONTEST_SECONDS, ContestStage, Outcome, ReaderKind, Status } from "./constants";
 import type { Campaign } from "./accounts";
@@ -41,6 +41,12 @@ export type PublicView = {
   /** Contested: the stage (`Stage1`, the reading run again; `Stage2`, the admin's decision) and its deadline. */
   contestStage: ContestStage | null;
   contestEndsAt: bigint | null;
+  /**
+   * Contested at stage 1 (D2): when a matching re-read may pay (stage 1's deadline, 24 hours after the contest opened),
+   * and whether a team key may still send the contest to stage 2 (until that deadline, by chain time).
+   */
+  contestTimelockEndsAt: bigint | null;
+  contestEscalable: boolean;
   /**
    * Contested: from when the stored result stands and finalize may run with no decision (stage 2's deadline, or 48
    * hours after stage 1's when nobody re-read it: review fix F3), and whether chain time has reached it.
@@ -65,7 +71,10 @@ function contestOf(campaign: Campaign, chain: ChainTime) {
         ? contestEndsAt + CONTEST_SECONDS.stage2
         : null;
   const contestLapsed = contestLapsesAt !== null && chain.unixTimestamp >= contestLapsesAt;
-  return { contestStage, contestEndsAt, contestLapsesAt, contestLapsed };
+  const stage1 = contestStage === ContestStage.Stage1;
+  const contestTimelockEndsAt = stage1 ? contestEndsAt : null;
+  const contestEscalable = stage1 && chain.unixTimestamp < contestEndsAt;
+  return { contestStage, contestEndsAt, contestTimelockEndsAt, contestEscalable, contestLapsesAt, contestLapsed };
 }
 
 /** The public state of `campaign` at chain time `chain`. Throws on a status the program never writes. */
@@ -81,6 +90,8 @@ export function publicState(
     windowEnded: false,
     contestStage: null,
     contestEndsAt: null,
+    contestTimelockEndsAt: null,
+    contestEscalable: false,
     contestLapsesAt: null,
     contestLapsed: false,
     settled: false,

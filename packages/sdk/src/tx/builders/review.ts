@@ -1,8 +1,8 @@
 /**
  * Purpose: the team's acts inside a campaign's review window, built by the Codama client: confirm the
- *          result, void it with a reason and the hash of its public note, open a contest (enabled in
- *          Sprint 14 with its exits: `../reread.ts` and `../decide-contest.ts`).
- * Version: 0.1.1 (the contest is no longer refused, Sprint 14 lane L14B)
+ *          result, void it with a reason and the hash of its public note, open a contest or send it to stage 2
+ *          (enabled in Sprint 14 with its exits: `../reread.ts` and `../decide-contest.ts`).
+ * Version: 0.1.2 (the contest is no longer refused, Sprint 14 lane L14B; the escalation, D2)
  * Sprint:  05 (SDK); 14 (lane L14B)
  *
  * A team key voids only an automatic void (`TeamVoidNotAutomatic` for a YES or NO, decision of
@@ -46,7 +46,9 @@ export async function buildTeamVoidCampaign(a: {
 
 /**
  * `team_open_contest`: inside the window, once every entry is tallied (`NotTallied` before); payout pauses and stage 1
- * starts: the reading is run again (`buildRereadCampaign`).
+ * starts for 24 hours: the reading is run again (`buildRereadCampaign`). The same call on a contest still at stage 1,
+ * before its deadline, sends it to stage 2 for the admin (D2; `WrongContestStage` at stage 2, `ContestDeadlinePassed`
+ * from stage 1's deadline on).
  */
 export async function buildTeamOpenContest(a: { teamMember: TransactionSigner; campaign: Address }) {
   return getTeamOpenContestInstruction({

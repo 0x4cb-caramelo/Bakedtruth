@@ -1,9 +1,10 @@
 /**
  * Purpose: `reread_campaign`, stage 1 of a contest (TP 3.4.7), built by the Codama client: any wallet, at the top
- *          level only, runs the campaign's reading again. The same reading pays out with the stored result; a
- *          different one, or a reader that cannot decide now, opens stage 2 (48 hours for the admin, counted from
- *          stage 1's deadline at the latest).
- * Version: 0.1.1 (review fix F9: no proof offered unless the caller passes one)
+ *          level only, runs the campaign's reading again. The same reading pays out with the stored result, but only
+ *          from stage 1's deadline on, 24 hours after the contest opened (`RereadBeforeTimelock` before it: the
+ *          founder's answer to D2); a different one, or a reader that cannot decide now, opens stage 2 at once (48
+ *          hours for the admin, counted from stage 1's deadline at the latest).
+ * Version: 0.1.2 (D2: a matching re-read's 24-hour wait; review fix F9: no proof offered unless the caller passes one)
  * Sprint:  14 (lane L14B)
  *
  * The proof slot is the resolution's. Unless the caller passes a proof, it holds the program's own address, which

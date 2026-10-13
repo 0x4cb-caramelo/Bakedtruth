@@ -4,8 +4,8 @@
  *          recipient, the team keys, every creation parameter, the admin's decision on a contest. Also the exact
  *          data size of every instruction, so a summary never describes bytes the program would refuse as
  *          `BadInstructionData`.
- * Version: 0.1.5 (Sprint 14 review fixes: the link's rent is counted and named, F7; the contest's texts moved to
- *          ./summary-contest.ts with the campaign the screen read, F6 and F9)
+ * Version: 0.1.6 (Sprint 14 review fixes: the link's rent is counted and named, F7; the contest's texts moved to
+ *          ./summary-contest.ts with the campaign the screen read, F6 and F9; D2: the opening or the escalation)
  * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 14 (lane L14B)
  */
 import * as G from "../idl/generated/instructions";
@@ -14,7 +14,7 @@ import { bytesToHex, type Bytes } from "../read/bytes";
 import { ACCOUNT_LEN } from "../read/constants";
 import { formatBps, formatSol } from "../read/format";
 import type { Campaign } from "../read/accounts";
-import { decisionText, rereadText } from "./summary-contest";
+import { contestOpenText, decisionText, rereadText } from "./summary-contest";
 
 /** The part of the summary's context these instructions read (`SummaryContext`, ./summary-brot.ts). */
 type OtherContext = { campaigns?: ReadonlyMap<string, Campaign>; linkRent?: bigint };
@@ -104,6 +104,7 @@ function teamText(teamLen: number, team: readonly string[]): string {
 /** One line for an instruction that takes nothing from the signer's wallet but the network fee. */
 export function describeOther(type: B, a: Slots, d: Record<string, any>, ctx: OtherContext = {}): string {
   const campaign = a.campaign?.address;
+  const stored = campaign === undefined ? undefined : ctx.campaigns?.get(campaign);
   switch (type) {
     case B.AdminInitializeConfig:
       return `Initialise the program's config and fee vault: admin ${d.admin}, fee recipient ${d.feeRecipient}; ${paramsText(d.params)} (the upgrade authority pays both rents)`;
@@ -126,11 +127,11 @@ export function describeOther(type: B, a: Slots, d: Record<string, any>, ctx: Ot
     case B.TeamConfirmResult:
       return `Confirm the result of campaign ${campaign} and end its review window`;
     case B.TeamOpenContest:
-      return `Contest the result of campaign ${campaign}: its payout pauses until the reading is run again (the same reading pays out; a different one gives the admin 48 hours to confirm or void, never to invert)`;
+      return contestOpenText(campaign, stored);
     case B.RereadCampaign:
-      return rereadText(campaign, a);
+      return rereadText(campaign, a, stored);
     case B.AdminDecideContest:
-      return decisionText(campaign, d, campaign === undefined ? undefined : ctx.campaigns?.get(campaign));
+      return decisionText(campaign, d, stored);
     case B.FinalizeCampaign:
       return `Finalize campaign ${campaign} after its review window`;
     case B.SettleEntry:

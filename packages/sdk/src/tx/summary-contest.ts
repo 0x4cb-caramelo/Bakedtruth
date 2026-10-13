@@ -1,15 +1,17 @@
 /**
- * Purpose: what the summary says for a contest's re-read and the admin's stage-2 decision (Sprint 14), from the bytes
- *          signed and, when the screen read it, the campaign: the decision, its reason, and where the 10% opening fee
+ * Purpose: what the summary says for a contest's opening or escalation, its re-read and the admin's stage-2 decision
+ *          (Sprint 14), from the bytes signed and, when the screen read it, the campaign: which of the team's two acts
+ *          the call is (D2), when a matching re-read may pay, the decision, its reason, and where the 10% opening fee
  *          goes. A house-failure void refunds the fee only once an entry landed (with no entry, founder answer 8 keeps
  *          it): the summary states the branch the program will take when it knows the campaign, and the rule when it
  *          does not (review fix F6). A re-read names a proof only when one is offered (review fix F9).
- * Version: 0.1.0
- * Sprint:  14 (lane L14B, review fixes F6 and F9)
+ * Version: 0.2.0 (the founder's answer to D2: stage 1's 24 hours and the team's escalation)
+ * Sprint:  14 (lane L14B, review fixes F6 and F9; D2)
  */
 import type { Campaign } from "../read/accounts";
 import { bytesToHex } from "../read/bytes";
-import { ContestDecision, PROGRAM_ID, SYSTEM_PROGRAM_ID, VoidReason } from "../read/constants";
+import { ContestDecision, ContestStage, PROGRAM_ID, Status, SYSTEM_PROGRAM_ID, VoidReason } from "../read/constants";
+import { formatUtc } from "../read/format";
 import { TEAM_VOID_REASONS } from "./decide-contest";
 
 type Slots = Record<string, { address: string }>;
@@ -49,11 +51,40 @@ export function decisionText(campaign: string | undefined, d: Record<string, any
   return `As the admin, void contested campaign ${campaign} (${reason}): ${voidReturns(d.voidReason, stored)}; ${note}`;
 }
 
-/** A contest's re-read, in words: a proof is named only when one is offered (the program's own address offers none). */
-export function rereadText(campaign: string | undefined, a: Slots): string {
+/** Stage 1's deadline as a date, when the screen read the campaign at stage 1; nothing otherwise. */
+function stage1Deadline(stored: Campaign | undefined): string {
+  const atStage1 = stored?.status === Status.Contested && stored.contestStage === ContestStage.Stage1;
+  return atStage1 ? ` (${formatUtc(stored.contestEndsAt)})` : "";
+}
+
+const TO_THE_ADMIN =
+  "the re-read closes and the admin has 48 hours to confirm or void the stored result, never to invert it (with no decision by then, it pays out as stored)";
+
+/**
+ * `team_open_contest`, in words (D2): on a result in review it opens a contest; on a contest still at stage 1, before
+ * stage 1's deadline, it sends the contest to stage 2. The branch is named when the screen read the campaign, and
+ * both are when it did not.
+ */
+export function contestOpenText(campaign: string | undefined, stored?: Campaign): string {
+  if (stored?.status === Status.Contested) {
+    if (stored.contestStage !== ContestStage.Stage1) {
+      return `Send the contest of campaign ${campaign} to stage 2, which the program refuses: it is at stage 2 already (WrongContestStage)`;
+    }
+    return `Send the contest of campaign ${campaign} to stage 2 before stage 1's deadline${stage1Deadline(stored)}, from which the program refuses it (ContestDeadlinePassed): ${TO_THE_ADMIN}`;
+  }
+  const open = `Contest the result of campaign ${campaign}: its payout pauses until the reading is run again (the same reading pays out as stored, but only after stage 1's 24 hours, during which a team key may send the contest to stage 2; a different one gives the admin 48 hours to confirm or void, never to invert)`;
+  if (stored !== undefined) return open;
+  return `${open}; on a contest still at stage 1, before its deadline, the same call sends it to stage 2: ${TO_THE_ADMIN}`;
+}
+
+/**
+ * A contest's re-read, in words: a matching reading pays only from stage 1's deadline on (D2), dated when the screen
+ * read the campaign; a proof is named only when one is offered (the program's own address offers none).
+ */
+export function rereadText(campaign: string | undefined, a: Slots, stored?: Campaign): string {
   const proof =
     a.proofAccount.address === PROGRAM_ID
       ? ""
       : `, with ${a.proofAccount.address} offered as proof (a proof the reader refuses refuses the re-read)`;
-  return `Run the reading of contested campaign ${campaign} again from ${a.metricAccount.address}${proof}: the same result pays out as stored; a different one opens stage 2, where the admin may confirm or void for 48 hours (counted from stage 1's deadline once that has passed)`;
+  return `Run the reading of contested campaign ${campaign} again from ${a.metricAccount.address}${proof}: the same result pays out as stored, but only from stage 1's deadline on${stage1Deadline(stored)}, 24 hours after the contest opened (before it the program refuses the re-read, RereadBeforeTimelock); a different one opens stage 2, where the admin may confirm or void for 48 hours (counted from stage 1's deadline once that has passed)`;
 }

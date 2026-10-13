@@ -28,7 +28,7 @@ import { DATA_SIZE, describeOther, otherLamports } from "./summary-other";
 
 /** What the screen read, so the summary can name it in words. */
 export type SummaryContext = {
-  /** The campaign at each address a join, or the admin's decision on a contest, points at, as read. */
+  /** The campaign at each address a join or a contest's act (its opening or escalation, re-read, decision) names. */
   campaigns?: ReadonlyMap<string, Campaign>;
   /** A referral link: the cluster's rent for its 96-byte account (`rentExemptMinimum`), which the referee pays. */
   linkRent?: bigint;

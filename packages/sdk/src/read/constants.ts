@@ -101,10 +101,11 @@ export const LIMITS = {
 export const CAMPAIGN_TEMPLATE_VERSION = 1;
 
 /**
- * A contest's two stages (constants.rs, Sprint 14): stage 1's hour for the re-read, stage 2's 48 hours for the admin.
- * An unread stage 1 lapses `stage2` after its own deadline, the latest any stage 2 can end (review fix F3).
+ * A contest's two stages (constants.rs, Sprint 14): stage 1's 24 hours (a matching re-read pays only after them, and
+ * until then a team key may send the contest to stage 2: the founder's answer to D2), stage 2's 48 hours for the
+ * admin. An unread stage 1 lapses `stage2` after its own deadline, the latest any stage 2 can end (review fix F3).
  */
-export const CONTEST_SECONDS = { stage1: 3_600n, stage2: 172_800n } as const;
+export const CONTEST_SECONDS = { stage1: 86_400n, stage2: 172_800n } as const;
 
 /** Price rules (constants.rs, "Prices"; join_rules.rs). */
 export const PRICE_RULES = {

@@ -1,8 +1,9 @@
 /**
  * Purpose: a contested campaign's public view (Sprint 14, lane L14B; TP 3.4.2): still "In review", with its stage, the
- *          stage's deadline and the stage-2 lapse computed from the CHAIN's time (A-7); a campaign in review that is
- *          not contested, or one already paying, shows no contest. Filter: `bun test tests/ -t "contest view"`.
- * Version: 0.1.1 (review fix F3: an unread stage 1 lapses too)
+ *          stage's deadline, stage 1's wait before a matching re-read pays and the team's escalation until then (D2),
+ *          and the lapse, all from the CHAIN's time (A-7); a campaign in review that is not contested, or one already
+ *          paying, shows no contest. Filter: `bun test tests/ -t "contest view"`.
+ * Version: 0.1.2 (D2: stage 1's 24 hours and the escalation; review fix F3: an unread stage 1 lapses too)
  * Sprint:  14 (lane L14B)
  */
 import { describe, expect, test } from "bun:test";
@@ -27,6 +28,8 @@ function campaign(over: Partial<Campaign>): Campaign {
 
 const chain = (unixTimestamp: bigint) => ({ slot: 1n, epoch: 0n, unixTimestamp });
 const REVIEW_ENDS = 5_000n;
+/** Stage 1's deadline for a contest opened at 5,100: its 24 hours later. */
+const STAGE1_ENDS = 5_100n + 86_400n;
 const contested = (stage: ContestStage, contestEndsAt: bigint) =>
   campaign({
     status: Status.Contested,
@@ -37,22 +40,25 @@ const contested = (stage: ContestStage, contestEndsAt: bigint) =>
   });
 
 describe("contest view", () => {
-  test("contest view: stage 1 is in review, paused, its re-read due by the hour's end", () => {
-    const view = publicState(contested(ContestStage.Stage1, 8_600n), chain(5_100n));
-    expect(view).toMatchObject({
+  test("contest view: stage 1 is in review, paused, a matching re-read waits for its deadline, the team escalates until then", () => {
+    const stage1 = contested(ContestStage.Stage1, STAGE1_ENDS);
+    expect(publicState(stage1, chain(5_100n))).toMatchObject({
       state: "InReview",
       contested: true,
       contestStage: ContestStage.Stage1,
-      contestEndsAt: 8_600n,
+      contestEndsAt: STAGE1_ENDS,
+      contestTimelockEndsAt: STAGE1_ENDS,
+      contestEscalable: true,
       contestLapsed: false,
     });
-    // Stage 1's deadline is the keeper's target, not a cut-off: past it, nothing has lapsed yet.
-    expect(publicState(contested(ContestStage.Stage1, 8_600n), chain(9_000n)).contestLapsed).toBe(false);
+    // The team's hand closes at stage 1's deadline, when a matching re-read may pay; nothing has lapsed there.
+    expect(publicState(stage1, chain(STAGE1_ENDS - 1n)).contestEscalable).toBe(true);
+    expect(publicState(stage1, chain(STAGE1_ENDS))).toMatchObject({ contestEscalable: false, contestLapsed: false });
   });
 
   test("contest view: a stage 1 nobody re-read lapses 48 hours after its deadline (review fix F3)", () => {
-    const unread = contested(ContestStage.Stage1, 8_600n);
-    const lapsesAt = 8_600n + 172_800n;
+    const unread = contested(ContestStage.Stage1, STAGE1_ENDS);
+    const lapsesAt = STAGE1_ENDS + 172_800n;
     expect(publicState(unread, chain(lapsesAt - 1n))).toMatchObject({
       contestLapsesAt: lapsesAt,
       contestLapsed: false,
@@ -64,6 +70,8 @@ describe("contest view", () => {
     const stage2 = contested(ContestStage.Stage2, 180_000n);
     expect(publicState(stage2, chain(179_999n))).toMatchObject({
       contestStage: ContestStage.Stage2,
+      contestTimelockEndsAt: null,
+      contestEscalable: false,
       contestLapsed: false,
     });
     expect(publicState(stage2, chain(180_000n))).toMatchObject({
@@ -76,7 +84,14 @@ describe("contest view", () => {
   });
 
   test("contest view: no contest shows for a campaign in review or already paying", () => {
-    const none = { contestStage: null, contestEndsAt: null, contestLapsesAt: null, contestLapsed: false };
+    const none = {
+      contestStage: null,
+      contestEndsAt: null,
+      contestTimelockEndsAt: null,
+      contestEscalable: false,
+      contestLapsesAt: null,
+      contestLapsed: false,
+    };
     const review = campaign({ status: Status.InReview, outcome: Outcome.No, reviewEndsAt: REVIEW_ENDS });
     expect(publicState(review, chain(1n))).toMatchObject({ state: "InReview", contested: false, ...none });
     // A campaign that was contested and is now paying keeps its stage in the account, not in the view.
