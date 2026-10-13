@@ -1,21 +1,23 @@
 /**
  * Purpose: the standby's three loops: the watchdog (every 5 minutes, probes the primary and takes over by the rules
- *          in standby.ts), the continuous feed watcher for open price campaigns, and the second read of InReview
- *          price campaigns (a mismatch goes to the review queue and an alert). The send gate reads the watchdog's
- *          state: a standby sends only after it has taken over and while the primary does not answer.
- * Version: 0.1.0
+ *          in standby.ts), the continuous feed watcher for open price campaigns, and the second read of every
+ *          campaign in review through RPC B (second-read-pass.ts: a price campaign against the transaction that wrote
+ *          its proof, the other kinds through the SDK's `recheck`; a mismatch goes to the review queue and an alert).
+ *          The send gate reads the watchdog's state: a standby sends only after it has taken over and while the
+ *          primary does not answer.
+ * Version: 0.2.0 (Sprint 07 carry-over: the second read of the proof transaction and of the other kinds)
  * Sprint:  07 (standby keeper and watchdog)
  */
 import type { TransactionSigner } from "@solana/kit";
-import { Status, type SolanaRpc } from "@brot/sdk/read";
+import { Status, recheck, type SolanaRpc } from "@brot/sdk/read";
 
 import type { Alerter } from "./alert";
 import type { KeeperConfig } from "./config";
+import type { LandingContext } from "./landing";
 import { listCampaignsWithStatus, listOpenCampaigns } from "./campaigns";
 import { log } from "./log";
-import { appendReview } from "./review-queue";
-import { secondRead } from "./second-read";
-import { startWatcher, priceCampaigns } from "./watcher";
+import { secondReadPass } from "./second-read-pass";
+import { startWatcher } from "./watcher";
 import { tryResolve } from "./resolve";
 import { INITIAL_WATCH, rulesOf, sendAllowed, type WatchState } from "./standby";
 import { watchdogTick } from "./watchdog";
@@ -30,6 +32,8 @@ export type StandbyDeps = {
   payer: TransactionSigner;
   secret: Uint8Array;
   alerter: Alerter;
+  /** The landing path of the watcher's resolves (never a dry run: the send gate decides). */
+  landing: LandingContext;
 };
 
 /** Runs `task` now and then every `ms`, never two at once; a throw is logged and the loop goes on. */
@@ -53,19 +57,19 @@ function every(ms: number, task: () => Promise<void>): () => void {
 }
 
 export function startStandby(deps: StandbyDeps): Standby {
-  const { config, rpc, payer, alerter } = deps;
+  const { config, rpc, alerter } = deps;
   const primaryUrl = config.primaryUrl ?? "";
   const rules = rulesOf(config);
   let watch: WatchState = INITIAL_WATCH;
   let primaryAlive = false;
   const mayTakeOver = () => sendAllowed("standby", watch, primaryAlive);
-  const checked = new Set<string>();
+  const memory = { done: new Set<string>(), unchecked: new Set<string>() };
 
   const watcher = startWatcher({
     intervalMs: config.watchMs,
     listOpen: () => listOpenCampaigns(rpc),
     mayResolve: mayTakeOver,
-    resolveOne: (open) => tryResolve(rpc, payer, false, open),
+    resolveOne: (open) => tryResolve(deps.landing, open),
     onAttempt: (result) => log(result.attempt, { campaign: result.campaign, detail: result.detail }),
     onError: (detail) => log("watch-error", { detail }),
   });
@@ -76,7 +80,7 @@ export function startStandby(deps: StandbyDeps): Standby {
       primaryAlive = next.primaryAlive;
     }),
     () => watcher.stop(),
-    every(config.cycleMs, () => secondReadPass(deps, checked)),
+    every(config.cycleMs, () => secondRead(deps, memory)),
   ];
   return {
     mayTakeOver,
@@ -84,25 +88,20 @@ export function startStandby(deps: StandbyDeps): Standby {
   };
 }
 
-/** The second read: every InReview price campaign once, both providers compared; a mismatch is queued and alerted. */
-async function secondReadPass(deps: StandbyDeps, checked: Set<string>): Promise<void> {
+/** The second read through RPC B, when one is configured; the journal names the origin that answered. */
+async function secondRead(deps: StandbyDeps, memory: { done: Set<string>; unchecked: Set<string> }): Promise<void> {
   const { config, rpc, rpcB, alerter } = deps;
-  if (!rpcB) return;
-  const inReview = priceCampaigns(await listCampaignsWithStatus(rpc, Status.InReview));
-  for (const open of inReview) {
-    const key = open.address.toString();
-    if (checked.has(key)) continue;
-    const result = await secondRead(rpc, rpcB, open.campaign.metricAccount, new Uint8Array(open.campaign.feedId));
-    if (result.match === null) continue; // not checked: retried on the next pass
-    checked.add(key);
-    if (result.match) continue;
-    await appendReview(config.reviewQueuePath, {
-      at: new Date().toISOString(),
-      campaign: key,
-      reason: "second_read_mismatch",
-      primarySlot: null,
-      detail: result.detail,
-    });
-    alerter.alert("second_read_mismatch", key, { detail: result.detail });
-  }
+  if (!rpcB || !config.rpcUrlB) return;
+  const urlB = config.rpcUrlB;
+  const answeredBy = new URL(urlB).origin;
+  await secondReadPass({
+    listInReview: () => listCampaignsWithStatus(rpc, Status.InReview),
+    rpcB,
+    recheck: (at) => recheck(at, urlB),
+    answeredBy,
+    sameProvider: answeredBy === new URL(config.rpcUrl).origin,
+    queuePath: config.reviewQueuePath,
+    alerter,
+    memory,
+  });
 }
