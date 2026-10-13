@@ -1,9 +1,11 @@
 # Sprint 08 — Indexer, API, relay and points
 
-**Status:** in progress. The **hackathon MVP** (founder, 2026-10-10), the read API for Lucas's screens, is merged
-(branch `sprint-08-read-api`). The **second part** (2026-10-11, branch `sprint-08-price-names-relay`): `/api/v1/names`,
-`/api/v1/price` and `brot-rpc`, built and tested, not deployed; the SQLite indexer is still to come · **Dates:** none,
-by the founder's decision
+**Status:** in progress. The read API (`services/api`) is **live** on the server since 2026-10-11 (`brot-api` on
+127.0.0.1:4220, public at `brot.markets/api/v1`), with `/api/v1/names` and `/api/v1/price` (PR #69). `brot-rpc` is
+built and tested, not installed. The **SQLite indexer** (`services/indexer`, PR #72) is built and tested, not
+deployed: ingest, projections, points, rebuild, ranking (`/api/v1/ranking`), KPIs and the partner report, `feed_history`,
+the `logsSubscribe` wake-up, the creator-own-entry alert and its unit file (2026-10-13). What stays open is listed in
+"Record" · **Dates:** none, by the founder's decision
 
 ## Hackathon MVP scope (founder, 2026-10-10)
 
@@ -30,21 +32,27 @@ only path from a client to a paid RPC account, and it relays only what Brot's cl
 ## Definition of done
 
 - [ ] `services/indexer/src` has `ingest.ts`, `db/` (SQLite in WAL mode through `bun:sqlite`, behind a small adapter,
-      with one writer), `ranking.ts`, `points.ts`, `price.ts`, the KPIs and `api/` (TP §3.2).
+      with one writer), `ranking.ts`, `points.ts`, `price.ts`, the KPIs and `api/` (TP §3.2). **Slice 1 (2026-10-11):**
+      `ingest.ts`, `db/` and `points.ts`, with the listing, the projections and the rebuild beside them.
 - [ ] **Ingestion** (proposal §2.7): `getSignaturesForAddress` for the program at `finalized`, paged back to the
       checkpoint and processed oldest first; `logsSubscribe` mentioning the program only as a wake-up hint; failed
       transactions skipped; events decoded by the SDK under the four decoder rules, lookup tables included; one SQLite
       transaction per signature (`INSERT OR IGNORE` on signature, top-level index and inner index; projections;
-      checkpoint). A gap in a campaign's `seq` refetches that campaign's signatures.
-- [ ] Tables of TP §4 and Appendix B: `events`, `campaigns`, `entries`, `settlements`, `points`, `checkpoints`, and the
-      evidence table `feed_history`.
-- [ ] **Rebuild:** deleting the file and rebuilding gives the same content as the live file, and its totals equal the
-      on-chain `Campaign` accounts and vault balances (X1.3).
+      checkpoint). A gap in a campaign's `seq` refetches that campaign's signatures. **Built (2026-10-11)** but the
+      `logsSubscribe` wake-up: the ingest polls (`INDEXER_POLL_MS`, 15 s).
+- [x] Tables of TP §4 and Appendix B: `events`, `campaigns`, `entries`, `settlements`, `points`, `checkpoints`, and the
+      evidence table `feed_history`. **Done (2026-10-11)** (`services/indexer/src/db/schema.ts`); a campaign is keyed by
+      (address, opening), since a closed id can open again; `feed_history` is written from a later slice.
+- [x] **Rebuild:** deleting the file and rebuilding gives the same content as the live file, and its totals equal the
+      on-chain `Campaign` accounts and vault balances (X1.3). **Done (2026-10-11)** (`tests/indexer/cycles.test.ts`).
 - [ ] **`/api/v1`,** read-only (TP §6): the campaign list and each campaign, its activity and its history, the recent
       activity across campaigns (`/api/v1/activity`), a wallet's entries, the leaderboard, `/names`, `/price` and
       `/health`, under the D6 names. DTOs are zod schemas in the SDK's own `schemas` entry point
       (`@brot/sdk/schemas`; `read` and `tx` never import zod, a lint rule since Sprint 05), with contract tests. Every response carries `chain_time`; lists carry `as_of_slot`; `/health`
-      returns `program_last_deploy_slot`, `schema_version`, `cluster` and `entries_allowed`.
+      returns `program_last_deploy_slot`, `schema_version`, `cluster` and `entries_allowed`. **Slice 2 (2026-10-11),
+      in the indexer:** a campaign's activity and chance, `/api/v1/activity` and a wallet's entries, with their zod
+      schemas in `@brot/sdk/schemas` (`indexer.ts`) and contract tests; the campaign list, the leaderboard, names,
+      price and health stay in `services/api` until the indexer takes them over.
 - [ ] Amounts are lamport strings, addresses base58, times Unix seconds in UTC. An unknown query parameter returns 400.
       An error returns `{ "error": { "code", "message" } }`, never a stack trace.
 - [x] **`/api/v1/price`** serves SOL's price in US$, fetched every few minutes, with its source and time. It never
@@ -242,3 +250,97 @@ unit could not run the Bun binary as its own user, and its key sat in the enviro
 relay's own root-owned copy of the pinned binary; the shared group first written could not reach the keeper's, as
 above). Its four low items too: typed options, the 8 KB socket limit, no `*` CORS origin, a cap on
 CoinGecko's answer.
+
+### The third part: the indexer (2026-10-11, branch `sprint-08-indexer`, slice 1)
+
+- **The file** (`services/indexer/src/db/`): bun:sqlite in WAL mode, one writer, the schema version in
+  `PRAGMA user_version`; a file of another version, or one that is not the indexer's, is refused, never migrated.
+  Appendix B's tables, with three changes the chain forced: `campaigns` is keyed by (address, opening), since a closed
+  campaign's id, and so its address, can carry a new campaign; `signatures` keeps each listed signature's place in the
+  chain (`ord`), since a slot holds many transactions; each event keeps its own bytes (`raw`), which the SDK decodes
+  again exactly. `settlements` has no `reserved`: a reserved creator share emits no event, so every row is a payment.
+- **The ingest** (`ingest.ts`, `listing.ts`): the program's signatures at `finalized`, newest first and paged back to
+  the checkpoint (a node that ignores `until` is cut there; a short page does not end the listing); read oldest first;
+  one SQLite transaction per signature with its events (`INSERT OR IGNORE`), the projections of the campaigns it
+  touches and its state. A transaction the node answers null for holds the later ones for up to five tries, then is
+  skipped and counted; a call that fails (a timeout, a node down) only stops the refresh, so an outage never makes it
+  skip; a gap in a campaign's `seq` lists that campaign's own signatures again, each refresh until it closes, with one
+  more read of a skipped one.
+- **The projections** (`project.ts`, `campaign-row.ts`): each address rebuilt whole from its events, split into
+  openings at each `CampaignOpened` and folded in `seq` order the way the program moves its account; entries with the
+  creator's own wallet flagged; a settlement for each payout to a baker, the creator or whoever opened.
+- **The points** (`points.ts`, `live.ts`): the SDK's `pointsTable` over every event and the live accounts judged by
+  `campaignNow`, which moved from the read API's leaderboard into the SDK so both use one rule.
+- **The rebuild** (`rebuild.ts`): the whole history into a new file; it refuses an existing path.
+- **Tests:** 10 with no cluster (the file; the ingest against a scripted RPC) and 6 on LiteSVM (four whole cycles; each
+  live row against its account and vault; a closed campaign that paid out what it took in; each baker's settlement is
+  what reached the wallet; the rebuild equals the live file; a second refresh changes nothing; the points equal the
+  leaderboard's). The LiteSVM run found that `EntryAdded.isFirst` marks the pot's first baker (Q3), not a wallet's
+  first entry, so the open entries are counted by wallet.
+- **Not in this slice:** the `/api/v1` routes over the file, the zod DTOs, the ranking and `content/partners.json`, the
+  KPIs and the partner report, `feed_history` and the nightly snapshot, the alerts, `logsSubscribe` and the unit.
+
+### Slice 2: the read routes (2026-10-11, same branch, after the merges of #69, #70 and #71)
+
+- **The branch, replayed.** Slice 1's three commits were replayed on `main` after PR #71 (`92f86f7`); the old base is
+  kept locally as `sprint-08-indexer-5bf3636`. Draft PR #72.
+- **The schemas** (`packages/sdk/src/schemas/indexer.ts`): an entry, a settlement and any other event as one
+  discriminated union; a campaign's activity; the split after each entry; the recent entries; a wallet's entries; the
+  error. The read API's conventions: lamports and slots as decimal strings, addresses base58, `as_of_slot` and
+  `chain_time` on every answer.
+- **The queries** (`services/indexer/src/api/queries.ts`): chain order is (slot, place, instruction, inner), so a
+  signature listed late for a gap still sorts by its slot; the other events are those that are neither an entry nor a
+  settlement row; `as_of_slot` is the last slot read in full (a pending signature holds it back).
+- **The routes and the server** (`routes.ts`, `server.ts`): GET only; an unknown parameter, a bad address or number is
+  a 400, an unknown campaign or opening a 404, never cached; answers cached 5 s at the edge (`s-maxage=5`); served from
+  the ingest's own handle on `127.0.0.1:4201`, with `/healthz`.
+- **Tests:** the routes over a hand-built file, each answer parsed by its schema (the contract), every refusal; the
+  settings and the running server; and on LiteSVM, the routes over the four cycles (each live split ends at its
+  account's pools, each activity opens with `CampaignOpened` and holds each entry once, each baker's entries and what
+  reached it). The hand-built test found the recent entries coming oldest first: a single `DESC` turned only the last
+  column of the order. The cycles moved to `tests/indexer/cycles-world.ts`, shared by both LiteSVM files.
+- **Open:** who reaches the routes from outside. The live read API (`services/api`, `brot.markets/api/v1`) does not
+  serve them yet: it can call the indexer on loopback for these four paths, or the tunnel can send them to port 4201.
+
+### Slice 3: ranking, KPIs, feed history, live wake-up, alert, DTOs (2026-10-13, lane L08 of the lead's run)
+
+- **Ranking and listing (X1.9):** computed in the indexer on every update and served at `/api/v1/ranking`: a partner
+  campaign first during its 72-hour highlight, only when a team key opened it (`creator_is_team`); then two-sided,
+  one-sided and empty; then more entries and the earlier close. A campaign with no entry 24 hours after opening leaves
+  the page. Nothing a creator can pay for counts, including entries from the creator's own wallet (TP §3.5) [decision
+  of the lane, to confirm].
+- **KPIs and the partner report (BR-29, BR-30, BR-34):** team exports with counts and lamports only, never an address
+  (a test checks it); the partner report in the format of Sprint 13's answer 4a. "On time" is not computed (it needs a
+  rule per kind); "30-day return" is a second campaign entered within 30 days of the first entry [lane's definition,
+  to confirm]. `content/partners.json` exists, empty, with its JSON Schema generated from the SDK's zod (optional link
+  and seal fields for Sprints 10 and 15) and a CI step that checks every content file against its schema.
+- **Points:** the indexer's table equals the SDK's `pointsTable` in every case of rule 3a.
+- **`feed_history`:** every update of each sponsored feed with an open price campaign, once per publish time, read in
+  `finalized`; a 15 s poll catches every devnet update (mainnet needs 5 s or a subscription). The nightly snapshot is a
+  hook (`VACUUM INTO`); the timer and the copy to VM 2 wait for VM 2 (D4).
+- **`logsSubscribe`:** only wakes the ingestion, which still lists and reads in `finalized`; the test, over a real
+  WebSocket, found that Kit 8.4 never reports the node's clean close, so a quiet subscription is renewed every 5 minutes.
+- **The alert the indexer feeds:** an entry from the creator's own wallet on a campaign whose result the creator can
+  move (burn, lock, stake, curve graduation), while the result is not final; journal lines in the keeper's format.
+  The test found a detail field overwriting the alert's own kind (fixed here; the same latent pattern in the keeper's
+  `alert.ts` went to the keeper lane).
+- **The API:** zod DTOs for every `/api/v1` answer; `/api/v1/health` gains `program_last_deploy_slot` and
+  `entries_allowed` (true only when the API is fresh, entries are not halted on-chain and `API_ENTRIES_ALLOWED` is on;
+  the same for every visitor). No field was removed.
+- **`deploy/vps/brot-indexer.service`:** written (own user, `LoadCredential=`, loopback 4201), not installed.
+- **The public devnet faucet's limit (C5):** "Maximum of 2 requests every 8 hours" (faucet.solana.com, read
+  2026-10-13); a GitHub sign-in raises it by an unstated amount.
+- **Privacy audit (gate 5), the nine answers:** the indexer stores public chain data only (wallets with their entries,
+  sides, amounts, times, payouts, the creator flag and points); KPIs and reports are counts and lamports; no IP, email
+  or cookie. Kept in `/var/lib/brot-indexer/indexer.sqlite` (0750 directory, 0077 umask, read-only sandbox, loopback
+  port, GET routes), for as long as the mirror is useful (it can be rebuilt from the chain at will); snapshot retention
+  is open. Logs carry counts and error names; alert lines carry campaign, side, lamports and signature. Chain data
+  cannot be deleted; the leaderboard's hide list is applied by `services/api`, and must be applied by the indexer too
+  if it ever serves the leaderboard (gap, recorded). The privacy page must describe the indexer's public routes before
+  they go live (TP §8 needs a subsection then).
+- **Checks:** `tsc` and lint clean; `bun test services/indexer` 46, `services/api` 40, `tests/indexer` 13; the full
+  suite 863 pass, 3 fail (the CPI-proxy tests, whose binary only CI builds).
+- **Open, with owners:** how the indexer's routes reach the public (founder: the read API as a proxy, or a tunnel
+  route); the indexer's RPC account (D4); the snapshot retention and VM 2 (D4); the privacy page text (founder, then
+  the lawyer); the real partner entries (founder, two-person review); the lane's three definitions above (founder);
+  the deploy (server, after the above).

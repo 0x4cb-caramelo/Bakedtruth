@@ -6,22 +6,11 @@
  *          success rate (the privacy review). Wallets whose owner asked to be left out (hidden.ts) are dropped before
  *          ranking. The route takes no wallet: a visitor's page finds its own line in the list, so a request to Brot
  *          never carries a wallet (TP §8.2).
- * Version: 0.3.0 (the founder's answer 3a: a live account says whether its pot is refunded, who opened it and its kind;
- *          0.2.0, the Sprint 13 reviews: the hide list, no success rate, a YES price result final only once settling)
- * Sprint:  13 (site: ranking, notices and copy)
+ * Version: 0.3.1 (Sprint 08: a live account's word comes from the SDK's `campaignNow`, which the indexer uses too; 0.3.0,
+ *          the founder's answer 3a; 0.2.0, the Sprint 13 reviews)
+ * Sprint:  13 (site: ranking, notices and copy); 08
  */
-import {
-  BOTH_SIDES_SCORE,
-  Outcome,
-  pointsTable,
-  ranksOf,
-  ReaderKind,
-  SettleMode,
-  snapshotOf,
-  storedVerdict,
-  type Campaign,
-  type CampaignNow,
-} from "@brot/sdk/read";
+import { BOTH_SIDES_SCORE, campaignNow, pointsTable, ranksOf, type CampaignNow } from "@brot/sdk/read";
 
 import type { Hidden } from "./hidden";
 import type { History } from "./history";
@@ -48,40 +37,8 @@ export function parseLeaderboardQuery(url: URL): LeaderboardQuery {
   };
 }
 
-/**
- * A live account's result is final once no key can change it and nothing is left to count: settling or settled, or
- * its window ended without a contest. A YES on a price campaign waits for settling: its late joins (at or after the
- * YES proof) are known only once every baker is tallied, which finalize requires, and on devnet nobody tallies until
- * someone settles. Whether the pot splits is the mode finalize stored, or the one it would store: entries close at
- * resolution, so a final result's totals are final too.
- */
-export function nowOf(row: Row): CampaignNow {
-  const c = row.campaign;
-  const v = row.view;
-  const outcome = c.outcome as Outcome;
-  const lateJoinsPossible = c.kind === ReaderKind.PriceTouch && outcome === Outcome.Yes;
-  const windowFinal = v.state === "InReview" && v.windowEnded && !v.contested && !lateJoinsPossible;
-  const final = v.state === "Paid" || v.state === "Void" || windowFinal;
-  const mode = final ? modeOf(c) : SettleMode.Unset;
-  return {
-    outcome,
-    final: final && mode !== SettleMode.Unset,
-    oneSided: mode === SettleMode.OneSided,
-    creator: c.creator,
-    kind: c.kind,
-  };
-}
-
-/** The mode finalize stored, or the one it would store now, through the SDK's mirror of its math. */
-function modeOf(c: Campaign): SettleMode {
-  if (c.settleMode !== SettleMode.Unset) return c.settleMode;
-  const verdict = storedVerdict(c);
-  try {
-    return verdict ? snapshotOf(c, verdict).mode : SettleMode.Unset;
-  } catch {
-    return SettleMode.Unset; // finalize would refuse these totals too: not final, so nothing scores yet
-  }
-}
+/** What a snapshot row's account says now for the points rule: the SDK's `campaignNow` (Sprint 13's rule). */
+export const nowOf = (row: Row): CampaignNow => campaignNow(row.campaign, row.view);
 
 /** The ranked lines, computed once per change of the history, the snapshot or the hide list. */
 export function createBoard(history: History, hidden?: Hidden) {

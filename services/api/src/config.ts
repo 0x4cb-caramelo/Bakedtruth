@@ -2,8 +2,9 @@
  * Purpose: the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only),
  *          the port and host (loopback by default), the refresh interval, the CORS origin for the site, how many
  *          program transactions a refresh reads for the leaderboard, and the file of wallets left out of it (Sprint
- *          13); the names file and the display price's interval (Sprint 08).
- * Version: 0.3.1 (2b: no CoinGecko settings)
+ *          13); the names file and the display price's interval (Sprint 08); K-11's entries switch, `on` unless set
+ *          to `off` (Sprint 08's third part).
+ * Version: 0.4.0 (the entries switch; 0.3.1, 2b: no CoinGecko settings)
  * Sprint:  08 (indexer and API, hackathon MVP)
  */
 import { fileURLToPath } from "node:url";
@@ -25,6 +26,8 @@ export type ApiConfig = {
   namesFile: string;
   /** How often the display price, Pyth's SOL/USD, is read (Sprint 08), in milliseconds. */
   priceRefreshMs: number;
+  /** K-11's switch: false turns /api/v1/health's `entries_allowed` off, whatever the chain says. */
+  entriesSwitch: boolean;
 };
 
 type Env = Record<string, string | undefined>;
@@ -53,7 +56,15 @@ export function loadApiConfig(env: Env = process.env): ApiConfig {
     namesFile:
       env.API_NAMES_FILE?.trim() || fileURLToPath(new URL("../../../content/account-names.json", import.meta.url)),
     priceRefreshMs: positive(env.API_PRICE_REFRESH_MS, 180_000, "API_PRICE_REFRESH_MS"),
+    entriesSwitch: onOff(env.API_ENTRIES_ALLOWED, "API_ENTRIES_ALLOWED"),
   };
+}
+
+/** `on` (the default) or `off`; anything else stops the start, so a typo never opens or closes entries silently. */
+function onOff(raw: string | undefined, name: string): boolean {
+  const value = raw?.trim() || "on";
+  if (value !== "on" && value !== "off") throw new Error(`${name} must be on or off`);
+  return value === "on";
 }
 
 /** An optional URL: unset or empty is null; anything else must parse. */

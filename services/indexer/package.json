@@ -1,0 +1,16 @@
+{
+  "name": "@brot/indexer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Brot Markets indexer (Sprint 08): the program's events at finalized, in a rebuildable SQLite file",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "bun src/main.ts",
+    "test": "bun test services/indexer tests/indexer"
+  },
+  "dependencies": {
+    "@brot/sdk": "workspace:*",
+    "@solana/kit": "~8.4.0"
+  }
+}

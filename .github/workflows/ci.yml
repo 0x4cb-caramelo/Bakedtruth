@@ -160,6 +160,11 @@ jobs:
       - name: Typecheck tests
         run: bunx tsc --noEmit
 
+      # Sprint 08: every content/*.json that has a JSON Schema beside it must match it (partners.json today, whose
+      # schema is generated from the SDK's zod and compared byte for byte by its own test).
+      - name: Content files match their JSON Schemas
+        run: bun run scripts/check-content-schema.ts
+
       - name: TypeScript tests (bun test + LiteSVM)
         run: bun run test
 
