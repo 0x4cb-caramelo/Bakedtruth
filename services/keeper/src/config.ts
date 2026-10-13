@@ -3,9 +3,13 @@
  *          origin and never the path or the query), the keeper's keypair file, the cluster, the cycle length,
  *          the dry-run switch, the health address, and (Sprint 07) the mode (primary or standby), the watchdog,
  *          the second RPC, the restart secret's file and the review queue. Nothing is read from the repository.
- * Version: 0.2.0
+ *          The two RPC URLs carry the provider's key: each is read from the systemd credential file its `*_FILE`
+ *          variable names (T13; the unit's LoadCredential=), or from the variable itself on a development machine;
+ *          the file wins. The settings beyond these are config-ops.ts's.
+ * Version: 0.3.0 (Sprint 07 carry-over: the RPC URLs as credentials, KEEPER_RPC_URL_FILE and KEEPER_RPC_URL_B_FILE)
  * Sprint:  07 (standby keeper and watchdog)
  */
+import { readFileSync } from "node:fs";
 
 export type KeeperMode = "primary" | "standby";
 
@@ -50,6 +54,13 @@ function required(env: Env, name: string): string {
   return value;
 }
 
+/** A secret from the credential file `NAME_FILE` names (read once, never logged), or from `NAME` itself. */
+function secret(env: Env, name: string, read: (path: string) => string): string | null {
+  const file = env[`${name}_FILE`]?.trim();
+  if (file) return read(file).trim() || null;
+  return env[name]?.trim() || null;
+}
+
 function optional(env: Env, name: string): string | null {
   return env[name]?.trim() || null;
 }
@@ -62,8 +73,8 @@ function positiveInt(env: Env, name: string, fallback: number): number {
   return value;
 }
 
-function url(env: Env, name: string): string | null {
-  const value = optional(env, name);
+function url(env: Env, name: string, read?: (path: string) => string): string | null {
+  const value = read ? secret(env, name, read) : optional(env, name);
   if (value === null) return null;
   try {
     new URL(value);
@@ -74,13 +85,12 @@ function url(env: Env, name: string): string | null {
 }
 
 /** Reads the settings or throws naming the variable that is wrong; the message never echoes a value. */
-export function loadConfig(env: Env = process.env): KeeperConfig {
-  const rpcUrl = required(env, "KEEPER_RPC_URL");
-  try {
-    new URL(rpcUrl);
-  } catch {
-    throw new Error("KEEPER_RPC_URL is not a URL");
-  }
+export function loadConfig(
+  env: Env = process.env,
+  read: (path: string) => string = (path) => readFileSync(path, "utf8"),
+): KeeperConfig {
+  const rpcUrl = url(env, "KEEPER_RPC_URL", read);
+  if (rpcUrl === null) throw new Error("KEEPER_RPC_URL is not set");
   const cluster = env.KEEPER_CLUSTER?.trim() || "devnet";
   if (cluster !== "devnet" && cluster !== "local") throw new Error("KEEPER_CLUSTER must be devnet or local");
   const healthHost = env.KEEPER_HEALTH_HOST?.trim() || "127.0.0.1";
@@ -97,7 +107,7 @@ export function loadConfig(env: Env = process.env): KeeperConfig {
     healthPort: positiveInt(env, "KEEPER_HEALTH_PORT", 4210),
     mode,
     primaryUrl: url(env, "KEEPER_PRIMARY_URL"),
-    rpcUrlB: url(env, "KEEPER_RPC_URL_B"),
+    rpcUrlB: url(env, "KEEPER_RPC_URL_B", read),
     restartSecretFile: optional(env, "KEEPER_RESTART_SECRET_FILE"),
     restartFlagPath: optional(env, "KEEPER_RESTART_FLAG") ?? "/run/brot-markets/restart.flag",
     reviewQueuePath: optional(env, "KEEPER_REVIEW_QUEUE") ?? "/var/lib/brot-markets/review-queue.jsonl",

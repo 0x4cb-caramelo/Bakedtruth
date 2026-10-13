@@ -27,6 +27,26 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **O keeper liquida, envia com orçamento e vigia a cadeia** (branch `sprint-07-keeper-carryover`, 13/10/2026; itens
+  abertos das Sprints 06 e 07). Nada instalado no servidor; nada enviado à devnet.
+  - **Liquidação atrás de `KEEPER_SETTLE`, desligada por padrão** (se o keeper da devnet paga é decisão do fundador):
+    tally (o de um SIM de preço espera o fim da janela, para o corte ainda poder voltar a uma prova anterior; os outros
+    resultados na hora), finalize depois da janela, `settle_entry` em lotes, parte do criador, prêmio, taxa, fechamento
+    e sweep, cada passo só quando o estado permite e com o destino gravado na cadeia. Testado em LiteSVM: Split,
+    OneSided, Refund por causa externa e falha da casa, cada lamport contra a matemática do SDK; dois keepers ao mesmo
+    tempo (um aterrissa, o outro recebe `AlreadySettled` e nada se move duas vezes).
+  - **Envio**: limite de unidades pela simulação, taxa de prioridade presa por tipo de instrução e por teto em
+    lamports, reenvio até o `lastValidBlockHeight`, instrução que falha sai do lote; repetição com espera crescente.
+  - **Leituras em lote**: um `getProgramAccounts` e `getMultipleAccounts` de 100; só simula a resolução de quem pode
+    resolver. Medido em processo: 1.000 campanhas abertas, 14 chamadas de RPC por ciclo.
+  - **Alertas novos**, cada um com runbook e teste: campanha parada (10 e 30 minutos), NÃO com `met_late`, 80% de
+    `max_open_campaigns`, aberturas por hora, abertura por chave do time, exposição nos cofres, crédito reservado
+    antigo, SOL/USD velho, mudança no programa da Pyth, segunda leitura sem conferência. Os campos da própria linha do
+    alerta não podem mais ser sobrescritos pelo detalhe.
+  - **Segunda leitura**: a campanha de preço contra a transação que gravou a prova no `posted_slot`, pelo RPC B; os
+    outros tipos pelo `recheck` do SDK; o diário diz qual RPC respondeu.
+  - **Unidades** `brot-keeper` e `brot-keeper-standby` com usuário próprio, segredos por `LoadCredential=` e
+    `ProtectProc=invisible`; não instaladas.
 - **O pacote de auditoria para as duas firmas** (branch `sprint-17-audit-fixes`, 13/10/2026; Sprint 17, a parte que
   não depende delas; `docs/audit/`). Cinco documentos, cada afirmação sobre o código com arquivo e linha em `395efa5`:
   - **`SCOPE.md`:** as 22 instruções; as dez regras de abertura do TP §3.4.10 com o código e o erro de cada uma; a

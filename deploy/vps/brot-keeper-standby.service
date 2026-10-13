@@ -1,52 +1,73 @@
-# Purpose: the standby keeper for VM 2 (Sprint 07): the same package as brot-keeper, in KEEPER_MODE=standby.
-#          It probes the primary, sends nothing while the primary answers, and takes over after the silence rule.
+# Purpose: the standby keeper for VM 2 (Sprint 07): the same package as brot-keeper, in KEEPER_MODE=standby. It
+#          probes the primary, sends nothing while the primary answers, takes over after the silence rule, and runs
+#          the second read through RPC B (the review queue in its state directory). Its own identity, and every
+#          secret a systemd credential (TP §11 and §12, T13): the keypair of wallet 2, the RPC URL, RPC B's URL and
+#          the restart secret, root-only files read by LoadCredential=, never in the environment.
 # Installs: VM 2 only, at another provider, as the unit of that machine. NOT INSTALLED anywhere yet: the second
-#           provider is a founder decision (D4). The ExecStart path below is the one on VM 2 and will differ from
-#           the primary's: adjust it when the machine is set up.
-# Secrets: the restart HMAC secret is a credential (LoadCredential=), never an environment variable. The keeper's
-#          keypair (wallet 2, SOL only) and the RPC URLs are read from the env file, root-owned, mode 0640.
+#           provider is a founder decision (D4). On VM 2, as root: the system user `brot-keeper` (no login), a
+#           root-owned copy of the pinned Bun at /usr/local/lib/brot-keeper/bun (group brot-keeper, 0750), the
+#           release under /srv/brot-markets/keeper readable by that group, and the four credential files below
+#           (root, 0400). /etc/brot-markets/keeper-standby.env (root, 0600) holds only settings, among them
+#           KEEPER_PRIMARY_URL (the primary's ops host), and none of the variables this unit sets (an
+#           EnvironmentFile= value overrides an Environment= line). Then `systemd-analyze security` and one start
+#           before `enable`.
 
 [Unit]
-Description=Brot Markets keeper, standby (VM 2): watchdog and takeover
+Description=Brot Markets keeper, standby (VM 2): watchdog, takeover and second read
 After=network-online.target
 Wants=network-online.target
 
 [Service]
-User=brot
-Group=brot
+User=brot-keeper
+Group=brot-keeper
 WorkingDirectory=/srv/brot-markets/keeper/current/services/keeper
 EnvironmentFile=/etc/brot-markets/keeper-standby.env
+LoadCredential=keeper-keypair:/etc/brot-markets/keeper-standby.json
+LoadCredential=keeper-rpc-url:/etc/brot-markets/keeper-rpc-url
+LoadCredential=keeper-rpc-url-b:/etc/brot-markets/keeper-rpc-url-b
 LoadCredential=restart-secret:/etc/brot-markets/restart-secret
-Environment=HOME=/var/lib/brot-markets
 Environment=KEEPER_MODE=standby
+Environment=KEEPER_KEYPAIR=%d/keeper-keypair
+Environment=KEEPER_RPC_URL_FILE=%d/keeper-rpc-url
+Environment=KEEPER_RPC_URL_B_FILE=%d/keeper-rpc-url-b
 Environment=KEEPER_RESTART_SECRET_FILE=%d/restart-secret
-ExecStart=/var/lib/brot-markets/bun/bun src/main.ts
+# Its own state directory: Bun's caches and the review queue (JSON lines, 0600), the only file it writes.
+StateDirectory=brot-keeper
+Environment=HOME=/var/lib/brot-keeper
+Environment=KEEPER_REVIEW_QUEUE=/var/lib/brot-keeper/review-queue.jsonl
+ExecStart=/usr/local/lib/brot-keeper/bun src/main.ts
 Restart=on-failure
 RestartSec=5
 UMask=0077
 
 # Limits: sized for a full takeover, on a machine that serves nothing else.
-MemoryMax=256M
+MemoryMax=384M
 CPUQuota=50%
 TasksMax=64
 
 # Sandboxing, as the primary's unit.
 NoNewPrivileges=true
 ProtectSystem=strict
-ReadWritePaths=/var/lib/brot-markets
 ProtectHome=true
 PrivateTmp=true
 PrivateDevices=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
+ProtectKernelLogs=true
 ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
 ProtectProc=invisible
 ProcSubset=pid
 RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 RestrictNamespaces=true
+RestrictRealtime=true
 RestrictSUIDSGID=true
 LockPersonality=true
+RemoveIPC=true
+SystemCallArchitectures=native
 CapabilityBoundingSet=
+AmbientCapabilities=
 
 [Install]
 WantedBy=multi-user.target

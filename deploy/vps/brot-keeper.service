@@ -1,46 +1,89 @@
-# Purpose: runs the Brot Markets keeper (MVP happy path, devnet) on 127.0.0.1:4210. Restarts on failure.
-# Install: copy to /etc/systemd/system/, then `systemctl daemon-reload && systemctl enable --now brot-keeper`.
-# The process is the unprivileged service user, opens no public port and writes nothing to disk.
-# The release lives in /srv/brot-markets/keeper/current (a link to releases/<commit>); settings and the keypair
-# are root-owned files readable by group brot (/etc/brot-markets/keeper.env, keeper-devnet.json).
+# Purpose: runs the Brot Markets keeper (devnet, primary) on 127.0.0.1:4210 as its own identity, with its secrets as
+#          systemd credentials (TP §11 and §12, T13; Sprint 06 DoD "per-unit identities"): the keypair, the RPC URL
+#          (it carries the provider's key) and the restart secret are root-only files read by LoadCredential=, never
+#          in the environment, so `/proc/<pid>/environ` holds no secret and ProtectProc=invisible hides the process
+#          from every other user. Restarts on failure. Opens no public port; writes only its runtime directory (the
+#          restart flag) and its state directory (Bun's caches).
+# Installs: NOT INSTALLED in this form. The server runs the earlier unit (User=brot, the RPC URL in keeper.env, the
+#          flag in /run/brot-markets). Installing this one needs the server owner's agreement to one identity per
+#          unit (Sprint 06, open), then, as root, before `systemctl daemon-reload`:
+#            1. `useradd --system --user-group --home-dir /nonexistent --no-create-home --shell /usr/sbin/nologin
+#               brot-keeper`;
+#            2. its own root-owned copy of the pinned Bun: `install -d -o root -g brot-keeper -m 0750
+#               /usr/local/lib/brot-keeper && install -o root -g brot-keeper -m 0750 /var/lib/brot-markets/bun/bun
+#               /usr/local/lib/brot-keeper/bun`, then `cmp` the two;
+#            3. the release readable by the group: `chgrp -R brot-keeper /srv/brot-markets/keeper`, `chmod -R g+rX,o-rwx`;
+#            4. the three credential files, root, 0400: /etc/brot-markets/keeper-devnet.json (the keypair, moved from
+#               its 0640 copy), /etc/brot-markets/keeper-rpc-url (the URL alone, taken out of keeper.env) and
+#               /etc/brot-markets/restart-secret (unchanged value);
+#            5. keeper.env (root, 0600) keeps only settings: no KEEPER_RPC_URL, KEEPER_KEYPAIR,
+#               KEEPER_RESTART_SECRET_FILE or KEEPER_RESTART_FLAG lines (an EnvironmentFile= value overrides this
+#               unit's Environment= lines), and KEEPER_SETTLE stays off unless the founder decides otherwise;
+#            6. the restart path unit and service of this directory, which now watch /run/brot-keeper/restart.flag;
+#               the tmpfiles line for /run/brot-markets can go.
+#          Then `systemd-analyze security brot-keeper.service`, one start with `journalctl -u brot-keeper -f` and
+#          `curl -s http://127.0.0.1:4210/healthz` before `enable`. Rollback: the previous unit file from
+#          /etc/brot-markets/bak-*/ and a restart.
 
 [Unit]
-Description=Brot Markets keeper (devnet, MVP happy path)
+Description=Brot Markets keeper (devnet, primary)
 After=network-online.target
 Wants=network-online.target
 
 [Service]
-User=brot
-Group=brot
+User=brot-keeper
+Group=brot-keeper
 WorkingDirectory=/srv/brot-markets/keeper/current/services/keeper
+# Settings only (root, 0600; systemd reads it before dropping privileges). No secret lives there.
 EnvironmentFile=/etc/brot-markets/keeper.env
-Environment=HOME=/var/lib/brot-markets
-ExecStart=/var/lib/brot-markets/bun/bun src/main.ts
+LoadCredential=keeper-keypair:/etc/brot-markets/keeper-devnet.json
+LoadCredential=keeper-rpc-url:/etc/brot-markets/keeper-rpc-url
+LoadCredential=restart-secret:/etc/brot-markets/restart-secret
+Environment=KEEPER_KEYPAIR=%d/keeper-keypair
+Environment=KEEPER_RPC_URL_FILE=%d/keeper-rpc-url
+Environment=KEEPER_RESTART_SECRET_FILE=%d/restart-secret
+# POST /restart writes its flag in the unit's own runtime directory (created for this user at start, removed at stop);
+# brot-keeper-restart.path, owned by root, watches it. The keeper's user never gets sudo.
+RuntimeDirectory=brot-keeper
+RuntimeDirectoryMode=0700
+Environment=KEEPER_RESTART_FLAG=/run/brot-keeper/restart.flag
+StateDirectory=brot-keeper
+Environment=HOME=/var/lib/brot-keeper
+ExecStart=/usr/local/lib/brot-keeper/bun src/main.ts
 Restart=on-failure
 RestartSec=5
 UMask=0077
 
-# Limits: this server is shared with other projects.
-MemoryMax=256M
+# Limits: this server is shared with other projects (TP §12: 384 MB to start).
+MemoryMax=384M
 CPUQuota=50%
 TasksMax=64
 
-# Sandboxing. The keeper writes nothing: its only output is the journal.
+# Sandboxing: the landing unit's, ProtectProc=invisible and ProcSubset=pid (they hide only once the user ids
+# differ, which this unit's own user makes true), and the kernel, clock and IPC protections a network client needs
+# none of. No MemoryDenyWriteExecute: Bun's JIT needs writable executable memory.
 NoNewPrivileges=true
 ProtectSystem=strict
-# Sprint 07: POST /restart writes its flag here (KEEPER_RESTART_FLAG). Created by /etc/tmpfiles.d/brot-markets.conf.
-ReadWritePaths=/run/brot-markets
 ProtectHome=true
 PrivateTmp=true
 PrivateDevices=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
+ProtectKernelLogs=true
 ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+ProtectProc=invisible
+ProcSubset=pid
 RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 RestrictNamespaces=true
+RestrictRealtime=true
 RestrictSUIDSGID=true
 LockPersonality=true
+RemoveIPC=true
+SystemCallArchitectures=native
 CapabilityBoundingSet=
+AmbientCapabilities=
 
 [Install]
 WantedBy=multi-user.target
