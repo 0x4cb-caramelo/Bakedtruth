@@ -10,10 +10,19 @@
 import { describe, expect, test } from "bun:test";
 
 import { join, readCampaign, readEntry, SOL_CHARGED } from "./flows";
+import * as I from "./instructions";
 import { ENTRY_LEN, JOIN_LEN } from "./join-campaign-support";
 import * as P from "./program";
-import { readSealedFee, SEALED_FEE_LEN, sealedCharge, sealedEntry, sealedState, sealedWorld } from "./sealed-support";
-import { balance, expectError, expectOk, rentFor, START_TIME, setPriceAccount } from "./setup";
+import {
+  readSealedFee,
+  SEALED_FEE_LEN,
+  sealedCharge,
+  sealedEntry,
+  sealedEntryIx,
+  sealedState,
+  sealedWorld,
+} from "./sealed-support";
+import { balance, expectError, expectOk, rentFor, send, START_TIME, setPriceAccount } from "./setup";
 
 const SOL = P.SOL;
 
@@ -136,6 +145,12 @@ describe("sealed entry", () => {
     solUsd({ conf: 1_000_000_000n });
     await refused({ side: P.Side.Yes }, "SolUsdConfidenceTooWide");
     solUsd({});
+    // Another account in the SOL/USD slot: the program derives the sponsored address and compares.
+    const elsewhere = I.withSlot(await sealedEntryIx(w, sponsor, campaign, { side: P.Side.Yes }), 7, {
+      address: P.BTC_USD_ACCOUNT,
+    });
+    expectError(await send(w, [elsewhere]), "SolUsdAccountMismatch");
+    expect(await sealedState(w, sponsor.address, campaign)).toEqual(kept);
     // At `max_lamports` exactly, the entry passes.
     expectOk(await sealedEntry(w, sponsor, campaign, { side: P.Side.Yes, maxLamports: paid }));
   });
