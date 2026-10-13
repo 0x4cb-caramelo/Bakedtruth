@@ -2352,6 +2352,21 @@ artifact with `brot_markets.so`, its IDL (`brot_markets.json`, the committed one
 build. *Mobile bundle* (added in Sprint 05; green on its pull request, PR #43, run 38009888067): Node 24.21.0,
 `npm ci --ignore-scripts` in `tests/react-native`, then `node run.mjs`.
 
+**Sprint 16, release integrity (2026-10-13)** **[F]** (`docs/technical/verifiable-build.md`). Every tool CI downloads
+is pinned by SHA-256 and installed by `scripts/ci/install-pinned.sh` (the Solana CLI and platform-tools, Bun, Node,
+gitleaks, `solana-verify` 0.5.2's release binary); `setup-bun` and `setup-node` left the workflow. `solana-verify build`
+runs twice from a clean state, in the Docker image pinned by digest (`--base-image`, because the image solana-verify
+would pick from `Cargo.lock` is 3.0.1's), and the job fails unless both hashes and the tested binaries are byte for
+byte the same. The devnet binary published in `programs-<sha>` now comes from that build; the `mainnet` build is
+published apart, as `programs-mainnet-<sha>` (`brot_markets.mainnet.so`, its IDL and its own `SHA256SUMS`), built
+with the one `MAINNET_FEATURES` list that the T12 tests also use, so the bytes the check tested are the bytes
+published. gitleaks backs the secret scan (`.gitleaks.toml`: Solana secret keys as JSON arrays and base58, keyed
+URLs, hex secrets, key stores); `CODEOWNERS` covers `.github/`, the secret scan and `.claude/hooks/`; a check refuses any
+`bun.lock` entry outside registry.npmjs.org. **Not done:** the provenance attestation, which GitHub offers only to
+public repositories or Enterprise Cloud organisations; it waits for the founder's choice (a public repository, which
+mainnet's `verify-from-repo` needs anyway, or a paid organisation). `CODEOWNERS` binds only with branch protection,
+which this plan lacks for a private repository.
+
 **What changes** **[DP]** (proposal §2.1, §2.3, §6).
 
 | Step | Change | Sprint |
@@ -2364,7 +2379,7 @@ build. *Mobile bundle* (added in Sprint 05; green on its pull request, PR #43, r
 | Services | `bun test services/` | 06–08 |
 | Web | The Playwright smoke at desktop and Android widths | 11 |
 | Lockfile | `bun install --frozen-lockfile` resolving from npmjs.org (T15) | 02, at its opening, before the Codama spike (done, `7d770ce`) |
-| Release integrity | `solana-verify build`, provenance attestation, pinned SHA-256 of downloaded tools, gitleaks or equivalent | 16 |
+| Release integrity | `solana-verify build`, provenance attestation, pinned SHA-256 of downloaded tools, gitleaks or equivalent | 16 (done 2026-10-13 but the attestation, which waits for the founder) |
 | Landing | Its tests leave with it | 09 |
 
 **How code reaches each place** **[DP]**.
