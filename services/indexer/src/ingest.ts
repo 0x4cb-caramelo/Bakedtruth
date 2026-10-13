@@ -12,7 +12,8 @@
  *          skipped one gets one more read each time, and never holds the others again). Last, the points and the
  *          home page's order, from one live read (derived.ts). Nothing about a visitor is ever stored: the indexer
  *          reads the chain only. Since Sprint 14, the referral tables are rewritten after each refresh, from the
- *          events alone (referral/project.ts); a failure there is named and stops nothing else.
+ *          events and the block positions a tie needs (referral/project.ts); a failure there is named and stops
+ *          nothing else.
  * Version: 0.3.0 (the referral tables after each refresh)
  * Sprint:  08 (indexer, API, relay and points); 14 (referral, lane L14R)
  */
@@ -34,7 +35,7 @@ import { checkpointOf, keepListed, listNewer, type ListOptions } from "./listing
 import { liveReader, type ReadLive } from "./live";
 import { refreshDerived } from "./derived";
 import { gapIn, projectAddress } from "./project";
-import { writeReferrals } from "./referral/project";
+import { refreshReferrals } from "./referral/project";
 
 export type IngestOptions = Partial<ListOptions> & {
   maxTries?: number;
@@ -55,7 +56,7 @@ export type IngestReport = {
   readError: string | null;
   /** The live read behind the points and the ranking failed: both stay as they were. */
   pointsError: string | null;
-  /** The referral tables could not be rewritten: they stay as they were. */
+  /** A block position or the referral tables could not be read or rewritten (referral/project.ts). */
   referralError: string | null;
 };
 
@@ -178,11 +179,7 @@ export function createIngest(rpc: SolanaRpc, store: Store, options: IngestOption
       }
       gapped = withGap([...touched, ...toFix]);
       report.gaps = [...gapped].sort();
-      try {
-        writeReferrals(store);
-      } catch (caught) {
-        report.referralError = nameOf(caught);
-      }
+      report.referralError = await refreshReferrals(rpc, store, list.timeoutMs);
       try {
         await refreshDerived(store, readLive, partners());
       } catch (caught) {

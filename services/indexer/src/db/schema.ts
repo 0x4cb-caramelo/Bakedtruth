@@ -16,9 +16,11 @@
  * event's `isFirst`: the wallet is the pot's first baker (Q3), on each of its entries.
  *
  * Schema 2 (Sprint 14, lane L14R): `referrals` (one row per `ReferralLinked`: the link, its status against the
- * referee's first entry, the 90-day window, the rebate state and what the referee earned its referrer) and
- * `referral_entries` (one row per opening an active referee entered: the basis of its winning entry and its state),
- * both rebuildable (referral/project.ts). The payouts' ledger is evidence and lives in its own file (referral/ledger.ts).
+ * referee's first entry, the 90-day window, the rebate state and what the referee earned its referrer),
+ * `referral_entries` (one row per opening an active referee entered: the basis of its winning entry and its state) and
+ * `tx_positions` (a transaction's index in its block, read only for a slot where a referee's link and first entry
+ * landed in different transactions: referral/positions.ts), all rebuildable. The payouts' ledger is evidence and lives
+ * in its own file (referral/ledger.ts).
  */
 export const SCHEMA_VERSION = 2;
 
@@ -71,7 +73,8 @@ export const SCHEMA: readonly string[] = [
     exponent INTEGER NOT NULL, posted_slot INTEGER, PRIMARY KEY (feed_account, publish_time))`,
   `CREATE TABLE referrals (
     referee TEXT PRIMARY KEY, referrer TEXT NOT NULL, linked_at INTEGER NOT NULL, linked_slot INTEGER NOT NULL,
-    signature TEXT NOT NULL, status TEXT NOT NULL CHECK (status IN ('awaiting_entry', 'active', 'late')),
+    signature TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('awaiting_entry', 'undecided', 'active', 'late')),
     first_entry_slot INTEGER, first_entry_time INTEGER, window_ends_at INTEGER, entered TEXT NOT NULL,
     rebate_reached_slot INTEGER, rebate_basis TEXT NOT NULL, rebate TEXT NOT NULL, basis TEXT NOT NULL,
     referrer_share TEXT NOT NULL, held INTEGER NOT NULL)`,
@@ -84,6 +87,7 @@ export const SCHEMA: readonly string[] = [
     basis TEXT NOT NULL, referrer_share TEXT NOT NULL, rebate_basis TEXT NOT NULL, payable_slot INTEGER,
     PRIMARY KEY (referee, campaign, opening))`,
   `CREATE INDEX referral_entries_referrer ON referral_entries (referrer, state)`,
+  `CREATE TABLE tx_positions (signature TEXT PRIMARY KEY, slot INTEGER NOT NULL, position INTEGER NOT NULL)`,
 ];
 
 /**
@@ -100,4 +104,5 @@ export const REBUILDABLE: readonly { table: string; columns: string; order: stri
   { table: "checkpoints", columns: "*", order: "source" },
   { table: "referrals", columns: "*", order: "referee" },
   { table: "referral_entries", columns: "*", order: "referee, campaign, opening" },
+  { table: "tx_positions", columns: "*", order: "signature" },
 ];

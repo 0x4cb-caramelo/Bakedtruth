@@ -36,6 +36,7 @@ describe("the indexer's SQLite file", () => {
       "referrals",
       "settlements",
       "signatures",
+      "tx_positions",
     ]);
     store.db.run("INSERT INTO checkpoints VALUES ('program', 'sig', 7)");
     store.close();
@@ -51,6 +52,7 @@ describe("the indexer's SQLite file", () => {
       "checkpoints",
       "referrals",
       "referral_entries",
+      "tx_positions",
     ]);
     again.close();
   });

@@ -1,11 +1,11 @@
 /**
  * Purpose: one referee's referral state (TP §3.4.11; P1 §3.9; Sprint 14, lane L14R), from its link, its joins and the
- *          facts of each opening it entered: whether the link came before its first entry (by slot, the two on-chain
- *          times: a link in the first entry's slot or later earns nothing); the 90-day window from that entry's chain
- *          time; each opening's basis (basis.ts) and the referrer's 20% of the part that landed in the window; and
- *          the rebate, the fee kept on its first 0.4576 SOL of entries once its entries reach 2.2879 SOL, capped at
- *          0.05 SOL. Pure. The rows are the `referrals` and `referral_entries` tables (db/schema.ts).
- * Version: 0.1.0
+ *          facts of each opening it entered: whether the link came before its first entry, by chain order (order.ts:
+ *          a link after it, or still undecided between two transactions of one slot, earns nothing); the 90-day
+ *          window from that entry's chain time; each opening's basis (basis.ts) and the referrer's 20% of the part
+ *          that landed in the window; and the rebate, the fee kept on its first 0.4576 SOL of entries once its entries
+ *          reach 2.2879 SOL, capped at 0.05 SOL. Pure. The rows are the `referrals` and `referral_entries` tables.
+ * Version: 0.2.0 (the link's status by chain order)
  * Sprint:  14 (referral, lane L14R)
  *
  * Read as the founder's rules leave open, and said in the lane's report: a join counts toward the 20% when its block
@@ -17,6 +17,7 @@ import { SettleMode } from "@brot/sdk/read";
 
 import { openingBasis } from "./basis";
 import type { Join, Link, OpeningFacts } from "./facts";
+import { linkedBefore } from "./order";
 import {
   REBATE_AFTER_LAMPORTS,
   REBATE_CAP_LAMPORTS,
@@ -31,7 +32,7 @@ export type ReferralRow = {
   linked_at: number;
   linked_slot: number;
   signature: string;
-  status: "awaiting_entry" | "active" | "late";
+  status: "awaiting_entry" | "undecided" | "active" | "late";
   first_entry_slot: number | null;
   first_entry_time: number | null;
   window_ends_at: number | null;
@@ -88,9 +89,11 @@ export function refereeRows(
   link: Link,
   joins: readonly Join[],
   factsOf: (campaign: string, opening: number) => OpeningFacts,
+  positionOf: (signature: string) => number | undefined,
 ): { referral: ReferralRow; entries: ReferralEntryRow[] } {
   const first = joins[0] ?? null;
-  const status = first === null ? "awaiting_entry" : BigInt(first.slot) > link.linkedSlot ? "active" : "late";
+  const before = first === null ? null : linkedBefore(link, joins, positionOf);
+  const status = first === null ? "awaiting_entry" : before === null ? "undecided" : before ? "active" : "late";
   const windowEnd = first?.time == null ? null : first.time + WINDOW_SECONDS;
   const reached = reachedAt(joins, REBATE_AFTER_LAMPORTS);
   const entries: ReferralEntryRow[] = [];

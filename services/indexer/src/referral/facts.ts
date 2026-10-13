@@ -1,11 +1,13 @@
 /**
  * Purpose: what the indexer's file says about referrals (Sprint 14, lane L14R; TP §3.4.11), from its finalized rows
  *          only: every `ReferralLinked` (the first for each referee, in chain order: the program refuses a second);
- *          each referee's joins (every `EntryAdded` of that wallet, in chain order, with its block time); and, for an
- *          opening a referee entered, the facts its basis is computed from and checked against: the outcome, whether
- *          the address has a gap, the `CampaignFinalized` snapshot, every baker's joins and late sums (`LateTallied`),
- *          each `EntrySettled` and the `FeeCollected`. Events are decoded again from their stored bytes (codec.ts).
- * Version: 0.1.0
+ *          each referee's joins (every `EntryAdded` of that wallet, in chain order, with its block time); each with
+ *          its place (slot, signature, instruction, inner instruction) and the block positions read for a tie
+ *          (`tx_positions`); and, for an opening a referee entered, the facts its basis is computed from and checked
+ *          against: the outcome, whether the address has a gap, the `CampaignFinalized` snapshot, every baker's joins
+ *          and late sums (`LateTallied`), each `EntrySettled` and the `FeeCollected`. Events are decoded again from
+ *          their stored bytes (codec.ts).
+ * Version: 0.2.0 (each event's place in the chain, and the block positions)
  * Sprint:  14 (referral, lane L14R)
  */
 import type { DecodedEvent, SettleMode } from "@brot/sdk/read";
@@ -14,13 +16,14 @@ import { revive, STORED_EVENT, type StoredEvent } from "../codec";
 import type { Store } from "../db/store";
 import { gapIn } from "../project";
 
-export type Link = { referee: string; referrer: string; linkedAt: bigint; linkedSlot: bigint; signature: string };
-export type Join = {
+/** Where an event sits: its transaction's slot and signature, then the instruction and the inner instruction. */
+export type Place = { slot: number; signature: string; ix: number; inner: number };
+export type Link = Place & { referee: string; referrer: string; linkedAt: bigint; linkedSlot: bigint };
+export type Join = Place & {
   campaign: string;
   opening: number;
   side: "Yes" | "No";
   amount: bigint;
-  slot: number;
   /** The block time of its transaction: chain time, or `null` when the node gave none. */
   time: number | null;
 };
@@ -67,7 +70,8 @@ export function linksOf(store: Store): Link[] {
     const event = revive(row);
     if (event.name !== "ReferralLinked" || links.has(event.data.referee)) continue;
     const { referee, referrer, linkedAt, linkedSlot } = event.data;
-    links.set(referee, { referee, referrer, linkedAt, linkedSlot, signature: row.signature });
+    const place = { slot: row.slot, signature: row.signature, ix: row.ix_index, inner: row.inner_index };
+    links.set(referee, { referee, referrer, linkedAt, linkedSlot, ...place });
   }
   return [...links.values()];
 }
@@ -76,7 +80,8 @@ export function linksOf(store: Store): Link[] {
 export function joinsOf(store: Store, baker: string): Join[] {
   const rows = store.db
     .query(
-      `SELECT e.campaign, e.opening, e.side, e.amount, e.slot, e.block_time FROM entries e
+      `SELECT e.campaign, e.opening, e.side, e.amount, e.slot, e.block_time, e.signature, e.ix_index, e.inner_index
+       FROM entries e
        JOIN signatures s USING (signature) WHERE e.baker = ? ORDER BY e.slot, s.ord, e.ix_index, e.inner_index`,
     )
     .all(baker) as {
@@ -86,16 +91,23 @@ export function joinsOf(store: Store, baker: string): Join[] {
     amount: string;
     slot: number;
     block_time: number | null;
+    signature: string;
+    ix_index: number;
+    inner_index: number;
   }[];
   return rows.map((r) => ({
-    campaign: r.campaign,
-    opening: r.opening,
-    side: r.side === "No" ? "No" : "Yes",
-    amount: BigInt(r.amount),
-    slot: r.slot,
-    time: r.block_time,
+    ...{ campaign: r.campaign, opening: r.opening, side: r.side === "No" ? "No" : "Yes", amount: BigInt(r.amount) },
+    ...{ slot: r.slot, signature: r.signature, ix: r.ix_index, inner: r.inner_index, time: r.block_time },
   }));
 }
+
+/** Each transaction's index in its block, where one was read (positions.ts). */
+export const positionsOf = (store: Store): Map<string, number> =>
+  new Map(
+    (
+      store.db.query("SELECT signature, position FROM tx_positions").all() as { signature: string; position: number }[]
+    ).map((r) => [r.signature, r.position]),
+  );
 
 /** The facts of one opening a referee entered. */
 export function openingFacts(store: Store, campaign: string, opening: number): OpeningFacts {
