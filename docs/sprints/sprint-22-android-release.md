@@ -2,6 +2,8 @@
 
 **Status:** planned · **Branch:** `sprint-22-android-release` · **Dates:** none, by the founder's decision
 
+**Final state (audit of 2026-10-13):** blocked by Sprints 21 and 18, the company (as publisher), the lawyer's written review (L0), whether to block Brazil in the app (C-06, after L0) and a named owner of the store presence.
+
 | | |
 |---|---|
 | Technical Plan block | M-3 (TP §3.7; TP §7, §8 for keys and privacy) |

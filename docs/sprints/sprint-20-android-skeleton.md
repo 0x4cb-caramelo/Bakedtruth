@@ -2,6 +2,8 @@
 
 **Status:** planned · **Branch:** `sprint-20-android-skeleton` · **Dates:** none, by the founder's decision
 
+**Final state (audit of 2026-10-13):** blocked by the founder's trade of M-1 and M-2 against a named Track A item (not allowed while Sprints 14 to 17 run), by X2 (real phones) and by D4 (a Seeker and another Android phone). No Android code exists; only Sprint 05's bundle check (`tests/react-native`).
+
 | | |
 |---|---|
 | Technical Plan block | M-1 (TP §3.7) |
