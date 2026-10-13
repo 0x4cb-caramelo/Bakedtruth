@@ -2,7 +2,7 @@
 //!          act needs, stage 2's deadline, the lapse of either stage, the admin's role, the account a re-read reads
 //!          and the offered proof's own errors. The binary runs the same rules in `contest_mollusk_*.rs` and
 //!          tests/brot/contest-*.test.ts.
-//! Version: 0.0.2 (review fixes F3, the unread stage 1 lapses; F4, an offered proof's error refuses)
+//! Version: 0.0.3 (D2: the team's escalation and the matching re-read's wait; review fixes F3 and F4)
 //! Sprint: 14 (lane L14B)
 
 use brot_markets::{
@@ -10,8 +10,9 @@ use brot_markets::{
     error::BrotError::*,
     instructions::resolution::contest_rules::{
         contest_lapses_at, require_before_deadline, require_contest_admin,
-        require_contest_team_key, require_contest_window, require_lapsed, require_metric,
-        require_proof_accepted, require_stage, require_tallied,
+        require_contest_team_key, require_contest_window, require_escalation, require_lapsed,
+        require_metric, require_proof_accepted, require_stage, require_tallied,
+        require_timelock_over,
     },
     layout::ZeroCopy,
     state::{
@@ -181,4 +182,34 @@ fn contest_stage_two_is_the_admins_alone() {
 fn contest_reread_reads_only_the_locked_account() {
     assert_eq!(require_metric(&key(5), &key(5)), Ok(()));
     assert_eq!(require_metric(&key(6), &key(5)), Err(MetricAccountMismatch));
+}
+
+#[test]
+fn contest_escalation_needs_stage_one_before_its_deadline() {
+    // D2 (2026-10-13): a team key sends a contest still at stage 1 to the admin, before stage 1's deadline.
+    let (one, two) = (ContestStage::Stage1 as u8, ContestStage::Stage2 as u8);
+    assert_eq!(require_escalation(one, ENDS - 1, ENDS), Ok(()));
+    assert_eq!(
+        require_escalation(one, ENDS, ENDS),
+        Err(ContestDeadlinePassed)
+    );
+    assert_eq!(
+        require_escalation(two, ENDS - 1, ENDS),
+        Err(WrongContestStage)
+    );
+    assert_eq!(
+        require_escalation(ContestStage::None as u8, ENDS - 1, ENDS),
+        Err(WrongContestStage)
+    );
+    assert_eq!(require_escalation(3, ENDS - 1, ENDS), Err(BadAccountData));
+}
+
+#[test]
+fn contest_matching_reread_waits_for_stage_one_deadline() {
+    assert_eq!(require_timelock_over(ENDS, ENDS), Ok(()));
+    assert_eq!(require_timelock_over(ENDS + 1, ENDS), Ok(()));
+    assert_eq!(
+        require_timelock_over(ENDS - 1, ENDS),
+        Err(RereadBeforeTimelock)
+    );
 }

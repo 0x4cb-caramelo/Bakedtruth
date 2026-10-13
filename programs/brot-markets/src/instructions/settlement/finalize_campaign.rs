@@ -1,7 +1,7 @@
 //! Purpose: `finalize_campaign`: the snapshot of a reviewed campaign once its window has ended, or of a contested
 //!          one once its contest has lapsed with no decision (Sprint 14). Any wallet, permissionless; it chooses
 //!          nothing. It runs `finalize_snapshot`, then emits `CampaignFinalized` with the next seq (TP 3.4.3, I7).
-//! Version: 0.0.5 (review fix F3: an unread stage 1 lapses too, so the payout is due 55 hours after resolution)
+//! Version: 0.0.6 (an unread stage 1 lapses too, review fix F3: the payout is due 78 hours after resolution at most)
 //! Sprint: 04 (lane C); accounts frozen at the sprint's opening; 14 (lane L14B) adds the lapse
 //!
 //! Accounts: 0 campaign (writable), 1 config (writable, the open count), 2 event authority, 3 program.

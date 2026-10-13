@@ -173,6 +173,7 @@ export const BROT_ERROR_CODES = {
   SealedFeeMismatch: 6173,
   WrongSponsor: 6174,
   ConfirmWithVoidReason: 6175,
+  RereadBeforeTimelock: 6176,
 } as const;
 
 /** The name of a program error, as error.rs and the IDL spell it. */

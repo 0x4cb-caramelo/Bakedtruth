@@ -4911,6 +4911,11 @@
       "code": 6175,
       "name": "ConfirmWithVoidReason",
       "msg": "A Confirm decision carries no void reason: its void_reason must be None"
+    },
+    {
+      "code": 6176,
+      "name": "RereadBeforeTimelock",
+      "msg": "A matching re-read pays only after stage 1's 24-hour wait"
     }
   ],
   "metadata": {

@@ -1,16 +1,18 @@
 //! Purpose: the contest's rules (TP section 3.4.7; BP v0.0.4 part 1 section 4.5) as pure functions, each refusal with
-//!          its own error: who opens a contest and when, the stage each act needs, stage 2's deadline, the lapse of
-//!          either stage, the admin's role, and the offered proof's own errors. The three contest instructions and
-//!          `finalize_campaign` call these; host tests check them without an account.
-//! Version: 0.0.2 (review fixes of Sprint 14: F3, a stage-1 contest lapses too; F4, an offered proof's error refuses)
+//!          its own error: who opens a contest and when, the team's escalation to stage 2, the stage each act needs,
+//!          the 24-hour wait a matching re-read keeps, stage 2's deadline, the lapse of either stage, the admin's role,
+//!          and the offered proof's own errors. The three contest instructions and `finalize_campaign` call these;
+//!          host tests check them without an account.
+//! Version: 0.0.3 (the founder's answer to D2: the matching re-read's 24-hour wait and the team's escalation)
 //! Sprint: 14 (lane L14B, the two-stage dispute)
 //!
 //! Each refusal follows an `// X0.9 <id>` line, as in `checks.rs`: `scripts/checks-mutation.mjs` returns early right
 //! after it and shows the check's negative tests fail. A contest opens only once every entry is tallied: the tally
 //! (`tally_late_joins`) runs only while a campaign is `InReview`, so a contest opened before it could never reach the
 //! snapshot by any of its three exits (`NotTallied` there). The keeper therefore tallies before a contest can open.
-//! The 55-hour bound holds with or without a keeper: a contest opens at most six hours after the resolution, stage 1
-//! ends an hour later, and both stage 2's deadline and the lapse of an unread stage 1 are at most 48 hours after that.
+//! The 78-hour bound holds with or without a keeper: a contest opens at most six hours after the resolution, stage 1
+//! ends 24 hours later, and both stage 2's deadline (from a re-read or the team's escalation) and the lapse of an
+//! unread stage 1 are at most 48 hours after that.
 
 use pinocchio::{error::ProgramError, Address, ProgramResult};
 
@@ -38,6 +40,31 @@ pub fn require_contest_team_key(config: &GlobalConfig, signer: &Address) -> Resu
 pub fn require_contest_window(status: u8, now: i64, review_ends_at: i64) -> Result<(), BrotError> {
     // X0.9 contest_window
     require_review(status, now, review_ends_at, BrotError::ContestOutsideReview)
+}
+
+/// The team's escalation (D2, 2026-10-13): a team key sends a contest still at stage 1 to stage 2, before stage 1's
+/// deadline. At stage 2 already, `WrongContestStage`; from stage 1's deadline on, `ContestDeadlinePassed` (a matching
+/// re-read may pay from then, and a different one escalates by itself).
+pub fn require_escalation(stage: u8, now: i64, contest_ends_at: i64) -> Result<(), BrotError> {
+    // X0.9 escalate_stage
+    if ContestStage::try_from(stage)? != ContestStage::Stage1 {
+        return Err(BrotError::WrongContestStage);
+    }
+    // X0.9 escalate_deadline
+    if now >= contest_ends_at {
+        return Err(BrotError::ContestDeadlinePassed);
+    }
+    Ok(())
+}
+
+/// A matching re-read pays only from stage 1's deadline on, 24 hours after the contest opened (D2, 2026-10-13):
+/// before it, `RereadBeforeTimelock`, so a team key still has that time to send the contest to the admin.
+pub fn require_timelock_over(now: i64, stage1_ends_at: i64) -> Result<(), BrotError> {
+    // X0.9 reread_timelock
+    if now < stage1_ends_at {
+        return Err(BrotError::RereadBeforeTimelock);
+    }
+    Ok(())
 }
 
 /// Every entry's joins are tallied (`NotTallied`): see the module documentation.
@@ -83,9 +110,10 @@ pub fn require_before_deadline(now: i64, contest_ends_at: i64) -> Result<(), Bro
     Ok(())
 }
 
-/// When a contest lapses with the stored result (the 55-hour bound, review fix F3): stage 2 at its own deadline, and
+/// When a contest lapses with the stored result (the 78-hour bound, review fix F3): stage 2 at its own deadline, and
 /// stage 1, whose re-read nobody ran, `CONTEST_STAGE2_SECONDS` after its deadline: the latest any stage 2 can end,
-/// since an escalating re-read starts stage 2 from `min(now, stage 1's deadline)`. No stage: `None`.
+/// since an escalating re-read starts stage 2 from `min(now, stage 1's deadline)` and the team's escalation comes
+/// before that deadline. No stage: `None`.
 pub fn contest_lapses_at(
     stage: ContestStage,
     contest_ends_at: i64,

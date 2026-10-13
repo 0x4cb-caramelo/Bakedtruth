@@ -1,14 +1,15 @@
 //! Purpose: the re-read's comparison and acts on the host (Sprint 14, lane L14B): "the same reading" is the stored
 //!          outcome, void reason, `met_late` and observed value exactly, and a reader that refuses is a different
-//!          reading; `reread_act`, the one place a comparison becomes an act (D2, open), pays the same reading and
-//!          escalates any difference; stage 2 opens for 48 hours from the re-read, or from stage 1's deadline when the
-//!          re-read is late (review fix F3), without touching the result.
-//! Version: 0.0.2
+//!          reading; `reread_act`, the one place a comparison becomes an act (D2, answered on 2026-10-13), pays the
+//!          same reading from stage 1's deadline on and escalates any difference at once; stage 2 opens for 48 hours
+//!          from the re-read, or from stage 1's deadline when the re-read is late (review fix F3), without touching the
+//!          result.
+//! Version: 0.0.3
 //! Sprint: 14 (lane L14B)
 
 use brot_markets::{
     constants::CONTEST_STAGE2_SECONDS,
-    error::BrotError::MathOverflow,
+    error::BrotError::{MathOverflow, RereadBeforeTimelock},
     instructions::resolution::contest_reread::{
         open_stage2, reread_act, reread_event, same_reading, RereadAct, StoredResult,
     },
@@ -97,9 +98,18 @@ fn contest_reread_any_field_that_differs_is_a_different_reading() {
 
 #[test]
 fn contest_reread_act_pays_the_same_reading_and_escalates_a_different_one() {
-    // The D2 hook (open with the founder): today the same reading pays at once.
-    assert_eq!(reread_act(true), RereadAct::Pay);
-    assert_eq!(reread_act(false), RereadAct::Escalate);
+    // D2, answered (2026-10-13): the same reading pays from stage 1's deadline on, a different one escalates at once.
+    // Stage 1 ends at `NOW`.
+    assert_eq!(reread_act(true, NOW, NOW), Ok(RereadAct::Pay));
+    assert_eq!(reread_act(true, NOW + 3_600, NOW), Ok(RereadAct::Pay));
+    assert_eq!(reread_act(true, NOW - 1, NOW), Err(RereadBeforeTimelock));
+    for now in [NOW - 86_400, NOW - 1, NOW, NOW + 1] {
+        assert_eq!(
+            reread_act(false, now, NOW),
+            Ok(RereadAct::Escalate),
+            "{now}"
+        );
+    }
 }
 
 #[test]

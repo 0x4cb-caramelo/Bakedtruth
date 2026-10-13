@@ -310,6 +310,8 @@ export const BROT_MARKETS_ERROR__SEALED_FEE_MISMATCH = 0x181d; // 6173
 export const BROT_MARKETS_ERROR__WRONG_SPONSOR = 0x181e; // 6174
 /** ConfirmWithVoidReason: A Confirm decision carries no void reason: its void_reason must be None */
 export const BROT_MARKETS_ERROR__CONFIRM_WITH_VOID_REASON = 0x181f; // 6175
+/** RereadBeforeTimelock: A matching re-read pays only after stage 1's 24-hour wait */
+export const BROT_MARKETS_ERROR__REREAD_BEFORE_TIMELOCK = 0x1820; // 6176
 
 export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY
@@ -412,6 +414,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__READER_NOT_READY
   | typeof BROT_MARKETS_ERROR__READER_WRONG_OWNER
   | typeof BROT_MARKETS_ERROR__RENT_PAYER_NOT_STORED
+  | typeof BROT_MARKETS_ERROR__REREAD_BEFORE_TIMELOCK
   | typeof BROT_MARKETS_ERROR__REREAD_NOT_TOP_LEVEL
   | typeof BROT_MARKETS_ERROR__RESERVE_NOT_CLAIMABLE
   | typeof BROT_MARKETS_ERROR__RESOLVE_NOT_TOP_LEVEL
@@ -564,6 +567,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__READER_NOT_READY]: `Unused since Sprint 03: the reader methods returned it before they were ported`,
     [BROT_MARKETS_ERROR__READER_WRONG_OWNER]: `Account is not owned by the program this reader trusts`,
     [BROT_MARKETS_ERROR__RENT_PAYER_NOT_STORED]: `The rent payer is not the one stored at opening`,
+    [BROT_MARKETS_ERROR__REREAD_BEFORE_TIMELOCK]: `A matching re-read pays only after stage 1's 24-hour wait`,
     [BROT_MARKETS_ERROR__REREAD_NOT_TOP_LEVEL]: `reread_campaign must run at the transaction's top level, never by CPI`,
     [BROT_MARKETS_ERROR__RESERVE_NOT_CLAIMABLE]: `The wallet is still below its rent-exempt minimum; the reserved credit cannot be claimed yet`,
     [BROT_MARKETS_ERROR__RESOLVE_NOT_TOP_LEVEL]: `\`resolve_campaign\` must be a top-level instruction, never called through a CPI`,

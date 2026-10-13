@@ -1,11 +1,11 @@
 //! Purpose: `reread_campaign`: stage 1 of a contest (TP section 3.4.7; BP v0.0.4 part 1 section 4.5). Any wallet, at
 //!          the top level only, runs the campaign's reading again NOW through the reader the resolution used, and
 //!          compares it EXACTLY with the stored result (outcome, void reason, `met_late`, observed value). The same
-//!          reading pays: the snapshot runs with the stored outcome. Any difference, or a reader that cannot decide now
-//!          or refuses the campaign's own metric account, opens stage 2. A proof the caller offers and the reader
+//!          reading pays, from stage 1's deadline on (24 hours after the contest opened; `RereadBeforeTimelock` before
+//!          it): the snapshot runs with the stored outcome. Any difference, or a reader that cannot decide now or
+//!          refuses the campaign's own metric account, opens stage 2 at once. A proof the caller offers and the reader
 //!          refuses refuses the re-read instead. It never writes a result into the campaign.
-//! Version: 0.1.1 (review fixes of Sprint 14: F3, stage 2 counts from stage 1's deadline at the latest; F4, an
-//!          offered proof's error refuses; F5, a fact-kind YES re-read after its deadline)
+//! Version: 0.1.2 (the founder's answer to D2: the 24-hour wait of a matching re-read; review fixes F3, F4 and F5)
 //! Sprint: 14 (scaffold of Sprints 14–15, 2026-10-13; the body by lane L14B). Accounts: 0 campaign (writable;
 //!         Contested, stage 1), 1 config (writable: the open count, for the snapshot), 2 metric account, 3 proof
 //!         account (price kind: a proof, as for `resolve_campaign`; the program's own address offers none; the other
@@ -18,10 +18,11 @@
 //! (`WrongContestStage`); the metric slot is the campaign's locked account (`MetricAccountMismatch`); then the reader,
 //! and an offered proof it read and refused refuses the re-read with the reader's own error (`ReaderWrongOwner`,
 //! `PriceWrongFeed`, `ProofStale`, `ProofDoesNotTouch`...; `readers::reads_proof`: the price kind inside its proof
-//! window). Allowed at any time in stage 1: its `contest_ends_at` is the hour the keeper has, not a cut-off. A re-read
-//! after it starts stage 2 from that deadline, not from now, and a stage 1 nobody re-reads lapses 48 hours after it
-//! (`finalize_campaign`), so the payout is due at most 55 hours after the resolution, with or without a keeper (F3).
-//! The pause never blocks it.
+//! window); last, `reread_act`: the same reading before stage 1's deadline (`RereadBeforeTimelock`). Allowed at any
+//! time in stage 1, which lasts 24 hours: during them a team key may send the contest to stage 2 (`team_open_contest`),
+//! a different reading escalates at once, and a matching one waits for the deadline. A re-read after it starts stage
+//! 2 from that deadline, not from now, and a stage 1 nobody re-reads lapses 48 hours after it (`finalize_campaign`),
+//! so the payout is due at most 78 hours after the resolution, with or without a keeper (F3). The pause never blocks it.
 //!
 //! What "the same reading" means, per family of TP section 3.4.6. The re-read runs the resolution's own code, so it
 //! cannot catch a reader's bug: a same reading shows only that the chain still says what it said. Many correct results
@@ -122,22 +123,23 @@ pub fn reread_campaign(
     };
     let same = same_reading(&StoredResult::of(&stored), reading.as_ref());
 
-    let (event, finalized) = match reread_act(same) {
-        RereadAct::Pay => {
-            let seq = take_seq(&mut stored)?;
-            // The stored outcome, as `team_confirm_result` takes it; the snapshot sets the status.
-            finalize_snapshot(&mut stored, &mut settings)?;
-            let event = reread_event(campaign_key, &stored, reading.as_ref(), true, seq);
-            let finalized_seq = take_seq(&mut stored)?;
-            let finalized = finalized_event(campaign_key, &stored, finalized_seq)?;
-            (event, Some(finalized))
-        }
-        RereadAct::Escalate => {
-            let seq = open_stage2(&mut stored, time.unix_timestamp)?;
-            let event = reread_event(campaign_key, &stored, reading.as_ref(), false, seq);
-            (event, None)
-        }
-    };
+    let (event, finalized) =
+        match reread_act(same, time.unix_timestamp, stored.contest_ends_at.get())? {
+            RereadAct::Pay => {
+                let seq = take_seq(&mut stored)?;
+                // The stored outcome, as `team_confirm_result` takes it; the snapshot sets the status.
+                finalize_snapshot(&mut stored, &mut settings)?;
+                let event = reread_event(campaign_key, &stored, reading.as_ref(), true, seq);
+                let finalized_seq = take_seq(&mut stored)?;
+                let finalized = finalized_event(campaign_key, &stored, finalized_seq)?;
+                (event, Some(finalized))
+            }
+            RereadAct::Escalate => {
+                let seq = open_stage2(&mut stored, time.unix_timestamp)?;
+                let event = reread_event(campaign_key, &stored, reading.as_ref(), false, seq);
+                (event, None)
+            }
+        };
     drop(settings);
     drop(stored);
     events::emit(&event, event_authority, program, program_id)?;

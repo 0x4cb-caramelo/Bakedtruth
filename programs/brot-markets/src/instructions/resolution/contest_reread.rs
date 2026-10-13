@@ -1,7 +1,8 @@
 //! Purpose: what `reread_campaign` compares and does (TP section 3.4.7): the stored result against the reading run
 //!          now, exactly (outcome, void reason, `met_late`, observed value); `reread_act`, the ONE function that turns
-//!          the comparison into an act (D2, open); stage 2's opening; and the `CampaignReread` event.
-//! Version: 0.0.2 (review fix F3: stage 2 counts from stage 1's deadline when the re-read comes late)
+//!          the comparison into an act (D2, answered: the matching re-read's 24-hour wait); stage 2's opening; and the
+//!          `CampaignReread` event.
+//! Version: 0.0.3 (the founder's answer to D2: a matching re-read pays only after stage 1's 24 hours)
 //! Sprint: 14 (lane L14B, the two-stage dispute). What "the same reading" means per kind is in `reread_campaign.rs`.
 //!
 //! The re-read never writes a result: the reading run now goes to the comparison and to the event, never into the
@@ -11,7 +12,7 @@ use crate::{
     constants::CONTEST_STAGE2_SECONDS,
     error::BrotError,
     events::CampaignReread,
-    instructions::resolution::team_shared::take_seq,
+    instructions::resolution::{contest_rules::require_timelock_over, team_shared::take_seq},
     layout::{LeI128, LeI64, LeU64, Pubkey},
     readers::Decision,
     state::{
@@ -62,22 +63,22 @@ pub enum RereadAct {
     Escalate,
 }
 
-/// The one place a re-read's comparison becomes an act. The approved shape (founder, 2026-10-13): the same reading
-/// pays at once, any difference escalates. D2, still open with the founder, asks whether a same reading pays only
-/// after stage 1's hour, while a team key may still send the contest to stage 2 (a re-read runs the readers' own
-/// code, so it cannot catch a reader's bug). That delay, or that escalation, changes this function and the match
-/// in `reread_campaign`, nothing else.
-pub fn reread_act(same: bool) -> RereadAct {
-    if same {
-        RereadAct::Pay
-    } else {
-        RereadAct::Escalate
+/// The one place a re-read's comparison becomes an act, as the founder answered D2 on 2026-10-13 (option a): any
+/// difference escalates at once; the same reading pays only from stage 1's deadline on, 24 hours after the contest
+/// opened (`RereadBeforeTimelock` before it, nothing written). A re-read runs the readers' own code, so it cannot catch
+/// a reader's bug: the wait gives a team key the time to send the contest to the admin (`team_open_contest` on a
+/// contest at stage 1).
+pub fn reread_act(same: bool, now: i64, stage1_ends_at: i64) -> Result<RereadAct, BrotError> {
+    if !same {
+        return Ok(RereadAct::Escalate);
     }
+    require_timelock_over(now, stage1_ends_at)?;
+    Ok(RereadAct::Pay)
 }
 
 /// A different reading: the campaign stays `Contested`, at stage 2, its deadline `CONTEST_STAGE2_SECONDS` from the
 /// re-read, or from stage 1's deadline when the re-read comes after it (review fix F3: a late keeper adds no time,
-/// so the payout is never more than 55 hours after the resolution), and takes the event's number, which is returned.
+/// so the payout is never more than 78 hours after the resolution), and takes the event's number, which is returned.
 /// The deadline is computed before any field is written; it may already have passed, and then only the lapse remains.
 pub fn open_stage2(campaign: &mut Campaign, now: i64) -> Result<u64, BrotError> {
     let from = now.min(campaign.contest_ends_at.get());

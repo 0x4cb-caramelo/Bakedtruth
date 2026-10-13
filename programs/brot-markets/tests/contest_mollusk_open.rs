@@ -1,7 +1,8 @@
 //! Purpose: `team_open_contest` on the program's SBF binary in Mollusk (Sprint 14, lane L14B): a team key contests a
-//!          campaign in review inside its window, and stage 1 starts for an hour with the result untouched; every
-//!          refusal with its own error (the X0.9 negatives of `contest_rules.rs`); the pause never blocks it.
-//! Version: 0.0.1
+//!          campaign in review inside its window, and stage 1 starts for 24 hours with the result untouched; every
+//!          refusal with its own error (the X0.9 negatives of `contest_rules.rs`); the pause never blocks it. The
+//!          team's escalation to stage 2 is in `contest_mollusk_escalate.rs`.
+//! Version: 0.0.2 (stage 1 lasts 24 hours: the founder's answer to D2)
 //! Sprint: 14 (lane L14B). Runs after the SBF build (`BROT_MARKETS_SO`, else `target/deploy/brot_markets.so`).
 
 #[allow(unused_imports)]
@@ -30,7 +31,7 @@ fn contested_at_now() -> Vec<u8> {
 }
 
 #[test]
-fn contest_open_starts_stage_one_for_an_hour_and_keeps_the_result() {
+fn contest_open_starts_stage_one_for_24_hours_and_keeps_the_result() {
     let mut w = World::new();
     let result = open_contest(&w, TEAM, campaign_data(|_| {})).at(&mut w, NOW);
     assert_ok(&result);
@@ -62,12 +63,8 @@ fn contest_team_key_refuses_a_stranger_and_the_admin() {
 #[test]
 fn contest_window_refuses_a_campaign_not_in_review() {
     let mut w = World::new();
-    for status in [
-        Status::Open,
-        Status::Contested,
-        Status::Settling,
-        Status::Settled,
-    ] {
+    // A Contested campaign takes the team's escalation instead (contest_mollusk_escalate.rs).
+    for status in [Status::Open, Status::Settling, Status::Settled] {
         let campaign = campaign_data(|c| c.status = status as u8);
         let result = open_contest(&w, TEAM, campaign).at(&mut w, NOW);
         assert_refused(&result, BrotError::TeamKeyOutsideReview);

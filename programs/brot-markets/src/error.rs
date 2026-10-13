@@ -356,7 +356,10 @@ pub enum BrotError {
     // Sprint 14, the lead's addendum (2026-10-13).
     #[error("A Confirm decision carries no void reason: its void_reason must be None")]
     ConfirmWithVoidReason = 6175,
-    // New codes are appended here, from 6176, never reusing a number.
+    // Sprint 14, the founder's answer to D2 (2026-10-13): a matching re-read waits for stage 1's end.
+    #[error("A matching re-read pays only after stage 1's 24-hour wait")]
+    RereadBeforeTimelock = 6176,
+    // New codes are appended here, from 6177, never reusing a number.
 }
 
 impl From<BrotError> for ProgramError {
