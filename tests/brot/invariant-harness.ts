@@ -137,12 +137,25 @@ export type ChainView = {
   feeVault: bigint;
 };
 
-export async function chainView(h: Harness, index: number): Promise<ChainView> {
+/** Each PDA the run derives again and again, derived once: the checks read every campaign after every operation. */
+const derived = new Map<string, Promise<Address>>();
+export function derivedOnce(key: string, derive: () => Promise<Address>): Promise<Address> {
+  const known = derived.get(key);
+  if (known) return known;
+  const address = derive();
+  derived.set(key, address);
+  return address;
+}
+export const entryAt = (campaign: Address, baker: Address) =>
+  derivedOnce(`entry ${campaign} ${baker}`, () => P.entryPda(campaign, baker));
+
+/** The chain side of campaign `index`; `config` is read once per round of checks, not once per campaign. */
+export async function chainView(h: Harness, index: number, config?: Record<string, any>): Promise<ChainView> {
   const { campaign, vault } = h.addrs[index];
   const c = h.w.client.svm.getAccount(campaign);
   const entries = new Map<string, { amount_yes: bigint; amount_no: bigint }>();
   for (const baker of h.bakers) {
-    const entry = await P.entryPda(campaign, baker.address);
+    const entry = await entryAt(campaign, baker.address);
     const account = h.w.client.svm.getAccount(entry);
     if (account.exists) {
       const d = decode(ENTRY, account.data);
@@ -153,7 +166,7 @@ export async function chainView(h: Harness, index: number): Promise<ChainView> {
     vault: balance(h.w, vault),
     campaign: c.exists ? decode(CAMPAIGN, c.data) : null,
     entries,
-    config: await readConfig(h.w),
+    config: config ?? (await readConfig(h.w)),
     feeVault: balance(h.w, h.feeVault),
   };
 }

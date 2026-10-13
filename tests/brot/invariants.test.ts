@@ -12,15 +12,19 @@ import { checkCampaign, checkWorld } from "./invariant-checks";
 import { chainView, makeHarness, seededRandom, type Harness } from "./invariant-harness";
 import { drawOp, runOp } from "./invariant-ops";
 
-/** The seed of the run; the report and the test output name it, so a failure can be replayed. */
-export const SEED = 0x0b_ad_c0de;
+/**
+ * The seed of the run; the report and the test output name it, so a failure can be replayed. `INVARIANT_SEED`
+ * (decimal or 0x-hex) runs another seed once, without changing the file: `INVARIANT_SEED=0x1234 bun test <this file>`.
+ */
+export const DEFAULT_SEED = 0x0b_ad_c0de;
+export const SEED = process.env.INVARIANT_SEED ? Number(process.env.INVARIANT_SEED) >>> 0 : DEFAULT_SEED;
 /** The number of operations drawn from the seed. */
 export const OPERATIONS = 1_200;
 
 async function checkAll(h: Harness) {
   const config = await readConfig(h.w);
   for (let i = 0; i < h.camps.length; i++) {
-    const view = await chainView(h, i);
+    const view = await chainView(h, i, config);
     checkCampaign(h.camps[i], view, h, `${h.camps[i].label}`);
   }
   checkWorld(h, config);
