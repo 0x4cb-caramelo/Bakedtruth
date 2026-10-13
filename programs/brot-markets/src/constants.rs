@@ -166,8 +166,7 @@ pub const PROOF_DELAY_SECONDS: i64 = 60;
 /// (62 to 64 s): one missed heartbeat, or a resolution timed into an update gap, cannot turn a NO
 /// into a void (Sprint 03 review).
 pub const STALE_FEED_MIN_SECONDS: u32 = 600;
-/// Contest stage 1, 24 hours: a matching re-read pays only after it, and until then a team key may send the
-/// contest to stage 2 (the founder's answer to D2, 2026-10-13); stage 2, 48 hours (P1 section 4.5), Sprints 04 and 14.
+/// Contest stage 1, 24 hours (D2: a matching re-read waits them out); stage 2, 48 hours (P1 section 4.5).
 pub const CONTEST_STAGE1_SECONDS: i64 = 24 * SECONDS_PER_HOUR;
 pub const CONTEST_STAGE2_SECONDS: i64 = 48 * SECONDS_PER_HOUR;
 
