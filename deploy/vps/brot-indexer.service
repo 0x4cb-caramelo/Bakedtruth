@@ -1,0 +1,69 @@
+# Purpose: brot-indexer, the indexer and its read routes (services/indexer; Sprint 08; TP §3.5, §12) on 127.0.0.1:4201:
+#          the program's events at finalized in its own SQLite file (WAL), the projections, the ranking, the points,
+#          feed_history and the creator's own entry alert on the journal. Its routes are read-only; it holds no key
+#          that can move money, and nothing it stores decides any (K-05).
+# Installs: the shared VPS. NOT INSTALLED yet. As the relay's steps in deploy/vps/README.md: the indexer's own RPC
+#           account (D4); a system user `brot-indexer` with no login and its own root-owned copy of the pinned Bun
+#           binary (/usr/local/lib/brot-indexer/bun, compared with `cmp`); the release at
+#           /srv/brot-markets/indexer/current (root:brot-indexer, 0750, `bun install --frozen-lockfile --ignore-scripts
+#           --filter @brot/indexer`), content/ included; /etc/brot-markets/indexer.env (root:brot-indexer, 0640) from
+#           services/indexer/.env.example, with no secret in it; the credential file below. Then
+#           `systemd-analyze security brot-indexer.service`, one start, `curl -s http://127.0.0.1:4201/healthz`, enable.
+#           Who reaches the routes from outside (an API proxy or the tunnel's route) is the founder's decision; nothing
+#           here opens one.
+# Secrets: the RPC URL of the indexer's account (it carries the key) is a credential (LoadCredential=, a root-owned
+#          0400 file), never in the environment (T13). The WebSocket URL is the same URL over wss unless set; if it
+#          differs, add `LoadCredential=ws-url:/etc/brot-markets/indexer-ws-url` and
+#          `Environment=INDEXER_WS_URL_FILE=%d/ws-url`. The indexer logs counts and error names only.
+# State: /var/lib/brot-indexer (StateDirectory, 0750): the SQLite file, its WAL, and the nightly snapshots
+#        (`bun src/snapshot.ts <file> <snapshot>`, timer not written) until they reach VM 2. feed_history cannot be
+#        rebuilt from RPC, so the directory is kept across releases; the rest can be rebuilt (src/rebuild.ts).
+
+[Unit]
+Description=Brot Markets indexer (/api/v1 read routes on 127.0.0.1:4201)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=brot-indexer
+Group=brot-indexer
+WorkingDirectory=/srv/brot-markets/indexer/current/services/indexer
+EnvironmentFile=/etc/brot-markets/indexer.env
+LoadCredential=rpc-url:/etc/brot-markets/indexer-rpc-url
+Environment=INDEXER_RPC_URL_FILE=%d/rpc-url
+# Set here, after the env file, so a stray line there cannot move the file or open the port beyond loopback.
+Environment=INDEXER_DB_PATH=/var/lib/brot-indexer/indexer.sqlite
+Environment=INDEXER_API_HOST=127.0.0.1
+Environment=INDEXER_API_PORT=4201
+StateDirectory=brot-indexer
+StateDirectoryMode=0750
+Environment=HOME=/var/lib/brot-indexer
+ExecStart=/usr/local/lib/brot-indexer/bun src/main.ts
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+# Limits (TP §12: 512 MB to start): the file is read through SQLite's page cache; history lives on disk.
+MemoryMax=512M
+CPUQuota=50%
+TasksMax=64
+
+# Sandboxing, as the relay's unit; the indexer writes only its StateDirectory.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectProc=invisible
+ProcSubset=pid
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target
