@@ -13,7 +13,8 @@ the founder's answers to Sprint 13's twelve questions, given after its merge (§
 privacy review (§8.3); v0.1.8 adds the sixth kind, `DbcGraduated`, a Meteora DBC curve's graduation (§3.4.6, §3.4.8,
 §3.4.10; `docs/technical/meteora-readers-plan.md`); v0.1.9 counts six kinds where the plan still said five and
 records the sixth kind's site (§3.6: the creation box and the campaign page); v0.1.10 records A-11's one exception,
-a graduation curve named by its token's ticker (§2 A-11, §3.4.10 "Display names", §3.5 the relay, the content table)
+approved by the founder on 2026-10-13: a graduation curve named by its token's ticker (§2 A-11, §3.4.10 "Display
+names", §3.5 the relay, the content table)
 · **Date:** 2026-10-13 · **Supersedes:** v0.0.1 of 2026-10-05,
 written in Portuguese, approved by the founder ("docs aprovados, podemos dar início"). Its last text, with §8.1, is in
 git history at commit `2089b81` (`git show 2089b81:docs/technical/TECHNICAL-PLAN.md`), the last commit that changed it;
@@ -243,7 +244,7 @@ program before the Sprint 04 randomized money test passes.
   mirrors them for the preview, and a test feeds each refused case straight to the program.
 - **A-11** No creator-supplied text is stored or shown. Names come from `content/account-names.json` or the pinned Pyth
   feed list, never from token metadata the token's owner can change. **One exception, the graduation kind's curve**
-  (`DbcGraduated`, asked for on 2026-10-13): it is named by the ticker its token's metadata stores, cleaned
+  (`DbcGraduated`, approved by the founder on 2026-10-13): it is named by the ticker its token's metadata stores, cleaned
   and always beside the pool's last four characters, `$TEST (…7Dny)`, or `Token (…7Dny)` when there is none to show;
   only a reviewed pool shows its name alone (§3.4.10, "Display names"). Nothing is stored, and the program never reads it.
 
@@ -829,9 +830,9 @@ It is not a gate (D-i): an unnamed account can still be used, and shows its shor
 
 **A-11's exception: a graduation curve's ticker (2026-10-13) [F].** A Meteora launch curve is a brand-new token by
 nature, so no team could review its name before a campaign on it opens, and a title like "Meteora launch curve 12uL…7Dny
-raises its full 85 SOL?" names nothing a baker recognises. The request of 2026-10-13
-(`session-log/2026-10-13-ticker-da-curva-e-botoes-de-lado.md`): any curve any creator pastes is named by its token's
-ticker, automatically. The site reads it for the screens only (the program never does, and nothing is
+raises its full 85 SOL?" names nothing a baker recognises. The request of 2026-10-13, approved by the founder the
+same day (`session-log/2026-10-13-ticker-da-curva-e-botoes-de-lado.md`): any curve any creator pastes is named by its
+token's ticker, automatically. The site reads it for the screens only (the program never does, and nothing is
 stored): the pool's `base_mint` (byte 136 of the `VirtualPool`), then the TokenMetadata extension of a Token-2022 mint
 or, for a classic mint, its Metaplex Token Metadata account (`["metadata", metaqbx…, mint]`), each read owner first
 through the SDK (`packages/sdk/src/read/chain/token-symbol.ts`, whose `tickerOf` also says what of a symbol a screen

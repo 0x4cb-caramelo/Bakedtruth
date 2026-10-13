@@ -29,7 +29,7 @@ recomendado (1a a 12a).
 
 - **A curva da graduação pelo ticker, e os botões SIM e NÃO limpos** (branch `feat/curve-ticker-side-buttons`,
   13/10/2026; `session-log/2026-10-13-ticker-da-curva-e-botoes-de-lado.md`). Responde ao nome legível que o registro
-  do upgrade deixou em aberto, pelo caminho que muda a A-11: o fundador precisa confirmar antes da mescla.
+  do upgrade deixou em aberto, pelo caminho que muda a A-11, aprovado pelo fundador, o Lucas, no mesmo dia.
   - **O título de uma campanha de graduação nomeia a curva pelo ticker do token**, e nunca só pelo endereço: "Meteora
     launch curve $TEST (…7Dny) raises its full 85 SOL?", o fim do endereço do pool sempre ao lado; `Token (…7Dny)`
     quando não há ticker para mostrar; o nome revisado sozinho, `$BROT`, para um pool em `content/account-names.json`

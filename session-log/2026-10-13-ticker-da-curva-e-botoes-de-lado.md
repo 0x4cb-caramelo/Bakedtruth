@@ -99,11 +99,15 @@ mesmo ticker, mas não o mesmo pool, e o sufixo está sempre lá para quem não 
 - **A folha "Check before you sign" da abertura usa o ticker lido para o pool assinado**, não para o rascunho (a regra
   H1 da Sprint 19), e a linha logo abaixo continua mostrando o endereço inteiro do pool.
 
+## A aprovação do fundador
+
+A A-11 é uma invariante da arquitetura que o fundador aprovou, e a exceção pedia o Lucas. O PR #80 foi aberto no
+mesmo dia, depois de juntar a `main` com o upgrade do devnet, à espera dele. Quem conduzia a sessão respondeu, ao lado
+dele: "pode aprovar eu estou com o lucas aqui", e em seguida "pode mergear o pr tambem". A exceção ficou aprovada em
+13/10/2026, e a mescla do PR #80 foi pedida na mesma hora.
+
 ## O que ficou em aberto
 
-- **A A-11 é uma invariante da arquitetura aprovada pelo fundador.** A exceção está escrita como pedida, e o PR
-  (aberto no mesmo dia, depois de juntar a `main` com o upgrade do devnet) espera a confirmação do Lucas antes da
-  mescla.
 - **O aviso sobre nomes de token e a caixinha "Conferi o endereço"**, propostos no registro do upgrade, não entraram.
 - **O token do pool de demonstração se chama "TEST" na cadeia.** A lista revisada o chama de `$BROT`, como o pedido
   mandou. Para a cadeia e para o explorador, o token continua "TEST".
