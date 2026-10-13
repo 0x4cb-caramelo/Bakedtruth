@@ -79,8 +79,10 @@ export async function setAccount(
 /** Gives a throwaway wallet `lamports` on the fork (a system account with no data). */
 export const fund = (rpc: Rpc, address: string, lamports: bigint) => setAccount(rpc, address, { lamports });
 
-/** Moves the fork's clock to `unixTimestamp` (seconds) and waits until the Clock sysvar shows it. */
+/** Moves the fork's clock forward to `unixTimestamp` (seconds), never back, and waits until the Clock shows it. */
 export async function travelTo(rpc: Rpc, unixTimestamp: bigint): Promise<bigint> {
+  const now = (await clock(rpc)).unixTimestamp;
+  if (now >= unixTimestamp) return now;
   await rpc.call("surfnet_timeTravel", [{ absoluteTimestamp: Number(unixTimestamp * 1000n) }]);
   for (let i = 0; i < 100; i++) {
     const now = (await clock(rpc)).unixTimestamp;

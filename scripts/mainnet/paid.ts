@@ -1,10 +1,11 @@
 /**
- * Purpose: the paid opening rehearsed on the fork with mainnet's real SOL/USD sponsored account (the founder's open
- *          question whether the first mainnet cycle includes one): a wallet outside the team opens a `SupplyAtMost`
- *          campaign on a real mint and pays US$500 at the Pyth price under init-params.mainnet.json's freshness and
- *          confidence bounds; the charge and its 90/10 split are checked against the SDK's quote. The price's age and
- *          confidence at that moment are printed, as evidence for the `maxPriceAge` and `maxPriceConfBps` proposals.
- * Version: 0.1.0
+ * Purpose: the paid opening of the first mainnet cycle (M-4, the founder, 2026-10-13: the first cycle includes one),
+ *          rehearsed on the fork with mainnet's real SOL/USD sponsored account: a wallet outside the team opens a
+ *          `SupplyAtMost` campaign on a real mint and pays US$500 at the Pyth price under init-params.mainnet.json's
+ *          freshness and confidence bounds; the charge and its 90/10 split are checked against the SDK's quote. The
+ *          price's age and confidence at that moment are printed, as evidence for the approved `maxPriceAge` and
+ *          `maxPriceConfBps`. Its bakers, resolution and settlement are the team campaign's (cycle.ts, settle.ts).
+ * Version: 0.2.0 (returns the campaign, which now runs the whole cycle)
  * Sprint:  18 (mainnet), lane L18
  *
  * The account is fetched from mainnet by the fork on its first read, here, so its age is mainnet's own plus the
@@ -31,7 +32,7 @@ function priceFields(data: Uint8Array) {
   };
 }
 
-export async function paidOpening(s: Session, creator: KeyPairSigner, mint: Address) {
+export async function paidOpening(s: Session, creator: KeyPairSigner, mint: Address): Promise<Address> {
   const config = await s.config();
   const solUsd = (await account(s.rpc, SOL_USD_ACCOUNT))!;
   const now = await clock(s.rpc);
@@ -60,7 +61,8 @@ export async function paidOpening(s: Session, creator: KeyPairSigner, mint: Addr
     await send(s.rpc, creator, [await buildOpenCampaign({ creator, args, metricAccount: mint })]),
     "paid opening",
   );
-  const stored = decodeCampaign((await account(s.rpc, await campaignAddress(args.id)))!);
+  const campaign = await campaignAddress(args.id);
+  const stored = decodeCampaign((await account(s.rpc, campaign))!);
   check(
     stored.openingPaidLamports === quote.paid,
     `US$${args.openingUsd} charged ${sol(quote.paid)} = the SDK's quote`,
@@ -70,4 +72,5 @@ export async function paidOpening(s: Session, creator: KeyPairSigner, mint: Addr
     !stored.creatorIsTeam && stored.creatorShareBps === config.params.creatorShareBps,
     "a paid opening keeps the 1%",
   );
+  return campaign;
 }

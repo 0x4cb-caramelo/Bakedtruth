@@ -1,9 +1,11 @@
 /**
  * Purpose: what the mainnet deploy reads before it plans anything, sending nothing (Sprint 18): the binary and its
  *          SHA-256, how the declared program id, its ProgramData and the config stand (a funded ProgramData kills the
- *          id for good), the Squads multisig as the runbook wants it (2 of 3, every member with every permission, no
- *          config authority) and its vault, and whether the session payer and the vault hold what the plan spends.
- * Version: 0.1.0
+ *          id for good), the two Squads multisigs the founder chose (M-1, 2026-10-13: each 2 of 3 with every
+ *          permission and no config authority, the same three members, the upgrade one without a lock until step 9
+ *          and then 24 h, the admin one never locked) and their vaults, and whether the session payer and the upgrade
+ *          vault hold what the plan spends.
+ * Version: 0.2.0 (two multisigs)
  * Sprint:  18 (mainnet), lane L18
  *
  * The standings and their meaning are the devnet deploy's (scripts/deploy/preflight.ts, rehearsed 2026-10-09).
@@ -16,7 +18,7 @@ import { ACCOUNT_LEN, formatSol, PROGRAM_ID } from "@brot/sdk/read";
 
 import { balance, rentFor, type Rpc } from "../validator/rpc";
 import { readStandings, standingProblem } from "./preflight";
-import { readMultisig, vaultAddress, type MultisigState } from "./mainnet-squads";
+import { readMultisig, UPGRADE_TIME_LOCK_SECONDS, vaultAddress, type MultisigState } from "./mainnet-squads";
 
 /** The binary named by `--so` and its SHA-256: the hash the operator types at `--execute`. */
 export function readBinary(path: string | undefined) {
@@ -47,18 +49,40 @@ export function multisigProblem(m: MultisigState): string | null {
   return null;
 }
 
-/** The multisig read and checked, and its vault (index 0), which takes the upgrade authority, `admin` and the fees. */
-export async function checkMultisig(rpc: Rpc, multisig: Address) {
+/** Why the two multisigs are not the pair the founder chose (M-1, M-2), or null. Pure. */
+export function pairProblem(upgrade: MultisigState, admin: MultisigState): string | null {
+  const members = (m: MultisigState) =>
+    m.members
+      .map((member) => member.key)
+      .sort()
+      .join();
+  if (members(upgrade) !== members(admin)) return "the two multisigs do not have the same three members";
+  if (admin.timeLock !== 0) return `the admin multisig has a ${admin.timeLock} s time lock; it must have none (M-1)`;
+  if (upgrade.timeLock !== 0 && upgrade.timeLock !== UPGRADE_TIME_LOCK_SECONDS) {
+    return `the upgrade multisig's lock is ${upgrade.timeLock} s: 0 until step 9, then ${UPGRADE_TIME_LOCK_SECONDS} (M-2)`;
+  }
+  return null;
+}
+
+async function readOne(rpc: Rpc, multisig: Address, role: string) {
   const state = await readMultisig(rpc, multisig);
   const vault = await vaultAddress(multisig, 0);
-  console.log(`multisig ${multisig}: ${state.threshold} of ${state.members.length}, time lock ${state.timeLock} s`);
+  console.log(`${role} multisig ${multisig}: ${state.threshold} of ${state.members.length}, lock ${state.timeLock} s`);
   console.log(`  members ${state.members.map((m) => m.key).join(", ")}; vault ${vault}`);
   const problem = multisigProblem(state);
-  if (problem) throw new Error(`multisig ${multisig}: ${problem}`);
-  if (state.timeLock > 0) {
-    console.log("  its time lock is already set: the initialization waits it out before it can execute (step 7)");
-  }
-  return { state, vault };
+  if (problem) throw new Error(`the ${role} multisig ${multisig}: ${problem}`);
+  return { multisig, state, vault };
+}
+
+/** Both multisigs read and checked: the upgrade one takes the upgrade authority, the admin one `admin` and the fees. */
+export async function checkMultisigs(rpc: Rpc, upgradeMultisig: Address, adminMultisig: Address) {
+  if (upgradeMultisig === adminMultisig) throw new Error("one multisig named twice: the founder chose two (M-1)");
+  const upgrade = await readOne(rpc, upgradeMultisig, "upgrade");
+  const admin = await readOne(rpc, adminMultisig, "admin");
+  const problem = pairProblem(upgrade.state, admin.state);
+  if (problem) throw new Error(problem);
+  if (upgrade.state.timeLock > 0) console.log("  the upgrade multisig is already locked: step 7a waits its 24 h");
+  return { upgrade, admin };
 }
 
 /** The session payer pays the buffer (refunded at the deploy), ProgramData and the program account, plus fees. */
@@ -72,7 +96,7 @@ export async function checkFunds(
   const vaultNeeds = (await rentFor(rpc, ACCOUNT_LEN.globalConfig)) + (await rentFor(rpc, ACCOUNT_LEN.feeVault));
   for (const [who, label, needs] of [
     [a.payer, "session payer", payerNeeds],
-    [a.vault, "multisig vault (the config's and the fee vault's rents)", vaultNeeds],
+    [a.vault, "upgrade multisig's vault (the config's and the fee vault's rents)", vaultNeeds],
   ] as const) {
     const holds = await balance(rpc, who);
     console.log(`  ${label} ${who} needs ${formatSol(needs)} SOL and holds ${formatSol(holds)}`);

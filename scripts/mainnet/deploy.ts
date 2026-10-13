@@ -2,8 +2,9 @@
  * Purpose: the deploy steps of the runbook (4 to 6) rehearsed on the mainnet fork with the `mainnet` binary and
  *          throwaway keys, through the same step builders and read-backs as scripts/deploy/mainnet-deploy.ts: the
  *          session payer writes a buffer, hands it to the upgrade authority (a key file standing for the hardware
- *          wallet), the program is deployed from the buffer and read back, and the upgrade authority goes to the
- *          multisig vault. Run twice: by the Solana CLI at a throwaway id, and at the declared id.
+ *          wallet Ronaldo holds on the day, M-4), the program is deployed from the buffer and read back, and the
+ *          upgrade authority goes to the upgrade multisig's vault. Run twice: by the CLI at a throwaway id, and at the
+ *          declared id.
  * Version: 0.1.0
  * Sprint:  18 (mainnet), lane L18
  *

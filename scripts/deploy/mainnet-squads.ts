@@ -1,10 +1,11 @@
 /**
- * Purpose: what the mainnet scripts need of Squads v4, the multisig that holds the upgrade authority, `admin` and
- *          `fee_recipient` (Sprint 18): its program id, its PDAs (multisig, vault, transaction, proposal, program
- *          config), the `Multisig` account decoded (threshold, time lock, members), and a vault transaction's message
- *          compiled to the bytes Squads stores and the Squads CLI takes (`vault-transaction-create
- *          --transaction-message`). Written by hand from Squads' published IDL and source, with no new dependency.
- * Version: 0.1.0
+ * Purpose: what the mainnet scripts need of Squads v4, whose two multisigs hold the upgrade authority (with the 24 h
+ *          lock) and `admin` and `fee_recipient` (without one), as the founder decided on 2026-10-13 (M-1, M-2): its
+ *          program id, its PDAs (multisig, vault, transaction, proposal, program config), the `Multisig` account
+ *          decoded (threshold, time lock, members), and a vault transaction's message compiled to the bytes Squads
+ *          stores and the Squads CLI takes (`vault-transaction-create --transaction-message`). Written by hand from
+ *          Squads' published IDL and source, with no new dependency.
+ * Version: 0.2.0 (the decided time lock)
  * Sprint:  18 (mainnet), lane L18
  *
  * Sources (read 2026-10-13): github.com/Squads-Protocol/v4 at `main`: sdk/multisig/idl/squads_multisig_program.json
@@ -30,6 +31,9 @@ import {
 import { account, type Rpc } from "../validator/rpc";
 
 export const SQUADS_V4 = address("SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf");
+
+/** The upgrade multisig's time lock, 24 hours (M-2, the founder, 2026-10-13); the admin multisig has none (M-1). */
+export const UPGRADE_TIME_LOCK_SECONDS = 86_400;
 
 const key = (a: Address) => getAddressEncoder().encode(a);
 const index = (n: bigint) => getU64Encoder().encode(n);

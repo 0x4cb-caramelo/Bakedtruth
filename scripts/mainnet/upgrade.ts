@@ -1,8 +1,8 @@
 /**
- * Purpose: an upgrade as it happens once the multisig holds the upgrade authority (runbook, "Upgrading"), rehearsed
- *          on the fork: the session payer writes a buffer, hands it to the vault, the multisig proposes the loader's
- *          `Upgrade` signed by the vault, the time lock refuses it until it has run its course, and the upgraded
- *          bytes are read back equal to the binary. The binary is the same one, so the program keeps answering.
+ * Purpose: an upgrade as it happens once the upgrade multisig holds the upgrade authority (runbook, "Upgrading"),
+ *          rehearsed on the fork: the session payer writes a buffer, hands it to that multisig's vault, the multisig
+ *          proposes the loader's `Upgrade` signed by the vault, its 24-hour lock (M-2) refuses it until it has run its
+ *          course, and the upgraded bytes are read back equal to the binary. The same binary, so the program answers.
  * Version: 0.1.0
  * Sprint:  18 (mainnet), lane L18
  *
