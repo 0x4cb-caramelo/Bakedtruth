@@ -1,7 +1,7 @@
 /**
  * Purpose: two wallets and a link (Sprint 14 DoD): wallet A cannot create, change or remove B's link. A signing its
- *          own link with B's address in the link slot is refused, before and after B links; A cannot sign as B; B
- *          cannot link twice. And no instruction of the program changes or closes a link: B's link put in every
+ *          own link with B's address in the link slot is refused, before and after B links; A cannot sign as B, even
+ *          after paying B's whole rent in advance; B cannot link twice. And no instruction of the program changes or closes a link: B's link put in every
  *          writable slot of every instruction's valid baseline (the slot matrix's), the joins `tally_late_joins`
  *          closes included, is refused each time and stays byte for byte, lamport for lamport, where it was.
  *          Filter: `bun test tests/ -t "link referrer two wallets"`.
@@ -13,10 +13,12 @@ import { AccountRole } from "@solana/kit";
 
 import { referralLinkAddress } from "@brot/sdk/read";
 
+import { place } from "./checks-support";
 import * as I from "./instructions";
+import * as P from "./program";
 import { link, linkIx, linkWorld, readLink, snapshot } from "./referral-support";
 import { BASELINES } from "./slot-matrix-fixtures";
-import { expectError, expectOk, fundedWallet, send } from "./setup";
+import { expectError, expectOk, fundedWallet, rentFor, send } from "./setup";
 
 describe("link referrer two wallets", () => {
   test("link: wallet A cannot create, change or remove wallet B's link", async () => {
@@ -31,6 +33,10 @@ describe("link referrer two wallets", () => {
     const asB = I.withSlot(await linkIx(b, a.address), 0, { role: AccountRole.WRITABLE });
     expectError(await send(w, [asB]), "MissingSignature");
     expect(snapshot(w, linkB).owner).toBeNull();
+    // Even when A pays B's whole rent in advance, so the link needs nothing from B: B's signature is still required.
+    place(w, linkB, { owner: P.SYSTEM_PROGRAM_ID, lamports: rentFor(w, 96) });
+    expectError(await send(w, [asB]), "MissingSignature");
+    expect(snapshot(w, linkB)).toMatchObject({ owner: P.SYSTEM_PROGRAM_ID, data: [] });
 
     // B links; then A can neither overwrite it nor make B link again, and B itself cannot change it.
     expectOk(await link(w, b, referrer.address));
