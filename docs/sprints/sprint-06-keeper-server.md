@@ -1,6 +1,11 @@
 # Sprint 06 — Server and primary keeper (Bun check first)
 
-**Status:** closed 2026-10-10 by the founder's decision, for the Hackathon MVP. The keeper runs live on the server; the real resolve is not yet observed, and the founder will let the test campaign's BTC/USD touch happen on its own (opened 2026-10-10 from `origin/main` at `6b5e3ec`) · **Branch:** `sprint-06-keeper-server` · **Dates:** none, by the founder's decision
+**Status:** closed 2026-10-10 for the Hackathon MVP by the founder's decision; its open code items are built since
+2026-10-13 (settlement behind `KEEPER_SETTLE`, off; batched reads; transaction landing; `/healthz`; the unit with its own
+identity), on branch `sprint-07-keeper-carryover`, not deployed. Not tagged: blocked by the founder (whether the devnet
+keeper pays; the tag), the server owner (one identity per unit), D4 (the Hermes stream) and P-7 (the conversion
+runbook), and by the clock: the real resolve is first observable when the test campaign `FmDo…` ends, 2026-10-14
+04:48 UTC
 
 | | |
 |---|---|
@@ -230,3 +235,17 @@ Written 2026-10-10, before closure, at the founder's request to wrap up. **Not c
   server; the server runs this branch's commit, not `main`; the cycle is 15 s on the server and 60 s in the code.
 - **Retrospective:** the proof window is the real constraint, not the RPC or the key. A 429 after a send does not mean
   failure: check the signer's recent transactions before retrying.
+
+### 2026-10-13, the carry-over (lane L07 of the lead's run, branch `sprint-07-keeper-carryover`)
+
+Built and tested, not installed: settlement behind `KEEPER_SETTLE` (off unless exactly "on"): tally (a YES price
+result only after its window, so the cut-off can still move to an earlier proof), finalize, `settle_entry` in batches,
+the creator share, the prize, the fee, close and sweep, every destination the stored one, every lamport checked against
+the SDK's math on LiteSVM (Split, OneSided, Refund by an outside cause, a house-failure void, a reserved creator share);
+batched reads (one `getProgramAccounts`, `getMultipleAccounts` by 100: 1,000 open campaigns cost 14 RPC calls a cycle,
+measured in process); landing (the compute limit from the simulation, a bounded priority fee, rebroadcast until the
+blockhash expires, a failing instruction dropped from its batch); `/healthz` with pending work, `max_open_campaigns`
+usage, exposure and the settle switch; the unit with its own user and `LoadCredential=` (the steps are in its header;
+not to be copied to the server before them). 131 keeper tests pass. Open: the server owner's agreement and the
+install; the founder's switch; concurrent landing for the Surfpool 1,000-campaign run (X1.8); `scripts/team/confirm.ts`
+does not tally first.

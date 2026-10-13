@@ -1,0 +1,17 @@
+{
+  "capturedAt": "2026-10-13T08:14:16.029Z",
+  "rpcOrigin": "https://api.devnet.solana.com",
+  "account": "APgzQGGdv2qCgBkX6aHVkrGePtBVDDg68GiqaM7rmtf5",
+  "postedSlot": 510561453,
+  "publishTime": 1791879247,
+  "writers": [
+    "5P61NhoQTFuP7LjiRLWgYqM9o4HyNw4DezipedZF2XMhta2htXvsG2hLs2zrqgVtqw5Ss4Bxn8jsXNwVauZp89wh"
+  ],
+  "receiverTx": "2XZfxxeyBKD3Hy22jBsM5iSUS1mchyhbAYa1bR9bxK16SrT8Ep49adGxcNDUoEjVXmgRkSJU3tDpSfZjP39AS1Y8",
+  "sha256": {
+    "account.json": "c6a0f1e98ea506f48f3c2db26dd7ca1577ed7b488d6a437a711399eebd5ab27e",
+    "block.json": "0098cb96d927c44aa11eed516e90cdb76ba563e588b72319166f9e8deea5bc31",
+    "tx-5P61NhoQTFuP7LjiRLWgYqM9o4HyNw4DezipedZF2XMhta2htXvsG2hLs2zrqgVtqw5Ss4Bxn8jsXNwVauZp89wh.json": "30ee8efc4388198a8311e3828977612f300f750c81e5546e9b00481adfdb1950",
+    "tx-2XZfxxeyBKD3Hy22jBsM5iSUS1mchyhbAYa1bR9bxK16SrT8Ep49adGxcNDUoEjVXmgRkSJU3tDpSfZjP39AS1Y8.json": "1752d23d1f615d969e63f3d40c42eabb6755534c82b4d9d2e910751650c51ee6"
+  }
+}
