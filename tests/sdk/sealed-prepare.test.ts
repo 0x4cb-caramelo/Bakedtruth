@@ -3,10 +3,11 @@
  *          local RPC endpoint): re-read, checked, quoted, built, summarised from the bytes the wallet signs and
  *          simulated by `prepareSealedEntry`, then signed and landed; a retry with the saved entry total is refused
  *          once the first landed (A-9); a refusal stops at the check in the program's order (the pause before the
- *          price); a change of the creation rules after the preparation refuses the signed entry; a sponsor the
- *          cluster cannot charge is not ready.
+ *          price); a change of the creation rules after the preparation refuses the signed entry, and a retry that
+ *          passes the saved terms back stops at the check (second red-team pass, L-a); on a SOL/USD campaign the one
+ *          account is read once (I-b); a sponsor the cluster cannot charge is not ready.
  *          Filter: `bun test tests/ -t "a sealed entry is prepared"`.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Sprint:  15 (lane L15). Needs the SBF build.
  */
 import { afterEach, describe, expect, test } from "bun:test";
@@ -15,7 +16,7 @@ import { createSolanaRpc, signTransactionMessageWithSigners, type Instruction } 
 import { ACCOUNT_LEN, Side } from "@brot/sdk/read";
 import { prepareSealedEntry, type PreparedSealedEntry } from "@brot/sdk/tx";
 
-import { DEFAULT_PARAMS, readCampaign } from "../brot/flows";
+import { DEFAULT_PARAMS, readCampaign, SOL_CHARGED, SOL_PRICE } from "../brot/flows";
 import * as I from "../brot/instructions";
 import * as P from "../brot/program";
 import { readSealedFee, sealedCharge, sealedWorld } from "../brot/sealed-support";
@@ -37,10 +38,19 @@ function ready(prepared: PreparedSealedEntry): Extract<PreparedSealedEntry, { ok
 const refusal = (prepared: PreparedSealedEntry) =>
   prepared.ok || prepared.stage !== "check" ? null : prepared.check.refusal.errorName;
 
-async function preparing() {
-  const world = await sealedWorld();
+/** A world with its campaign (`over` its opening), and the preparation through an RPC that records each account read. */
+async function preparing(over: Parameters<typeof sealedWorld>[0] = {}) {
+  const world = await sealedWorld(over);
   rpc = startFakeRpc(world.w);
-  const client = createSolanaRpc(rpc.url);
+  const reads: string[] = [];
+  const base = createSolanaRpc(rpc.url);
+  const client = new Proxy(base, {
+    get(target, method, receiver) {
+      const call = Reflect.get(target, method, receiver);
+      if (method !== "getAccountInfo") return call;
+      return (at: string, config: unknown) => (reads.push(at), call.call(target, at, config));
+    },
+  });
   const prepare = (more: Partial<Parameters<typeof prepareSealedEntry>[0]> = {}) =>
     prepareSealedEntry({
       rpc: client,
@@ -50,7 +60,7 @@ async function preparing() {
       entryUsd: 500n,
       ...more,
     });
-  return { ...world, prepare };
+  return { ...world, prepare, reads };
 }
 
 describe("a sealed entry is prepared, then signed", () => {
@@ -122,6 +132,41 @@ describe("a sealed entry is prepared, then signed", () => {
     const renewed = ready(await prepare());
     expect(renewed.expectedParamsVersion).toBe(1);
     expect(renewed.summary.lines[1]).toContain("; 5.00% of it is Brot's fee");
+  });
+
+  test("a retry keeps the terms approved: a version that moved stops at the check; the bound is never exceeded", async () => {
+    const { w, admin, prepare } = await preparing();
+    // Approved at version 0 (a 10% fee); the answer never comes; the admin moves the split to 95/5 (version 1).
+    const first = ready(await prepare());
+    expectOk(await send(w, [await I.setCreationParamsIx(admin, { ...DEFAULT_PARAMS, opening_prize_bps: 9_500 })]));
+    const saved = {
+      expectedEntryTotal: first.expectedEntryTotal,
+      expectedParamsVersion: first.expectedParamsVersion,
+      maxLamports: first.maxLamports,
+    };
+    expect(refusal(await prepare(saved))).toBe("CreationParamsChanged");
+    // Shown the new terms again, the sponsor approves version 1; a saved bound is a ceiling, never raised.
+    const { paid } = sealedCharge(500n);
+    const renewed = ready(await prepare({ ...saved, expectedParamsVersion: 1, maxLamports: paid }));
+    expect([renewed.maxLamports, renewed.debit.maxPayment, renewed.expectedParamsVersion]).toEqual([paid, paid, 1]);
+    expect(refusal(await prepare({ ...saved, expectedParamsVersion: 1, maxLamports: paid - 1n }))).toBe(
+      "SealedEntryAboveMaxLamports",
+    );
+  });
+
+  test("on a SOL/USD campaign the one account is read once and serves both the lock and the price", async () => {
+    const { w, campaign, prepare, reads } = await preparing({
+      feedId: P.SOL_USD_FEED_ID,
+      target: (SOL_PRICE * 11n) / 10n,
+    });
+    expect(readCampaign(w, campaign).metric_account).toBe(P.SOL_USD_ACCOUNT);
+    const prepared = ready(await prepare());
+    expect(reads.filter((at) => at === P.SOL_USD_ACCOUNT)).toHaveLength(1);
+    expect(prepared.check.charge).toMatchObject({ paid: sealedCharge(500n).paid, price: SOL_CHARGED });
+    expect(prepared.simulation.events.map((e) => e.name)).toEqual(["EntryAdded", "SealedFeeHeld"]);
+    expect(
+      w.client.svm.sendTransaction(await signTransactionMessageWithSigners(prepared.message)).toString(),
+    ).not.toContain("err");
   });
 
   test("a sponsor the cluster cannot charge is not ready, though the SDK's checks passed", async () => {
