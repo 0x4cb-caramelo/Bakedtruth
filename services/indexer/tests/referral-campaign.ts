@@ -3,9 +3,10 @@
  *          the campaign's events as it would, numbered from seq 0 (opening, joins, resolution, every baker's tally,
  *          the snapshot, each payout, the creator's share, the fee, the prize and the close), with the SDK's own money
  *          math (`snapshot` and `entryPayout`, the program's mirrors), so a test says only who joined, on which side,
- *          when, whether late, and how the campaign ended. `edit` changes an event before it lands, for the checks
- *          against the campaign; `skip` leaves a gap in its seq; `noFee` stops before the fee is collected.
- * Version: 0.1.0
+ *          when, whether late, and how the campaign ended, through a two-stage contest if asked (the admin confirms or
+ *          voids). `edit` changes an event before it lands, for the checks against the campaign; `skip` leaves a gap in
+ *          its seq; `noFee` stops before the fee is collected.
+ * Version: 0.1.1 (a contested ending)
  * Sprint:  14 (referral, lane L14R)
  */
 import type { Address } from "@solana/kit";
@@ -89,7 +90,7 @@ export class Campaign {
   private bakers = () => [...new Set(this.joins.map((j) => j.baker))];
 
   /** Resolution, every baker's tally, and the snapshot: `void` is a stale feed (an outside cause). */
-  finalize(result: "yes" | "no" | "void", at: { edit?: Edit } = {}) {
+  finalize(result: "yes" | "no" | "void", at: { edit?: Edit; contest?: "confirm" | VoidReason } = {}) {
     this.outcome = result === "yes" ? Outcome.Yes : result === "no" ? Outcome.No : Outcome.Void;
     this.reason = result === "void" ? VoidReason.StaleFeed : VoidReason.None;
     const resolved = { kind: T.ReaderKind.PriceTouch, outcome: this.outcome, voidReason: this.reason, metLate: false };
@@ -100,6 +101,7 @@ export class Campaign {
       return ["LateTallied", { baker, joinsClosed: 1, lateYesAdded, lateNoAdded }];
     });
     if (tallies.length > 0) this.step(tallies);
+    if (at.contest !== undefined) this.contested(at.contest);
     const [lateYes, lateNo] = [this.sum(null, Side.Yes, true), this.sum(null, Side.No, true)];
     const verdict =
       this.outcome === Outcome.Void
@@ -119,6 +121,18 @@ export class Campaign {
       fromFee: s.creatorShareFromFee,
     };
     return this.step([["CampaignFinalized", { ...fields, ...fees, distributable: s.distributable }]], at);
+  }
+
+  /** A contest through both stages: opened, re-read different, then the admin confirms or voids with `decision`. */
+  private contested(decision: "confirm" | VoidReason) {
+    const stage = (contestStage: number) => ({ contestStage, contestEndsAt: 0n });
+    this.step([["ContestOpened", { signer: wallet(201), ...stage(T.ContestStage.Stage1) }]]);
+    const read = { same: false, outcome: this.outcome, voidReason: VoidReason.None, metLate: false, observedValue: 1n };
+    this.step([["CampaignReread", { ...read, publishTime: 0n, ...stage(T.ContestStage.Stage2) }]]);
+    const reason = decision === "confirm" ? VoidReason.None : decision;
+    const closed = { signer: wallet(202), decision: reason === VoidReason.None ? 0 : T.ContestDecision.Void };
+    this.step([["ContestClosed", { ...closed, voidReason: reason, noteHash: new Uint8Array(32) }]]);
+    if (reason !== VoidReason.None) [this.outcome, this.reason] = [Outcome.Void, reason];
   }
 
   /** Every entry paid, the creator's share, the fee collected (unless `noFee`), the prize back and the close. */

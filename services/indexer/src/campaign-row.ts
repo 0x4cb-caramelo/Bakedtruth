@@ -3,15 +3,25 @@
  *          the way the program moves its account (state/transitions.rs): `CampaignOpened` sets the terms, the pot and
  *          the prize; each `EntryAdded` carries both pools after it, and a baker's first one opens that baker's
  *          `Entry` account (its `isFirst` is something else: the pot's first baker, Q3); `CampaignResolved` puts it in
- *          review with the outcome; a contest makes it `Contested`; the team's
- *          void sets the outcome `Void`; `CampaignFinalized` stores the mode and moves it to `Settling`, or `Settled`
+ *          review with the outcome; a contest makes it `Contested`; the team's void, or the admin's `ContestClosed`
+ *          with a Void decision, sets the outcome `Void` and its reason (a re-read never writes an outcome, and a
+ *          Confirm keeps the stored one); `CampaignFinalized` stores the mode and moves it to `Settling`, or `Settled`
  *          when no entry was ever made; the last `EntrySettled` makes it `Settled`; `CampaignClosed` marks the account
  *          gone. `LateTallied` changes no pool: the late totals are kept apart (tally_late_joins), and the prize never
  *          changes after the opening. No row without its `CampaignOpened`: a gap is refetched first (ingest.ts).
- * Version: 0.1.0
- * Sprint:  08 (indexer, API, relay and points)
+ * Version: 0.1.1 (the admin's Void through ContestClosed)
+ * Sprint:  08 (indexer, API, relay and points); 14 (the admin's decision, lane L14R)
  */
-import { Direction, Outcome, ReaderKind, SettleMode, Status, VoidReason, type DecodedEvent } from "@brot/sdk/read";
+import {
+  ContestDecision,
+  Direction,
+  Outcome,
+  ReaderKind,
+  SettleMode,
+  Status,
+  VoidReason,
+  type DecodedEvent,
+} from "@brot/sdk/read";
 
 export type CampaignRow = {
   address: string;
@@ -128,6 +138,11 @@ function apply(row: CampaignRow, event: DecodedEvent, bakers: Set<string>): void
       row.status = Status[Status.Contested];
       return;
     case "CampaignVoided":
+      row.outcome = Outcome[Outcome.Void];
+      row.void_reason = VoidReason[event.data.voidReason];
+      return;
+    case "ContestClosed":
+      if (event.data.decision !== ContestDecision.Void) return;
       row.outcome = Outcome[Outcome.Void];
       row.void_reason = VoidReason[event.data.voidReason];
       return;
