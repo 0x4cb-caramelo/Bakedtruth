@@ -91,6 +91,7 @@ sealed_fee_sponsor    fail  sealed_fee_sponsor_refuses_another_wallet | two user
 sealed_fee_finalized  fail  sealed_fee_finalized_refuses_a_campaign_not_finalized | the held fee waits for the campaign to be finalized
 sealed_fees_open      fail  sealed_fees_open_keeps_the_campaign_from_closing | Split: the sealed entry is paid as any winning entry, and its fee goes to the fee vault
 distinct              fail  settle_sealed_fee_refuses_its_sealed_fee_in_another_slot | -
+sealed_terms          fail  sealed_terms_refuse_an_entry_signed_under_other_creation_rules | the creation rules signed are the config's: a change between the preview and the landing refuses it
 `;
 
 const args = process.argv.slice(2);
