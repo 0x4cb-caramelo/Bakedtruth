@@ -49,6 +49,11 @@ recomendado (1a a 12a).
     `tests/site/panels-render.test.ts`, um em `tests/ops/resolution-post.test.ts`), em contas reais da mainnet; dois
     testes antigos passam a esperar `Token (…XXXX)` no lugar do endereço curto. Conferido também num navegador, com o
     site rodando localmente contra o devnet, a 1280 e a 412 px.
+  - **No ar em `brot.markets/dev0x`** desde as 04h45min20s UTC de 13/10/2026, na versão `df09357435d5` (a mescla do
+    PR #80, CI verde), publicada da máquina do Ronaldo a pedido dele: montada ao lado da anterior, construída para o
+    slot 510.454.676 (A-8; o programa não mudou) e testada na porta 4239 antes da troca. A versão anterior
+    (`570fa306b4d3`) ficou no servidor. O erro #418 do React visto no navegador já existia na versão anterior
+    (`session-log/2026-10-13-publicacao-do-ticker-no-dev0x.md`).
 - **O sexto tipo no ar no devnet e no `/dev0x`** (12/10/2026 em Brasília, 13/10 em UTC; a pedido do Ronaldo, que
   confirmou antes de qualquer envio; `session-log/2026-10-12-upgrade-devnet-sexto-tipo.md`).
   - **O programa** `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o` foi atualizado com o artefato do CI da `main` em
