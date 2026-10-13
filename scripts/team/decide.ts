@@ -4,13 +4,18 @@
  *          instruction). Before stage 2's deadline the admin confirms the stored result or voids the campaign; the
  *          snapshot follows at once. It never inverts: a confirm keeps the stored outcome, a void records Void. After
  *          the deadline the stored result stands and anyone finalizes (finalize_campaign takes the lapse).
- * Version: 0.1.0
+ * Version: 0.1.1 (the admin's reading of a fact-kind YES re-read after its deadline: review fix F5, lane L14B)
  * Sprint:  14 (the two-stage dispute; lane INV14)
  *
  * A void writes its public record to content/void-log/ as the team's void does (record.ts: the SHA-256 of the saved
  * bytes goes on-chain; written only with --yes after the simulation passes). Its header's "Team key" line names the
  * signing key, here the admin's: the record's format (packages/sdk/src/schemas/void-log.ts) has no admin form yet. A
  * confirm hashes its note's text (LF line endings) for the ContestClosed event and saves nothing.
+ *
+ * Reading the re-read's evidence (red-team review F5): on an irreversible fact (`SupplyAtMost`, `DammV2LockedAtLeast`)
+ * a correct YES re-read after its deadline reads NO with `met_late` set, because after the deadline the reader decides
+ * only NO, and `met_late` says the fact WAS met. That reading is what sent the contest here; it is not evidence against
+ * the YES. Check the resolution's own `CampaignResolved` (its time before the deadline, the value it read) first.
  *
  *   TEAM_KEYPAIR=~/admin.json bun run scripts/team/decide.ts <campaign> --decision Confirm --note note.md --cluster devnet [--yes]
  *   TEAM_KEYPAIR=~/admin.json bun run scripts/team/decide.ts <campaign> --decision Void --reason TeamOutsideCause --note note.md ...
