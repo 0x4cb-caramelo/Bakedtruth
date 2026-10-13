@@ -22,6 +22,14 @@ export type AdvanceOp = { k: "advance"; seconds: bigint };
 const bakerIndex = (h: Harness, address: string) => h.bakers.findIndex((b) => b.address === address);
 /** The reasons a team key may choose, which the admin's void may name too. */
 const TEAM_REASONS = [1, 3, 4, 5];
+/**
+ * The reason a void draws. Until the run's first held fee has gone back to its sponsor (Sprint 15), a campaign holding
+ * one draws a house reason (MissedWindow, TeamHouseFailure): the refund path is reached whatever the seed's stream.
+ */
+const voidReason = (h: Harness, r: Rng, c: Harness["camps"][number]) =>
+  liveSealed(c).length > 0 && !h.trace.some((line) => line.startsWith("sealedSettle-refunded"))
+    ? r.pick([1, 4])
+    : r.pick(TEAM_REASONS);
 
 /** The next operation that moves campaign `index` along its lifecycle, or `null` when its phase has none. */
 export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | AdvanceOp | null {
@@ -52,7 +60,7 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
       const [first, second] = c.outcome === "Void" ? (["void", "contest"] as const) : (["contest", "void"] as const);
       const act = x < 0.55 ? first : x < 0.7 ? second : null;
       if (act === "contest") return { k: "contest", c: index, stage: r.next() < 0.1 ? 2 : 1, member, tally };
-      if (act === "void") return { k: "void", c: index, member, reason: r.pick(TEAM_REASONS), tally };
+      if (act === "void") return { k: "void", c: index, member, reason: voidReason(h, r, c), tally };
       if (x < 0.8) return { k: "confirm", c: index, member, tally };
       return r.next() < 0.5 ? { k: "advance", seconds: c.reviewEndsAt - t + 1n } : null;
     }
@@ -82,11 +90,11 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
       }
       // From the deadline on only the lapse remains: a decision then is refused (ContestDeadlinePassed).
       if (t >= c.contestEndsAt) {
-        if (x < 0.15) return { k: "decide", c: index, decision: 1, reason: r.pick(TEAM_REASONS), signer: "admin" };
+        if (x < 0.15) return { k: "decide", c: index, decision: 1, reason: voidReason(h, r, c), signer: "admin" };
         return { k: "finalize", c: index };
       }
       if (x < 0.25) return { k: "decide", c: index, decision: 0, reason: 0, signer: "admin" };
-      if (x < 0.5) return { k: "decide", c: index, decision: 1, reason: r.pick(TEAM_REASONS), signer: "admin" };
+      if (x < 0.5) return { k: "decide", c: index, decision: 1, reason: voidReason(h, r, c), signer: "admin" };
       // Before the deadline the lapse is refused (ContestNotLapsed), and so are a second re-read and a second
       // escalation (WrongContestStage).
       if (x < 0.57) return { k: "finalize", c: index };

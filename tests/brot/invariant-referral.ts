@@ -3,8 +3,8 @@
  *          at any phase and paused or not (I10′), paying only the top-up of its `ReferralLink`; a second link, a zero
  *          or self referrer and another wallet's link are refused; SOL sent by hand to a link address not yet made is
  *          kept. The per-run check: every link keeps its owner, lamports and bytes to the end of the run.
- * Version: 0.1.0
- * Sprint:  14 (lane INV14)
+ * Version: 0.1.1 (the first SOL sent by hand to a link address is drawn while a referee is unlinked)
+ * Sprint:  14 (lane INV14); 15 (lane INV15, with Sprint 14 in one branch)
  */
 import { type Address } from "@solana/kit";
 
@@ -141,7 +141,10 @@ export function drawLinkOp(h: Harness, r: Rng): LinkOp {
   const referee = r.int(0, h.referees.length - 1);
   const unlinked = h.referees.map((_, i) => i).filter((i) => !h.links.has(h.referees[i].address));
   const x = r.next();
-  if (x < 0.15 && unlinked.length > 0) {
+  // Until the run's first SOL sent by hand to a link address, a link draw sends it while one is unlinked (Sprint 15
+  // merge: the referees are all linked early in some streams, and the case would never run).
+  const funded = h.trace.some((line) => line.startsWith("fundLink"));
+  if ((x < 0.15 || !funded) && unlinked.length > 0) {
     return { k: "fundLink", referee: r.pick(unlinked), amount: r.big(h.rent.wallet, 3_000_000n) };
   }
   if (x < 0.25)
