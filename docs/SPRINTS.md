@@ -107,7 +107,7 @@ mainnet line, which still says "and a cap" and whose new wording waits for the f
 | 14 | [Referral and second read](sprints/sprint-14-referral-second-read.md) | B9 | 04, 07, 08, 12 |
 | 15 | [Sponsorship: the sealed entry](sprints/sprint-15-sponsorship.md) | B9 | 04, 05, 12 |
 | 16 | [Hardening (multisig, pause, incident plan, creation rules frozen)](sprints/sprint-16-hardening.md) (in progress: CI and supply chain built 2026-10-13; the attestation waits for the founder; the rest waits for 14 and 15 and the hardware multisig) | B9 (TP §7, §7.1) | 14, 15, 07 |
-| 17 | [Audits and fixes](sprints/sprint-17-audit-fixes.md) | B9 (TP §7, §8) | 16 |
+| 17 | [Audits and fixes](sprints/sprint-17-audit-fixes.md) (in progress: the audit package written 2026-10-13; blocked by the two firms, L0 and the freeze in 16) | B9 (TP §7, §8) | 16 |
 | 18 | [Mainnet](sprints/sprint-18-mainnet.md) | B9 (TP §7, §12) | 17 |
 | 19 | [Site: open a campaign (the creation box, `/abrir`)](sprints/sprint-19-site-open-campaign.md) (built 2026-10-10; merged 2026-10-11, PR #68, tag `sprint-19`; waiting: the founder's devnet openings (1a, after the merge), the landing deploy before `/abrir` is public (2a), the phones (X2.2, Ronaldo by hand), a second review of `content/powers.md` (Lucas or Bernardo), the US$ price route, the names route, the relay's country refusal, `content/partners.json` and the share card) | B8 | 11, -1 |
 | 20 | [Android app: design pass and skeleton (M-1)](sprints/sprint-20-android-skeleton.md) | M (TP §3.7) | 13, 05 |
