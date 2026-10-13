@@ -2,9 +2,9 @@
  * Purpose: run the test kit's account injectors and the slot matrix's mutations against a surfnet, unchanged: a
  *          recording stand-in for the three synchronous LiteSVM calls they make (`setAccount`, `airdrop`,
  *          `minimumBalanceForRentExemption`), replayed on the surfnet with `surfnet_setAccount` and airdrops.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Sprint:  05 (SDK and the devnet cycle), lane OPS: the DoD row "the negative tests, the slot tests and one paid
- *          opening run once on a real validator"
+ *          opening run once on a real validator"; 15 (the SealedFee's size, lane INV15)
  *
  * The rent the kit asks for is the surfnet's own, read beforehand for every size the kit writes. The campaign
  * `base` mirrors tests/brot/slot-matrix-fixtures.ts, times taken from the surfnet's clock.
@@ -23,8 +23,8 @@ type Recorded =
   | { kind: "set"; address: string; lamports: bigint; data: Uint8Array; owner: string; executable: boolean }
   | { kind: "airdrop"; address: string; lamports: bigint };
 
-/** The account sizes the kit writes: data-less, mint, join, entry, token account, config, campaign. */
-const SIZES = [0, 45, 82, 96, 116, 134, 165, 400, 512, 611, 1_112, 3_762];
+/** The account sizes the kit writes: data-less, mint, join, sealed fee, entry, token account, config, campaign. */
+const SIZES = [0, 45, 82, 96, 112, 116, 134, 165, 400, 512, 611, 1_112, 3_762];
 
 /** A world the kit's helpers accept; their writes wait in `flush` until it is awaited. */
 export type ShimWorld = { w: World; flush: () => Promise<void> };
