@@ -1,0 +1,15 @@
+# Purpose: who reviews the files that decide what CI checks, what it trusts and what it publishes (Sprint 16,
+#          carried from Sprint 00's review, TP section 7.1): the workflows, the secret scan and its rules, the
+#          commit hooks, the pinned tool hashes and the pin of Bun's binary that CI and the server share.
+#
+# GitHub reads this file but enforces it only through branch protection or a ruleset that requires a code owner's
+# review. A private repository on GitHub Free has neither, so until the founders choose a paid plan or a public
+# repository it names the reviewers and blocks nothing (docs/technical/verifiable-build.md, "What binds").
+# Both owners have write access to the repository, which GitHub requires of a code owner.
+
+/.github/                       @0x4cb-caramelo @0xcf07
+/scripts/ci-secret-scan.js      @0x4cb-caramelo @0xcf07
+/scripts/ci/                    @0x4cb-caramelo @0xcf07
+/.gitleaks.toml                 @0x4cb-caramelo @0xcf07
+/.claude/hooks/                 @0x4cb-caramelo @0xcf07
+/deploy/vps/bun-*.sha256        @0x4cb-caramelo @0xcf07

@@ -61,6 +61,12 @@ authority, admin and fee recipient, and his team key as the only team key until 
   blocked id is found early.
 - This machine's Solana CLI defaults to **mainnet-beta**: every command here passes `--url` and every key explicitly.
 - Rehearse: `bun run deploy:rehearse` must end with "every step behaved as the deploy expects".
+- **Since Sprint 16 (2026-10-13)** the `brot_markets.so` in `programs-<sha>` is the output of `solana-verify build` in the
+  pinned image, equal byte for byte to a second clean build and to the binary the tests ran
+  (`docs/technical/verifiable-build.md`); the folder's layout is unchanged, so this procedure is too. The `mainnet`
+  build is a separate artifact, `programs-mainnet-<sha>`, never deployed here. A provenance attestation (checked with
+  `gh attestation verify <file> --repo 0x4cb-caramelo/Bakedtruth`) is not produced yet: it waits for the founder's
+  choice on the repository's visibility or plan.
 
 | Standing, as the dry run names it | What it means | What to do |
 |---|---|---|

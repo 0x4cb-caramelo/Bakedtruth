@@ -14,10 +14,15 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  # Keep in sync with README "Stack" and the local toolchain.
+  # Keep in sync with README "Stack" and the local toolchain. scripts/ci/pins.sh pins this version's hashes and
+  # refuses another one.
   SOLANA_VERSION: "3.1.10"
   # Writes the brot-markets IDL from its source (T9); scripts/build-idl.ts refuses other versions.
   SHANK_VERSION: "0.4.9"
+  # T12 (Sprint 16): the features of the mainnet build. The mainnet test steps and both mainnet builds (the
+  # Program job's and the verifiable one) read this one list, so the published binary carries the features the
+  # checks ran with.
+  MAINNET_FEATURES: "mainnet"
   CARGO_TERM_COLOR: always
 
 jobs:
@@ -25,6 +30,10 @@ jobs:
     name: Program
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    outputs:
+      # The binaries every test of this job ran on. The verifiable builds must reproduce them byte for byte.
+      devnet_sha256: ${{ steps.tested.outputs.devnet_sha256 }}
+      mainnet_sha256: ${{ steps.tested.outputs.mainnet_sha256 }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -39,41 +48,37 @@ jobs:
         with:
           cache-on-failure: true
 
-      - name: Cache Solana CLI and platform-tools
-        id: solana-cache
+      # Sprint 16: the Solana CLI comes from its release tarball and the platform-tools from theirs, each checked
+      # against scripts/ci/pins.sh before extraction (no more `curl | sh`, and no unchecked download by
+      # cargo-build-sbf). The cache is keyed by the pins, and a restored copy is checked against the same hashes.
+      # This job's binaries are tested, never published: the published ones come from the cache-free
+      # verifiable builds below, which must match them byte for byte.
+      - name: Cache Solana CLI and platform-tools (keyed by their pins)
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.local/share/solana/install
             ~/.cache/solana
-          key: solana-${{ runner.os }}-${{ env.SOLANA_VERSION }}
+          key: solana-${{ runner.os }}-${{ env.SOLANA_VERSION }}-${{ hashFiles('scripts/ci/pins.sh') }}
 
-      - name: Install Solana CLI
-        if: steps.solana-cache.outputs.cache-hit != 'true'
-        run: sh -c "$(curl -sSfL https://release.anza.xyz/v${SOLANA_VERSION}/install)"
-
-      - name: Add Solana CLI to PATH
-        run: echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+      - name: Install Solana CLI and platform-tools (pinned, checksum-verified)
+        run: bash scripts/ci/install-pinned.sh solana
 
       # Cached by version outside target/: rust-cache prunes unknown folders under target/
-      # before saving. cargo install --locked builds it from crates.io with its own lockfile.
+      # before saving. cargo install --locked builds it from crates.io with its own lockfile, once the crate's
+      # checksum in the index matches the pin (scripts/ci/pins.sh).
       - name: Cache shank-cli
-        id: shank-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.local/share/shank-cli
-          key: shank-cli-${{ env.SHANK_VERSION }}-ubuntu-24.04-${{ runner.arch }}
+          key: shank-cli-${{ env.SHANK_VERSION }}-ubuntu-24.04-${{ runner.arch }}-${{ hashFiles('scripts/ci/pins.sh') }}
 
-      - name: Install shank-cli
-        if: steps.shank-cache.outputs.cache-hit != 'true'
-        run: cargo install --locked --version "${SHANK_VERSION}" --root "$HOME/.local/share/shank-cli" shank-cli
+      - name: Install shank-cli (crate checksum pinned)
+        run: bash scripts/ci/install-pinned.sh shank
 
-      - name: Add shank-cli to PATH
-        run: echo "$HOME/.local/share/shank-cli/bin" >> "$GITHUB_PATH"
-
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version-file: package.json
+      # The version package.json names, checked against deploy/vps/bun-<version>.sha256, the server's own pin.
+      - name: Install Bun (pinned, checksum-verified)
+        run: bash scripts/ci/install-pinned.sh bun
 
       - name: Toolchain versions
         run: |
@@ -104,6 +109,21 @@ jobs:
         run: |
           rm -rf packages/sdk/src/idl/brot_markets.json packages/sdk/src/idl/generated
           bun run build:program
+
+      # T12 (Sprint 16): the mainnet variant, with the one feature list, into its own folder.
+      - name: Build the mainnet variant
+        run: >-
+          cargo build-sbf --manifest-path programs/brot-markets/Cargo.toml --sbf-out-dir target/mainnet
+          --features "$MAINNET_FEATURES" -- --locked
+
+      - name: Record the binaries the tests run on
+        id: tested
+        run: |
+          set -euo pipefail
+          devnet="$(sha256sum target/deploy/brot_markets.so | cut -d' ' -f1)"
+          mainnet="$(sha256sum target/mainnet/brot_markets.so | cut -d' ' -f1)"
+          printf 'devnet_sha256=%s\nmainnet_sha256=%s\n' "$devnet" "$mainnet" >> "$GITHUB_OUTPUT"
+          printf 'tested: brot_markets.so %s, mainnet build %s\n' "$devnet" "$mainnet"
 
       # Developers whose machine cannot run the pinned toolchain take the generated IDL from
       # here. It holds no program binary, so it is safe to publish from any branch. The IDL
@@ -154,11 +174,25 @@ jobs:
         run: bun run test:rust
 
       # T12: the mainnet feature must carry the real minimum duration, review window and entry
-      # close, never the drill values. Its test only compiles with `mainnet` on.
+      # close, never the drill values. Its test only compiles with `mainnet` on. Since Sprint 16 the
+      # Mollusk checks of the same run execute the mainnet binary built above, not the default one.
       - name: Mainnet build carries the real values
         env:
-          SBF_OUT_DIR: ${{ github.workspace }}/target/deploy
-        run: cargo test --locked -p brot-markets --features no-entrypoint,mainnet
+          SBF_OUT_DIR: ${{ github.workspace }}/target/mainnet
+        run: cargo test --locked -p brot-markets --features "no-entrypoint,${MAINNET_FEATURES}"
+
+      # T12 on the binary itself (Sprint 16): LiteSVM runs the mainnet build where the tests load
+      # target/deploy/brot_markets.so. A 3 days − 1 s campaign must be refused (DurationTooShort) and a
+      # resolution must open a six-hour review window; a drill build fails both. Each filter must match a
+      # test (bun fails one that matches none). The default binary is put back whatever happens.
+      - name: Mainnet binary keeps the real minimum duration and review window (LiteSVM)
+        run: |
+          set -euo pipefail
+          cp target/deploy/brot_markets.so "$RUNNER_TEMP/brot_markets.default.so"
+          trap 'cp "$RUNNER_TEMP/brot_markets.default.so" target/deploy/brot_markets.so' EXIT
+          cp target/mainnet/brot_markets.so target/deploy/brot_markets.so
+          bun test tests/brot/open-campaign-refuses.test.ts -t "row 5: 3 days"
+          bun test tests/brot/resolve-campaign.test.ts -t "a mint's supply at or below the target"
 
       # Sprint 03 (carried from Sprint 01): Surfpool runs the price reader inside the program's
       # instructions. Pinned by version and by SHA-256, and downloaded rather than piped into a
@@ -196,31 +230,29 @@ jobs:
           SURFPOOL_EXPECTED_VERSION: "1.6.0"
         run: bun run scripts/surfpool/price-touch.ts
 
-      # The program is never built on the shared server (technical plan, section 10). What goes
-      # to a cluster is this artifact. It is published only from main and only after every step
-      # above passed, so a red run or a pull request never leaves a deployable binary behind.
-      # A manual run on main counts: it builds the same commit and needs write access to start,
-      # and the push that merged Sprint 00 never triggered this workflow. The SHA-256 file
-      # detects a corrupted download, nothing more: it is written by the same job that builds.
-      # Provenance attestation is Sprint 16.
-      - name: Hash program artifacts
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      # Sprint 16: the folders the publishing job uploads, laid out by the same script from the
+      # binaries tested here, pass the deploy script's own check (scripts/deploy/checks.ts).
+      - name: Artifact layout passes the deploy scripts' checks
+        env:
+          DEVNET_SHA256: ${{ steps.tested.outputs.devnet_sha256 }}
+          MAINNET_SHA256: ${{ steps.tested.outputs.mainnet_sha256 }}
         run: |
-          set -o pipefail
-          mkdir -p artifacts
-          cp target/deploy/brot_markets.so packages/sdk/src/idl/brot_markets.json artifacts/
-          cd artifacts
-          sha256sum -- * > SHA256SUMS
-          cat SHA256SUMS
+          set -euo pipefail
+          tested="$RUNNER_TEMP/tested-binaries"
+          mkdir "$tested"
+          cp target/deploy/brot_markets.so "$tested/brot_markets.so"
+          cp target/mainnet/brot_markets.so "$tested/brot_markets.mainnet.so"
+          bash scripts/ci/assemble-artifacts.sh "$tested" "$RUNNER_TEMP/layout" "$DEVNET_SHA256" "$MAINNET_SHA256"
+          bun scripts/ci/artifact-layout.ts "$RUNNER_TEMP/layout"
 
-      - name: Upload program artifacts
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: programs-${{ github.sha }}
-          path: artifacts/
-          if-no-files-found: error
-          retention-days: 30
+      # The hashes this job reports are those of the binaries the steps above ran on.
+      - name: The tested binaries are unchanged
+        env:
+          DEVNET_SHA256: ${{ steps.tested.outputs.devnet_sha256 }}
+          MAINNET_SHA256: ${{ steps.tested.outputs.mainnet_sha256 }}
+        run: |
+          printf '%s  %s\n' "$DEVNET_SHA256" target/deploy/brot_markets.so \
+            "$MAINNET_SHA256" target/mainnet/brot_markets.so | sha256sum --check --strict -
 
   repo:
     name: Repo
@@ -245,10 +277,24 @@ jobs:
           node --test services/landing/tests/leads.test.mjs services/landing/tests/server.test.mjs
           services/landing/tests/pages.test.mjs
 
+      # T15 (Sprint 02), kept by Sprint 16: bun.lock and the React Native check's lockfile resolve
+      # every package from registry.npmjs.org with a sha512, and no registry setting names another host.
+      - name: Lockfiles resolve from registry.npmjs.org only
+        run: node scripts/ci/lockfile-registry.js
+
+      - name: Install gitleaks (pinned, checksum-verified)
+        run: bash scripts/ci/install-pinned.sh gitleaks
+
+      # The checks behind the scan, on generated keys and planted commits (the last case runs gitleaks).
+      - name: Secret scan's own tests
+        run: node --test scripts/ci/secret-scan.test.js scripts/ci/lockfile-registry.test.js
+
+      # The commit hook's patterns, the Solana keypair check, the file rules and gitleaks with
+      # .gitleaks.toml, over every commit the branch adds and its net diff (scripts/ci-secret-scan.js).
       - name: Secret scan over the branch
         env:
           BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
-        run: node scripts/ci-secret-scan.js "$BASE"
+        run: node scripts/ci-secret-scan.js "$BASE" --require-gitleaks
 
   app:
     name: App
@@ -264,9 +310,9 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version-file: package.json
+      - name: Install Bun (pinned, checksum-verified)
+        working-directory: ${{ github.workspace }}
+        run: bash scripts/ci/install-pinned.sh bun
 
       - name: Cache Next.js build
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -288,7 +334,8 @@ jobs:
   # with Metro the way a React Native 0.87.1 release build bundles them, compiled with the hermesc that
   # version pins, and the Rust math vectors are replayed on a Hermes VM (tests/react-native/run.mjs).
   # The VM is Hermes v0.13.0's CLI, the newest release with a runnable VM, checked by SHA-256 before it
-  # is extracted (tests/react-native/hermes.mjs); the tools come from that folder's own lockfile.
+  # is extracted (tests/react-native/hermes.mjs); the tools come from that folder's own lockfile, whose
+  # sha512 hashes `npm ci` checks (and lockfile-registry.js holds to registry.npmjs.org).
   mobile:
     name: Mobile bundle
     runs-on: ubuntu-24.04
@@ -298,16 +345,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version-file: package.json
+      - name: Install Bun (pinned, checksum-verified)
+        run: bash scripts/ci/install-pinned.sh bun
 
-      # Metro 0.87 and React Native 0.87.1's Babel packages need Node ^22.13, ^24.3 or 26+.
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: "24.21.0"
-          cache: npm
-          cache-dependency-path: tests/react-native/package-lock.json
+      # Metro 0.87 and React Native 0.87.1's Babel packages need Node ^22.13, ^24.3 or 26+. Node
+      # 24.21.0 from nodejs.org, pinned in scripts/ci/pins.sh (Sprint 16; it was actions/setup-node).
+      - name: Install Node.js (pinned, checksum-verified)
+        run: bash scripts/ci/install-pinned.sh node
 
       # The SDK resolves from the root: its workspace link (node_modules/@brot/sdk) and @solana/kit.
       - name: Install JS dependencies
@@ -321,3 +365,177 @@ jobs:
       - name: Bundle both SDK halves for Android, compile with hermesc, replay the vectors on Hermes
         working-directory: tests/react-native
         run: node run.mjs
+
+  # Sprint 16: the verifiable build. Two runners each build the commit with `solana-verify build` in the image
+  # pinned by digest, from a fresh checkout and an empty target/, restoring no cache of any kind
+  # (scripts/ci/verifiable-build.sh). It runs where something is published or may be: pushes to main and manual
+  # runs (on any branch, so a change can be tried before it merges). Pull requests skip it.
+  verifiable-build:
+    name: Verifiable build (${{ matrix.leg }} of 2)
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        leg: [1, 2]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install solana-verify (pinned, checksum-verified)
+        run: bash scripts/ci/install-pinned.sh solana-verify
+
+      - name: Build brot-markets for devnet and mainnet, and the test-only CPI proxy
+        run: bash scripts/ci/verifiable-build.sh "$RUNNER_TEMP/verifiable"
+
+      - name: Upload this build's binaries
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: verifiable-build-${{ matrix.leg }}-${{ github.sha }}
+          path: ${{ runner.temp }}/verifiable/
+          if-no-files-found: error
+          retention-days: 7
+
+  # The two builds must be byte for byte the same, and the same as the binaries the Program job tested.
+  verifiable-compare:
+    name: Verifiable build is reproducible and tested
+    needs: [program, verifiable-build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      devnet_sha256: ${{ steps.compare.outputs.devnet_sha256 }}
+      mainnet_sha256: ${{ steps.compare.outputs.mainnet_sha256 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: verifiable-build-1-${{ github.sha }}
+          path: ${{ runner.temp }}/leg-1
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: verifiable-build-2-${{ github.sha }}
+          path: ${{ runner.temp }}/leg-2
+
+      - name: Compare the two builds with each other and with the tested binaries
+        id: compare
+        env:
+          TESTED_DEVNET: ${{ needs.program.outputs.devnet_sha256 }}
+          TESTED_MAINNET: ${{ needs.program.outputs.mainnet_sha256 }}
+        run: >-
+          bash scripts/ci/compare-builds.sh "$RUNNER_TEMP/leg-1" "$RUNNER_TEMP/leg-2"
+          "$TESTED_DEVNET" "$TESTED_MAINNET"
+
+  # The program is never built on the shared server (technical plan, section 10). What goes
+  # to a cluster is an artifact of this job. It is published only from main and only after every
+  # job above passed, so a red run or a pull request never leaves a deployable binary behind.
+  # A manual run on main counts: it builds the same commit and needs write access to start,
+  # and the push that merged Sprint 00 never triggered this workflow. A manual run elsewhere goes
+  # as far as the layout and uploads nothing. This job builds nothing and restores no cache: it
+  # lays out the bytes the verifiable builds produced twice and the Program job tested.
+  # programs-<sha> keeps the shape scripts/deploy/artifact.ts reads (brot_markets.so, brot_markets.json,
+  # SHA256SUMS); programs-mainnet-<sha> holds the mainnet build under its own name with its IDL. A SHA256SUMS
+  # file detects a corrupted download, nothing more: it is written by the same workflow that builds.
+  # Provenance is the next job.
+  publish:
+    name: Publish program artifacts
+    if: github.event_name != 'pull_request'
+    needs: [program, repo, app, mobile, verifiable-compare]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: verifiable-build-1-${{ github.sha }}
+          path: ${{ runner.temp }}/verifiable
+
+      - name: Lay out the artifacts from the verified binaries
+        env:
+          DEVNET_SHA256: ${{ needs.verifiable-compare.outputs.devnet_sha256 }}
+          MAINNET_SHA256: ${{ needs.verifiable-compare.outputs.mainnet_sha256 }}
+          # The provenance job reads the same field to decide whether it runs.
+          REPOSITORY_VISIBILITY: ${{ github.event.repository.visibility }}
+        run: |
+          set -euo pipefail
+          bash scripts/ci/assemble-artifacts.sh "$RUNNER_TEMP/verifiable" "$RUNNER_TEMP/publish" \
+            "$DEVNET_SHA256" "$MAINNET_SHA256"
+          {
+            echo "### Program artifacts of ${GITHUB_SHA}"
+            echo
+            echo '```'
+            cat "$RUNNER_TEMP/publish/programs/SHA256SUMS" "$RUNNER_TEMP/publish/programs-mainnet/SHA256SUMS"
+            echo '```'
+            echo
+            echo "Reproduce: docs/technical/verifiable-build.md."
+            if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+              echo "Not uploaded: only a run on main publishes."
+            elif [ "$REPOSITORY_VISIBILITY" != "public" ]; then
+              echo "Provenance: NOT attested. Artifact attestations need a public repository on this plan."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload program artifacts (devnet)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: programs-${{ github.sha }}
+          path: ${{ runner.temp }}/publish/programs/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload program artifacts (mainnet build)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: programs-mainnet-${{ github.sha }}
+          path: ${{ runner.temp }}/publish/programs-mainnet/
+          if-no-files-found: error
+          retention-days: 30
+
+  # Sprint 16: signed build provenance for every published file, in a job of its own, the only one with
+  # id-token and attestations write. GitHub offers artifact attestations to private repositories only on
+  # GitHub Enterprise Cloud; this repository is private on a plan without them, so the job runs only once the
+  # repository is public, and is shown as skipped until then. Check: docs/technical/verifiable-build.md.
+  provenance:
+    name: Provenance attestation (public repository only)
+    needs: publish
+    if: github.ref == 'refs/heads/main' && github.event.repository.visibility == 'public'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: programs-${{ github.sha }}
+          path: ${{ runner.temp }}/programs
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: programs-mainnet-${{ github.sha }}
+          path: ${{ runner.temp }}/programs-mainnet
+
+      - name: The downloaded files match their SHA256SUMS
+        run: |
+          set -euo pipefail
+          (cd "$RUNNER_TEMP/programs" && sha256sum --check --strict SHA256SUMS)
+          (cd "$RUNNER_TEMP/programs-mainnet" && sha256sum --check --strict SHA256SUMS)
+
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            ${{ runner.temp }}/programs/brot_markets.so
+            ${{ runner.temp }}/programs/brot_markets.json
+            ${{ runner.temp }}/programs-mainnet/brot_markets.mainnet.so
+            ${{ runner.temp }}/programs-mainnet/brot_markets.mainnet.json

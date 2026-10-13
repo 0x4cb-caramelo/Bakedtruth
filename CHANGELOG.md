@@ -64,6 +64,46 @@ recomendado (1a a 12a).
     firma, a confirmação dela, o hash novo, o relatório público).
   - **`README.md`:** o bloco da versão candidata, a preencher no congelamento (tag, commit, hashes, o comando do
     `solana-verify`), e o mapa de cada checagem para os seus testes.
+- **O roteiro da mainnet e o ensaio dele num fork do Surfpool** (branch `sprint-18-mainnet`, 13/10/2026; Sprint 18,
+  a parte que não depende de ninguém; `deploy/mainnet/README.md`; `session-log/2026-10-13-auditoria-do-roteiro-e-faixas.md`).
+  Nunca executado: nada foi enviado à mainnet nem ao devnet, e nenhuma chave de verdade foi usada.
+  - **O roteiro** (`deploy/mainnet/README.md`): as condições do dia com a evidência de cada uma (os dois relatórios,
+    o multisig 2 de 3 em carteiras de hardware, a empresa, a revisão do advogado, a regra de tesouraria), os passos do
+    artefato do CI ao primeiro ciclo de 0,01 SOL, os pontos de parada e a atualização depois do lançamento.
+  - **Três decisões tomadas pelas fontes:** o primeiro deploy não pode ser uma proposta do multisig (o loader do Agave
+    3.1.10 não aceita `DeployWithMaxDataLen` por CPI), então uma carteira de hardware publica a partir de um buffer e
+    passa a autoridade de upgrade ao cofre do Squads na mesma sessão; o cofre inicializa o `GlobalConfig` (admin e
+    `fee_recipient` = cofre, sem chave de admin intermediária); o time lock do Squads é o último ato da sessão.
+  - **As respostas do fundador de 13/10 (M-1 a M-4), agora o caminho padrão:** dois multisigs com as mesmas três
+    carteiras, o da autoridade de upgrade com time lock de 24 horas e o do admin e das taxas sem trava; o Ronaldo
+    segura a carteira de hardware no dia; o primeiro ciclo tem uma abertura paga ao lado da abertura da equipe. O passo
+    7 virou duas propostas: o cofre do upgrade inicializa o `GlobalConfig` (taxas no cofre do admin) e indica o cofre
+    do admin como o próximo admin, que aceita em seguida. O script recusa um multisig nomeado duas vezes, membros
+    diferentes, trava no multisig do admin e qualquer trava do upgrade que não seja 0 ou 24 horas.
+  - **Os scripts** (`scripts/deploy/mainnet-*.ts`, `bun run deploy:mainnet`): só a mainnet-beta pelo hash de gênese,
+    o fork do Surfpool reconhecido à parte, a autoridade de upgrade só numa carteira de hardware, o binário amarrado
+    ao SHA-256 digitado, simulação por padrão.
+  - **O ensaio** (`scripts/mainnet/`, `bun run mainnet:rehearse`): num fork da mainnet no Surfpool, com o binário do
+    recurso `mainnet`, o programa Squads v4 de verdade e contas reais (SOL/USD, mints): deploy, passagem da autoridade,
+    inicialização pelo cofre, abertura paga de US$ 500 ao preço da Pyth igual à cotação do SDK, um ciclo inteiro, o
+    time lock recusando antes da hora, a pausa e a retomada. Passou de ponta a ponta quatro vezes (43 conferências em
+    13 passos), e de novo no caminho das respostas do fundador (51 conferências em 12 passos; a abertura paga cobrou
+    4,662 SOL; os pagamentos, o 1% do criador e a parte do Brot iguais aos do SDK). Não ensaiado: as carteiras de hardware, as esperas de verdade, o app e a CLI do Squads, o
+    `solana-verify` (precisa de Docker) e os serviços na mainnet.
+  - **Os parâmetros da mainnet** em `deploy/mainnet/init-params.mainnet.json`, aprovados pelo fundador em 13/10
+    (M-3): `max_open_campaigns` 1.000, `max_price_age` 60 s, `max_price_conf_bps` 50, `campaign_max_age` 30 s.
+  - **Teste:** 5 novos (`tests/ops/mainnet-deploy.test.ts`), as guardas sem rede, o par de multisigs incluído.
+- **Sprint 16, a integridade da versão no CI** (branch `sprint-16-hardening`, 13/10/2026;
+  `docs/technical/verifiable-build.md`). Toda ferramenta que o CI baixa é fixada pelo SHA-256 e instalada por um script
+  só (`scripts/ci/install-pinned.sh`): a CLI da Solana e as platform-tools, o Bun, o Node, o gitleaks e o binário do
+  `solana-verify` 0.5.2; o `setup-bun` e o `setup-node` saíram. O `solana-verify build` roda duas vezes do zero, na
+  imagem do Docker fixada pelo digest, e o CI falha se os dois hashes e os binários testados não forem iguais byte a
+  byte; o binário do devnet publicado no `programs-<sha>` passa a sair desse build. O build `mainnet` sai num artefato
+  à parte, `programs-mainnet-<sha>`, com a mesma lista de recursos que os testes do T12 usam. O gitleaks reforça a
+  varredura de segredos (chaves da Solana em JSON e em base58, URLs com chave, segredos em hex, keystores); um
+  `CODEOWNERS` cobre o `.github/`, a varredura e os hooks; uma checagem recusa no `bun.lock` qualquer registro que não
+  seja o npmjs.org. A atestação de origem não sai: o GitHub só a oferece a repositórios públicos ou a organizações
+  pagas, e isso é decisão do fundador.
 - **Sprint 08, a terceira fatia do indexador** (branch `sprint-08-indexer`, PR #72, 13/10/2026; construída e testada,
   não implantada; o registro em `docs/sprints/sprint-08-indexer-api-points.md`). A ordem da página inicial calculada
   no indexador e servida em `/api/v1/ranking` (X1.9); os KPIs e o relatório do parceiro sem endereço nenhum; o
