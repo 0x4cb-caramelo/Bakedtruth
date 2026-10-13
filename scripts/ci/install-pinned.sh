@@ -77,9 +77,13 @@ install_solana() {
   (cd "$platform" && printf '%s\n' "$PLATFORM_TOOLS_FILES" | sha256sum --check --strict - >&2)
   ln -sfn "$release/solana-release" "$install/active_release"
   on_path "$install/active_release/bin"
-  solana --version | grep -q "^solana-cli $SOLANA_PIN_VERSION " || die "solana reports: $(solana --version)"
-  cargo-build-sbf --version | grep -qx "platform-tools $PLATFORM_TOOLS_VERSION" ||
-    die "cargo-build-sbf does not use platform-tools $PLATFORM_TOOLS_VERSION: $(cargo-build-sbf --version)"
+  # Read whole, then matched: `cmd | grep -q` under pipefail fails when grep stops reading first.
+  local reported
+  reported="$(solana --version)"
+  grep -q "^solana-cli $SOLANA_PIN_VERSION " <<<"$reported" || die "solana reports: $reported"
+  reported="$(cargo-build-sbf --version)"
+  grep -qx "platform-tools $PLATFORM_TOOLS_VERSION" <<<"$reported" ||
+    die "cargo-build-sbf does not use platform-tools $PLATFORM_TOOLS_VERSION: $reported"
 }
 
 install_shank() {

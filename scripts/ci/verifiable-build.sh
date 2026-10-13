@@ -47,8 +47,8 @@ cd "$bin"
 printf '%s  solana\n%s  cargo-build-sbf\n' "$SOLANA_BIN_SHA256" "$CARGO_BUILD_SBF_SHA256" | sha256sum --check --strict -
 cd "$HOME/.cache/solana/$PLATFORM_TOOLS_VERSION/platform-tools"
 printf '%s\n' "$PLATFORM_TOOLS_FILES" | sha256sum --check --strict -
-solana --version | grep -q "^solana-cli $SOLANA_PIN_VERSION "
-cargo-build-sbf --version | grep -qx "platform-tools $PLATFORM_TOOLS_VERSION"
+grep -q "^solana-cli $SOLANA_PIN_VERSION " <<<"$(solana --version)"
+grep -qx "platform-tools $PLATFORM_TOOLS_VERSION" <<<"$(cargo-build-sbf --version)"
 echo "the image's Solana CLI $SOLANA_PIN_VERSION and platform-tools $PLATFORM_TOOLS_VERSION match the pins"
 IN_IMAGE
 
