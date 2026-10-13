@@ -8,8 +8,8 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **952** |
-| Acima de 200 linhas | **43** ⚠️ |
+| Arquivos mapeados | **976** |
+| Acima de 200 linhas | **45** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -20,11 +20,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `programs/brot-markets/src/constants.rs` — 204 linhas
 - `programs/brot-markets/src/error.rs` — 370 linhas
 - `programs/brot-markets/src/instructions/campaigns/open_campaign.rs` — 209 linhas
-- `programs/brot-markets/src/instructions/entries/join_campaign.rs` — 212 linhas
 - `programs/brot-markets/src/instructions/interface.rs` — 274 linhas
 - `programs/brot-markets/src/math/snapshot.rs` — 208 linhas
 - `programs/brot-markets/tests/epoch_support/mod.rs` — 201 linhas
 - `programs/brot-markets/tests/price_stale_feed.rs` — 201 linhas
+- `programs/brot-markets/tests/sealed_settle.rs` — 205 linhas
+- `programs/brot-markets/tests/sealed_support/mod.rs` — 263 linhas
 - `programs/brot-markets/tests/settle_host_finalize.rs` — 236 linhas
 - `prototype-lab/prototype-b/view.js` — 265 linhas
 - `prototype-lab/prototype-e/view.js` — 258 linhas
@@ -35,11 +36,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `prototype-lab/shared/ledger.js` — 238 linhas
 - `prototype-lab/shared/mascot.js` — 379 linhas
 - `prototype-lab/shared/mock-data.js` — 290 linhas
+- `scripts/checks-mutation.mjs` — 224 linhas
 - `scripts/codemap.js` — 223 linhas
 - `scripts/devnet-clock-probe.ts` — 201 linhas
 - `scripts/os-self-test.js` — 406 linhas
 - `scripts/pyth-sponsored-feeds.ts` — 201 linhas
-- `scripts/slot-matrix-spec.ts` — 320 linhas
+- `scripts/slot-matrix-spec.ts` — 360 linhas
 - `scripts/sync-selfhosted.js` — 349 linhas
 - `scripts/test/hooks.test.js` — 278 linhas
 - `scripts/tokenomics-model.ts` — 584 linhas
@@ -434,12 +436,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`accounts.ts`](packages/sdk/src/read/accounts.ts) | the program's own accounts decoded from their bytes (Codama's codecs, from the Shank IDL), after the checks the program makes before it reads a field: the owner | 70 |
 | [`bytes.ts`](packages/sdk/src/read/bytes.ts) | small byte helpers the SDK shares, written without `Buffer`, `TextEncoder` or any Node or DOM API, so they run the same in a browser, in Bun and under React Nat | 39 |
-| [`constants.ts`](packages/sdk/src/read/constants.ts) | the program's address and the constants compiled into it that a client needs: seeds, other programs, code ceilings, price and reader bounds, account sizes, and  | 133 |
+| [`constants.ts`](packages/sdk/src/read/constants.ts) | the program's address and the constants compiled into it that a client needs: seeds, other programs, code ceilings, price and reader bounds, account sizes, and  | 143 |
 | [`decoder.ts`](packages/sdk/src/read/decoder.ts) | the program's events out of a transaction as the RPC returns it (`getTransaction` with JSON encoding, or `simulateTransaction`), under the four decoder rules ev | 153 |
 | [`events.ts`](packages/sdk/src/read/events.ts) | the program's events: each name with its discriminator and the Codama decoder of its payload, and the decoding of one event's inner-instruction data `[0xFF, dis | 109 |
 | [`feeds.ts`](packages/sdk/src/read/feeds.ts) | the compiled lists of Pyth feeds a price campaign may name, one per cluster, as programs/brot-markets/src/feeds.rs compiles them (founder answer 1, 2026-10-09;  | 113 |
 | [`format.ts`](packages/sdk/src/read/format.ts) | exact, deterministic display of the program's units: lamports as SOL with all nine decimals (no floating point), Unix seconds as a UTC date, basis points as a p | 54 |
-| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 39 |
+| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 42 |
 | [`knowable.ts`](packages/sdk/src/read/knowable.ts) | the join lock (BR-06) as the program applies it, for a client that wants to know whether a join can still go in: `outcomeKnowable` per kind (the price band reac | 69 |
 | [`pdas.ts`](packages/sdk/src/read/pdas.ts) | every program-derived address a client needs: the config, the fee vault, a campaign and its vault, an entry, a join, a referral link, a sealed fee, the event au | 79 |
 | [`points.ts`](packages/sdk/src/read/points.ts) | devnet points (BR-29; TP §3.5 "Points"; Q7 answered a, narrowed by the founder's answer 3a): 1 point per campaign a wallet entered on the side that won, once th | 167 |
@@ -447,6 +449,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`quote.ts`](packages/sdk/src/read/quote.ts) | what an opening pays (row 7 of TP 3.4.10): US$ at the sponsored Pyth SOL/USD price charged at `price − conf`, the 90/10 split, the `max_lamports` the creator si | 146 |
 | [`recheck.ts`](packages/sdk/src/read/recheck.ts) | `recheck(campaign, rpcUrl)` (BR-23, "Anyone can re-check. Same account, same answer"): through any RPC the caller chooses, read the campaign, then the very acco | 174 |
 | [`rpc.ts`](packages/sdk/src/read/rpc.ts) | the reads the SDK makes through any Solana RPC (Kit's `createSolanaRpc`, no paid key, A-5): an account's owner and bytes, several at once, the cluster's clock f | 72 |
+| [`sealed-fee.ts`](packages/sdk/src/read/sealed-fee.ts) | the `SealedFee` account (Sprint 15; `["sealed", campaign, sponsor]`) decoded from its bytes after the checks the program's loader makes before it reads a field, | 23 |
+| [`sealed-quote.ts`](packages/sdk/src/read/sealed-quote.ts) | what a sealed entry costs (Sprint 15, founder answer of 2026-10-13). Mirrors programs/brot-markets/src/instructions/entries/sealed_charge.rs: row 7's charge (`c | 90 |
 | [`view.ts`](packages/sdk/src/read/view.ts) | a campaign's public state (BR-05; TP 3.4.2): Open, Closed, In review, Paid or Void, computed by one function from what the program recorded and the CHAIN's time | 82 |
 
 ## `packages/sdk/src/read/chain/`
@@ -494,6 +498,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`open-campaign.ts`](packages/sdk/src/read/validate/open-campaign.ts) | `validateOpenCampaign`, the SDK's mirror of `user_open_campaign`'s rules (TP 3.4.10) for the preview: from the arguments, the config, the chain's clock and the  | 146 |
 | [`open-rules.ts`](packages/sdk/src/read/validate/open-rules.ts) | the opening's rules that read no account, in the program's order: the argument sizes (row 9), row 1 (the kind names a reader and opens in this build), the canon | 89 |
 | [`rows.ts`](packages/sdk/src/read/validate/rows.ts) | which row of the opening's checks (TP 3.4.10) each refusal belongs to, so a preview can say "row 7: the price moved past your maximum" next to the program's own | 60 |
+| [`sealed-entry.ts`](packages/sdk/src/read/validate/sealed-entry.ts) | `checkSealedEntry`, the SDK's mirror of `sponsor_join_campaign`'s rules for the preview (Sprint 15): from the campaign, the config, the sponsor's entry and Seal | 125 |
 
 ## `packages/sdk/src/schemas/`
 
@@ -508,15 +513,18 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`index.ts`](packages/sdk/src/tx/index.ts) | `@brot/sdk/tx`, the transaction half of the SDK: every instruction builder, and (A-3) the path a baker's or creator's transaction takes before the wallet signs  | 23 |
+| [`index.ts`](packages/sdk/src/tx/index.ts) | `@brot/sdk/tx`, the transaction half of the SDK: every instruction builder, and (A-3) the path a baker's or creator's transaction takes before the wallet signs  | 25 |
 | [`message.ts`](packages/sdk/src/tx/message.ts) | the transaction message a prepared instruction is simulated and signed in: one instruction, the signer paying, the cluster's latest blockhash. The network fee a | 31 |
 | [`prepare-claim.ts`](packages/sdk/src/tx/prepare-claim.ts) | A-3 for the one claim a person ever signs (TP §3.4.5, the reserve path; TP v0.0.1 Q2, answered b): a creator share the program kept in the vault because paying  | 124 |
 | [`prepare-open.ts`](packages/sdk/src/tx/prepare-open.ts) | A-3 for an opening: re-read the config, the SOL/USD price account, the metric account, the campaign's address and the chain's clock; quote the payment and its ` | 199 |
 | [`prepare.ts`](packages/sdk/src/tx/prepare.ts) | A-3 for a join: re-read the campaign, the config, the baker's entry, the metric account and the chain's clock through the RPC; check them with the SDK's mirror  | 126 |
+| [`settle-sealed-fee.ts`](packages/sdk/src/tx/settle-sealed-fee.ts) | `settle_sealed_fee` (Sprint 15), built by the Codama client with every program address derived here: once the campaign is finalized, a sponsor's held fee goes b | 25 |
 | [`simulate.ts`](packages/sdk/src/tx/simulate.ts) | simulate a transaction before the wallet signs it (A-3): the cluster runs it on its current state, unsigned, with the latest blockhash, and the SDK reports the  | 90 |
-| [`summary-brot.ts`](packages/sdk/src/tx/summary-brot.ts) | the summary of this program's own instructions (A-3). The structure is checked against the IDL first: the exact data size, the exact account count, each slot's  | 183 |
+| [`sponsor-join.ts`](packages/sdk/src/tx/sponsor-join.ts) | `sponsor_join_campaign`, the sealed entry (Sprint 15; TP 3.4.12), built by the Codama client with every program address derived here: the sponsor's `Entry`, its | 54 |
+| [`summary-brot.ts`](packages/sdk/src/tx/summary-brot.ts) | the summary of this program's own instructions (A-3). The structure is checked against the IDL first: the exact data size, the exact account count, each slot's  | 190 |
 | [`summary-budget.ts`](packages/sdk/src/tx/summary-budget.ts) | the summary's reading of compute-budget instructions (Sprint 05 review, H1): the unit limit and the unit price decoded, the priority fee they allow bounded and  | 89 |
-| [`summary-other.ts`](packages/sdk/src/tx/summary-other.ts) | what the summary says for the instructions that move no money out of a signer's wallet (the admin, team and settlement instructions), each with the values it si | 125 |
+| [`summary-other.ts`](packages/sdk/src/tx/summary-other.ts) | what the summary says for the instructions that move no money out of a signer's wallet (the admin, team and settlement instructions), each with the values it si | 131 |
+| [`summary-sealed.ts`](packages/sdk/src/tx/summary-sealed.ts) | what the summary says for a sealed entry (`sponsor_join_campaign`, Sprint 15), from its own bytes: the campaign, the side, the sponsor, the US$ and the most it  | 37 |
 | [`summary.ts`](packages/sdk/src/tx/summary.ts) | the deterministic summary of a transaction before the wallet signs it (A-3). `summarizeMessage` reads the very bytes the wallet signs: the compiled message, dec | 173 |
 
 ## `packages/sdk/src/tx/builders/`
@@ -606,13 +614,17 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`entry_account.rs`](programs/brot-markets/src/instructions/entries/entry_account.rs) | the baker's `Entry` at a join: created at its canonical PDA on the first join, rent paid by the baker, and checked against the campaign, the baker and the total | 121 |
-| [`join_campaign.rs`](programs/brot-markets/src/instructions/entries/join_campaign.rs) | `user_join_campaign`: a baker joins YES or NO with at least `min_entry_lamports` while the outcome is not knowable; the entry moves from the baker's wallet into | 212 |
+| [`join_campaign.rs`](programs/brot-markets/src/instructions/entries/join_campaign.rs) | `user_join_campaign`: a baker joins YES or NO with at least `min_entry_lamports` while the outcome is not knowable; the entry moves from the baker's wallet into | 85 |
+| [`join_core.rs`](programs/brot-markets/src/instructions/entries/join_core.rs) | the core of a join, shared by `user_join_campaign` and `sponsor_join_campaign`: every join rule in `user_join_campaign`'s order with its own error, the baker's  | 192 |
 | [`join_lock.rs`](programs/brot-markets/src/instructions/entries/join_lock.rs) | the join lock (BR-06) and the proximity buffer (question 7): a join is refused once the campaign's reader says the outcome is knowable (`OutcomeKnowable`), and  | 79 |
 | [`join_record.rs`](programs/brot-markets/src/instructions/entries/join_record.rs) | the `Join` account (`["join", campaign, baker, index]`): its creation with the baker's rent, and the checked read of one join for the refund (lane G, question 7 | 168 |
 | [`join_rules.rs`](programs/brot-markets/src/instructions/entries/join_rules.rs) | the two pure rules of a join: the campaign's own minimum entry (question 5) and the proximity buffer at the join lock (question 7). Pure, so the host tests chec | 63 |
+| [`join_slots.rs`](programs/brot-markets/src/instructions/entries/join_slots.rs) | the slots of a join and what the client signs with it, shared by `user_join_campaign` and `sponsor_join_campaign`, and the slot checks both run before the join' | 49 |
 | [`join_tally.rs`](programs/brot-markets/src/instructions/entries/join_tally.rs) | the tally of one join (`tally_late_joins`): reads the join at its index, returns the rent to the baker and closes the account, and reports which side it was on  | 79 |
-| [`mod.rs`](programs/brot-markets/src/instructions/entries/mod.rs) | entries: a baker joins a campaign with SOL (TP section 3.4.3) until the outcome is knowable (the join lock, BR-06), and each join leaves a `Join` record that th | 15 |
-| [`sponsor_join_campaign.rs`](programs/brot-markets/src/instructions/entries/sponsor_join_campaign.rs) | `sponsor_join_campaign(side, entry_usd, max_lamports, min_return_bps, expected_entry_total)`: a sealed entry. A sponsor joins with at least the config's `openin | 58 |
+| [`mod.rs`](programs/brot-markets/src/instructions/entries/mod.rs) | entries: a baker joins a campaign with SOL (TP section 3.4.3) until the outcome is knowable (the join lock, BR-06), and each join leaves a `Join` record that th | 20 |
+| [`sealed_charge.rs`](programs/brot-markets/src/instructions/entries/sealed_charge.rs) | what a sealed entry costs (Sprint 15, founder answer of 2026-10-13): its US$ at the sponsored Pyth SOL/USD price, charged exactly as a paid opening is (row 7 of | 59 |
+| [`sealed_fee_account.rs`](programs/brot-markets/src/instructions/entries/sealed_fee_account.rs) | the sponsor's `SealedFee` (`["sealed", campaign, sponsor]`) at a sealed entry: its slot checked; before anything moves, an existing one loaded and matched with  | 158 |
+| [`sponsor_join_campaign.rs`](programs/brot-markets/src/instructions/entries/sponsor_join_campaign.rs) | `sponsor_join_campaign(side, entry_usd, max_lamports, min_return_bps, expected_entry_total)`: a sealed entry (TP section 3.4.12). A sponsor joins YES or NO with | 145 |
 
 ## `programs/brot-markets/src/instructions/referral/`
 
@@ -647,7 +659,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`bookkeeping.rs`](programs/brot-markets/src/instructions/settlement/bookkeeping.rs) | the moves and counters every settlement instruction shares: the event sequence number, the lamport move out of the vault (checked against I1 by `math::invariant | 64 |
-| [`close_campaign.rs`](programs/brot-markets/src/instructions/settlement/close_campaign.rs) | `close_campaign`: once the fee, the prize and the creator share are settled, moves the vault's dust and hand-sent surplus to the fee vault, returns the rent of  | 128 |
+| [`close_campaign.rs`](programs/brot-markets/src/instructions/settlement/close_campaign.rs) | `close_campaign`: once the fee, the prize and the creator share are settled, moves the vault's dust and hand-sent surplus to the fee vault, returns the rent of  | 141 |
 | [`collect_fee.rs`](programs/brot-markets/src/instructions/settlement/collect_fee.rs) | `collect_fee`: moves what Brot keeps to the fee vault, once, after the entries are settled: the house fee net of the creator's share from it, the opening fee un | 81 |
 | [`finalize_campaign.rs`](programs/brot-markets/src/instructions/settlement/finalize_campaign.rs) | `finalize_campaign`: the snapshot of a reviewed campaign once its window has ended. Any wallet, permissionless; it chooses nothing. It runs `finalize_snapshot`, | 56 |
 | [`mod.rs`](programs/brot-markets/src/instructions/settlement/mod.rs) | the instructions that settle a campaign after its outcome: the snapshot, the payouts to people and Brot's fee, the prize, the close and the sweep (TP section 3. | 20 |
@@ -655,7 +667,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`settle_creator_share.rs`](programs/brot-markets/src/instructions/settlement/settle_creator_share.rs) | `settle_creator_share`: pays the creator's share once, to the stored creator only (TP 3.4.5, I13). A credit that would leave the creator's wallet below its rent | 126 |
 | [`settle_entry.rs`](programs/brot-markets/src/instructions/settlement/settle_entry.rs) | `settle_entry`: pays one entry from the vault to its stored baker and closes the Entry, its rent back to the baker (TP 3.4.5). A losing entry goes through the s | 161 |
 | [`settle_prize.rs`](programs/brot-markets/src/instructions/settlement/settle_prize.rs) | `settle_prize`: returns the prize to whoever opened in `OneSided` and `Refund`, and the opening fee too on a house-failure void (TP sections 3.4.7, 3.4.16; P-4) | 77 |
-| [`settle_sealed_fee.rs`](programs/brot-markets/src/instructions/settlement/settle_sealed_fee.rs) | `settle_sealed_fee`: once the campaign is finalized, any wallet sends a sponsor's held fee to the sponsor (a refund for a house failure) or else to the fee vaul | 25 |
+| [`settle_sealed_fee.rs`](programs/brot-markets/src/instructions/settlement/settle_sealed_fee.rs) | `settle_sealed_fee`: once the campaign is finalized, any wallet sends a sponsor's held fee to the sponsor on a void the house caused, or else to the fee vault ( | 177 |
 | [`snapshot.rs`](programs/brot-markets/src/instructions/settlement/snapshot.rs) | `finalize_snapshot`, the one snapshot path that `finalize_campaign`, `team_confirm_result` and `team_void_campaign` call: it takes the campaign's totals and ver | 158 |
 | [`sweep_fees.rs`](programs/brot-markets/src/instructions/settlement/sweep_fees.rs) | `sweep_fees`: sends the fee vault's lamports above its rent-exempt minimum to `GlobalConfig.fee_recipient`, and nowhere else (TP sections 3.4.3, 3.4.4). Any wal | 71 |
 | [`tally_late_joins.rs`](programs/brot-markets/src/instructions/settlement/tally_late_joins.rs) | `tally_late_joins` (amendment of 2026-10-09, founder decisions 1 and 2): reads a baker's Join accounts in index order, adds the late amounts (joined at or after | 121 |
@@ -794,6 +806,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`readers_vote_stake.rs`](programs/brot-markets/tests/readers_vote_stake.rs) | `StakeAtLeast` on the captured mainnet vote account: Agave's version tags and sizes (every truncation, stretched, zeroed, unknown tags), the owner first, rows 2 | 154 |
 | [`resolve_record.rs`](programs/brot-markets/tests/resolve_record.rs) | `resolve_campaign` on the host: what `record::write` stores and emits for a reader's decision (the result group only, checked math, `Unresolved` refused), and t | 198 |
 | [`review_money_fixes.rs`](programs/brot-markets/tests/review_money_fixes.rs) | the regression tests of the Sprint 04 closure review (second lens, 2026-10-09): a void that follows a late-only pot pays the opener as a house failure requires, | 70 |
+| [`sealed_entry.rs`](programs/brot-markets/tests/sealed_entry.rs) | `sponsor_join_campaign` on the program's SBF binary in Mollusk (Sprint 15): a sealed entry of US$500 at the captured SOL/USD price puts its 90% in the vault and | 119 |
+| [`sealed_settle.rs`](programs/brot-markets/tests/sealed_settle.rs) | `settle_sealed_fee` and the close rule of the sealed entry on the program's SBF binary in Mollusk (Sprint 15): the fee goes to the sponsor on a void the house c | 205 |
 | [`settle_d_amounts.rs`](programs/brot-markets/tests/settle_d_amounts.rs) | lane D's pure money rules on the host: what `collect_fee` moves to the fee vault and what `settle_prize` returns, worked out from a stored campaign (TP 3.4.16,  | 185 |
 | [`settle_d_close_sweep.rs`](programs/brot-markets/tests/settle_d_close_sweep.rs) | lane D's `close_campaign` and `sweep_fees` on the host: each refusal in its order, and that the Rent sysvar is read only after every refusal, so a refused close | 151 |
 | [`settle_d_collect_prize.rs`](programs/brot-markets/tests/settle_d_collect_prize.rs) | lane D's `collect_fee` and `settle_prize` on the host: each refusal in its order, and the effect of a payment (the lamports that move, the flag, the sequence nu | 148 |
@@ -855,6 +869,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`mod.rs`](programs/brot-markets/tests/readers_support/mod.rs) | what the fact readers' host tests share: a campaign built from zeroed bytes, the reader contexts over runtime-shaped accounts (`opening_support::HostAccount`),  | 192 |
+
+## `programs/brot-markets/tests/sealed_support/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`mod.rs`](programs/brot-markets/tests/sealed_support/mod.rs) | what the sealed entry's Mollusk tests share (Sprint 15): a paid BTC/USD campaign at its PDA in any state, its vault, a sponsor's `SealedFee`, the fee vault, the | 263 |
 
 ## `programs/brot-markets/tests/settle_d_support/`
 
@@ -1043,7 +1063,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`bun-junit.mjs`](scripts/bun-junit.mjs) | reads the JUnit file `bun test --reporter=junit` writes: each test by name, with its body (empty when it passed, `<skipped />` when filtered out, `<failure …>`  | 18 |
 | [`capture-fixtures-dbc.ts`](scripts/capture-fixtures-dbc.ts) | the Meteora Dynamic Bonding Curve (DBC) accounts the graduation kind (`DbcGraduated`) is tested on, for scripts/capture-fixtures.ts: a `VirtualPool` at each mig | 73 |
 | [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party programs actually write instead of a layout someone typed f | 185 |
-| [`checks-mutation.mjs`](scripts/checks-mutation.mjs) | the X0.9 evidence for the checks module: removes each check of programs/brot-markets/src/checks.rs and its submodules (checks/top_level.rs) in turn, rebuilds th | 199 |
+| [`checks-mutation.mjs`](scripts/checks-mutation.mjs) | the X0.9 evidence for the checks module: removes each check of programs/brot-markets/src/checks.rs and its submodules (checks/top_level.rs) in turn, rebuilds th | 224 |
 | [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns | 74 |
 | [`codama-spike.ts`](scripts/codama-spike.ts) | the Codama spike (T9): renders a Kit client from the Shank IDL of brot-markets into packages/sdk/src/idl/generated. T9, decided in Sprint 05: the generated clie | 61 |
 | [`codemap.js`](scripts/codemap.js) | let an AI locate the right file without reading every file. Pairs with the 200-line limit in .claude/rules/code-style.md — small files plus a one-line index mea | 223 |
@@ -1072,7 +1092,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`sdk-portability.ts`](scripts/sdk-portability.ts) | the SDK's portability lint (proposal 3.2; Sprint 05 DoD "a lint rule fails if it does"): every identifier in packages/sdk/src (the generated Codama client aside | 59 |
 | [`sensor-wiring.js`](scripts/sensor-wiring.js) | verify the repo has a standard test entry point, a linter with its config, a lockfile, a feedback hook, a git pre-commit, and a CI that actually runs them. The  | 121 |
 | [`slot-matrix-check.ts`](scripts/slot-matrix-check.ts) | the CI step of the slot matrix: regenerates the matrix in memory and fails when the committed tests/brot/slot-matrix.gen.ts is stale (or missing) | 18 |
-| [`slot-matrix-spec.ts`](scripts/slot-matrix-spec.ts) | the expectations of the slot matrix: what each account slot of each instruction is, and which BrotError a refused mutation gets, from the checks order of checks | 320 |
+| [`slot-matrix-spec.ts`](scripts/slot-matrix-spec.ts) | the expectations of the slot matrix: what each account slot of each instruction is, and which BrotError a refused mutation gets, from the checks order of checks | 360 |
 | [`slot-matrix.ts`](scripts/slot-matrix.ts) | generates tests/brot/slot-matrix.gen.ts, the slot matrix of Sprint 04 (T-lane F), from the frozen Shank IDL: every signer unsigned, every writable slot read-onl | 176 |
 | [`sync-selfhosted.js`](scripts/sync-selfhosted.js) | keep a local, navigable mirror of the full self-hosted catalogue so the WIZARD (stage 4.2) can offer self-hosted alternatives without a network call | 349 |
 | [`tokenomics-model.ts`](scripts/tokenomics-model.ts) | Quantitative model behind ECONOMICS.md: protocol fees, revenue split, staker yield, the token unlock curve and the | 584 |
@@ -1347,7 +1367,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`limits.ts`](services/rpc/src/limits.ts) | brot-rpc's limits (TP §3.5; Sprint 08), all in memory, none written to a disk or a log: whose request it is (Cloudflare's `cf-connecting-ip`, an IPv6 address by | 128 |
 | [`main.ts`](services/rpc/src/main.ts) | brot-rpc's entry point (TP §3.5, T14; Sprint 08). Reads its settings, derives the program's ProgramData address once (A-8), and serves the relay on the loopback | 78 |
 | [`relay.ts`](services/rpc/src/relay.ts) | brot-rpc's handler (TP §3.5, §6; proposal §2.6; Sprint 08): one JSON-RPC 2.0 call per POST, in this order — the body's size (8 KB), its shape (no batch), the me | 176 |
-| [`transaction.ts`](services/rpc/src/transaction.ts) | what a transaction may hold to pass brot-rpc (TP §3.5; Sprint 08): sendTransaction and simulateTransaction carry a base64 wire transaction whose every top-level | 49 |
+| [`transaction.ts`](services/rpc/src/transaction.ts) | what a transaction may hold to pass brot-rpc (TP §3.5; Sprint 08): sendTransaction and simulateTransaction carry a base64 wire transaction whose every top-level | 54 |
 
 ## `services/rpc/tests/`
 
@@ -1357,6 +1377,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`hardening.test.ts`](services/rpc/tests/hardening.test.ts) | the fixes of the Sprint 08 security review, each tested: a hostile option value is refused, never converted (M1, L1), and any throw is a JSON-RPC error with no  | 128 |
 | [`kit.ts`](services/rpc/tests/kit.ts) | what the relay's tests share (Sprint 08): settings as the defaults give them with a fake upstream URL, a relay wired to an in-process fake upstream that records | 103 |
 | [`relay.test.ts`](services/rpc/tests/relay.test.ts) | brot-rpc's refusals and its account rule, with an in-process fake upstream (Sprint 08; X1.7): a batch, an oversized body, a method off the allowlist, a subscrip | 171 |
+| [`sealed-gate.test.ts`](services/rpc/tests/sealed-gate.test.ts) | the country gate covers the sealed entry (Sprint 15; K-11): `sponsor_join_campaign` puts a sponsor's money into a campaign as a join does, so a transaction that | 37 |
 
 ## `tests/`
 
@@ -1443,6 +1464,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`resolve-campaign.test.ts`](tests/brot/resolve-campaign.test.ts) | the resolution table of TP section 3.4.6 as test cases, one per row and kind: `Yes` before the deadline, `No` after it, `met_late`, `Void` for `MissedWindow`, ` | 161 |
 | [`resolve-refuses.test.ts`](tests/brot/resolve-refuses.test.ts) | what `resolve_campaign` refuses, each with its exact error and nothing written: a call forwarded by another program (`checks::top_level`, `bun test tests/ -t "r | 143 |
 | [`resolve-support.ts`](tests/brot/resolve-support.ts) | what the resolution tests share: a world at a mainnet-like slot and epoch, a campaign of each kind written into it with its metric account (a synthetic mint, th | 205 |
+| [`sealed-entry.test.ts`](tests/brot/sealed-entry.test.ts) | the sealed entry on the program (Sprint 15; TP 3.4.12): its 10% held in the sponsor's `SealedFee`, never in the vault, while the 90% joins the pot as a join doe | 174 |
+| [`sealed-flows.ts`](tests/brot/sealed-flows.ts) | the whole life of a campaign that carries a sealed entry, on the program (Sprint 15): resolved YES by a touching sponsored price, NO after the deadline, or void | 76 |
+| [`sealed-outcomes.test.ts`](tests/brot/sealed-outcomes.test.ts) | a sealed entry follows the common rule of any entry (TP v0.0.1 Q5, answered a; P-4), on the program, from the entry to `close_campaign`: in a split it is paid a | 128 |
+| [`sealed-pause.test.ts`](tests/brot/sealed-pause.test.ts) | I10′ with the sealed entry (TP 3.4.13; Sprint 15 DoD): with the pause on, a sealed entry fails as a join and an opening do, before its price is even read, and m | 76 |
+| [`sealed-settle.test.ts`](tests/brot/sealed-settle.test.ts) | `settle_sealed_fee` and the SealedFee slot of a sealed entry, on the program (Sprint 15): the fee waits for the campaign to be finalized; two sponsors' fees on  | 146 |
+| [`sealed-support.ts`](tests/brot/sealed-support.ts) | what the sealed-entry tests share (Sprint 15): a world with a paid BTC/USD campaign and a sponsor holding 1,000 SOL; the sealed entry sent through the SDK's bui | 140 |
 | [`sent-events.ts`](tests/brot/sent-events.ts) | the events of a transaction the kit sent, decoded by the SDK (`@brot/sdk/read`), the way an indexer reads them: the LiteSVM result put in the RPC's `getTransact | 66 |
 | [`setup.ts`](tests/brot/setup.ts) | a LiteSVM world for the program's tests: the binary loaded, the clock set next to the captured Pyth prices, the upgrade authority recorded, funded wallets, and  | 193 |
 | [`slot-matrix-fixtures-14-15.ts`](tests/brot/slot-matrix-fixtures-14-15.ts) | the slot matrix's baselines for the five instructions of Sprints 14 and 15, spread into slot-matrix-fixtures.ts's table. Until a lane lands, the program refuses | 113 |
@@ -1519,9 +1546,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`boundaries.test.ts`](tests/sdk/boundaries.test.ts) | every import rule of `.dependency-cruiser.cjs` fires (Sprint 05 review): the SDK is copied into a temporary folder with the configuration, one violation of each | 67 |
-| [`builders.test.ts`](tests/sdk/builders.test.ts) | every builder of `@brot/sdk/tx` against the test kit's hand-written builder of the same instruction (which tests/brot/idl.test.ts checks against the IDL and eve | 122 |
-| [`contract-events.test.ts`](tests/sdk/contract-events.test.ts) | the SDK's event table and addresses against the program: each event's discriminator and size as events.rs and events/*.rs declare them, the event decoder's refu | 107 |
-| [`contract-relay.test.ts`](tests/sdk/contract-relay.test.ts) | the read half's hand-written values the relay depends on (Sprint 08), checked so they cannot drift: the two instruction discriminators of the country gate again | 30 |
+| [`builders.test.ts`](tests/sdk/builders.test.ts) | every builder of `@brot/sdk/tx` against the test kit's hand-written builder of the same instruction (which tests/brot/idl.test.ts checks against the IDL and eve | 140 |
+| [`contract-events.test.ts`](tests/sdk/contract-events.test.ts) | the SDK's event table and addresses against the program: each event's discriminator and size as events.rs and events/*.rs declare them, the event decoder's refu | 108 |
+| [`contract-relay.test.ts`](tests/sdk/contract-relay.test.ts) | the read half's hand-written values the relay depends on (Sprint 08), checked so they cannot drift: the three instruction discriminators of the country gate (th | 32 |
 | [`contract-source.test.ts`](tests/sdk/contract-source.test.ts) | the SDK's hand-written copies of the program's contract, checked against the program's own source so they cannot drift: the error codes (and one IDL message per | 173 |
 | [`decoder-shapes.test.ts`](tests/sdk/decoder-shapes.test.ts) | the decoder reads an inner instruction whichever way the node wrote it (Sprint 05 review, M1 and L6): compiled with indexes (`getTransaction`, `json`), partiall | 139 |
 | [`decoder.test.ts`](tests/sdk/decoder.test.ts) | the decoder rules (TP 3.4.14; proposal 2.3) on transactions sent in LiteSVM and read back in the RPC's shape: a failed transaction is skipped; only this program | 168 |
@@ -1542,6 +1569,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`recheck.test.ts`](tests/sdk/recheck.test.ts) | BR-23: `recheck(campaign, rpcUrl)` re-reads, through an RPC endpoint the caller chooses (here a local one backed by the LiteSVM world), the account and field th | 126 |
 | [`rpc-shape.ts`](tests/sdk/rpc-shape.ts) | a transaction sent in LiteSVM, returned in the shape the RPC's `getTransaction` (encoding `json`, `maxSupportedTransactionVersion: 0`) gives it, so the SDK's de | 107 |
 | [`schemas.test.ts`](tests/sdk/schemas.test.ts) | the opening's zod schema (TP Appendix B): one valid input per kind parses and converts to the SDK's `OpenArgs` the builders take; text, extra keys, numbers wher | 86 |
+| [`sealed-decoder.test.ts`](tests/sdk/sealed-decoder.test.ts) | the SDK's `SealedFee` decoder (Sprint 15) refuses what the program's loader refuses, in its order (owner, length, tag, layout version), and decodes every field  | 64 |
+| [`sealed-parity.test.ts`](tests/sdk/sealed-parity.test.ts) | `checkSealedEntry` and the SDK's sealed-entry charge against `sponsor_join_campaign` (Sprint 15), as tests/sdk/join-parity.test.ts holds `checkJoin` to the join | 167 |
+| [`sealed-quote.test.ts`](tests/sdk/sealed-quote.test.ts) | the SDK's sealed-entry charge and quote (Sprint 15; TP 3.4.16) on the captured SOL/USD account: US$ at its price less its confidence, rounded up toward Brot, sp | 79 |
+| [`sealed-summary.test.ts`](tests/sdk/sealed-summary.test.ts) | the summary of the sealed entry's two instructions (Sprint 15; A-3): both are trusted only as the IDL shapes them; a sealed entry says its campaign, side, spons | 82 |
 | [`shown-return.test.ts`](tests/sdk/shown-return.test.ts) | the return a screen shows is what finalize would pay if entries closed now (Sprint 13, the legal and adversarial reviews): the split's estimate when the pot wou | 98 |
 | [`snapshot-vectors.test.ts`](tests/sdk/snapshot-vectors.test.ts) | X0.3, the TypeScript half, second file: every vector of tests/vectors/snapshot-vectors.csv (programs/brot-markets/tests/math_vectors_snapshot.rs: the finalize s | 114 |
 | [`stored.test.ts`](tests/sdk/stored.test.ts) | the SDK's reading of a stored campaign (packages/sdk/src/read/math/stored.ts) against the program's own payouts in LiteSVM, on whole cycles: what each entry is  | 131 |

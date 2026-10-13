@@ -3,8 +3,9 @@
  *          admin, team and settlement instructions), each with the values it signs: the new admin, the fee
  *          recipient, the team keys, every creation parameter. Also the exact data size of every instruction,
  *          so a summary never describes bytes the program would refuse as `BadInstructionData`.
- * Version: 0.1.3 (no size, so never trusted, for the scaffold's five stubs until their lanes)
- * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13)
+ * Version: 0.1.4 (no size, so never trusted, for the scaffold's stubs until their lanes; the sealed entry's two
+ *          instructions sized, lane L15)
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 15 (lane L15)
  */
 import * as G from "../idl/generated/instructions";
 import { BrotMarketsInstruction as B } from "../idl/generated/programs";
@@ -38,6 +39,9 @@ export const DATA_SIZE: Partial<Record<B, number>> = {
   [B.CloseCampaign]: G.getCloseCampaignInstructionDataDecoder().fixedSize,
   [B.SweepFees]: G.getSweepFeesInstructionDataDecoder().fixedSize,
   [B.TallyLateJoins]: G.getTallyLateJoinsInstructionDataDecoder().fixedSize,
+  // Lane L15 (Sprint 15): the sealed entry (said by ./summary-sealed.ts) and its fee's settlement.
+  [B.SponsorJoinCampaign]: G.getSponsorJoinCampaignInstructionDataDecoder().fixedSize,
+  [B.SettleSealedFee]: G.getSettleSealedFeeInstructionDataDecoder().fixedSize,
 };
 
 type Slots = Record<string, { address: string }>;
@@ -118,6 +122,8 @@ export function describeOther(type: B, a: Slots, d: Record<string, any>): string
       return `Sweep the fee vault to ${a.feeRecipient.address}`;
     case B.TallyLateJoins:
       return `Tally ${a.baker.address}'s joins in campaign ${campaign}`;
+    case B.SettleSealedFee:
+      return `Settle ${a.sponsor.address}'s held fee on campaign ${campaign}: back to that sponsor on a void the house caused, else to Brot's fee vault; the SealedFee closes, its rent back to the sponsor`;
     default:
       return `Brot Markets instruction ${B[type]}`;
   }

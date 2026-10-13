@@ -23,13 +23,28 @@ import { junitCases, unxml } from "./bun-junit.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // checks.rs and its submodules: each `// X0.9 <id>` marker is in exactly one of them.
-const SOURCES = ["checks.rs", "checks/top_level.rs", "checks/upgrade.rs"].map((file) => join(ROOT, "programs/brot-markets/src", file));
+const SOURCES = [
+  "checks.rs",
+  "checks/top_level.rs",
+  "checks/upgrade.rs",
+  "instructions/entries/sealed_charge.rs",
+  "instructions/entries/sealed_fee_account.rs",
+  "instructions/settlement/settle_sealed_fee.rs",
+  "instructions/settlement/close_campaign.rs",
+].map((file) => join(ROOT, "programs/brot-markets/src", file));
 const DEPLOY = join(ROOT, "target/deploy");
 const SO = join(DEPLOY, "brot_markets.so");
 const SAVED = join(ROOT, "target/checks-mutation/brot_markets.so");
 const JUNIT = join(ROOT, "target/checks-mutation/junit.xml");
-const RUST_TARGETS = ["checks_mollusk", "checks_mollusk_init"];
-const TS_FILES = ["tests/brot/checks.test.ts", "tests/brot/checks-init.test.ts", "tests/brot/resolve-refuses.test.ts"];
+const RUST_TARGETS = ["checks_mollusk", "checks_mollusk_init", "sealed_entry", "sealed_settle"];
+const TS_FILES = [
+  "tests/brot/checks.test.ts",
+  "tests/brot/checks-init.test.ts",
+  "tests/brot/resolve-refuses.test.ts",
+  "tests/brot/sealed-entry.test.ts",
+  "tests/brot/sealed-settle.test.ts",
+  "tests/brot/sealed-outcomes.test.ts",
+];
 const PATH = `${process.env.HOME}/.bun/bin:${process.env.PATH}`;
 // Mollusk and LiteSVM both run the binary this script builds; logs off and no colours to parse.
 const ENV = { ...process.env, PATH, BROT_MARKETS_SO: SO, RUST_LOG: "off", NO_COLOR: "1" };
@@ -66,6 +81,16 @@ event_accounts        fail  event_program_refuses_a_wrong_program_slot | event_p
 event_program         fail  event_program_refuses_a_wrong_program_slot | event_program: a wrong program slot
 event_program         keeps event_accounts_refuse_a_wrong_event_authority | event_accounts: a wrong event authority
 top_level             fail  - | top_level: a resolve forwarded by another program
+sealed_floor          fail  sealed_floor_refuses_an_entry_below_the_config_opening_fee | the floor, max_lamports and the SOL/USD account refuse with their own codes and move nothing
+sealed_max_lamports   fail  sealed_max_lamports_refuses_an_entry_above_its_bound | the floor, max_lamports and the SOL/USD account refuse with their own codes and move nothing
+sealed_fee_distinct   fail  sealed_fee_distinct_refuses_a_sealed_fee_slot_that_is_another_slot | a sealed entry's SealedFee slot: another slot of the join, or a SealedFee that does not match, is refused
+sealed_fee_keys       fail  sealed_fee_keys_refuse_a_sealed_fee_that_names_another_campaign_or_sponsor | a sealed entry's SealedFee slot: another slot of the join, or a SealedFee that does not match, is refused
+sealed_fee_settled    fail  sealed_fee_settled_refuses_a_closed_sealed_fee | a second settle is refused: AlreadySettled, and nothing moves
+sealed_fee_campaign   fail  sealed_fee_campaign_refuses_a_sealed_fee_of_another_campaign | two users: A cannot settle, redirect or refund B's sealed fee (destinations fixed)
+sealed_fee_sponsor    fail  sealed_fee_sponsor_refuses_another_wallet | two users: A cannot settle, redirect or refund B's sealed fee (destinations fixed)
+sealed_fee_finalized  fail  sealed_fee_finalized_refuses_a_campaign_not_finalized | the held fee waits for the campaign to be finalized
+sealed_fees_open      fail  sealed_fees_open_keeps_the_campaign_from_closing | Split: the sealed entry is paid as any winning entry, and its fee goes to the fee vault
+distinct              fail  settle_sealed_fee_refuses_its_sealed_fee_in_another_slot | -
 `;
 
 const args = process.argv.slice(2);
