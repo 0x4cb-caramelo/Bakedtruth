@@ -7,7 +7,7 @@
  *          the creator's own wallet flagged) and its `settlements` (`EntrySettled` to a baker, `CreatorShareSettled`
  *          to the creator, `PrizeSettled` to whoever opened it). `gapIn` says whether an opening's `seq` is not
  *          contiguous from 0, which makes the ingest refetch the address's signatures.
- * Version: 0.1.0
+ * Version: 0.1.1 (an opening's rank and listing kept across a re-projection)
  * Sprint:  08 (indexer, API, relay and points)
  */
 import { SettleMode, Side, type DecodedEvent } from "@brot/sdk/read";
@@ -52,16 +52,29 @@ function openingsOf(store: Store, address: string): Map<number, DecodedEvent[]> 
   return openings;
 }
 
-/** Rewrites every row the address's events project to. Runs inside the caller's transaction. */
+/**
+ * Rewrites every row the address's events project to. Runs inside the caller's transaction. An opening's rank and
+ * listing are the ranking's (ranking.ts), written after the refresh: kept as they were, so a reader between two
+ * signatures never sees a ranked campaign lose its place.
+ */
 export function projectAddress(store: Store, address: string): void {
   const openings = openingsOf(store, address);
+  const ranked = new Map(
+    (
+      store.db.query("SELECT opening, rank, listed FROM campaigns WHERE address = ?").all(address) as {
+        opening: number;
+        rank: number | null;
+        listed: number | null;
+      }[]
+    ).map((r) => [r.opening, r] as const),
+  );
   store.db.run("DELETE FROM campaigns WHERE address = ?", [address]);
   store.db.run("DELETE FROM entries WHERE campaign = ?", [address]);
   store.db.run("DELETE FROM settlements WHERE campaign = ?", [address]);
   const [campaign, entry, settlement] = ["campaigns", "entries", "settlements"].map((t) => inserter(store, t));
   for (const [opening, events] of openings) {
     const row = campaignRow(address, opening, events);
-    if (row) campaign(row);
+    if (row) campaign({ ...row, rank: ranked.get(opening)?.rank ?? null, listed: ranked.get(opening)?.listed ?? null });
     for (const event of events) {
       const base: Row = {
         signature: event.key.signature,

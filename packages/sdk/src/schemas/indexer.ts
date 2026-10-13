@@ -6,8 +6,9 @@
  *          conventions: amounts as lamport strings, addresses base58, slots and times as decimal strings (Unix
  *          seconds, UTC), every answer with `as_of_slot` and `chain_time`, errors as `{ error: { code, message } }`.
  *          A campaign is its address plus its `opening` (1, 2…): a closed campaign's address can carry a new one.
- * Version: 0.1.0
- * Sprint:  08 (indexer, API, relay and points), slice 2
+ *          Since slice 3, the home page's order (`/api/v1/ranking`).
+ * Version: 0.2.0 (the ranking)
+ * Sprint:  08 (indexer, API, relay and points), slices 2 and 3
  */
 import { z } from "zod";
 
@@ -112,6 +113,23 @@ export const WalletEntrySchema = z.object({
 
 export const WalletEntriesSchema = z.object({ ...Fresh, wallet: Address, items: z.array(WalletEntrySchema) });
 
+/** One live opening in the home page's order: 1 is first; `listed` false is off the home page, still reachable. */
+export const RankedCampaignSchema = z.object({
+  campaign: Address,
+  opening: Opening,
+  id: Count,
+  rank: z.number().int().min(1),
+  listed: z.boolean(),
+});
+
+export const RankingSchema = z.object({
+  ...Fresh,
+  total: z.number().int().min(0),
+  offset: z.number().int().min(0),
+  limit: z.number().int().min(1).max(100),
+  items: z.array(RankedCampaignSchema),
+});
+
 export const ApiErrorSchema = z.object({ error: z.object({ code: z.string(), message: z.string() }) });
 
 export type EntryItem = z.infer<typeof EntryItemSchema>;
@@ -124,4 +142,6 @@ export type Chance = z.infer<typeof ChanceSchema>;
 export type RecentActivity = z.infer<typeof RecentActivitySchema>;
 export type WalletEntry = z.infer<typeof WalletEntrySchema>;
 export type WalletEntries = z.infer<typeof WalletEntriesSchema>;
+export type RankedCampaign = z.infer<typeof RankedCampaignSchema>;
+export type Ranking = z.infer<typeof RankingSchema>;
 export type ApiError = z.infer<typeof ApiErrorSchema>;

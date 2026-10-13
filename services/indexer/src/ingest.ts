@@ -9,9 +9,10 @@
  *          fails (a timeout, a 429, a node down) only stops the refresh and is named: an outage never costs a try, so
  *          it never makes the indexer skip a transaction. A campaign whose
  *          `seq` has a gap gets its own signatures listed and read again, once per refresh until the gap closes (a
- *          skipped one gets one more read each time, and never holds the others again). Last, the points table
- *          (points.ts). Nothing about a visitor is ever stored: the indexer reads the chain only.
- * Version: 0.1.0
+ *          skipped one gets one more read each time, and never holds the others again). Last, the points and the
+ *          home page's order, from one live read (derived.ts). Nothing about a visitor is ever stored: the indexer
+ *          reads the chain only.
+ * Version: 0.2.0 (the ranking after each refresh, with content/partners.json)
  * Sprint:  08 (indexer, API, relay and points)
  */
 import { signature as toSignature } from "@solana/kit";
@@ -24,14 +25,22 @@ import {
   type SolanaRpc,
 } from "@brot/sdk/read";
 
+import type { Partner } from "@brot/sdk/schemas";
+
 import { jsonOf, rawOf } from "./codec";
 import type { Store } from "./db/store";
 import { checkpointOf, keepListed, listNewer, type ListOptions } from "./listing";
 import { liveReader, type ReadLive } from "./live";
-import { refreshPoints } from "./points";
+import { refreshDerived } from "./derived";
 import { gapIn, projectAddress } from "./project";
 
-export type IngestOptions = Partial<ListOptions> & { maxTries?: number; atOnce?: number; readLive?: ReadLive };
+export type IngestOptions = Partial<ListOptions> & {
+  maxTries?: number;
+  atOnce?: number;
+  readLive?: ReadLive;
+  /** The launch partners the ranking highlights (content/partners.json), read before each ranking. */
+  partners?: () => readonly Partner[];
+};
 export type IngestReport = {
   listed: number;
   processed: number;
@@ -42,6 +51,7 @@ export type IngestReport = {
   gaps: string[];
   /** The name of a read or a gap's listing that failed in this refresh (a timeout, a node error). */
   readError: string | null;
+  /** The live read behind the points and the ranking failed: both stay as they were. */
   pointsError: string | null;
 };
 
@@ -54,6 +64,7 @@ export function createIngest(rpc: SolanaRpc, store: Store, options: IngestOption
   const maxTries = options.maxTries ?? 5;
   const atOnce = options.atOnce ?? 4;
   const readLive = options.readLive ?? liveReader(rpc, list.timeoutMs);
+  const partners = options.partners ?? (() => []);
   const insertEvent = store.db.prepare(
     `INSERT OR IGNORE INTO events (signature, ix_index, inner_index, slot, ord, block_time, name, campaign, seq, data,
        raw) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -164,7 +175,7 @@ export function createIngest(rpc: SolanaRpc, store: Store, options: IngestOption
       gapped = withGap([...touched, ...toFix]);
       report.gaps = [...gapped].sort();
       try {
-        await refreshPoints(store, readLive);
+        await refreshDerived(store, readLive, partners());
       } catch (caught) {
         report.pointsError = nameOf(caught);
       }

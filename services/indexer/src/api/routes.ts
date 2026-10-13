@@ -1,23 +1,27 @@
 /**
  * Purpose: the indexer's read routes (TP §6; Sprint 08, slice 2), all GET (HEAD too): a campaign's activity and the
  *          history of its split (`/api/v1/campaigns/:address/activity` and `/chance`, the latest opening unless
- *          `?opening=` names one), the recent entries across campaigns (`/api/v1/activity?limit=`), and a wallet's
- *          entries (`/api/v1/wallets/:address/entries`). Every answer carries `as_of_slot` and `chain_time`; an unknown
+ *          `?opening=` names one), the recent entries across campaigns (`/api/v1/activity?limit=`), a wallet's
+ *          entries (`/api/v1/wallets/:address/entries`), and since slice 3 the home page's order
+ *          (`/api/v1/ranking?listed=&limit=&offset=`). Every answer carries `as_of_slot` and `chain_time`; an unknown
  *          query parameter, a bad address or a bad number is a 400, an unknown campaign or opening a 404, any throw a
  *          JSON 500; errors are `{ error: { code, message } }`, never a stack trace. Cached a few seconds at the edge.
- * Version: 0.1.0
- * Sprint:  08 (indexer, API, relay and points), slice 2
+ * Version: 0.2.0 (the ranking)
+ * Sprint:  08 (indexer, API, relay and points), slices 2 and 3
  */
 import { isAddress } from "@solana/kit";
 
 import type { Store } from "../db/store";
 import { campaignActivity, campaignChance, freshness, latestOpening, recentEntries, walletEntries } from "./queries";
+import { rankingPage } from "./ranking";
 
 export type RouteOptions = { corsOrigin: string };
 
 /** The recent entries' page size: 20 unless `?limit=` asks for 1 to 100. */
 const RECENT_DEFAULT = 20;
 const RECENT_MAX = 100;
+/** The ranking's page size: 50 unless `?limit=` asks for 1 to 100, as the campaign list's. */
+const RANKING_DEFAULT = 50;
 
 class Refusal extends Error {
   constructor(
@@ -82,6 +86,16 @@ function route(store: Store, url: URL): unknown {
     const q = params(url, ["limit"]);
     const limit = whole(q.get("limit"), "limit", 1, RECENT_MAX) ?? RECENT_DEFAULT;
     return { ...freshness(store), items: recentEntries(store, limit) };
+  }
+  if (head === "ranking" && parts.length === 3) {
+    const q = params(url, ["listed", "limit", "offset"]);
+    const flag = q.get("listed");
+    if (flag !== undefined && flag !== "true" && flag !== "false")
+      throw new Refusal(400, "bad_parameter", "listed must be true or false");
+    const limit = whole(q.get("limit"), "limit", 1, RECENT_MAX) ?? RANKING_DEFAULT;
+    const offset = whole(q.get("offset"), "offset", 0, 100_000_000) ?? 0;
+    const page = rankingPage(store, { listed: flag === undefined ? null : flag === "true", limit, offset });
+    return { ...freshness(store), total: page.total, offset, limit, items: page.items };
   }
   if (head === "wallets" && id && tail === "entries" && parts.length === 5) {
     params(url, []);

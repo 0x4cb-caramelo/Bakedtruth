@@ -49,8 +49,9 @@ export type CampaignRow = {
   closed: number;
   last_seq: number;
   updated_slot: number;
-  listed: null;
-  rank: null;
+  /** The ranking's (ranking.ts), kept across a re-projection until the next refresh writes it again. */
+  listed: number | null;
+  rank: number | null;
 };
 
 const hex = (bytes: Uint8Array) => Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
