@@ -41,8 +41,10 @@ recomendado (1a a 12a).
   - **O site em `brot.markets/dev0x`** passou para a versão `570fa306b4d3` às 01h18min24s UTC de 13/10, construída
     para o slot novo (A-8) e testada numa porta interna antes da troca. A versão anterior (`6a52505c9aba`) ficou no
     servidor. Entre o upgrade e a troca, uns nove minutos e meio, o site no ar não assinava nada.
-  - **A campanha de demonstração**, no pool `12uLN2texEDbadM4WzJm6Dry8Quc8qFpDQEwhSdi7Dny`, ainda não foi aberta: o
-    Ronaldo quer decidir antes como o pool aparece na frase (um nome no lugar do endereço) e que avisos a caixa dá.
+  - **A campanha de demonstração** `8670587885290160238`, no pool `12uLN2texEDbadM4WzJm6Dry8Quc8qFpDQEwhSdi7Dny`,
+    foi aberta pelo Ronaldo no site, com a carteira da equipe, às 02h34 UTC de 13/10: grátis, meta de 85 SOL, prazo em
+    20/10. A página mostra a barra da curva e o aviso "YES can be bought by anyone who pays the rest of the curve.".
+    Ficam em aberto um nome legível no lugar do endereço na frase e os avisos que garantem o pool certo.
   - **`deploy/devnet/README.md`** ganhou a seção "Upgrading", com os passos de hoje e o porquê.
 - **O sexto tipo no site e nos documentos** (branch `feat/dbc-graduation-ui`, 12/10/2026, empilhada sobre a
   `feat/dbc-graduation-reader`; `session-log/2026-10-12-sexto-tipo-no-site-e-nos-documentos.md`).

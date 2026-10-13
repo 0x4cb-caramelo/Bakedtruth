@@ -1,4 +1,4 @@
-# 2026-10-12 — O sexto tipo no devnet: o upgrade do programa e o site novo em `brot.markets/dev0x`
+# 2026-10-12 — O sexto tipo no devnet: o upgrade do programa, o site novo em `brot.markets/dev0x` e a campanha de demonstração
 
 Horários em UTC. No horário de Brasília, tudo aconteceu na noite de 12/10 (o upgrade às 22h08).
 
@@ -90,7 +90,9 @@ código do site e do SDK.
   - num navegador sem tela, duas campanhas abertas mostram o painel de entrada com o campo de valor e o "Connect", sem
     o aviso "Entries are not taken on this site right now". Os únicos erros no console são os dois de sempre: a folha
     de estilo do Google e o script de estatísticas do Cloudflare, bloqueados pela política do site.
-- **Não conferido:** uma carteira ligada e uma entrada assinada depois do upgrade.
+- **Não conferido aqui:** uma entrada assinada depois do upgrade. A abertura da campanha de demonstração, assinada
+  depois no site com a carteira da equipe (abaixo), mostra que a trava A-8 deixa assinar: a caixa confere o deploy
+  antes de entregar a transação à carteira.
 
 ## A janela sem assinatura
 
@@ -105,7 +107,7 @@ De 01h08min59s (o upgrade) a 01h18min24s (a troca do site), uns nove minutos e m
 - **A assinatura do aumento** não saiu na tela, e a primeira leitura do histórico escondeu a linha dela por causa de um
   filtro meu. A segunda leitura trouxe a assinatura.
 
-## A campanha de demonstração, adiada
+## A campanha de demonstração
 
 O passo 8 era do Ronaldo: abrir em `/dev0x/abrir`, com a carteira da equipe, uma campanha "Graduation" no pool
 `12uLN2texEDbadM4WzJm6Dry8Quc8qFpDQEwhSdi7Dny`. Os scripts `scripts/team/open.ts` e `seed:devnet` não servem para isso:
@@ -123,8 +125,31 @@ não passam a config do pool como décima conta.
 - **Ele parou antes de abrir:** "estou achando que so colocar pool e o endereco base58 fica pouco user friendly,
   teriamos como colocar esse endereco mas na frase da UI ficar algo direfernte tipo o nome da pool ou algo assim?
   teremos que colocar disclaimers tambem pra garantie que o usuario esteja realmente colocando o endereco correto.
-  vamos falar a respeito disso antes de eu abrir a campanha". A campanha fica para depois dessa conversa: como o pool
+  vamos falar a respeito disso antes de eu abrir a campanha". A campanha ficou para depois dessa conversa: como o pool
   aparece na frase (um nome no lugar do endereço) e que avisos garantem que quem abre colou o pool certo.
+- **O que a sessão propôs** (as respostas dele seguem abertas):
+  - o nome legível vem só da lista revisada pela equipe (`content/account-names.json`), como a regra A-11 da
+    arquitetura aprovada já diz ("never from token metadata that the token's owner can change"). A lista passa a
+    aceitar curvas, e o nome passa a aparecer também no título, nos cartões e na página, e não só na caixa de abertura;
+  - sem nome revisado, a caixa e a página mostram o endereço do token (o "CA", que os projetos publicam no X e no site),
+    com botão de copiar, o link do explorador e o aviso de que qualquer pessoa cria um token com qualquer nome ou logo;
+  - antes de assinar a abertura de uma conta sem nome revisado, uma caixinha "Conferi o endereço".
+- **Por que não o nome do próprio token:** qualquer pessoa cria um token chamado "Solana" ou "Brot", e quem guardou o
+  direito de editar os metadados pode trocar o nome depois que os padeiros entraram. O token deste pool se chama
+  "Test" e foi criado por outra pessoa no devnet; os dois de reserva se chamam "Flush Two" e "Test Token UILQ" (lidos
+  nos metadados da Metaplex de cada token). Como a campanha guarda só o endereço do pool, um nome revisado que entre
+  depois aparece também nas campanhas já abertas, e nada disso mexe no programa.
+- **Aberta pelo Ronaldo** às 02h34min51s, com a carteira da equipe, ainda com o endereço na frase: a campanha
+  `8670587885290160238`, conta `3yJ3QxApTtSV8sPasRiowceKsXGrhw9HuDQ8ogJDiuN2`, transação
+  `2RQNL84W4PDYmdBwQqLXe73DBrgQxz7F7gmf8BXrxrhQSzyMvfYWYDpngCsuMPxhYXPmzvh9WDaQ12zSHsz4sXxu` (slot 510.476.240). A
+  conferência de abertura (`scripts/team/check-opening.ts`, só leitura) diz "a free opening: paid 0, prize 0, fee 0" e
+  "The opening matches the formula.": grátis, sem parte do criador, meta de 85 SOL (o limite da curva), entradas até
+  19/10 às 02h33 UTC e prazo em 20/10 às 02h33 UTC, sete dias.
+- **A página**, `brot.markets/dev0x/c/8670587885290160238`, num navegador sem tela: o título "Meteora launch curve
+  12uL…7Dny raises its full 85 SOL?", a barra da curva (0% filled, "0.0000 SOL raised of 85.0000 SOL", "On the curve",
+  "85.0000 SOL still to raise before the curve completes and the token graduates."), o aviso "YES can be bought by
+  anyone who pays the rest of the curve." com a explicação, "If read now: NO", e o painel de entrada com o campo de
+  valor, sem o aviso de entradas fechadas. No console, só os dois bloqueios de sempre.
 
 ## Para voltar atrás
 
@@ -135,6 +160,8 @@ não passam a config do pool como décima conta.
 
 ## O que fica com o Ronaldo e o fundador
 
-- A conversa sobre o nome do pool na frase e os avisos da caixa, e depois a campanha de demonstração.
+- Decidir de onde vem o nome legível (só a lista revisada, ou também o nome que o token declara, o que muda a regra
+  A-11 e pede o Lucas) e que avisos a caixa e a página dão; depois, a mudança no site e, para um nome revisado, a
+  segunda revisão de `content/` (Lucas ou Bernardo).
 - Conferir com uma carteira ligada uma entrada assinada no site novo.
-- O `deploy/devnet/README.md` ganhou a seção "Upgrading", com os passos de hoje e o porquê de cada um.
+- Mesclar este registro.
