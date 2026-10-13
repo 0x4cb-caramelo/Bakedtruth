@@ -69,8 +69,10 @@ pub fn settle_sealed_fee(
     let mut stored = Campaign::load_mut(campaign, program_id)?;
     require_finalized(&stored)?;
     let refunded = refunds(&stored)?;
+    // The address is derived from the two slots, not from the stored keys: a second guard on both.
     let fee = {
-        let seeds: [&[u8]; 3] = [SEALED_FEE_SEED, key.as_ref(), stored_sponsor.as_ref()];
+        let sponsor_key = sponsor.address();
+        let seeds: [&[u8]; 3] = [SEALED_FEE_SEED, key.as_ref(), sponsor_key.as_ref()];
         state::load::<SealedFee, 3>(sealed_fee, &seeds, program_id)?
             .fee_lamports
             .get()
