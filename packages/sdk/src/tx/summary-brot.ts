@@ -5,8 +5,9 @@
  *          a signer's wallet: a join names its campaign, side, amount, guards and rents; an opening names its
  *          target in the feed's units, its deadline, its creator, what it pays, the SOL price below which the
  *          payment is refused, and the terms it binds (review, M3 and L7).
- * Version: 0.1.3 (an instruction the summary does not describe yet is refused by name)
- * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13)
+ * Version: 0.1.4 (an instruction the summary does not describe yet is refused by name; the sealed entry, said by
+ *          ./summary-sealed.ts, lane L15)
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 15 (lane L15)
  *
  * The context (the campaign a join points at; an opening's price exponent and terms) is what the screen read
  * through its RPC. Without it the summary still says everything the bytes hold, in raw units.
@@ -25,6 +26,7 @@ import { Direction, ReaderKind, Side, VoidReason } from "../read/constants";
 import { feedSymbol } from "../read/feeds";
 import { formatBps, formatScaled, formatSol, formatUsdCents, formatUtc } from "../read/format";
 import { DATA_SIZE, describeOther } from "./summary-other";
+import { describeSealedEntry } from "./summary-sealed";
 
 /** What the screen read, so the summary can name it in words. */
 export type SummaryContext = {
@@ -121,6 +123,14 @@ function terms(version: number, paid: boolean, t: SummaryContext["terms"]): stri
   return `under creation rules version ${version}: Brot's fee ${formatBps(t.feeBps)} of the losing side; the creator's share ${formatBps(t.creatorShareBps)} of the entries (none for a team key); a one-sided pot's fee ${formatBps(t.oneSidedFeeBps)}; entries from ${formatSol(t.minEntryLamports)} SOL${prize}`;
 }
 
+/** The campaign a join or a sealed entry points at, in words, when the screen read it; nothing otherwise. */
+function about(ctx: SummaryContext, campaign: string): string {
+  const c = ctx.campaigns?.get(campaign);
+  if (!c) return "";
+  const exponent = c.kind === ReaderKind.PriceTouch ? c.priceExponent : undefined;
+  return ` (#${c.id}: ${what(c, c.metricAccount, exponent)}; entries close ${formatUtc(c.entriesCloseAt)}, deadline ${formatUtc(c.deadlineAt)})`;
+}
+
 type Parsed = ReturnType<typeof parseBrotMarketsInstruction>;
 
 function describe(parsed: Parsed, ctx: SummaryContext, ix: Instruction): { text: string; lamports: bigint } {
@@ -137,20 +147,17 @@ function describe(parsed: Parsed, ctx: SummaryContext, ix: Instruction): { text:
       };
     }
     case B.UserJoinCampaign: {
-      const c = ctx.campaigns?.get(a.campaign.address);
-      const exponent = c?.kind === ReaderKind.PriceTouch ? c.priceExponent : undefined;
-      const about = c
-        ? ` (#${c.id}: ${what(c, c.metricAccount, exponent)}; entries close ${formatUtc(c.entriesCloseAt)}, deadline ${formatUtc(c.deadlineAt)})`
-        : "";
       const rents =
         d.expectedEntryTotal === 0n
           ? "the rents of the entry and of the join's record"
           : "the rent of the join's record";
       return {
-        text: `Join campaign ${a.campaign.address}${about} on ${Side[d.side].toUpperCase()} with ${formatSol(d.amount)} SOL from ${a.baker.address}; refused if the return estimate is below ${formatBps(d.minReturnBps)} or the entry total is not ${formatSol(d.expectedEntryTotal)} SOL; plus ${rents} (returned to the baker when the campaign settles)`,
+        text: `Join campaign ${a.campaign.address}${about(ctx, a.campaign.address)} on ${Side[d.side].toUpperCase()} with ${formatSol(d.amount)} SOL from ${a.baker.address}; refused if the return estimate is below ${formatBps(d.minReturnBps)} or the entry total is not ${formatSol(d.expectedEntryTotal)} SOL; plus ${rents} (returned to the baker when the campaign settles)`,
         lamports: d.amount,
       };
     }
+    case B.SponsorJoinCampaign:
+      return describeSealedEntry(d, a, about(ctx, a.campaign.address));
     case B.TeamVoidCampaign:
       return {
         text: `Void campaign ${a.campaign.address} (${VoidReason[d.reason]}), note hash ${bytesToHex(d.noteHash)}`,

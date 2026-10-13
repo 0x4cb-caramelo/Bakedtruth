@@ -3,9 +3,10 @@
  *          carry a base64 wire transaction whose every top-level instruction belongs to this program, to ComputeBudget
  *          or to Lighthouse, the wallet-assertion program a wallet may add (the System Program appears only as the
  *          program's own CPI); a program id taken from a lookup table is refused. And whether the transaction joins
- *          or opens a campaign, which the country gate reads (K-11). Pure: nothing is signed or sent here.
- * Version: 0.1.0
- * Sprint:  08 (indexer, API, relay and points)
+ *          or opens a campaign, which the country gate reads (K-11): a sealed entry (Sprint 15) is a join with a
+ *          sponsor's money, gated as one. Pure: nothing is signed or sent here.
+ * Version: 0.1.1
+ * Sprint:  08 (indexer, API, relay and points); 15 (lane L15: the sealed entry is gated)
  */
 import { getBase64Encoder, getCompiledTransactionMessageDecoder, getTransactionDecoder } from "@solana/kit";
 import {
@@ -18,7 +19,11 @@ import {
 export type TransactionCheck = { ok: true; joinsOrOpens: boolean } | { ok: false; reason: string };
 
 const ALSO_CARRIED = new Set<string>([COMPUTE_BUDGET_PROGRAM_ID, LIGHTHOUSE_PROGRAM_ID]);
-const GATED = new Set<number>([INSTRUCTION_DISCRIMINATOR.userOpenCampaign, INSTRUCTION_DISCRIMINATOR.userJoinCampaign]);
+const GATED = new Set<number>([
+  INSTRUCTION_DISCRIMINATOR.userOpenCampaign,
+  INSTRUCTION_DISCRIMINATOR.userJoinCampaign,
+  INSTRUCTION_DISCRIMINATOR.sponsorJoinCampaign,
+]);
 
 type Compiled = { programAddressIndex: number; data?: Uint8Array };
 
