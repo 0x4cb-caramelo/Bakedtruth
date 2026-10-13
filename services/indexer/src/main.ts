@@ -84,7 +84,7 @@ for (;;) {
     const r = await ingest.refresh();
     const alerts = watch.check();
     health.last_refresh_at = new Date().toISOString();
-    health.last_refresh_error = r.readError ?? r.pointsError;
+    health.last_refresh_error = r.readError ?? r.pointsError ?? r.referralError;
     log({ event: "refresh", woken, ...r, gaps: r.gaps.length, alerts, partnersError: partners.lastError() });
   } catch (caught) {
     health.last_refresh_error = nameOf(caught);

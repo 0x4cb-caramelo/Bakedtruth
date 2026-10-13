@@ -7,7 +7,7 @@
  * Sprint:  14 (referral), lane L14A
  *
  * The program writes a link once, signed by the referee, and no instruction changes or closes it. "Before the first
- * entry" is not a program rule: the indexer compares `linkedSlot` and `linkedAt` with the referee's first entry
+ * entry" is not a program rule: the indexer decides it by chain order (slot, the transaction's place in the block, the instruction) against the referee's first entry
  * (TP 3.4.11).
  */
 import { type Address } from "@solana/kit";

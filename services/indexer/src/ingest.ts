@@ -11,9 +11,11 @@
  *          `seq` has a gap gets its own signatures listed and read again, once per refresh until the gap closes (a
  *          skipped one gets one more read each time, and never holds the others again). Last, the points and the
  *          home page's order, from one live read (derived.ts). Nothing about a visitor is ever stored: the indexer
- *          reads the chain only.
- * Version: 0.2.0 (the ranking after each refresh, with content/partners.json)
- * Sprint:  08 (indexer, API, relay and points)
+ *          reads the chain only. Since Sprint 14, the referral tables are rewritten after each refresh, from the
+ *          events and the block positions a tie needs (referral/project.ts); a failure there is named and stops
+ *          nothing else.
+ * Version: 0.3.0 (the referral tables after each refresh)
+ * Sprint:  08 (indexer, API, relay and points); 14 (referral, lane L14R)
  */
 import { signature as toSignature } from "@solana/kit";
 import {
@@ -33,6 +35,7 @@ import { checkpointOf, keepListed, listNewer, type ListOptions } from "./listing
 import { liveReader, type ReadLive } from "./live";
 import { refreshDerived } from "./derived";
 import { gapIn, projectAddress } from "./project";
+import { refreshReferrals } from "./referral/project";
 
 export type IngestOptions = Partial<ListOptions> & {
   maxTries?: number;
@@ -53,6 +56,8 @@ export type IngestReport = {
   readError: string | null;
   /** The live read behind the points and the ranking failed: both stay as they were. */
   pointsError: string | null;
+  /** A block position or the referral tables could not be read or rewritten (referral/project.ts). */
+  referralError: string | null;
 };
 
 type Pending = { signature: string; slot: number; ord: number; tries: number };
@@ -154,7 +159,7 @@ export function createIngest(rpc: SolanaRpc, store: Store, options: IngestOption
     async refresh(): Promise<IngestReport> {
       const report: IngestReport = {
         ...{ listed: 0, processed: 0, waiting: false, skipped: 0, gaps: [] },
-        ...{ readError: null, pointsError: null },
+        ...{ readError: null, pointsError: null, referralError: null },
       };
       gapped ??= withGap(
         (
@@ -174,6 +179,7 @@ export function createIngest(rpc: SolanaRpc, store: Store, options: IngestOption
       }
       gapped = withGap([...touched, ...toFix]);
       report.gaps = [...gapped].sort();
+      report.referralError = await refreshReferrals(rpc, store, list.timeoutMs);
       try {
         await refreshDerived(store, readLive, partners());
       } catch (caught) {

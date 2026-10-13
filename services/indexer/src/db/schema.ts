@@ -4,8 +4,8 @@
  *          `settlements`, `points`) and the ingest's own place (`signatures`, `checkpoints`) are rebuildable from the
  *          chain; `feed_history` is evidence (A-4), created here and written from a later slice. Amounts are lamport
  *          strings, times Unix seconds, enums their names.
- * Version: 0.1.0
- * Sprint:  08 (indexer, API, relay and points)
+ * Version: 0.2.0 (schema 2: the referral tables)
+ * Sprint:  08 (indexer, API, relay and points); 14 (referral, lane L14R)
  *
  * Where it departs from Appendix B's sketch, the chain forced it. A closed campaign's id, and so its address, can carry
  * a new campaign later, so `campaigns` is keyed by (address, opening) and every campaign row keeps its `opening`.
@@ -14,8 +14,15 @@
  * (base58), which the SDK decodes again exactly. `settlements` has no `reserved`: a reserved creator share emits no
  * event (settle_creator_share), so every settlement row is lamports that reached a wallet. `entries.is_first` is the
  * event's `isFirst`: the wallet is the pot's first baker (Q3), on each of its entries.
+ *
+ * Schema 2 (Sprint 14, lane L14R): `referrals` (one row per `ReferralLinked`: the link, its status against the
+ * referee's first entry, the 90-day window, the rebate state and what the referee earned its referrer),
+ * `referral_entries` (one row per opening an active referee entered: the basis of its winning entry and its state) and
+ * `tx_positions` (a transaction's index in its block, read only for a slot where a referee's link and first entry
+ * landed in different transactions: referral/positions.ts), all rebuildable. The payouts' ledger is evidence and lives
+ * in its own file (referral/ledger.ts).
  */
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const SCHEMA: readonly string[] = [
   `CREATE TABLE signatures (
@@ -64,6 +71,23 @@ export const SCHEMA: readonly string[] = [
   `CREATE TABLE feed_history (
     feed_account TEXT NOT NULL, publish_time INTEGER NOT NULL, price TEXT NOT NULL, conf TEXT NOT NULL,
     exponent INTEGER NOT NULL, posted_slot INTEGER, PRIMARY KEY (feed_account, publish_time))`,
+  `CREATE TABLE referrals (
+    referee TEXT PRIMARY KEY, referrer TEXT NOT NULL, linked_at INTEGER NOT NULL, linked_slot INTEGER NOT NULL,
+    signature TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('awaiting_entry', 'undecided', 'active', 'late')),
+    first_entry_slot INTEGER, first_entry_time INTEGER, window_ends_at INTEGER, entered TEXT NOT NULL,
+    rebate_reached_slot INTEGER, rebate_basis TEXT NOT NULL, rebate TEXT NOT NULL, basis TEXT NOT NULL,
+    referrer_share TEXT NOT NULL, held INTEGER NOT NULL)`,
+  `CREATE INDEX referrals_referrer ON referrals (referrer)`,
+  `CREATE TABLE referral_entries (
+    referee TEXT NOT NULL, campaign TEXT NOT NULL, opening INTEGER NOT NULL, referrer TEXT NOT NULL,
+    first_slot INTEGER NOT NULL,
+    state TEXT NOT NULL CHECK (state IN ('open', 'no_fee', 'unsettled', 'payable', 'held')), reason TEXT,
+    settle_mode TEXT, entered TEXT NOT NULL, counted TEXT NOT NULL, winning_total TEXT, fee_total TEXT, from_fee TEXT,
+    basis TEXT NOT NULL, referrer_share TEXT NOT NULL, rebate_basis TEXT NOT NULL, payable_slot INTEGER,
+    PRIMARY KEY (referee, campaign, opening))`,
+  `CREATE INDEX referral_entries_referrer ON referral_entries (referrer, state)`,
+  `CREATE TABLE tx_positions (signature TEXT PRIMARY KEY, slot INTEGER NOT NULL, position INTEGER NOT NULL)`,
 ];
 
 /**
@@ -78,4 +102,7 @@ export const REBUILDABLE: readonly { table: string; columns: string; order: stri
   { table: "settlements", columns: "*", order: "signature, ix_index, inner_index" },
   { table: "points", columns: "*", order: "wallet" },
   { table: "checkpoints", columns: "*", order: "source" },
+  { table: "referrals", columns: "*", order: "referee" },
+  { table: "referral_entries", columns: "*", order: "referee, campaign, opening" },
+  { table: "tx_positions", columns: "*", order: "signature" },
 ];
