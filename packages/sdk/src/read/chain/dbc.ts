@@ -2,8 +2,9 @@
  * Purpose: the Meteora Dynamic Bonding Curve (DBC) accounts the graduation kind (`DbcGraduated`) reads, parsed the
  *          way the program parses them, owner first: the `VirtualPool` (its config, the quote raised, the stage, the
  *          second the curve completed) and its `PoolConfig` (the quote mint and the threshold). Mirrors
- *          programs/brot-markets/src/readers/dbc_graduation.rs and dbc_graduation/config.rs.
- * Version: 0.1.0
+ *          programs/brot-markets/src/readers/dbc_graduation.rs and dbc_graduation/config.rs. Plus, for the screens
+ *          only, the pool's base mint, whose symbol names the curve.
+ * Version: 0.1.1 (the base mint, display only)
  * Sprint:  the sixth kind, after 05 (docs/technical/meteora-readers-plan.md)
  *
  * Each refuses with the reader's own errors, in the program's order: `ReaderWrongOwner` before a byte is read, then
@@ -70,6 +71,18 @@ export function readCurveConfig(owner: string, data: Uint8Array): CurveConfig {
   const quoteMint = decodeAddress(c.take(32));
   c.skip(DBC_OFFSETS.threshold - DBC_OFFSETS.quoteMint - 32);
   return { quoteMint, threshold: c.u64() };
+}
+
+/** `base_mint`, the token the curve sells, after the volatility tracker, the config and the creator. */
+const BASE_MINT_AT = 136;
+
+/**
+ * A DBC pool's base mint, after the same refusals as `readCurvePool`. Display only: the program never reads it, and the
+ * site names a graduation campaign's curve by this token's symbol (./token-symbol.ts).
+ */
+export function readCurveBaseMint(owner: string, data: Uint8Array): Address {
+  readCurvePool(owner, data);
+  return decodeAddress(data.slice(BASE_MINT_AT, BASE_MINT_AT + 32));
 }
 
 /** The curve has completed (`CurvePool::graduated`): its stage left 0, and nothing brings it back. */
