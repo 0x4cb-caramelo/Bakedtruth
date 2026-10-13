@@ -57,6 +57,12 @@ recomendado (1a a 12a).
     3.1.10 não aceita `DeployWithMaxDataLen` por CPI), então uma carteira de hardware publica a partir de um buffer e
     passa a autoridade de upgrade ao cofre do Squads na mesma sessão; o cofre inicializa o `GlobalConfig` (admin e
     `fee_recipient` = cofre, sem chave de admin intermediária); o time lock do Squads é o último ato da sessão.
+  - **As respostas do fundador de 13/10 (M-1 a M-4), agora o caminho padrão:** dois multisigs com as mesmas três
+    carteiras, o da autoridade de upgrade com time lock de 24 horas e o do admin e das taxas sem trava; o Ronaldo
+    segura a carteira de hardware no dia; o primeiro ciclo tem uma abertura paga ao lado da abertura da equipe. O passo
+    7 virou duas propostas: o cofre do upgrade inicializa o `GlobalConfig` (taxas no cofre do admin) e indica o cofre
+    do admin como o próximo admin, que aceita em seguida. O script recusa um multisig nomeado duas vezes, membros
+    diferentes, trava no multisig do admin e qualquer trava do upgrade que não seja 0 ou 24 horas.
   - **Os scripts** (`scripts/deploy/mainnet-*.ts`, `bun run deploy:mainnet`): só a mainnet-beta pelo hash de gênese,
     o fork do Surfpool reconhecido à parte, a autoridade de upgrade só numa carteira de hardware, o binário amarrado
     ao SHA-256 digitado, simulação por padrão.
@@ -64,12 +70,12 @@ recomendado (1a a 12a).
     recurso `mainnet`, o programa Squads v4 de verdade e contas reais (SOL/USD, mints): deploy, passagem da autoridade,
     inicialização pelo cofre, abertura paga de US$ 500 ao preço da Pyth igual à cotação do SDK, um ciclo inteiro, o
     time lock recusando antes da hora, a pausa e a retomada. Passou de ponta a ponta quatro vezes (43 conferências em
-    13 passos). Não ensaiado: as carteiras de hardware, as esperas de verdade, o app e a CLI do Squads, o
+    13 passos), e de novo no caminho das respostas do fundador (51 conferências em 12 passos; a abertura paga cobrou
+    4,662 SOL; os pagamentos, o 1% do criador e a parte do Brot iguais aos do SDK). Não ensaiado: as carteiras de hardware, as esperas de verdade, o app e a CLI do Squads, o
     `solana-verify` (precisa de Docker) e os serviços na mainnet.
-  - **Os parâmetros da mainnet** propostos em `deploy/mainnet/init-params.mainnet.json`, cada um marcado para o
-    fundador confirmar: `max_open_campaigns` 1.000, `max_price_age` 60 s, `max_price_conf_bps` 50,
-    `campaign_max_age` 30 s.
-  - **Teste:** 4 novos (`tests/ops/mainnet-deploy.test.ts`), as guardas sem rede.
+  - **Os parâmetros da mainnet** em `deploy/mainnet/init-params.mainnet.json`, aprovados pelo fundador em 13/10
+    (M-3): `max_open_campaigns` 1.000, `max_price_age` 60 s, `max_price_conf_bps` 50, `campaign_max_age` 30 s.
+  - **Teste:** 5 novos (`tests/ops/mainnet-deploy.test.ts`), as guardas sem rede, o par de multisigs incluído.
 
 - **A curva da graduação pelo ticker, e os botões SIM e NÃO limpos** (branch `feat/curve-ticker-side-buttons`,
   13/10/2026; `session-log/2026-10-13-ticker-da-curva-e-botoes-de-lado.md`). Responde ao nome legível que o registro

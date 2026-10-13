@@ -76,3 +76,37 @@ desligado por padrão até o fundador decidir). Depois das respostas: o andaime 
   vezes de ponta a ponta. As decisões que as fontes impuseram e as quatro perguntas novas ao fundador (M-1 a M-4: um
   ou dois multisigs, a duração do time lock, os parâmetros propostos, quem segura a carteira do dia) estão no registro
   da Sprint 18.
+
+## Respostas do Ronaldo, segunda rodada (13/10, à tarde)
+
+Coladas num bloco só; as que mexem fora do repositório ele confirmou com as próprias palavras na caixa de perguntas.
+
+- **D2, a mesma leitura numa disputa:** (a), com a etapa 1 de **24 horas** (confirmado na caixa: "24 hours"). A mesma
+  leitura só paga depois delas, e nesse prazo uma chave da equipe pode mandar a disputa ao admin; o pior caso passa de
+  55 para 78 horas (6 + 24 + 48). Construído na branch da Sprint 14 (o registro dela diz como).
+- **A entrada selada feita tarde:** o Brot fica com os 10% (a regra de hoje, presa num teste da Sprint 15).
+- **As cinco leituras das regras da indicação:** aprovadas como recomendado.
+- **As tags das Sprints -1, 09 e 10:** postas ("Yes, tag all three now"), com a lista do que fica em cada uma.
+- **O pagamento automático do keeper no devnet:** ligado ("turn on the keeper payout with the current unit"), e a RPC
+  do keeper trocada para a Helius ("use the Helius RPC for the keeper"); o registro vai com a branch da Sprint 14.
+- **Os limites dos alertas:** aprovados (exposição de 100 SOL, 20 aberturas por hora, varredura mínima de 0,01 SOL).
+- **O repositório público antes da mainnet:** (a); é o que destrava a atestação de origem do CI (Sprint 16).
+- **O indexador:** as três definições aprovadas, e o caminho público pela API de leitura em `/api/v1`, sem mudança na
+  Cloudflare (a construir depois da mescla do indexador).
+- **A landing publicada a partir da `main`** ("Yes, publish it now"); o registro está em
+  `2026-10-13-landing-tags-e-pr-88.md`, com o PR #88 mesclado.
+
+## Respostas do Ronaldo, terceira rodada (13/10, à noite)
+
+- **M-1:** (a) dois multisigs com as mesmas três carteiras: o trancado guarda a autoridade de atualização; o outro, o
+  admin e o recebedor das taxas.
+- **M-2:** (a) time lock de 24 horas.
+- **M-3:** aprovados os parâmetros propostos (1.000 campanhas abertas, preço de até 60 s, confiança de até 50 pontos
+  base, 30 s de idade da campanha na abertura).
+- **M-4:** o Ronaldo segura a carteira física no dia do lançamento, e o primeiro ciclo na mainnet inclui uma abertura
+  paga.
+- **`content/powers.md`:** "Lucas and Bernardo have reviewed and approved it", como relatado pelo Ronaldo; o líder não
+  tem como conferir a revisão deles.
+- **As mesclas:** autorizou mesclar #86, #85, #87, #72 e #89 nessa ordem ("Yes, merge all five as described"), cada
+  um só com o CI verde no último commit e com a `main` trazida antes. O #86 (o pacote de auditoria) entrou na `main`
+  como `b863ce3`.

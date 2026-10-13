@@ -1,8 +1,10 @@
 /**
  * Purpose: the mainnet deploy's pure guards, without a cluster (Sprint 18, lane L18): the cluster rule (mainnet-beta by
  *          genesis hash, a Surfpool fork told apart), the upgrade authority on hardware only, the multisig shape the
- *          runbook asks for, and the Squads vault message's layout (the vault first, the counts, the compact vectors).
- * Version: 0.1.0
+ *          runbook asks for, the pair of multisigs the founder chose (M-1, M-2: the same three members, the upgrade one
+ *          locked 24 h at step 9, the admin one never), and the Squads vault message's layout (the vault first, the
+ *          counts, the compact vectors).
+ * Version: 0.2.0 (the pair of multisigs)
  * Sprint:  18 (mainnet)
  */
 import { describe, expect, test } from "bun:test";
@@ -12,9 +14,9 @@ import { address, createNoopSigner } from "@solana/kit";
 import { buildSetTeam } from "@brot/sdk/tx";
 
 import { mainnetProblem, MAINNET_GENESIS } from "../../scripts/deploy/mainnet-cluster";
-import { multisigProblem } from "../../scripts/deploy/mainnet-preflight";
+import { multisigProblem, pairProblem } from "../../scripts/deploy/mainnet-preflight";
 import { isHardwareUri, upgradeAuthority } from "../../scripts/deploy/mainnet-signers";
-import { compileVaultMessage } from "../../scripts/deploy/mainnet-squads";
+import { compileVaultMessage, UPGRADE_TIME_LOCK_SECONDS } from "../../scripts/deploy/mainnet-squads";
 import { GENESIS } from "../../scripts/validator/clusters";
 
 const facts = (genesisHash: string, surfnet: string | null) => ({ genesisHash, surfnet, core: "test" });
@@ -63,6 +65,21 @@ describe("mainnet deploy guards", () => {
       "permission",
     );
     expect(multisigProblem({ ...good, configAuthority: MEMBER })).toContain("config authority");
+  });
+
+  test("two multisigs: the same three members, the admin one never locked, the upgrade one at 0 or 24 hours", () => {
+    const keys = [KEY, MEMBER, address("4L2v1qyNeXzrDmU4o4kVC4E5Bp1WFqMdahup252CSMAJ")];
+    const base = { configAuthority: KEY, threshold: 2, transactionIndex: 0n, staleTransactionIndex: 0n };
+    const ms = (timeLock: number, members = keys) => ({
+      ...base,
+      timeLock,
+      members: members.map((key) => ({ key, mask: 7 })),
+    });
+    expect(pairProblem(ms(0), ms(0))).toBeNull();
+    expect(pairProblem(ms(UPGRADE_TIME_LOCK_SECONDS), ms(0, [...keys].reverse()))).toBeNull();
+    expect(pairProblem(ms(0), ms(0, [KEY, MEMBER, KEY]))).toContain("same three members");
+    expect(pairProblem(ms(UPGRADE_TIME_LOCK_SECONDS), ms(3_600))).toContain("must have none");
+    expect(pairProblem(ms(3_600), ms(0))).toContain("0 until step 9");
   });
 
   test("a vault message puts the vault first as the writable signer and encodes compact vectors", async () => {
