@@ -2,9 +2,9 @@
  * Purpose: the program's addresses for the LiteSVM tests: ids, seeds, discriminators, PDAs and
  *          the known outside accounts (Pyth, the loader). Mirrors programs/brot-markets/src
  *          (constants.rs, instructions/mod.rs).
- * Version: 0.0.3 (the new program id and its event authority)
+ * Version: 0.0.4 (the sixth kind: Meteora DBC, wSOL, its distance and floor)
  * Sprint:  02 (pot core on Pinocchio); Sprint 03 adds `resolve_campaign`, the outcome enums, the
- *          readers' programs and constants, frozen at its opening
+ *          readers' programs and constants, frozen at its opening; the sixth kind its own
  */
 import { address, getAddressEncoder, getProgramDerivedAddress, type Address } from "@solana/kit";
 
@@ -19,6 +19,8 @@ export const PYTH_PUSH_ORACLE_ID = address("pyt2F414BA6dPttK6RddPZUdHfapoBN24GL5
 export const SPL_TOKEN_PROGRAM_ID = address("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 export const TOKEN_2022_PROGRAM_ID = address("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
 export const DAMM_V2_PROGRAM_ID = address("cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG");
+export const DBC_PROGRAM_ID = address("dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN");
+export const WSOL_MINT = address("So11111111111111111111111111111111111111112");
 export const STAKE_POOL_PROGRAM_ID = address("SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy");
 export const VOTE_PROGRAM_ID = address("Vote111111111111111111111111111111111111111");
 export const EPOCH_SCHEDULE_SYSVAR_ID = address("SysvarEpochSchedu1e111111111111111111111111");
@@ -43,7 +45,16 @@ export const MAX_PRICE_CLOCK_LEAD_SECONDS = 60n;
 export const MIN_SLOT_MS = 100n;
 export const PRICE_TARGET_MAX_RATIO = 10n;
 export const EPOCH_START_SLOW_SLOT_MS = 500n;
-export const MIN_DISTANCE_BPS = { price: 100n, supply: 100n, damm: 100n, stakePool: 100n, stake: 100n } as const;
+export const MIN_DISTANCE_BPS = {
+  price: 100n,
+  supply: 100n,
+  damm: 100n,
+  stakePool: 100n,
+  stake: 100n,
+  dbc: 1_000n,
+} as const;
+/** The graduation kind's floor on a curve's threshold in the default (non-drill) build: 85 SOL. */
+export const DBC_MIN_GRADUATION_LAMPORTS = 85n * 1_000_000_000n;
 export const DAY = 86_400n;
 export const HOUR = 3_600n;
 
@@ -80,6 +91,7 @@ export const ReaderKind = {
   DammV2LockedAtLeast: 2,
   StakePoolTvlAtLeast: 3,
   StakeAtLeast: 4,
+  DbcGraduated: 5,
 } as const;
 export const Status = { Open: 0, InReview: 1, Contested: 2, Settling: 3, Settled: 4 } as const;
 export const Outcome = { Unresolved: 0, Yes: 1, No: 2, Void: 3 } as const;

@@ -27,6 +27,24 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **O sexto tipo de campanha, `DbcGraduated`: "a curva de lançamento da Meteora (DBC) do token X completa até a data
+  D?"** (branch `feat/dbc-graduation-reader`, 12/10/2026; `docs/technical/meteora-readers-plan.md`,
+  `session-log/2026-10-12-sexto-tipo-dbc-graduated.md`). Entra no programa, nos testes, no IDL e no SDK; a caixa de
+  abertura, a página da campanha, o upgrade no devnet, o BP, o resumo de produto e os Termos ficam para depois.
+  - **O leitor** (`readers/dbc_graduation.rs` e `dbc_graduation/config.rs`) lê o `VirtualPool` da DBC (o
+    `TransferHookPool` é recusado) e, na abertura, o `PoolConfig` do próprio pool, passado como décima conta: só curvas
+    em SOL, de 85 SOL para cima (1 SOL no build `drill`); o alvo é o limite da curva; ao abrir, falta ao menos 10% dele.
+    As entradas travam quando a curva completa. A resolução lê o segundo que o próprio pool gravou
+    (`finish_curve_timestamp`), e não a hora de quem resolve: completou até o prazo é SIM, mesmo resolvido depois.
+  - **Cinco erros novos, 6148 a 6152**, acrescentados no fim (`CurveHasTransferHook`, `CurveConfigMismatch`,
+    `CurveNotInSol`, `CurveTooSmall`, `TargetNotThreshold`), cada um com teste no host, teste no LiteSVM, a mesma recusa
+    no `validateOpenCampaign` e o texto do site.
+  - **Abre em todo build menos o de mainnet** (`DBC_GRADUATED_OPENS`), até as auditorias cobrirem o leitor.
+  - **Doze contas reais da mainnet** em `tests/fixtures/dbc-*` (`scripts/capture-fixtures-dbc.ts`): pools nos estágios
+    0 a 3, configs de 85 SOL, 11 SOL e em USDC, e um pool com transfer hook.
+  - **A demonstração no Surfpool** (`scripts/surfpool/dbc-graduation.ts`): num fork da mainnet, uma campanha abre num
+    pool real ainda na curva, duas pessoas entram (SIM e NÃO), uma carteira completa a curva com o swap da própria DBC,
+    a resolução grava SIM, e quem entrou no SIM recebe o pote.
 - **A página inicial "ainda assando"** (branch `feat/landing-still-baking`, 12/10/2026, a pedido do Lucas;
   `session-log/2026-10-12-pagina-inicial-ainda-assando.md`). A página inicial foi publicada no mesmo dia, sozinha; o ícone do `/dev0x` entrou no ar à tarde, numa versão nova do site (`6a52505c9aba`).
   - **A marca da barra do topo** é o pão simples (`img/brot-loaf.webp`), como o `BRAND.md` diz; o Baked segue andando

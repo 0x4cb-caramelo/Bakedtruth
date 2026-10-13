@@ -1,9 +1,9 @@
 //! Purpose: the rules of `user_open_campaign` that read no account: row 1 of TP section 3.4.10
 //!          (the kind opens in this build), the canonical arguments (D-j: a field the kind does
 //!          not use is zero) and the terms the creator saw (`expected_params_version`).
-//! Version: 0.0.2
+//! Version: 0.0.3
 //! Sprint: 03 (readers and resolution), lane F; 04 (the feed list, the valve for paid openings
-//!         only), lane H
+//!         only), lane H; the sixth kind's switch (`DBC_GRADUATED_OPENS`)
 //!
 //! Pure functions over the argument bytes and one config field, so the host test
 //! (tests/open_campaign_rules.rs) runs every branch without a cluster. The handler calls them in
@@ -22,12 +22,21 @@ use crate::{
 /// campaign opened by a build with the feature still resolves under one without it.
 pub const STAKE_AT_LEAST_OPENS: bool = cfg!(feature = "stake-at-least");
 
-/// Row 1: the kind byte names one of the five readers (`UnknownReaderKind`), and that kind opens
-/// in this build: `StakeAtLeast` only with [`STAKE_AT_LEAST_OPENS`] (`ReaderKindNotOpen`). The
-/// four other kinds open.
+/// Whether this build opens `DbcGraduated` (M-7, 2026-10-12): every build but `mainnet`, until
+/// the audits cover its reader. As with `StakeAtLeast`, resolution never reads it.
+pub const DBC_GRADUATED_OPENS: bool = !cfg!(feature = "mainnet");
+
+/// Row 1: the kind byte names one of the six readers (`UnknownReaderKind`), and that kind opens
+/// in this build: `StakeAtLeast` only with [`STAKE_AT_LEAST_OPENS`] and `DbcGraduated` only with
+/// [`DBC_GRADUATED_OPENS`] (`ReaderKindNotOpen`). The four other kinds open.
 pub fn opening_kind(byte: u8) -> Result<ReaderKind, BrotError> {
     let kind = ReaderKind::try_from(byte)?;
-    if kind == ReaderKind::StakeAtLeast && !STAKE_AT_LEAST_OPENS {
+    let opens = match kind {
+        ReaderKind::StakeAtLeast => STAKE_AT_LEAST_OPENS,
+        ReaderKind::DbcGraduated => DBC_GRADUATED_OPENS,
+        _ => true,
+    };
+    if !opens {
         return Err(BrotError::ReaderKindNotOpen);
     }
     Ok(kind)

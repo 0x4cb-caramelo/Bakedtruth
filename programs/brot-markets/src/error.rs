@@ -1,6 +1,7 @@
 //! Purpose: every refusal the program can return, one code per cause, as custom program errors.
-//! Version: 0.0.3
-//! Sprint: 02 (pot core on Pinocchio); reader errors from 01 keep their codes; 03 appends 6071 on
+//! Version: 0.0.4
+//! Sprint: 02 (pot core on Pinocchio); reader errors from 01 keep their codes; 03 appends 6071 on;
+//!         the sixth kind (`DbcGraduated`) appends 6148 to 6152
 //!
 //! Codes start at 6000 so they never collide with the System Program's own custom errors, which
 //! a failed CPI passes through. A code, once assigned, never changes meaning. Each variant's
@@ -116,7 +117,7 @@ pub enum BrotError {
     // --- Opening a campaign: the rows of TP section 3.4.10 ---------------------------------
     #[error("Row 1: the kind byte names no reader")]
     UnknownReaderKind = 6043,
-    #[error("Row 1: this kind does not open yet (`StakeAtLeast` until a devnet YES is recorded)")]
+    #[error("Row 1: this kind does not open in this build (`StakeAtLeast` until a devnet YES is recorded; `DbcGraduated` not on mainnet)")]
     ReaderKindNotOpen = 6044,
     #[error("Row 2: the metric account is not the one the campaign's parameters name")]
     MetricAccountMismatch = 6045,
@@ -311,7 +312,20 @@ pub enum BrotError {
     IllegalTransition = 6146,
     #[error("The proof does not move the cut-off back: not earlier, not a YES price result, or a tally has started")]
     CutoffNotMovable = 6147,
-    // New codes are appended here, from 6147, never reusing a number.
+    // The sixth kind, `DbcGraduated` (numbers from 6148).
+    #[error("Row 2: the DBC pool is a transfer-hook pool, which this kind does not accept")]
+    CurveHasTransferHook = 6148,
+    #[error("Row 2: the config account passed after the nine slots is not the DBC pool's own")]
+    CurveConfigMismatch = 6149,
+    #[error("Row 2: the curve is not priced in SOL: its config's quote mint is not wSOL")]
+    CurveNotInSol = 6150,
+    #[error("Row 2: the curve's graduation threshold is below `DBC_MIN_GRADUATION_LAMPORTS`")]
+    CurveTooSmall = 6151,
+    #[error(
+        "Row 3: the target is not the curve's graduation threshold (`migration_quote_threshold`)"
+    )]
+    TargetNotThreshold = 6152,
+    // New codes are appended here, from 6153, never reusing a number.
 }
 
 impl From<BrotError> for ProgramError {

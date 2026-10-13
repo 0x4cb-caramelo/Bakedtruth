@@ -34,13 +34,24 @@ import {
 
 export type KindName = "price" | "burn" | "lock" | "pool" | "stake";
 
-export const KIND_OF: Record<ReaderKind, KindName> = {
+/**
+ * The site's name for each reader kind it shows. The sixth, `DbcGraduated`, has none yet: its creation box and its
+ * campaign page come later, and `kindOf` refuses it until then.
+ */
+export const KIND_OF: Partial<Record<ReaderKind, KindName>> = {
   [ReaderKind.PriceTouch]: "price",
   [ReaderKind.SupplyAtMost]: "burn",
   [ReaderKind.DammV2LockedAtLeast]: "lock",
   [ReaderKind.StakePoolTvlAtLeast]: "pool",
   [ReaderKind.StakeAtLeast]: "stake",
 };
+
+/** The site's name for `kind`; throws for a kind the site does not show yet. */
+export function kindOf(kind: ReaderKind): KindName {
+  const name = KIND_OF[kind];
+  if (name === undefined) throw new Error(`the site does not show ${ReaderKind[kind] ?? kind} campaigns yet`);
+  return name;
+}
 
 /** Per kind: the owner program the reader checks first, and the field it reads (TP §3.4.8). */
 export const READER: Record<KindName, { owner: string; ownerId: string; field: string }> = {
@@ -136,7 +147,7 @@ function read(c: Campaign, kind: KindName, metric: FetchedAccount, chain: ChainT
 
 /** The proof of `campaign` from its metric account as read at `chain` (`null`: the account does not exist). */
 export function proofOf(campaign: Campaign, metric: FetchedAccount | null, chain: ChainTime): Proof {
-  const kind = KIND_OF[campaign.kind];
+  const kind = kindOf(campaign.kind);
   const base: Proof = {
     kind,
     account: campaign.metricAccount,

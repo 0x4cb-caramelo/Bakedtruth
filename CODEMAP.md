@@ -8,8 +8,8 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **909** |
-| Acima de 200 linhas | **40** ⚠️ |
+| Arquivos mapeados | **924** |
+| Acima de 200 linhas | **41** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -17,11 +17,12 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 A regra diz "under 200 lines where practical". Estes passaram — vale checar se dá pra separar:
 
 - `app/lib/mascot/engine.ts` — 312 linhas
-- `programs/brot-markets/src/error.rs` — 328 linhas
-- `programs/brot-markets/src/instructions/campaigns/open_campaign.rs` — 210 linhas
+- `programs/brot-markets/src/error.rs` — 342 linhas
+- `programs/brot-markets/src/instructions/campaigns/open_campaign.rs` — 209 linhas
 - `programs/brot-markets/src/instructions/entries/join_campaign.rs` — 212 linhas
-- `programs/brot-markets/src/instructions/interface.rs` — 216 linhas
+- `programs/brot-markets/src/instructions/interface.rs` — 217 linhas
 - `programs/brot-markets/src/math/snapshot.rs` — 208 linhas
+- `programs/brot-markets/tests/epoch_support/mod.rs` — 201 linhas
 - `programs/brot-markets/tests/price_stale_feed.rs` — 201 linhas
 - `programs/brot-markets/tests/settle_host_finalize.rs` — 236 linhas
 - `prototype-lab/prototype-b/view.js` — 265 linhas
@@ -184,7 +185,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`payout-panel.tsx`](app/features/campaign-page/payout-panel.tsx) | the connected wallet's own lines on the campaign page (Sprint 12): "Your entry" with its sides and what it returns, as an estimate while the pot or the result c | 168 |
 | [`pot-panel.tsx`](app/features/campaign-page/pot-panel.tsx) | the split and the pot (P1 §3.1–3.2; spec 3.5): each side's chance (its share of the entries; none for an empty pot, L-05) and its total in SOL, the bar, the pri | 61 |
 | [`proof-panel.tsx`](app/features/campaign-page/proof-panel.tsx) | the campaign page's proof (BR-23; spec 3.5): the value read now through the SDK's copy of the program's reader against the target, "if read now", the distance,  | 168 |
-| [`proof.ts`](app/features/campaign-page/proof.ts) | the proof a campaign page shows (BR-23; P1 §4.4): the value read now from the account the campaign reads, through the SDK's copy of the program's readers (owner | 159 |
+| [`proof.ts`](app/features/campaign-page/proof.ts) | the proof a campaign page shows (BR-23; P1 §4.4): the value read now from the account the campaign reads, through the SDK's copy of the program's readers (owner | 170 |
 | [`recheck-commands.ts`](app/features/campaign-page/recheck-commands.ts) | the re-check panel's commands (BR-23, "Anyone can re-check. Same account, same answer"; proposal §2.9): one JSON-RPC request that fetches the bytes the reader r | 68 |
 | [`recheck-panel.tsx`](app/features/campaign-page/recheck-panel.tsx) | the re-check panel (BR-23; P1 §4.4 "Anyone can re-check. Same account, same answer"; spec 3.7): the account, its owner, the field the reader reads, the raw valu | 152 |
 | [`state-panel.tsx`](app/features/campaign-page/state-panel.tsx) | what takes the entry panel's place once a campaign takes no entry (Sprint 12; BR-05, BR-10, BR-11, BR-25, BR-45): closed and why; in review with the result, the | 189 |
@@ -322,7 +323,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`check-issues.ts`](app/features/open-campaign/check-issues.ts) | what the creation box says before the program's mirror has the whole draft (the Sprint 19 reviews): the stops the box can name early (the pause, a full valve, a | 99 |
 | [`check.ts`](app/features/open-campaign/check.ts) | the creation box's verdict on every change (Sprint 19 DoD; A-10, X0.7): the draft turned into the exact arguments the transaction will carry (`OpenArgs`, with t | 183 |
 | [`copy-money.ts`](app/features/open-campaign/copy-money.ts) | the creation box's money words and notices (BR-01, BR-26; TP §3.4.10, §3.4.16; D-m vocabulary; English per L-01): the charge at Pyth's price, the cost table wit | 105 |
-| [`copy-refusals.ts`](app/features/open-campaign/copy-refusals.ts) | one message for each refusal of `user_open_campaign` (TP §3.4.10, rows 1 to 10; D-m vocabulary; English per L-01), keyed by the program's error name, with the s | 157 |
+| [`copy-refusals.ts`](app/features/open-campaign/copy-refusals.ts) | one message for each refusal of `user_open_campaign` (TP §3.4.10, rows 1 to 10; D-m vocabulary; English per L-01), keyed by the program's error name, with the s | 179 |
 | [`copy-sheet.ts`](app/features/open-campaign/copy-sheet.ts) | the words of an opening's sheet, from "Review and sign" to the campaign's link (spec 3.12 of Sprint -1; A-3; T17; D-m vocabulary; English per L-01): "Check befo | 144 |
 | [`copy.ts`](app/features/open-campaign/copy.ts) | the creation box's words (spec 3.12 of Sprint -1; BR-01, BR-02, BR-26; D-m vocabulary; English per L-01): the four sections, the five kinds' words, the fields a | 178 |
 | [`cost-section.tsx`](app/features/open-campaign/cost-section.tsx) | section 4 of the creation box, "Cost" (spec 3.12; TP §3.4.10, §3.4.16; P-3): the opening amount (US$500 or more, split 90/10 as a whole; amount-picker.tsx), the | 175 |
@@ -423,18 +424,18 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`accounts.ts`](packages/sdk/src/read/accounts.ts) | the program's own accounts decoded from their bytes (Codama's codecs, from the Shank IDL), after the checks the program makes before it reads a field: the owner | 70 |
 | [`bytes.ts`](packages/sdk/src/read/bytes.ts) | small byte helpers the SDK shares, written without `Buffer`, `TextEncoder` or any Node or DOM API, so they run the same in a browser, in Bun and under React Nat | 39 |
-| [`constants.ts`](packages/sdk/src/read/constants.ts) | the program's address and the constants compiled into it that a client needs: seeds, other programs, code ceilings, price and reader bounds, account sizes, and  | 122 |
+| [`constants.ts`](packages/sdk/src/read/constants.ts) | the program's address and the constants compiled into it that a client needs: seeds, other programs, code ceilings, price and reader bounds, account sizes, and  | 131 |
 | [`decoder.ts`](packages/sdk/src/read/decoder.ts) | the program's events out of a transaction as the RPC returns it (`getTransaction` with JSON encoding, or `simulateTransaction`), under the four decoder rules ev | 153 |
 | [`events.ts`](packages/sdk/src/read/events.ts) | the program's events: each name with its discriminator and the Codama decoder of its payload, and the decoding of one event's inner-instruction data `[0xFF, dis | 99 |
 | [`feeds.ts`](packages/sdk/src/read/feeds.ts) | the compiled lists of Pyth feeds a price campaign may name, one per cluster, as programs/brot-markets/src/feeds.rs compiles them (founder answer 1, 2026-10-09;  | 113 |
 | [`format.ts`](packages/sdk/src/read/format.ts) | exact, deterministic display of the program's units: lamports as SOL with all nine decimals (no floating point), Unix seconds as a UTC date, basis points as a p | 54 |
-| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 37 |
-| [`knowable.ts`](packages/sdk/src/read/knowable.ts) | the join lock (BR-06) as the program applies it, for a client that wants to know whether a join can still go in: `outcomeKnowable` per kind (the price band reac | 66 |
+| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 38 |
+| [`knowable.ts`](packages/sdk/src/read/knowable.ts) | the join lock (BR-06) as the program applies it, for a client that wants to know whether a join can still go in: `outcomeKnowable` per kind (the price band reac | 69 |
 | [`pdas.ts`](packages/sdk/src/read/pdas.ts) | every program-derived address a client needs: the config, the fee vault, a campaign and its vault, an entry, a join, the event authority, the program's ProgramD | 68 |
-| [`points.ts`](packages/sdk/src/read/points.ts) | devnet points (BR-29; TP §3.5 "Points"; Q7 answered a, narrowed by the founder's answer 3a): 1 point per campaign a wallet entered on the side that won, once th | 166 |
+| [`points.ts`](packages/sdk/src/read/points.ts) | devnet points (BR-29; TP §3.5 "Points"; Q7 answered a, narrowed by the founder's answer 3a): 1 point per campaign a wallet entered on the side that won, once th | 167 |
 | [`program-data.ts`](packages/sdk/src/read/program-data.ts) | the program's last deploy (A-8), read from its ProgramData account under the upgradeable loader (loader v3), whose first 45 bytes are `[state u32 = 3 (ProgramDa | 86 |
 | [`quote.ts`](packages/sdk/src/read/quote.ts) | what an opening pays (row 7 of TP 3.4.10): US$ at the sponsored Pyth SOL/USD price charged at `price − conf`, the 90/10 split, the `max_lamports` the creator si | 146 |
-| [`recheck.ts`](packages/sdk/src/read/recheck.ts) | `recheck(campaign, rpcUrl)` (BR-23, "Anyone can re-check. Same account, same answer"): through any RPC the caller chooses, read the campaign, then the very acco | 158 |
+| [`recheck.ts`](packages/sdk/src/read/recheck.ts) | `recheck(campaign, rpcUrl)` (BR-23, "Anyone can re-check. Same account, same answer"): through any RPC the caller chooses, read the campaign, then the very acco | 174 |
 | [`rpc.ts`](packages/sdk/src/read/rpc.ts) | the reads the SDK makes through any Solana RPC (Kit's `createSolanaRpc`, no paid key, A-5): an account's owner and bytes, several at once, the cluster's clock f | 72 |
 | [`view.ts`](packages/sdk/src/read/view.ts) | a campaign's public state (BR-05; TP 3.4.2): Open, Closed, In review, Paid or Void, computed by one function from what the program recorded and the CHAIN's time | 82 |
 
@@ -444,6 +445,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`accounts.ts`](packages/sdk/src/read/chain/accounts.ts) | the other programs' accounts the four non-price kinds read, parsed the way the program parses them, owner first: a classic SPL Token mint (`SupplyAtMost`), a Me | 119 |
 | [`cursor.ts`](packages/sdk/src/read/chain/cursor.ts) | bounds-checked little-endian reads over raw account bytes, for the SDK's readers of other programs' accounts. An account shorter than its layout is `ReaderBadLa | 66 |
+| [`dbc.ts`](packages/sdk/src/read/chain/dbc.ts) | the Meteora Dynamic Bonding Curve (DBC) accounts the graduation kind (`DbcGraduated`) reads, parsed the way the program parses them, owner first: the `VirtualPo | 88 |
 | [`epoch.ts`](packages/sdk/src/read/chain/epoch.ts) | the epoch kinds' opening rule (row 5's part for `StakePoolTvlAtLeast` and `StakeAtLeast`): the measured epoch has not started, and its latest plausible start is | 72 |
 | [`price-rules.ts`](packages/sdk/src/read/chain/price-rules.ts) | the price rules the opening, the join lock and the proof share: freshness by time and by slot, the confidence bound, the two touch tests, row 3's minimum distan | 91 |
 | [`price-update.ts`](packages/sdk/src/read/chain/price-update.ts) | a Pyth `PriceUpdateV2` account read the way the program reads it: owner first (the upgraded receiver `rec2HH…` only), exactly 134 bytes, the discriminator, Full | 62 |
@@ -452,7 +454,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`codes.ts`](packages/sdk/src/read/errors/codes.ts) | the program's custom error codes by name (programs/brot-markets/src/error.rs), so a client names the exact refusal. Codes are appended there and here, never reu | 157 |
+| [`codes.ts`](packages/sdk/src/read/errors/codes.ts) | the program's custom error codes by name (programs/brot-markets/src/error.rs), so a client names the exact refusal. Codes are appended there and here, never reu | 163 |
 | [`index.ts`](packages/sdk/src/read/errors/index.ts) | one message per program error code, read from the IDL, and the refusal the SDK throws when its mirror of a program rule refuses (math, creation checks), carryin | 79 |
 
 ## `packages/sdk/src/read/math/`
@@ -477,10 +479,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`join.ts`](packages/sdk/src/read/validate/join.ts) | `checkJoin`, the SDK's mirror of `user_join_campaign`'s rules for the preview: from the campaign, the config, the baker's entry, the metric account and the chai | 79 |
-| [`kinds.ts`](packages/sdk/src/read/validate/kinds.ts) | rows 2 and 3 of TP 3.4.10 (and the epoch kinds' part of row 5) for each of the five kinds: the metric account fits the kind and the target is neither met nor to | 107 |
-| [`open-campaign.ts`](packages/sdk/src/read/validate/open-campaign.ts) | `validateOpenCampaign`, the SDK's mirror of `user_open_campaign`'s rules (TP 3.4.10) for the preview: from the arguments, the config, the chain's clock and the  | 123 |
-| [`open-rules.ts`](packages/sdk/src/read/validate/open-rules.ts) | the opening's rules that read no account, in the program's order: the argument sizes (row 9), row 1 (the kind names a reader and opens in this build), the canon | 85 |
-| [`rows.ts`](packages/sdk/src/read/validate/rows.ts) | which row of the opening's checks (TP 3.4.10) each refusal belongs to, so a preview can say "row 7: the price moved past your maximum" next to the program's own | 55 |
+| [`kinds.ts`](packages/sdk/src/read/validate/kinds.ts) | rows 2 and 3 of TP 3.4.10 (and the epoch kinds' part of row 5) for each of the six kinds: the metric account fits the kind and the target is neither met nor too | 133 |
+| [`open-campaign.ts`](packages/sdk/src/read/validate/open-campaign.ts) | `validateOpenCampaign`, the SDK's mirror of `user_open_campaign`'s rules (TP 3.4.10) for the preview: from the arguments, the config, the chain's clock and the  | 146 |
+| [`open-rules.ts`](packages/sdk/src/read/validate/open-rules.ts) | the opening's rules that read no account, in the program's order: the argument sizes (row 9), row 1 (the kind names a reader and opens in this build), the canon | 89 |
+| [`rows.ts`](packages/sdk/src/read/validate/rows.ts) | which row of the opening's checks (TP 3.4.10) each refusal belongs to, so a preview can say "row 7: the price moved past your maximum" next to the program's own | 60 |
 
 ## `packages/sdk/src/schemas/`
 
@@ -488,7 +490,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`account-names.ts`](packages/sdk/src/schemas/account-names.ts) | the reviewed account names of `content/account-names.json` (A-11; TP §3.4.10 "Display names"): a JSON array of `{ "address", "kind", "name" }`, each address onc | 45 |
 | [`index.ts`](packages/sdk/src/schemas/index.ts) | `@brot/sdk/schemas`, the zod 4 schemas the site, the app and the services share: the opening's input; the public format of a void-log record (Sprint 12); the re | 13 |
-| [`open-campaign.ts`](packages/sdk/src/schemas/open-campaign.ts) | the zod schema of an opening's input (TP Appendix B, written here as Sprint 05 must), shared by the SDK, the site, the app and the preview: what a creator may c | 117 |
+| [`open-campaign.ts`](packages/sdk/src/schemas/open-campaign.ts) | the zod schema of an opening's input (TP Appendix B, written here as Sprint 05 must), shared by the SDK, the site, the app and the preview: what a creator may c | 125 |
 | [`void-log.ts`](packages/sdk/src/schemas/void-log.ts) | the public format of a `content/void-log/` record (TP §3.4.7, BR-45; Sprint 12 gives it its public format, which Sprint 05's `scripts/team/void.ts` started): a  | 135 |
 
 ## `packages/sdk/src/tx/`
@@ -498,10 +500,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`index.ts`](packages/sdk/src/tx/index.ts) | `@brot/sdk/tx`, the transaction half of the SDK: every instruction builder, and (A-3) the path a baker's or creator's transaction takes before the wallet signs  | 23 |
 | [`message.ts`](packages/sdk/src/tx/message.ts) | the transaction message a prepared instruction is simulated and signed in: one instruction, the signer paying, the cluster's latest blockhash. The network fee a | 31 |
 | [`prepare-claim.ts`](packages/sdk/src/tx/prepare-claim.ts) | A-3 for the one claim a person ever signs (TP §3.4.5, the reserve path; TP v0.0.1 Q2, answered b): a creator share the program kept in the vault because paying  | 124 |
-| [`prepare-open.ts`](packages/sdk/src/tx/prepare-open.ts) | A-3 for an opening: re-read the config, the SOL/USD price account, the metric account, the campaign's address and the chain's clock; quote the payment and its ` | 190 |
+| [`prepare-open.ts`](packages/sdk/src/tx/prepare-open.ts) | A-3 for an opening: re-read the config, the SOL/USD price account, the metric account, the campaign's address and the chain's clock; quote the payment and its ` | 199 |
 | [`prepare.ts`](packages/sdk/src/tx/prepare.ts) | A-3 for a join: re-read the campaign, the config, the baker's entry, the metric account and the chain's clock through the RPC; check them with the SDK's mirror  | 126 |
 | [`simulate.ts`](packages/sdk/src/tx/simulate.ts) | simulate a transaction before the wallet signs it (A-3): the cluster runs it on its current state, unsigned, with the latest blockhash, and the SDK reports the  | 90 |
-| [`summary-brot.ts`](packages/sdk/src/tx/summary-brot.ts) | the summary of this program's own instructions (A-3). The structure is checked against the IDL first: the exact data size, the exact account count, each slot's  | 163 |
+| [`summary-brot.ts`](packages/sdk/src/tx/summary-brot.ts) | the summary of this program's own instructions (A-3). The structure is checked against the IDL first: the exact data size, the exact account count, each slot's  | 181 |
 | [`summary-budget.ts`](packages/sdk/src/tx/summary-budget.ts) | the summary's reading of compute-budget instructions (Sprint 05 review, H1): the unit limit and the unit price decoded, the priority fee they allow bounded and  | 89 |
 | [`summary-other.ts`](packages/sdk/src/tx/summary-other.ts) | what the summary says for the instructions that move no money out of a signer's wallet (the admin, team and settlement instructions), each with the values it si | 122 |
 | [`summary.ts`](packages/sdk/src/tx/summary.ts) | the deterministic summary of a transaction before the wallet signs it (A-3). `summarizeMessage` reads the very bytes the wallet signs: the compiled message, dec | 173 |
@@ -511,7 +513,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`admin.ts`](packages/sdk/src/tx/builders/admin.ts) | the admin and team-configuration instructions, built by the Codama client from the Shank IDL with every program address derived here: initialisation, the team k | 98 |
-| [`campaign.ts`](packages/sdk/src/tx/builders/campaign.ts) | the instructions of a campaign's open life, built by the Codama client with every program address derived here: opening (`user_open_campaign`), joining (`user_j | 136 |
+| [`campaign.ts`](packages/sdk/src/tx/builders/campaign.ts) | the instructions of a campaign's open life, built by the Codama client with every program address derived here: opening (`user_open_campaign`), joining (`user_j | 142 |
 | [`review.ts`](packages/sdk/src/tx/builders/review.ts) | the team's acts inside a campaign's review window, built by the Codama client: confirm the result, void it with a reason and the hash of its public note, open a | 55 |
 | [`settlement.ts`](packages/sdk/src/tx/builders/settlement.ts) | the permissionless settlement instructions, built by the Codama client with every program address derived here: finalize, the late-join tally, an entry's payout | 104 |
 
@@ -520,9 +522,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`checks.rs`](programs/brot-markets/src/checks.rs) | every account check Anchor used to make, written by hand in one place (TP 3.4.17), each with its own error and a negative test that fails without it (T24, X0.9) | 172 |
-| [`constants.rs`](programs/brot-markets/src/constants.rs) | seeds, program ids, code ceilings and the duration and window constants compiled into the program, with the devnet-only drill values behind the `drill` feature | 183 |
+| [`constants.rs`](programs/brot-markets/src/constants.rs) | seeds, program ids, code ceilings and the duration and window constants compiled into the program, with the devnet-only drill values behind the `drill` feature | 199 |
 | [`entrypoint.rs`](programs/brot-markets/src/entrypoint.rs) | the instruction dispatcher: the first byte of the instruction data picks the handler, the rest is that handler's arguments | 81 |
-| [`error.rs`](programs/brot-markets/src/error.rs) | every refusal the program can return, one code per cause, as custom program errors | 328 |
+| [`error.rs`](programs/brot-markets/src/error.rs) | every refusal the program can return, one code per cause, as custom program errors | 342 |
 | [`events.rs`](programs/brot-markets/src/events.rs) | the events, one per instruction, and how they leave the program: a self-CPI signed by the event-authority PDA, so they survive log truncation (T4) | 101 |
 | [`feeds.rs`](programs/brot-markets/src/feeds.rs) | the compiled list of Pyth feeds a price campaign may name (founder answer 1, 2026-10-09; TP 3.4.1, 3.4.10). One list per cluster, chosen by the `mainnet` featur | 147 |
 | [`layout.rs`](programs/brot-markets/src/layout.rs) | zero-copy byte layouts shared by accounts, instruction arguments and events: the little-endian field types and the one place where bytes become a typed view | 126 |
@@ -552,7 +554,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`interface.rs`](programs/brot-markets/src/instructions/interface.rs) | the program's interface for the Shank IDL (T9): the `BrotInstruction` enum, with each instruction's accounts in order and its arguments | 216 |
+| [`interface.rs`](programs/brot-markets/src/instructions/interface.rs) | the program's interface for the Shank IDL (T9): the `BrotInstruction` enum, with each instruction's accounts in order and its arguments | 217 |
 | [`mod.rs`](programs/brot-markets/src/instructions/mod.rs) | the program's interface: every instruction with its discriminator, its accounts in order and its arguments, for the dispatcher and for the Shank IDL (T9) | 67 |
 
 ## `programs/brot-markets/src/instructions/admin/`
@@ -575,7 +577,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`mod.rs`](programs/brot-markets/src/instructions/campaigns/mod.rs) | opening a campaign (TP section 3.4.10). Resolution joins this folder in Sprint 03 | 6 |
-| [`open_campaign.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign.rs) | `user_open_campaign`: any wallet opens a campaign of any open kind paying US$500 in SOL at the Pyth SOL/USD price, 90% bookkept as the prize and 10% held as the | 210 |
+| [`open_campaign.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign.rs) | `user_open_campaign`: any wallet opens a campaign of any open kind paying US$500 in SOL at the Pyth SOL/USD price, 90% bookkept as the prize and 10% held as the | 209 |
 
 ## `programs/brot-markets/src/instructions/campaigns/open_campaign/`
 
@@ -584,7 +586,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`create.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign/create.rs) | row 10 of TP section 3.4.10 for `user_open_campaign`: the `Campaign` and its vault, created at their canonical PDAs with the creator paying both rents. An exist | 59 |
 | [`payment.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign/payment.rs) | row 7 of TP section 3.4.10, what an opening pays: US$ at the sponsored Pyth SOL/USD price of the compiled feed (`SOL_USD_FEED_ID`) at its charged low end, `pric | 137 |
 | [`record.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign/record.rs) | the end of `user_open_campaign`: every field an opening writes into the new `Campaign`, and the `CampaignOpened` event built from what was stored, so the event  | 151 |
-| [`rules.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign/rules.rs) | the rules of `user_open_campaign` that read no account: row 1 of TP section 3.4.10 (the kind opens in this build), the canonical arguments (D-j: a field the kin | 103 |
+| [`rules.rs`](programs/brot-markets/src/instructions/campaigns/open_campaign/rules.rs) | the rules of `user_open_campaign` that read no account: row 1 of TP section 3.4.10 (the kind opens in this build), the canonical arguments (D-j: a field the kin | 112 |
 
 ## `programs/brot-markets/src/instructions/entries/`
 
@@ -592,7 +594,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`entry_account.rs`](programs/brot-markets/src/instructions/entries/entry_account.rs) | the baker's `Entry` at a join: created at its canonical PDA on the first join, rent paid by the baker, and checked against the campaign, the baker and the total | 121 |
 | [`join_campaign.rs`](programs/brot-markets/src/instructions/entries/join_campaign.rs) | `user_join_campaign`: a baker joins YES or NO with at least `min_entry_lamports` while the outcome is not knowable; the entry moves from the baker's wallet into | 212 |
-| [`join_lock.rs`](programs/brot-markets/src/instructions/entries/join_lock.rs) | the join lock (BR-06) and the proximity buffer (question 7): a join is refused once the campaign's reader says the outcome is knowable (`OutcomeKnowable`), and  | 78 |
+| [`join_lock.rs`](programs/brot-markets/src/instructions/entries/join_lock.rs) | the join lock (BR-06) and the proximity buffer (question 7): a join is refused once the campaign's reader says the outcome is knowable (`OutcomeKnowable`), and  | 79 |
 | [`join_record.rs`](programs/brot-markets/src/instructions/entries/join_record.rs) | the `Join` account (`["join", campaign, baker, index]`): its creation with the baker's rent, and the checked read of one join for the refund (lane G, question 7 | 168 |
 | [`join_rules.rs`](programs/brot-markets/src/instructions/entries/join_rules.rs) | the two pure rules of a join: the campaign's own minimum entry (question 5) and the proximity buffer at the join lock (question 7). Pure, so the host tests chec | 63 |
 | [`join_tally.rs`](programs/brot-markets/src/instructions/entries/join_tally.rs) | the tally of one join (`tally_late_joins`): reads the join at its index, returns the rent to the baker and closes the account, and reports which side it was on  | 79 |
@@ -662,14 +664,21 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`cursor.rs`](programs/brot-markets/src/readers/cursor.rs) | bounds-checked little-endian reads over raw account data, for the readers. An account shorter than its layout is an error, never a panic | 100 |
 | [`damm_v2.rs`](programs/brot-markets/src/readers/damm_v2.rs) | `DammV2LockedAtLeast`: YES once a Meteora DAMM v2 pool's permanently locked liquidity reaches the target. Locking is one-way, so the fact is irreversible | 104 |
+| [`dbc_graduation.rs`](programs/brot-markets/src/readers/dbc_graduation.rs) | `DbcGraduated`: YES once a Meteora Dynamic Bonding Curve (DBC) launch completes its curve by the deadline, at the second the pool itself records. Its stage only | 166 |
 | [`epoch.rs`](programs/brot-markets/src/readers/epoch.rs) | the epoch kinds' shared rules: when the measured epoch starts, against the deadline (row 5 for `StakePoolTvlAtLeast` and `StakeAtLeast`), from the EpochSchedule | 149 |
-| [`mod.rs`](programs/brot-markets/src/readers/mod.rs) | the closed set of readers that turn an on-chain account into a YES/NO answer, and the interface each one exposes: `validate_at_creation`, `outcome_knowable`, `t | 126 |
+| [`mod.rs`](programs/brot-markets/src/readers/mod.rs) | the closed set of readers that turn an on-chain account into a YES/NO answer, and the interface each one exposes: `validate_at_creation`, `outcome_knowable`, `t | 138 |
 | [`price_touch.rs`](programs/brot-markets/src/readers/price_touch.rs) | the price kind (`PriceTouch`) at the three moments a campaign reads its feed: the opening (rows 2 to 4, and row 3 at both ends), the join lock on the sponsored  | 101 |
 | [`price_update.rs`](programs/brot-markets/src/readers/price_update.rs) | read a Pyth `PriceUpdateV2` account into the price of one named feed, checking who wrote it and how well it was verified, and derive a feed's sponsored account | 127 |
-| [`shared.rs`](programs/brot-markets/src/readers/shared.rs) | what the readers share: the outcome a reader decides and the reading behind it, the deadline test, the irreversible-fact table and row 3's minimum distance | 147 |
+| [`shared.rs`](programs/brot-markets/src/readers/shared.rs) | what the readers share: the outcome a reader decides and the reading behind it, the deadline test, the irreversible-fact table (and its row for a fact the accou | 188 |
 | [`spl_mint.rs`](programs/brot-markets/src/readers/spl_mint.rs) | `SupplyAtMost`, the burn kind: YES once a classic SPL Token mint's supply is at or below the target. An irreversible fact while the mint authority stays revoked | 136 |
 | [`stake_pool.rs`](programs/brot-markets/src/readers/stake_pool.rs) | `StakePoolTvlAtLeast`: YES if an SPL stake pool's total at the start of the measured epoch, the snapshot its first balance update of that epoch writes, reaches  | 196 |
 | [`vote_stake.rs`](programs/brot-markets/src/readers/vote_stake.rs) | `StakeAtLeast`: YES if a vote account's stake in the measured epoch, read by `sol_get_epoch_stake`, reaches the target. Closed at opening until a devnet YES | 180 |
+
+## `programs/brot-markets/src/readers/dbc_graduation/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`config.rs`](programs/brot-markets/src/readers/dbc_graduation/config.rs) | the graduation kind's `PoolConfig`, read at opening only: the account passed after the nine slots of `user_open_campaign` must be the pool's own config, priced  | 81 |
 
 ## `programs/brot-markets/src/readers/price_touch/`
 
@@ -686,7 +695,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`campaign.rs`](programs/brot-markets/src/state/campaign.rs) | `Campaign` (`["campaign", id]`): everything about one campaign, and the loaders that check it. Its vault (`["vault", campaign]`) is data-less and its bump lives | 185 |
 | [`config.rs`](programs/brot-markets/src/state/config.rs) | `GlobalConfig` (`["config"]`): roles, the pause, the creation parameters, the fee recipient and the open-campaign counter; and the creation parameters' own layo | 195 |
 | [`entry.rs`](programs/brot-markets/src/state/entry.rs) | `Entry` (`["entry", campaign, baker]`): one baker's entry in one campaign, both sides, created on the baker's first join and closed by `settle_entry` (Sprint 04 | 80 |
-| [`enums.rs`](programs/brot-markets/src/state/enums.rs) | the one-byte enums stored in accounts and passed in instruction data, with their checked conversion from a raw byte | 162 |
+| [`enums.rs`](programs/brot-markets/src/state/enums.rs) | the one-byte enums stored in accounts and passed in instruction data, with their checked conversion from a raw byte | 164 |
 | [`join.rs`](programs/brot-markets/src/state/join.rs) | `Join` (`["join", campaign, baker, index]`): one join of one baker in one campaign. One account per join, so the late-entry refund is exact with no cap on joins | 46 |
 | [`mod.rs`](programs/brot-markets/src/state/mod.rs) | the accounts the program owns: their type tags, layout version and the one loader that runs the owner, length, tag and PDA checks before any field is read | 106 |
 | [`transitions.rs`](programs/brot-markets/src/state/transitions.rs) | the transition table of TP section 3.4.2 as one function. Every instruction that moves a campaign's status calls `transition` first, so a transition outside the | 31 |
@@ -716,7 +725,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`join_host_record.rs`](programs/brot-markets/tests/join_host_record.rs) | the `Join` record's fields as the join writes them, the checked read of joins from account bytes, and the refund split of those joins against `split_late` (ques | 183 |
 | [`join_host_tally.rs`](programs/brot-markets/tests/join_host_tally.rs) | the late rule of the tally (`LateRule`): late only on a YES price campaign, at or after the proof's publish time, inclusive at the boundary. A NO price campaign | 64 |
 | [`join_layout.rs`](programs/brot-markets/tests/join_layout.rs) | the layout of the per-join account and the fields the join and the refund read from `Entry` and `Campaign` (founder decision, 2026-10-09: one `Join` per join, n | 34 |
-| [`layout.rs`](programs/brot-markets/tests/layout.rs) | pins the program's frozen interface: account and argument sizes, event sizes, the event authority, the discriminators and the enum bytes. A change here is a cha | 123 |
+| [`layout.rs`](programs/brot-markets/tests/layout.rs) | pins the program's frozen interface: account and argument sizes, event sizes, the event authority, the discriminators and the enum bytes. A change here is a cha | 124 |
 | [`math_estimate_properties.rs`](programs/brot-markets/tests/math_estimate_properties.rs) | the join's return estimate over random pots: in `Split` it is the settlement's own payout in bps and never below 10,000; in a one-sided pot it is the refund, wi | 100 |
 | [`math_fees.rs`](programs/brot-markets/tests/math_fees.rs) | the fee functions and the rounding helpers under them on the host: the TP's worked examples, the 100% ceiling, and the tight round-up over random amounts and ra | 102 |
 | [`math_opening_properties.rs`](programs/brot-markets/tests/math_opening_properties.rs) | the opening conversion and split over random dollars, prices and exponents: tight rounding toward Brot, an overflow exactly past u64, and a larger prize at 90/1 | 104 |
@@ -735,7 +744,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`math_vectors.rs`](programs/brot-markets/tests/math_vectors.rs) | the committed math vectors (X0.3, the Rust half): 12,000 rows from a fixed seed over the house fee, the creator share, the distributable pot, the split payout,  | 169 |
 | [`open_campaign_payment.rs`](programs/brot-markets/tests/open_campaign_payment.rs) | row 7 of TP section 3.4.10 on the host up to the conversion, each refusal with its own error (X0.7): who must pay, the US$ floor, the SOL/USD account derived fr | 189 |
 | [`open_campaign_rows.rs`](programs/brot-markets/tests/open_campaign_rows.rs) | rows 1, 2 and 4 of TP section 3.4.10 on the host, each refusal with its own error (X0.7): `readers::validate_at_creation` over runtime-shaped accounts holding t | 157 |
-| [`open_campaign_rules.rs`](programs/brot-markets/tests/open_campaign_rules.rs) | the rules of `user_open_campaign` that read no account, on the host: row 1 (the five kinds, `StakeAtLeast` behind its feature), the canonical arguments (D-j), t | 194 |
+| [`open_campaign_rules.rs`](programs/brot-markets/tests/open_campaign_rules.rs) | the rules of `user_open_campaign` that read no account, on the host: row 1 (the six kinds, `StakeAtLeast` behind its feature, `DbcGraduated` off mainnet), the c | 198 |
 | [`open_h_feed.rs`](programs/brot-markets/tests/open_h_feed.rs) | lane H, question 3 and question 1 (founder answers 3 and 1, 2026-10-09): the SOL/USD feed id is a compiled constant that equals the id the captured mainnet and  | 71 |
 | [`open_h_params.rs`](programs/brot-markets/tests/open_h_params.rs) | lane H, question 5 (founder answer 5, 2026-10-09): the minimum entry the campaign opens with is copied from the config at opening, and the admin range is 0.001  | 96 |
 | [`open_h_price.rs`](programs/brot-markets/tests/open_h_price.rs) | lane H, question 2 (founder answer 2, 2026-10-09): a paid opening is charged at the low end of the SOL/USD band, `price − conf`, and the campaign records that c | 135 |
@@ -748,7 +757,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`price_stale_feed.rs`](programs/brot-markets/tests/price_stale_feed.rs) | a price campaign after its proof window on the host: NO from the sponsored account, the stale-feed void (D7) at `deadline − max(max_age, 600 s)` ± 1 s, an updat | 201 |
 | [`price_target.rs`](programs/brot-markets/tests/price_target.rs) | row 3 of TP section 3.4.10 for the price kind, at both ends, on the host: a target already touched, too close to the band or out of reach is refused with its ow | 183 |
 | [`readers_damm_v2.rs`](programs/brot-markets/tests/readers_damm_v2.rs) | the locked-liquidity kind's reader (`DammV2LockedAtLeast`) on the two DAMM v2 pools captured from mainnet and on broken copies of them: the read, the saturation | 180 |
-| [`readers_epoch.rs`](programs/brot-markets/tests/readers_epoch.rs) | the epoch kinds' shared rules on the host: the first slot of an epoch against `solana-epoch-schedule` itself (the copy Mollusk carries) under warmup and normal  | 189 |
+| [`readers_dbc_opening.rs`](programs/brot-markets/tests/readers_dbc_opening.rs) | row 2 of the graduation kind (`DbcGraduated`) on the captured Meteora DBC configs: the account passed after the nine slots is missing, another pool's, another o | 131 |
+| [`readers_dbc_resolve.rs`](programs/brot-markets/tests/readers_dbc_resolve.rs) | the graduation kind's join lock and resolution (`DbcGraduated`, TP section 3.4.6's stamped row) on the captured Meteora DBC pools and on copies whose curve comp | 140 |
+| [`readers_dbc_target.rs`](programs/brot-markets/tests/readers_dbc_target.rs) | row 3 of the graduation kind (`DbcGraduated`) on the captured Meteora DBC pools: the target is the curve's threshold and nothing else, a completed curve is refu | 135 |
+| [`readers_dbc.rs`](programs/brot-markets/tests/readers_dbc.rs) | the graduation kind's pool read (`DbcGraduated`) on the Meteora DBC pools captured from mainnet, one at each stage, and on broken copies of them: the fields rea | 166 |
+| [`readers_epoch.rs`](programs/brot-markets/tests/readers_epoch.rs) | the epoch kinds' shared rules on the host: the first slot of an epoch against `solana-epoch-schedule` itself (the copy Mollusk carries) under warmup and normal  | 190 |
 | [`readers_shared.rs`](programs/brot-markets/tests/readers_shared.rs) | what the fact readers share, on its own: `fact_resolution`'s table (TP section 3.4.6), `min_distance` (row 3, C45) and `after_deadline`, with the deadline's own | 170 |
 | [`readers_spl_mint.rs`](programs/brot-markets/tests/readers_spl_mint.rs) | the burn kind's reader (`SupplyAtMost`) on the mainnet mints captured in tests/fixtures and on broken copies of them: the read, rows 2 and 3 in their order, the | 189 |
 | [`readers_stake_pool.rs`](programs/brot-markets/tests/readers_stake_pool.rs) | `StakePoolTvlAtLeast` on the captured JitoSOL and bSOL pools: the walk's values at the frozen offsets and past set options, every refusal of the bytes (owner, a | 200 |
@@ -784,11 +797,17 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`mod.rs`](programs/brot-markets/tests/common/mod.rs) | a small seeded generator for the math property tests (xorshift64*): fixed seeds, reproducible runs, no dependency; plus the checked u128 helpers the oracles use | 152 |
 | [`pots.rs`](programs/brot-markets/tests/common/pots.rs) | random `Split` pots for the property tests, and the P-2 chain that settles one (fee, creator share, distributable), shared by the payout and estimate properties | 54 |
 
+## `programs/brot-markets/tests/dbc_support/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`mod.rs`](programs/brot-markets/tests/dbc_support/mod.rs) | what the graduation kind's host tests share: the Meteora DBC pools and configs captured from mainnet (tests/fixtures, never edited), their addresses and pinned  | 116 |
+
 ## `programs/brot-markets/tests/epoch_support/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`mod.rs`](programs/brot-markets/tests/epoch_support/mod.rs) | what the epoch kinds' host tests share: the captured pools and vote account, a clock in a mainnet epoch, a `Campaign`, the reader calls and the expected outcome | 200 |
+| [`mod.rs`](programs/brot-markets/tests/epoch_support/mod.rs) | what the epoch kinds' host tests share: the captured pools and vote account, a clock in a mainnet epoch, a `Campaign`, the reader calls and the expected outcome | 201 |
 
 ## `programs/brot-markets/tests/opening_support/`
 
@@ -802,14 +821,14 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`campaign.rs`](programs/brot-markets/tests/price_support/campaign.rs) | a price campaign written in place for the host tests, and the join lock and resolution called through `readers` as the program calls them | 159 |
 | [`mod.rs`](programs/brot-markets/tests/price_support/mod.rs) | what the price kind's host tests share: the captured mainnet Pyth accounts next to the devnet ones of `opening_support`, changes to an update's fields made in m | 160 |
-| [`opening.rs`](programs/brot-markets/tests/price_support/opening.rs) | rows 2 to 4 of an opening for the price kind's host tests: `readers:: validate_at_creation` on a runtime-shaped account, with the devnet `campaign_max_age` | 53 |
+| [`opening.rs`](programs/brot-markets/tests/price_support/opening.rs) | rows 2 to 4 of an opening for the price kind's host tests: `readers:: validate_at_creation` on a runtime-shaped account, with the devnet `campaign_max_age` | 54 |
 | [`outcome.rs`](programs/brot-markets/tests/price_support/outcome.rs) | the outcomes the price kind's host tests expect from the readers: the reading behind a recorded outcome, a YES, a NO, a void and a refusal, in the readers' own  | 52 |
 
 ## `programs/brot-markets/tests/readers_support/`
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`mod.rs`](programs/brot-markets/tests/readers_support/mod.rs) | what the fact readers' host tests share: a campaign built from zeroed bytes, the reader contexts over runtime-shaped accounts (`opening_support::HostAccount`),  | 191 |
+| [`mod.rs`](programs/brot-markets/tests/readers_support/mod.rs) | what the fact readers' host tests share: a campaign built from zeroed bytes, the reader contexts over runtime-shaped accounts (`opening_support::HostAccount`),  | 192 |
 
 ## `programs/brot-markets/tests/settle_d_support/`
 
@@ -996,7 +1015,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`build-idl.ts`](scripts/build-idl.ts) | writes the brot-markets IDL with the pinned shank-cli into packages/sdk/src/idl, then renders the Codama spike client from it (T9). `bun run idl`; also the last | 59 |
 | [`bun-junit.mjs`](scripts/bun-junit.mjs) | reads the JUnit file `bun test --reporter=junit` writes: each test by name, with its body (empty when it passed, `<skipped />` when filtered out, `<failure …>`  | 18 |
-| [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party programs actually write instead of a layout someone typed f | 182 |
+| [`capture-fixtures-dbc.ts`](scripts/capture-fixtures-dbc.ts) | the Meteora Dynamic Bonding Curve (DBC) accounts the graduation kind (`DbcGraduated`) is tested on, for scripts/capture-fixtures.ts: a `VirtualPool` at each mig | 73 |
+| [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party programs actually write instead of a layout someone typed f | 185 |
 | [`checks-mutation.mjs`](scripts/checks-mutation.mjs) | the X0.9 evidence for the checks module: removes each check of programs/brot-markets/src/checks.rs and its submodules (checks/top_level.rs) in turn, rebuilds th | 199 |
 | [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns | 74 |
 | [`codama-spike.ts`](scripts/codama-spike.ts) | the Codama spike (T9): renders a Kit client from the Shank IDL of brot-markets into packages/sdk/src/idl/generated. T9, decided in Sprint 05: the generated clie | 61 |
@@ -1059,6 +1079,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`campaign.ts`](scripts/surfpool/campaign.ts) | the program's steps the price-touch run takes on a surfnet, with the test kit's builders and layouts: funded throwaway wallets, the config and the team, a free  | 111 |
+| [`dbc-graduation.ts`](scripts/surfpool/dbc-graduation.ts) | the Surfpool run of the graduation kind (`DbcGraduated`) on a real Meteora DBC curve: on a mainnet fork, a team campaign opens on a stage-0 pool priced in SOL w | 186 |
+| [`dbc.ts`](scripts/surfpool/dbc.ts) | what the graduation run needs of Meteora DBC on a surfnet: a pool and its config read through the SDK's readers, with the vaults and the base mint its swap name | 144 |
 | [`install.ts`](scripts/surfpool/install.ts) | install the brot-markets binary on a surfnet at the id the program declares, with no keypair: its ProgramData account (naming an upgrade authority the caller ho | 63 |
 | [`price-touch.ts`](scripts/surfpool/price-touch.ts) | the Surfpool run of the price reader, the criterion Sprint 01 carried to Sprint 03: on a mainnet fork, a team campaign is opened on SOL/USD's sponsored account; | 140 |
 | [`pyth-model.ts`](scripts/surfpool/pyth-model.ts) | drive Surfpool's Pyth `PriceUpdateV2` model on the upgraded receiver's accounts: read an account's fields, give the model's IDL to `rec2HH…`, and schedule overr | 177 |
@@ -1293,7 +1315,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`accounts.ts`](services/rpc/src/accounts.ts) | what an account read may return through brot-rpc (TP §3.5, by owner, since there is no list of accounts, D-i): an account owned by the program, one of the five  | 62 |
+| [`accounts.ts`](services/rpc/src/accounts.ts) | what an account read may return through brot-rpc (TP §3.5, by owner, since there is no list of accounts, D-i): an account owned by the program, one of the six r | 64 |
 | [`allowlist.ts`](services/rpc/src/allowlist.ts) | the methods brot-rpc relays and the arguments each may carry (docs/technical/relay-allowlist.md, the trace of Sprints 11 to 19; TP §3.5, §6): eleven methods, ea | 161 |
 | [`config.ts`](services/rpc/src/config.ts) | brot-rpc's settings, read from its environment only (TP §3.5, T14; Sprint 08): the upstream RPC of its own account (a secret: logs never show it), a loopback bi | 107 |
 | [`limits.ts`](services/rpc/src/limits.ts) | brot-rpc's limits (TP §3.5; Sprint 08), all in memory, none written to a disk or a log: whose request it is (Cloudflare's `cf-connecting-ip`, an IPv6 address by | 128 |
@@ -1308,7 +1330,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`gates.test.ts`](services/rpc/tests/gates.test.ts) | brot-rpc's gates on transactions and clients (Sprint 08; X1.7): a transaction carries only this program, ComputeBudget and Lighthouse at its top level, never a  | 130 |
 | [`hardening.test.ts`](services/rpc/tests/hardening.test.ts) | the fixes of the Sprint 08 security review, each tested: a hostile option value is refused, never converted (M1, L1), and any throw is a JSON-RPC error with no  | 128 |
 | [`kit.ts`](services/rpc/tests/kit.ts) | what the relay's tests share (Sprint 08): settings as the defaults give them with a fake upstream URL, a relay wired to an in-process fake upstream that records | 103 |
-| [`relay.test.ts`](services/rpc/tests/relay.test.ts) | brot-rpc's refusals and its account rule, with an in-process fake upstream (Sprint 08; X1.7): a batch, an oversized body, a method off the allowlist, a subscrip | 154 |
+| [`relay.test.ts`](services/rpc/tests/relay.test.ts) | brot-rpc's refusals and its account rule, with an in-process fake upstream (Sprint 08; X1.7): a batch, an oversized body, a method off the allowlist, a subscrip | 163 |
 
 ## `tests/`
 
@@ -1348,7 +1370,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`idl.test.ts`](tests/brot/idl.test.ts) | the drift check (X0.6): the hand-written test kit (struct layouts, events, instruction builders, error codes) against the Shank IDL that `bun run idl` writes fr | 231 |
 | [`idl.ts`](tests/brot/idl.ts) | the Shank IDL (packages/sdk/src/idl/brot_markets.json) in the test kit's terms: struct fields as layouts.ts types, enums as one byte, names as Shank writes them | 127 |
 | [`instructions-settlement.ts`](tests/brot/instructions-settlement.ts) | builders for the ten instructions of Sprint 04, with the accounts in the frozen order of programs/brot-markets/src/instructions/interface.rs. The bodies are lan | 81 |
-| [`instructions.ts`](tests/brot/instructions.ts) | builders for every instruction of the program, with the accounts in the frozen order of programs/brot-markets/src/instructions/mod.rs, and helpers that tamper w | 166 |
+| [`instructions.ts`](tests/brot/instructions.ts) | builders for every instruction of the program, with the accounts in the frozen order of programs/brot-markets/src/instructions/mod.rs, and helpers that tamper w | 170 |
 | [`invariant-checks.ts`](tests/brot/invariant-checks.ts) | the money invariants I1 to I15 (TP section 3.4.13) as small functions of the model state and the chain state. The randomized test runs them after every operatio | 208 |
 | [`invariant-harness.ts`](tests/brot/invariant-harness.ts) | the world of the randomized test: a seeded generator, the wallets, the price accounts the operations refresh, the reference model of every campaign, and the cha | 160 |
 | [`invariant-model.ts`](tests/brot/invariant-model.ts) | the reference model of one campaign's money, the state the randomized test expects the program to hold (TP sections 3.4.7, 3.4.13, 3.4.16). It sits on money-mod | 219 |
@@ -1384,7 +1406,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`opening.ts`](tests/brot/opening.ts) | what the opening's LiteSVM tests share: a world with the founder's config, one team key and a funded creator; the default opening's arguments, and the canonical | 92 |
 | [`price-proof.test.ts`](tests/brot/price-proof.test.ts) | the price kind's YES proof window in LiteSVM (TP sections 3.4.6 and 3.4.8; Q4; D7): a touch proven from any address resolves YES inside `[opens_at, deadline]` w | 143 |
 | [`price-support.ts`](tests/brot/price-support.ts) | what the price kind's LiteSVM tests share: a captured update's fields read from its bytes, a fresh address holding a price update (the YES proof slot accepts an | 53 |
-| [`program.ts`](tests/brot/program.ts) | the program's addresses for the LiteSVM tests: ids, seeds, discriminators, PDAs and the known outside accounts (Pyth, the loader). Mirrors programs/brot-markets | 128 |
+| [`program.ts`](tests/brot/program.ts) | the program's addresses for the LiteSVM tests: ids, seeds, discriminators, PDAs and the known outside accounts (Pyth, the loader). Mirrors programs/brot-markets | 140 |
+| [`readers-dbc-adversarial.test.ts`](tests/brot/readers-dbc-adversarial.test.ts) | the graduation kind (`DbcGraduated`) against the two attacks of the audit of 2026-10-12, sent to the program in LiteSVM on the Meteora DBC accounts captured fro | 141 |
+| [`readers-dbc.test.ts`](tests/brot/readers-dbc.test.ts) | the graduation kind (`DbcGraduated`) in the program, on the Meteora DBC pool and config captured from mainnet (tests/fixtures/dbc-*): a team key opens a campaig | 134 |
 | [`readers-epoch.test.ts`](tests/brot/readers-epoch.test.ts) | the two epoch kinds through the program in LiteSVM, on the captured JitoSOL pool and mainnet vote account: the stake pool opening at its edges, resolution with  | 194 |
 | [`readers-facts.test.ts`](tests/brot/readers-facts.test.ts) | the two fact readers in the program, on the mainnet accounts of tests/fixtures: a team key opens `SupplyAtMost` and `DammV2LockedAtLeast` campaigns on the real  | 199 |
 | [`readers-price.test.ts`](tests/brot/readers-price.test.ts) | the price reader on the captured mainnet accounts in LiteSVM (TP section 3.4.8): an opening checked and priced on them as captured, a campaign left on them void | 93 |
@@ -1469,31 +1493,33 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`builders.test.ts`](tests/sdk/builders.test.ts) | every builder of `@brot/sdk/tx` against the test kit's hand-written builder of the same instruction (which tests/brot/idl.test.ts checks against the IDL and eve | 110 |
 | [`contract-events.test.ts`](tests/sdk/contract-events.test.ts) | the SDK's event table and addresses against the program: each event's discriminator and size as events.rs and events/*.rs declare them, the event decoder's refu | 103 |
 | [`contract-relay.test.ts`](tests/sdk/contract-relay.test.ts) | the read half's hand-written values the relay depends on (Sprint 08), checked so they cannot drift: the two instruction discriminators of the country gate again | 30 |
-| [`contract-source.test.ts`](tests/sdk/contract-source.test.ts) | the SDK's hand-written copies of the program's contract, checked against the program's own source so they cannot drift: the error codes (and one IDL message per | 166 |
+| [`contract-source.test.ts`](tests/sdk/contract-source.test.ts) | the SDK's hand-written copies of the program's contract, checked against the program's own source so they cannot drift: the error codes (and one IDL message per | 171 |
 | [`decoder-shapes.test.ts`](tests/sdk/decoder-shapes.test.ts) | the decoder reads an inner instruction whichever way the node wrote it (Sprint 05 review, M1 and L6): compiled with indexes (`getTransaction`, `json`), partiall | 139 |
 | [`decoder.test.ts`](tests/sdk/decoder.test.ts) | the decoder rules (TP 3.4.14; proposal 2.3) on transactions sent in LiteSVM and read back in the RPC's shape: a failed transaction is skipped; only this program | 168 |
 | [`fake-rpc.ts`](tests/sdk/fake-rpc.ts) | a JSON-RPC endpoint on 127.0.0.1 backed by a LiteSVM world, so SDK functions that take an RPC URL (`recheck`, the A-3 preparation) run against the program's rea | 86 |
 | [`fake-simulate.ts`](tests/sdk/fake-simulate.ts) | the two RPC methods the A-3 preparation needs beyond reads, answered by a LiteSVM world: `getLatestBlockhash`, and `simulateTransaction` of an unsigned transact | 84 |
 | [`join-parity.test.ts`](tests/sdk/join-parity.test.ts) | `checkJoin` against `user_join_campaign` (Sprint 05 closure review: a baker's money path had no parity harness). Each case of the program's join tests that the  | 131 |
 | [`math-vectors.test.ts`](tests/sdk/math-vectors.test.ts) | X0.3, the TypeScript half, first file: every vector the program's Rust math wrote into tests/vectors/math-vectors.csv (programs/brot-markets/tests/math_vectors. | 56 |
-| [`open-parity.ts`](tests/sdk/open-parity.ts) | the parity harness of A-10 / X0.7 (SDK half): one opening fed to both `validateOpenCampaign` (from the world's accounts and clock, read before anything is sent) | 124 |
+| [`open-parity.ts`](tests/sdk/open-parity.ts) | the parity harness of A-10 / X0.7 (SDK half): one opening fed to both `validateOpenCampaign` (from the world's accounts and clock, read before anything is sent) | 133 |
 | [`points-3a.test.ts`](tests/sdk/points-3a.test.ts) | what the founder's answer 3a (2026-10-10) takes out of the leaderboard's points rule: a wallet with entries on both sides of a campaign scores nothing for it; a | 80 |
 | [`points-kit.ts`](tests/sdk/points-kit.ts) | the points rule tests' events and live accounts, shaped as the SDK decodes and the read API passes them: entries, results, finalizations and openings in chain o | 48 |
 | [`points.test.ts`](tests/sdk/points.test.ts) | the leaderboard's points rule (Sprint 13; BR-29; Q7 answered a): 1 point per campaign entered on the side that won, once the result is final; never for volume,  | 123 |
 | [`prepare-claim.test.ts`](tests/sdk/prepare-claim.test.ts) | the reserve path end to end (TP §3.4.5; TP v0.0.1 Q2, answered b): a creator share that would leave the creator's empty wallet below the rent-exempt minimum sta | 136 |
+| [`prepare-dbc.test.ts`](tests/sdk/prepare-dbc.test.ts) | the SDK on the sixth kind (`DbcGraduated`), against the program's state (LiteSVM behind a local RPC endpoint) and the Meteora DBC pool and config captured from  | 143 |
 | [`prepare-guards.test.ts`](tests/sdk/prepare-guards.test.ts) | the guards of the A-3 preparation (Sprint 05 review): a retried join that already landed is refused instead of doubled (A-9, M2); the slippage is bounded (L3);  | 109 |
 | [`prepare.test.ts`](tests/sdk/prepare.test.ts) | A-3 end to end against the program's state (LiteSVM behind a local RPC endpoint): a join and a paid opening are re-read, checked, built, summarised from the byt | 138 |
 | [`prepared.ts`](tests/sdk/prepared.ts) | `ready(prepared)` for the SDK tests: the prepared transaction when `prepareJoin` or `prepareOpenCampaign` says ready, or a failure that names the stage that sto | 18 |
 | [`program-data.test.ts`](tests/sdk/program-data.test.ts) | A-8 in the SDK: the program's last deploy read from its ProgramData account (owner first, the loader's layout, only 45 bytes), and the preparations of a join an | 116 |
 | [`recheck.test.ts`](tests/sdk/recheck.test.ts) | BR-23: `recheck(campaign, rpcUrl)` re-reads, through an RPC endpoint the caller chooses (here a local one backed by the LiteSVM world), the account and field th | 126 |
 | [`rpc-shape.ts`](tests/sdk/rpc-shape.ts) | a transaction sent in LiteSVM, returned in the shape the RPC's `getTransaction` (encoding `json`, `maxSupportedTransactionVersion: 0`) gives it, so the SDK's de | 107 |
-| [`schemas.test.ts`](tests/sdk/schemas.test.ts) | the opening's zod schema (TP Appendix B): one valid input per kind parses and converts to the SDK's `OpenArgs` the builders take; text, extra keys, numbers wher | 75 |
+| [`schemas.test.ts`](tests/sdk/schemas.test.ts) | the opening's zod schema (TP Appendix B): one valid input per kind parses and converts to the SDK's `OpenArgs` the builders take; text, extra keys, numbers wher | 86 |
 | [`shown-return.test.ts`](tests/sdk/shown-return.test.ts) | the return a screen shows is what finalize would pay if entries closed now (Sprint 13, the legal and adversarial reviews): the split's estimate when the pot wou | 98 |
 | [`snapshot-vectors.test.ts`](tests/sdk/snapshot-vectors.test.ts) | X0.3, the TypeScript half, second file: every vector of tests/vectors/snapshot-vectors.csv (programs/brot-markets/tests/math_vectors_snapshot.rs: the finalize s | 114 |
 | [`stored.test.ts`](tests/sdk/stored.test.ts) | the SDK's reading of a stored campaign (packages/sdk/src/read/math/stored.ts) against the program's own payouts in LiteSVM, on whole cycles: what each entry is  | 131 |
 | [`summary-budget.test.ts`](tests/sdk/summary-budget.test.ts) | the summary bounds what a compute budget can cost (Sprint 05 review, H1): the unit limit and price decoded, `ceil(price × limit / 10^6)` counted in what the sig | 83 |
 | [`summary-message.test.ts`](tests/sdk/summary-message.test.ts) | the summary of the bytes a wallet signs (Sprint 05 review, M5) and of what they say (M3, L1, L10): `summarizeMessage` decodes the compiled message itself, so an | 192 |
 | [`summary-shape.test.ts`](tests/sdk/summary-shape.test.ts) | the summary trusts this program's instructions only as the IDL shapes them (Sprint 05 review, L11): every instruction the SDK builds, all 22 kinds, is trusted;  | 116 |
+| [`validate-open-dbc.test.ts`](tests/sdk/validate-open-dbc.test.ts) | A-10 / X0.7 for the sixth kind (`DbcGraduated`): every refusal of its rows 2 and 3, the canonical arguments and an opening that passes, fed to both the program  | 116 |
 | [`validate-open-extra.test.ts`](tests/sdk/validate-open-extra.test.ts) | A-10 / X0.7, SDK half: the cases of the program's own tests the first parity files left out (Sprint 05 closure review), each fed to `validateOpenCampaign` and t | 91 |
 | [`validate-open-kinds.test.ts`](tests/sdk/validate-open-kinds.test.ts) | A-10 / X0.7, SDK half, for the four kinds other than the price kind: each case tests/brot/open-campaign-kinds.test.ts feeds to the program (row 1's closed `Stak | 120 |
 | [`validate-open-payment.test.ts`](tests/sdk/validate-open-payment.test.ts) | A-10 / X0.7, SDK half, for rows 7, 8 and 10: each case tests/brot/open-campaign-refuses-payment.test.ts and open-campaign-retry.test.ts feed to the program is f | 100 |

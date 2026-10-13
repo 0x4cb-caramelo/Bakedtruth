@@ -8,7 +8,13 @@
  * Sprint:  08 (indexer, API, relay and points)
  */
 import { describe, expect, test } from "bun:test";
-import { ACCOUNT_TAG, BPF_LOADER_UPGRADEABLE_ID, PROGRAM_ID, SPL_TOKEN_PROGRAM_ID } from "@brot/sdk/read";
+import {
+  ACCOUNT_TAG,
+  BPF_LOADER_UPGRADEABLE_ID,
+  DBC_PROGRAM_ID,
+  PROGRAM_ID,
+  SPL_TOKEN_PROGRAM_ID,
+} from "@brot/sdk/read";
 
 import { CODE } from "../src/relay";
 import { account, ADDR, PROGRAM_DATA, setup } from "./kit";
@@ -67,6 +73,7 @@ describe("brot-rpc's account rule and cache", () => {
     const owners: Record<string, string> = {
       a: "Fore1gnProgram11111111111111111111111111111",
       b: SPL_TOKEN_PROGRAM_ID,
+      c: DBC_PROGRAM_ID,
     };
     const r = setup({
       answer: (c) => ({
@@ -76,9 +83,11 @@ describe("brot-rpc's account rule and cache", () => {
         },
       }),
     });
-    const { json } = await r.call("getMultipleAccounts", [[ADDR, ADDR], B64]);
+    const { json } = await r.call("getMultipleAccounts", [[ADDR, ADDR, ADDR], B64]);
     expect(json.result.value[0]).toMatchObject({ owner: owners.a, data: ["", "base64"], space: 4 });
     expect(json.result.value[1]).toEqual(account(SPL_TOKEN_PROGRAM_ID));
+    // The graduation kind's pools and configs (Meteora DBC) come whole, as the other readers' accounts do.
+    expect(json.result.value[2]).toEqual(account(DBC_PROGRAM_ID));
   });
 
   test("ProgramData only as its first 45 bytes, owned by the upgradeable loader, and never cached", async () => {

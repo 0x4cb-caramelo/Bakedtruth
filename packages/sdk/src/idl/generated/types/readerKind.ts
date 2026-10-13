@@ -21,6 +21,7 @@ export enum ReaderKind {
   DammV2LockedAtLeast,
   StakePoolTvlAtLeast,
   StakeAtLeast,
+  DbcGraduated,
 }
 
 export type ReaderKindArgs = ReaderKind;

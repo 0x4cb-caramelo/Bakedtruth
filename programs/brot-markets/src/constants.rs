@@ -1,7 +1,7 @@
 //! Purpose: seeds, program ids, code ceilings and the duration and window constants compiled
 //!          into the program, with the devnet-only drill values behind the `drill` feature.
-//! Version: 0.0.4 (the event authority of the new program id; its bump is 254, as before)
-//! Sprint: 02 (pot core on Pinocchio); Sprint 03 adds the readers' programs and rules
+//! Version: 0.0.5 (Meteora DBC and the graduation kind's floor and distance)
+//! Sprint: 02 (pot core on Pinocchio); 03 adds the readers' programs and rules; DBC its own
 //!
 //! Values marked [AC] were chosen by the team where the sources give none (TP section 3.4.1,
 //! C43); the session logs of 2026-10-08 (Sprint 02) and 2026-10-09 (Sprint 03) record why. Money
@@ -109,6 +109,11 @@ pub const SPL_TOKEN_PROGRAM_ID: Address = address!("TokenkegQfeZyiNwAJbNbGKPFXCW
 pub const TOKEN_2022_PROGRAM_ID: Address = address!("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
 /// Meteora DAMM v2, owner of the locked-liquidity kind's pool.
 pub const DAMM_V2_PROGRAM_ID: Address = address!("cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG");
+/// Meteora Dynamic Bonding Curve (DBC), owner of the graduation kind's pool and of its config; the
+/// same address on mainnet and devnet.
+pub const DBC_PROGRAM_ID: Address = address!("dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN");
+/// Wrapped SOL: the graduation kind accepts only a curve whose config quotes it (M-3).
+pub const WSOL_MINT: Address = address!("So11111111111111111111111111111111111111112");
 /// SPL Stake Pool, owner of the stake-pool kind's pool.
 pub const STAKE_POOL_PROGRAM_ID: Address = address!("SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy");
 /// The Vote program, owner of the stake kind's vote account.
@@ -127,6 +132,9 @@ pub const MIN_DISTANCE_BPS_SUPPLY: u16 = 100;
 pub const MIN_DISTANCE_BPS_DAMM: u16 = 100;
 pub const MIN_DISTANCE_BPS_STAKE_POOL: u16 = 100;
 pub const MIN_DISTANCE_BPS_STAKE: u16 = 100;
+/// Row 3 of the graduation kind, in bps of the curve's threshold, not of the current value: at
+/// least 10% of it is still missing when the campaign opens (M-4, 2026-10-12).
+pub const MIN_DISTANCE_BPS_DBC: u16 = 1_000;
 /// [AC] The slowest average slot the opening assumes when it checks that the measured epoch
 /// starts before the deadline: mainnet runs near 400 ms and devnet near 235 ms.
 pub const EPOCH_START_SLOW_SLOT_MS: u64 = 500;
@@ -180,3 +188,11 @@ pub const REVIEW_WINDOW_SECONDS: i64 = 10 * 60;
 /// would close a 15-minute campaign before it opens.
 #[cfg(feature = "drill")]
 pub const ENTRY_CLOSE_MIN_SECONDS: i64 = 5 * 60;
+
+/// The smallest curve a graduation campaign may name, in lamports of its threshold (M-2,
+/// 2026-10-12): 85 SOL, the most common and the median threshold of mainnet's curves in SOL.
+#[cfg(not(feature = "drill"))]
+pub const DBC_MIN_GRADUATION_LAMPORTS: u64 = 85_000_000_000;
+/// Drill: 1 SOL, so a devnet drill can fill a curve of its own.
+#[cfg(feature = "drill")]
+pub const DBC_MIN_GRADUATION_LAMPORTS: u64 = 1_000_000_000;

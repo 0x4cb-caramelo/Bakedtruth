@@ -49,12 +49,12 @@ describe("leaderboard points rule, the founder's answer 3a", () => {
     expect(finalResults(events, new Map()).get("gone#0")?.oneSided).toBe(true);
   });
 
-  test("the creator's own wallet never scores on a burn, lock or stake campaign; on a price one it does (3a)", () => {
+  test("the creator's own wallet never scores on a burn, lock, stake or graduation campaign; on a price one it does (3a)", () => {
     expect(
       [...Object.values(ReaderKind)]
         .filter((k) => typeof k === "number")
         .map((k) => creatorCanControl(k as ReaderKind)),
-    ).toEqual([false, true, true, true, true]);
+    ).toEqual([false, true, true, true, true, true]);
     const events = [
       opened("burn", "maker", ReaderKind.SupplyAtMost),
       entry("burn", "maker", Side.Yes),

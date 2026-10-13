@@ -20,7 +20,7 @@ import { expectError, expectOk, now, send, setPriceAccount } from "./setup";
 describe("open campaign refuses", () => {
   test("row 1: a kind byte that names no reader", async () => {
     const w = await openingWorld();
-    for (const kind of [5, 255]) {
+    for (const kind of [6, 255]) {
       expectError((await tryOpen(w, w.creator, { kind })).sent, "UnknownReaderKind");
     }
   });

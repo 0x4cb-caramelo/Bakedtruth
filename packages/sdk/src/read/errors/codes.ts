@@ -150,6 +150,12 @@ export const BROT_ERROR_CODES = {
   FeedNotOnList: 6141,
   IllegalTransition: 6146,
   CutoffNotMovable: 6147,
+  // The sixth kind, `DbcGraduated` (error.rs, from 6148)
+  CurveHasTransferHook: 6148,
+  CurveConfigMismatch: 6149,
+  CurveNotInSol: 6150,
+  CurveTooSmall: 6151,
+  TargetNotThreshold: 6152,
 } as const;
 
 /** The name of a program error, as error.rs and the IDL spell it. */

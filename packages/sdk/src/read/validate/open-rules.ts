@@ -15,7 +15,7 @@ import { I128_MAX, I128_MIN, I64_MAX, I64_MIN, U64_MAX } from "../math/integers"
 /** The opening's arguments as the program receives them (`OpenCampaignArgs`), every field explicit. */
 export type OpenArgs = {
   id: bigint;
-  /** The kind byte; any value 0 to 255 can be sent, only 0 to 4 name a reader. */
+  /** The kind byte; any value 0 to 255 can be sent, only 0 to 5 name a reader. */
   kind: number;
   /** The direction byte; 0 (`Above`) for every kind but the price kind. */
   direction: number;
@@ -54,10 +54,14 @@ export function checkArgumentSizes(args: OpenArgs): void {
   if (!fits) refuse("BadInstructionData");
 }
 
-/** Row 1 (`opening_kind`): a reader's byte (`UnknownReaderKind`) that opens in this build (`ReaderKindNotOpen`). */
-export function openingKind(byte: number, stakeAtLeastOpens: boolean): ReaderKind {
+/**
+ * Row 1 (`opening_kind`): a reader's byte (`UnknownReaderKind`) that opens in this build (`ReaderKindNotOpen`):
+ * `StakeAtLeast` with its feature only, `DbcGraduated` in every build but mainnet's.
+ */
+export function openingKind(byte: number, stakeAtLeastOpens: boolean, dbcGraduatedOpens = true): ReaderKind {
   if (!(byte in ReaderKind) || typeof ReaderKind[byte] !== "string") refuse("UnknownReaderKind");
   if (byte === ReaderKind.StakeAtLeast && !stakeAtLeastOpens) refuse("ReaderKindNotOpen");
+  if (byte === ReaderKind.DbcGraduated && !dbcGraduatedOpens) refuse("ReaderKindNotOpen");
   return byte as ReaderKind;
 }
 

@@ -142,7 +142,7 @@ type Call = (Vec<u8>, Vec<Slot>);
 type Tamper = fn(&mut Call);
 const NOT_OPEN: Tamper = |c| c.1[0].2[STATUS] = Status::Settled as u8;
 const OTHER_METRIC: Tamper = |c| c.1[1].0 = key(9);
-const UNKNOWN_KIND: Tamper = |c| c.1[0].2[KIND] = 5;
+const UNKNOWN_KIND: Tamper = |c| c.1[0].2[KIND] = 6;
 
 /// The handler, on host accounts, for an `Open` supply campaign that passes, after `tampers`.
 fn resolve_with(tampers: &[Tamper]) -> ProgramResult {

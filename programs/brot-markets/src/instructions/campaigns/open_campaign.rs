@@ -1,7 +1,7 @@
 //! Purpose: `user_open_campaign`: any wallet opens a campaign of any open kind paying US$500 in
 //!          SOL at the Pyth SOL/USD price, 90% bookkept as the prize and 10% held as the opening
 //!          fee; a team key opens free with no creator share (TP section 3.4.10).
-//! Version: 0.0.5
+//! Version: 0.0.6
 //! Sprint: 02 (pot core on Pinocchio), lane D; 03 (the other four kinds, the canonical arguments,
 //!         the terms the creator saw and row 7's own codes), lane F; 04 (feed list, paid valve), lane H
 //!
@@ -11,9 +11,9 @@
 //! epoch the kind does not use, and a price feed on the compiled list (`rules`); (4) the slots (TP section 3.4.17); (5) row 8, the
 //! pause and the valve; (6) the terms the creator saw, `params_version` (`rules`); (7) row 5,
 //! 3 to 90 days for every kind, with the clock read once; (8) rows 2 to 4, and the epoch kinds'
-//! part of row 5, in the kind's reader; (9) row 7, the payment (`payment`); (10) row 10, the
-//! campaign and its vault (`create`). Then the deposit, row 6 and every other field (`record`),
-//! the count of open campaigns and the event.
+//! part of row 5, in the kind's reader, which for `DbcGraduated` also reads the account after the
+//! nine slots; (9) row 7, the payment (`payment`); (10) row 10, the campaign and its vault
+//! (`create`). Then the deposit, row 6 and every other field (`record`), the open count and the event.
 
 mod create;
 pub mod payment;
@@ -80,7 +80,7 @@ pub fn user_open_campaign(
     data: &[u8],
 ) -> ProgramResult {
     let args = args::<OpenCampaignArgs>(data)?;
-    let [creator, config, campaign, vault, metric_account, sol_usd_price, system_program, event_authority, program, ..] =
+    let [creator, config, campaign, vault, metric_account, sol_usd_price, system_program, event_authority, program, rest @ ..] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -138,18 +138,17 @@ pub fn user_open_campaign(
         epoch,
         deadline_at,
         time,
+        curve_config: rest.first(),
     };
     let reading = readers::validate_at_creation(kind, &context)?;
 
     // Row 7: what the opening pays, priced and bounded before anything is created.
     let is_team = config.is_team(creator.address());
-    let opening_usd = args.opening_usd.get();
-    let max_lamports = args.max_lamports.get();
     let payment = payment::charge(
         &params,
         is_team,
-        opening_usd,
-        max_lamports,
+        args.opening_usd.get(),
+        args.max_lamports.get(),
         sol_usd_price,
         &time,
     )?;

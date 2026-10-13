@@ -76,11 +76,14 @@ export type OpenArgs = {
   expectedParamsVersion?: number;
 };
 
-/** `user_open_campaign`. The metric and SOL/USD slots default to the sponsored accounts. */
+/**
+ * `user_open_campaign`. The metric and SOL/USD slots default to the sponsored accounts; `curveConfig`, when given,
+ * follows the nine slots read-only, as the graduation kind passes its pool's config.
+ */
 export async function openCampaignIx(
   creator: TransactionSigner,
   a: OpenArgs,
-  slots: { metric?: Address; solUsd?: Address } = {},
+  slots: { metric?: Address; solUsd?: Address; curveConfig?: Address } = {},
 ) {
   const campaign = await P.campaignPda(a.id);
   const args = encode(S.OPEN_CAMPAIGN_ARGS, {
@@ -98,6 +101,7 @@ export async function openCampaignIx(
   const accounts = [signer(creator, true), rw(await P.configPda()), rw(campaign), rw(await P.vaultPda(campaign))];
   accounts.push(ro(slots.metric ?? (await P.sponsoredPriceAccount(a.feedId))), ro(slots.solUsd ?? P.SOL_USD_ACCOUNT));
   accounts.push(ro(P.SYSTEM_PROGRAM_ID), ...eventSlots());
+  if (slots.curveConfig) accounts.push(ro(slots.curveConfig));
   return ix(accounts, data(P.IX.USER_OPEN_CAMPAIGN, args));
 }
 

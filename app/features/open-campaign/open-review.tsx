@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { shortAddress } from "@/lib/brot";
 import { CLUSTER, explorerAddress } from "@/lib/config";
 import { KIND_NAME } from "../campaign-page/copy";
-import { KIND_OF } from "../campaign-page/proof";
+import { kindOf } from "../campaign-page/proof";
 import { local } from "../campaign-page/format";
 import { AGE_NOTICE } from "@/components/copy-site";
 import { BOX, PREVIEW, SLOTS } from "./copy";
@@ -66,7 +66,7 @@ export function OpenReview(p: {
   const { ready, choice } = p;
   // From the signed arguments only (H1): never the draft, which may have changed while this was prepared.
   const facts = reviewFacts({ choice, priceExponent: ready.check.priceExponent, metric: p.metric, names: p.names });
-  const kind = KIND_OF[choice.kind as ReaderKind];
+  const kind = kindOf(choice.kind as ReaderKind);
   const t = templateOf(kind);
   const pay = ready.check.payment;
   const free = ready.check.isTeam && choice.openingUsd === 0n;

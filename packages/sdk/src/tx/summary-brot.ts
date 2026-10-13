@@ -5,7 +5,7 @@
  *          a signer's wallet: a join names its campaign, side, amount, guards and rents; an opening names its
  *          target in the feed's units, its deadline, its creator, what it pays, the SOL price below which the
  *          payment is refused, and the terms it binds (review, M3 and L7).
- * Version: 0.1.1 (Sprint 19: the creator's share is of the entries, as the site says; "creation rules", not "terms")
+ * Version: 0.1.2 (the sixth kind: a graduation opening's one read-only config after the listed accounts, named)
  * Sprint:  05 (SDK)
  *
  * The context (the campaign a join points at; an opening's price exponent and terms) is what the screen read
@@ -53,16 +53,30 @@ const ROLES: ReadonlyMap<string, readonly AccountRole[]> = new Map(
   ]),
 );
 
+/**
+ * What may follow the listed accounts: a tally's joins, plain writable; a graduation opening's pool config, alone
+ * and read-only; nothing for any other instruction.
+ */
+function extraProblem(type: B, kind: unknown, extra: readonly { role: AccountRole }[]): string | null {
+  if (type === B.UserOpenCampaign && kind === ReaderKind.DbcGraduated) {
+    const one = extra.length === 1 && extra[0].role === AccountRole.READONLY;
+    return one ? null : "a graduation opening takes one read-only config after the listed accounts";
+  }
+  if (type !== B.TallyLateJoins && extra.length > 0) return "it carries accounts the instruction does not take";
+  if (extra.some((a) => a.role !== AccountRole.WRITABLE))
+    return "an account after the listed ones is not plain writable";
+  return null;
+}
+
 /** Why `ix` is not shaped as the IDL says, or `null`. The fee payer may fill any slot as a writable signer. */
-function structureProblem(ix: Instruction, type: B, feePayer: Address | undefined): string | null {
+function structureProblem(ix: Instruction, parsed: Parsed, feePayer: Address | undefined): string | null {
+  const type = parsed.instructionType;
   if (ix.data?.length !== DATA_SIZE[type]) return "the data is not the instruction's size";
   const expected = ROLES.get(B[type]) ?? [];
   const accounts = ix.accounts ?? [];
   if (accounts.length < expected.length) return "accounts are missing";
-  const extra = accounts.slice(expected.length);
-  if (type !== B.TallyLateJoins && extra.length > 0) return "it carries accounts the instruction does not take";
-  if (extra.some((a) => a.role !== AccountRole.WRITABLE))
-    return "an account after the listed ones is not plain writable";
+  const extra = extraProblem(type, (parsed.data as { kind?: unknown }).kind, accounts.slice(expected.length));
+  if (extra) return extra;
   for (let i = 0; i < expected.length; i++) {
     const { address, role } = accounts[i];
     if (role === expected[i] || (address === feePayer && role === AccountRole.WRITABLE_SIGNER)) continue;
@@ -75,6 +89,9 @@ type Target = { kind: ReaderKind; direction: Direction; feedId: Bytes; target: b
 
 /** What a campaign reads, in words; a price target scaled by the feed's exponent when it is known. */
 function what(t: Target, metric: string, exponent: number | undefined): string {
+  if (t.kind === ReaderKind.DbcGraduated) {
+    return `DbcGraduated of Meteora curve ${metric}: YES if it completes by the deadline (threshold ${formatSol(t.target)} SOL)`;
+  }
   if (t.kind !== ReaderKind.PriceTouch) {
     const epoch =
       t.kind === ReaderKind.StakePoolTvlAtLeast || t.kind === ReaderKind.StakeAtLeast ? ` in epoch ${t.epoch}` : "";
@@ -104,15 +121,16 @@ function terms(version: number, paid: boolean, t: SummaryContext["terms"]): stri
 
 type Parsed = ReturnType<typeof parseBrotMarketsInstruction>;
 
-function describe(parsed: Parsed, ctx: SummaryContext): { text: string; lamports: bigint } {
+function describe(parsed: Parsed, ctx: SummaryContext, ix: Instruction): { text: string; lamports: bigint } {
   const d = parsed.data as Record<string, any>;
   const a = parsed.accounts as Record<string, { address: string }>;
   switch (parsed.instructionType) {
     case B.UserOpenCampaign: {
       const exponent = d.kind === ReaderKind.PriceTouch ? ctx.priceExponent : undefined;
       const paid = d.openingUsd !== 0n;
+      const curve = d.kind === ReaderKind.DbcGraduated ? ` with its curve config ${ix.accounts?.[9]?.address}` : "";
       return {
-        text: `Open campaign #${d.id} on ${what(d as Target, a.metricAccount.address, exponent)}, deadline ${formatUtc(d.deadlineAt)}; created by ${a.creator.address}, who pays ${payment(d.openingUsd, d.maxLamports)}, plus the rents of the campaign and its vault (returned at close); ${terms(d.expectedParamsVersion, paid, ctx.terms)}`,
+        text: `Open campaign #${d.id} on ${what(d as Target, a.metricAccount.address, exponent)}${curve}, deadline ${formatUtc(d.deadlineAt)}; created by ${a.creator.address}, who pays ${payment(d.openingUsd, d.maxLamports)}, plus the rents of the campaign and its vault (returned at close); ${terms(d.expectedParamsVersion, paid, ctx.terms)}`,
         lamports: paid ? d.maxLamports : 0n,
       };
     }
@@ -152,9 +170,9 @@ export function summarizeBrot(ix: Instruction, ctx: SummaryContext, feePayer?: A
   try {
     identifyBrotMarketsInstruction(ix.data ?? new Uint8Array());
     const parsed = parseBrotMarketsInstruction(ix as never);
-    const problem = structureProblem(ix, parsed.instructionType, feePayer);
+    const problem = structureProblem(ix, parsed, feePayer);
     if (problem) return refused(problem);
-    const { text, lamports } = describe(parsed, ctx);
+    const { text, lamports } = describe(parsed, ctx, ix);
     return { name: B[parsed.instructionType], text, trusted: true, lamportsAtMost: lamports };
   } catch {
     return refused("its bytes do not decode as one of the program's instructions");

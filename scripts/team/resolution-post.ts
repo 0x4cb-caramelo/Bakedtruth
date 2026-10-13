@@ -34,7 +34,7 @@ import {
 } from "@brot/sdk/read";
 
 import { valueText } from "../../app/features/campaign-page/format";
-import { KIND_OF } from "../../app/features/campaign-page/proof";
+import { kindOf } from "../../app/features/campaign-page/proof";
 import { sentenceOf } from "../../app/features/campaigns/sentence";
 import { clusterArgs, openCluster } from "../validator/clusters";
 import { runCli } from "./common";
@@ -64,7 +64,7 @@ export type PostOptions = { cluster: "devnet" | "local"; site?: string };
 export function resolutionPost(campaign: Campaign, address: string, chain: ChainTime, options: PostOptions): string {
   if (campaign.outcome === Outcome.Unresolved) throw new Error("nothing to post yet: the result has not been read");
   const view = publicState(campaign, chain);
-  const kind = KIND_OF[campaign.kind];
+  const kind = kindOf(campaign.kind);
   const sentence = sentenceOf({
     kind: ReaderKind[campaign.kind],
     direction: Direction[campaign.direction],

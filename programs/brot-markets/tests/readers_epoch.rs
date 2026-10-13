@@ -59,6 +59,7 @@ fn rule(epoch: u64, deadline: i64, time: ChainTime) -> Result<(), ProgramError> 
         epoch,
         deadline_at: deadline,
         time,
+        curve_config: None,
     })
 }
 

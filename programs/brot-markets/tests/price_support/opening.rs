@@ -37,6 +37,7 @@ pub fn open_kind(
         epoch: 0,
         deadline_at: DEADLINE,
         time,
+        curve_config: None,
     };
     validate_at_creation(kind, &context)
 }

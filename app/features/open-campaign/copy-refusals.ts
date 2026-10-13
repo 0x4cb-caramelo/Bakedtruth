@@ -5,8 +5,8 @@
  *          the program's actual errors. Row 6 has no refusal: the fees and the share are read from the program, never
  *          typed. tests/site/open-refusals.test.ts checks every error with a row has its message here, and sends each
  *          refused case straight to the program.
- * Version: 0.2.0 (the Sprint 19 copy review: the reader's own words for an account, a price target too far, plainer)
- * Sprint:  19 (site: open a campaign)
+ * Version: 0.3.0 (the sixth kind's refusals: a Meteora launch curve's own words; Sprint 19's copy review before it)
+ * Sprint:  19 (site: open a campaign); the sixth kind (`DbcGraduated`), whose box comes later
  */
 import type { BrotErrorName } from "@brot/sdk/read";
 
@@ -57,6 +57,23 @@ export const REFUSALS: Partial<Record<BrotErrorName, RefusalCopy>> = {
     "Pool not updating",
     "This stake pool stopped updating: its last update is more than one epoch old.",
   ),
+  // Row 2, a Meteora launch curve (the graduation kind).
+  CurveHasTransferHook: fixed(
+    "account",
+    "Transfer hook",
+    "This Meteora launch uses a transfer-hook token. Graduation campaigns take plain launch pools only, for now.",
+  ),
+  CurveConfigMismatch: fixed("after", "Wrong curve config", `This isn't the config this Meteora pool uses. ${RELOAD}`),
+  CurveNotInSol: fixed(
+    "account",
+    "Not priced in SOL",
+    "This launch curve is priced in another token. Graduation campaigns take curves priced in SOL only.",
+  ),
+  CurveTooSmall: fixed(
+    "account",
+    "Curve too small",
+    "This curve graduates below 85 SOL. Graduation campaigns need a curve of at least 85 SOL.",
+  ),
   // Row 3: the target.
   TargetAlreadyTouched: fixed(
     "target",
@@ -72,6 +89,11 @@ export const REFUSALS: Partial<Record<BrotErrorName, RefusalCopy>> = {
     "target",
     "Too far",
     "Too far from the price now. The target must be within ten times the price, up or down, and above zero.",
+  ),
+  TargetNotThreshold: fixed(
+    "target",
+    "Not the threshold",
+    "A graduation campaign's target is the curve's own graduation threshold, and nothing else.",
   ),
   // Row 4: the price kind's feed.
   FeedNotOnList: fixed("feed", "Feed not listed", "This feed isn't on the program's list of Pyth feeds."),

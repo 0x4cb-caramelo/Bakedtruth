@@ -2,9 +2,9 @@
  * Purpose: the join lock (BR-06) as the program applies it, for a client that wants to know whether a
  *          join can still go in: `outcomeKnowable` per kind (the price band reaching the target on the
  *          sponsored account, the supply at the target, the locked liquidity at the target, the measured
- *          epoch started) and the proximity buffer of a price campaign. Mirrors
+ *          epoch started, a DBC curve completed) and the proximity buffer of a price campaign. Mirrors
  *          programs/brot-markets/src/readers/*.rs `outcome_knowable` and instructions/entries/join_rules.rs.
- * Version: 0.1.0
+ * Version: 0.1.1 (the sixth kind's lock: the curve's stage at 1 or later)
  * Sprint:  05 (SDK)
  *
  * An unreadable metric account is a refusal with the reader's error, as at the join.
@@ -14,6 +14,7 @@ import { Direction, PRICE_RULES, ReaderKind } from "./constants";
 import type { Campaign } from "./accounts";
 import { bytesToHex } from "./bytes";
 import { readLockedLiquidity, readMint } from "./chain/accounts";
+import { curveGraduated, readCurvePool } from "./chain/dbc";
 import { bandReachesTarget, minDistance, postedWithin, publishedWithin } from "./chain/price-rules";
 import { readPriceUpdate, type PriceReading } from "./chain/price-update";
 import { i128 } from "./math/integers";
@@ -46,6 +47,8 @@ export function outcomeKnowable(campaign: Campaign, metric: FetchedAccount, chai
     case ReaderKind.StakePoolTvlAtLeast:
     case ReaderKind.StakeAtLeast:
       return chain.epoch >= campaign.epoch;
+    case ReaderKind.DbcGraduated:
+      return curveGraduated(readCurvePool(metric.owner, metric.data));
     default:
       return refuse("BadAccountData");
   }

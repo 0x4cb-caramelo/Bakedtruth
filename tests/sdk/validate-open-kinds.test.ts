@@ -60,7 +60,7 @@ describe("sdk refuses at least what the program refuses", () => {
     const w = await openingWorld();
     const vote = setFixture(w.client, "vote-mainnet-top").address;
     await parity(w, "ReaderKindNotOpen", StakeAtLeast, vote, P.SOL, { epoch: 2n });
-    for (const kind of [5, 255]) await parity(w, "UnknownReaderKind", kind, vote, P.SOL);
+    for (const kind of [6, 255]) await parity(w, "UnknownReaderKind", kind, vote, P.SOL);
     const wif = setFixture(w.client, "mint-wif").address;
     const half = WIF_SUPPLY / 2n;
     for (const over of [{ feedId: P.BTC_USD_FEED_ID }, { direction: P.Direction.Below }, { epoch: 1n }]) {
