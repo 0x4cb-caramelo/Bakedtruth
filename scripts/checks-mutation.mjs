@@ -23,18 +23,22 @@ import { junitCases, unxml } from "./bun-junit.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // checks.rs and its submodules: each `// X0.9 <id>` marker is in exactly one of them.
-const SOURCES = ["checks.rs", "checks/top_level.rs", "checks/upgrade.rs", "instructions/referral/rules.rs"].map((file) => join(ROOT, "programs/brot-markets/src", file));
+const SOURCES = ["checks.rs", "checks/top_level.rs", "checks/upgrade.rs", "instructions/referral/rules.rs", "instructions/resolution/contest_rules.rs", "instructions/resolution/contest_decision.rs"].map((file) => join(ROOT, "programs/brot-markets/src", file));
 const DEPLOY = join(ROOT, "target/deploy");
 const SO = join(DEPLOY, "brot_markets.so");
 const SAVED = join(ROOT, "target/checks-mutation/brot_markets.so");
 const JUNIT = join(ROOT, "target/checks-mutation/junit.xml");
-const RUST_TARGETS = ["checks_mollusk", "checks_mollusk_init", "referral_link", "referral_refusals"];
+const RUST_TARGETS = ["checks_mollusk", "checks_mollusk_init", "referral_link", "referral_refusals", "contest_mollusk_open", "contest_mollusk_reread", "contest_mollusk_decide"];
 const TS_FILES = [
   "tests/brot/checks.test.ts",
   "tests/brot/checks-init.test.ts",
   "tests/brot/resolve-refuses.test.ts",
   "tests/brot/referral-link.test.ts",
   "tests/brot/referral-refuses.test.ts",
+  "tests/brot/contest-open.test.ts",
+  "tests/brot/contest-reread.test.ts",
+  "tests/brot/contest-decide.test.ts",
+  "tests/brot/contest-worst-case.test.ts",
 ];
 const PATH = `${process.env.HOME}/.bun/bin:${process.env.PATH}`;
 // Mollusk and LiteSVM both run the binary this script builds; logs off and no colours to parse.
@@ -89,6 +93,22 @@ event_accounts        fail  link_refuses_wrong_event_accounts | link: a wrong ev
 event_accounts        fail  - | link: a wrong program slot
 event_program         fail  link_refuses_wrong_event_accounts | link: a wrong program slot
 event_program         keeps - | link: a wrong event authority
+contest_team_key      fail  contest_team_key_refuses_a_stranger_and_the_admin | contest opens: each refusal has its own error and writes nothing
+contest_window        fail  contest_window_refuses_a_campaign_not_in_review | contest opens: each refusal has its own error and writes nothing
+contest_window        fail  contest_window_refuses_at_the_instant_the_window_closes | -
+contest_tallied       fail  contest_tallied_refuses_while_an_entry_is_untallied | contest opens: each refusal has its own error and writes nothing
+reread_metric         fail  contest_reread_metric_refuses_another_account | contest reread: each refusal has its own error and writes nothing
+contest_status        fail  contest_status_refuses_a_campaign_not_contested | contest reread: each refusal has its own error and writes nothing
+contest_status        fail  contest_status_refuses_a_decision_on_a_campaign_not_contested | contest decide: each refusal has its own error and writes nothing
+contest_stage         fail  contest_stage_refuses_a_reread_at_stage_two | contest reread: each refusal has its own error and writes nothing
+contest_stage         fail  contest_stage_refuses_a_decision_at_stage_one | contest decide: each refusal has its own error and writes nothing
+decide_deadline       fail  decide_deadline_refuses_from_the_deadline_on | contest decide: each refusal has its own error and writes nothing
+lapse_stage           fail  lapse_stage_refuses_a_campaign_at_stage_one | contest lapse: finalize takes stage 2 from its deadline on, with the stored result, never at stage 1
+lapse_deadline        fail  lapse_deadline_refuses_one_second_before | contest worst case is 55 hours: resolution to payout, and refused one second earlier
+decide_admin          fail  decide_admin_refuses_a_team_key_and_a_stranger | contest decide: a stranger and a team key cannot decide
+decide_confirm_reason fail  decide_arguments_are_refused_each_with_its_own_error | contest decide: each refusal has its own error and writes nothing
+decide_void_reason    fail  decide_arguments_are_refused_each_with_its_own_error | contest decide: each refusal has its own error and writes nothing
+top_level             fail  - | top_level: a re-read forwarded by another program
 `;
 
 const args = process.argv.slice(2);

@@ -1,11 +1,12 @@
 //! Purpose: the transition table of TP section 3.4.2 as one function. Every instruction that moves a
 //!          campaign's status calls `transition` first, so a transition outside the table is refused
 //!          with `IllegalTransition`, and the table lives in one place.
-//! Version: 0.0.1
-//! Sprint: 04 (contract freeze)
+//! Version: 0.0.2
+//! Sprint: 04 (contract freeze); 14 (the lead's addendum, 2026-10-13: a contested campaign with no
+//!         entry leaves `Contested` straight to `Settled`, as an `InReview` one does)
 //!
-//! Sprint 14's exits from `Contested` are in the table because the table is the design; their
-//! instructions stay disabled until then (founder, 2026-10-09), so no campaign leaves `Contested`.
+//! Sprint 14's exits from `Contested` (a same re-read, the admin's decision, the stage-2 lapse) all
+//! end in the finalize snapshot, which goes to `Settled` when no entry is open.
 
 use crate::{error::BrotError, state::enums::Status};
 
@@ -21,8 +22,10 @@ pub fn transition(from: Status, to: Status) -> Result<(), BrotError> {
         | (Status::Contested, Status::Settling)
         | (Status::Contested, Status::Contested)
         // finalize_snapshot with no entry at all: nothing will ever be settled (used only there, with
-        // entries_open == 0)
+        // entries_open == 0), from the window or from a contest; without the second edge a contested
+        // campaign with no entry could never leave Contested, its prize and opening fee frozen
         | (Status::InReview, Status::Settled)
+        | (Status::Contested, Status::Settled)
         // settle_entry, the last one
         | (Status::Settling, Status::Settled) => Ok(()),
         _ => Err(BrotError::IllegalTransition),

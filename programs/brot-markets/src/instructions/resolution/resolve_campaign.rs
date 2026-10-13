@@ -44,7 +44,7 @@ pub fn resolve_campaign(
     };
     // Called from inside another program, a resolution could be wrapped by logic the
     // transaction's instruction list does not show, so no account is read before this check.
-    checks::top_level()?;
+    checks::top_level(BrotError::ResolveNotTopLevel)?;
     checks::writable(campaign)?;
     checks::event_accounts(event_authority, program, program_id)?;
 

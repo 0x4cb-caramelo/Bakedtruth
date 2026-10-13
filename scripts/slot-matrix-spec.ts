@@ -165,6 +165,9 @@ export const DISTINCT: Record<string, [string, string][]> = {
     ["feeVault", "vault"],
   ],
   SweepFees: [["feeRecipient", "feeVault"]],
+  // Sprint 14, lane L14B: the re-read and the admin's decision check their two writable slots differ first.
+  RereadCampaign: [["campaign", "config"]],
+  AdminDecideContest: [["config", "campaign"]],
 };
 
 /**
@@ -275,9 +278,6 @@ export const overrideOf = (key: string, generic: string) => OVERRIDES[key]?.expe
  * lamport. One entry per line: each lane deletes its own when it lands.
  */
 export const DISABLED: Record<string, string> = {
-  TeamOpenContest: "ContestExitDisabled",
-  RereadCampaign: "UnknownInstruction",
-  AdminDecideContest: "UnknownInstruction",
   SponsorJoinCampaign: "UnknownInstruction",
   SettleSealedFee: "UnknownInstruction",
 };
