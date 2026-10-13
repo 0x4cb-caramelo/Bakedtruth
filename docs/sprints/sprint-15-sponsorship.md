@@ -79,8 +79,8 @@ the opening, which already is the US$500 sponsorship (Sprint 02).
   someone else's campaign (P1 §3.7)? It is the only reason to keep `sponsor_add_prize`.
 - **Answered 2026-10-13 (Ronaldo):** the sealed entry's minimum is the US$500 floor, priced at the Pyth SOL/USD price with
   `max_lamports`, reusing the opening's conversion (TP §3.4.16).
-- **[Q], new 2026-10-13:** a LATE sealed entry (after the YES proof) gets its 90% back whole; is its 10% kept (today's
-  rule, pinned by a test) or refunded too?
+- **Answered 2026-10-13 (Ronaldo):** a LATE sealed entry (after the YES proof) gets its 90% back whole and Brot keeps
+  its 10% (today's rule, pinned by `tests/brot/sealed-late.test.ts`).
 - **BP-3** (P-9, open): the perks; recommended: seal, name and link for all, posts and highlight case by case.
 - **P-8** (open): whether Cloak works with SOL.
 - **L-11 and L-18** (Product Brief v0.0.1 gaps): the screens of the sealed entry and of the Cloak page.
@@ -163,7 +163,7 @@ floor priced on-chain (yes); `sponsor_add_prize` deferred (not built, nothing re
 - **Not built here:** the site's sealed-entry screens (L-11, open), the seal on cards and pages (needs the partner data
   and BP-3), the Cloak page (P-8, open), the devnet redeploy (after the merge, Ronaldo's key).
 
-**Open, with owners.** The founder: whether a late sealed entry's 10% is kept or refunded; BP-3 (perks); L-11 and L-18
+**Open, with owners.** The founder: BP-3 (perks); L-11 and L-18
 (screens); P-8 (Cloak with SOL); `sponsor_add_prize`. The lead, after the merge: the devnet redeploy with Ronaldo; the
 keeper's settlement must call `settle_sealed_fee` before `close_campaign` once the keeper (PR #88) and this sprint are
 both on `main`.

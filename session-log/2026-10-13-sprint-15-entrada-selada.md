@@ -38,6 +38,8 @@ as duas correções se juntam quando as sprints se encontrarem.
 
 ## O que fica com o fundador
 
-Se a taxa de 10% de uma entrada selada feita tarde (depois da prova do SIM) fica com o Brot ou volta (hoje fica, e os
-90% voltam inteiros); os benefícios do patrocinador (BP-3); as telas da entrada selada e da página do Cloak (L-11,
+os benefícios do patrocinador (BP-3); as telas da entrada selada e da página do Cloak (L-11,
 L-18); se o Cloak funciona com SOL (P-8); o prêmio de terceiros.
+
+**Respondido depois, no mesmo dia (Ronaldo):** a taxa de 10% de uma entrada selada feita tarde fica com o Brot; os 90%
+voltam inteiros. É a regra de hoje, presa num teste.
