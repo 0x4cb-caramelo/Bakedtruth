@@ -128,8 +128,9 @@ authority on a hardware wallet and the binary bound to its typed SHA-256; `scrip
 a Surfpool fork of mainnet (the `mainnet` build, the real Squads v4 program, real SOL/USD and mint accounts). The
 rehearsal passed end to end four times, 43 checks in 13 steps. Sources settled three steps: the first deploy cannot be a
 multisig proposal (Agave 3.1.10 refuses `DeployWithMaxDataLen` by CPI), so a hardware wallet deploys from a buffer and
-hands the upgrade authority to the Squads vault in the same session; the vault initializes the config (admin and
-`fee_recipient` are the vault); the Squads time lock is the session's last act.
+hands the upgrade authority to the Squads vault in the same session; the vault initializes the config (since M-1,
+below: the upgrade multisig's vault initializes and hands `admin` and `fee_recipient` to the admin multisig in two
+steps); the Squads time lock is the session's last act.
 
 Not rehearsed: hardware wallets (key files stood in), the real waits (the fork's clock jumps), the Squads app and CLI,
 `solana-verify` (Docker; Sprint 16's CI job), the services on mainnet, and a deploy at the real mainnet id (no keypair
@@ -141,10 +142,13 @@ Open, with owners:
   `[workspace.metadata.cli] solana = "3.1.10"` for `solana-verify`; CI's `brot_markets.mainnet.so`; a `mainnet` value
   for `KEEPER_CLUSTER`, `API_CLUSTER` and `scripts/validator/clusters.ts`, each checking the genesis hash; a
   hardware-signing path for `scripts/team`.
-- **Founder (new, from the runbook):** M-1, one multisig or two (recommended: the same three devices in two 2-of-3
-  multisigs, the locked one holding the upgrade authority and the unlocked one holding admin and fees, so a pause's
-  resume, a leaked team key's removal and keeper refills do not wait the lock); M-2, the lock (24 h proposed); M-3, the
-  four parameter proposals in `deploy/mainnet/init-params.mainnet.json`; M-4, who holds the deploy-day device, and
-  whether the first cycle includes a paid opening.
+- **Founder, answered on 2026-10-13 (Ronaldo):** M-1, **two multisigs** of the same three wallets, each 2 of 3: the
+  locked one holds the upgrade authority, the unlocked one holds `admin` and `fee_recipient`; M-2, a **24-hour** lock on
+  the upgrade multisig; M-3, the four parameters **approved as proposed** (`max_open_campaigns` 1,000,
+  `max_price_age` 60 s, `max_price_conf_bps` 50, `campaign_max_age` 30 s); M-4, **Ronaldo** holds the hardware wallet
+  on launch day, and the first mainnet cycle **includes a paid opening** of US$500 beside the team-key opening. The
+  runbook, `init-params.mainnet.json` and the scripts' defaults follow them, and the rehearsal of that path passed on
+  the fork (51 checks in 12 steps): initialization by the upgrade multisig, `admin` accepted by the admin multisig, the
+  resume at once, an upgrade held until the 24 h ran, the paid and the free campaigns settled to the SDK's amounts.
 - **Outside parties:** both audit reports (Sprint 17), the company, the lawyer's review (L0), the treasury rule (P-7),
   the paid RPC accounts and the Hermes key (D4), the three hardware wallets.
