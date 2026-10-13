@@ -11,6 +11,7 @@ import { Status, type SolanaRpc } from "@brot/sdk/read";
 
 import type { Alerter } from "./alert";
 import type { KeeperConfig } from "./config";
+import type { LandingContext } from "./landing";
 import { listCampaignsWithStatus, listOpenCampaigns } from "./campaigns";
 import { log } from "./log";
 import { appendReview } from "./review-queue";
@@ -30,6 +31,8 @@ export type StandbyDeps = {
   payer: TransactionSigner;
   secret: Uint8Array;
   alerter: Alerter;
+  /** The landing path of the watcher's resolves (never a dry run: the send gate decides). */
+  landing: LandingContext;
 };
 
 /** Runs `task` now and then every `ms`, never two at once; a throw is logged and the loop goes on. */
@@ -53,7 +56,7 @@ function every(ms: number, task: () => Promise<void>): () => void {
 }
 
 export function startStandby(deps: StandbyDeps): Standby {
-  const { config, rpc, payer, alerter } = deps;
+  const { config, rpc, alerter } = deps;
   const primaryUrl = config.primaryUrl ?? "";
   const rules = rulesOf(config);
   let watch: WatchState = INITIAL_WATCH;
@@ -65,7 +68,7 @@ export function startStandby(deps: StandbyDeps): Standby {
     intervalMs: config.watchMs,
     listOpen: () => listOpenCampaigns(rpc),
     mayResolve: mayTakeOver,
-    resolveOne: (open) => tryResolve(rpc, payer, false, open),
+    resolveOne: (open) => tryResolve(deps.landing, open),
     onAttempt: (result) => log(result.attempt, { campaign: result.campaign, detail: result.detail }),
     onError: (detail) => log("watch-error", { detail }),
   });

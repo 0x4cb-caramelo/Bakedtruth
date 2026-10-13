@@ -1,21 +1,26 @@
 /**
  * Purpose: the keeper's entry point. Reads its settings and keypair, serves /healthz on loopback (and POST /restart
- *          on the primary, when its secret is set), and runs one cycle every KEEPER_CYCLE_MS (60 s by default). A
+ *          on the primary, when its secret is set), and runs one cycle every KEEPER_CYCLE_MS (60 s by default): the
+ *          resolve task, the settlement task when KEEPER_SETTLE=on, the Pyth watch and the chain watch's alerts. A
  *          cycle that throws is logged and the loop goes on. In standby mode (KEEPER_MODE=standby) the send gate
  *          stays closed until the watchdog has taken over and the primary does not answer.
- * Version: 0.2.0
+ * Version: 0.3.0 (Sprint 07 carry-over: settlement, landing, the chain and Pyth watches)
  * Sprint:  07 (standby keeper and watchdog)
  *
  * Run: KEEPER_RPC_URL=... KEEPER_KEYPAIR=/path/outside/repo.json bun services/keeper/src/main.ts
- *      KEEPER_DRY_RUN=1 simulates and never sends.
+ *      KEEPER_DRY_RUN=1 simulates and never sends. KEEPER_SETTLE=on also finalizes, settles and pays.
  */
 import { rpcFor } from "@brot/sdk/read";
 
 import { createAlerter } from "./alert";
+import { Backoff, DailyClock } from "./backoff";
+import { createChainWatch } from "./chain-watch";
 import { loadConfig } from "./config";
-import { runCycle, errorText } from "./cycle";
+import { loadOpsConfig } from "./config-ops";
+import { runCycle, errorText, type CycleContext } from "./cycle";
 import { startHealth, type KeeperState } from "./health";
 import { log } from "./log";
+import { createPythWatch } from "./pyth-watch";
 import { handleRestart } from "./restart";
 import { setSendGate } from "./send";
 import { loadKeeperSigner } from "./signer";
@@ -23,6 +28,7 @@ import { loadRestartSecret } from "./secret";
 import { startStandby } from "./standby-loop";
 
 const config = loadConfig();
+const ops = loadOpsConfig();
 const payer = await loadKeeperSigner(config.keypairPath);
 const rpc = rpcFor(config.rpcUrl);
 const rpcB = config.rpcUrlB ? rpcFor(config.rpcUrlB) : null;
@@ -34,6 +40,20 @@ const state: KeeperState = {
   cycles: 0,
   last: null,
   lastError: null,
+  mode: config.mode,
+  settle: ops.settle ? "on" : "off",
+};
+const landing = { rpc, payer, fees: ops.fees, batchMax: ops.batchMax };
+const cycle: CycleContext = {
+  landing,
+  settle: {
+    enabled: ops.settle,
+    backoff: new Backoff(config.cycleMs),
+    claims: new DailyClock(),
+    sweepMinLamports: ops.sweepMinLamports,
+  },
+  watch: createChainWatch(alerter, ops.thresholds, ops.idle),
+  pyth: createPythWatch(config.cluster, alerter),
 };
 
 const restart =
@@ -48,13 +68,19 @@ log("start", {
   keeper: payer.address,
   cycleMs: config.cycleMs,
   dryRun: config.dryRun,
+  settle: ops.settle,
+  batchMax: ops.batchMax,
+  priorityFee: { floor: ops.fees.floor.toString(), ceiling: ops.fees.ceiling.toString() },
   health: `${config.healthHost}:${config.healthPort}`,
   restartEndpoint: restart !== undefined,
   secondRead: rpcB !== null,
+  secondReadOrigin: config.rpcUrlB ? new URL(config.rpcUrlB).origin : null,
 });
 
 const standby =
-  config.mode === "standby" && secret ? startStandby({ config, rpc, rpcB, payer, secret, alerter }) : null;
+  config.mode === "standby" && secret
+    ? startStandby({ config, rpc, rpcB, payer, secret, alerter, landing: { ...landing, dryRun: false } })
+    : null;
 const allowed = () => (standby ? standby.mayTakeOver() : true);
 setSendGate(allowed);
 
@@ -68,10 +94,11 @@ process.on("SIGINT", stop);
 for (;;) {
   const started = Date.now();
   try {
-    state.last = await runCycle(rpc, payer, config.dryRun || !allowed());
+    state.last = await runCycle(cycle, config.dryRun || !allowed());
     state.lastError = null;
     state.cycles++;
-    log("cycle", { openCampaigns: state.last.openCampaigns, counts: state.last.counts, ms: state.last.durationMs });
+    const { counts, settle, skipped, durationMs } = state.last;
+    log("cycle", { openCampaigns: state.last.openCampaigns, counts, skipped, settle, ms: durationMs });
     if (BigInt(state.last.keeperLamports) < config.solFloorLamports) {
       alerter.alert("keeper_sol_low", "keeper", { lamports: Number(state.last.keeperLamports) });
     }

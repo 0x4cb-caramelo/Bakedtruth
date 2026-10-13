@@ -3,18 +3,26 @@
  *          window, so a stuck condition does not flood the log. Email is not wired: the provider is a founder
  *          decision (D4), so today the only transport is the journal, and every line says so. Detail values are
  *          the caller's to choose; a detail key that names a secret, a token or a URL is refused by name, never echoed.
- * Version: 0.1.0
+ * Version: 0.2.0 (Sprint 07 carry-over: the chain-watch, exposure, team-opening, Pyth and second-read kinds)
  * Sprint:  07 (standby keeper and watchdog)
  */
 
+/** Each kind has its runbook in deploy/vps/runbooks/ (the index is runbooks/README.md). */
 export type AlertKind =
   | "primary_down"
   | "standby_took_over"
   | "keeper_sol_low"
   | "met_late_no"
   | "second_read_mismatch"
+  | "second_read_unchecked"
   | "campaign_idle"
   | "open_campaigns_high"
+  | "openings_per_hour_high"
+  | "team_key_opening"
+  | "exposure_high"
+  | "reserved_credit_old"
+  | "sol_usd_stale"
+  | "pyth_program_changed"
   | "restart_requested"
   | "restart_failed";
 
