@@ -1,6 +1,6 @@
 # Sprint 16 — Hardening (multisig, pause, incident plan, creation rules frozen)
 
-**Status:** planned · **Branch:** `sprint-16-hardening` · **Dates:** none, by the founder's decision
+**Status:** in progress; the CI and supply-chain items are built (2026-10-13); the rest waits for Sprints 14 and 15, the founder and the hardware multisig (see "Record") · **Branch:** `sprint-16-hardening` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -150,4 +150,25 @@ From Sprint 01's review of the price reader (`knowledge-base/tecnologia/pyth-lei
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+**2026-10-13, the CI and supply-chain items (lane L16).** Built: `solana-verify build` twice from clean, in the image
+pinned by digest, compared byte for byte with each other and with the tested binaries; every downloaded tool pinned by
+SHA-256 (`scripts/ci/install-pinned.sh`); the publishing build without cache; the `mainnet` variant published apart as
+`programs-mainnet-<sha>` with its own IDL copy and `SHA256SUMS`, built with the same feature list the T12 tests use;
+gitleaks backing the secret scan; `CODEOWNERS`; the registry check on `bun.lock`; `[workspace.metadata.cli]` in
+`Cargo.toml`. Checked locally: shellcheck, actionlint, the pinned installs (a wrong pin, a tampered cache and a wrong
+version each fail), a local build byte-identical to CI's artifact of run 38352871035, the T12 tests on the mainnet
+binary (and failing on a drill build), gitleaks over the 510 commits of history (clean). What only CI proves is in
+`docs/technical/verifiable-build.md`; the first run on the branch is 38368538751.
+
+**Blocked by the founder:** the provenance attestation (`actions/attest-build-provenance`) needs a public repository or
+an Enterprise Cloud organisation; options: (a) make the repository public before mainnet, which `verify-from-repo` needs
+anyway (recommended), (b) GitHub Pro (branch protection and CODEOWNERS, no attestation), (c) an Enterprise
+organisation, (d) stay as is. Branch protection on `main` follows the same choice.
+
+**Still to build here, after Sprints 14 and 15:** the pause (I10′) with every instruction; the exposure alert, the
+80% alert and the team-key opening alert under test (the keeper lane is building them); `content/powers.md` (needs the
+founders' second review); the incident plan and its page; where each key lives and how to rotate it; the mainnet
+parameters (proposed in `deploy/mainnet/init-params.mainnet.json`, PR #85); a mainnet program id per cluster; the
+pre-freeze fixes the audit package found (`docs/audit/SCOPE.md` §17); then the release candidate's tag (the founder's
+go-ahead). **Outside parties:** the three signers' written agreement and three hardware wallets, hardware second
+factors on the domain, Cloudflare, the server and GitHub.

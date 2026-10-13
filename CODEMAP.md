@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **939** |
+| Arquivos mapeados | **951** |
 | Acima de 200 linhas | **42** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -1028,7 +1028,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`capture-fixtures-dbc.ts`](scripts/capture-fixtures-dbc.ts) | the Meteora Dynamic Bonding Curve (DBC) accounts the graduation kind (`DbcGraduated`) is tested on, for scripts/capture-fixtures.ts: a `VirtualPool` at each mig | 73 |
 | [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party programs actually write instead of a layout someone typed f | 185 |
 | [`checks-mutation.mjs`](scripts/checks-mutation.mjs) | the X0.9 evidence for the checks module: removes each check of programs/brot-markets/src/checks.rs and its submodules (checks/top_level.rs) in turn, rebuilds th | 199 |
-| [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns | 74 |
+| [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns, | 98 |
 | [`codama-spike.ts`](scripts/codama-spike.ts) | the Codama spike (T9): renders a Kit client from the Shank IDL of brot-markets into packages/sdk/src/idl/generated. T9, decided in Sprint 05: the generated clie | 61 |
 | [`codemap.js`](scripts/codemap.js) | let an AI locate the right file without reading every file. Pairs with the 200-line limit in .claude/rules/code-style.md — small files plus a one-line index mea | 223 |
 | [`detach-os.ps1`](scripts/detach-os.ps1) | detach-os.ps1 — desconecta seu projeto do repositório AI Dev Operating System | 161 |
@@ -1061,6 +1061,23 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`sync-selfhosted.js`](scripts/sync-selfhosted.js) | keep a local, navigable mirror of the full self-hosted catalogue so the WIZARD (stage 4.2) can offer self-hosted alternatives without a network call | 349 |
 | [`tokenomics-model.ts`](scripts/tokenomics-model.ts) | Quantitative model behind ECONOMICS.md: protocol fees, revenue split, staker yield, the token unlock curve and the | 584 |
 | [`void-log-schema.ts`](scripts/void-log-schema.ts) | writes content/void-log/record.schema.json, the JSON Schema of a void-log record, from the zod schema in packages/sdk/src/schemas/void-log.ts (Sprint 12: the re | 33 |
+
+## `scripts/ci/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`artifact-layout.ts`](scripts/ci/artifact-layout.ts) | proves the folders CI publishes are what the deploy scripts read (Sprint 16): `programs/` passes verifyArtifactDir of scripts/deploy/checks.ts, the devnet deplo | 49 |
+| [`assemble-artifacts.sh`](scripts/ci/assemble-artifacts.sh) | lays out the two program artifacts CI publishes from main (Sprint 16): `programs/` is exactly what scripts/deploy/artifact.ts expects (brot_markets.so, brot_mar | 53 |
+| [`compare-builds.sh`](scripts/ci/compare-builds.sh) | the reproducibility gate of the verifiable build (Sprint 16): two clean builds of the commit, made on two runners by scripts/ci/verifiable-build.sh, must be byt | 55 |
+| [`file-rules.js`](scripts/ci/file-rules.js) | beyond the commit hook's list (.env, keypair JSON, .pem, .key, .p12, .pfx), refuse Android and Java key stores, compiled binaries and archives by name, and any  | 47 |
+| [`gitleaks.js`](scripts/ci/gitleaks.js) | gitleaks (the version scripts/ci/pins.sh pins) with the repository's .gitleaks.toml, over `<base>..HEAD` without merges, the commits scripts/ci-secret-scan.js w | 73 |
+| [`install-pinned.sh`](scripts/ci/install-pinned.sh) | install one tool CI downloads, pinned by version and SHA-256 (scripts/ci/pins.sh): the download lands in a new empty folder, its hash is checked before anything | 165 |
+| [`lockfile-registry.js`](scripts/ci/lockfile-registry.js) | T15 moved bun.lock off registry.npmmirror.com at the opening of Sprint 02; this keeps it there, and holds the React Native check's lockfile to the same rule. bu | 126 |
+| [`lockfile-registry.test.js`](scripts/ci/lockfile-registry.test.js) | shows the check accepts what this repository's lockfiles hold (npmjs.org entries, workspaces, an empty URL under a pinned bunfig.toml) and refuses a mirror, a g | 67 |
+| [`pins.sh`](scripts/ci/pins.sh) | every tool CI downloads, pinned by version, URL and SHA-256, in one place. Sourced by scripts/ci/install-pinned.sh and scripts/ci/verifiable-build.sh. docs/tech | 60 |
+| [`secret-scan.test.js`](scripts/ci/secret-scan.test.js) | shows each new check of scripts/ci-secret-scan.js catches what it is for and lets through what this repository holds on purpose (signatures in session logs, sha | 156 |
+| [`solana-keys.js`](scripts/ci/solana-keys.js) | a Solana keypair is 64 bytes, a 32-byte seed and then the ed25519 public key of that seed. This decodes every 64-byte value the added lines hold (base58, hex, b | 103 |
+| [`verifiable-build.sh`](scripts/ci/verifiable-build.sh) | the verifiable build of brot-markets (Sprint 16): `solana-verify build` in the image pinned by digest (scripts/ci/pins.sh), once its Solana CLI and platform-too | 81 |
 
 ## `scripts/deploy/`
 

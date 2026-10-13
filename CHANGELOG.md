@@ -27,6 +27,18 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **Sprint 16, a integridade da versão no CI** (branch `sprint-16-hardening`, 13/10/2026;
+  `docs/technical/verifiable-build.md`). Toda ferramenta que o CI baixa é fixada pelo SHA-256 e instalada por um script
+  só (`scripts/ci/install-pinned.sh`): a CLI da Solana e as platform-tools, o Bun, o Node, o gitleaks e o binário do
+  `solana-verify` 0.5.2; o `setup-bun` e o `setup-node` saíram. O `solana-verify build` roda duas vezes do zero, na
+  imagem do Docker fixada pelo digest, e o CI falha se os dois hashes e os binários testados não forem iguais byte a
+  byte; o binário do devnet publicado no `programs-<sha>` passa a sair desse build. O build `mainnet` sai num artefato
+  à parte, `programs-mainnet-<sha>`, com a mesma lista de recursos que os testes do T12 usam. O gitleaks reforça a
+  varredura de segredos (chaves da Solana em JSON e em base58, URLs com chave, segredos em hex, keystores); um
+  `CODEOWNERS` cobre o `.github/`, a varredura e os hooks; uma checagem recusa no `bun.lock` qualquer registro que não
+  seja o npmjs.org. A atestação de origem não sai: o GitHub só a oferece a repositórios públicos ou a organizações
+  pagas, e isso é decisão do fundador.
+
 - **A curva da graduação pelo ticker, e os botões SIM e NÃO limpos** (branch `feat/curve-ticker-side-buttons`,
   13/10/2026; `session-log/2026-10-13-ticker-da-curva-e-botoes-de-lado.md`). Responde ao nome legível que o registro
   do upgrade deixou em aberto, pelo caminho que muda a A-11, aprovado pelo fundador, o Lucas, no mesmo dia.
