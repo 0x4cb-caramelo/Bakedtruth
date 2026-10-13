@@ -65,7 +65,8 @@ pub fn team_open_contest(
     )?;
     require_tallied(stored.entries_untallied.get())?;
 
-    transition(Status::InReview, Status::Contested)?;
+    // From the stored status, so the table refuses on its own whatever the window check let through.
+    transition(Status::try_from(stored.status)?, Status::Contested)?;
     let ends_at = time
         .unix_timestamp
         .checked_add(CONTEST_STAGE1_SECONDS)
