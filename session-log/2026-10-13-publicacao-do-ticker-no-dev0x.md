@@ -139,3 +139,47 @@ Depois do histórico, o passo seguinte da lista era este erro.
   por isso. Foi trocado pelo do CI da `main` em `df09357` (execução 38346226973, sha256 conferido pelo `SHA256SUMS`, o
   mesmo `63610a32…d7e4` do devnet). O antigo ficou guardado fora do repositório.
 - **Vale no ar só na próxima versão publicada,** como a correção do histórico.
+
+## A segunda publicação: as duas correções no ar
+
+O Ronaldo respondeu "merge 81, 82 and 83, then publish the new main".
+
+- **As mesclas,** na ordem em que as branches se empilhavam, cada uma presa à ponta testada (`--match-head-commit`):
+  - o #81 às 05h27min35s UTC (`a0dcf2208c1d`);
+  - o #82 às 05h28min01s (`8981cf14b414`);
+  - o #83 às 05h31min17s, depois do CI dele verde nos quatro trabalhos (`353c2a3a1b90`).
+
+  A árvore da `main` em `353c2a3a1b90` é idêntica à da ponta do #83, que o CI testou inteira. O CI da própria `main`
+  nesse commit (execução 38351814128) também passou nos quatro trabalhos; a execução do #82 foi cancelada pela do
+  #83, que veio logo depois.
+- **A versão:** `git archive` da `main` em `353c2a3a1b90`, sha256
+  `7a1c0a48a0afda049cb726facef9df0aedc47e5ecd91b2fd6a454d1b6b66ae50`, conferido no servidor. Entre a versão no ar
+  (`df09357435d5`) e ela, nada mudou nas unidades, nas configurações, nas dependências nem no programa: só o código do
+  site e da API, testes e documentos.
+- **O build,** montado ao lado do atual de 05h32min06s a 05h32min44s UTC: "A-8: this build is for the program deploy
+  at slot 510454676", build `K5nJXciPK1w7nNmCmaHcH`.
+- **Testado na porta 4239** antes da troca, com o usuário e as restrições do site:
+  - as oito páginas responderam 200, com o `x-robots-tag`;
+  - o HTML do servidor já diz "Connect", e não "No installed wallet found";
+  - pelo túnel, num navegador sem tela, `/dev0x`, a página da campanha e `/fees` não deram nenhum erro de página;
+  - "Connect" abre a lista, com "Solflare: Ready" e "Phantom: Not installed".
+- **A troca:** `current` passou para `releases/353c2a3a1b90`, e `brot-api` e `brot-site` foram reiniciados às
+  05h33min49s UTC. A API disse `ok` em dois segundos.
+- **O ranking depois do reinício,** pelo log da API: 7, 7, 16, 22, 32, 35, 43, 48 e 53 eventos, uma rodada a cada 15
+  segundos. Ficou completo às 05h35min56s, 2min07s depois do reinício, com 53 eventos e nenhuma transação pulada.
+  Antes da troca eram 20 eventos e 40 puladas. O ranking no ar lista 7 carteiras.
+- **Conferido de fora:**
+  - a landing, `/dev0x` (com o `x-robots-tag`), a saúde da API (`ok`), `/prototype/` e a campanha de demonstração
+    respondem;
+  - o HTML no ar traz o build novo;
+  - num navegador sem tela, `/dev0x`, a página da campanha e `/fees` no ar não dão o #418. Os únicos erros são os dois
+    de sempre: a folha da Google e o script da Cloudflare, bloqueados pela política do site;
+  - a campanha de demonstração, a 1280 e a 412 px, mostra o título com `$BROT`, os botões limpos e o painel de entrada
+    aceitando entradas, já na primeira visita depois do reinício.
+- **O que deu errado:** a primeira tentativa de mesclar o #82 foi recusada. Eu passei ao `--match-head-commit` um hash
+  completo que eu tinha estendido a partir dos doze primeiros caracteres, e ele não batia. A trava fez o trabalho dela:
+  li o hash exato do PR, que era o commit testado aqui, e mesclei.
+- **Para voltar atrás:** apontar `current` para `releases/df09357435d5` e reiniciar `brot-api` e `brot-site`. Essa
+  versão foi construída para o mesmo slot, mas volta a ter os dois defeitos.
+- **Ficaram no servidor** as versões `df09357435d5` e `570fa306b4d3`, o pacote em `/tmp/brot-353c2a3a1b90.tar.gz` e os
+  logs da instalação e do build na pasta do `ronaldo`.
