@@ -27,6 +27,16 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **Sprint 08, a terceira fatia do indexador** (branch `sprint-08-indexer`, PR #72, 13/10/2026; construída e testada,
+  não implantada; o registro em `docs/sprints/sprint-08-indexer-api-points.md`). A ordem da página inicial calculada
+  no indexador e servida em `/api/v1/ranking` (X1.9); os KPIs e o relatório do parceiro sem endereço nenhum; o
+  `content/partners.json` vazio com o esquema gerado do zod do SDK e a checagem de todo arquivo de conteúdo no CI; os
+  pontos iguais aos do SDK em toda regra 3a; o `feed_history` gravado; o `logsSubscribe` só para acordar a ingestão
+  (o teste achou que o Kit 8.4 não avisa quando o nó fecha o socket); o alerta da entrada da carteira de quem abriu numa
+  campanha que ele pode mover; os DTOs em zod da API e os campos `program_last_deploy_slot` e `entries_allowed` no
+  `/api/v1/health`; a unidade `brot-indexer.service`, escrita e não instalada; o limite do faucet do devnet (2 pedidos a
+  cada 8 horas); a revisão de privacidade das nove perguntas.
+
 - **A curva da graduação pelo ticker, e os botões SIM e NÃO limpos** (branch `feat/curve-ticker-side-buttons`,
   13/10/2026; `session-log/2026-10-13-ticker-da-curva-e-botoes-de-lado.md`). Responde ao nome legível que o registro
   do upgrade deixou em aberto, pelo caminho que muda a A-11, aprovado pelo fundador, o Lucas, no mesmo dia.
