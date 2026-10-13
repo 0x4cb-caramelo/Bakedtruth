@@ -1,10 +1,11 @@
 /**
  * Purpose: `reread_campaign`, stage 1 of a contest (TP §3.4.7): any wallet (here your own key from TEAM_KEYPAIR, as
  *          the keeper would) runs the campaign's reading again now and the program compares it exactly with the
- *          stored result. The same reading pays out at once with the stored result; a different one, or a reader that
- *          cannot decide now, opens stage 2: 48 hours for the admin (decide.ts). It never writes a new result.
- * Version: 0.1.0
- * Sprint:  14 (the two-stage dispute; lane INV14)
+ *          stored result. The same reading pays out with the stored result, but only from stage 1's deadline on, 24
+ *          hours after the contest opened (`RereadBeforeTimelock` before it, D2); a different one, or a reader that
+ *          cannot decide now, opens stage 2 at once: 48 hours for the admin (decide.ts). It never writes a new result.
+ * Version: 0.2.0 (the founder's answer to D2: the matching re-read's 24-hour wait)
+ * Sprint:  14 (the two-stage dispute; lane INV14; lane L14B, D2)
  *
  * A price campaign inside its proof window (up to the deadline + 60 s) reads only a YES proof: pass one with
  * --proof (any fully verified account of the feed); after it, the sponsored account alone is read.
@@ -27,7 +28,7 @@ export async function reread(ctx: TeamContext, campaign: Address, proof?: Addres
   console.log(`campaign #${c.id}: ${Status[c.status]}, ${ContestStage[c.contestStage]}; stored ${stored}`);
   if (c.status !== Status.Contested || c.contestStage !== ContestStage.Stage1) {
     console.log("note: only a contest at stage 1 is re-read (NotContested or WrongContestStage otherwise)");
-  }
+  } else console.log(`stage 1's deadline ${c.contestEndsAt}: the same reading pays only from it on`);
   const ix = await buildRereadCampaign({ campaign, metricAccount: c.metricAccount, proofAccount: proof });
   const result = await act(ctx, "reread_campaign", [ix]);
   const reread = result.sent?.events.find((e) => e.name === "CampaignReread")?.data as

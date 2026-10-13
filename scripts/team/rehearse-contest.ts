@@ -1,10 +1,12 @@
 /**
  * Purpose: the contest's part of the team rehearsal (Sprint 14; TP §3.4.7), on the local offline surfnet of
- *          rehearse.ts: a team key contests a YES in review, and a re-read of the same reading pays at once; a contest
- *          whose reading moved (more tokens burned after the YES) goes to stage 2, where a team key cannot decide and
- *          the admin confirms; another the admin voids, with its record, whose SHA-256 is the note hash on-chain.
- * Version: 0.1.0
- * Sprint:  14 (the two-stage dispute; lane INV14)
+ *          rehearse.ts: a team key contests a YES in review; a re-read of the same reading is refused during stage 1's
+ *          24 hours (`RereadBeforeTimelock`) and pays once the cluster's clock is past them (D2); a contest whose
+ *          reading moved (more tokens burned after the YES) goes to stage 2, where a team key cannot decide and the
+ *          admin confirms; another a team key sends to stage 2 itself (D2, once only), and the admin voids it, with its
+ *          record, whose SHA-256 is the note hash on-chain.
+ * Version: 0.2.0 (the founder's answer to D2: stage 1's wait and the team's escalation)
+ * Sprint:  14 (the two-stage dispute; lane INV14; lane L14B, D2)
  */
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -15,7 +17,7 @@ import { ContestStage, Outcome, Status, bytesToHex, decodeCampaign } from "@brot
 import { buildResolveCampaign } from "@brot/sdk/tx";
 
 import { check } from "../devnet";
-import { account, expectOk, send, type Rpc } from "../validator/rpc";
+import { account, clock, expectOk, send, type Rpc } from "../validator/rpc";
 import { burnIx } from "../validator/spl-token";
 import type { TeamContext } from "./common";
 import { contest } from "./contest";
@@ -47,6 +49,15 @@ async function refusedBefore(label: string, attempt: () => Promise<unknown>) {
   check(error !== null, `${label}: refused before anything is built (${error?.message})`);
 }
 
+/** The act's simulation is refused with `error`, so nothing is sent. */
+async function refusedWith(label: string, error: string, attempt: () => Promise<unknown>) {
+  const thrown = await attempt().then(
+    () => null,
+    (e: Error) => e,
+  );
+  check(thrown?.message.includes(`(${error})`) === true, `${label}: refused, ${thrown?.message}`);
+}
+
 export async function rehearseContest(
   rpc: Rpc,
   r: Roles,
@@ -56,11 +67,19 @@ export async function rehearseContest(
 ) {
   const state = async (c: Burn) => decodeCampaign((await account(rpc, c.campaign))!);
 
-  console.log("\n▸ contest: the same reading, re-read by any wallet, pays at once with the stored result");
+  console.log(
+    "\n▸ contest: the same reading, re-read by any wallet, pays with the stored result after stage 1's 24 hours",
+  );
   const same = await open("+5d");
   await contested(rpc, r, holder, same);
+  await refusedWith("the same reading during stage 1", "RereadBeforeTimelock", () =>
+    reread(r.ctxOf(holder), same.campaign),
+  );
+  const ends = (await state(same)).contestEndsAt;
+  await rpc.call("surfnet_timeTravel", [{ absoluteTimestamp: Number(ends + 5n) * 1000 }]);
+  check((await clock(rpc)).unixTimestamp >= ends, "the cluster's clock is past stage 1's deadline");
   const paid = await reread(r.ctxOf(holder), same.campaign);
-  check(names(paid.sent) === "CampaignReread,CampaignFinalized", "re-read: the same reading, finalized at once");
+  check(names(paid.sent) === "CampaignReread,CampaignFinalized", "re-read: the same reading, finalized after the wait");
   const settled = await state(same);
   check(settled.status >= Status.Settling && settled.outcome === Outcome.Yes, "the stored YES stands, never rewritten");
 
@@ -78,11 +97,13 @@ export async function rehearseContest(
   check(names(confirmed.sent) === "ContestClosed,CampaignFinalized", "the admin confirmed: the stored YES stands");
   check((await state(moved)).outcome === Outcome.Yes, "a confirm never inverts the outcome");
 
-  console.log("\n▸ contest: the admin voids at stage 2, the record's hash on-chain");
+  console.log("\n▸ contest: a team key sends it to stage 2 itself, and the admin voids, the record's hash on-chain");
   const voided = await open("+5d");
   await contested(rpc, r, holder, voided);
-  await burn(rpc, holder, voided, 5_000n);
-  check(names((await reread(r.ctxOf(holder), voided.campaign)).sent) === "CampaignReread", "stage 2 again");
+  const sentOn = await contest(r.ctxOf(r.team), voided.campaign);
+  check(names(sentOn.sent) === "ContestOpened", "a team key's escalation during stage 1 (ContestOpened)");
+  check((await state(voided)).contestStage === ContestStage.Stage2, "stage 2: the admin has 48 hours");
+  await refusedWith("a second escalation", "WrongContestStage", () => contest(r.ctxOf(r.team), voided.campaign));
   const text = "The token's supply was moved by its issuer during the review.";
   const decided = await decide(r.ctxOf(r.admin), voided.campaign, "Void", "TeamOutsideCause", text, logDir);
   const event = decided.sent?.events.find((e) => e.name === "ContestClosed")?.data as unknown as

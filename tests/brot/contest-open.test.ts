@@ -1,9 +1,10 @@
 /**
  * Purpose: `team_open_contest` on the binary (Sprint 14, lane L14B): a team key contests a result inside its window,
- *          stage 1 starts for an hour, and `ContestOpened` decodes through the SDK; each refusal with its own error
- *          and nothing written; the pause never blocks it; and while a campaign is contested, at either stage, no
- *          payout instruction moves a lamport. Filter: `bun test tests/ -t "contest opens"`.
- * Version: 0.1.0
+ *          stage 1 starts for 24 hours (D2), and `ContestOpened` decodes through the SDK; each refusal with its own
+ *          error and nothing written (the same call on a contest is the escalation: contest-escalate.test.ts); the
+ *          pause never blocks it; and while a campaign is contested, at either stage, no payout instruction moves a
+ *          lamport. Filter: `bun test tests/ -t "contest opens"`.
+ * Version: 0.1.1 (D2: stage 1's 24 hours)
  * Sprint:  14 (lane L14B). Needs target/deploy/brot_markets.so.
  */
 import { describe, expect, test } from "bun:test";
