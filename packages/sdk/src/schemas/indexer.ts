@@ -6,8 +6,10 @@
  *          conventions: amounts as lamport strings, addresses base58, slots and times as decimal strings (Unix
  *          seconds, UTC), every answer with `as_of_slot` and `chain_time`, errors as `{ error: { code, message } }`.
  *          A campaign is its address plus its `opening` (1, 2…): a closed campaign's address can carry a new one.
- *          Since slice 3, the home page's order (`/api/v1/ranking`).
- * Version: 0.2.0 (the ranking)
+ *          Since slice 3, the home page's order (`/api/v1/ranking`); a campaign's activity and chance and a wallet's
+ *          entries come in pages, each answer with `next_before` (the `?before=` of the page before it, or null on the
+ *          last page): a campaign's lists by `seq`, a wallet's rows by its first entry's place in the chain.
+ * Version: 0.3.0 (the pages' `next_before`; 0.2.0, the ranking)
  * Sprint:  08 (indexer, API, relay and points), slices 2 and 3
  */
 import { z } from "zod";
@@ -67,11 +69,20 @@ export const ActivityItemSchema = z.discriminatedUnion("type", [
 /** Every answer: the last slot the indexer has read in full, and that slot's block time. */
 const Fresh = { as_of_slot: Count, chain_time: Time };
 
+/** A campaign list's cursor: the `seq` to pass as `?before=` for the older page; null on the last page. */
+const SeqCursor = Count.nullable();
+/** A wallet list's cursor, `<slot>:<signature>:<instruction>:<inner>` of a row's first entry; null on the last page. */
+const WalletCursor = z
+  .string()
+  .regex(/^\d{1,15}:[1-9A-HJ-NP-Za-km-z]{64,88}:\d{1,3}:\d{1,3}$/, "a wallet list's cursor")
+  .nullable();
+
 export const CampaignActivitySchema = z.object({
   ...Fresh,
   campaign: Address,
   opening: Opening,
   items: z.array(ActivityItemSchema),
+  next_before: SeqCursor,
 });
 
 /** The split after one entry, from the pools the program wrote in its `EntryAdded`. */
@@ -90,6 +101,7 @@ export const ChanceSchema = z.object({
   campaign: Address,
   opening: Opening,
   points: z.array(ChancePointSchema),
+  next_before: SeqCursor,
 });
 
 export const RecentActivitySchema = z.object({ ...Fresh, items: z.array(EntryItemSchema) });
@@ -111,7 +123,12 @@ export const WalletEntrySchema = z.object({
   last_slot: Count,
 });
 
-export const WalletEntriesSchema = z.object({ ...Fresh, wallet: Address, items: z.array(WalletEntrySchema) });
+export const WalletEntriesSchema = z.object({
+  ...Fresh,
+  wallet: Address,
+  items: z.array(WalletEntrySchema),
+  next_before: WalletCursor,
+});
 
 /** One live opening in the home page's order: 1 is first; `listed` false is off the home page, still reachable. */
 export const RankedCampaignSchema = z.object({

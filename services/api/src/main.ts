@@ -2,8 +2,9 @@
  * Purpose: the read API's entry point. Reads its settings, takes a chain snapshot at start and then every
  *          API_REFRESH_MS, reads the program's new history and the hide list for the leaderboard on a loop of their own
  *          (Sprint 13), the names file with it and the display price on a loop of its own (Sprint 08), and serves
- *          /api/v1 on the loopback address. Logs one JSON line per refresh, never the RPC URL, a key or a wallet.
- * Version: 0.4.3 (the entries switch reaches health; 0.4.2, 2b: the price from Pyth only)
+ *          /api/v1 on the loopback address, the indexer's read routes forwarded to API_INDEXER_URL (the founder's
+ *          routing answer (a)). Logs one JSON line per refresh, never the RPC URL, a key or a wallet.
+ * Version: 0.5.0 (the indexer's routes forwarded; 0.4.3, the entries switch reaches health)
  * Sprint:  08 (indexer and API, hackathon MVP); 13
  *
  * Run: API_RPC_URL=... bun services/api/src/main.ts
@@ -13,6 +14,7 @@ import { rpcFor } from "@brot/sdk/read";
 import { loadApiConfig } from "./config";
 import { createHidden } from "./hidden";
 import { createHistory } from "./history";
+import { createIndexerProxy } from "./indexer-proxy";
 import { createNames } from "./names";
 import { createPrice } from "./price";
 import { pythSource } from "./price-source";
@@ -39,6 +41,7 @@ const handle = createHandler(store, {
   price,
   now: unixNow,
   entriesSwitch: config.entriesSwitch,
+  indexer: createIndexerProxy(config.indexerUrl),
 });
 
 // development: false whatever NODE_ENV says, so no error page can ever show a stack trace (the security review, M1/M2).

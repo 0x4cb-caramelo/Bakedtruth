@@ -14,6 +14,7 @@ every 15 s by default.
 | `/leaderboard`        | devnet points (Sprint 13): `rows` (`rank`, `wallet`, `points`, `entered`) of the wallets with points, with `total`, `offset`, `limit`, `complete`, `rule`, `both_sides_score` (false: the founder's answer 3a, which also leaves out refunded pots and the creator's own wallet on a burn, lock or stake campaign), `as_of_slot`, `chain_time`. `limit` 1 to 100 (default 50); `offset`. No `wallet` parameter, and no success rate (the privacy review). 503 until the history's first read |
 | `/names`              | `names` (`address`, `kind`, `name`: the reviewed names of `content/account-names.json`, checked by the SDK's `parseAccountNames`) and `feeds` (`feed_id`, `symbol`, `account`: the Pyth feeds the program lists, each with its sponsored account), with `chain_time`. No parameters (a query is a 400)                                                                                                                                                                                       |
 | `/price`              | `price`: SOL in US$ for display only (`usd`, `source` `pyth`, `published_at`, `fetched_at`, `stale`, `attribution`, `use`), with `chain_time`; 503 until a first price. No parameters                                                                                                                                                                                                                                                                                         |
+| `/activity`, `/ranking`, `/wallets/:address/entries`, `/campaigns/:address/activity`, `/campaigns/:address/chance` | the indexer's read routes, forwarded to `API_INDEXER_URL` (below) with the path and query unchanged; the indexer's status, body, `content-type` and `cache-control` come back with the API's CORS |
 
 **`entries_allowed`** (K-11; Sprints 11, 19 and 21 read it) is true only while the snapshot is fresh (`ok`), the
 program has not halted entries (its `GlobalConfig` operating level, read with each snapshot) and the operator's switch
@@ -57,6 +58,12 @@ a file that does not parse keeps the last good list. The chain itself cannot be 
 Amounts are lamport strings, times Unix seconds, addresses base58. An unknown parameter or a bad value is a 400
 `{"error": {"code": "bad_query", "message": ...}}`. A request before the first snapshot is a 503.
 
+**The indexer's routes (Sprint 08, the founder's routing answer (a), 2026-10-13).** The five routes above go to the
+indexer (`services/indexer`, loopback port 4201) as GET or HEAD, with no request header but `accept`: no cookie,
+authorization or client address leaves the API. A slow indexer (2.5 s) answers 504 `indexer_timeout`; a down one, or
+`API_INDEXER_URL=off`, 503 `indexer_unavailable`; an answer over 1 MB, 502 `indexer_too_large`; never with the
+indexer's address. `API_INDEXER_URL` must be an http URL on loopback, or the API does not start.
+
 **The display price (Sprint 08, D-f).** Pyth's SOL/USD sponsored account, read through `API_RPC_URL` every
 `API_PRICE_REFRESH_MS` (default 3 minutes): the price the program charges an opening at. A failed read keeps the last
 good price and names the error; a price older than ten minutes is served as stale, and none older than a day is served.
@@ -74,8 +81,8 @@ curl -s http://127.0.0.1:4220/api/v1/health
 
 ## Not in this MVP
 
-The SQLite indexer and its stored history (`services/indexer`, which serves the activity routes and the ranking on its
-own port), the relay (`brot-rpc`, in `services/rpc`), and a public address. Those are the rest of Sprint 08 (`docs/sprints/sprint-08-indexer-api-points.md`).
+The SQLite indexer itself (`services/indexer`, whose read routes this API forwards), the relay (`brot-rpc`, in
+`services/rpc`), and a public address. Those are the rest of Sprint 08 (`docs/sprints/sprint-08-indexer-api-points.md`).
 The state "closed because the outcome is knowable" needs each metric account, so a campaign shows Open until its entries
 close by time or epoch.
 
