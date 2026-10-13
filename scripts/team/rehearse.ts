@@ -2,10 +2,12 @@
  * Purpose: rehearse every team script on a local offline surfnet, inside a loopback-only network namespace: the
  *          admin sets the team and the creation parameters; a team key pauses and the admin resumes; a stranger
  *          and a team key acting as admin are refused before anything is built; a team key opens free campaigns;
- *          a contest and a void of a YES are refused by the program (simulated, nothing written); a team key
- *          confirms; and, after the deadline, voids an automatic void with its record's hash on-chain.
- * Version: 0.1.0
- * Sprint:  05 (SDK and the devnet cycle), lane OPS
+ *          a void of a YES is refused by the program (simulated, nothing written); a team key confirms a YES a baker
+ *          joined, its late-join tally first; the contest (rehearse-contest.ts): a re-read that pays, a stage 2 the
+ *          admin confirms and one the admin voids; and, after the deadline, the team voids an automatic void with its
+ *          record's hash on-chain.
+ * Version: 0.2.0 (Sprint 14: the contest is real; the confirm tallies first)
+ * Sprint:  05 (SDK and the devnet cycle), lane OPS; 14 (lane INV14)
  *
  * `bun run scripts/team/rehearse.ts`. The void records go to a temporary folder, not content/void-log/.
  */
@@ -16,8 +18,8 @@ import { join } from "node:path";
 
 import { generateKeyPairSigner, type Address, type KeyPairSigner } from "@solana/kit";
 
-import { Outcome, Status, bytesToHex, campaignAddress, decodeCampaign } from "@brot/sdk/read";
-import { buildResolveCampaign } from "@brot/sdk/tx";
+import { Outcome, Side, Status, bytesToHex, campaignAddress, decodeCampaign } from "@brot/sdk/read";
+import { buildJoinCampaign, buildResolveCampaign } from "@brot/sdk/tx";
 
 import { check, type Session } from "../devnet";
 import { initializeConfig, readInitParams } from "../deploy/initialize";
@@ -28,9 +30,9 @@ import { setAccount } from "../validator/surfnet";
 import { SOL, startLocalWorld } from "../validator/world";
 import type { TeamContext } from "./common";
 import { confirm } from "./confirm";
-import { contest } from "./contest";
 import { openTeamCampaign } from "./open";
 import { pause } from "./pause";
+import { rehearseContest } from "./rehearse-contest";
 import { resume } from "./resume";
 import { setParams } from "./set-params";
 import { setTeamKeys } from "./set-team";
@@ -110,16 +112,15 @@ async function main() {
     const { prizeLamports, creatorIsTeam, creatorShareBps } = decodeCampaign((await account(rpc, yes.campaign))!);
     check(prizeLamports === 0n && creatorIsTeam && creatorShareBps === 0, "no prize, no creator share (P-3)");
 
-    console.log("\n▸ a YES in review: contest and void refused by the program, confirm accepted");
+    console.log("\n▸ a YES in review a baker joined: a void refused by the program, the confirm tallies first");
+    const joinArgs = { baker: stranger, campaign: yes.campaign, metricAccount: yes.mint, side: Side.Yes, joinIndex: 0 };
+    const joinIx = await buildJoinCampaign({ ...joinArgs, amount: SOL / 10n, minReturnBps: 0, expectedEntryTotal: 0n });
+    expectOk(await send(rpc, stranger, [joinIx]), "a baker joins before the burn");
     const { burnIx } = await import("../validator/spl-token");
     expectOk(await send(rpc, bob, [burnIx(yes.holding, yes.mint, bob, 10_000n)]), "burn");
     expectOk(
       await send(rpc, bob, [buildResolveCampaign({ campaign: yes.campaign, metricAccount: yes.mint })]),
       "resolve",
-    );
-    check(
-      (await contest(ctxOf(rpc, alice), yes.campaign)).simulated.error === "ContestExitDisabled",
-      "contest: ContestExitDisabled (Sprint 14)",
     );
     await refusedBefore("void of a YES", () =>
       voidCampaign(ctxOf(rpc, alice), yes.campaign, "TeamOutsideCause", "text", logDir),
@@ -128,7 +129,20 @@ async function main() {
       readdirSync(logDir).every((f) => !f.endsWith(".md")),
       "no void record was written for the refused void",
     );
-    check((await confirm(ctxOf(rpc, alice), yes.campaign)).sent?.ok, "alice confirmed the YES");
+    const confirmed = await confirm(ctxOf(rpc, alice), yes.campaign);
+    const events = confirmed.sent?.events.map((e) => e.name).join();
+    check(
+      events === "LateTallied,ResultConfirmed,CampaignFinalized",
+      `alice confirmed the YES, tallied first (${events})`,
+    );
+
+    await rehearseContest(
+      rpc,
+      { ctxOf: (s) => ctxOf(rpc, s), team: alice, admin },
+      bob,
+      (d) => teamBurnCampaign(rpc, alice, bob, d),
+      logDir,
+    );
 
     console.log("\n▸ an automatic void (unreadable after the deadline), then the team's void with its record");
     const late = await teamBurnCampaign(rpc, alice, bob, "+3d");

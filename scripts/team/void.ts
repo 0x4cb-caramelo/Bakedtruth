@@ -2,47 +2,32 @@
  * Purpose: `team_void_campaign(reason, note_hash)` with your own team key (TP §3.4.7, BR-45): the public text of
  *          the void is saved to content/void-log/<campaign>-<UTC time>.md, and the SHA-256 of exactly the saved
  *          bytes goes on-chain with the reason. A team key may use `TeamHouseFailure` (the 10% opening fee goes
- *          back to the opener, unless nobody had entered) or `TeamOutsideCause` (Brot keeps it).
- * Version: 0.1.3 (Sprint 12: the personal-data rule from the record's format; line endings made LF before hashing)
- * Sprint:  05 (SDK and the devnet cycle), lane OPS
+ *          back to the opener, unless nobody had entered) or `TeamOutsideCause` (Brot keeps it). The snapshot that
+ *          follows needs every join tallied (`NotTallied`), so the entries not yet tallied go first (tally.ts).
+ * Version: 0.1.4 (Sprint 14: the late-join tally first; the record and its send moved to record.ts)
+ * Sprint:  05 (SDK and the devnet cycle), lane OPS; 14 (lane INV14)
  *
  * The program lets a team key void only an AUTOMATIC void (a campaign `resolve_campaign` voided: missed window,
- * unreadable account, stale feed), never a YES or NO (`TeamVoidNotAutomatic`, decision of 2026-10-09). The
- * record names the acting team key (accountability: the key is public on-chain as the signer anyway) and nothing
- * else about a person: text with an email address, an @handle or a URL is refused. It is written as `.pending`
- * only after the simulation passes and with --yes, renamed once the ledger confirms, removed on a refusal, and left
- * pending when the answer never comes (Sprint 05 deploy review, F10). Sprint 12 gave the record its public format
- * (packages/sdk/src/schemas/void-log.ts): what `voidRecord` writes parses there, and CI checks every committed record.
+ * unreadable account, stale feed), never a YES or NO (`TeamVoidNotAutomatic`, decision of 2026-10-09); since Sprint
+ * 14 the admin may void a contested YES or NO at stage 2 (decide.ts). The record (record.ts) parses in its public
+ * format (packages/sdk/src/schemas/void-log.ts), and CI checks every committed record.
  *
  *   TEAM_KEYPAIR=~/k.json bun run scripts/team/void.ts <campaign> --reason TeamOutsideCause --note note.md --cluster devnet [--yes]
  */
-import { createHash } from "node:crypto";
-import { readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
 
 import { address, type Address } from "@solana/kit";
 
 import { Outcome, VoidReason, decodeCampaign } from "@brot/sdk/read";
-import { personalDataIn } from "@brot/sdk/schemas";
 import { buildTeamVoidCampaign } from "@brot/sdk/tx";
 
-import { account, send } from "../validator/rpc";
-import { act, contextFromCli, requireRole, runCli, type TeamContext } from "./common";
+import { account } from "../validator/rpc";
+import { contextFromCli, requireRole, runCli, type TeamContext } from "./common";
+import { checkVoidText, recordOf, sendRecorded, type TeamVoidReason } from "./record";
+import { frontTallies } from "./tally";
 
-export type TeamVoidReason = "TeamHouseFailure" | "TeamOutsideCause";
-const REASONS: TeamVoidReason[] = ["TeamHouseFailure", "TeamOutsideCause"];
-
-/**
- * The record's bytes: a short header the reader can check against the chain, then the team's text with its line
- * endings made `\n` first, so the bytes hashed on-chain are the bytes Git keeps (Sprint 12 review, L2).
- */
-export function voidRecord(campaign: Address, reason: TeamVoidReason, signer: Address, at: string, text: string) {
-  const header = `# Void of campaign ${campaign}\n\n- Reason: ${reason}\n- Team key: ${signer}\n- Written (UTC): ${at}\n\n`;
-  return new TextEncoder().encode(`${header}${text.replace(/\r\n?/g, "\n").trimEnd()}\n`);
-}
-
-/** The rule moved to the record's public format (Sprint 12), shared with the site and CI's check. */
-export { personalDataIn };
+export { personalDataIn } from "@brot/sdk/schemas";
+export { voidRecord, type TeamVoidReason } from "./record";
 
 export async function voidCampaign(
   ctx: TeamContext,
@@ -51,10 +36,7 @@ export async function voidCampaign(
   text: string,
   logDir = "content/void-log",
 ) {
-  if (!REASONS.includes(reason)) throw new Error(`a team key voids with ${REASONS.join(" or ")}, not ${reason}`);
-  if (text.trim() === "") throw new Error("the void needs its public text (--note <file>)");
-  const personal = personalDataIn(text);
-  if (personal) throw new Error(`the public text holds ${personal}: the record is permanent, so leave it out`);
+  checkVoidText(reason, text);
   await requireRole(ctx, "team");
   const found = await account(ctx.rpc, campaign);
   if (!found) throw new Error(`no campaign at ${campaign}`);
@@ -64,36 +46,11 @@ export async function voidCampaign(
       `note: outcome ${Outcome[c.outcome]} is not an automatic void; the program refuses (TeamVoidNotAutomatic)`,
     );
   }
-  const at = new Date().toISOString();
-  const bytes = voidRecord(campaign, reason, ctx.signer.address, at, text);
-  const noteHash = new Uint8Array(createHash("sha256").update(bytes).digest());
-  const path = join(logDir, `${campaign}-${at.replace(/[:.]/g, "-")}.md`);
-  console.log(`record ${path}, sha256 ${Buffer.from(noteHash).toString("hex")}:\n${new TextDecoder().decode(bytes)}`);
+  const record = recordOf(campaign, reason, ctx.signer.address, text, logDir);
+  const noteHash = record.noteHash;
   const ix = await buildTeamVoidCampaign({ teamMember: ctx.signer, campaign, reason: VoidReason[reason], noteHash });
-  const { simulated } = await act(ctx, "team_void_campaign", [ix], { simulateOnly: true });
-  if (!ctx.yes) {
-    console.log("nothing written or sent: add --yes to save the record and void");
-    return { simulated, path: null };
-  }
-  if (!simulated.ok) throw new Error(`the program would refuse the void (${simulated.error}): nothing written`);
-  const pending = `${path}.pending`;
-  writeFileSync(pending, bytes);
-  let sent;
-  try {
-    sent = await send(ctx.rpc, ctx.signer, [ix]);
-  } catch (error) {
-    const hash = Buffer.from(noteHash).toString("hex");
-    throw new Error(
-      `no answer from the ledger (${(error as Error).message}): ${pending} stays; compare the campaign's void_note_hash with ${hash}, then rename it or delete it`,
-    );
-  }
-  if (!sent.ok) {
-    rmSync(pending);
-    throw new Error(`the void failed on the ledger (${sent.error}); the record was removed`);
-  }
-  renameSync(pending, path);
-  console.log(`voided: ${sent.signature}; events ${sent.events.map((e) => e.name).join(", ")}; commit ${path}`);
-  return { simulated, path, sent };
+  const tallies = await frontTallies(ctx, campaign);
+  return sendRecorded(ctx, "team_void_campaign", [...tallies, ix], record);
 }
 
 if (import.meta.main) {
