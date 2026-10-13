@@ -63,7 +63,10 @@ export class Backoff {
   }
 }
 
-/** Once per `periodMs` per key (a day by default): the daily retry of a reserved creator share. */
+/**
+ * Once per `periodMs` per key (a day by default): the daily retry of a reserved creator share. The first sighting
+ * starts the day instead of trying at once: the share was reserved because the wallet could not take it a moment ago.
+ */
 export class DailyClock {
   private readonly last = new Map<string, number>();
 
@@ -71,7 +74,11 @@ export class DailyClock {
 
   due(key: string, now: number): boolean {
     const at = this.last.get(key);
-    return at === undefined || now - at >= this.periodMs;
+    if (at === undefined) {
+      this.last.set(key, now);
+      return false;
+    }
+    return now - at >= this.periodMs;
   }
 
   mark(key: string, now: number): void {
