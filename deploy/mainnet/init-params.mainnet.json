@@ -1,0 +1,28 @@
+{
+  "//": "Creation parameters for admin_initialize_config on mainnet (deploy/mainnet/README.md, step 7), proposed by the multisig with admin_set_team in one vault transaction. Same shape as deploy/devnet/init-params.json. Values marked [proposal, founder to confirm] are not decided: the founder confirms or changes each before deploy day (Sprint 16 records the final values), and every change needs its source.",
+  "openingFeeUsd": 500,
+  "openingPrizeBps": 9000,
+  "feeBps": 1000,
+  "oneSidedFeeBps": 100,
+  "creatorShareBps": 100,
+  "maxOpenCampaigns": 1000,
+  "minEntryLamports": 10000000,
+  "solUsdFeedId": "ef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
+  "maxPriceAge": 60,
+  "maxPriceConfBps": 50,
+  "campaignMaxAge": 30,
+  "proposals": ["maxOpenCampaigns", "maxPriceAge", "maxPriceConfBps", "campaignMaxAge"],
+  "sources": {
+    "openingFeeUsd": "D-b: US$500 per paid opening (Sprint 16 DoD, 'opening fee US$500')",
+    "openingPrizeBps": "D-b: 90% of the payment becomes the prize (Sprint 16 DoD, 'prize 9,000 bps')",
+    "feeBps": "P1 section 3.3: Brot's fee, 10% of the losing side (Sprint 16 DoD, 'fee 1,000 bps'); code ceiling 1,000",
+    "oneSidedFeeBps": "P1 section 3.5: 1% per entry in a one-sided pot; code ceiling 100, as on devnet",
+    "creatorShareBps": "D-g: the creator's 1% (Sprint 16 DoD, 'creator share 100 bps'); code ceiling 100",
+    "maxOpenCampaigns": "[proposal, founder to confirm] 1,000: the keeper's design load (X1.8), as on devnet; code ceiling 10,000; the 80% alert fires at 800 (Sprint 16). Lower makes a leaked team key's free openings fill the valve sooner (TP section 7); higher passes the load the keeper was sized for",
+    "minEntryLamports": "P-5: 0.01 SOL (Sprint 16 DoD, 'min_entry_lamports 10,000,000'); admin range 0.001 to 1 SOL",
+    "solUsdFeedId": "D-f: Pyth SOL/USD; the program prices openings with its compiled SOL_USD_FEED_ID, this field is checked non-zero only",
+    "maxPriceAge": "[proposal, founder to confirm] 60 s for the SOL/USD read at a paid opening: mainnet's sponsored SOL/USD account renewed every 5 to 11 s, price 0 to 5 s old (knowledge-base/tecnologia/pyth-leitor-de-preco.md section 1.4, measured 2026-10-05 for one to two minutes), and Pyth documents a 55 s heartbeat or a 0.5% move for sponsored feeds (same file; the page itself was not recorded): 60 s still prices an opening if the feed falls back to its heartbeat. Half of devnet's 120; ceiling 300. On the mainnet fork (scripts/mainnet/rehearse.ts, three runs on 2026-10-13) the account was 1 to 5 s old when read: three samples, not a measure of the cadence",
+    "maxPriceConfBps": "[proposal, founder to confirm] 50 bps (0.5%): the same bound a price campaign's own feed must meet at opening (PRICE_CAMPAIGN_MAX_CONF_BPS) and devnet's value; ceiling 100. The opening charges at price minus confidence, so 0.5% caps the opener's overpayment at US$2.50 on US$500. On the mainnet fork the confidence was 2 to 3 bps in three reads on 2026-10-13",
+    "campaignMaxAge": "[proposal, founder to confirm] 30 s, the floor (Q4 answer) and the plan's join rule (knowledge-base/tecnologia/pyth-leitor-de-preco.md section 3), which mainnet's 5 to 11 s cadence meets. If the sponsored feed falls back to its 55 s heartbeat, joins on price campaigns fail for part of each interval: raise it to 60 then. Price campaigns open on mainnet only once D4 (the Hermes key) is answered"
+  }
+}
