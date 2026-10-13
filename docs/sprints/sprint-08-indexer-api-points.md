@@ -52,7 +52,11 @@ only path from a client to a paid RPC account, and it relays only what Brot's cl
       returns `program_last_deploy_slot`, `schema_version`, `cluster` and `entries_allowed`. **Slice 2 (2026-10-11),
       in the indexer:** a campaign's activity and chance, `/api/v1/activity` and a wallet's entries, with their zod
       schemas in `@brot/sdk/schemas` (`indexer.ts`) and contract tests; the campaign list, the leaderboard, names,
-      price and health stay in `services/api` until the indexer takes them over.
+      price and health stay in `services/api` until the indexer takes them over. **Public through the read API (the
+      founder's routing answer (a), 2026-10-13):** `services/api` forwards the indexer's five read routes (activity,
+      chance, `/api/v1/activity`, a wallet's entries, `/api/v1/ranking`) to `API_INDEXER_URL` on loopback, with no
+      Cloudflare or tunnel change (`services/api/src/indexer-proxy.ts`, `tests/api/indexer-proxy.test.ts`); built, live
+      once the indexer is deployed and `brot-api` is restarted with this code.
 - [ ] Amounts are lamport strings, addresses base58, times Unix seconds in UTC. An unknown query parameter returns 400.
       An error returns `{ "error": { "code", "message" } }`, never a stack trace.
 - [x] **`/api/v1/price`** serves SOL's price in US$, fetched every few minutes, with its source and time. It never

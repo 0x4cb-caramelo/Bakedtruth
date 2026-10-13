@@ -1359,7 +1359,11 @@ from a browser or the app to a paid provider.
   order of `deploy/vps/README.md`.
 
 **The read API.** `/api/v1` is served by the indexer process, read-only, with zod schemas from `@brot/sdk/read`; its
-conventions and routes are §6.
+conventions and routes are §6. **Until the indexer takes the whole list over, the public reaches its read routes
+through `brot-api`** (`services/api`, 127.0.0.1:4220, the tunnel's `/api/v1` route), which forwards the five of them
+(a campaign's activity and chance, the recent activity, a wallet's entries, the ranking) to the indexer on loopback
+(`API_INDEXER_URL`), GET and HEAD only, with no request header but `accept` (the founder's routing answer (a),
+2026-10-13; no Cloudflare or tunnel change) **[FD]**. Built in Sprint 08 **[F]**; live once the indexer is deployed.
 
 **RPC accounts** (proposal §2.6; prices as listed on 2026-10-06 [E40]; limits are per plan **[AC]**) **[DP]**.
 
@@ -1954,7 +1958,7 @@ exposes only `GET /healthz` and `POST /restart` (TP v0.0.1 §5, §12) **[DP]**.
 |---|---|---|
 | `GET /api/v1/campaigns` | Campaigns with `rank`, `listed` and filters | 08 |
 | `GET /api/v1/campaigns/:id` | One `CampaignDTO` (Appendix B) | 08 |
-| `GET /api/v1/campaigns/:id/activity` | Entries, settlements and events of one campaign. **Built in Sprint 08's slice 2 (2026-10-11) [F]** in `services/indexer` (by address, the latest opening unless `?opening=`), on loopback; not public yet | 08 |
+| `GET /api/v1/campaigns/:id/activity` | Entries, settlements and events of one campaign. **Built in Sprint 08's slice 2 (2026-10-11) [F]** in `services/indexer` (by address, the latest opening unless `?opening=`), on loopback; public through the read API, which forwards it and the routes below to the indexer (the founder's answer (a), 2026-10-13, §3.5), once the indexer is deployed | 08 |
 | `GET /api/v1/campaigns/:id/chance` | The history of the YES/NO split. **Built in slice 2 [F]**, as the line above | 08 |
 | `GET /api/v1/activity` | Recent activity across campaigns (X1.4). **Built in slice 2 [F]**: the newest entries, as the line above | 08 |
 | `GET /api/v1/wallets/:address/entries` | One wallet's entries, results and payouts ("my entries"). **Built in slice 2 [F]** in `services/indexer`, as the lines above; Sprint 12's page still reads the chain | 08 |

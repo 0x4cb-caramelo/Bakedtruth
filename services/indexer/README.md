@@ -49,8 +49,9 @@ On `INDEXER_API_HOST:INDEXER_API_PORT` (loopback only, port 4201; TP §3.5), all
 A campaign route takes the latest opening at the address unless `?opening=` names one. An unknown query parameter, a
 bad address or a bad number answers 400; an unknown campaign or opening 404; errors are `{ error: { code, message } }`,
 never cached and never a stack trace. `/healthz` answers the server's own check: freshness, the last refresh's time
-and error name, the wake-up's state, the feeds' and the partners file's error names. Who reaches these routes from
-outside (the read API in front, or a tunnel route) is still to be decided.
+and error name, the wake-up's state, the feeds' and the partners file's error names. The public reaches these routes
+through the read API, which forwards them to this port (`services/api`, `API_INDEXER_URL`; the founder's routing answer
+(a), 2026-10-13); the indexer's own port stays on loopback.
 
 ## The team's exports (no public route)
 
