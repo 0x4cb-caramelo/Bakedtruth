@@ -6,6 +6,8 @@ real device are marked waiting below · **Branch:** `sprint-19-site-open-campaig
 `70fc29b` (PR #66, which holds the tag `sprint-13`), with `origin/main` at `c25d500` (PR #67, the brand's colours)
 merged in before the pull request · **Dates:** none, by the founder's decision
 
+**Final state (audit of 2026-10-13):** closed: merged by PR #68 and tagged `sprint-19` (`5bf3636`). Carried: the landing release before `/abrir` is public (that order is broken today; see Sprint 13); the founder's paid non-team opening (the free team opening is done: campaign `8670587885290160238`, 2026-10-13); the phones; the second review of `content/powers.md` (Lucas or Bernardo); the box to read `/api/v1/price` and the share card (A); the relay's country list (founder) and the relay's install (the server owner).
+
 ## Record (2026-10-10)
 
 - **Starting point.** `origin/main` holds `sprint-13` (`git merge-base --is-ancestor sprint-13 origin/main`), with PR #64
