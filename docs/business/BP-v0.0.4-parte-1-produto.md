@@ -724,6 +724,9 @@ NÃO, seria paga sem volta. O plano mantém a janela, decisão de 5/10/2026 que 
 decisão (decisão 5, P-9):** mantê-la até a auditoria, como freio que só devolve, e dizer "no human picks the winner":
 nenhuma pessoa escolhe o vencedor. Essa frase o produto cumpre.
 
+**Decisão de 13/10/2026 (Ronaldo, D2):** a etapa 1 dura 24 horas; a mesma leitura só paga depois delas, e nesse prazo
+uma chave da equipe pode levar a disputa à etapa 2. O pior caso passa de 55 para 78 horas (6 + 24 + 48).
+
 ### 4.6 Como falamos disso
 
 **Decisão, de 8/10/2026 (D-m).** "we will adopt the therm On-Chain Campaigns. we will not use markets, or bets, or

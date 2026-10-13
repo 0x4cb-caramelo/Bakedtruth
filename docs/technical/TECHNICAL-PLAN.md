@@ -118,8 +118,9 @@ request is gone (§3.4.12). A relay, a ranking for many campaigns and an Android
 2. **A creator who controls the measured account can force the result.** On a worthless token, forcing pays once a
    little over US$56 of other people's money sits on the other side (§3.4.10). It is a written risk; your decision
    stands.
-3. **Still open with you:** the lawyer's written review (L0), the budget (D4), attestation and wallet screening (D5,
-   before Sprint 14), P-6 to P-9 and the BP's two new open items (§14.2).
+3. **Still open with you:** the lawyer's written review (L0), the budget (D4), attestation and wallet screening on
+   mainnet (D5; on devnet, none, answered on 2026-10-13), P-7 to P-9 (P-6 was answered on 2026-10-13) and the BP's two
+   new open items (§14.2).
 
 ## 1. Stack
 
@@ -447,8 +448,8 @@ referee, once, immutable (§3.4.11).
 receiver `rec2HHDDnjLfj4kE7VyEtFA1HPGQLK33259532cRyHp` and push-oracle program
 `pyt2F414BA6dPttK6RddPZUdHfapoBN24GL5wbrPCou` [F]; `PRICE_UPDATE_V2_LEN` 134 [F]; minimum and maximum duration 3 and 90
 days (D-k); the review window, 6 hours (P1 §4.5); the entry close, 5% of the duration clamped to 24 hours and 7 days (P1
-§3.6); the proof delay, 60 s (Q4); the join-age floor, 30 s (Q4 answer); contest stage 1, one hour, and stage 2, 48
-hours (P1 §4.5). Three of them have devnet-only drill values behind a `drill` cargo feature (T12) **[AC]**: the
+§3.6); the proof delay, 60 s (Q4); the join-age floor, 30 s (Q4 answer); contest stage 1, 24 hours (S14-D2, the founder's
+answer of 2026-10-13, §14.2; P1 §4.5 said one hour), and stage 2, 48 hours (P1 §4.5). Three of them have devnet-only drill values behind a `drill` cargo feature (T12) **[AC]**: the
 minimum duration, 15 minutes; the review window, 10 minutes; and the entry close, at least 5 minutes before the
 deadline instead of 24 hours, without which a 15-minute campaign would close before it opens [F] (`constants.rs`). The
 `mainnet` feature refuses `drill` at compile time, and a CI step checks that the `mainnet` build carries the real
@@ -474,7 +475,7 @@ public state comes from the indexer's events.
 ```
 Open ─resolve─▶ InReview ─confirm, or 6 h elapsed─▶ Settling ─last entry settled─▶ Settled ─close─▶ (account closed)
                   │  └─void─▶ Settling (Void)
-                  └─contest─▶ Contested ─same reading, or decision─▶ Settling
+                  └─contest─▶ Contested ─same reading after stage 1, decision, or lapse─▶ Settling
 ```
 
 | From | To | Instruction | Who | Condition | Sprint |
@@ -484,10 +485,13 @@ Open ─resolve─▶ InReview ─confirm, or 6 h elapsed─▶ Settling ─last
 | `InReview` | `Settling` | `team_confirm_result` | A team key | Inside the window | 04 |
 | `InReview` | `Settling` | `finalize_campaign` | Any wallet | `now ≥ review_ends_at` | 04 |
 | `InReview` | `Settling` (`Void`) | `team_void_campaign` | A team key | Inside the window, with a `VoidReason` | 04 |
-| `InReview` | `Contested` | `team_open_contest` | A team key | Inside the window. Entry only: nothing leaves `Contested` before Sprint 14 | 04 |
-| `Contested` | `Settling` | `reread_campaign` (same reading) | Any wallet | Stage 1, within one hour | 14 |
-| `Contested` | `Contested` (stage 2) | `reread_campaign` (different reading) | Any wallet | Opens 48 hours | 14 |
-| `Contested` | `Settling` | `admin_decide_contest` | `admin` | Confirm or void only | 14 |
+| `InReview` | `Contested` | `team_open_contest` | A team key | Inside the window, every entry tallied: stage 1, 24 hours (S14-D2). Entry only: nothing leaves `Contested` before Sprint 14 | 04; 14 |
+| `Contested` | `Settling` | `reread_campaign` (same reading) | Any wallet | Stage 1, from its deadline on, 24 hours after the contest opened (`RereadBeforeTimelock` before it; S14-D2) | 14 |
+| `Contested` | `Contested` (stage 2) | `reread_campaign` (different reading) | Any wallet | Stage 1, at any time: stage 2 at once, until `min(now, stage 1's deadline) + 48 h` | 14 |
+| `Contested` | `Contested` (stage 2) | `team_open_contest` (the escalation) | A team key | Stage 1, before its deadline: stage 2 for 48 hours (S14-D2) | 14 |
+| `Contested` | `Settling` | `admin_decide_contest` | `admin` | Stage 2, before its deadline; confirm or void only | 14 |
+| `Contested` | `Settling` | `finalize_campaign` (the lapse) | Any wallet | Stage 2 from its deadline on, or an unread stage 1 from 48 hours after its deadline: the stored result stands | 14 |
+| `InReview`, `Contested` | `Settled` | The finalize snapshot of any exit above | As above | A pot with no entry: nothing is left to settle, so the campaign goes straight to `Settled` (from `Contested`: the lead's addendum, 2026-10-13) | 04; 14 |
 | `Settling` | `Settled` | `settle_entry` (the last one) | Any wallet | `entries_open` reaches 0 | 04 |
 | `Settled` | closed | `close_campaign` | Any wallet | Fee collected, prize settled, creator share settled | 04 |
 
@@ -517,7 +521,7 @@ the same effect whoever calls it: the second keeper to arrive gets an error and 
 | `admin_resume_entries` | `admin` | `EntriesHalted` → `Normal` | `EntriesResumed` | 02 |
 | `team_confirm_result` | A team key | `InReview`, inside the window: ends the window and runs the finalize snapshot at once ("pays now") | `ResultConfirmed`, then `CampaignFinalized` | 04 |
 | `team_void_campaign(reason, note_hash)` | A team key | `InReview`, inside the window: `outcome = Void` with a team `VoidReason` and the hash of the text in `content/void-log/`; then the finalize snapshot in `Refund` | `CampaignVoided`, then `CampaignFinalized` | 04 |
-| `team_open_contest` | A team key | `InReview`, inside the window: `Contested`, payout paused, stage 1 clock starts | `ContestOpened` | 04 |
+| `team_open_contest` | A team key | `InReview`, inside the window, every entry tallied: `Contested`, payout paused, stage 1 starts for 24 hours. Called again on a contest at stage 1, before its deadline, it sends the contest to stage 2 for 48 hours (the escalation, S14-D2, built 2026-10-13) | `ContestOpened`, with the stage it opened | 04; 14 |
 | `admin_decide_contest(confirm or void, reason)` | `admin` (the 2-of-3 on mainnet) | Stage 2 only; confirm or void, never invert | `ContestClosed`, then `CampaignFinalized` | 14 |
 
 **Bakers, creators and anyone.**
@@ -534,7 +538,7 @@ the same effect whoever calls it: the second keeper to arrive gets an error and 
 | `settle_prize` | Any wallet | `OneSided` or `Refund`: returns `prize_lamports` to `creator`, plus `opening_fee_lamports` on a house-failure void (P-4). In `Split` the prize is inside `distributable` and this is marked settled at finalize | `PrizeSettled` | 04 |
 | `close_campaign` | Any wallet | `Settled`, with fee, prize and creator share settled: moves dust and hand-sent surplus to the fee vault, returns the rent of `Campaign` and vault to `rent_payer`, zeroes the data and reassigns both accounts to the System Program | `CampaignClosed` | 04 |
 | `sweep_fees` | Any wallet | Moves the fee vault's lamports above its rent-exempt minimum to `GlobalConfig.fee_recipient`, and nowhere else | `FeesSwept` | 04 |
-| `reread_campaign` | Any wallet, top level only | Contest stage 1 (§3.4.7): runs the kind's reading again and compares it exactly with the stored result. The same reading runs the snapshot with the stored outcome; a different one, or a reader that cannot decide now, opens stage 2 until `min(now, stage 1's deadline) + 48 h`. A proof the caller offers and the reader refuses refuses the call (built 2026-10-13; the founder's question D2 on the same reading is open) | `CampaignReread`, then `CampaignFinalized` when it pays | 14 |
+| `reread_campaign` | Any wallet, top level only | Contest stage 1 (§3.4.7): runs the kind's reading again and compares it exactly with the stored result. The same reading runs the snapshot with the stored outcome from stage 1's deadline on, 24 hours after the contest opened (`RereadBeforeTimelock` before it); a different one, or a reader that cannot decide now, opens stage 2 at once, until `min(now, stage 1's deadline) + 48 h`. A proof the caller offers and the reader refuses refuses the call (built 2026-10-13; the 24-hour wait is the founder's answer to S14-D2 the same day) | `CampaignReread`, then `CampaignFinalized` when it pays | 14 |
 | `user_link_referrer(referrer)` | The referee | Creates `ReferralLink` once (§3.4.11) | `ReferralLinked` | 14 |
 | The sealed entry | The sponsor | A join that also charges the 10% (§3.4.12) | `EntryAdded` | 15 |
 | `sponsor_add_prize(lamports, disclosed)` | A third party | Only if the founder keeps it **[Q]** (P1 §3.7; §3.4.12) | — | 15, if kept |
@@ -665,15 +669,20 @@ opens a contest.
 | Result read; the window opens (`review_ends_at = resolved_at + 6 h`) | Keeper, or any wallet | `resolve_campaign` |
 | Confirm, or void with a reason, inside the window | A team key | `team_confirm_result`, `team_void_campaign` |
 | Nobody reviewed and the window ended | Keeper, or any wallet | `finalize_campaign` |
-| Contest (MVP: team only) | A team key | `team_open_contest`; stage 1 within one hour |
-| Stage 1: the second read (B9) | Any wallet | `reread_campaign`. Same reading: payout. Different: stage 2, 48 hours |
+| Contest (MVP: team only) | A team key | `team_open_contest`; stage 1 lasts 24 hours (S14-D2, 2026-10-13) |
+| Stage 1: the second read (B9) | Any wallet | `reread_campaign`. Same reading: payout from stage 1's deadline on (`RereadBeforeTimelock` before). Different: stage 2 at once, 48 hours |
+| Stage 1: the escalation (S14-D2) | A team key | `team_open_contest` again, before stage 1's deadline: stage 2, 48 hours |
 | Stage 2: two of three (B9) | `admin`, the 2-of-3 | `admin_decide_contest` |
 
 - **Stage 2 needs no voting code.** The "two of three members" of P1 §4.5 are the multisig's signatures (v0.0.1).
 - **Nobody voids outside the window.** After `Settling` the result is final. A team key voids only inside `InReview`.
   The automatic voids are written by `resolve_campaign` and pass through the same window; the team can confirm an
   automatic void, never turn it into `Yes` or `No`.
-- **Worst case:** payout 55 hours after resolution (6 + 1 + 48), as P1 §4.5 says.
+- **Why stage 1 waits (S14-D2, answered (a) on 2026-10-13).** A re-read runs the readers' own code, so it cannot
+  catch a reader's bug: a matching re-read pays only after stage 1's 24 hours, which give a team key the time to send
+  the contest to the admin when the standby's independent read disagrees.
+- **Worst case:** payout 78 hours after resolution (6 + 24 + 48), enforced on-chain with or without a keeper (review
+  fix F3). P1 §4.5 said 55 hours (6 + 1 + 48) before the founder's answer to S14-D2.
 - **Review by exception** (T22): only the review queue of §3.5 puts a campaign in front of a person; everything else
   pays at the end of the window.
 - **"No human in the loop."** The window is kept until the audit, and the copy says "no human picks the winner"
@@ -757,7 +766,7 @@ sponsored account, and older ones are skipped; only the push oracle writes it [E
 | Upgrade the program; act as `admin` | Devnet: a file key held for the company; Lucas and Ronaldo hold the keys, and which of them holds the upgrade key on deploy day is set in Sprint 05 (Q12). Mainnet: the 2-of-3 multisig on hardware devices, with the three partners, and a public wait of 24 to 48 hours before an upgrade takes effect [FD] (P4 §4.1) | Verifiable build (Sprint 16); two-step `admin` change |
 | Open a campaign, paying | Any wallet | Six kinds (`DbcGraduated` off in the mainnet build, M-7); an account the reader accepts; 3 to 90 days; fees from config; US$500 at the Pyth price (§3.4.10) |
 | Open without paying | One team key, for the team or a launch partner | `creator_share_bps = 0`; no prize unless the team adds one (P-3). Every team-key opening raises an alert (§3.5) |
-| Confirm, void, contest | One team key | Only in `InReview`; never inverts; void only an automatic void (2026-10-09); a contest only once every entry is tallied. Since Sprint 14, one team key can hold a payout up to about 49 hours by contesting (an honest re-read can escalate it), and with `admin` it can void a contested result |
+| Confirm, void, contest | One team key | Only in `InReview`; never inverts; void only an automatic void (2026-10-09); a contest only once every entry is tallied. Since Sprint 14, one team key can hold a payout up to 72 hours by contesting and escalating (S14-D2: stage 1's 24 hours, then stage 2's 48), and with `admin` it can void a correct contested result |
 | Pause | One team key, to be fast | Only `Normal` → `EntriesHalted` |
 | Resume; creation parameters; team keys; fee recipient; decide a contest | `admin` | Code ceilings; an open campaign's fee and share never change; a contest only at stage 2, before its deadline, confirm or void with a team reason, never invert |
 | Move the fees | Anyone calls `sweep_fees` | Only to `GlobalConfig.fee_recipient` |
@@ -878,10 +887,10 @@ to the TP; kept by the proposal, K-05).
 | Who referred whom | `ReferralLink`, signed by the referee, once, immutable |
 | "Before the first entry", as built (2026-10-13) | Chain order, not time: (slot, the transaction's place in the block, the instruction) of `ReferralLinked` against the referee's first `EntryAdded`; in one transaction the instruction order decides; a slot shared with the first entry is resolved by reading that block once (`getBlock`), and until then the link earns nothing |
 | The payout's evidence, as built | A ledger in its own SQLite file (a rebuilt indexer never erases what was paid); each transfer carries the memo `brot-referral:<batch>:<index>`, so a line is never paid twice; the routine prepares a signing file and never signs (founder answer of 2026-10-13); a wallet below the RPC's rent minimum waits for the next week |
-| "Before the first entry" | Checked by the indexer: both times are on-chain |
 | The fee Brot actually received on each winning entry of the referee ("a taxa que o Brot de fato recebeu", P1 §3.9) | `(fee_total − from_fee) × entry ÷ V`, where `from_fee` is the part of the creator share taken from the fee (§3.4.16); from the events, checked against the `Campaign` |
 | 20% of that fee for 90 days, to the referrer [FD] (P1 §3.9) | Weekly routine from the operations wallet, with a public report |
-| The referee's rebate: the fee charged on the first US$50 of entries, after US$250, with a ceiling | Same routine. Ceiling 0.05 SOL and the thresholds in SOL (0.4576 and 2.2879 SOL at the reference price) are **[Q]** P-6 |
+| The referee's rebate: the fee charged on the first US$50 of entries, after US$250, with a ceiling | Same routine. Ceiling 0.05 SOL and the thresholds in SOL (0.4576 and 2.2879 SOL at the reference price): P-6, answered on 2026-10-13 (Ronaldo, as recommended) [FD] |
+| How the rules are read (approved 2026-10-13, Ronaldo) [FD] | The 90 days count the entries joined in the window, settled whenever; every entry counts toward both thresholds, refunded or not; the rebate has no window; the rebate uses the same fee as the 20%, so the 1% of a one-sided pot is refunded by neither; amounts round down per entry |
 | When the 90 days start | At the referee's first entry [FD] (Q9, b) |
 | How the link is born | A `?ref=<address>` link; the site proposes the signature before the first entry |
 | "Day one" | The first day on mainnet (BP-9, recommendation open in P-9) |
@@ -890,7 +899,9 @@ to the TP; kept by the proposal, K-05).
   from the indexer. It reads finalized rows only, and its ledger is an evidence table snapshotted nightly (A-4).
 - **Rejected:** splitting the fee inside `settle_entry`. Accepted cost: the referrer depends on the company to be paid.
   Self-referral is possible and its gain has a ceiling (accepted risk, P1 §3.9).
-- **Still open:** who signs the weekly payout (v0.0.1 roadmap), and the treasury rule it pays from (P-7) **[Q]**.
+- **Who signs the weekly payout** (v0.0.1 roadmap): answered on 2026-10-13 (Ronaldo) **[FD]**: a person signs each
+  batch from an operations wallet; the routine prepares the signing file, and no key goes on the server. **Still
+  open:** the treasury rule it pays from (P-7) **[Q]**.
 
 #### 3.4.12 Sponsorship, folded into opening (the sealed entry)
 
@@ -946,8 +957,8 @@ I3′ and I10′ replace v0.0.1's I3 and I10, which named instructions that no l
 
 #### 3.4.14 Events
 
-One event per instruction, plus `CampaignFinalized` on the three paths that finalize without `finalize_campaign`
-(`team_confirm_result`, `team_void_campaign`, `admin_decide_contest`). Events are defined in `events.rs` and emitted by
+One event per instruction, plus `CampaignFinalized` on the four paths that finalize without `finalize_campaign`
+(`team_confirm_result`, `team_void_campaign`, `reread_campaign` when the same reading pays, `admin_decide_contest`). Events are defined in `events.rs` and emitted by
 a hand-written self-CPI signed by an event-authority PDA, from Sprint 02 (T4: one event round-tripped in npm `litesvm`
 1.5.0 on day one, whose `innerInstructions()` shows it at stack height 2) [F]. The authority is the PDA
 `["__event_authority"]`, `CmNehEdy55jRh7waxt2u5vbwLwe3jmRuZXv3AHi1qGwx`, bump 254, a constant checked by a test [F]
@@ -966,6 +977,7 @@ indexer notices a gap; admin and config events carry none (X0.4). Amounts are la
 | `CampaignResolved` | `resolve_campaign` | Outcome, value read, `met_late` or the void reason, `review_ends_at`; for price: `publish_time`, `posted_slot`, the proof account | 03 |
 | `ResultConfirmed`, `CampaignVoided` | Team instructions | The signer; for a void, the reason and the note hash | 04 |
 | `ContestOpened`, `ContestClosed` | Contest instructions | Stage, deadline, result | 04, 14 |
+| `CampaignReread` | `reread_campaign` | Whether the reading was the same; what it read now (outcome, void reason, `met_late`, value, publish time); the contest's stage and deadline after it | 14 |
 | `CampaignFinalized` | `finalize_campaign` and the paths that finalize | `settle_mode`, V, P, R, fee, `from_pot`, `from_fee`, `distributable` | 04 |
 | `EntrySettled` | `settle_entry` | Baker, amount paid, mode | 04 |
 | `CreatorShareSettled` | `settle_creator_share` | Creator, amount, `from_pot`, `from_fee` | 04 |
@@ -1829,12 +1841,13 @@ disagree, this section is what the code does.
 
 ## 4. Data model
 
-Four places hold data. Only the first decides anything about money.
+Five places hold data. Only the first decides anything about money.
 
 | Place | What | Rebuildable | Section |
 |---|---|---|---|
 | On-chain accounts | `GlobalConfig`, the fee vault, `Campaign`, the campaign vault, `Entry`, `ReferralLink` | It is the source | §3.4.1 |
-| The indexer's SQLite file | Projections of the program's events, ranking, points, KPIs; two evidence tables | Yes, except the evidence tables (A-4) | This section; Appendix B |
+| The indexer's SQLite file | Projections of the program's events, ranking, points, KPIs; one evidence table, `feed_history` | Yes, except `feed_history` (A-4) | This section; Appendix B |
+| The referral ledger's SQLite file (Sprint 14) | The weekly referral payouts (`referral_payouts`) and the batches they were prepared in (`services/indexer/src/referral/ledger.ts`) | No: evidence (A-4). A file of its own, apart from the indexer's, so a rebuilt indexer can never erase what was paid | §3.4.11; §8.5 |
 | `content/` in Git | Hand-written files, reviewed by two people | It is a source | This section |
 | The visitor's device | Theme, "Saved" list, MWA `auth_token`, the pending-entry snapshot | No; losing it costs nothing on-chain | §3.6, §3.7 |
 
@@ -1850,8 +1863,10 @@ WAL mode; behind a small adapter (§3.5).
 | `points` | Devnet points per wallet (Q7) | Rebuildable |
 | `referrals` | Links and the fee per referred winning entry (Sprint 14; TP v0.0.1 §3.5) | Rebuildable |
 | `feed_history` | Every update of each sponsored feed with an open campaign | **Evidence**, snapshotted nightly |
-| `referral_payouts` | The weekly payout ledger, with its basis and transaction | **Evidence**, snapshotted nightly |
 | `checkpoints` | Ingest position per source | Rebuildable |
+
+The weekly payout ledger (`referral_payouts`) is not an indexer table: since Sprint 14 it lives in the referral
+ledger's own file (above), which the routine refuses to open unless it carries the ledger's marks.
 
 Every row keeps `signature`, `seq` and `block_time` where it comes from an event (TP v0.0.1 §3.5). A store for H1
 sign-in challenges, if H1 is ever approved, is a separate, backed-up file owned by a write unit, never the indexer's
@@ -2580,8 +2595,8 @@ The business risks are in P4 §7. These are the plan's. Severities marked "(P4 �
 |---|---|---|---|
 | L0 | The team lawyer's written review (an action, D-s) | Classification first (is a pot inside MP 1.394, or CMN 5.298, or another regime?), then open creation, the US$500 opening, SOL, no caps and no list, the dApp Store, the C-items of §3.7. An outside reader stays a BP proposal (P4 §5.1) | D5; C-06; Sprint 22; the mainnet date (18) |
 | D4 | Budget: RPC accounts, VM 2, email, the Pyth plan, a Seeker and another Android phone. Includes v0.0.1's Q8 | Devnet below about US$150 a month **[INF]**: Helius Developer (US$49) for the keeper, free tiers elsewhere **[AC]**. Pyth: paid openings need no plan; keyed proofs for mainnet price campaigns need Hermes Starter, US$500 a month [E51], or price campaigns wait. CoinGecko: dropped on 2026-10-11 (2b), since the Sprint 08 legal review found no plan that fits (attribution on every plan, no gambling use, no re-distributed access, binding user terms first; §3.5); the display price is Pyth's [E79] | 06; 07; 08; 16 (Pyth); 20 (devices) |
-| D5 | Attestation of each entry, and wallet screening | (a) None on devnet: gates live in the site, the app and `brot-rpc`. Decide after L0, before Sprint 14. (b) and (c) see wallets with IPs or send addresses to a third party (K-04) | 14 |
-| P-6 | Ceiling of the referral rebate | 0.05 SOL; the US$50 and US$250 thresholds also in SOL (0.4576 and 2.2879 SOL at the reference price **[INF]**, P1 §3.9) | 14 |
+| D5 | Attestation of each entry, and wallet screening | **Devnet answered 2026-10-13 (Ronaldo): (a), none on devnet**; gates live in the site, the app and `brot-rpc`. Mainnet: decide after L0. (b) and (c) see wallets with IPs or send addresses to a third party (K-04) | The mainnet date (18), after L0 |
+| P-6 | Ceiling of the referral rebate | **Answered 2026-10-13 (Ronaldo): as recommended.** 0.05 SOL; the US$50 and US$250 thresholds also in SOL (0.4576 and 2.2879 SOL at the reference price **[INF]**, P1 §3.9). Built in Sprint 14 (§3.4.11) | 14 |
 | P-7 | The treasury, with a SOL-only platform | The platform receives and pays in SOL; the company converts monthly what it needs, outside it; `fee_recipient` under the multisig | 06 (runbook); 18 |
 | P-8 | Do Cloak and SODAX work with SOL? | Check before use | 15 (the Cloak page for undisclosed sponsors, BR-17); 17 (the SODAX page) |
 | P-9 | Still open from v0.0.3 | BP-3 sponsor perks: US$500 as the floor; seal, name and link for all; posts case by case (15). BP-5: keep the window until the audit; say "no human picks the winner" (window in 04, copy in 13). BP-8: token B against the pitch's ready answer (no architecture impact). BP-9: "Referrals, day one" means the first day on mainnet (14; live at 18). BP-11: the mascot is Baked in writing, Cacetinho in speech (copy only). BP-5's line and BP-11 were approved on 2026-10-10 (Sprint 13, answer 6a). BP-12: Bernardo's and Ronaldo's written agreement to appear in public versions (no architecture impact; it gates the multisig signers). BP-14: the creator may join their own campaign, with an automatic notice (08, 11). BP-17: the creation rules, the Pyth charge and the 1% inside the audited version (16) | As listed |
@@ -2601,7 +2616,7 @@ The business risks are in P4 §7. These are the plan's. Severities marked "(P4 �
 | C-06 | Block Brazil in the app? | After L0 | 21; 22 |
 | Waitlist | What happens to the waitlist, its purge, its deletion form and `/pitch` when the landing leaves (§8.1) **[Q]** | Keep a deletion path and the purge until the last line expires, or use the list once and delete it | 09 |
 | Program key | A backup copy of the program-address keypair (Sprint 00) | Before Sprint 05 | 05 |
-| Weekly referral payout | Who signs the weekly referral payout, sent from the operations wallet (§3.4.11; roadmap v0.0.1 §5), and the treasury rule it pays from | Ties to P-7 and the multisig signers | 14 |
+| Weekly referral payout | Who signs the weekly referral payout, sent from the operations wallet (§3.4.11; roadmap v0.0.1 §5), and the treasury rule it pays from | **The signer answered 2026-10-13 (Ronaldo):** a person signs each weekly batch from an operations wallet, and no key goes on the server (built in Sprint 14). Still open: the treasury rule it pays from, which ties to P-7 and the multisig signers | With P-7 |
 | Demand-test thresholds | **Closed 2026-10-10 (Sprint 13 answer 7a).** The thresholds of the three demand tests (P2 §2.5) | Tests 1 and 2 keep v0.0.2's (fewer than 10% of wallets back within 30 days is a bad sign, 20% to 35% is reasonable; more than 40% of pots one-sided is a bad sign); test 3 is measured on devnet without a pass mark, which it gets before mainnet | 13 |
 | Prize harvesting | Which rule stops one wallet that enters both sides of a paid campaign nobody else joins from taking its prize (§13) | Decided 2026-10-10 (Sprint 13 answer 12a): a rule before mainnet, for example a prize paid only in proportion to the losing side; nothing changes on devnet | 16–17 (a program change, inside the audit scope) |
 | Price feeds | **Closed 2026-10-09 (answer 1).** Which Pyth feeds may a price campaign name, and does D-i (no accepted-account list) also cover feed ids? Today any Full feed of the upgraded receiver passes, so "price of a large asset" (§3.4.8) and "out of any creator's reach" (§3.4.10) are not enforced (Sprint 02 review, finding 1) | A list of our own, fixed in the program, per cluster. Day one: Pyth's official list of sponsored feeds (62 on mainnet, 17 on devnet, on 2026-10-09). Feeds are added from Sprint 06. D-i narrows to the price kind only. Built in Sprint 04 (§3.4.1, §3.4.10 row 4) | 04 |
@@ -2619,7 +2634,7 @@ The business risks are in P4 §7. These are the plan's. Severities marked "(P4 �
 | L-03, L-23, L-24 | The stuck-money notice; the split-history chart; the partner seal and highlight. L-24's partner report was answered on 2026-10-10 (Sprint 13 answer 4a): one text file per partner campaign, never an address; a partner who does not post keeps its campaign but loses the 72-hour highlight and is not invited again | -1; the report, 08 |
 | L-04, L-13 | The public name of the state during a dispute; the public contest channel | 12 |
 | L-09 | **Answered 2026-10-10 (2a):** what points are worth after devnet: nothing is promised; they are not money (`POINTS_WORTH`) | 13 |
-| L-10, L-14 | Where the referral balance is shown; stage 2 of the dispute before phase 1.2, and the second oracle (T8) | 14 |
+| L-10, L-14 | Where the referral balance is shown; the second oracle (T8). L-14's other half, stage 2 of the dispute before phase 1.2, was answered on 2026-10-13 (Ronaldo: both stages now; built in Sprint 14) | 14 |
 | L-11, L-18 | The sealed-entry screens; the Cloak page (15) and the SODAX page (17) | 15; 17 |
 | L-16 | Notifications: none in the web MVP; app push only with a decision and a privacy audit (§3.7) | — |
 | L-20, L-21 | The country-block text; the privacy policy (with L0) | 17 |
@@ -2644,6 +2659,7 @@ L-08 (test USDC), L-17 (the suggestions page) and L-19 (the cap's value) fall aw
 | D7 | A price campaign whose feed went stale | (b): `StaleFeed` voids it (see the Summary) |
 | D8 | The creation screen | (a): a design pass in Sprint -1 at web and phone widths, and a site slot after Sprint 11, which is Sprint 19 (see the Summary) |
 | D1, D2 | The fee base; the AI scope | Closed: 10% of the losing side (BP v0.0.3); no AI (D-q) |
+| S14-D2 | The same re-read paying a contested result (Sprint 14's red-team review, finding F1): a re-read runs the readers' own code, so a reader's bug repeats its wrong YES or NO, and "the same reading pays" closes the team's contest | (a), answered 2026-10-13 (Ronaldo), with a 24-hour stage 1: a matching re-read pays only after it (`RereadBeforeTimelock` before), and during it a team key can send the contest to stage 2 (`team_open_contest` again). Worst case 78 hours from resolution to payout (6 + 24 + 48). Built in Sprint 14 (§3.4.2, §3.4.7) **[FD]** |
 | Q1 | Who may trigger resolution and payout | (B): any wallet, directly on-chain; it chooses nothing. No button on the site **[FD]** (approved with v0.0.1) |
 | Q2 | A payout that cannot land | With lamport credits, the closed-USDC-account case is gone. What remains is a credit below rent to an empty wallet: it stays reserved, the keeper retries daily, and (b) the recipient can call the open instruction from their own funded wallet (L-15) **[FD]** |
 | Q3 | Entry limits | Both sides allowed, since another wallet gets around a ban; the first baker's exemption covers everything that first wallet puts in; minimum 0.01 SOL (P-5) **[FD]** |
@@ -2788,7 +2804,7 @@ Android app comes from D-n, which BP v0.0.4 records in P1 §2.2 and places after
 | BR-17 | Neutral prize or sealed entry; an undisclosed sponsor only with a neutral prize, through Cloak | P1 §3.7; P4 §2.2; P-8 | Sealed entry; off-chain sponsor record; Cloak page; privacy audit | §3.4.12, §3.6, §8 | 15 |
 | BR-18 | Sponsor perks: seal, name and link; posts case by case (BP-3) | P1 §3.7 | `content/partners.json` | §4 | 15 |
 | BR-19 | 20–30 launch partners with a free campaign and a 72-hour highlight | P1 §3.8; D-d | Team-key campaigns; `content/partners.json`; ranking | §3.4.10, §3.5, §4 | 02; 08; 10 |
-| BR-20 | Referral: 20% of the fee for 90 days; rebate up to 0.05 SOL (P-6, open); from day one on mainnet (BP-9) | P1 §3.9 | `ReferralLink`; indexer `referrals`; weekly routine; snapshot | §3.4.11, §3.5, §4 | 14 |
+| BR-20 | Referral: 20% of the fee for 90 days; rebate up to 0.05 SOL (P-6, answered 2026-10-13); from day one on mainnet (BP-9) | P1 §3.9 | `ReferralLink`; indexer `referrals`; weekly routine; snapshot | §3.4.11, §3.5, §4 | 14 |
 | BR-21 | Six campaign kinds; price by touch, with a fresh price on every entry | P1 §4.2 | `readers/*`; the price split | §3.4.8 | 01; 03 |
 | BR-22 | Exclusions: single-key outcomes, opinion, sports (phase 2), Token-2022 for now, small-token prices by steps | P1 §4.3 | Closed `ReaderKind` | §3.4.8 | 03 |
 | BR-23 | The program reads and compares; anyone can re-check the same account | P1 §4.4 | `resolve_campaign`; re-check panel; `recheck` | §3.4.6, §3.6 | 03; 05; 11 |
@@ -2821,11 +2837,12 @@ Android app comes from D-n, which BP v0.0.4 records in P1 §2.2 and places after
 
 ## Appendix B — Data contract sketches
 
-From proposal Appendix B, unchanged except that its section references point at this plan **[DP]**. They are sketches:
+From proposal Appendix B, unchanged except that its section references point at this plan and that the referral payout
+ledger left the indexer's sketch in Sprint 14 **[DP]**. They are sketches:
 Sprint 05 (SDK) and Sprint 08 (indexer, API) write the real schemas, and the program's Shank IDL stays the single source
 of the on-chain interface (proposal §2.3). No argument or field names a partner: a team key opens each partner campaign
-and `content/partners.json` links it (P-3). Not sketched here: the `referrals` table (Sprint 14) and the H1 sign-in
-store, which exists only if H1 is approved.
+and `content/partners.json` links it (P-3). Not sketched here: the `referrals` table (Sprint 14), the referral payout
+ledger (a SQLite file of its own, §4) and the H1 sign-in store, which exists only if H1 is approved.
 
 **SQLite (indexer), simplified.** Names follow D6.
 
@@ -2849,11 +2866,10 @@ CREATE TABLE settlements (signature TEXT, ix_index INTEGER, inner_index INTEGER,
   role TEXT,                                           -- 'baker' | 'creator' | 'opener'
   paid TEXT, reserved INTEGER, mode TEXT, slot INTEGER, PRIMARY KEY (signature, ix_index, inner_index));
 CREATE TABLE points (wallet TEXT PRIMARY KEY, points INTEGER NOT NULL, updated_slot INTEGER);
--- evidence tables: not rebuildable from RPC, snapshotted nightly
+-- evidence table: not rebuildable from RPC, snapshotted nightly
 CREATE TABLE feed_history (feed_account TEXT, publish_time INTEGER, price TEXT, conf TEXT, exponent INTEGER,
   posted_slot INTEGER, PRIMARY KEY (feed_account, publish_time));
-CREATE TABLE referral_payouts (week TEXT, referrer TEXT, amount TEXT, basis_json TEXT, tx_signature TEXT,
-  PRIMARY KEY (week, referrer));
+-- referral_payouts is not here: the ledger is a SQLite file of its own (§4; services/indexer/src/referral/ledger.ts)
 CREATE TABLE checkpoints (source TEXT PRIMARY KEY, last_signature TEXT, last_slot INTEGER);
 ```
 
