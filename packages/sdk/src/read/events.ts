@@ -2,8 +2,8 @@
  * Purpose: the program's events: each name with its discriminator and the Codama decoder of its
  *          payload, and the decoding of one event's inner-instruction data `[0xFF, discriminator,
  *          payload]` (TP 3.4.14). Mirrors programs/brot-markets/src/events.rs and events/*.rs.
- * Version: 0.1.0
- * Sprint:  05 (SDK)
+ * Version: 0.1.1
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13) appends discriminators 18 to 22
  *
  * The IDL carries each event as a type but not its discriminator, so the table below is written by
  * hand; tests/sdk/contract-events.test.ts reads every `impl Event for X { const DISCRIMINATOR: u8 = n }` in
@@ -35,6 +35,11 @@ export type EventPayloads = {
   CampaignClosed: T.CampaignClosed;
   FeesSwept: T.FeesSwept;
   LateTallied: T.LateTallied;
+  ReferralLinked: T.ReferralLinked;
+  CampaignReread: T.CampaignReread;
+  ContestClosed: T.ContestClosed;
+  SealedFeeHeld: T.SealedFeeHeld;
+  SealedFeeSettled: T.SealedFeeSettled;
 };
 
 export type EventName = keyof EventPayloads;
@@ -66,6 +71,11 @@ export const EVENTS: readonly Entry<EventName>[] = [
   entry("CampaignClosed", 15, T.getCampaignClosedDecoder()),
   entry("FeesSwept", 16, T.getFeesSweptDecoder()),
   entry("LateTallied", 17, T.getLateTalliedDecoder()),
+  entry("ReferralLinked", 18, T.getReferralLinkedDecoder()),
+  entry("CampaignReread", 19, T.getCampaignRereadDecoder()),
+  entry("ContestClosed", 20, T.getContestClosedDecoder()),
+  entry("SealedFeeHeld", 21, T.getSealedFeeHeldDecoder()),
+  entry("SealedFeeSettled", 22, T.getSealedFeeSettledDecoder()),
 ];
 
 const BY_DISCRIMINATOR: ReadonlyMap<number, Entry<EventName>> = new Map(EVENTS.map((e) => [e.discriminator, e]));
@@ -85,7 +95,7 @@ export function decodeEventData(data: Uint8Array): BrotEvent | null {
   return { name: found.name, discriminator: found.discriminator, data: found.decoder.decode(data, 2) } as BrotEvent;
 }
 
-/** The campaign an event belongs to, for the campaign-scoped events (all but config, pause and sweep). */
+/** The campaign an event belongs to, for the campaign-scoped events (all but config, pause, sweep and referral). */
 export function eventCampaign(event: BrotEvent): string | null {
   const data = event.data as { campaign?: string };
   return typeof data.campaign === "string" ? data.campaign : null;

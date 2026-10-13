@@ -5,8 +5,8 @@
  *          a signer's wallet: a join names its campaign, side, amount, guards and rents; an opening names its
  *          target in the feed's units, its deadline, its creator, what it pays, the SOL price below which the
  *          payment is refused, and the terms it binds (review, M3 and L7).
- * Version: 0.1.2 (the sixth kind: a graduation opening's one read-only config after the listed accounts, named)
- * Sprint:  05 (SDK)
+ * Version: 0.1.3 (an instruction the summary does not describe yet is refused by name)
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13)
  *
  * The context (the campaign a join points at; an opening's price exponent and terms) is what the screen read
  * through its RPC. Without it the summary still says everything the bytes hold, in raw units.
@@ -71,7 +71,9 @@ function extraProblem(type: B, kind: unknown, extra: readonly { role: AccountRol
 /** Why `ix` is not shaped as the IDL says, or `null`. The fee payer may fill any slot as a writable signer. */
 function structureProblem(ix: Instruction, parsed: Parsed, feePayer: Address | undefined): string | null {
   const type = parsed.instructionType;
-  if (ix.data?.length !== DATA_SIZE[type]) return "the data is not the instruction's size";
+  const size = DATA_SIZE[type];
+  if (size === undefined) return "the summary does not describe this instruction yet";
+  if (ix.data?.length !== size) return "the data is not the instruction's size";
   const expected = ROLES.get(B[type]) ?? [];
   const accounts = ix.accounts ?? [];
   if (accounts.length < expected.length) return "accounts are missing";

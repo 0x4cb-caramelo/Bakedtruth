@@ -2,16 +2,30 @@
  * Purpose: the expectations of the slot matrix: what each account slot of each instruction is, and
  *          which BrotError a refused mutation gets, from the checks order of checks.rs (arguments,
  *          signer and writable flags, distinct, system and event slots, account loads, roles, rules).
- * Version: 0.0.1
+ * Version: 0.0.2
  * Sprint:  04 (lane F: slot matrix). Expectations are predictions from the contract and are checked
- *          by tests/brot/slot-matrix.test.ts at integration.
+ *          by tests/brot/slot-matrix.test.ts at integration. The scaffold of Sprints 14–15 (2026-10-13) adds the
+ *          five new instructions, disabled until their lanes, and the slot kinds of `ReferralLink` and `SealedFee`.
  */
 import { CAMPAIGN, ENTRY, GLOBAL_CONFIG, JOIN } from "../tests/brot/structs";
+import { REFERRAL_LINK, SEALED_FEE } from "../tests/brot/structs-14-15";
 import { layoutSize } from "../tests/brot/layouts";
 
 /** What a slot is. Only signers and writable slots are in the matrix; the rest need no kind. */
 export type Kind =
-  "admin" | "pending" | "team" | "payer" | "stored" | "config" | "campaign" | "entry" | "join" | "vault" | "feeVault";
+  | "admin"
+  | "pending"
+  | "team"
+  | "payer"
+  | "stored"
+  | "config"
+  | "campaign"
+  | "entry"
+  | "join"
+  | "vault"
+  | "feeVault"
+  | "referral"
+  | "sealedFee";
 
 export type Slot = {
   kind: Kind;
@@ -35,7 +49,8 @@ export const roleError = (kind: Kind) => ROLE_ERROR[kind];
 
 /** Account types a slot may be given in a type case (the brief's list; `System` is the stranger case). */
 export const TYPES = ["Token", "Config", "Campaign", "Entry", "Join"] as const;
-export type Source = (typeof TYPES)[number] | "Wallet" | "Vault";
+/** Sprints 14 and 15's accounts are sources of the alias cases only: no type case gives them to other slots yet. */
+export type Source = (typeof TYPES)[number] | "Wallet" | "Vault" | "ReferralLink" | "SealedFee";
 
 /** Data sizes: a zero-data PDA is `Vault`; the rest come from the kit's layouts. */
 export const SIZE: Record<Source, number> = {
@@ -46,6 +61,8 @@ export const SIZE: Record<Source, number> = {
   Entry: layoutSize(ENTRY),
   Join: layoutSize(JOIN),
   Vault: 0,
+  ReferralLink: layoutSize(REFERRAL_LINK),
+  SealedFee: layoutSize(SEALED_FEE),
 };
 
 const C = { kind: "config" } as const;
@@ -103,6 +120,27 @@ export const SPEC: Record<string, Record<string, Slot>> = {
   },
   SweepFees: { feeVault: FEE, feeRecipient: { kind: "stored", stored: "FeeRecipientMismatch" } },
   TallyLateJoins: { campaign: CAMP, entry: { kind: "entry" }, baker: { kind: "stored", stored: "WrongBaker" } },
+  // The scaffold of Sprints 14–15 (2026-10-13): disabled below until each lane lands.
+  UserLinkReferrer: {
+    referee: { kind: "payer", stranger: "PdaMismatch" },
+    referralLink: { kind: "referral", create: true },
+  },
+  RereadCampaign: { campaign: CAMP, config: C },
+  AdminDecideContest: { admin: { kind: "admin" }, config: C, campaign: CAMP },
+  SponsorJoinCampaign: {
+    sponsor: { kind: "payer", stranger: "PdaMismatch" },
+    campaign: CAMP,
+    vault: VAULT,
+    entry: { kind: "entry", create: true },
+    join: { kind: "join", create: true },
+    sealedFee: { kind: "sealedFee", create: true },
+  },
+  SettleSealedFee: {
+    sealedFee: { kind: "sealedFee" },
+    campaign: CAMP,
+    sponsor: { kind: "stored", stored: "WrongSponsor" },
+    feeVault: FEE,
+  },
 };
 
 /**
@@ -232,10 +270,18 @@ export const OVERRIDES: Record<string, { expect: string; why: string }> = {
 export const overrideOf = (key: string, generic: string) => OVERRIDES[key]?.expect ?? generic;
 
 /**
- * Instructions disabled by decision (2026-10-09): every case is refused with the one error. The baseline is refused
- * too, so the matrix checks that the refusal moves no lamport.
+ * Instructions disabled by decision (2026-10-09), and the stubs of the scaffold of Sprints 14–15 (2026-10-13): every
+ * case is refused with the one error. The baseline is refused too, so the matrix checks that the refusal moves no
+ * lamport. One entry per line: each lane deletes its own when it lands.
  */
-export const DISABLED: Record<string, string> = { TeamOpenContest: "ContestExitDisabled" };
+export const DISABLED: Record<string, string> = {
+  TeamOpenContest: "ContestExitDisabled",
+  UserLinkReferrer: "UnknownInstruction",
+  RereadCampaign: "UnknownInstruction",
+  AdminDecideContest: "UnknownInstruction",
+  SponsorJoinCampaign: "UnknownInstruction",
+  SettleSealedFee: "UnknownInstruction",
+};
 
 /** The source type of a slot's current account, as a type case or an alias sees it. */
 export function typeOf(slot: Slot): Source {
@@ -244,6 +290,8 @@ export function typeOf(slot: Slot): Source {
   if (slot.kind === "campaign") return "Campaign";
   if (slot.kind === "entry") return "Entry";
   if (slot.kind === "join") return "Join";
+  if (slot.kind === "referral") return "ReferralLink";
+  if (slot.kind === "sealedFee") return "SealedFee";
   return "Wallet";
 }
 

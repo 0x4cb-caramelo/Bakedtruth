@@ -3,16 +3,19 @@
  *          admin, team and settlement instructions), each with the values it signs: the new admin, the fee
  *          recipient, the team keys, every creation parameter. Also the exact data size of every instruction,
  *          so a summary never describes bytes the program would refuse as `BadInstructionData`.
- * Version: 0.1.2 (Sprint 19: the creator's share is of the entries)
- * Sprint:  05 (SDK)
+ * Version: 0.1.3 (no size, so never trusted, for the scaffold's five stubs until their lanes)
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13)
  */
 import * as G from "../idl/generated/instructions";
 import { BrotMarketsInstruction as B } from "../idl/generated/programs";
 import { bytesToHex, type Bytes } from "../read/bytes";
 import { formatBps, formatSol } from "../read/format";
 
-/** Each instruction's data size, discriminator included, from the generated decoders. */
-export const DATA_SIZE: Record<B, number> = {
+/**
+ * Each instruction's data size, discriminator included, from the generated decoders. The scaffold's stubs of Sprints
+ * 14–15 have none until their lanes write their summary, so the summary never trusts them.
+ */
+export const DATA_SIZE: Partial<Record<B, number>> = {
   [B.AdminInitializeConfig]: G.getAdminInitializeConfigInstructionDataDecoder().fixedSize,
   [B.AdminSetTeam]: G.getAdminSetTeamInstructionDataDecoder().fixedSize,
   [B.AdminSetCreationParams]: G.getAdminSetCreationParamsInstructionDataDecoder().fixedSize,

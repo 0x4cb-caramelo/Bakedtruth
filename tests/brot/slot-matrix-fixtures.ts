@@ -2,9 +2,10 @@
  * Purpose: one valid instruction per Brot Markets instruction, in a world of its own, the baseline
  *          each slot case mutates. Every baseline must succeed before its cases mean anything; the test
  *          checks that first. Built from the kit's injectors, so no instruction's own path is needed.
- * Version: 0.0.1
+ * Version: 0.0.2
  * Sprint:  04 (lane F). Lanes C and D's bodies decide whether the settlement baselines succeed; the
- *          integration run is where they are checked.
+ *          integration run is where they are checked. The scaffold of Sprints 14–15 (2026-10-13) spreads in
+ *          its five baselines (slot-matrix-fixtures-14-15.ts).
  */
 import {
   generateKeyPairSigner,
@@ -23,6 +24,7 @@ import { joinWorld } from "./join-campaign-support";
 import { encode, layoutSize } from "./layouts";
 import { settleSplit } from "./money-model";
 import { JOIN } from "./structs";
+import { BASELINES_14_15 } from "./slot-matrix-fixtures-14-15";
 import { openArgs, openingWorld } from "./opening";
 import * as P from "./program";
 import { resolveIx, resolveWorld, supplyCampaign } from "./resolve-support";
@@ -263,4 +265,5 @@ export const BASELINES: Record<string, () => Promise<Baseline>> = {
     w.client.svm.airdrop(feeVault, lamports(2n * SOL));
     return { w, ix: S.sweepFeesIx(await P.configPda(), feeVault, feeRecipient.address) };
   },
+  ...BASELINES_14_15,
 };

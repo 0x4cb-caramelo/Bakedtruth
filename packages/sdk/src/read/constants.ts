@@ -2,8 +2,8 @@
  * Purpose: the program's address and the constants compiled into it that a client needs: seeds, other
  *          programs, code ceilings, price and reader bounds, account sizes, and the enums. Mirrors
  *          programs/brot-markets/src/constants.rs; tests/sdk/contract-source.test.ts compares the two.
- * Version: 0.1.2 (Meteora DBC, wSOL and the graduation kind's floor and distance)
- * Sprint:  05 (SDK); the sixth kind (`DbcGraduated`)
+ * Version: 0.1.3 (the seeds of `ReferralLink` and `SealedFee`)
+ * Sprint:  05 (SDK); the sixth kind (`DbcGraduated`); the scaffold of Sprints 14–15 (2026-10-13)
  *
  * The program address is read from the IDL, which shank-cli writes from `declare_id!` (Sprint 00's
  * carried item: "the SDK takes the program address from the IDL"). The time constants that differ in
@@ -38,6 +38,8 @@ export const SEEDS = {
   vault: "vault",
   entry: "entry",
   join: "join",
+  referral: "referral",
+  sealedFee: "sealed",
   eventAuthority: "__event_authority",
 } as const;
 

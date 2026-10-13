@@ -4,8 +4,8 @@
  *          constants.rs and join_rules.rs, the real and drill time constants, both compiled feed lists, and
  *          the event authority's seeds used to sign only in `emit`.
  *          Needs no binary.
- * Version: 0.1.0
- * Sprint:  05 (SDK)
+ * Version: 0.1.1
+ * Sprint:  05 (SDK); the seeds of the scaffold of Sprints 14–15 (2026-10-13)
  */
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
@@ -135,6 +135,8 @@ describe("sdk constants match the program source", () => {
       VAULT: R.SEEDS.vault,
       ENTRY: R.SEEDS.entry,
       JOIN: R.SEEDS.join,
+      REFERRAL: R.SEEDS.referral,
+      SEALED_FEE: R.SEEDS.sealedFee,
       EVENT_AUTHORITY: R.SEEDS.eventAuthority,
     });
     const feedBytes = /SOL_USD_FEED_ID: \[u8; 32\] = \[([^\]]+)\]/

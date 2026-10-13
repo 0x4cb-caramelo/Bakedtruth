@@ -1197,6 +1197,349 @@
         "type": "u8",
         "value": 21
       }
+    },
+    {
+      "name": "UserLinkReferrer",
+      "accounts": [
+        {
+          "name": "referee",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The signing wallet; pays the rent"
+          ]
+        },
+        {
+          "name": "referralLink",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "ReferralLink, PDA [\"referral\", referee], created"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System Program"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "linkReferrerArgs",
+          "type": {
+            "defined": "LinkReferrerArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 22
+      }
+    },
+    {
+      "name": "RereadCampaign",
+      "accounts": [
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign, Contested, stage 1"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig: the open count"
+          ]
+        },
+        {
+          "name": "metricAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Campaign.metric_account"
+          ]
+        },
+        {
+          "name": "proofAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Price kind: a proof, any Full account of the feed; other kinds: not read"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 23
+      }
+    },
+    {
+      "name": "AdminDecideContest",
+      "accounts": [
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "GlobalConfig.admin"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig: the open count"
+          ]
+        },
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign, Contested, stage 2"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "decideContestArgs",
+          "type": {
+            "defined": "DecideContestArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 24
+      }
+    },
+    {
+      "name": "SponsorJoinCampaign",
+      "accounts": [
+        {
+          "name": "sponsor",
+          "isMut": true,
+          "isSigner": true,
+          "docs": [
+            "The joining wallet; pays the entry, the fee and the rents"
+          ]
+        },
+        {
+          "name": "config",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "GlobalConfig: the pause, the minimum and the price rules"
+          ]
+        },
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign"
+          ]
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The campaign's vault"
+          ]
+        },
+        {
+          "name": "entry",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Entry, PDA [\"entry\", campaign, sponsor], created on the first join"
+          ]
+        },
+        {
+          "name": "metricAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Campaign.metric_account, read by the join lock"
+          ]
+        },
+        {
+          "name": "join",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Join, PDA [\"join\", campaign, sponsor, index], created: one per join"
+          ]
+        },
+        {
+          "name": "solUsdPrice",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The sponsored SOL/USD account of SOL_USD_FEED_ID"
+          ]
+        },
+        {
+          "name": "sealedFee",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "SealedFee, PDA [\"sealed\", campaign, sponsor], created on the first sealed entry, then topped up"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System Program"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "sponsorJoinArgs",
+          "type": {
+            "defined": "SponsorJoinArgs"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 25
+      }
+    },
+    {
+      "name": "SettleSealedFee",
+      "accounts": [
+        {
+          "name": "sealedFee",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "SealedFee, closed"
+          ]
+        },
+        {
+          "name": "campaign",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Campaign, Settling or Settled: sealed_fees_open decremented"
+          ]
+        },
+        {
+          "name": "sponsor",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "SealedFee.sponsor: receives the refund and the rent"
+          ]
+        },
+        {
+          "name": "feeVault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The fee vault, PDA [\"fee_vault\"]"
+          ]
+        },
+        {
+          "name": "eventAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "PDA [\"__event_authority\"]"
+          ]
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "This program"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 26
+      }
     }
   ],
   "accounts": [
@@ -1641,15 +1984,10 @@
             ]
           },
           {
-            "name": "reserved",
-            "type": {
-              "array": [
-                "u8",
-                4
-              ]
-            },
+            "name": "sealedFeesOpen",
+            "type": "u32",
             "attrs": [
-              "padding"
+              "idl-type"
             ]
           }
         ]
@@ -1895,6 +2233,128 @@
               "array": [
                 "u8",
                 8
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "ReferralLink",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tag",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "referee",
+            "type": "publicKey"
+          },
+          {
+            "name": "referrer",
+            "type": "publicKey"
+          },
+          {
+            "name": "linkedAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "linkedSlot",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                13
+              ]
+            },
+            "attrs": [
+              "padding"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "SealedFee",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tag",
+            "type": "u8"
+          },
+          {
+            "name": "version",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "sponsor",
+            "type": "publicKey"
+          },
+          {
+            "name": "feeLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "entryLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "usdTotal",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "sealedCount",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                17
               ]
             },
             "attrs": [
@@ -2717,6 +3177,36 @@
       }
     },
     {
+      "name": "ReferralLinked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "referee",
+            "type": "publicKey"
+          },
+          {
+            "name": "referrer",
+            "type": "publicKey"
+          },
+          {
+            "name": "linkedAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "linkedSlot",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "ResultConfirmed",
       "type": {
         "kind": "struct",
@@ -2821,6 +3311,253 @@
           {
             "name": "contestEndsAt",
             "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignReread",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "same",
+            "type": "bool",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "outcome",
+            "type": {
+              "defined": "Outcome"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "voidReason",
+            "type": {
+              "defined": "VoidReason"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "metLate",
+            "type": "bool",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "observedValue",
+            "type": "i128",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "publishTime",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "contestStage",
+            "type": {
+              "defined": "ContestStage"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "contestEndsAt",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "ContestClosed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "signer",
+            "type": "publicKey"
+          },
+          {
+            "name": "decision",
+            "type": {
+              "defined": "ContestDecision"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "voidReason",
+            "type": {
+              "defined": "VoidReason"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "noteHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "SealedFeeHeld",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "sponsor",
+            "type": "publicKey"
+          },
+          {
+            "name": "entryUsd",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "paid",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "entryLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "feeLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "feeTotal",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "price",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "exponent",
+            "type": "i32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "publishTime",
+            "type": "i64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "SealedFeeSettled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "publicKey"
+          },
+          {
+            "name": "seq",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "sponsor",
+            "type": "publicKey"
+          },
+          {
+            "name": "feeLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "refunded",
+            "type": "bool",
             "attrs": [
               "idl-type"
             ]
@@ -3013,6 +3750,98 @@
             "attrs": [
               "idl-type"
             ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "SponsorJoinArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "side",
+            "type": {
+              "defined": "Side"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "entryUsd",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "maxLamports",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "minReturnBps",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "expectedEntryTotal",
+            "type": "u64",
+            "attrs": [
+              "idl-type"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "LinkReferrerArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "referrer",
+            "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DecideContestArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "decision",
+            "type": {
+              "defined": "ContestDecision"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "voidReason",
+            "type": {
+              "defined": "VoidReason"
+            },
+            "attrs": [
+              "idl-type"
+            ]
+          },
+          {
+            "name": "noteHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           }
         ]
       }
@@ -3323,6 +4152,20 @@
           },
           {
             "name": "Admin"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ContestDecision",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Confirm"
+          },
+          {
+            "name": "Void"
           }
         ]
       }
@@ -4003,6 +4846,66 @@
       "code": 6152,
       "name": "TargetNotThreshold",
       "msg": "Row 3: the target is not the curve's graduation threshold (`migration_quote_threshold`)"
+    },
+    {
+      "code": 6153,
+      "name": "InvalidReferrer",
+      "msg": "The referrer is the zero address or the referee itself"
+    },
+    {
+      "code": 6160,
+      "name": "NotContested",
+      "msg": "The campaign is not Contested"
+    },
+    {
+      "code": 6161,
+      "name": "WrongContestStage",
+      "msg": "The contest is not at the stage this instruction acts on"
+    },
+    {
+      "code": 6162,
+      "name": "ContestDeadlinePassed",
+      "msg": "The contest stage's deadline has passed"
+    },
+    {
+      "code": 6163,
+      "name": "ContestNotLapsed",
+      "msg": "Stage 2 of the contest has not lapsed yet"
+    },
+    {
+      "code": 6164,
+      "name": "InvalidContestDecision",
+      "msg": "The contest decision is neither Confirm nor Void"
+    },
+    {
+      "code": 6165,
+      "name": "RereadNotTopLevel",
+      "msg": "reread_campaign must run at the transaction's top level, never by CPI"
+    },
+    {
+      "code": 6170,
+      "name": "SealedEntryBelowFloor",
+      "msg": "The sealed entry is below the US$ floor (the config's opening_fee_usd)"
+    },
+    {
+      "code": 6171,
+      "name": "SealedEntryAboveMaxLamports",
+      "msg": "The sealed entry would cost more lamports than max_lamports"
+    },
+    {
+      "code": 6172,
+      "name": "SealedFeesOpen",
+      "msg": "A sponsor's held fee on this campaign is not settled yet"
+    },
+    {
+      "code": 6173,
+      "name": "SealedFeeMismatch",
+      "msg": "The SealedFee account does not belong to this campaign and sponsor"
+    },
+    {
+      "code": 6174,
+      "name": "WrongSponsor",
+      "msg": "The account is not the SealedFee's stored sponsor"
     }
   ],
   "metadata": {

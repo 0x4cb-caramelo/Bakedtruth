@@ -4,8 +4,8 @@
  *          and `join_count` of the Entry (4 of 16, the reserve now 12). Both accounts keep their size and their
  *          first bytes, so a version 1 account reads the same, with the new fields zero. The pure checks run
  *          now; the program check needs the binary (integration).
- * Version: 0.0.1
- * Sprint:  04 (contract freeze, lane E)
+ * Version: 0.0.2 (the Campaign's last 4 reserved bytes are `sealed_fees_open`)
+ * Sprint:  04 (contract freeze, lane E); the scaffold of Sprints 14–15 (2026-10-13) takes the rest of the reserve
  */
 import { describe, expect, test } from "bun:test";
 import { getAddressEncoder, getProgramDerivedAddress, lamports, type Address } from "@solana/kit";
@@ -18,7 +18,10 @@ import * as P from "./program";
 import { balance, createWorld, expectError, expectOk, fundedWallet, now, rentFor, send, type World } from "./setup";
 import { CAMPAIGN, ENTRY } from "./structs";
 
-/** The fields this sprint and Sprint 03 took out of the Campaign's 64 reserved bytes (the amendment included). */
+/**
+ * The fields this sprint and Sprint 03 took out of the Campaign's 64 reserved bytes (the amendment included), and
+ * Sprint 15's `sealed_fees_open`, its last 4.
+ */
 const CAMPAIGN_ADDED = [
   "epoch",
   "min_entry_lamports",
@@ -28,6 +31,7 @@ const CAMPAIGN_ADDED = [
   "entries_untallied",
   "one_sided_fees",
   "creator_share_reserved",
+  "sealed_fees_open",
 ];
 /** The fields the Entry took out of its 16 reserved bytes (the amendment included). */
 const ENTRY_ADDED = ["join_count", "joins_tallied", "late_yes", "late_no"];
@@ -104,7 +108,7 @@ describe("layout version 1 (Sprint 02 accounts)", () => {
       entries_untallied: 0,
       one_sided_fees: 0n,
       creator_share_reserved: 0n,
-      _reserved: new Uint8Array(4),
+      sealed_fees_open: 0,
     });
     expect(Buffer.from(grown.subarray(0, epochAt)).equals(Buffer.from(old.subarray(0, epochAt)))).toBe(true);
     // A version 1 account reads back under the new layout with the new fields at zero.

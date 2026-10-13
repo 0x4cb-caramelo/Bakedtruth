@@ -3,8 +3,8 @@
  *          instruction (which tests/brot/idl.test.ts checks against the IDL and every LiteSVM test sends):
  *          the same data bytes and the same slots with the same roles, for all 22 instructions. Needs
  *          no binary.
- * Version: 0.1.0
- * Sprint:  05 (SDK)
+ * Version: 0.1.1
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13) names its five stubs, which have no builder yet
  */
 import { describe, expect, test } from "bun:test";
 import { generateKeyPairSigner, type Instruction } from "@solana/kit";
@@ -22,6 +22,17 @@ const shape = (ix: Instruction) => ({
   data: Array.from(ix.data ?? []),
   accounts: (ix.accounts ?? []).map((a) => [a.address, a.role]),
 });
+/**
+ * The scaffold's stubs of Sprints 14–15 (2026-10-13): in the IDL, refused by the program, with no SDK builder until
+ * their lanes. Each lane deletes its own name when it adds the builder and its pair below.
+ */
+const NO_BUILDER_YET = [
+  "UserLinkReferrer",
+  "RereadCampaign",
+  "AdminDecideContest",
+  "SponsorJoinCampaign",
+  "SettleSealedFee",
+];
 const params = Object.fromEntries(
   Object.entries(DEFAULT_PARAMS).map(([k, v]) => [camel(k), v]),
 ) as unknown as T.CreationParamsArgs;
@@ -91,7 +102,8 @@ describe("sdk builders match the test kit", () => {
       [T.buildCloseCampaign({ campaign, rentPayer: other }), IS.closeCampaignIx(campaign, vault, other, feeVault)],
       [T.buildSweepFees({ feeRecipient: other }), IS.sweepFeesIx(config, feeVault, other)],
     ];
-    expect(pairs.length).toBe(IDL.instructions.length);
+    expect(NO_BUILDER_YET.filter((name) => !IDL.instructions.some((ix) => ix.name === name))).toEqual([]);
+    expect(pairs.length).toBe(IDL.instructions.length - NO_BUILDER_YET.length);
     for (const [sdk, kit] of pairs) expect(shape(await sdk)).toEqual(shape(await kit));
   });
 

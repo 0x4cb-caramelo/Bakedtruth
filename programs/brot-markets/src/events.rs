@@ -1,8 +1,9 @@
 //! Purpose: the events, one per instruction, and how they leave the program: a self-CPI signed by
 //!          the event-authority PDA, so they survive log truncation (T4).
-//! Version: 0.0.3
+//! Version: 0.0.4
 //! Sprint: 02 (pot core on Pinocchio); structs frozen at the sprint's opening, `emit` by lane F;
-//!         Sprint 03 moves the campaign events to `events/campaign.rs`
+//!         Sprint 03 moves the campaign events to `events/campaign.rs`; the scaffold of Sprints
+//!         14–15 (2026-10-13) appends discriminators 18 to 22
 //!
 //! Wire format of an event: an inner instruction to this program whose data is
 //! `[EVENT_IX_TAG, discriminator, payload]`, the payload being the event's bytes as laid out
@@ -94,7 +95,11 @@ mod finalize;
 pub use finalize::{CampaignClosed, CampaignFinalized, LateTallied};
 mod payout;
 pub use payout::{CreatorShareSettled, EntrySettled, FeeCollected, FeesSwept, PrizeSettled};
+mod referral;
+pub use referral::ReferralLinked;
 mod review;
-pub use review::{CampaignVoided, ContestOpened, ResultConfirmed};
+pub use review::{CampaignReread, CampaignVoided, ContestClosed, ContestOpened, ResultConfirmed};
+mod sealed;
+pub use sealed::{SealedFeeHeld, SealedFeeSettled};
 mod self_cpi;
 pub use self_cpi::{emit, event_data, process_event_instruction, EVENT_BUFFER_LEN};

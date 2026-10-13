@@ -36,6 +36,8 @@ import {
   getEntryCodec,
   getGlobalConfigCodec,
   getJoinCodec,
+  getReferralLinkCodec,
+  getSealedFeeCodec,
   type Campaign,
   type CampaignArgs,
   type Entry,
@@ -44,9 +46,14 @@ import {
   type GlobalConfigArgs,
   type Join,
   type JoinArgs,
+  type ReferralLink,
+  type ReferralLinkArgs,
+  type SealedFee,
+  type SealedFeeArgs,
 } from "../accounts";
 import {
   getAdminAcceptAdminInstruction,
+  getAdminDecideContestInstruction,
   getAdminInitializeConfigInstruction,
   getAdminResumeEntriesInstruction,
   getAdminSetCreationParamsInstruction,
@@ -56,10 +63,13 @@ import {
   getCloseCampaignInstruction,
   getCollectFeeInstruction,
   getFinalizeCampaignInstruction,
+  getRereadCampaignInstruction,
   getResolveCampaignInstruction,
   getSettleCreatorShareInstruction,
   getSettleEntryInstruction,
   getSettlePrizeInstruction,
+  getSettleSealedFeeInstruction,
+  getSponsorJoinCampaignInstruction,
   getSweepFeesInstruction,
   getTallyLateJoinsInstruction,
   getTeamConfirmResultInstruction,
@@ -67,8 +77,10 @@ import {
   getTeamPauseEntriesInstruction,
   getTeamVoidCampaignInstruction,
   getUserJoinCampaignInstruction,
+  getUserLinkReferrerInstruction,
   getUserOpenCampaignInstruction,
   parseAdminAcceptAdminInstruction,
+  parseAdminDecideContestInstruction,
   parseAdminInitializeConfigInstruction,
   parseAdminResumeEntriesInstruction,
   parseAdminSetCreationParamsInstruction,
@@ -78,10 +90,13 @@ import {
   parseCloseCampaignInstruction,
   parseCollectFeeInstruction,
   parseFinalizeCampaignInstruction,
+  parseRereadCampaignInstruction,
   parseResolveCampaignInstruction,
   parseSettleCreatorShareInstruction,
   parseSettleEntryInstruction,
   parseSettlePrizeInstruction,
+  parseSettleSealedFeeInstruction,
+  parseSponsorJoinCampaignInstruction,
   parseSweepFeesInstruction,
   parseTallyLateJoinsInstruction,
   parseTeamConfirmResultInstruction,
@@ -89,8 +104,10 @@ import {
   parseTeamPauseEntriesInstruction,
   parseTeamVoidCampaignInstruction,
   parseUserJoinCampaignInstruction,
+  parseUserLinkReferrerInstruction,
   parseUserOpenCampaignInstruction,
   type AdminAcceptAdminInput,
+  type AdminDecideContestInput,
   type AdminInitializeConfigInput,
   type AdminResumeEntriesInput,
   type AdminSetCreationParamsInput,
@@ -101,6 +118,7 @@ import {
   type CollectFeeInput,
   type FinalizeCampaignInput,
   type ParsedAdminAcceptAdminInstruction,
+  type ParsedAdminDecideContestInstruction,
   type ParsedAdminInitializeConfigInstruction,
   type ParsedAdminResumeEntriesInstruction,
   type ParsedAdminSetCreationParamsInstruction,
@@ -110,10 +128,13 @@ import {
   type ParsedCloseCampaignInstruction,
   type ParsedCollectFeeInstruction,
   type ParsedFinalizeCampaignInstruction,
+  type ParsedRereadCampaignInstruction,
   type ParsedResolveCampaignInstruction,
   type ParsedSettleCreatorShareInstruction,
   type ParsedSettleEntryInstruction,
   type ParsedSettlePrizeInstruction,
+  type ParsedSettleSealedFeeInstruction,
+  type ParsedSponsorJoinCampaignInstruction,
   type ParsedSweepFeesInstruction,
   type ParsedTallyLateJoinsInstruction,
   type ParsedTeamConfirmResultInstruction,
@@ -121,11 +142,15 @@ import {
   type ParsedTeamPauseEntriesInstruction,
   type ParsedTeamVoidCampaignInstruction,
   type ParsedUserJoinCampaignInstruction,
+  type ParsedUserLinkReferrerInstruction,
   type ParsedUserOpenCampaignInstruction,
+  type RereadCampaignInput,
   type ResolveCampaignInput,
   type SettleCreatorShareInput,
   type SettleEntryInput,
   type SettlePrizeInput,
+  type SettleSealedFeeInput,
+  type SponsorJoinCampaignInput,
   type SweepFeesInput,
   type TallyLateJoinsInput,
   type TeamConfirmResultInput,
@@ -133,6 +158,7 @@ import {
   type TeamPauseEntriesInput,
   type TeamVoidCampaignInput,
   type UserJoinCampaignInput,
+  type UserLinkReferrerInput,
   type UserOpenCampaignInput,
 } from "../instructions";
 
@@ -144,6 +170,8 @@ export enum BrotMarketsAccount {
   GlobalConfig,
   Entry,
   Join,
+  ReferralLink,
+  SealedFee,
 }
 
 export enum BrotMarketsInstruction {
@@ -169,6 +197,11 @@ export enum BrotMarketsInstruction {
   CloseCampaign,
   SweepFees,
   TallyLateJoins,
+  UserLinkReferrer,
+  RereadCampaign,
+  AdminDecideContest,
+  SponsorJoinCampaign,
+  SettleSealedFee,
 }
 
 export function identifyBrotMarketsInstruction(
@@ -241,6 +274,21 @@ export function identifyBrotMarketsInstruction(
   if (containsBytes(data, getU8Encoder().encode(21), 0)) {
     return BrotMarketsInstruction.TallyLateJoins;
   }
+  if (containsBytes(data, getU8Encoder().encode(22), 0)) {
+    return BrotMarketsInstruction.UserLinkReferrer;
+  }
+  if (containsBytes(data, getU8Encoder().encode(23), 0)) {
+    return BrotMarketsInstruction.RereadCampaign;
+  }
+  if (containsBytes(data, getU8Encoder().encode(24), 0)) {
+    return BrotMarketsInstruction.AdminDecideContest;
+  }
+  if (containsBytes(data, getU8Encoder().encode(25), 0)) {
+    return BrotMarketsInstruction.SponsorJoinCampaign;
+  }
+  if (containsBytes(data, getU8Encoder().encode(26), 0)) {
+    return BrotMarketsInstruction.SettleSealedFee;
+  }
   throw new SolanaError(SOLANA_ERROR__PROGRAM_CLIENTS__FAILED_TO_IDENTIFY_INSTRUCTION, {
     instructionData: data,
     programName: "brotMarkets",
@@ -273,7 +321,12 @@ export type ParsedBrotMarketsInstruction<TProgram extends string = "5Rx8o5c5frxq
   | ({ instructionType: BrotMarketsInstruction.SettlePrize } & ParsedSettlePrizeInstruction<TProgram>)
   | ({ instructionType: BrotMarketsInstruction.CloseCampaign } & ParsedCloseCampaignInstruction<TProgram>)
   | ({ instructionType: BrotMarketsInstruction.SweepFees } & ParsedSweepFeesInstruction<TProgram>)
-  | ({ instructionType: BrotMarketsInstruction.TallyLateJoins } & ParsedTallyLateJoinsInstruction<TProgram>);
+  | ({ instructionType: BrotMarketsInstruction.TallyLateJoins } & ParsedTallyLateJoinsInstruction<TProgram>)
+  | ({ instructionType: BrotMarketsInstruction.UserLinkReferrer } & ParsedUserLinkReferrerInstruction<TProgram>)
+  | ({ instructionType: BrotMarketsInstruction.RereadCampaign } & ParsedRereadCampaignInstruction<TProgram>)
+  | ({ instructionType: BrotMarketsInstruction.AdminDecideContest } & ParsedAdminDecideContestInstruction<TProgram>)
+  | ({ instructionType: BrotMarketsInstruction.SponsorJoinCampaign } & ParsedSponsorJoinCampaignInstruction<TProgram>)
+  | ({ instructionType: BrotMarketsInstruction.SettleSealedFee } & ParsedSettleSealedFeeInstruction<TProgram>);
 
 export function parseBrotMarketsInstruction<TProgram extends string>(
   instruction: Instruction<TProgram> & InstructionWithData<ReadonlyUint8Array>,
@@ -413,6 +466,38 @@ export function parseBrotMarketsInstruction<TProgram extends string>(
       assertIsInstructionWithAccounts(instruction);
       return { instructionType: BrotMarketsInstruction.TallyLateJoins, ...parseTallyLateJoinsInstruction(instruction) };
     }
+    case BrotMarketsInstruction.UserLinkReferrer: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BrotMarketsInstruction.UserLinkReferrer,
+        ...parseUserLinkReferrerInstruction(instruction),
+      };
+    }
+    case BrotMarketsInstruction.RereadCampaign: {
+      assertIsInstructionWithAccounts(instruction);
+      return { instructionType: BrotMarketsInstruction.RereadCampaign, ...parseRereadCampaignInstruction(instruction) };
+    }
+    case BrotMarketsInstruction.AdminDecideContest: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BrotMarketsInstruction.AdminDecideContest,
+        ...parseAdminDecideContestInstruction(instruction),
+      };
+    }
+    case BrotMarketsInstruction.SponsorJoinCampaign: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BrotMarketsInstruction.SponsorJoinCampaign,
+        ...parseSponsorJoinCampaignInstruction(instruction),
+      };
+    }
+    case BrotMarketsInstruction.SettleSealedFee: {
+      assertIsInstructionWithAccounts(instruction);
+      return {
+        instructionType: BrotMarketsInstruction.SettleSealedFee,
+        ...parseSettleSealedFeeInstruction(instruction),
+      };
+    }
     default:
       throw new SolanaError(SOLANA_ERROR__PROGRAM_CLIENTS__UNRECOGNIZED_INSTRUCTION_TYPE, {
         instructionType: instructionType as string,
@@ -433,6 +518,8 @@ export type BrotMarketsPluginAccounts = {
   globalConfig: ReturnType<typeof getGlobalConfigCodec> & SelfFetchFunctions<GlobalConfigArgs, GlobalConfig>;
   entry: ReturnType<typeof getEntryCodec> & SelfFetchFunctions<EntryArgs, Entry>;
   join: ReturnType<typeof getJoinCodec> & SelfFetchFunctions<JoinArgs, Join>;
+  referralLink: ReturnType<typeof getReferralLinkCodec> & SelfFetchFunctions<ReferralLinkArgs, ReferralLink>;
+  sealedFee: ReturnType<typeof getSealedFeeCodec> & SelfFetchFunctions<SealedFeeArgs, SealedFee>;
 };
 
 export type BrotMarketsPluginInstructions = {
@@ -492,6 +579,21 @@ export type BrotMarketsPluginInstructions = {
   tallyLateJoins: (
     input: TallyLateJoinsInput,
   ) => ReturnType<typeof getTallyLateJoinsInstruction> & SelfPlanAndSendFunctions;
+  userLinkReferrer: (
+    input: UserLinkReferrerInput,
+  ) => ReturnType<typeof getUserLinkReferrerInstruction> & SelfPlanAndSendFunctions;
+  rereadCampaign: (
+    input: RereadCampaignInput,
+  ) => ReturnType<typeof getRereadCampaignInstruction> & SelfPlanAndSendFunctions;
+  adminDecideContest: (
+    input: AdminDecideContestInput,
+  ) => ReturnType<typeof getAdminDecideContestInstruction> & SelfPlanAndSendFunctions;
+  sponsorJoinCampaign: (
+    input: SponsorJoinCampaignInput,
+  ) => ReturnType<typeof getSponsorJoinCampaignInstruction> & SelfPlanAndSendFunctions;
+  settleSealedFee: (
+    input: SettleSealedFeeInput,
+  ) => ReturnType<typeof getSettleSealedFeeInstruction> & SelfPlanAndSendFunctions;
 };
 
 export type BrotMarketsPluginRequirements = ClientWithRpc<GetAccountInfoApi & GetMultipleAccountsApi> &
@@ -509,6 +611,8 @@ export function brotMarketsProgram() {
           globalConfig: addSelfFetchFunctions(client, getGlobalConfigCodec()),
           entry: addSelfFetchFunctions(client, getEntryCodec()),
           join: addSelfFetchFunctions(client, getJoinCodec()),
+          referralLink: addSelfFetchFunctions(client, getReferralLinkCodec()),
+          sealedFee: addSelfFetchFunctions(client, getSealedFeeCodec()),
         },
         instructions: {
           adminInitializeConfig: (input) =>
@@ -536,6 +640,11 @@ export function brotMarketsProgram() {
           closeCampaign: (input) => addSelfPlanAndSendFunctions(client, getCloseCampaignInstruction(input)),
           sweepFees: (input) => addSelfPlanAndSendFunctions(client, getSweepFeesInstruction(input)),
           tallyLateJoins: (input) => addSelfPlanAndSendFunctions(client, getTallyLateJoinsInstruction(input)),
+          userLinkReferrer: (input) => addSelfPlanAndSendFunctions(client, getUserLinkReferrerInstruction(input)),
+          rereadCampaign: (input) => addSelfPlanAndSendFunctions(client, getRereadCampaignInstruction(input)),
+          adminDecideContest: (input) => addSelfPlanAndSendFunctions(client, getAdminDecideContestInstruction(input)),
+          sponsorJoinCampaign: (input) => addSelfPlanAndSendFunctions(client, getSponsorJoinCampaignInstruction(input)),
+          settleSealedFee: (input) => addSelfPlanAndSendFunctions(client, getSettleSealedFeeInstruction(input)),
         },
         identifyInstruction: identifyBrotMarketsInstruction,
         parseInstruction: parseBrotMarketsInstruction,

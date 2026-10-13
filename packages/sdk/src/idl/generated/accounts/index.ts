@@ -10,3 +10,5 @@ export * from "./campaign";
 export * from "./entry";
 export * from "./globalConfig";
 export * from "./join";
+export * from "./referralLink";
+export * from "./sealedFee";

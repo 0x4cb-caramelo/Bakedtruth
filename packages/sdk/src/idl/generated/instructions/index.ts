@@ -7,6 +7,7 @@
  */
 
 export * from "./adminAcceptAdmin";
+export * from "./adminDecideContest";
 export * from "./adminInitializeConfig";
 export * from "./adminResumeEntries";
 export * from "./adminSetCreationParams";
@@ -16,10 +17,13 @@ export * from "./adminTransferAdmin";
 export * from "./closeCampaign";
 export * from "./collectFee";
 export * from "./finalizeCampaign";
+export * from "./rereadCampaign";
 export * from "./resolveCampaign";
 export * from "./settleCreatorShare";
 export * from "./settleEntry";
 export * from "./settlePrize";
+export * from "./settleSealedFee";
+export * from "./sponsorJoinCampaign";
 export * from "./sweepFees";
 export * from "./tallyLateJoins";
 export * from "./teamConfirmResult";
@@ -27,4 +31,5 @@ export * from "./teamOpenContest";
 export * from "./teamPauseEntries";
 export * from "./teamVoidCampaign";
 export * from "./userJoinCampaign";
+export * from "./userLinkReferrer";
 export * from "./userOpenCampaign";
