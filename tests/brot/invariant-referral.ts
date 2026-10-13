@@ -92,6 +92,7 @@ export async function planLink(h: Harness, op: LinkOp): Promise<Plan> {
     verify: ([e]) => {
       const stored = decodeLinkAccount(h, link);
       if (!stored || stored.owner !== P.PROGRAM_ID) throw new Error(`link of ${referee.address}: not the program's`);
+      if (stored.data.length !== 96) throw new Error(`link of ${referee.address}: ${stored.data.length} bytes, not 96`);
       for (const [name, value] of Object.entries(want)) {
         if (stored.fields[name] !== value) throw new Error(`link ${name} is ${stored.fields[name]}, wanted ${value}`);
         if (name !== "tag" && name !== "version" && field(e, name, camel(name)) !== value) {
