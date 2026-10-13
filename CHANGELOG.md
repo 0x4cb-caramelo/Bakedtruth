@@ -27,6 +27,24 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **O pacote de auditoria para as duas firmas** (branch `sprint-17-audit-fixes`, 13/10/2026; Sprint 17, a parte que
+  não depende delas; `docs/audit/`). Cinco documentos, cada afirmação sobre o código com arquivo e linha em `395efa5`:
+  - **`SCOPE.md`:** as 22 instruções; as dez regras de abertura do TP §3.4.10 com o código e o erro de cada uma; a
+    abertura cobrada ao preço da Pyth, o `max_lamports` e a guarda do `id`; os tetos dos parâmetros; os seis leitores e
+    quais abrem na mainnet; entradas, resolução, janela, liquidação e o caminho da reserva; taxas e a parte do criador;
+    o `VoidReason`; poderes e pausa; eventos; I1 a I15; as lacunas conhecidas antes do congelamento; seções a preencher
+    para as Sprints 14 e 15.
+  - **`THREAT-MODEL.md`:** ativos, atores, fronteiras de confiança, quinze classes de ataque com o índice por
+    instrução, e os riscos que o fundador aceitou (sem teto, sem lista de contas, o criador que controla a conta
+    medida, a autoindicação).
+  - **`PINOCCHIO.md`:** as duas auditorias públicas do Pinocchio (Zellic, 30/6/2025; Neodyme, 12/6/2025) cobrem a
+    versão 0.8.4; o programa fixa a 0.11.2, e nenhuma auditoria posterior foi achada. O plano técnico dizia só
+    "auditado pela Zellic": corrigido (§1 e C38).
+  - **`FIX-WORKFLOW.md`:** de um achado à correção (teste que reproduz primeiro, as conferências antes de voltar à
+    firma, a confirmação dela, o hash novo, o relatório público).
+  - **`README.md`:** o bloco da versão candidata, a preencher no congelamento (tag, commit, hashes, o comando do
+    `solana-verify`), e o mapa de cada checagem para os seus testes.
+
 - **A curva da graduação pelo ticker, e os botões SIM e NÃO limpos** (branch `feat/curve-ticker-side-buttons`,
   13/10/2026; `session-log/2026-10-13-ticker-da-curva-e-botoes-de-lado.md`). Responde ao nome legível que o registro
   do upgrade deixou em aberto, pelo caminho que muda a A-11, aprovado pelo fundador, o Lucas, no mesmo dia.

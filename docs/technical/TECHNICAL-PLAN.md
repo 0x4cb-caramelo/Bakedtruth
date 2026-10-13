@@ -156,8 +156,10 @@ What the repository pins today stays, unless a decision of 2026-10-08 changes it
 | Removed | `anchor-lang`, `anchor-spl` and their `event-cpi` feature; the Anchor CLI; `@anchor-lang/core`; SPL Token CPIs for the pot; the USDC mint constant; every AI package and the inherited chat route | **[FD]** D-o, D-a, D-q |
 | Not used | Quasar; gill (needs Kit ^5); Seeker Connect 0.1.x; Redis or Valkey; PostgreSQL | **[DP]** §2 |
 
-Nothing alpha or beta [DP]. Pinocchio is below 1.0 but published, audited by Zellic **[AC: link the report]** and the
-base of p-token [E73]. Bun 1.4.2 is the current stable release of its Rust port [E52]. A version marked "pinned after"
+Nothing alpha or beta [DP]. Pinocchio is below 1.0 but published and the base of p-token [E73]. Its public audits
+(Zellic, report of 2025-06-30; Neodyme, 2025-06-12) cover `pinocchio` 0.8.4 and `pinocchio-system` 0.2.3, not the
+0.11.2 and 0.6.1 this program pins, and no later audit was found on 2026-10-13 [F] (`docs/audit/PINOCCHIO.md`, with
+the report URLs): the firms read the newer crate code as part of this program's scope. Bun 1.4.2 is the current stable release of its Rust port [E52]. A version marked "pinned after"
 enters only after its spike or check passes (§14.4).
 
 ## 2. Stack rationale
@@ -2720,7 +2722,7 @@ Closed in Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`; `session-log/
 | C35 | The App Links certificate fingerprint and `assetlinks.json` | 20 |
 | C36 | MWA gives the wallet no verified web origin | Before any H1 |
 | C37 | The publisher wallet on hardware or offline; `dapp-store-cli` flags; the App NFT in the portal | 22 |
-| C38 | Pinocchio's Zellic audit report, to link [E73] | 16 |
+| C38 | Pinocchio's audit reports, to link [E73]. **Done 2026-10-13:** `docs/audit/PINOCCHIO.md` (Zellic and Neodyme, both on 0.8.4; this program pins 0.11.2) | 16 |
 | C39 | Helius and other plan limits, which are per plan [E40] | 06; 18 |
 | C40 | Who controls the Pyth receiver's upgrade authority on mainnet | 16 |
 | C45 | The minimum distance between the target and the current value, per kind (check 3, §3.4.10) | 03 |
