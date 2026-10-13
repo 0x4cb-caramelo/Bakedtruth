@@ -1,9 +1,9 @@
 //! Purpose: the contest's rules (TP section 3.4.7; BP v0.0.4 part 1 section 4.5) as pure functions, each refusal with
-//!          its own error: who opens a contest and when, the team's escalation to stage 2, the stage each act needs,
-//!          the 24-hour wait a matching re-read keeps, stage 2's deadline, the lapse of either stage, the admin's role,
-//!          and the offered proof's own errors. The three contest instructions and `finalize_campaign` call these;
-//!          host tests check them without an account.
-//! Version: 0.0.3 (the founder's answer to D2: the matching re-read's 24-hour wait and the team's escalation)
+//!          its own error: the act a team key's signed byte names and whether it fits the campaign, who opens a
+//!          contest and when, the team's escalation to stage 2, the stage each act needs, the 24-hour wait a matching
+//!          re-read keeps, stage 2's deadline, the lapse of either stage, the admin's role, and the offered proof's own
+//!          errors. The three contest instructions and `finalize_campaign` call these; host tests check them.
+//! Version: 0.0.4 (the second review's S1: the act in the signed byte; D2: the wait and the escalation)
 //! Sprint: 14 (lane L14B, the two-stage dispute)
 //!
 //! Each refusal follows an `// X0.9 <id>` line, as in `checks.rs`: `scripts/checks-mutation.mjs` returns early right
@@ -28,6 +28,35 @@ use crate::{
         enums::{ContestStage, Status},
     },
 };
+
+/// The one byte of `team_open_contest`, the stage the call opens (the second review's S1: the act is in the signed
+/// bytes, never read from the stored status): 1 opens a contest, 2 escalates one (`BadInstructionData` otherwise).
+pub fn require_contest_act(byte: u8) -> Result<(), BrotError> {
+    // X0.9 contest_act
+    if byte != ContestStage::Stage1 as u8 && byte != ContestStage::Stage2 as u8 {
+        return Err(BrotError::BadInstructionData);
+    }
+    Ok(())
+}
+
+/// The act fits the campaign, before any other rule on it: an opening (stage 1) of a campaign already `Contested` is
+/// a retried or duplicate opening (`ContestAlreadyOpen`) and never escalates it; an escalation (stage 2) needs a
+/// `Contested` campaign (`NotContested`).
+pub fn require_act_fits(act: ContestStage, status: u8) -> Result<(), BrotError> {
+    let contested = Status::try_from(status)? == Status::Contested;
+    if act == ContestStage::Stage2 {
+        // X0.9 contest_not_open
+        if !contested {
+            return Err(BrotError::NotContested);
+        }
+    } else {
+        // X0.9 contest_already_open
+        if contested {
+            return Err(BrotError::ContestAlreadyOpen);
+        }
+    }
+    Ok(())
+}
 
 /// The signer is one of the config's team keys (`NotTeamMember`): in the MVP only the team opens a contest.
 pub fn require_contest_team_key(config: &GlobalConfig, signer: &Address) -> Result<(), BrotError> {

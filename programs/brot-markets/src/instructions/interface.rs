@@ -18,7 +18,8 @@ use super::{
     entries::{join_campaign::JoinCampaignArgs, sponsor_join_campaign::SponsorJoinArgs},
     referral::link_referrer::LinkReferrerArgs,
     resolution::{
-        admin_decide_contest::DecideContestArgs, team_void_campaign::TeamVoidCampaignArgs,
+        admin_decide_contest::DecideContestArgs, team_open_contest::TeamOpenContestArgs,
+        team_void_campaign::TeamVoidCampaignArgs,
     },
 };
 use crate::state::config::CreationParams;
@@ -139,17 +140,19 @@ pub enum BrotInstruction {
     #[account(4, name = "program", desc = "This program")]
     TeamVoidCampaign(TeamVoidCampaignArgs),
 
-    /// Enters Contested inside the window, once every entry is tallied: payout paused, stage 1 starts
-    /// and lasts 24 hours. A second call by a team key on a contest at stage 1, before its deadline,
-    /// sends it to stage 2 (the escalation, D2). It leaves by reread_campaign (the same reading pays
-    /// from stage 1's deadline on, a different one opens stage 2), admin_decide_contest (stage 2) or
-    /// finalize_campaign (the lapse).
+    /// The act is the signed byte `stage`, never the stored status. Stage 1: enters Contested inside
+    /// the window, once every entry is tallied: payout paused, stage 1 lasts 24 hours; on a campaign
+    /// already Contested it is refused (ContestAlreadyOpen), so a retried opening never escalates.
+    /// Stage 2: sends a contest still at stage 1, before its deadline, to the admin for 48 hours (the
+    /// escalation, D2); NotContested on any other campaign. A contest leaves by reread_campaign (the
+    /// same reading pays from stage 1's deadline on, a different one opens stage 2),
+    /// admin_decide_contest (stage 2) or finalize_campaign (the lapse).
     #[account(0, signer, name = "team_member", desc = "A key in GlobalConfig.team")]
     #[account(1, name = "config", desc = "GlobalConfig, read")]
-    #[account(2, writable, name = "campaign", desc = "Campaign, InReview; or Contested at stage 1 (the escalation)")]
+    #[account(2, writable, name = "campaign", desc = "Campaign: InReview for stage 1; Contested at stage 1 for stage 2")]
     #[account(3, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
     #[account(4, name = "program", desc = "This program")]
-    TeamOpenContest,
+    TeamOpenContest(TeamOpenContestArgs),
 
     /// Snapshots the totals, the mode and the creator share of a reviewed campaign, once the window
     /// has closed, or of a contested one once its contest lapsed (stage 2's deadline, or 48 hours

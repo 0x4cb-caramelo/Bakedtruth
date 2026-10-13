@@ -72,8 +72,8 @@ const BUILDERS: Record<string, Builder> = {
       }),
   },
   TeamOpenContest: {
-    args: null,
-    build: async (who) => IS.teamOpenContestIx(who, await P.configPda(), await P.campaignPda(CAMPAIGN_ID)),
+    args: SL.TEAM_OPEN_CONTEST_ARGS,
+    build: async (who) => IS.teamOpenContestIx(who, await P.configPda(), await P.campaignPda(CAMPAIGN_ID), 1),
   },
   FinalizeCampaign: {
     args: null,
