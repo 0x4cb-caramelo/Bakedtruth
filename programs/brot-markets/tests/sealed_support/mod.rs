@@ -3,7 +3,7 @@
 //!          accounts at their sponsored addresses, and the slots of `sponsor_join_campaign`, `settle_sealed_fee`
 //!          and `close_campaign` in the IDL's order. A test crate that declares this module declares `world`
 //!          (`checks_support/mollusk.rs`) first.
-//! Version: 0.0.1
+//! Version: 0.0.2 (a sealed entry signed under any creation rules' version, red team L2)
 //! Sprint: 15 (lane L15)
 
 #![allow(dead_code)]
@@ -204,12 +204,23 @@ pub fn close_accounts(world: &World, campaign: Vec<u8>) -> Accounts {
 
 /// `sponsor_join_campaign` by `SPONSOR`: YES, `entry_usd` at most `max_lamports`, its first entry.
 pub fn sponsor_join_ix(world: &World, entry_usd: u64, max_lamports: u64) -> Instruction {
+    sponsor_join_ix_at(world, entry_usd, max_lamports, 0)
+}
+
+/// `sponsor_join_ix` signed under creation rules `version` (the world's config is at version 0).
+pub fn sponsor_join_ix_at(
+    world: &World,
+    entry_usd: u64,
+    max_lamports: u64,
+    version: u32,
+) -> Instruction {
     let args = SponsorJoinArgs {
         side: 0,
         entry_usd: LeU64::new(entry_usd),
         max_lamports: LeU64::new(max_lamports),
         min_return_bps: LeU32::new(0),
         expected_entry_total: LeU64::new(0),
+        expected_params_version: LeU32::new(version),
     };
     let accounts = vec![
         AccountMeta::new(SPONSOR, true),

@@ -2,11 +2,12 @@
  * Purpose: `checkSealedEntry` and the SDK's sealed-entry charge against `sponsor_join_campaign` (Sprint 15), as
  *          tests/sdk/join-parity.test.ts holds `checkJoin` to the join: each case is fed to both from the same world,
  *          with the same verdict, in the program's order: not Open; the entry close; the lock and the buffer; the
- *          pause (before the price is read); the floor, `max_lamports` and the SOL/USD account; a SealedFee that is not
+ *          pause (before the price is read); the creation rules' version; the floor, `max_lamports` and the SOL/USD
+ *          account; a SealedFee that is not
  *          the sponsor's; the campaign's minimum on the entry part; the signed entry total, a replay included; and the
  *          signed return at the SDK's estimate and one basis point above it. An accepted entry is charged what the SDK
  *          said, to the lamport. Filter: `bun test tests/ -t "checkSealedEntry refuses what the program refuses"`.
- * Version: 0.1.0
+ * Version: 0.1.1 (red team L2: the creation rules' version)
  * Sprint:  15 (lane L15). Needs the SBF build.
  */
 import { describe, expect, test } from "bun:test";
@@ -64,6 +65,7 @@ async function sdkVerdict(w: World, sponsor: KeyPairSigner, campaign: Address, a
     maxLamports: a.maxLamports ?? 100n * SOL,
     minReturnBps: a.minReturnBps ?? 0,
     expectedEntryTotal: a.expectedEntryTotal ?? (await entryTotal(w, campaign, sponsor.address)),
+    expectedParamsVersion: a.expectedParamsVersion,
   });
 }
 
@@ -112,8 +114,10 @@ describe("checkSealedEntry refuses what the program refuses", () => {
     solUsd({ conf: 1_000_000_000n });
     await parity(w, sponsor, campaign, "SolUsdConfidenceTooWide", yes());
     solUsd({});
+    // The creation rules' version is checked before the charge (red team L2).
+    await parity(w, sponsor, campaign, "CreationParamsChanged", yes({ entryUsd: 1n, expectedParamsVersion: 1 }));
     expectOk(await send(w, [await I.pauseEntriesIx(team[0])]));
-    await parity(w, sponsor, campaign, "JoinWhilePaused", yes({ entryUsd: 1n }));
+    await parity(w, sponsor, campaign, "JoinWhilePaused", yes({ entryUsd: 1n, expectedParamsVersion: 1 }));
     expectOk(await send(w, [await I.resumeEntriesIx(admin)]));
     await parity(w, sponsor, campaign, "accepted", yes({ maxLamports: paid }));
   });

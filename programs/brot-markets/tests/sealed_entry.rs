@@ -1,9 +1,9 @@
 //! Purpose: `sponsor_join_campaign` on the program's SBF binary in Mollusk (Sprint 15): a sealed entry of US$500 at
-//!          the captured SOL/USD price puts its 90% in the vault and holds its 10% in a new SealedFee; the floor and
-//!          `max_lamports` refuse with their own codes; a SealedFee slot that is another slot, or a SealedFee that
-//!          names another campaign or sponsor, is refused before anything moves. X0.9 reruns the refusals with each
-//!          check removed.
-//! Version: 0.0.1
+//!          the captured SOL/USD price puts its 90% in the vault and holds its 10% in a new SealedFee; another
+//!          creation rules' version, the floor and `max_lamports` refuse with their own codes; a SealedFee slot that
+//!          is another slot, or a SealedFee that names another campaign or sponsor, is refused before anything
+//!          moves. X0.9 reruns the refusals with each check removed.
+//! Version: 0.0.2 (red team L2: the creation rules' version)
 //! Sprint: 15 (lane L15). Runs after the SBF build (`BROT_MARKETS_SO`, else target/deploy).
 
 mod sealed_support;
@@ -72,6 +72,18 @@ fn a_sealed_entry_holds_its_fee_in_a_new_sealed_fee_and_puts_its_entry_in_the_va
         (entry, 1, 1)
     );
     assert_eq!(c.event_seq.get(), 3); // EntryAdded and SealedFeeHeld after the opening's one.
+}
+
+#[test]
+fn sealed_terms_refuse_an_entry_signed_under_other_creation_rules() {
+    // The world's config is at version 0; an entry signed for 1 is refused before its price is read, and so
+    // is one that would also be below the floor.
+    for usd in [500, 1] {
+        let mut world = World::new();
+        let accounts = sponsor_join_accounts(&mut world, Account::default());
+        let signed = world.run(&sponsor_join_ix_at(&world, usd, 100 * SOL, 1), &accounts);
+        assert_refused(&signed, BrotError::CreationParamsChanged);
+    }
 }
 
 #[test]

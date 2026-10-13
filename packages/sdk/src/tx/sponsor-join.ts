@@ -2,7 +2,7 @@
  * Purpose: `sponsor_join_campaign`, the sealed entry (Sprint 15; TP 3.4.12), built by the Codama client with
  *          every program address derived here: the sponsor's `Entry`, its next `Join`, its `SealedFee` and the
  *          sponsored SOL/USD account the program prices the entry with.
- * Version: 0.1.0
+ * Version: 0.1.1 (the creation rules' version, red team L2)
  * Sprint:  15 (lane L15)
  *
  * A builder checks nothing a program rule decides: ../read/validate/sealed-entry.ts mirrors the sealed entry's
@@ -32,6 +32,8 @@ export async function buildSponsorJoinCampaign(a: {
   minReturnBps: number;
   /** The sponsor's entry total before this one, both sides: the retry guard (A-9). */
   expectedEntryTotal: bigint;
+  /** `GlobalConfig.params_version` as read for the preview: the split and the floor the sponsor saw. */
+  expectedParamsVersion: number;
   joinIndex: number;
 }): Promise<Instruction> {
   return getSponsorJoinCampaignInstruction({
@@ -49,5 +51,6 @@ export async function buildSponsorJoinCampaign(a: {
     maxLamports: a.maxLamports,
     minReturnBps: a.minReturnBps,
     expectedEntryTotal: a.expectedEntryTotal,
+    expectedParamsVersion: a.expectedParamsVersion,
   });
 }
