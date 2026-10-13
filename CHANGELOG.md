@@ -1010,6 +1010,18 @@ recomendado (1a a 12a).
 
 ### Fixed
 
+- **O erro #418 do React em todas as páginas do site** (13/10/2026, achado na publicação do ticker;
+  `session-log/2026-10-13-publicacao-do-ticker-no-dev0x.md`). O servidor não vê carteira nenhuma, e o navegador quase
+  sempre vê uma: o adaptador da Solflare fica "Loadable" em qualquer navegador de computador. Por isso duas partes da
+  moldura comum saíam diferentes no HTML do servidor e na primeira renderização do navegador. Uma era o botão da barra
+  do topo ("No installed wallet found", desligado, contra "Connect"). A outra era a lista "Connect a wallet", fechada
+  mas renderizada (um aviso contra os botões das carteiras). Em toda carga, o React jogava fora a árvore e
+  renderizava a página inteira de novo. Agora o `useInstalledWallet` diz que há carteira até a hidratação terminar, e
+  a lista monta as linhas só depois dela, com o `useIsClient`, que saiu de `features/open-campaign` para `app/lib`.
+  Quem não tem carteira vê o aviso logo depois da carga. Conferido: no modo de desenvolvimento, as oito páginas
+  hidratam sem diferença; no build de produção com as configurações do servidor, `/dev0x`, a página da campanha e
+  `/fees` não dão erro de página; e "Connect" abre a lista com a Solflare e a Phantom. Teste novo:
+  `tests/site/wallet-render.test.ts`, que falha no código anterior. Vale no ar a partir da próxima versão publicada.
 - **O ranking da API perdia mais da metade do histórico para o limite da RPC pública** (13/10/2026, achado na
   publicação do ticker; `session-log/2026-10-13-publicacao-do-ticker-no-dev0x.md`). A RPC pública do devnet aceita dez
   `getTransaction` a cada dez segundos por endereço (`x-ratelimit-method-limit: 10`) e responde 429 ao resto. O

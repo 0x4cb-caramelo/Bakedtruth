@@ -63,7 +63,8 @@ anterior (`2026-10-12-upgrade-devnet-sexto-tipo.md`).
   `/fees`, que é estática, sem o script da Cloudflare no caminho. Vem, então, da moldura comum das páginas. O registro
   da versão anterior listava só os dois erros de sempre no console (a folha da Google e o script da Cloudflare);
   provavelmente aquela conferência não escutava os erros da página, só os do console. O React refaz a árvore no
-  navegador e a página funciona, mas o erro custa uma segunda renderização na carga e merece uma correção à parte.
+  navegador e a página funciona, mas o erro custa uma segunda renderização na carga. A causa e a correção estão no fim
+  deste registro.
 - **O histórico da API** relê tudo a cada reinício e não tenta de novo, até o próximo, uma transação que não voltou
   depois de cinco tentativas. Antes da troca eram 39 puladas e 21 eventos guardados; depois, 40 e 20. Não é desta
   versão: o log da API mostra 36 a 39 puladas desde que ela entrou no ar, em 11/10. O programa tem 70 transações que
@@ -106,3 +107,35 @@ para o mesmo slot, então também assina.
 A versão anterior, em `releases/570fa306b4d3`; o pacote em `/tmp/brot-df09357435d5.tar.gz`, ao lado dos pacotes das
 versões anteriores; e os logs da instalação e do build na pasta do `ronaldo` (`brot-install-df09357435d5.log` e
 `brot-build-df09357435d5.log`).
+
+## O erro #418 do React
+
+Depois do histórico, o passo seguinte da lista era este erro.
+
+- **Achado no modo de desenvolvimento,** que escreve a diferença no lugar do código. Duas partes da moldura comum saíam
+  diferentes no HTML do servidor e na primeira renderização do navegador, e por isso o erro aparecia em toda página:
+  - o botão da barra do topo: o servidor, que não vê carteira nenhuma, escrevia "No installed wallet found" com o
+    botão desligado, e o navegador renderizava "Connect";
+  - a lista "Connect a wallet", fechada mas renderizada: o servidor escrevia só o aviso, sem carteira, e o navegador
+    as linhas das carteiras.
+- **Por que o navegador sempre via carteira:** o adaptador da Solflare fica "Loadable" em qualquer navegador de
+  computador, mesmo sem a extensão, e o site conta "Loadable" como carteira para escolher. No servidor, todo adaptador
+  é "Unsupported".
+- **A correção:** o `useInstalledWallet` diz que há carteira até a hidratação terminar, e a lista monta as linhas só
+  depois dela. As duas usam o `useIsClient`, que passou de `features/open-campaign` para `app/lib`, para a carteira
+  não depender da caixa de abertura. Quem tem carteira não vê mudança. Quem não tem vê "Connect" durante a carga e o
+  aviso logo depois, quando o navegador já olhou.
+- **Conferido:**
+  - no modo de desenvolvimento, as oito páginas hidratam sem diferença;
+  - no build de produção com as configurações do servidor, servido daqui, `/dev0x`, a página da campanha e `/fees`
+    não dão erro de página, e as três davam o #418 antes;
+  - "Connect" abre a lista, com "Solflare: Ready" e "Phantom: Not installed";
+  - teste novo, `tests/site/wallet-render.test.ts`: o botão renderizado no servidor diz "Connect", ligado. Ele falha no
+    código anterior;
+  - o lint do site e o do repositório e a checagem de tipos passaram;
+  - a bateria de TypeScript inteira deu 799 de 802. As três que falham precisam do `cpi_proxy.so`, o programa só de
+    teste, que nunca foi construído nesta máquina (o CI constrói).
+- **O binário local do programa** era de 10/10, anterior ao sexto tipo, e seis testes da caixa de abertura falhavam
+  por isso. Foi trocado pelo do CI da `main` em `df09357` (execução 38346226973, sha256 conferido pelo `SHA256SUMS`, o
+  mesmo `63610a32…d7e4` do devnet). O antigo ficou guardado fora do repositório.
+- **Vale no ar só na próxima versão publicada,** como a correção do histórico.

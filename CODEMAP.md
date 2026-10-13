@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **938** |
+| Arquivos mapeados | **939** |
 | Acima de 200 linhas | **42** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -362,7 +362,6 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`sheet-steps.tsx`](app/features/open-campaign/sheet-steps.tsx) | two steps of an opening's sheet (spec 3.12; split from open-sheet.tsx in the Sprint 19 reviews): signing (the wallet, with the total and the most it can take; c | 98 |
 | [`submit.ts`](app/features/open-campaign/submit.ts) | an opening from the box to the chain, without React. `prepareOpening` is the SDK's A-3 preparation for the connected wallet's address (the config, the SOL/USD a | 125 |
 | [`suggestion-text.ts`](app/features/open-campaign/suggestion-text.ts) | what one suggestion of "What should the chain answer?" says (the approved prototype's option, open-slots.js): the campaign sentence it would start, written by t | 45 |
-| [`use-is-client.ts`](app/features/open-campaign/use-is-client.ts) | whether this render is in the browser (the Sprint 19 adversarial review, L12): the visitor's own time zone exists only there, so the creation box writes local t | 18 |
 | [`use-open-box.ts`](app/features/open-campaign/use-open-box.ts) | the creation box's data in React: the draft, the chain as the box reads it (once, then every 15 seconds while the tab is visible), the draft's own accounts (the | 159 |
 | [`use-open-flow.ts`](app/features/open-campaign/use-open-flow.ts) | an opening's steps in React, around submit.ts (A-3, A-8, A-9; T17): "Review and sign" takes the guard's id (the saved one, or the page's for this wallet), then  | 197 |
 | [`watch.ts`](app/features/open-campaign/watch.ts) | watching an opening after the wallet, by polling and never a WebSocket (proposal §2.6): the signature's status (`getSignatureStatuses`), the finalized block hei | 135 |
@@ -397,9 +396,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`mwa-chain.test.ts`](app/features/wallet/mwa-chain.test.ts) | X2.1. The chain the wallet registers for (from the site's cluster setting) equals the chain for the cluster the read API reports in /api/v1/health. Registration | 54 |
 | [`register-mwa.ts`](app/features/wallet/register-mwa.ts) | the explicit Mobile Wallet Adapter registration (S1, proposal §3.4). Registers the MWA wallet once, for the chain of the site's cluster (never the RPC URL's), w | 49 |
 | [`sol-balance-provider.tsx`](app/features/wallet/sol-balance-provider.tsx) | the connected wallet's SOL balance, one reading for the whole site, so the top bar's chip, the entry panel and the creation box always show the same number. It  | 65 |
-| [`use-installed-wallet.ts`](app/features/wallet/use-installed-wallet.ts) | "Connect" (S1, proposal §3.4 rule 3): connect only from a person's click. Shared by the top bar's button, the entry panel and the creation box, so all three con | 23 |
+| [`use-installed-wallet.ts`](app/features/wallet/use-installed-wallet.ts) | "Connect" (S1, proposal §3.4 rule 3): connect only from a person's click. Shared by the top bar's button, the entry panel and the creation box, so all three con | 30 |
 | [`use-sol-balance.ts`](app/features/wallet/use-sol-balance.ts) | the connected wallet's SOL balance in lamports, from the site's one reading (sol-balance-provider.tsx). `null` while it loads, when nothing is connected or when | 24 |
-| [`wallet-picker.tsx`](app/features/wallet/wallet-picker.tsx) | "Connect" opens this list (the approved prototype's "Connect a wallet" dialog, ui/wallet.js): every wallet the browser has, detected ones first and the missing  | 113 |
+| [`wallet-picker.tsx`](app/features/wallet/wallet-picker.tsx) | "Connect" opens this list (the approved prototype's "Connect a wallet" dialog, ui/wallet.js): every wallet the browser has, detected ones first and the missing  | 119 |
 | [`wallet-state.test.ts`](app/features/wallet/wallet-state.test.ts) | the wallet's view: disconnected, connected with a balance, no SOL (faucet on devnet only), the balance still loading, and the SOL formatting (four decimals, tru | 54 |
 | [`wallet-state.ts`](app/features/wallet/wallet-state.ts) | the wallet's view, as pure logic: disconnected; connected with its address and SOL balance; connected with no SOL, which offers the devnet faucet only on devnet | 36 |
 
@@ -418,6 +417,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`fonts.ts`](app/lib/fonts.ts) | the site's two fonts, served by the site itself: Barlow Condensed 700 for display and numbers, Inter 400, 500 and 600 for text. next/font downloads them at buil | 26 |
 | [`rpc.ts`](app/lib/rpc.ts) | the browser's one Kit RPC client, on the site's RPC (NEXT_PUBLIC_RPC_URL: public configuration, never a paid key, A-5). The SDK reads accounts, simulates and po | 13 |
 | [`theme.ts`](app/lib/theme.ts) | the site's theme: the storage key, the script that sets data-theme before the first paint, and the reads and writes the theme button needs. Dark is the default  | 39 |
+| [`use-is-client.ts`](app/lib/use-is-client.ts) | whether this render is in the browser, false on the server and while the page hydrates, so a value that exists only in the browser never makes the first render  | 20 |
 
 ## `app/lib/mascot/`
 
@@ -1583,6 +1583,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`tokens.test.ts`](tests/site/tokens.test.ts) | the site's colours are the brand's (docs/product/BRAND.md §5; ported 2026-10-10): every token BRAND.md gives a plain colour in both themes has that value in app | 130 |
 | [`upgrade-pause.test.ts`](tests/site/upgrade-pause.test.ts) | A-8 on the site (the founder's answers of 2026-10-10: ProgramData read through the site's RPC; the floor at 1%): the entry's preparation passes the deploy the s | 89 |
 | [`void-log.test.ts`](tests/site/void-log.test.ts) | the void log's public format (Sprint 12 deliverable, "its JSON Schema check in CI"): the committed JSON Schema is the one generated from the zod schema; every r | 132 |
+| [`wallet-render.test.ts`](tests/site/wallet-render.test.ts) | the top bar's wallet button, rendered on the server, is what the browser renders first (React #418, found after the 2026-10-13 release). The server sees no wall | 39 |
 
 ---
 
