@@ -27,6 +27,36 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **O keeper paga sozinho no devnet** (13/10/2026, a pedido do Ronaldo; `deploy/vps/README.md`,
+  `docs/sprints/sprint-06-keeper-server.md`). O código do keeper do PR #88 (as pendências das Sprints 06 e 07, release
+  `88a00f9`) entrou no servidor às 19h03 UTC, na unidade de sempre e com `KEEPER_SETTLE=on`, depois de um ensaio sem
+  envio na porta 4239. O keeper liquidou sozinho as duas campanhas que esperavam: `FmDo…` (finalize `5Z5zdkN5…`,
+  prêmio e taxa `ZqDWtcrs…`, fechamento `647Zc7S2…`) e `G6Un…` (finalize `3dRvL3Lz…`, prêmio e taxa `4Ev4MJCH…`,
+  fechamento `4XEdx7xh…`). A resolução de verdade da Sprint 06 já tinha sido vista: o keeper resolveu `FmDo…` sozinho
+  em 11/10/2026, às 15h59min17s UTC (`23agRJq8nJtzUjNy…`). Mais tarde no mesmo dia, também a pedido do Ronaldo, a RPC
+  do keeper passou da RPC pública do devnet, que respondia 429, para a da Helius no devnet (a escolha do D4, de
+  10/10): a chave fica só no arquivo de configuração do servidor, e o keeper registra só a origem. Depois da troca, a
+  unidade ativa, nenhum erro e nenhum 429 nos primeiros ciclos, a liquidação ligada e nada pendente. As cópias de
+  segurança e o caminho de volta estão no README. A unidade com identidade própria continua não instalada: depende do
+  dono do servidor.
+
+- **Sprint 14: a resposta do fundador ao D2, construída** (13/10/2026, faixa L14B, `3d524c9` a `05fe0d8`). O Ronaldo
+  respondeu (a), com uma etapa 1 de 24 horas: a releitura igual só paga depois delas (`RereadBeforeTimelock`, erro
+  6176), e nesse prazo uma chave da equipe leva a disputa à etapa 2 chamando `team_open_contest` de novo. O pior caso,
+  do resultado lido ao pagamento, passa de 55 para 78 horas (6 + 24 + 48), garantido na cadeia com ou sem keeper. O SDK
+  mostra o fim da espera e se a escalada ainda cabe (`contestTimelockEndsAt`, `contestEscalable`), e o resumo diz se a
+  assinatura abre ou escala a disputa. Conferido: a escalada e cada recusa dela (LiteSVM e Mollusk), o pior caso de 78
+  horas, o teste aleatório em 12 sementes, o ensaio da equipe (44 de 44) e a prova de mutação dos 17 ids da disputa
+  (37 casos). Antes de enviar uma releitura, o keeper precisa simulá-la: a igual é recusada até `contestTimelockEndsAt`.
+
+- **Sprint 14: as correções da revisão adversária, F3 a F10** (13/10/2026). F3: o pior caso vale na cadeia, com ou sem
+  keeper (uma releitura atrasada não acrescenta tempo, e uma etapa 1 sem releitura vence 48 horas depois do seu
+  prazo). F4: uma prova oferecida que o leitor recusa recusa a releitura, em vez de levá-la à etapa 2. F5: a nota do
+  admin sobre o SIM de fato relido depois do prazo. F6: o resumo da decisão do admin só promete a devolução da taxa de
+  abertura quando entrou alguém. F7: o aluguel do vínculo de indicação entra no máximo que se assina e no texto. F8: o
+  comentário da guarda do `team_open_contest`. F9: a releitura não oferece prova por padrão. F10: os textos da interface
+  e do plano técnico sobre a releitura e o seu `CampaignFinalized`.
+
 - **Sprint 14, indicação e disputa em duas etapas** (branch `sprint-14-referral-second-read`, 13/10/2026; construída
   e testada, não publicada no devnet; `docs/sprints/sprint-14-referral-second-read.md`,
   `session-log/2026-10-13-sprint-14-indicacao-e-disputa.md`). Base: o andaime das Sprints 14 e 15 (cinco instruções
@@ -35,8 +65,8 @@ recomendado (1a a 12a).
     nem fecha o vínculo depois; recusa o endereço zero e o próprio indicado; um endereço pago antes é completado; nunca
     pausado. 66 casos provam que nenhuma instrução altera um vínculo.
   - **A disputa em duas etapas**: `team_open_contest` ligado (só depois de toda entrada contada), `reread_campaign`
-    (qualquer carteira, só no nível de cima: a mesma leitura paga com o resultado gravado; outra leva à etapa 2, de 48
-    horas; nunca grava um resultado), `admin_decide_contest` (o admin confirma ou anula, nunca inverte: conferido em
+    (qualquer carteira, só no nível de cima: a mesma leitura paga com o resultado gravado, depois das 24 horas da etapa
+    1; outra leva à etapa 2, de 48 horas; nunca grava um resultado), `admin_decide_contest` (o admin confirma ou anula, nunca inverte: conferido em
     todas as 65.536 combinações de argumentos) e o fim da etapa 2 no `finalize_campaign`. A aresta Contested → Settled
     para a campanha sem entrada, e o erro 6175 para a confirmação com motivo de anulação.
   - **A indicação fora do programa** (`services/indexer`, `scripts/referral/`): as tabelas de indicação, "antes da
@@ -46,9 +76,10 @@ recomendado (1a a 12a).
     carteiras e valores.
   - **O teste de dinheiro** (I1 a I15) agora sorteia vincular, contestar, reler, decidir e deixar vencer a etapa 2, e
     confere o contador de campanhas abertas em toda saída; os scripts da equipe usam a contestação de verdade.
-  - **A revisão adversária** não achou caminho para mandar SOL ao lugar errado nem para inverter um resultado; achou um
-    problema de desenho grave, a releitura igual que paga um resultado contestado (D2, com o fundador), e as correções
-    menores aplicadas antes do PR.
+  - **A revisão adversária** (do andaime à integração da disputa, `fd67706` a `e978f5c`) não achou caminho para mandar
+    SOL ao lugar errado nem para inverter um resultado; achou um problema de desenho grave, a releitura igual que paga um
+    resultado contestado (o D2, respondido e construído em 13/10, acima), e correções menores (F3 a F10, acima). A
+    segunda revisão, das mudanças posteriores, está com o líder.
 
 - **Sprint 08, a terceira fatia do indexador** (branch `sprint-08-indexer`, PR #72, 13/10/2026; construída e testada,
   não implantada; o registro em `docs/sprints/sprint-08-indexer-api-points.md`). A ordem da página inicial calculada
