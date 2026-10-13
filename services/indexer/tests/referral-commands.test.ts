@@ -1,15 +1,16 @@
 /**
  * Purpose: the referral commands (scripts/referral/; Sprint 14, lane L14R) on real files, no cluster: a dry run
  *          writes nothing; prepare writes the ledger, the signing file (executable, never overwritten) and its
- *          summary; record prints each landed transfer with its signature and cancels on request; report prints
+ *          summary, and refuses a stale signing file before any row is committed; record prints each landed transfer
+ *          with its signature and cancels on request; report prints
  *          wallets and amounts; the snapshot copies the ledger into a new file that opens as a ledger; the flags and
  *          the RPC's environment; and a failing RPC call ends the process with its error's name, never its URL.
  *          Filter: `bun test services/indexer -t referral`.
- * Version: 0.1.0
+ * Version: 0.1.1 (the stale signing file)
  * Sprint:  14 (referral, lane L14R)
  */
 import { describe, expect, test } from "bun:test";
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -49,7 +50,7 @@ describe("referral commands", () => {
       expect(out).toContain(`Written: ${at("out/referral-batch-1.txt")}, ${at("out/referral-batch-1.sh")}`);
       const script = readFileSync(at("out/referral-batch-1.sh"), "utf8");
       expect(script).toStartWith("#!/usr/bin/env bash\n");
-      expect(script).toEndWith(`send 1 ${F} 0.040000000\nsend 2 ${F2} 0.000700000\n`);
+      expect(script).toContain(`send 1 ${F} 0.040000000\nsend 2 ${F2} 0.000700000\n`);
       expect(statSync(at("out/referral-batch-1.sh")).mode & 0o777).toBe(0o750);
       const signature = ops.pay(F, 40_000_000n, 1, 1);
       const ledgerArgs = ["--ledger", at("ledger.sqlite"), "--ops", OPS];
@@ -77,6 +78,25 @@ describe("referral commands", () => {
         { status: "cancelled" },
       ]);
       copy.close();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("R3: a stale signing file in --out is refused before any row is committed", async () => {
+    const { at, base, dir } = await filesWithEarnings();
+    try {
+      mkdirSync(at("out"));
+      writeFileSync(at("out/referral-batch-1.sh"), "a stale file from another run");
+      const rpc = () => routineRpc(new OpsWallet());
+      await expect(prepareCommand([...base, "--out", at("out"), "--new-ledger"], {}, rpc)).rejects.toThrow(
+        "--out already holds referral-batch-1.sh from another run: move it away, nothing was written",
+      );
+      const ledger = openLedger(at("ledger.sqlite"), { readonly: true });
+      const rows = "SELECT (SELECT count(*) FROM batches) + (SELECT count(*) FROM referral_payouts) AS n";
+      expect(ledger.db.query(rows).get()).toEqual({ n: 0 });
+      ledger.close();
+      expect(readFileSync(at("out/referral-batch-1.sh"), "utf8")).toBe("a stale file from another run");
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

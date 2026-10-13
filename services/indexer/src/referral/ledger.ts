@@ -5,7 +5,7 @@
  *          erase what was paid and make the routine pay it again. One row per transfer prepared or carried, and one
  *          per transfer the chain shows landed (by its signature and instruction, unique). What a wallet was paid is the sum of its
  *          landed rows; what is in flight, the sum of its prepared rows. A file that is not a ledger is refused.
- * Version: 0.1.0
+ * Version: 0.2.0 (ledger version 2: the scan keeps the oldest signature it ever read; batch numbers never reused)
  * Sprint:  14 (referral, lane L14R)
  *
  * Statuses: `prepared` (in a signing file, not seen on-chain yet), `carried` (not sent: it would leave the wallet
@@ -16,7 +16,7 @@ import { Database } from "bun:sqlite";
 
 import type { Store } from "../db/store";
 
-export const LEDGER_VERSION = 1;
+export const LEDGER_VERSION = 2;
 /** `PRAGMA application_id` of a ledger file ("BRLG"): the indexer's own file never carries it. */
 export const LEDGER_APPLICATION_ID = 0x42524c47;
 
@@ -31,7 +31,9 @@ const SCHEMA = [
     signature TEXT, ix INTEGER, slot INTEGER, note TEXT, UNIQUE (signature, ix))`,
   `CREATE INDEX referral_payouts_batch ON referral_payouts (batch, idx)`,
   `CREATE INDEX referral_payouts_wallet ON referral_payouts (wallet, status)`,
-  `CREATE TABLE scans (ops_wallet TEXT PRIMARY KEY, last_signature TEXT NOT NULL, last_slot INTEGER NOT NULL)`,
+  `CREATE TABLE scans (
+    ops_wallet TEXT PRIMARY KEY, last_signature TEXT NOT NULL, last_slot INTEGER NOT NULL,
+    first_signature TEXT NOT NULL, first_slot INTEGER NOT NULL)`,
 ];
 
 /** A file the routine will not use as its ledger. */
@@ -113,8 +115,24 @@ export const openBatch = (ledger: Store): number | null =>
   ).b;
 
 /** The next batch's number. */
+/**
+ * The next batch's number: above every batch prepared here and every batch a landing's memo named, so a new or
+ * restored ledger, which reads the old landings back from the chain, never reuses a memo's number.
+ */
 export const nextBatch = (ledger: Store): number =>
-  (ledger.db.query("SELECT coalesce(max(batch), 0) + 1 AS b FROM batches").get() as { b: number }).b;
+  (
+    ledger.db
+      .query(
+        `SELECT max(coalesce((SELECT max(batch) FROM batches), 0),
+                    coalesce((SELECT max(batch) FROM referral_payouts), 0)) + 1 AS b`,
+      )
+      .get() as { b: number }
+  ).b;
+
+/** The operations wallet batch `batch` was prepared for, or `null` when this ledger prepared none. */
+export const batchOps = (ledger: Store, batch: number): string | null =>
+  (ledger.db.query("SELECT ops_wallet FROM batches WHERE batch = ?").get(batch) as { ops_wallet: string } | null)
+    ?.ops_wallet ?? null;
 
 /** Anything written since: the count and the last id, compared before a batch is written. */
 export const ledgerMark = (ledger: Store): string =>

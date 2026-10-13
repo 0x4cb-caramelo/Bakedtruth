@@ -4,12 +4,20 @@
  *          transfer and a memo, as `solana transfer --with-memo` builds one; or a shape a test makes irregular), and
  *          the routine's RPC: fake-chain.ts's scripted listing and reads over those transactions, each wallet's
  *          balance and data size, and the rent-exempt minimum at a rate a test sets: `(128 + size) × rate`, 5,080 a
- *          byte as devnet and mainnet answer, or 6,960 as LiteSVM does. And `earnings`, the indexer's side of them.
- * Version: 0.1.0
+ *          byte as devnet and mainnet answer, or 6,960 as LiteSVM does; an account's executable flag; the genesis hash;
+ *          and a simulation that fails a transfer to any wallet a test marks uncreditable.
+ *          And `earnings`, the indexer's side of them.
+ * Version: 0.1.1 (the genesis hash, an executable account)
  * Sprint:  14 (referral, lane L14R)
  */
 import { expect } from "bun:test";
-import { getBase58Decoder, getBase64Decoder } from "@solana/kit";
+import {
+  getBase58Decoder,
+  getBase64Decoder,
+  getBase64Encoder,
+  getCompiledTransactionMessageDecoder,
+  getTransactionDecoder,
+} from "@solana/kit";
 import type { RpcTransaction, SolanaRpc } from "@brot/sdk/read";
 
 import { scripted } from "./fake-chain";
@@ -17,6 +25,8 @@ import { Campaign } from "./referral-campaign";
 import { Chain, indexed, SOL, wallet } from "./referral-chain";
 
 export const OPS = wallet(77);
+/** The genesis hash the routine's RPC answers: a stand-in for a cluster's. */
+export const GENESIS = "7kTaUuJSoBS8CSSiHDZ3ETFig7ZNxVGoBEHGasbA3tRr";
 const SYSTEM = "11111111111111111111111111111111";
 const MEMO = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr";
 const base58 = getBase58Decoder();
@@ -34,7 +44,12 @@ export class OpsWallet {
   readonly txs: RpcTransaction[] = [];
   slot = 5_000;
   /** Each wallet the routine reads, by address; missing ones do not exist. */
-  readonly balances = new Map<string, { lamports: bigint; size?: number }>([[OPS, { lamports: 10n ** 10n }]]);
+  readonly balances = new Map<string, { lamports: bigint; size?: number; executable?: boolean }>([
+    [OPS, { lamports: 10n ** 10n }],
+  ]);
+  /** Wallets whose simulated transfer fails, and every recipient a simulation was asked about, in order. */
+  readonly uncreditable = new Set<string>();
+  readonly simulated: string[] = [];
   /** Lamports a byte of the rent-exempt minimum, the 128-byte header included. */
   rentPerByte = 5_080n;
 
@@ -78,10 +93,26 @@ export function routineRpc(ops: OpsWallet): SolanaRpc {
     if (!known) return null;
     const size = known.size ?? 0;
     const data = [getBase64Decoder().decode(new Uint8Array(size)), "base64"];
-    return { lamports: known.lamports, owner: SYSTEM, executable: false, rentEpoch: 0n, space: BigInt(size), data };
+    const executable = known.executable ?? false;
+    return { lamports: known.lamports, owner: SYSTEM, executable, rentEpoch: 0n, space: BigInt(size), data };
   };
   return Object.assign(rpc, {
     getMultipleAccounts: (addresses: string[]) => ({ send: async () => ({ value: addresses.map(account) }) }),
+    getGenesisHash: () => ({ send: async () => GENESIS }),
+    getLatestBlockhash: () => ({
+      send: async () => ({ context: { slot: 0n }, value: { blockhash: SYSTEM, lastValidBlockHeight: 0n } }),
+    }),
+    simulateTransaction: (wire: string) => ({
+      send: async () => {
+        const tx = getTransactionDecoder().decode(getBase64Encoder().encode(wire));
+        const keys = getCompiledTransactionMessageDecoder().decode(tx.messageBytes).staticAccounts as string[];
+        ops.simulated.push(keys[1]);
+        const err = keys.some((k) => ops.uncreditable.has(k))
+          ? { InstructionError: [0, "ReadonlyLamportChange"] }
+          : null;
+        return { context: { slot: 0n }, value: { err, logs: [], accounts: null, unitsConsumed: 0n, returnData: null } };
+      },
+    }),
     getMinimumBalanceForRentExemption: (size: bigint) => ({
       send: async () => (128n + BigInt(size)) * ops.rentPerByte,
     }),
