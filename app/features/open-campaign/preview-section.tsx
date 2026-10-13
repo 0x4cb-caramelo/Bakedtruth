@@ -25,7 +25,7 @@ import { PRINCIPLE } from "../how/copy";
 import { BOX, PREVIEW } from "./copy";
 import { NO_ENTRY_RULE, NO_TAKE_BACK } from "./copy-money";
 import type { PreviewFacts } from "./preview";
-import { useIsClient } from "./use-is-client";
+import { useIsClient } from "@/lib/use-is-client";
 
 const L = PREVIEW.labels;
 
