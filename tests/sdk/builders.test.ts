@@ -15,6 +15,7 @@ import { DEFAULT_PARAMS } from "../brot/flows";
 import { camel } from "../brot/idl";
 import * as I from "../brot/instructions";
 import * as IS from "../brot/instructions-settlement";
+import * as IL from "../brot/instructions-14-15";
 import * as P from "../brot/program";
 
 const shape = (ix: Instruction) => ({
@@ -26,13 +27,7 @@ const shape = (ix: Instruction) => ({
  * The scaffold's stubs of Sprints 14–15 (2026-10-13): in the IDL, refused by the program, with no SDK builder until
  * their lanes. Each lane deletes its own name when it adds the builder and its pair below.
  */
-const NO_BUILDER_YET = [
-  "UserLinkReferrer",
-  "RereadCampaign",
-  "AdminDecideContest",
-  "SponsorJoinCampaign",
-  "SettleSealedFee",
-];
+const NO_BUILDER_YET = ["RereadCampaign", "AdminDecideContest", "SponsorJoinCampaign", "SettleSealedFee"];
 const params = Object.fromEntries(
   Object.entries(DEFAULT_PARAMS).map(([k, v]) => [camel(k), v]),
 ) as unknown as T.CreationParamsArgs;
@@ -101,6 +96,7 @@ describe("sdk builders match the test kit", () => {
       [T.buildSettlePrize({ campaign, recipient: other }), IS.settlePrizeIx(campaign, vault, other)],
       [T.buildCloseCampaign({ campaign, rentPayer: other }), IS.closeCampaignIx(campaign, vault, other, feeVault)],
       [T.buildSweepFees({ feeRecipient: other }), IS.sweepFeesIx(config, feeVault, other)],
+      [T.buildUserLinkReferrer({ referee: who, referrer: other }), IL.userLinkReferrerIx(who, other)],
     ];
     expect(NO_BUILDER_YET.filter((name) => !IDL.instructions.some((ix) => ix.name === name))).toEqual([]);
     expect(pairs.length).toBe(IDL.instructions.length - NO_BUILDER_YET.length);

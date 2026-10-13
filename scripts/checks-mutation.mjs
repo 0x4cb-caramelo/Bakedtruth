@@ -23,13 +23,19 @@ import { junitCases, unxml } from "./bun-junit.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 // checks.rs and its submodules: each `// X0.9 <id>` marker is in exactly one of them.
-const SOURCES = ["checks.rs", "checks/top_level.rs", "checks/upgrade.rs"].map((file) => join(ROOT, "programs/brot-markets/src", file));
+const SOURCES = ["checks.rs", "checks/top_level.rs", "checks/upgrade.rs", "instructions/referral/rules.rs"].map((file) => join(ROOT, "programs/brot-markets/src", file));
 const DEPLOY = join(ROOT, "target/deploy");
 const SO = join(DEPLOY, "brot_markets.so");
 const SAVED = join(ROOT, "target/checks-mutation/brot_markets.so");
 const JUNIT = join(ROOT, "target/checks-mutation/junit.xml");
-const RUST_TARGETS = ["checks_mollusk", "checks_mollusk_init"];
-const TS_FILES = ["tests/brot/checks.test.ts", "tests/brot/checks-init.test.ts", "tests/brot/resolve-refuses.test.ts"];
+const RUST_TARGETS = ["checks_mollusk", "checks_mollusk_init", "referral_link", "referral_refusals"];
+const TS_FILES = [
+  "tests/brot/checks.test.ts",
+  "tests/brot/checks-init.test.ts",
+  "tests/brot/resolve-refuses.test.ts",
+  "tests/brot/referral-link.test.ts",
+  "tests/brot/referral-refuses.test.ts",
+];
 const PATH = `${process.env.HOME}/.bun/bin:${process.env.PATH}`;
 // Mollusk and LiteSVM both run the binary this script builds; logs off and no colours to parse.
 const ENV = { ...process.env, PATH, BROT_MARKETS_SO: SO, RUST_LOG: "off", NO_COLOR: "1" };
@@ -66,6 +72,23 @@ event_accounts        fail  event_program_refuses_a_wrong_program_slot | event_p
 event_program         fail  event_program_refuses_a_wrong_program_slot | event_program: a wrong program slot
 event_program         keeps event_accounts_refuse_a_wrong_event_authority | event_accounts: a wrong event authority
 top_level             fail  - | top_level: a resolve forwarded by another program
+referrer_not_zero     fail  link_refuses_the_zero_referrer | link: the zero address as the referrer
+referrer_not_referee  fail  link_refuses_the_referee_as_its_own_referrer | link: the referee as its own referrer
+referrer_not_referee  keeps link_refuses_the_zero_referrer | link: the zero address as the referrer
+signer                fail  link_refuses_an_unsigned_referee | link: an unsigned referee
+signer                fail  link_refuses_an_unsigned_referee_whose_link_was_funded_in_advance | link: an unsigned referee whose link was funded in advance
+writable              fail  link_refuses_a_read_only_referee | link: a read-only referee
+writable              fail  link_refuses_a_read_only_link | link: a read-only link
+canonical_pda         fail  link_refuses_a_look_alike_a_non_canonical_or_another_referees_link | link: a look-alike, a non-canonical or another referee's link
+system_program        fail  link_refuses_a_look_alike_system_program | link: a look-alike System Program
+create_pda_account    fail  link_records_the_referrer_once_with_the_referees_rent | link: the referee's link records the referrer, the time and the slot, with the referee's rent
+create_pda_account    fail  link_tops_up_a_link_funded_in_advance | link: an address funded in advance is topped up and linked
+create_pda_account    fail  link_refuses_another_programs_account_or_a_system_account_with_data_at_the_link | link: another program's account, or a System account with data, at the link
+create_pda_account    fail  link_refuses_a_second_link_to_any_referrer | link: a second link, to any referrer
+event_accounts        fail  link_refuses_wrong_event_accounts | link: a wrong event authority
+event_accounts        fail  - | link: a wrong program slot
+event_program         fail  link_refuses_wrong_event_accounts | link: a wrong program slot
+event_program         keeps - | link: a wrong event authority
 `;
 
 const args = process.argv.slice(2);

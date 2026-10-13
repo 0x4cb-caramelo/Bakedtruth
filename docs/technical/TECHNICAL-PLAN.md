@@ -440,7 +440,7 @@ prize funder (the creator is the opener); the held sponsor cut, which becomes `o
 `_reserved`. One account per baker and campaign, holding both sides (Q3). It is created on the baker's first join and
 closed by `settle_entry`.
 
-**`ReferralLink`** (`["referral", referee]`, Sprint 14): `referee`, `referrer`, `created_at`, `bump`. Signed by the
+**`ReferralLink`** (`["referral", referee]`, Sprint 14; 96 bytes, built 2026-10-13): `referee`, `referrer`, `linked_at` (cluster time), `linked_slot` (the ordering key the indexer compares with the referee's first entry), `bump`. Signed by the
 referee, once, immutable (§3.4.11).
 
 **Code constants.** `MAX_FEE_BPS` 1,000 [F]; `MAX_CREATOR_SHARE_BPS` 100; `BPS_DENOMINATOR` 10,000 [F]; the Pyth
@@ -970,7 +970,7 @@ indexer notices a gap; admin and config events carry none (X0.4). Amounts are la
 | `FeeCollected`, `PrizeSettled` | `collect_fee`, `settle_prize` | Amounts and destination; the opening fee kept or refunded | 04 |
 | `CampaignClosed` | `close_campaign` | Rent returned, surplus swept | 04 |
 | `FeesSwept` | `sweep_fees` | Amount, `fee_recipient` | 04 |
-| `ReferralLinked` | `user_link_referrer` | Referee, referrer | 14 |
+| `ReferralLinked` | `user_link_referrer` | Referee, referrer, `linked_at`, `linked_slot` (no campaign, no `seq`) | 14 |
 
 v0.0.1's proposal, cancellation and four sponsorship events are gone; the old names map to these per D6.
 `EntriesHalted`, in the D6 table, is the `operating_level` value set by the pause, not an event (v0.0.1 §3.4.1).
