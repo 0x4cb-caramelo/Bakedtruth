@@ -2,6 +2,8 @@
 
 **Status:** merged 2026-10-10 (PR #60, tag `sprint-11`) at the founder's request, after the founder reported the Phantom test passed; built for the Hackathon MVP, A-8 the same day on the founder's answer. The test's entry is not found on devnet yet (record below) · **Branch:** `sprint-11-site-campaign-entry` · **Dates:** none, by the founder's decision
 
+**Final state (audit of 2026-10-13):** closed: merged by PR #60 and tagged `sprint-11` (`9e3c2fd`). Carried: `entries_allowed` is served by the read API since PR #72 (not deployed); the founder's Phantom signature was never recorded (a read-only lookup of Ronaldo's 10-11 devnet YES, A); a CSP nonce, a check of the landed transaction against the summary and a byte-altering smoke wallet (A).
+
 ## Record (2026-10-10)
 
 - **Built:** `/c/[id]` (`app/features/campaign-page/`) reads the campaign, the config, the Clock, the account it reads,

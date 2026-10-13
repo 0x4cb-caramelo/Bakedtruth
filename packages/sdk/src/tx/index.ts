@@ -20,3 +20,6 @@ export * from "./message";
 export * from "./prepare";
 export * from "./prepare-open";
 export * from "./prepare-claim";
+export * from "./sponsor-join";
+export * from "./settle-sealed-fee";
+export * from "./prepare-sealed";

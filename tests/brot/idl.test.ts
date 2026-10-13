@@ -2,8 +2,9 @@
  * Purpose: the drift check (X0.6): the hand-written test kit (struct layouts, events, instruction
  *          builders, error codes) against the Shank IDL that `bun run idl` writes from the program.
  *          Needs no program binary. When it fails, fix the kit or the program, never the IDL.
- * Version: 0.0.2
- * Sprint:  02 (pot core on Pinocchio), lane F; `resolve_campaign` in 03
+ * Version: 0.0.3
+ * Sprint:  02 (pot core on Pinocchio), lane F; `resolve_campaign` in 03; the scaffold of Sprints 14–15
+ *          (2026-10-13): its two accounts, five instructions and `ContestDecision`
  */
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -15,10 +16,12 @@ import { EVENTS } from "./events";
 import { DEFAULT_PARAMS } from "./flows";
 import { camelLayout, enumVariants, IDL, idlLayout } from "./idl";
 import * as I from "./instructions";
+import * as IL from "./instructions-14-15";
 import * as IS from "./instructions-settlement";
 import { layoutSize, type Layout } from "./layouts";
 import * as P from "./program";
 import * as S from "./structs";
+import * as SL from "./structs-14-15";
 
 type Signer = Awaited<ReturnType<typeof generateKeyPairSigner>>;
 /** An error's name and code. */
@@ -127,12 +130,43 @@ const BUILDERS: Record<string, Builder> = {
     args: null,
     build: async (who) => IS.sweepFeesIx(await P.configPda(), await P.feeVaultPda(), who.address),
   },
+  UserLinkReferrer: { args: SL.LINK_REFERRER_ARGS, build: (who) => IL.userLinkReferrerIx(who, who.address) },
+  RereadCampaign: {
+    args: null,
+    build: async () => IL.rereadCampaignIx(await P.campaignPda(CAMPAIGN_ID), await P.configPda(), metric),
+  },
+  AdminDecideContest: {
+    args: SL.DECIDE_CONTEST_ARGS,
+    build: async (who) =>
+      IL.adminDecideContestIx(who, await P.configPda(), await P.campaignPda(CAMPAIGN_ID), {
+        decision: P.ContestDecision.Void,
+        voidReason: P.VoidReason.TeamHouseFailure,
+        noteHash: new Uint8Array(32),
+      }),
+  },
+  SponsorJoinCampaign: {
+    args: SL.SPONSOR_JOIN_ARGS,
+    build: async (who) =>
+      IL.sponsorJoinCampaignIx(who, await P.campaignPda(CAMPAIGN_ID), metric, {
+        side: 0,
+        entryUsd: 500n,
+        maxLamports: 1n,
+      }),
+  },
+  SettleSealedFee: {
+    args: null,
+    build: async (who) => {
+      const campaign = await P.campaignPda(CAMPAIGN_ID);
+      const sealedFee = await P.sealedFeePda(campaign, who.address);
+      return IL.settleSealedFeeIx(sealedFee, campaign, who.address, await P.feeVaultPda());
+    },
+  },
 };
 
 /** The address each named slot must hold; signing slots hold the signer. */
 async function expectedAddresses(who: Address): Promise<Record<string, Address>> {
   const campaign = await P.campaignPda(CAMPAIGN_ID);
-  const signers = ["authority", "admin", "newAdmin", "teamMember", "creator", "baker"];
+  const signers = ["authority", "admin", "newAdmin", "teamMember", "creator", "baker", "referee", "sponsor"];
   return {
     ...Object.fromEntries(signers.map((name) => [name, who])),
     config: await P.configPda(),
@@ -153,6 +187,9 @@ async function expectedAddresses(who: Address): Promise<Record<string, Address>>
     join: await P.joinPda(campaign, who, 0),
     rentPayer: who,
     feeRecipient: who,
+    // Sprints 14 and 15: the referee's link, and the sponsor's held fee (the sponsor is the test wallet).
+    referralLink: await P.referralLinkPda(who),
+    sealedFee: await P.sealedFeePda(campaign, who),
   };
 }
 
@@ -170,11 +207,14 @@ describe("idl matches the test kit", () => {
   });
 
   test("accounts have the hand-written layouts", () => {
-    expect(IDL.accounts.map((a) => a.name).sort()).toEqual(["Campaign", "Entry", "GlobalConfig", "Join"]);
+    const names = ["Campaign", "Entry", "GlobalConfig", "Join", "ReferralLink", "SealedFee"];
+    expect(IDL.accounts.map((a) => a.name).sort()).toEqual(names);
     expect(idlLayout("GlobalConfig")).toEqual(camelLayout(S.GLOBAL_CONFIG));
     expect(idlLayout("Campaign")).toEqual(camelLayout(S.CAMPAIGN));
     expect(idlLayout("Entry")).toEqual(camelLayout(S.ENTRY));
     expect(idlLayout("Join")).toEqual(camelLayout(S.JOIN));
+    expect(idlLayout("ReferralLink")).toEqual(camelLayout(SL.REFERRAL_LINK));
+    expect(idlLayout("SealedFee")).toEqual(camelLayout(SL.SEALED_FEE));
     expect(idlLayout("CreationParams")).toEqual(camelLayout(S.CREATION_PARAMS));
   });
 
@@ -208,7 +248,7 @@ describe("idl matches the test kit", () => {
 
   test("enums keep the kit's order, from zero", () => {
     const kit = { ReaderKind: P.ReaderKind, Status: P.Status, Side: P.Side, Direction: P.Direction };
-    const more = { OperatingLevel: P.OperatingLevel, ConfigChange: P.ConfigChange };
+    const more = { OperatingLevel: P.OperatingLevel, ConfigChange: P.ConfigChange, ContestDecision: P.ContestDecision };
     for (const [name, values] of Object.entries({ ...kit, ...more })) {
       const tags: number[] = Object.values(values).sort((a, b) => a - b);
       expect([name, tags]).toEqual([name, enumVariants(name).map((_, i) => i)]);

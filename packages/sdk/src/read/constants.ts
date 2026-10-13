@@ -2,8 +2,9 @@
  * Purpose: the program's address and the constants compiled into it that a client needs: seeds, other
  *          programs, code ceilings, price and reader bounds, account sizes, and the enums. Mirrors
  *          programs/brot-markets/src/constants.rs; tests/sdk/contract-source.test.ts compares the two.
- * Version: 0.1.2 (Meteora DBC, wSOL and the graduation kind's floor and distance)
- * Sprint:  05 (SDK); the sixth kind (`DbcGraduated`)
+ * Version: 0.1.4 (the seeds of `ReferralLink` and `SealedFee`; the sealed entry's discriminator, the SealedFee's size
+ *          and tag, lane L15)
+ * Sprint:  05 (SDK); the sixth kind (`DbcGraduated`); the scaffold of Sprints 14–15 (2026-10-13)
  *
  * The program address is read from the IDL, which shank-cli writes from `declare_id!` (Sprint 00's
  * carried item: "the SDK takes the program address from the IDL"). The time constants that differ in
@@ -38,6 +39,8 @@ export const SEEDS = {
   vault: "vault",
   entry: "entry",
   join: "join",
+  referral: "referral",
+  sealedFee: "sealed",
   eventAuthority: "__event_authority",
 } as const;
 
@@ -52,9 +55,10 @@ export const COMPUTE_BUDGET_PROGRAM_ID = address("ComputeBudget11111111111111111
 /** The wallet-assertion program a wallet may add to a transaction, the same on both clusters (Sprint 03;
  * knowledge-base/tecnologia/lighthouse.md). The relay accepts it next to this program and ComputeBudget. */
 export const LIGHTHOUSE_PROGRAM_ID = address("L2TExMFKdjpN9kozasaurPirfHy9P8sbXoAN1qA3S95");
-/** The first byte of an instruction's data for the two a baker or a creator signs (the relay's country gate reads
- * them; checked against the generated client by tests/sdk/contract-relay.test.ts). */
-export const INSTRUCTION_DISCRIMINATOR = { userOpenCampaign: 8, userJoinCampaign: 9 } as const;
+/** The first byte of an instruction's data for the three that put a wallet's money in: an opening, a join and a
+ * sealed entry (Sprint 15). The relay's country gate reads them; checked against the generated client by
+ * tests/sdk/contract-relay.test.ts. */
+export const INSTRUCTION_DISCRIMINATOR = { userOpenCampaign: 8, userJoinCampaign: 9, sponsorJoinCampaign: 25 } as const;
 export const BPF_LOADER_UPGRADEABLE_ID = address("BPFLoaderUpgradeab1e11111111111111111111111");
 export const PYTH_RECEIVER_ID = address("rec2HHDDnjLfj4kE7VyEtFA1HPGQLK33259532cRyHp");
 export const PYTH_PUSH_ORACLE_ID = address("pyt2F414BA6dPttK6RddPZUdHfapoBN24GL5wbrPCou");
@@ -125,6 +129,14 @@ export const EPOCH_START_SLOW_SLOT_MS = 500n;
 export const DBC_MIN_GRADUATION_LAMPORTS = { real: 85_000_000_000n, drill: 1_000_000_000n } as const;
 
 /** Account sizes and type tags (state/*.rs; pinned by programs/brot-markets/tests/layout.rs). */
-export const ACCOUNT_LEN = { globalConfig: 400, campaign: 512, entry: 116, join: 96, vault: 0, feeVault: 0 } as const;
-export const ACCOUNT_TAG = { globalConfig: 1, campaign: 2, entry: 3, join: 5 } as const;
+export const ACCOUNT_LEN = {
+  globalConfig: 400,
+  campaign: 512,
+  entry: 116,
+  join: 96,
+  vault: 0,
+  feeVault: 0,
+  sealedFee: 112,
+} as const;
+export const ACCOUNT_TAG = { globalConfig: 1, campaign: 2, entry: 3, join: 5, sealedFee: 6 } as const;
 export const LAYOUT_VERSION = 1;

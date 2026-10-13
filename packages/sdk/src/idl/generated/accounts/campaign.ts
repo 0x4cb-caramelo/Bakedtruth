@@ -144,7 +144,7 @@ export type Campaign = {
   entriesUntallied: number;
   oneSidedFees: bigint;
   creatorShareReserved: bigint;
-  reserved: ReadonlyUint8Array;
+  sealedFeesOpen: number;
 };
 
 export type CampaignArgs = {
@@ -211,7 +211,7 @@ export type CampaignArgs = {
   entriesUntallied: number;
   oneSidedFees: number | bigint;
   creatorShareReserved: number | bigint;
-  reserved: ReadonlyUint8Array;
+  sealedFeesOpen: number;
 };
 
 /** Gets the encoder for {@link CampaignArgs} account data. */
@@ -280,7 +280,7 @@ export function getCampaignEncoder(): FixedSizeEncoder<CampaignArgs> {
     ["entriesUntallied", getU32Encoder()],
     ["oneSidedFees", getU64Encoder()],
     ["creatorShareReserved", getU64Encoder()],
-    ["reserved", fixEncoderSize(getBytesEncoder(), 4)],
+    ["sealedFeesOpen", getU32Encoder()],
   ]);
 }
 
@@ -350,7 +350,7 @@ export function getCampaignDecoder(): FixedSizeDecoder<Campaign> {
     ["entriesUntallied", getU32Decoder()],
     ["oneSidedFees", getU64Decoder()],
     ["creatorShareReserved", getU64Decoder()],
-    ["reserved", fixDecoderSize(getBytesDecoder(), 4)],
+    ["sealedFeesOpen", getU32Decoder()],
   ]);
 }
 

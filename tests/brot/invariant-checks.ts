@@ -18,6 +18,8 @@ import {
 import { payoutOf } from "./money-model";
 import type { ChainView, Harness } from "./invariant-harness";
 import { countOpen } from "./invariant-open";
+import { SEALED_CHECKS } from "./invariant-sealed-checks";
+import { balance } from "./setup";
 
 type Check = (c: ModelCampaign, v: ChainView, h: Harness) => string | null;
 const ledgerTo = (c: ModelCampaign, kind: string) => c.ledger.filter((l) => l.kind === kind);
@@ -95,7 +97,8 @@ const i6: Check = (c, v, h) => {
     return v.feeVault === h.feeVaultModel ? null : `fee vault ${v.feeVault}, the model ${h.feeVaultModel}`;
   }
   if (c.phase !== "Settled" || !c.feeMoved || !c.prizeSettled || (shareDue(c) > 0n && !c.shareSettled)) return null;
-  const dust = booked(c);
+  // A reserved creator share is still the creator's (close pays it with the rent): it is not dust.
+  const dust = booked(c) - c.reserved;
   if (dust < 0n) return `dust ${dust} is negative`;
   if (c.snapshot?.mode !== "Split") return dust === 0n ? null : `dust ${dust} outside Split`;
   return dust < BigInt(Math.max(1, winnersOf(c))) ? null : `dust ${dust} not below ${winnersOf(c)} winners`;
@@ -140,6 +143,7 @@ const i13: Check = (c, v) => {
   if (ledgerTo(c, "share").some((l) => l.to !== c.creator)) return "the share went to someone else";
   if (v.campaign && v.campaign.creator_share_from_fee > v.campaign.fee_total) return "from_fee above the fee";
   if (v.campaign && v.campaign.creator_share_settled !== c.shareSettled) return "creator_share_settled disagrees";
+  if (v.campaign && v.campaign.creator_share_reserved !== c.reserved) return "creator_share_reserved disagrees";
   return null;
 };
 
@@ -175,15 +179,18 @@ const CHECKS: [number, Check][] = [
   [15, i15],
 ];
 
-/** Runs the per-campaign invariants; throws naming the first one that fails. */
+/** Runs the per-campaign invariants, the sealed entry's too (Sprint 15); throws naming the first one that fails. */
 export function checkCampaign(c: ModelCampaign, v: ChainView, h: Harness, label: string) {
-  for (const [n, check] of CHECKS) {
+  for (const [n, check] of [...CHECKS, ...SEALED_CHECKS]) {
     const failure = check(c, v, h);
     if (failure) throw new Error(`I${n} (${label}): ${failure}`);
   }
 }
 
-/** I7 and I10′, about the whole world: the valve counts the open paid campaigns; the pause is the chain's. */
+/**
+ * I7, I10′ and I8 about the whole world: the valve counts the open paid campaigns; the pause is the chain's; the fee
+ * vault holds exactly what the model sent it, after every operation (a held sponsor fee reaches it only at settlement).
+ */
 export function checkWorld(h: Harness, config: Record<string, any>) {
   const open = countOpen(h);
   if (Number(config.open_campaigns) !== open) {
@@ -193,6 +200,9 @@ export function checkWorld(h: Harness, config: Record<string, any>) {
   if (config.operating_level !== (h.paused ? 1 : 0)) {
     throw new Error(`I10′: operating level ${config.operating_level}, the model paused ${h.paused}`);
   }
+  const feeVault = balance(h.w, h.feeVault);
+  if (feeVault !== h.feeVaultModel)
+    throw new Error(`I8: the fee vault holds ${feeVault}, the model ${h.feeVaultModel}`);
 }
 
 /**

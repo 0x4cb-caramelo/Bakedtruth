@@ -6,6 +6,8 @@ questions the same evening (1a to 12a, below), and answer 3a's code went in a fo
 marked waiting below · **Branch:**
 `sprint-13-site-notices-copy`, cut from `origin/main` at `sprint-12` (`107fec2`) · **Dates:** none, by the founder's decision
 
+**Final state (audit of 2026-10-13):** closed: merged by PR #63 and tagged `sprint-13` (`2dc5cb1`). Carried, and one of them urgent: **the corrected legal pages are not live** (the landing serves `ab764ab`, without PR #65: `/privacy` is the old text and `/terms` answers 200, while the banner sends the public to `/dev0x`), fixed by a landing release that needs Ronaldo's words; the partner report is built (PR #72); a full devnet cycle through the site (the founder's devnet writes); X2.2 on real phones (a person).
+
 ## Record (2026-10-10)
 
 - **Starting point.** Sprint 12 was merged (PR #61) and tagged `sprint-12` on `107fec2` the same day; this branch was

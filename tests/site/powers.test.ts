@@ -4,7 +4,7 @@
  *          and the page's live check reads the same roles from the program (ProgramData's upgrade authority, the
  *          config's admin, fee recipient and team keys) through an RPC, here the program in LiteSVM.
  *          Filter: `bun test tests/ -t "powers table"`.
- * Version: 0.2.0 (the Sprint 13 adversarial review: every instruction mapped to a row)
+ * Version: 0.2.1 (the scaffold of Sprints 14–15, 2026-10-13: two rows mapped, the stage-2 decision pending)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
@@ -76,14 +76,21 @@ describe("powers table", () => {
       "settlement/bookkeeping": null,
       "settlement/rules": null,
       "settlement/snapshot": null,
+      // The scaffold of Sprints 14–15 (2026-10-13): any wallet, and the program chooses every result and destination.
+      "resolution/reread_campaign": "Resolve, settle and pay",
+      "settlement/settle_sealed_fee": "Resolve, settle and pay",
     };
+    // A stub that refuses every call until its lane, which maps it above and names its power in content/powers.md (a
+    // new row needs the founders): the admin's decision at a contest's second stage (lane L14B).
+    const PENDING = ["resolution/admin_decide_contest"];
     const dir = `${import.meta.dir}/../../programs/brot-markets/src/instructions`;
     const files = ["admin", "campaigns", "resolution", "settlement"].flatMap((folder) =>
       [...new Bun.Glob("*.rs").scanSync({ cwd: `${dir}/${folder}` })]
         .filter((f) => f !== "mod.rs")
         .map((f) => `${folder}/${f.replace(/\.rs$/, "")}`),
     );
-    expect(files.filter((f) => !(f in ROW))).toEqual([]);
+    expect(files.filter((f) => !(f in ROW) && !PENDING.includes(f))).toEqual([]);
+    expect(PENDING.filter((f) => !files.includes(f) || f in ROW)).toEqual([]);
     const { blocks } = loadPowers();
     const table = blocks.find((b) => b.kind === "table" && b.head[0] === "Power");
     const powers = table?.kind === "table" ? table.rows.map((r) => r[0]) : [];

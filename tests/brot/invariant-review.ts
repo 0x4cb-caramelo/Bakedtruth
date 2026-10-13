@@ -4,6 +4,8 @@
  * Version: 0.0.1
  * Sprint:  04 (contract freeze, lane E)
  */
+import type { Address, Instruction } from "@solana/kit";
+
 import { BTC_PRICE } from "./flows";
 import { isTeamReason, PROOF_DELAY, shareDue, SIX_HOURS, snapshotOf, type ModelCampaign } from "./invariant-model";
 import * as I from "./instructions";
@@ -15,7 +17,7 @@ import {
   teamVoidCampaignIx,
 } from "./instructions-settlement";
 import type { BrotErrorName } from "./errors";
-import { clock, refreshBase, setBtc, type Harness, type Plan } from "./invariant-harness";
+import { clock, entryAt, refreshBase, setBtc, type Harness, type Plan } from "./invariant-harness";
 import * as P from "./program";
 
 export const REVIEW_KINDS = [
@@ -56,6 +58,23 @@ function takeSnapshot(c: ModelCampaign) {
 
 export const inWindow = (c: ModelCampaign, t: bigint) => t < c.reviewEndsAt;
 
+/**
+ * Every snapshot needs each join tallied first (amendment 2026-10-09; `NotTallied` otherwise, for the team's confirm
+ * and void as for finalize: settlement/snapshot.rs). When the snapshot will succeed, the same transaction tallies
+ * each baker's joins before it. The tally moves each Join's rent into its Entry: no wallet is paid here.
+ */
+async function tallied(h: Harness, c: ModelCampaign, campaign: Address, error: unknown, snapshot: Instruction) {
+  if (error !== undefined) return [snapshot];
+  const ixs: Instruction[] = [];
+  for (const baker of h.bakers) {
+    const mine = c.joins.filter((j) => j.baker === baker.address);
+    if (mine.length === 0) continue;
+    const joins = await Promise.all(mine.map((_, index) => P.joinPda(campaign, baker.address, index)));
+    ixs.push(tallyLateJoinsIx(baker.address, campaign, await entryAt(campaign, baker.address), joins));
+  }
+  return [...ixs, snapshot];
+}
+
 /** Plans one settlement operation; the refusal follows the program's order of checks. */
 export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
   const t = clock(h);
@@ -93,9 +112,10 @@ export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
       const stale = op.k === "resolveStale";
       if (stale) setBtc(h.w, BTC_PRICE, c.deadline - 700n);
       else refreshBase(h.w);
-      // An offered proof that is too old is refused as stale; with no proof the window is simply not over.
+      // An offered proof that is too old is refused as stale; with no proof the window is simply not over. The window
+      // includes its last second: a NO needs the clock past deadline + 60 s (readers/price_touch/proof.rs).
       const reader: BrotErrorName | undefined =
-        t < c.deadline + PROOF_DELAY ? (stale ? "ProofStale" : "NotResolvableYet") : undefined;
+        t <= c.deadline + PROOF_DELAY ? (stale ? "ProofStale" : "NotResolvableYet") : undefined;
       // In review, a NO (or a void) is decided by the reader first, then refused as a re-proof, unless the outcome is
       // not a YES: the program's order (decision of 2026-10-09). A campaign in review with a YES reads the same way.
       const error: BrotErrorName | undefined =
@@ -120,33 +140,39 @@ export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
         },
       };
     }
-    case "confirm":
+    case "confirm": {
+      const error: BrotErrorName | undefined =
+        c.phase !== "InReview" ? "TeamKeyOutsideReview" : !inWindow(c, t) ? "OutsideReviewWindow" : undefined;
       return {
-        ixs: [teamConfirmResultIx(h.team[op.member], config, campaign)],
-        error: c.phase !== "InReview" ? "TeamKeyOutsideReview" : !inWindow(c, t) ? "OutsideReviewWindow" : undefined,
+        ixs: await tallied(h, c, campaign, error, teamConfirmResultIx(h.team[op.member], config, campaign)),
+        error,
         deltas: BLANK,
         apply: () => takeSnapshot(c),
       };
-    case "void":
+    }
+    case "void": {
+      // The program's order: the reason, the team key, the window, then the outcome (decision of 2026-10-09:
+      // a team key voids only an automatic void, so a YES or NO is refused).
+      const error: BrotErrorName | undefined = !isTeamReason(op.reason)
+        ? "VoidReasonNotForTeam"
+        : c.phase !== "InReview"
+          ? "TeamKeyOutsideReview"
+          : !inWindow(c, t)
+            ? "OutsideReviewWindow"
+            : c.outcome !== "Void"
+              ? "TeamVoidNotAutomatic"
+              : undefined;
+      const args = { reason: op.reason, noteHash: NOTE_HASH };
       return {
-        ixs: [teamVoidCampaignIx(h.team[op.member], config, campaign, { reason: op.reason, noteHash: NOTE_HASH })],
-        // The program's order: the reason, the team key, the window, then the outcome (decision of 2026-10-09:
-        // a team key voids only an automatic void, so a YES or NO is refused).
-        error: !isTeamReason(op.reason)
-          ? "VoidReasonNotForTeam"
-          : c.phase !== "InReview"
-            ? "TeamKeyOutsideReview"
-            : !inWindow(c, t)
-              ? "OutsideReviewWindow"
-              : c.outcome !== "Void"
-                ? "TeamVoidNotAutomatic"
-                : undefined,
+        ixs: await tallied(h, c, campaign, error, teamVoidCampaignIx(h.team[op.member], config, campaign, args)),
+        error,
         deltas: BLANK,
         apply: () => {
           c.voidReason = op.reason;
           takeSnapshot(c);
         },
       };
+    }
     case "contest":
       return {
         ixs: [teamOpenContestIx(h.team[op.member], config, campaign)],
@@ -158,24 +184,10 @@ export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
     case "finalize": {
       const error: BrotErrorName | undefined =
         c.phase !== "InReview" ? "CampaignNotInReview" : t < c.reviewEndsAt ? "ReviewNotEnded" : undefined;
-      // Finalize needs every join tallied (amendment 2026-10-09): when it will succeed, the same transaction
-      // tallies each baker's joins first. Each closed Join returns its rent to its baker.
-      const ixs = [];
-      const deltas = new Map<string, bigint>();
-      if (error === undefined) {
-        for (const baker of h.bakers) {
-          const mine = c.joins.filter((j) => j.baker === baker.address);
-          if (mine.length === 0) continue;
-          const entry = await P.entryPda(campaign, baker.address);
-          const joins = await Promise.all(mine.map((_, index) => P.joinPda(campaign, baker.address, index)));
-          ixs.push(tallyLateJoinsIx(baker.address, campaign, entry, joins));
-          // The tally moves each Join's rent into the Entry (decision of 2026-10-09): no wallet is paid here.
-        }
-      }
       return {
-        ixs: [...ixs, finalizeCampaignIx(campaign, config)],
+        ixs: await tallied(h, c, campaign, error, finalizeCampaignIx(campaign, config)),
         error,
-        deltas,
+        deltas: BLANK,
         apply: () => takeSnapshot(c),
       };
     }

@@ -2,6 +2,8 @@
 
 **Status:** planned · **Branch:** `sprint-21-android-money-flows` · **Dates:** none, by the founder's decision
 
+**Final state (audit of 2026-10-13):** blocked by Sprint 20 (and by the same trade). Push notifications need a founder decision and a privacy audit.
+
 | | |
 |---|---|
 | Technical Plan block | M-2 (TP §3.7) |

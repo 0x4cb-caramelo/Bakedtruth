@@ -3,8 +3,9 @@
  *          instruction (which tests/brot/idl.test.ts checks against the IDL and every LiteSVM test sends):
  *          the same data bytes and the same slots with the same roles, for all 22 instructions. Needs
  *          no binary.
- * Version: 0.1.0
- * Sprint:  05 (SDK)
+ * Version: 0.1.1
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13) names its five stubs, which have no builder yet;
+ *          lane L15 adds the sealed entry's two
  */
 import { describe, expect, test } from "bun:test";
 import { generateKeyPairSigner, type Instruction } from "@solana/kit";
@@ -15,6 +16,7 @@ import { DEFAULT_PARAMS } from "../brot/flows";
 import { camel } from "../brot/idl";
 import * as I from "../brot/instructions";
 import * as IS from "../brot/instructions-settlement";
+import * as IL from "../brot/instructions-14-15";
 import * as P from "../brot/program";
 
 const shape = (ix: Instruction) => ({
@@ -22,6 +24,11 @@ const shape = (ix: Instruction) => ({
   data: Array.from(ix.data ?? []),
   accounts: (ix.accounts ?? []).map((a) => [a.address, a.role]),
 });
+/**
+ * The scaffold's stubs of Sprints 14–15 (2026-10-13): in the IDL, refused by the program, with no SDK builder until
+ * their lanes. Each lane deletes its own name when it adds the builder and its pair below.
+ */
+const NO_BUILDER_YET = ["UserLinkReferrer", "RereadCampaign", "AdminDecideContest"];
 const params = Object.fromEntries(
   Object.entries(DEFAULT_PARAMS).map(([k, v]) => [camel(k), v]),
 ) as unknown as T.CreationParamsArgs;
@@ -46,6 +53,14 @@ describe("sdk builders match the test kit", () => {
       expectedParamsVersion: 3,
     };
     const join = { side: P.Side.No, amount: 25_000_000n, minReturnBps: 12_345, expectedEntryTotal: 10_000_000n };
+    const sealed = {
+      side: P.Side.Yes,
+      entryUsd: 750n,
+      maxLamports: 9n * P.SOL,
+      minReturnBps: 7,
+      expectedEntryTotal: 3n,
+      expectedParamsVersion: 4,
+    };
     const pairs: [Promise<Instruction> | Instruction, Promise<Instruction> | Instruction][] = [
       [
         T.buildInitializeConfig({ authority: who, admin: other, feeRecipient: other, params }),
@@ -90,8 +105,24 @@ describe("sdk builders match the test kit", () => {
       [T.buildSettlePrize({ campaign, recipient: other }), IS.settlePrizeIx(campaign, vault, other)],
       [T.buildCloseCampaign({ campaign, rentPayer: other }), IS.closeCampaignIx(campaign, vault, other, feeVault)],
       [T.buildSweepFees({ feeRecipient: other }), IS.sweepFeesIx(config, feeVault, other)],
+      // Lane L15 (Sprint 15): the sealed entry and its fee's settlement.
+      [
+        T.buildSponsorJoinCampaign({
+          sponsor: who,
+          campaign,
+          metricAccount: P.BTC_USD_ACCOUNT,
+          ...sealed,
+          joinIndex: 4,
+        }),
+        IL.sponsorJoinCampaignIx(who, campaign, P.BTC_USD_ACCOUNT, { ...sealed, joinIndex: 4 }),
+      ],
+      [
+        T.buildSettleSealedFee({ campaign, sponsor: other }),
+        IL.settleSealedFeeIx(await P.sealedFeePda(campaign, other), campaign, other, feeVault),
+      ],
     ];
-    expect(pairs.length).toBe(IDL.instructions.length);
+    expect(NO_BUILDER_YET.filter((name) => !IDL.instructions.some((ix) => ix.name === name))).toEqual([]);
+    expect(pairs.length).toBe(IDL.instructions.length - NO_BUILDER_YET.length);
     for (const [sdk, kit] of pairs) expect(shape(await sdk)).toEqual(shape(await kit));
   });
 

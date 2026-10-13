@@ -1,7 +1,8 @@
 //! Purpose: `Campaign` (`["campaign", id]`): everything about one campaign, and the loaders that
 //!          check it. Its vault (`["vault", campaign]`) is data-less and its bump lives here.
-//! Version: 0.0.3
-//! Sprint: 02 (pot core on Pinocchio); `epoch` taken from the reserve in 03; settlement fields in 04 (lane C)
+//! Version: 0.0.4
+//! Sprint: 02 (pot core on Pinocchio); `epoch` taken from the reserve in 03; settlement fields in 04 (lane C);
+//!         `sealed_fees_open` takes the last of the reserve (scaffold of Sprints 14–15, 2026-10-13)
 //!
 //! Balances are bookkept in fields, never read from the vault, where anyone can send lamports
 //! (I15). `resolve_campaign` writes the result group (03); the settlement group is Sprint 04's.
@@ -167,8 +168,10 @@ pub struct Campaign {
     /// creator claims it (`settle_creator_share`); zero when nothing is reserved.
     #[idl_type("u64")]
     pub creator_share_reserved: LeU64,
-    #[padding]
-    pub _reserved: [u8; 4],
+    /// Sprint 15: `SealedFee` accounts of this campaign not yet settled; `close_campaign` waits for zero.
+    /// Taken from the reserve, so the size stays 512 and old accounts read zero.
+    #[idl_type("u32")]
+    pub sealed_fees_open: LeU32,
 }
 
 zero_copy!(Campaign = 512);

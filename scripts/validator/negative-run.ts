@@ -4,8 +4,8 @@
  *          not the cluster's runtime). Every case of tests/brot/slot-matrix.gen.ts is sent, unchanged, against
  *          the baseline its instruction gets here, and must fail with its own error and move no lamport; the
  *          baselines are checked by simulation first, and the paid opening is sent and charged as the SDK says.
- * Version: 0.1.0
- * Sprint:  05 (SDK and the devnet cycle), lane OPS
+ * Version: 0.1.1
+ * Sprint:  05 (SDK and the devnet cycle), lane OPS; 15 (the sealed entry's baselines, negative-baselines-sealed.ts)
  *
  * `bun run scripts/validator/negative-run.ts` (offline surfnet, loopback-only namespace). Surfpool is not Agave's
  * validator either: see knowledge-base notes; `solana-test-validator` needs a CPU with AVX2 to start.
@@ -19,6 +19,7 @@ import { mutate } from "../../tests/brot/slot-matrix-mutate";
 import { isolateOrExit } from "./isolate";
 import { CONFIG_BASELINES, funded, type Build, type Env } from "./negative-baselines";
 import { SETTLE_BASELINES } from "./negative-baselines-settle";
+import { SEALED_BASELINES } from "./negative-baselines-sealed";
 import { shimWorld } from "./negative-world";
 import { account, balance, clock, send } from "./rpc";
 import { simulate } from "./simulate";
@@ -119,10 +120,9 @@ async function main() {
       feeRecipient: await funded(rpc, 1n),
       team: [await funded(rpc), await funded(rpc)],
     };
-    console.log(
-      `slot matrix: ${SLOT_MATRIX.length} cases over ${CONFIG_BASELINES.length + SETTLE_BASELINES.length} instructions`,
-    );
-    for (const [name, build] of [...CONFIG_BASELINES, ...SETTLE_BASELINES]) await runCases(env, name, build);
+    const baselines = [...CONFIG_BASELINES, ...SETTLE_BASELINES, ...SEALED_BASELINES];
+    console.log(`slot matrix: ${SLOT_MATRIX.length} cases over ${baselines.length} instructions`);
+    for (const [name, build] of baselines) await runCases(env, name, build);
     await paidOpening(env);
     console.log("rule refusals:");
     await runRules(env, "user_open_campaign", OPEN_RULES);

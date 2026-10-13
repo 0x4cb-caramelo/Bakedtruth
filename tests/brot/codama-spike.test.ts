@@ -4,8 +4,8 @@
  *          instruction encodes to the kit's bytes and slots, every account and event decodes as the
  *          kit decodes it. With the program (Wave 2): admin_set_team built by Codama runs in LiteSVM
  *          and Codama's generated fetch decodes GlobalConfig as tests/brot/structs.ts does.
- * Version: 0.0.1
- * Sprint:  02 (pot core on Pinocchio), lane F
+ * Version: 0.0.2
+ * Sprint:  02 (pot core on Pinocchio), lane F; the five instructions of the scaffold of Sprints 14–15 (2026-10-13)
  */
 import { describe, expect, test } from "bun:test";
 import { address, generateKeyPairSigner, type Instruction, type ReadonlyUint8Array } from "@solana/kit";
@@ -15,6 +15,7 @@ import { EVENTS } from "./events";
 import { DEFAULT_PARAMS, initConfig } from "./flows";
 import { camel, IDL, normalized, sampleBytes } from "./idl";
 import * as I from "./instructions";
+import * as IL from "./instructions-14-15";
 import * as IS from "./instructions-settlement";
 import { decode, type Layout } from "./layouts";
 import * as P from "./program";
@@ -56,6 +57,16 @@ describe("codama client matches the test kit", () => {
     };
     const join = { amount: 25_000_000n, minReturnBps: 12_345, expectedEntryTotal: 10_000_000n };
     const accounts = { config, campaign, vault, metricAccount };
+    // Sprints 14 and 15: the admin's decision and a sealed entry.
+    const decide = { voidReason: P.VoidReason.TeamOutsideCause, noteHash: new Uint8Array(32).fill(7) };
+    const sealed = {
+      entryUsd: 750n,
+      maxLamports: 9n * P.SOL,
+      minReturnBps: 12_345,
+      expectedEntryTotal: 10_000_000n,
+      expectedParamsVersion: 5,
+    };
+    const sealedFee = await P.sealedFeePda(campaign, who.address);
     const pairs: [Instruction, Instruction][] = [
       [
         C.getAdminInitializeConfigInstruction({
@@ -163,6 +174,45 @@ describe("codama client matches the test kit", () => {
       [
         C.getSweepFeesInstruction({ config, feeVault, feeRecipient: who.address }),
         IS.sweepFeesIx(config, feeVault, who.address),
+      ],
+      [
+        C.getUserLinkReferrerInstruction({
+          referee: who,
+          referralLink: await P.referralLinkPda(who.address),
+          referrer: metricAccount,
+        }),
+        await IL.userLinkReferrerIx(who, metricAccount),
+      ],
+      [
+        C.getRereadCampaignInstruction({ campaign, config, metricAccount, proofAccount: P.SOL_USD_ACCOUNT }),
+        IL.rereadCampaignIx(campaign, config, metricAccount, P.SOL_USD_ACCOUNT),
+      ],
+      [
+        C.getAdminDecideContestInstruction({
+          admin: who,
+          config,
+          campaign,
+          ...decide,
+          decision: C.ContestDecision.Void,
+        }),
+        IL.adminDecideContestIx(who, config, campaign, { ...decide, decision: P.ContestDecision.Void }),
+      ],
+      [
+        C.getSponsorJoinCampaignInstruction({
+          sponsor: who,
+          ...accounts,
+          entry,
+          join: await P.joinPda(campaign, who.address, 0),
+          solUsdPrice: P.SOL_USD_ACCOUNT,
+          sealedFee,
+          side: C.Side.No,
+          ...sealed,
+        }),
+        await IL.sponsorJoinCampaignIx(who, campaign, metricAccount, { side: P.Side.No, ...sealed }),
+      ],
+      [
+        C.getSettleSealedFeeInstruction({ sealedFee, campaign, sponsor: who.address, feeVault }),
+        IL.settleSealedFeeIx(sealedFee, campaign, who.address, feeVault),
       ],
     ];
     expect(pairs.length).toBe(IDL.instructions.length);

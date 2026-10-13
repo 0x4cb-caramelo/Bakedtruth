@@ -1,9 +1,11 @@
 /**
  * Purpose: the program's structs as layouts: accounts (GlobalConfig, Campaign, Entry), instruction
  *          arguments and events, each in the field order of its Rust struct.
- * Version: 0.0.2
+ * Version: 0.0.3
  * Sprint:  02 (pot core on Pinocchio); Sprint 03 adds `epoch`, `params_version` and the opening's
- *          `epoch` and `expected_params_version`, frozen at its opening
+ *          `epoch` and `expected_params_version`, frozen at its opening; the scaffold of Sprints 14–15
+ *          (2026-10-13) turns the Campaign's last reserve into `sealed_fees_open` (its new layouts are in
+ *          structs-14-15.ts)
  */
 import type { Layout } from "./layouts";
 
@@ -102,7 +104,7 @@ export const CAMPAIGN: Layout = [
   ["entries_untallied", "u32"],
   ["one_sided_fees", "u64"],
   ["creator_share_reserved", "u64"],
-  ["_reserved", { bytes: 4 }],
+  ["sealed_fees_open", "u32"],
 ];
 
 export const ENTRY: Layout = [

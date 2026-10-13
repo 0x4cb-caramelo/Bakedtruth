@@ -1,6 +1,6 @@
 # Sprint 16 — Hardening (multisig, pause, incident plan, creation rules frozen)
 
-**Status:** planned · **Branch:** `sprint-16-hardening` · **Dates:** none, by the founder's decision
+**Status:** in progress; the CI and supply-chain items are built (2026-10-13); the rest waits for Sprints 14 and 15, the founder and the hardware multisig (see "Record") · **Branch:** `sprint-16-hardening` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -31,8 +31,13 @@ release candidate. The version that leaves this sprint is the one the two firms 
 - [ ] **The creation rules are frozen (BP-17):** the release candidate carries `user_open_campaign` with the ten
       checks of TP §3.4.10, the Pyth-priced opening with `max_lamports`, the creator share per P-2, `VoidReason`
       with the 10% path (T23), and every creation parameter under its code ceiling. The audit's scope names each.
-- [ ] **No cap:** the code has no `CapState` and no `max_pot`. The exposure alert (SOL held in all open vaults,
-      proposal §2.11) fires in a devnet test, and so does the alert at 80% of `max_open_campaigns`.
+- [x] **No cap:** the code has no `CapState` and no `max_pot`. The exposure alert (SOL held in all open vaults,
+      proposal §2.11) fires in a devnet test, and so does the alert at 80% of `max_open_campaigns`. **Done
+      (2026-10-13):** no `CapState` or `max_pot` anywhere in the program or the SDK; the keeper of `main` (`5eacb70`),
+      run read-only against devnet with `KEEPER_DRY_RUN=1`, a key holding no SOL and the thresholds lowered
+      (`KEEPER_EXPOSURE_ALERT_LAMPORTS=1`, `KEEPER_OPEN_CAMPAIGNS_ALERT_BPS=1`), raised `exposure_high` (27.87 SOL in
+      seven vaults) and `open_campaigns_high` (4 of 1,000) at 20:07 UTC. The approved thresholds (100 SOL, 80%) are
+      the defaults.
 - [ ] **The pause:** I10′ runs with every instruction of the version. Only `user_join_campaign`, `user_open_campaign`,
       the sealed entry and, if kept, `sponsor_add_prize` fail; resolution, payout and refund work with the pause on;
       only `admin` resumes.
@@ -150,4 +155,30 @@ From Sprint 01's review of the price reader (`knowledge-base/tecnologia/pyth-lei
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+**2026-10-13, the CI and supply-chain items (lane L16).** Built: `solana-verify build` twice from clean, in the image
+pinned by digest, compared byte for byte with each other and with the tested binaries; every downloaded tool pinned by
+SHA-256 (`scripts/ci/install-pinned.sh`); the publishing build without cache; the `mainnet` variant published apart as
+`programs-mainnet-<sha>` with its own IDL copy and `SHA256SUMS`, built with the same feature list the T12 tests use;
+gitleaks backing the secret scan; `CODEOWNERS`; the registry check on `bun.lock`; `[workspace.metadata.cli]` in
+`Cargo.toml`; and the services' tests in CI (`bun run test` now runs `bun test tests/ app/ services/`: the keeper,
+the API, the relay and the landing, 163 tests on this branch, which no CI step ran since Sprint 06, although
+`docs/SPRINTS.md` §4 listed them; found by the referral lane on 2026-10-13). Checked locally: shellcheck, actionlint, the pinned installs (a wrong pin, a tampered cache and a wrong
+version each fail), a local build byte-identical to CI's artifact of run 38352871035, the T12 tests on the mainnet
+binary (and failing on a drill build), gitleaks over the 510 commits of history (clean). What only CI proves is in
+`docs/technical/verifiable-build.md`; the first run on the branch is 38368538751.
+
+**Blocked by the founder:** the provenance attestation (`actions/attest-build-provenance`) needs a public repository or
+an Enterprise Cloud organisation; options: (a) make the repository public before mainnet, which `verify-from-repo` needs
+anyway (recommended), (b) GitHub Pro (branch protection and CODEOWNERS, no attestation), (c) an Enterprise
+organisation, (d) stay as is. Branch protection on `main` follows the same choice. **Answered 2026-10-13 (Ronaldo):
+(a)**, the repository goes public before mainnet; the attestation job runs from then (making it public is his act).
+The team-key opening alert is built and unit-tested, but was not seen on devnet: it fires for a team opening inside its
+one-hour look-back, so it needs an opening by a team key during a run.
+
+**Still to build here, after Sprints 14 and 15:** the pause (I10′) with every instruction; the exposure alert, the
+80% alert and the team-key opening alert under test (the keeper lane is building them); `content/powers.md` (needs the
+founders' second review); the incident plan and its page; where each key lives and how to rotate it; the mainnet
+parameters (proposed in `deploy/mainnet/init-params.mainnet.json`, PR #85); a mainnet program id per cluster; the
+pre-freeze fixes the audit package found (`docs/audit/SCOPE.md` §17); then the release candidate's tag (the founder's
+go-ahead). **Outside parties:** the three signers' written agreement and three hardware wallets, hardware second
+factors on the domain, Cloudflare, the server and GitHub.

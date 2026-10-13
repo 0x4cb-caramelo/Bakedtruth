@@ -1,29 +1,32 @@
 /**
- * Purpose: the randomized test's operations: the dispatch of every operation to its planner, the money moved by
- *          hand and by the wallets (drain, fund, sweep), the run of one operation against the program, and the
- *          draw of the next one. Openings and joins are in invariant-open.ts, settlements in invariant-settle.ts.
- * Version: 0.0.1
- * Sprint:  04 (contract freeze, lane E)
+ * Purpose: the randomized test's operations: the dispatch of every operation to its planner, the run of one
+ *          operation against the program, and the draw of the next one. Openings and joins are in invariant-open.ts,
+ *          the money moved by hand and by the wallets in invariant-wallets.ts, settlements in invariant-settle.ts,
+ *          the sealed entry and its held fee (Sprint 15) in invariant-sealed.ts and invariant-sealed-settle.ts.
+ * Version: 0.0.2
+ * Sprint:  04 (contract freeze, lane E); 15 (the sealed entry, its events checked; lane INV15)
  */
 import { type Address } from "@solana/kit";
 
-import { readConfig } from "./flows";
 import { type Harness, type Plan, type Rng, clock } from "./invariant-harness";
 import { planJoin, planOpenPaid, planOpenTeam, planPause, type JoinOp } from "./invariant-open";
 import { drawPhaseOp } from "./invariant-phase";
+import { drawHandSealed, drawSealed, planHandSealed, planSealed } from "./invariant-sealed";
+import { liveSealed, type HandSealedOp, type SealedOp } from "./invariant-sealed-model";
+import { drawSealedSettle } from "./invariant-sealed-settle";
 import { drawSettleOp, planSettle, type SettleOp } from "./invariant-settle";
-import { sweepFeesIx } from "./instructions-settlement";
-import * as P from "./program";
-import { systemTransferIx } from "./join-campaign-support";
+import { planDrain, planFund, planHand, planSweep } from "./invariant-wallets";
 import { balance, expectError, expectOk, send, setTime } from "./setup";
 
 export type BaseOp =
   | { k: "openPaid"; creator: number; days: number }
   | { k: "openTeam"; member: number }
   | JoinOp
+  | SealedOp
   | { k: "pause" }
   | { k: "resume" }
   | { k: "hand"; c: number; to: "vault" | "campaign"; amount: bigint }
+  | HandSealedOp
   | { k: "advance"; seconds: bigint }
   | { k: "drain"; creator: number }
   | { k: "fund"; creator: number }
@@ -39,6 +42,10 @@ export async function planOp(h: Harness, op: Op): Promise<Plan> {
       return planOpenTeam(h, op.member);
     case "join":
       return planJoin(h, op);
+    case "sealed":
+      return planSealed(h, op);
+    case "handSealed":
+      return planHandSealed(h, op);
     case "pause":
       return planPause(h, true);
     case "resume":
@@ -58,71 +65,6 @@ export async function planOp(h: Harness, op: Op): Promise<Plan> {
   }
 }
 
-function planHand(h: Harness, index: number, to: "vault" | "campaign", amount: bigint): Plan {
-  const { campaign, vault } = h.addrs[index];
-  const target = to === "vault" ? vault : campaign;
-  return {
-    ixs: [systemTransferIx(h.bank, target, amount)],
-    deltas: new Map<string, bigint>([
-      [target, amount],
-      [h.bank.address, -amount],
-    ]),
-    apply: () => {
-      const c = h.camps[index];
-      if (to === "vault") c.handSent += amount;
-      else c.handSentCampaign += amount;
-    },
-  };
-}
-
-/** Empties a creator's wallet: a credit below the reserve then has nowhere to land (Q2). */
-function planDrain(h: Harness, creatorIndex: number): Plan {
-  const creator = h.creators[creatorIndex];
-  const amount = balance(h.w, creator.address);
-  return {
-    ixs: [systemTransferIx(creator, h.sink, amount)],
-    deltas: new Map<string, bigint>([
-      [creator.address, -amount],
-      [h.sink, amount],
-    ]),
-    apply: () => {
-      h.drained.add(creator.address);
-    },
-  };
-}
-
-function planFund(h: Harness, creatorIndex: number): Plan {
-  const creator = h.creators[creatorIndex];
-  const amount = P.SOL;
-  return {
-    ixs: [systemTransferIx(h.bank, creator.address, amount)],
-    deltas: new Map<string, bigint>([
-      [creator.address, amount],
-      [h.bank.address, -amount],
-    ]),
-    apply: () => {
-      h.drained.delete(creator.address);
-    },
-  };
-}
-
-async function planSweep(h: Harness): Promise<Plan> {
-  const config = await readConfig(h.w);
-  const recipient = config.fee_recipient as Address;
-  const surplus = h.feeVaultModel - h.rent.vault;
-  return {
-    ixs: [sweepFeesIx(await P.configPda(), h.feeVault, recipient)],
-    error: surplus > 0n ? undefined : "NothingToSweep",
-    deltas: new Map<string, bigint>([
-      [h.feeVault, -surplus],
-      [recipient, surplus],
-    ]),
-    apply: () => {
-      h.feeVaultModel -= surplus;
-    },
-  };
-}
-
 /** Runs one operation: sends it, checks the refusal or the balance changes, then moves the model on. */
 export async function runOp(h: Harness, op: Op): Promise<void> {
   const plan = await planOp(h, op);
@@ -130,7 +72,7 @@ export async function runOp(h: Harness, op: Op): Promise<void> {
   const before = addrs.map((a) => balance(h.w, a));
   if (plan.ixs.length === 0) {
     plan.apply();
-    h.trace.push(`${op.k} ok`);
+    h.trace.push(`${op.k} ${plan.tag ?? "ok"}`);
     return;
   }
   const sent = await send(h.w, plan.ixs);
@@ -140,16 +82,17 @@ export async function runOp(h: Harness, op: Op): Promise<void> {
       if (balance(h.w, a) !== before[i]) throw new Error(`${op.k}: ${a} moved on a refused ${plan.error}`);
     });
   } else {
-    expectOk(sent);
+    const ok = expectOk(sent);
     addrs.forEach((a, i) => {
       const moved = balance(h.w, a) - before[i];
       const want = plan.deltas.get(a) ?? 0n;
       if (moved !== want) throw new Error(`${op.k}: ${a} moved ${moved}, the model expects ${want}`);
     });
+    plan.check?.(ok);
     plan.apply();
   }
   plan.after?.();
-  h.trace.push(`${op.k} ${plan.error ?? "ok"}`);
+  h.trace.push(`${op.k} ${plan.error ?? "ok"}${!plan.error && plan.tag ? ` ${plan.tag}` : ""}`);
 }
 
 /** The draw of the next operation: its kind by weight, then the campaign or wallet it names (seeded). */
@@ -168,7 +111,7 @@ export function drawOp(h: Harness, r: Rng): Op {
   // Most joins go to campaigns still taking entries; the rest name any open campaign, so refusals still run.
   const taking = open.filter((i) => h.camps[i].phase === "Open");
   const joinPool = taking.length > 0 && r.next() < 0.8 ? taking : open;
-  if (roll < 0.5 && joinPool.length > 0)
+  if (roll < 0.41 && joinPool.length > 0)
     return {
       k: "join",
       c: r.pick(joinPool),
@@ -176,15 +119,25 @@ export function drawOp(h: Harness, r: Rng): Op {
       side: r.next() < 0.5 ? 0 : 1,
       amount: r.big(10_000_000n, 3_000_000_000n),
     };
+  // Sprint 15: a sealed entry, by any baker (a sponsor may also join plainly: one Entry holds both).
+  const sealed = roll >= 0.41 && roll < 0.5 ? drawSealed(h, r, open) : null;
+  if (sealed) return sealed;
   if (roll < 0.53) return { k: "pause" };
   if (roll < 0.56) return { k: "resume" };
-  if (roll < 0.6 && open.length > 0)
+  if (roll < 0.6 && open.length > 0) {
+    if (r.next() < 0.3) return drawHandSealed(h, r, open);
     return { k: "hand", c: r.pick(open), to: r.next() < 0.6 ? "vault" : "campaign", amount: r.big(1n, 500_000_000n) };
+  }
   if (roll < 0.62 && live.length > 0) return { k: "drain", creator: r.pick(live) };
   if (roll < 0.64) return { k: "fund", creator: anyCreator };
   if (roll < 0.66) return { k: "sweep" };
+  // Sprint 15: a held fee settled at any phase (refused before the snapshot), sometimes by a thief in the sponsor's slot.
+  const holding = open.filter((i) => liveSealed(h.camps[i]).length > 0);
+  if (roll < 0.68 && holding.length > 0) return drawSealedSettle(h, r, r.pick(holding));
   if (open.length === 0) return { k: "openPaid", creator: 0, days: 3 };
-  const target = r.pick(open);
+  // Half the lifecycle draws go to a campaign inside its review window, so the team's confirm and void happen.
+  const reviewing = open.filter((i) => h.camps[i].phase === "InReview" && clock(h) < h.camps[i].reviewEndsAt);
+  const target = reviewing.length > 0 && r.next() < 0.5 ? r.pick(reviewing) : r.pick(open);
   // Most lifecycle draws name the step the phase allows (invariant-phase.ts); the rest stay random, so refusals still run.
   if (r.next() < 0.7) {
     const phased = drawPhaseOp(h, r, target);

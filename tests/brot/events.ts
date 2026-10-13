@@ -1,9 +1,10 @@
 /**
  * Purpose: the program's events as layouts: an inner instruction to the program whose data is
  *          [0xFF, discriminator, payload], signed by the event authority (T4). Mirrors events.rs.
- * Version: 0.0.3
+ * Version: 0.0.4
  * Sprint:  02 (pot core on Pinocchio); Sprint 03 adds `CampaignResolved` and the opening's `epoch`; Sprint 04 adds
- *          the team's `ResultConfirmed` and `CampaignVoided` and the snapshot's `CampaignFinalized`
+ *          the team's `ResultConfirmed` and `CampaignVoided` and the snapshot's `CampaignFinalized`; the scaffold of
+ *          Sprints 14–15 (2026-10-13) the five events of the referral, the contest and the sealed entry
  */
 import type { Layout } from "./layouts";
 import { CREATION_PARAMS } from "./structs";
@@ -131,6 +132,67 @@ export const EVENTS: Record<string, { discriminator: number; layout: Layout }> =
       ["from_pot", "u64"],
       ["from_fee", "u64"],
       ["distributable", "u64"],
+    ],
+  },
+  ReferralLinked: {
+    discriminator: 18,
+    layout: [
+      ["referee", "pubkey"],
+      ["referrer", "pubkey"],
+      ["linked_at", "i64"],
+      ["linked_slot", "u64"],
+    ],
+  },
+  CampaignReread: {
+    discriminator: 19,
+    layout: [
+      ["campaign", "pubkey"],
+      ["seq", "u64"],
+      ["same", "bool"],
+      ["outcome", "u8"],
+      ["void_reason", "u8"],
+      ["met_late", "bool"],
+      ["observed_value", "i128"],
+      ["publish_time", "i64"],
+      ["contest_stage", "u8"],
+      ["contest_ends_at", "i64"],
+    ],
+  },
+  ContestClosed: {
+    discriminator: 20,
+    layout: [
+      ["campaign", "pubkey"],
+      ["seq", "u64"],
+      ["signer", "pubkey"],
+      ["decision", "u8"],
+      ["void_reason", "u8"],
+      ["note_hash", { bytes: 32 }],
+    ],
+  },
+  SealedFeeHeld: {
+    discriminator: 21,
+    layout: [
+      ["campaign", "pubkey"],
+      ["seq", "u64"],
+      ["sponsor", "pubkey"],
+      ["entry_usd", "u64"],
+      ["paid", "u64"],
+      ["entry_lamports", "u64"],
+      ["fee_lamports", "u64"],
+      ["fee_total", "u64"],
+      ["price", "i64"],
+      ["exponent", "i32"],
+      ["publish_time", "i64"],
+    ],
+  },
+  SealedFeeSettled: {
+    discriminator: 22,
+    layout: [
+      ["campaign", "pubkey"],
+      ["seq", "u64"],
+      ["sponsor", "pubkey"],
+      ["fee_lamports", "u64"],
+      ["refunded", "bool"],
     ],
   },
 };

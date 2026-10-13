@@ -1,7 +1,8 @@
 //! Purpose: the one-byte enums stored in accounts and passed in instruction data, with their
 //!          checked conversion from a raw byte.
-//! Version: 0.0.4
-//! Sprint: 02 (pot core on Pinocchio); `measured_by_epoch` in 03; `DbcGraduated` appended after 05
+//! Version: 0.0.5
+//! Sprint: 02 (pot core on Pinocchio); `measured_by_epoch` in 03; `DbcGraduated` appended after 05;
+//!         `ContestDecision` appended (scaffold of Sprints 14–15, 2026-10-13)
 //!
 //! Stored as `u8` in the layouts and tagged by position, as Borsh would: a new variant is
 //! appended, never inserted or reordered (CLAUDE.md). Each enum is written out in full, not
@@ -126,6 +127,15 @@ pub enum ConfigChange {
     Admin = 4,
 }
 
+/// What the admin decides at stage 2 of a contest (Sprint 14, lane L14B): the stored result stands
+/// (`Confirm`), or the campaign is voided with a team reason (`Void`). Never an inverted outcome.
+#[derive(ShankType, Clone, Copy, Debug, PartialEq, Eq)]
+#[repr(u8)]
+pub enum ContestDecision {
+    Confirm = 0,
+    Void = 1,
+}
+
 /// `TryFrom<u8>` for each enum: a byte that is not a variant is refused with the given error.
 macro_rules! try_from_u8 {
     ($($ty:ident => $err:expr => [$($variant:ident),+]);+ $(;)?) => {
@@ -160,4 +170,5 @@ try_from_u8! {
     Direction => BrotError::InvalidDirection => [Above, Below];
     ConfigChange => BrotError::BadAccountData =>
         [Team, CreationParams, FeeRecipient, PendingAdmin, Admin];
+    ContestDecision => BrotError::InvalidContestDecision => [Confirm, Void];
 }

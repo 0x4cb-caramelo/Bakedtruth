@@ -27,6 +27,47 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **As rotas do indexador públicas pela API de leitura** (branch `feat/api-indexer-route`, 13/10/2026; Sprint 08, a
+  resposta (a) do fundador sobre o caminho público; `session-log/2026-10-13-rotas-do-indexador-pela-api.md`). O
+  `brot-api`, já público em `brot.markets/api/v1`, encaminha ao indexador, no loopback, exatamente as cinco rotas de
+  leitura dele (a atividade e a chance de uma campanha, a atividade recente, as entradas de uma carteira e a ordem da
+  página inicial), sem mudança na Cloudflare nem no túnel. Só GET e HEAD; o caminho e a consulta passam como vieram;
+  nenhum cabeçalho do cliente segue adiante além do `accept`; o CORS é o da API; o indexador fora do ar dá 503, a
+  demora 504 e uma resposta acima de 1 MB 502, sempre no formato de erro da API e sem o endereço do indexador
+  (`API_INDEXER_URL`, só no loopback; `off` desliga). As três listas sem limite do indexador ganharam páginas
+  (`?limit=` de 1 a 500, 100 por padrão, e o cursor `?before=`, com `next_before` na resposta), para nenhuma resposta
+  chegar ao teto. Nada foi publicado: vale quando o indexador for instalado e o `brot-api` reiniciado, um ato do
+  Ronaldo no servidor.
+
+- **13/10/2026, ações em produção pedidas pelo Ronaldo, nas palavras dele** (`session-log/2026-10-13-landing-tags-e-pr-88.md`):
+  o landing de `brot.markets` passou de `ab764ab` para a `main` em `395efa5`, depois do teste na porta 4239: a página
+  de privacidade corrigida está no ar e `/terms` responde 404 (a resposta 9a); as tags `sprint--1` (`635c77a`),
+  `sprint-09` (`368a76a`) e `sprint-10` (`b4f3b55`) foram criadas com as listas do que fica; o PR #88 (o keeper das
+  Sprints 06 e 07) entrou na `main` (`88a00f9`). O pagamento automático do keeper no devnet ainda não foi ligado: o
+  servidor continua com o keeper antigo, à espera da palavra do Ronaldo para a instalação.
+
+- **Sprint 15, a entrada selada do patrocinador** (branch `sprint-15-sponsorship`, 13/10/2026; construída e testada, não
+  publicada no devnet; `docs/sprints/sprint-15-sponsorship.md`, `session-log/2026-10-13-sprint-15-entrada-selada.md`).
+  Base: o andaime das Sprints 14 e 15 (`fd67706`).
+  - **`sponsor_join_campaign`**: o patrocinador entra no SIM ou no NÃO com pelo menos US$ 500 (o `opening_fee_usd`),
+    cobrados ao preço SOL/USD da Pyth pela mesma conversão da abertura, com o teto de lamports e a versão das regras de
+    criação travada entre a prévia e a assinatura; 90% entram no pote pelo mesmo caminho da entrada comum, 10% ficam
+    retidos numa conta do próprio patrocinador (`SealedFee`) até o resultado. A pausa recusa a entrada selada.
+  - **`settle_sealed_fee`**: qualquer carteira liquida depois do resultado; a taxa volta ao patrocinador numa anulação
+    por falha da casa e vai ao cofre de taxas em todo outro caso; o `close_campaign` espera toda taxa retida.
+  - **O núcleo da entrada comum** saiu de `join_campaign.rs` para `join_core.rs` e `join_slots.rs`, na mesma ordem e com
+    os mesmos erros: nenhum dos 40 testes da entrada comum mudou.
+  - **O SDK**: o construtor, a cotação, a conferência na ordem do programa, a preparação segura (`prepareSealedEntry`:
+    "ok" só quando conferência, resumo e simulação concordam) e o resumo do que se assina com a parte da taxa em
+    números; o relay passa a barrar a entrada selada de um país bloqueado.
+  - **O teste de dinheiro** (I1 a I15) sorteia a entrada selada, a liquidação da taxa, SOL mandado à mão para a conta e
+    o fechamento esperando a taxa; verde em 35 sementes. A revisão adversária não achou nada grave: o achado médio (o
+    teste de dinheiro) e quatro menores entraram antes do PR, revistos numa segunda passada; a taxa da entrada selada
+    feita tarde ficou com o fundador, presa por um teste.
+  - **O andaime das Sprints 14 e 15 vem junto** (`fd67706`): se esta sprint entrar na `main` antes da 14, as três
+    instruções da 14 (`user_link_referrer`, `reread_campaign`, `admin_decide_contest`) chegam como esboços que recusam
+    tudo, com os erros 6153 a 6165 e os eventos 18 a 20.
+  - **O `bun run test` passa a rodar também `services/`** (a mesma linha do PR #87).
 - **O keeper liquida, envia com orçamento e vigia a cadeia** (branch `sprint-07-keeper-carryover`, 13/10/2026; itens
   abertos das Sprints 06 e 07). Nada instalado no servidor; nada enviado à devnet.
   - **Liquidação atrás de `KEEPER_SETTLE`, desligada por padrão** (se o keeper da devnet paga é decisão do fundador):
@@ -64,6 +105,46 @@ recomendado (1a a 12a).
     firma, a confirmação dela, o hash novo, o relatório público).
   - **`README.md`:** o bloco da versão candidata, a preencher no congelamento (tag, commit, hashes, o comando do
     `solana-verify`), e o mapa de cada checagem para os seus testes.
+- **O roteiro da mainnet e o ensaio dele num fork do Surfpool** (branch `sprint-18-mainnet`, 13/10/2026; Sprint 18,
+  a parte que não depende de ninguém; `deploy/mainnet/README.md`; `session-log/2026-10-13-auditoria-do-roteiro-e-faixas.md`).
+  Nunca executado: nada foi enviado à mainnet nem ao devnet, e nenhuma chave de verdade foi usada.
+  - **O roteiro** (`deploy/mainnet/README.md`): as condições do dia com a evidência de cada uma (os dois relatórios,
+    o multisig 2 de 3 em carteiras de hardware, a empresa, a revisão do advogado, a regra de tesouraria), os passos do
+    artefato do CI ao primeiro ciclo de 0,01 SOL, os pontos de parada e a atualização depois do lançamento.
+  - **Três decisões tomadas pelas fontes:** o primeiro deploy não pode ser uma proposta do multisig (o loader do Agave
+    3.1.10 não aceita `DeployWithMaxDataLen` por CPI), então uma carteira de hardware publica a partir de um buffer e
+    passa a autoridade de upgrade ao cofre do Squads na mesma sessão; o cofre inicializa o `GlobalConfig` (admin e
+    `fee_recipient` = cofre, sem chave de admin intermediária); o time lock do Squads é o último ato da sessão.
+  - **As respostas do fundador de 13/10 (M-1 a M-4), agora o caminho padrão:** dois multisigs com as mesmas três
+    carteiras, o da autoridade de upgrade com time lock de 24 horas e o do admin e das taxas sem trava; o Ronaldo
+    segura a carteira de hardware no dia; o primeiro ciclo tem uma abertura paga ao lado da abertura da equipe. O passo
+    7 virou duas propostas: o cofre do upgrade inicializa o `GlobalConfig` (taxas no cofre do admin) e indica o cofre
+    do admin como o próximo admin, que aceita em seguida. O script recusa um multisig nomeado duas vezes, membros
+    diferentes, trava no multisig do admin e qualquer trava do upgrade que não seja 0 ou 24 horas.
+  - **Os scripts** (`scripts/deploy/mainnet-*.ts`, `bun run deploy:mainnet`): só a mainnet-beta pelo hash de gênese,
+    o fork do Surfpool reconhecido à parte, a autoridade de upgrade só numa carteira de hardware, o binário amarrado
+    ao SHA-256 digitado, simulação por padrão.
+  - **O ensaio** (`scripts/mainnet/`, `bun run mainnet:rehearse`): num fork da mainnet no Surfpool, com o binário do
+    recurso `mainnet`, o programa Squads v4 de verdade e contas reais (SOL/USD, mints): deploy, passagem da autoridade,
+    inicialização pelo cofre, abertura paga de US$ 500 ao preço da Pyth igual à cotação do SDK, um ciclo inteiro, o
+    time lock recusando antes da hora, a pausa e a retomada. Passou de ponta a ponta quatro vezes (43 conferências em
+    13 passos), e de novo no caminho das respostas do fundador (51 conferências em 12 passos; a abertura paga cobrou
+    4,662 SOL; os pagamentos, o 1% do criador e a parte do Brot iguais aos do SDK). Não ensaiado: as carteiras de hardware, as esperas de verdade, o app e a CLI do Squads, o
+    `solana-verify` (precisa de Docker) e os serviços na mainnet.
+  - **Os parâmetros da mainnet** em `deploy/mainnet/init-params.mainnet.json`, aprovados pelo fundador em 13/10
+    (M-3): `max_open_campaigns` 1.000, `max_price_age` 60 s, `max_price_conf_bps` 50, `campaign_max_age` 30 s.
+  - **Teste:** 5 novos (`tests/ops/mainnet-deploy.test.ts`), as guardas sem rede, o par de multisigs incluído.
+- **Sprint 16, a integridade da versão no CI** (branch `sprint-16-hardening`, 13/10/2026;
+  `docs/technical/verifiable-build.md`). Toda ferramenta que o CI baixa é fixada pelo SHA-256 e instalada por um script
+  só (`scripts/ci/install-pinned.sh`): a CLI da Solana e as platform-tools, o Bun, o Node, o gitleaks e o binário do
+  `solana-verify` 0.5.2; o `setup-bun` e o `setup-node` saíram. O `solana-verify build` roda duas vezes do zero, na
+  imagem do Docker fixada pelo digest, e o CI falha se os dois hashes e os binários testados não forem iguais byte a
+  byte; o binário do devnet publicado no `programs-<sha>` passa a sair desse build. O build `mainnet` sai num artefato
+  à parte, `programs-mainnet-<sha>`, com a mesma lista de recursos que os testes do T12 usam. O gitleaks reforça a
+  varredura de segredos (chaves da Solana em JSON e em base58, URLs com chave, segredos em hex, keystores); um
+  `CODEOWNERS` cobre o `.github/`, a varredura e os hooks; uma checagem recusa no `bun.lock` qualquer registro que não
+  seja o npmjs.org. A atestação de origem não sai: o GitHub só a oferece a repositórios públicos ou a organizações
+  pagas, e isso é decisão do fundador.
 - **Sprint 08, a terceira fatia do indexador** (branch `sprint-08-indexer`, PR #72, 13/10/2026; construída e testada,
   não implantada; o registro em `docs/sprints/sprint-08-indexer-api-points.md`). A ordem da página inicial calculada
   no indexador e servida em `/api/v1/ranking` (X1.9); os KPIs e o relatório do parceiro sem endereço nenhum; o
