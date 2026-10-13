@@ -56,7 +56,8 @@ describe("contest opens", () => {
     for (const signer of [cw.outsider, cw.admin]) {
       await expectRefused(cw.w, c, contestIx(signer, cw.config, c.campaign), "NotTeamMember");
     }
-    for (const status of [P.Status.Open, P.Status.Contested, P.Status.Settling]) {
+    // A Contested campaign takes the team's escalation instead (contest-escalate.test.ts).
+    for (const status of [P.Status.Open, P.Status.Settling]) {
       const other = await C.reviewed(cw, { status });
       await expectRefused(cw.w, other, contestIx(cw.team, cw.config, other.campaign), "TeamKeyOutsideReview");
     }

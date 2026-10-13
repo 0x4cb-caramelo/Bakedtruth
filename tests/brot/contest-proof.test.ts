@@ -32,8 +32,8 @@ const T = DEADLINE - C.HOUR;
 /** The stored YES: a touch 30 s before the contest, the price 1% past the target. */
 const STORED = (PRICE_TARGET * 101n) / 100n;
 
-/** A world at `T` and a price YES contested at stage 1 until `T + HOUR`. */
-async function contestedYes() {
+/** A world at `T` and a price YES contested at stage 1 until `ends` (by default an hour on; before `T`, over). */
+async function contestedYes(ends = T + C.HOUR) {
   const cw = await C.contestWorld();
   at(cw.w, T);
   const c = await campaignOn(cw.w, P.ReaderKind.PriceTouch, P.BTC_USD_ACCOUNT, PRICE_TARGET, {
@@ -46,7 +46,7 @@ async function contestedYes() {
       observed_value: STORED,
       publish_time: T - 30n,
       contest_stage: 1,
-      contest_ends_at: T + C.HOUR,
+      contest_ends_at: ends,
       event_seq: C.SEQ,
       entries_open: 2,
     },
@@ -87,7 +87,8 @@ describe("contest proof", () => {
   });
 
   test("contest proof: a fresh touch at the stored price pays, at another price it escalates", async () => {
-    const same = await contestedYes();
+    // Stage 1's 24 hours over (D2) while the deadline is still an hour away: the proof window is open.
+    const same = await contestedYes(T - 10n);
     expectOk(await C.reread(same.cw, same.c, await proof(same.cw, STORED, 5n)));
     expect(readCampaign(same.cw.w, same.c.campaign).status).toBe(P.Status.Settling);
     const moved = await contestedYes();

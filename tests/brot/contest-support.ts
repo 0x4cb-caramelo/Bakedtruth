@@ -20,7 +20,8 @@ import { anyAddress, at, campaignOn, DEADLINE, resolveWorld, type Injected } fro
 import { balance, fundedWallet, send, type World } from "./setup";
 
 export const HOUR = 3_600n;
-export const STAGE1_SECONDS = HOUR;
+/** Stage 1's 24 hours (the founder's answer to D2) and stage 2's 48 (constants.rs). */
+export const STAGE1_SECONDS = 24n * HOUR;
 export const STAGE2_SECONDS = 48n * HOUR;
 /** The mint stays above its target: after the deadline the reading is NO, not met late. */
 export const SUPPLY = 2_000_000n;

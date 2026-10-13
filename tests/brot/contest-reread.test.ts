@@ -4,7 +4,7 @@
  *          stored outcome (a Split, a one-sided pot, a stored void), a different one opens stage 2 and writes no
  *          result, and `CampaignReread` says which, decoded through the SDK; the price kind's documented cases;
  *          each refusal with its own error; the pause never blocks it. Filter: `bun test tests/ -t "contest reread"`.
- * Version: 0.1.0
+ * Version: 0.1.1 (D2: a matching re-read pays only after stage 1's 24 hours)
  * Sprint:  14 (lane L14B). Needs target/deploy/brot_markets.so and target/deploy/cpi_proxy.so.
  */
 import { describe, expect, test } from "bun:test";
@@ -18,6 +18,7 @@ import * as IL from "./instructions-14-15";
 import * as P from "./program";
 import {
   anyAddress,
+  at,
   campaignOn,
   DEADLINE,
   expectRefused,
@@ -28,7 +29,9 @@ import {
 } from "./resolve-support";
 import { expectOk, send, type World } from "./setup";
 
+/** Stage 1's 24 hours still running at `NOW`, or over (`WAITED`): a matching re-read pays only then (D2). */
 const STAGE1_ENDS = C.NOW + C.HOUR;
+const WAITED = C.NOW - 10n;
 const { No, Yes, Void, Unresolved } = P.Outcome;
 
 /** `ix` forwarded by the test-only CPI proxy, loaded at a fresh address (tests/programs/cpi-proxy). */
@@ -56,7 +59,7 @@ async function expectPays(cw: C.ContestWorld, c: Injected, mode: number, stored:
     ["CampaignReread", C.SEQ],
     ["CampaignFinalized", C.SEQ + 1n],
   ]);
-  expect(sent.events[0].data).toMatchObject({ same: true, contest_stage: 1, contest_ends_at: STAGE1_ENDS, ...stored });
+  expect(sent.events[0].data).toMatchObject({ same: true, contest_stage: 1, contest_ends_at: WAITED, ...stored });
   const after = readCampaign(cw.w, c.campaign);
   expect([after.status, after.settle_mode, after.event_seq]).toEqual([P.Status.Settling, mode, C.SEQ + 2n]);
   expect(sent.events[1].data.settle_mode).toBe(mode);
@@ -65,7 +68,7 @@ async function expectPays(cw: C.ContestWorld, c: Injected, mode: number, stored:
 describe("contest reread", () => {
   test("top_level: a re-read forwarded by another program", async () => {
     const cw = await C.contestWorld();
-    const c = await C.contested(cw, 1, STAGE1_ENDS);
+    const c = await C.contested(cw, 1, WAITED);
     const ix = await C.rereadIx(c);
     await expectRefused(cw.w, c, await forwarded(cw.w, ix), "RereadNotTopLevel");
     expectOk(await send(cw.w, [ix]));
@@ -74,13 +77,13 @@ describe("contest reread", () => {
 
   test("contest reread: the same reading pays a Split, a one-sided pot and a stored void", async () => {
     const cw = await C.contestWorld();
-    const split = await C.contested(cw, 1, STAGE1_ENDS);
+    const split = await C.contested(cw, 1, WAITED);
     await expectPays(cw, split, 1, { outcome: No, observed_value: C.SUPPLY, met_late: false });
-    const oneSided = await C.contested(cw, 1, STAGE1_ENDS, { pool_no: 0n });
+    const oneSided = await C.contested(cw, 1, WAITED, { pool_no: 0n });
     await expectPays(cw, oneSided, 2, { outcome: No });
     // Resolved as an unreadable account: the same void, nothing read, refunds every entry.
     const unreadable = { outcome: Void, void_reason: P.VoidReason.UnreadableAccount, observed_value: 0n };
-    const voided = await C.contested(cw, 1, STAGE1_ENDS, unreadable);
+    const voided = await C.contested(cw, 1, WAITED, unreadable);
     C.makeUnreadable(cw.w, voided.metric);
     await expectPays(cw, voided, 3, { outcome: Void, void_reason: P.VoidReason.UnreadableAccount });
   });
@@ -133,7 +136,7 @@ describe("contest reread", () => {
     const cw = await C.contestWorld();
     // The sponsored account's last update, ten seconds before the deadline: fresh, so the reading after it is NO.
     setBtcPrice(cw.w, P.BTC_USD_ACCOUNT, BTC_PRICE, DEADLINE - 10n);
-    const no = await priceContested(cw, { outcome: No, observed_value: BTC_PRICE });
+    const no = await priceContested(cw, { outcome: No, observed_value: BTC_PRICE, contest_ends_at: WAITED });
     await expectPays(cw, no, 1, { outcome: No, observed_value: BTC_PRICE, publish_time: DEADLINE - 10n });
     // A YES proven before the deadline: after the proof window the sponsored account alone is read (NO), so the
     // re-read differs and the contest escalates: the documented false escalation of a price YES.
@@ -170,10 +173,20 @@ describe("contest reread", () => {
     await expectRefused(cw.w, c, IL.rereadCampaignIx(c.campaign, config, other), "MetricAccountMismatch");
   });
 
+  test("contest reread: a matching re-read is refused before stage 1's 24 hours end, and pays at their end", async () => {
+    // D2 (2026-10-13): the wait gives a team key the time to send the contest to the admin.
+    const cw = await C.contestWorld();
+    const c = await C.contested(cw, 1, STAGE1_ENDS);
+    await expectRefused(cw.w, c, await C.rereadIx(c), "RereadBeforeTimelock");
+    at(cw.w, STAGE1_ENDS);
+    expectOk(await C.reread(cw, c));
+    expect(readCampaign(cw.w, c.campaign).status).toBe(P.Status.Settling);
+  });
+
   test("contest reread: the pause never blocks a re-read", async () => {
     const cw = await C.contestWorld();
     expectOk(await send(cw.w, [await buildPauseEntries({ teamMember: cw.team })]));
-    const c = await C.contested(cw, 1, STAGE1_ENDS);
+    const c = await C.contested(cw, 1, WAITED);
     expectOk(await C.reread(cw, c));
     expect(readCampaign(cw.w, c.campaign).status).toBe(P.Status.Settling);
   });
