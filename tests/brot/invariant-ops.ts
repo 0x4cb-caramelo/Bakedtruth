@@ -1,21 +1,23 @@
 /**
  * Purpose: the randomized test's operations: the dispatch of every operation to its planner, the money moved by
- *          hand and by the wallets (drain, fund, sweep), the run of one operation against the program, and the
- *          draw of the next one. Openings and joins are in invariant-open.ts, settlements in invariant-settle.ts.
- * Version: 0.0.1
- * Sprint:  04 (contract freeze, lane E)
+ *          hand and by the wallets (drain, fund, sweep), and the draw of the next one. Openings and joins are in
+ *          invariant-open.ts, the lifecycle in invariant-settle.ts and the files it dispatches to, the referral links
+ *          in invariant-referral.ts; invariant-run.ts runs one operation.
+ * Version: 0.1.0 (Sprint 14: the referral links; the run moved to invariant-run.ts, the lifecycle draw to -phase.ts)
+ * Sprint:  04 (contract freeze, lane E); 14 (lane INV14)
  */
 import { type Address } from "@solana/kit";
 
 import { readConfig } from "./flows";
 import { type Harness, type Plan, type Rng, clock } from "./invariant-harness";
 import { planJoin, planOpenPaid, planOpenTeam, planPause, type JoinOp } from "./invariant-open";
-import { drawPhaseOp } from "./invariant-phase";
-import { drawSettleOp, planSettle, type SettleOp } from "./invariant-settle";
+import { drawPhaseOp, drawSettleOp } from "./invariant-phase";
+import { drawLinkOp, planLink, type LinkOp } from "./invariant-referral";
+import { planSettle, type SettleOp } from "./invariant-settle";
 import { sweepFeesIx } from "./instructions-settlement";
 import * as P from "./program";
 import { systemTransferIx } from "./join-campaign-support";
-import { balance, expectError, expectOk, send, setTime } from "./setup";
+import { balance, setTime } from "./setup";
 
 export type BaseOp =
   | { k: "openPaid"; creator: number; days: number }
@@ -28,10 +30,13 @@ export type BaseOp =
   | { k: "drain"; creator: number }
   | { k: "fund"; creator: number }
   | { k: "sweep" };
-export type Op = BaseOp | SettleOp;
+export type Op = BaseOp | LinkOp | SettleOp;
+
+const LINK_KINDS = new Set(["link", "linkOther", "fundLink"]);
 
 /** Plans one operation against the model: the transaction, the expected refusal and balance changes. */
 export async function planOp(h: Harness, op: Op): Promise<Plan> {
+  if (LINK_KINDS.has(op.k)) return planLink(h, op as LinkOp);
   switch (op.k) {
     case "openPaid":
       return planOpenPaid(h, op.creator, op.days);
@@ -54,7 +59,7 @@ export async function planOp(h: Harness, op: Op): Promise<Plan> {
     case "sweep":
       return planSweep(h);
     default:
-      return planSettle(h, op);
+      return planSettle(h, op as SettleOp);
   }
 }
 
@@ -91,9 +96,10 @@ function planDrain(h: Harness, creatorIndex: number): Plan {
   };
 }
 
+/** Funds a creator with enough for about twenty paid openings, so a wallet once drained opens again. */
 function planFund(h: Harness, creatorIndex: number): Plan {
   const creator = h.creators[creatorIndex];
-  const amount = P.SOL;
+  const amount = 100n * P.SOL;
   return {
     ixs: [systemTransferIx(h.bank, creator.address, amount)],
     deltas: new Map<string, bigint>([
@@ -117,39 +123,11 @@ async function planSweep(h: Harness): Promise<Plan> {
       [h.feeVault, -surplus],
       [recipient, surplus],
     ]),
+    events: ["FeesSwept"],
     apply: () => {
       h.feeVaultModel -= surplus;
     },
   };
-}
-
-/** Runs one operation: sends it, checks the refusal or the balance changes, then moves the model on. */
-export async function runOp(h: Harness, op: Op): Promise<void> {
-  const plan = await planOp(h, op);
-  const addrs = [...plan.deltas.keys()] as Address[];
-  const before = addrs.map((a) => balance(h.w, a));
-  if (plan.ixs.length === 0) {
-    plan.apply();
-    h.trace.push(`${op.k} ok`);
-    return;
-  }
-  const sent = await send(h.w, plan.ixs);
-  if (plan.error) {
-    expectError(sent, plan.error);
-    addrs.forEach((a, i) => {
-      if (balance(h.w, a) !== before[i]) throw new Error(`${op.k}: ${a} moved on a refused ${plan.error}`);
-    });
-  } else {
-    expectOk(sent);
-    addrs.forEach((a, i) => {
-      const moved = balance(h.w, a) - before[i];
-      const want = plan.deltas.get(a) ?? 0n;
-      if (moved !== want) throw new Error(`${op.k}: ${a} moved ${moved}, the model expects ${want}`);
-    });
-    plan.apply();
-  }
-  plan.after?.();
-  h.trace.push(`${op.k} ${plan.error ?? "ok"}`);
 }
 
 /** The draw of the next operation: its kind by weight, then the campaign or wallet it names (seeded). */
@@ -159,16 +137,17 @@ export function drawOp(h: Harness, r: Rng): Op {
   const baker = r.int(0, h.bakers.length - 1);
   if (roll < 0.1)
     return { k: "advance", seconds: BigInt(r.pick([60, 90, 120, 3_600, 6 * 3_600, 2 * 86_400, 8 * 86_400])) };
-  // A creator whose wallet is drained cannot pay an opening: it is funded first.
+  // A creator whose wallet cannot pay an opening (about 4.6 SOL; drained, or not refilled since) is funded first.
   const live = h.creators.map((_, i) => i).filter((i) => !h.drained.has(h.creators[i].address));
+  const payers = h.creators.map((_, i) => i).filter((i) => balance(h.w, h.creators[i].address) >= 5n * P.SOL);
   const anyCreator = r.int(0, h.creators.length - 1);
-  if (roll < 0.16 && live.length === 0) return { k: "fund", creator: anyCreator };
-  if (roll < 0.16) return { k: "openPaid", creator: r.pick(live), days: r.int(3, 10) };
+  if (roll < 0.16 && payers.length === 0) return { k: "fund", creator: anyCreator };
+  if (roll < 0.16) return { k: "openPaid", creator: r.pick(payers), days: r.int(3, 10) };
   if (roll < 0.2) return { k: "openTeam", member: r.int(0, h.team.length - 1) };
   // Most joins go to campaigns still taking entries; the rest name any open campaign, so refusals still run.
   const taking = open.filter((i) => h.camps[i].phase === "Open");
   const joinPool = taking.length > 0 && r.next() < 0.8 ? taking : open;
-  if (roll < 0.5 && joinPool.length > 0)
+  if (roll < 0.47 && joinPool.length > 0)
     return {
       k: "join",
       c: r.pick(joinPool),
@@ -176,6 +155,8 @@ export function drawOp(h: Harness, r: Rng): Op {
       side: r.next() < 0.5 ? 0 : 1,
       amount: r.big(10_000_000n, 3_000_000_000n),
     };
+  // Sprint 14: a referral link, at any phase of any campaign and paused or not.
+  if (roll < 0.5) return drawLinkOp(h, r);
   if (roll < 0.53) return { k: "pause" };
   if (roll < 0.56) return { k: "resume" };
   if (roll < 0.6 && open.length > 0)
@@ -183,8 +164,12 @@ export function drawOp(h: Harness, r: Rng): Op {
   if (roll < 0.62 && live.length > 0) return { k: "drain", creator: r.pick(live) };
   if (roll < 0.64) return { k: "fund", creator: anyCreator };
   if (roll < 0.66) return { k: "sweep" };
-  if (open.length === 0) return { k: "openPaid", creator: 0, days: 3 };
-  const target = r.pick(open);
+  if (open.length === 0) {
+    return payers.length > 0 ? { k: "openPaid", creator: r.pick(payers), days: 3 } : { k: "fund", creator: 0 };
+  }
+  // Some draws pick a campaign in review or contested, so a contest's later stages come before the clock passes them.
+  const reviewing = open.filter((i) => h.camps[i].phase === "InReview" || h.camps[i].phase === "Contested");
+  const target = reviewing.length > 0 && r.next() < 0.35 ? r.pick(reviewing) : r.pick(open);
   // Most lifecycle draws name the step the phase allows (invariant-phase.ts); the rest stay random, so refusals still run.
   if (r.next() < 0.7) {
     const phased = drawPhaseOp(h, r, target);

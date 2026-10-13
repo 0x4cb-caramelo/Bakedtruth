@@ -1,13 +1,15 @@
 /**
  * Purpose: the randomized test's settlement operations: the payouts out of order and twice, the fee, the prize,
- *          the creator share and the close, each with its expected refusal and balance changes; the draw of
- *          every settlement operation. The review operations are in invariant-review.ts.
- * Version: 0.0.1
- * Sprint:  04 (contract freeze, lane E)
+ *          the creator share (paid, or held in the vault for a wallet that could not take it, then claimed) and the
+ *          close, each with its expected refusal, balance changes and events; and the dispatch of every lifecycle
+ *          operation to its planner (review, window, contest, payout).
+ * Version: 0.1.0 (Sprint 14: the contest dispatched, the share's reserve and claim, the events of each payout)
+ * Sprint:  04 (contract freeze, lane E); 14 (lane INV14)
  */
 import { type Address } from "@solana/kit";
 
-import { booked, collectDue, entryPayout, prizeDue, shareDue, type ModelCampaign } from "./invariant-model";
+import { booked, type ModelCampaign } from "./invariant-model";
+import { collectDue, entryPayout, prizeDue, shareDue } from "./invariant-payouts";
 import {
   closeCampaignIx,
   collectFeeIx,
@@ -16,12 +18,13 @@ import {
   settlePrizeIx,
 } from "./instructions-settlement";
 import type { BrotErrorName } from "./errors";
-import { clock, type Harness, type Plan, type Rng } from "./invariant-harness";
+import { CONTEST_KINDS, planContest, type ContestOp } from "./invariant-contest";
+import { entryOf, type Harness, type Plan } from "./invariant-harness";
 import { planReview, REVIEW_KINDS, type ReviewOp } from "./invariant-review";
-import * as P from "./program";
+import { balance } from "./setup";
 
 export const PAYOUT_KINDS = ["settle", "collect", "share", "prize", "close"] as const;
-export const SETTLE_KINDS = [...REVIEW_KINDS, ...PAYOUT_KINDS] as const;
+export const SETTLE_KINDS = [...REVIEW_KINDS, ...CONTEST_KINDS, ...PAYOUT_KINDS] as const;
 
 export type PayoutOp =
   | { k: "settle"; c: number; baker: number }
@@ -29,32 +32,23 @@ export type PayoutOp =
   | { k: "share"; c: number }
   | { k: "prize"; c: number }
   | { k: "close"; c: number };
-export type SettleOp = ReviewOp | PayoutOp;
+export type SettleOp = ReviewOp | ContestOp | PayoutOp;
 
-/** A payment that clears the reserve (Q2) frees a drained wallet; one below it stays reserved and is refused. */
+/** A payment that clears the reserve (Q2) frees a drained wallet; one below it stays reserved. */
 function credit(h: Harness, address: string, amount: bigint) {
   if (amount > 0n && h.drained.has(address) && amount >= h.rent.wallet) h.drained.delete(address);
 }
 
-/** Plans one settlement operation: a review step, or a payment. The refusals follow the program's order of checks. */
+/** Plans one lifecycle operation: a review step, a contest step, or a payment. */
 export async function planSettle(h: Harness, op: SettleOp): Promise<Plan> {
   if ((REVIEW_KINDS as readonly string[]).includes(op.k)) return planReview(h, op as ReviewOp);
-  const c = h.camps[op.c];
+  if ((CONTEST_KINDS as readonly string[]).includes(op.k)) return planContest(h, op as ContestOp);
   const { campaign, vault } = h.addrs[op.c];
-  return planPayout(h, op as PayoutOp, c, campaign, vault);
+  return planPayout(h, op as PayoutOp, h.camps[op.c], campaign, vault);
 }
 
 /** The money operations. Each pays a stored destination and runs under the pause too (I10′). */
-async function planPayout(
-  h: Harness,
-  op: Exclude<
-    SettleOp,
-    { k: "resolveYes" | "resolveNo" | "resolveStale" | "confirm" | "void" | "contest" | "finalize" }
-  >,
-  c: ModelCampaign,
-  campaign: Address,
-  vault: Address,
-): Promise<Plan> {
+async function planPayout(h: Harness, op: PayoutOp, c: ModelCampaign, campaign: Address, vault: Address) {
   const feeVault = h.feeVault;
   const settling = c.snapshot !== null && (c.phase === "Settling" || c.phase === "Settled");
   const notFinal: BrotErrorName | undefined = settling ? undefined : "NotFinalized";
@@ -62,21 +56,24 @@ async function planPayout(
     case "settle": {
       const baker = h.bakers[op.baker].address;
       const payout = c.snapshot ? entryPayout(c, baker) : 0n;
-      const entry = await P.entryPda(campaign, baker);
+      // The Entry returns its own rent and the rent of every Join the tally closed into it.
+      const rents = h.rent.entry + BigInt(c.joins.filter((j) => j.baker === baker).length) * h.rent.join;
       return {
-        ixs: [settleEntryIx(entry, campaign, vault, baker)],
+        ixs: [settleEntryIx(await entryOf(h, campaign, baker), campaign, vault, baker as Address)],
         error: notFinal ?? (c.settled.has(baker) ? "AlreadySettled" : undefined),
         deltas: new Map<string, bigint>([
           [vault, -payout],
-          [baker, payout + h.rent.entry + BigInt(c.joins.filter((j) => j.baker === baker).length) * h.rent.join],
+          [baker, payout + rents],
         ]),
+        events: ["EntrySettled"],
         apply: () => {
+          c.seq += 1n;
           c.ledger.push({ to: baker, amount: payout, kind: "entry" });
           c.paidOut += payout;
           c.settled.add(baker);
           if (c.settled.size === new Set(c.joins.map((j) => j.baker)).size) c.phase = "Settled";
         },
-      };
+      } satisfies Plan;
     }
     case "collect": {
       const amount = collectDue(c);
@@ -89,35 +86,18 @@ async function planPayout(
           [vault, -amount],
           [feeVault, amount],
         ]),
+        events: ["FeeCollected"],
         apply: () => {
+          c.seq += 1n;
           c.feeMoved = true;
           c.ledger.push({ to: "fee", amount, kind: "fee" });
           c.paidOut += amount;
           h.feeVaultModel += amount;
         },
-      };
+      } satisfies Plan;
     }
-    case "share": {
-      const amount = shareDue(c);
-      const error: BrotErrorName | undefined =
-        notFinal ??
-        (c.shareSettled || amount === 0n ? "CreatorShareNotDue" : undefined) ??
-        (h.drained.has(c.creator) && amount < h.rent.wallet ? "ReserveNotClaimable" : undefined);
-      return {
-        ixs: [settleCreatorShareIx(campaign, vault, c.creator as Address)],
-        error,
-        deltas: new Map<string, bigint>([
-          [vault, -amount],
-          [c.creator, amount],
-        ]),
-        apply: () => {
-          c.shareSettled = true;
-          c.ledger.push({ to: c.creator, amount, kind: "share" });
-          c.paidOut += amount;
-          credit(h, c.creator, amount);
-        },
-      };
-    }
+    case "share":
+      return planShare(h, c, campaign, vault, notFinal);
     case "prize": {
       const amount = prizeDue(c);
       return {
@@ -127,87 +107,94 @@ async function planPayout(
           [vault, -amount],
           [c.creator, amount],
         ]),
+        events: ["PrizeSettled"],
         apply: () => {
+          c.seq += 1n;
           c.prizeSettled = true;
           c.ledger.push({ to: c.creator, amount, kind: "prize" });
           c.paidOut += amount;
           credit(h, c.creator, amount);
         },
-      };
+      } satisfies Plan;
     }
     case "close":
       return planClose(h, c, campaign, vault);
   }
 }
 
-/** `close_campaign`: once settled, the rent goes to rent_payer; the dust and any hand-sent SOL go to the fee vault. */
+/**
+ * `settle_creator_share`, in the program's order: finalized; a share due (none for a team, a mode other than Split
+ * or a zero share: `CreatorShareNotDue`); once settled, only a reserved share can be claimed (`AlreadySettled`
+ * otherwise), when the wallet can take it (`ReserveNotClaimable`). A first credit that would leave the wallet below its
+ * rent-exempt minimum is held in the vault (`creator_share_reserved`), with no event; close pays it to the rent payer.
+ */
+function planShare(h: Harness, c: ModelCampaign, campaign: Address, vault: Address, notFinal?: BrotErrorName): Plan {
+  const due = shareDue(c);
+  const wallet = balance(h.w, c.creator as Address);
+  const claim = c.shareSettled && c.reserved > 0n;
+  const error: BrotErrorName | undefined =
+    notFinal ??
+    (due === 0n ? "CreatorShareNotDue" : undefined) ??
+    (!c.shareSettled
+      ? undefined
+      : c.reserved === 0n
+        ? "AlreadySettled"
+        : wallet + c.reserved < h.rent.wallet
+          ? "ReserveNotClaimable"
+          : undefined);
+  const reserve = error === undefined && !c.shareSettled && wallet + due < h.rent.wallet;
+  const paid = reserve ? 0n : claim ? c.reserved : due;
+  return {
+    ixs: [settleCreatorShareIx(campaign, vault, c.creator as Address)],
+    error,
+    deltas: new Map<string, bigint>([
+      [vault, -paid],
+      [c.creator, paid],
+    ]),
+    label: reserve ? "share-reserve" : claim ? "share-claim" : undefined,
+    events: reserve ? [] : ["CreatorShareSettled"],
+    apply: () => {
+      c.shareSettled = true;
+      c.reserved = reserve ? due : 0n;
+      if (reserve) return;
+      c.seq += 1n;
+      c.ledger.push({ to: c.creator, amount: paid, kind: "share" });
+      c.paidOut += paid;
+      credit(h, c.creator, paid);
+    },
+  };
+}
+
+/**
+ * `close_campaign`: once settled, the rent and any reserved creator share go to rent_payer (the creator, in this
+ * run); the dust and any hand-sent SOL go to the fee vault.
+ */
 function planClose(h: Harness, c: ModelCampaign, campaign: Address, vault: Address): Plan {
-  const dust = booked(c);
+  const reserved = c.reserved;
+  const dust = booked(c) - reserved;
   const waiting = shareDue(c) > 0n && !c.shareSettled;
   const payer = c.creator;
   return {
     ixs: [closeCampaignIx(campaign, vault, payer as Address, h.feeVault)],
     error: c.phase !== "Settled" || !c.feeMoved || !c.prizeSettled || waiting ? "CampaignNotSettled" : undefined,
     deltas: new Map<string, bigint>([
-      [vault, -(h.rent.vault + dust + c.handSent)],
+      [vault, -(h.rent.vault + dust + reserved + c.handSent)],
       [campaign, -(h.rent.campaign + c.handSentCampaign)],
-      [payer, h.rent.campaign + h.rent.vault],
+      [payer, h.rent.campaign + h.rent.vault + reserved],
       [h.feeVault, dust + c.handSent + c.handSentCampaign],
     ]),
+    events: ["CampaignClosed"],
     apply: () => {
       const surplus = dust + c.handSent + c.handSentCampaign;
+      c.seq += 1n;
       c.ledger.push({ to: "fee", amount: surplus, kind: "close" });
-      c.paidOut += dust + c.handSent;
+      if (reserved > 0n) c.ledger.push({ to: payer, amount: reserved, kind: "share" });
+      c.paidOut += dust + reserved + c.handSent;
       h.feeVaultModel += surplus;
+      c.reserved = 0n;
       c.closed = true;
       c.phase = "Closed";
-      credit(h, payer, h.rent.campaign);
+      credit(h, payer, h.rent.campaign + reserved);
     },
   };
-}
-
-export type AdvanceOp = { k: "advance"; seconds: bigint };
-
-/** The draw of one settlement operation against campaign `index`; a moot draw becomes a clock advance. */
-export function drawSettleOp(h: Harness, r: Rng, index: number): SettleOp | AdvanceOp {
-  const camp = h.camps[index];
-  const t = clock(h);
-  const member = r.int(0, h.team.length - 1);
-  const advance: AdvanceOp = { k: "advance", seconds: 3_600n };
-  const roll = r.int(0, SETTLE_KINDS.length - 1);
-  switch (SETTLE_KINDS[roll]) {
-    case "resolveYes":
-      return t >= camp.deadline ? advance : { k: "resolveYes", c: index, back: r.big(0n, 50n) };
-    case "resolveNo":
-      return { k: "resolveNo", c: index };
-    case "resolveStale":
-      return { k: "resolveStale", c: index };
-    case "confirm":
-      return { k: "confirm", c: index, member };
-    case "void": {
-      const inside = camp.phase === "InReview" && t < camp.reviewEndsAt;
-      const reason = inside && r.next() < 0.3 ? r.pick([1, 2, 3]) : r.pick([4, 5]);
-      return { k: "void", c: index, member, reason };
-    }
-    case "contest":
-      return { k: "contest", c: index, member };
-    case "finalize":
-      return { k: "finalize", c: index };
-    case "settle": {
-      const bakers = [...new Set(camp.joins.map((j) => j.baker))];
-      if (bakers.length === 0) return advance;
-      const who = r.pick(bakers);
-      return { k: "settle", c: index, baker: h.bakers.findIndex((b) => b.address === who) };
-    }
-    case "collect":
-      return { k: "collect", c: index };
-    case "share":
-      return { k: "share", c: index };
-    case "prize":
-      return { k: "prize", c: index };
-    case "close":
-      return { k: "close", c: index };
-    default:
-      return advance;
-  }
 }
