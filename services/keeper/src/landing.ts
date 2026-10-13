@@ -14,7 +14,7 @@
  * recorded as failed: the next cycle re-reads the chain and plans again, so nothing is paid twice.
  */
 import { compileTransaction, getTransactionSize, type Instruction, type TransactionSigner } from "@solana/kit";
-import type { SolanaRpc } from "@brot/sdk/read";
+import { customErrorCode, errorName, type SolanaRpc } from "@brot/sdk/read";
 import { simulate, type Simulation } from "@brot/sdk/tx";
 
 import {
@@ -72,6 +72,13 @@ export function failedIndex(err: unknown): number | null {
   const raw = (err as { InstructionError?: readonly unknown[] } | null)?.InstructionError?.[0];
   const index = typeof raw === "bigint" ? Number(raw) : raw;
   return typeof index === "number" && Number.isInteger(index) ? index : null;
+}
+
+/** A landed failure, named when it is a program refusal: "AlreadySettled (6107): {...}". */
+function failure(landed: Extract<Landed, { ok: false }>): string {
+  const code = landed.err === undefined ? null : customErrorCode(landed.err);
+  const name = code === null ? undefined : errorName(code);
+  return name ? `${name} (${code}): ${landed.error}` : landed.error;
 }
 
 const why = (sim: Simulation) => sim.errorName ?? `simulation failed: ${JSON.stringify(sim.err ?? null, plain)}`;
@@ -149,7 +156,7 @@ export async function landItems(ctx: LandingContext, items: readonly Item[]): Pr
       results.push(
         landed.ok
           ? { ...meta(item), outcome: "landed", detail: null, signature: landed.signature }
-          : { ...meta(item), outcome: "failed", detail: landed.error, signature: landed.signature },
+          : { ...meta(item), outcome: "failed", detail: failure(landed), signature: landed.signature },
       );
     }
   }

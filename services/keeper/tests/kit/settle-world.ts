@@ -167,7 +167,12 @@ export function owed(captured: Captured) {
   const verdict = storedVerdict(c);
   if (!verdict) throw new Error("the campaign has no verdict");
   const snap = snapshotOf(c, verdict);
-  const bakers = captured.entries.map((e) => ({ baker: e.baker, rent: e.lamports, ...entryOwed(c, e.entry) }));
+  const bakers = captured.entries.map((e) => ({
+    baker: e.baker,
+    entry: e.entry,
+    rent: e.lamports,
+    ...entryOwed(c, e.entry),
+  }));
   const share = creatorShareStatus(c);
   const prize = prizeReturnOf(c);
   const oneSided = bakers.reduce((sum, b) => sum + b.oneSidedFee, 0n);
