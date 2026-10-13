@@ -41,7 +41,9 @@ recomendado (1a a 12a).
   - **Os endereços ficam na prova**: o pool e o mint do token ("Token mint (CA)"), com link e botão de copiar.
   - **O relay serve inteiras as contas da Metaplex e do Token-2022**, pronto para quando ele entrar no ar (hoje o site
     lê a RPC pública do devnet direto).
-  - **Os botões SIM e NÃO** levam só a palavra; a chance e a estimativa ficam embaixo de cada um, no texto neutro.
+  - **Os botões SIM e NÃO** levam só a palavra; a chance e a estimativa ficam embaixo de cada um, no texto neutro. O
+    mesmo nos cartões e no slide "Open now" da página inicial (sem a chance, que o cartão já mostra em destaque, e sem
+    o "Join" antes da palavra), num estilo só para os três (`.side-cell` e `.side-est`).
   - **Testes**: 14 novos (`tests/sdk/token-symbol.test.ts`, `tests/site/curve-name.test.ts`,
     `tests/site/panels-render.test.ts`, um em `tests/ops/resolution-post.test.ts`), em contas reais da mainnet; dois
     testes antigos passam a esperar `Token (…XXXX)` no lugar do endereço curto. Conferido também num navegador, com o

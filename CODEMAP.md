@@ -204,7 +204,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`arrange.test.ts`](app/features/campaigns/arrange.test.ts) | the list's rules: the ranking order, the state, kind and search filters, the saved filter, the unlisted switch, the sorts, and the empty pot's chance (none) | 111 |
 | [`arrange.ts`](app/features/campaigns/arrange.ts) | what the list shows and in which order (Sprint 10): the five states and "saved", the six kinds, the search, the unlisted switch, and the sort. The default order | 62 |
-| [`campaign-card.tsx`](app/features/campaigns/campaign-card.tsx) | one campaign's card (Sprint 10), in the approved prototype's structure (prototype-lab/campaigns, ui/card.js and css/card.css): kind and state, the sentence, the | 148 |
+| [`campaign-card.tsx`](app/features/campaigns/campaign-card.tsx) | one campaign's card (Sprint 10), in the approved prototype's structure (prototype-lab/campaigns, ui/card.js and css/card.css): kind and state, the sentence, the | 154 |
 | [`campaign-list.tsx`](app/features/campaigns/campaign-list.tsx) | the home page's toolbar and grid (Sprint 10), in the approved prototype's layout (`.home-toolbar`, `.grid-cards`): the five states and "Saved" as chips (Open by | 147 |
 | [`card-parts.tsx`](app/features/campaigns/card-parts.tsx) | the small pieces the approved prototype's cards, rows and slides share (ui/parts.js): the kind tile with its letter on the kind's colour ($, B, L, P, V, G), the | 50 |
 | [`card-row.tsx`](app/features/campaigns/card-row.tsx) | a campaign on one line (the approved prototype's `.card-row`), for the home page's "Closing soon" and "Answered recently": the kind tile, the sentence and its k | 30 |
@@ -251,7 +251,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`landed.ts`](app/features/entry/landed.ts) | what a landed transaction says about its own failure: the program of the instruction that failed, read from the transaction as the cluster recorded it (`getTran | 46 |
 | [`reload-countdown.tsx`](app/features/entry/reload-countdown.tsx) | A-8 on screen: under the "program updated" failure, the seconds left before the page reloads (the back-off of upgrade-pause.ts); at zero the page reloads. The f | 37 |
 | [`retry-guard.ts`](app/features/entry/retry-guard.ts) | the retry guard (A-9; proposal §3.4 rule 6; TP §3.6 S1 rule 6). Before the wallet gets a join, the site saves what it read: the entry total the join is signed a | 200 |
-| [`side-picker.tsx`](app/features/entry/side-picker.tsx) | YES or NO in the entry panel. The button holds only its side's word, centred; under each button, in the page's neutral text, the side's chance (its share of the | 64 |
+| [`side-picker.tsx`](app/features/entry/side-picker.tsx) | YES or NO in the entry panel. The button holds only its side's word, centred; under each button, in the page's neutral text, the side's chance (its share of the | 65 |
 | [`sides-tinted.tsx`](app/features/entry/sides-tinted.tsx) | the side words of a line written in green and red (Ronaldo, 2026-10-11): "YES" in the YES colour and "NO" in the NO colour wherever an estimate or a summary nam | 27 |
 | [`stored-record.ts`](app/features/entry/stored-record.ts) | one browser record of a retry guard, read for the guards' clean-up (an entry's and an opening's): a record that does not parse, or is not an object, guards noth | 16 |
 | [`submit.ts`](app/features/entry/submit.ts) | an entry from the panel to the chain, without React. `prepareEntry` is the SDK's A-3 preparation for the connected wallet's address (re-read, checked, built, su | 183 |
@@ -280,7 +280,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`home-page.tsx`](app/features/home/home-page.tsx) | the home page (the UI overhaul; the approved prototype's home.js): the top line with the opening's cost, the mosaic ("Open now" and the two side boxes), how it  | 76 |
 | [`home-proof.tsx`](app/features/home/home-proof.tsx) | the "On-chain read" panel of a home slide (the approved prototype's `.home-proof`, where the old chart was): the value read now against the target, "if read now | 126 |
 | [`home-side.tsx`](app/features/home/home-side.tsx) | the two boxes beside the home page's carousel (the approved prototype's `.home-side`): "Closing soon", the four listed campaigns whose entries close first, and  | 113 |
-| [`home-slide.tsx`](app/features/home/home-slide.tsx) | one slide of the home page's "Open now" carousel (the approved prototype's `.home-slide`): the kind, the sentence, each side's share in large type, the pot bar  | 110 |
+| [`home-slide.tsx`](app/features/home/home-slide.tsx) | one slide of the home page's "Open now" carousel (the approved prototype's `.home-slide`): the kind, the sentence, each side's share in large type, the pot bar  | 111 |
 | [`use-opening-now.ts`](app/features/home/use-opening-now.ts) | what a US$500 opening costs right now, for the home page's top line (the approved prototype's `.home-open`): the creation box's own reads (open-campaign/reads.t | 45 |
 
 ## `app/features/how/`
@@ -1569,7 +1569,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`open-retry.test.ts`](tests/site/open-retry.test.ts) | the opening's retry guard end to end (T17, A-9; TP §3.4.10 row 10), against the program in LiteSVM behind a local RPC: the id is the page's until the hand-off s | 168 |
 | [`open-search.test.ts`](tests/site/open-search.test.ts) | the creation box's search as a search bar (the UI overhaul, the approved prototype's open-slots.js): what a person types becomes campaigns the chain can check.  | 132 |
 | [`page-format.test.ts`](tests/site/page-format.test.ts) | how the campaign page writes what it read: exact grouped integers, a value in its kind's units, an age, the visitor's local time (built with options a browser a | 41 |
-| [`panels-render.test.ts`](tests/site/panels-render.test.ts) | two of the campaign page's blocks rendered with the site's React on the server. The entry panel's sides: each button holds only "YES" or "NO", and the line unde | 90 |
+| [`panels-render.test.ts`](tests/site/panels-render.test.ts) | blocks of the site rendered with its React on the server. The entry panel's sides: each button holds only "YES" or "NO", and the line under it (the chance, then | 151 |
 | [`powers.test.ts`](tests/site/powers.test.ts) | the powers table (BR-41, Sprint 13 DoD): content/powers.md is published on /record with who holds each key and the limit of each power (P4 §4.2), its four roles | 122 |
 | [`received.test.ts`](tests/site/received.test.ts) | what "my entries" says a wallet received equals the program's settlement events for that wallet, and the SOL that actually reached it (Sprint 12 DoD), on whole  | 172 |
 | [`recheck-commands.test.ts`](tests/site/recheck-commands.test.ts) | the re-check panel's commands fetch the bytes the program's readers read (BR-23): on real captured accounts, the byte range each command asks for decodes to the | 79 |

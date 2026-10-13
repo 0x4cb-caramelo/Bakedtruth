@@ -3,8 +3,9 @@
  *          page's neutral text, the side's chance (its share of the entries) and its estimated return per 1 for a 1 SOL
  *          entry, or "refund if alone" while the other side is empty. The line under a button describes it to screen
  *          readers (aria-describedby). Never a price in cents: the chance is not a price (P1 §3.2). aria-pressed marks
- *          the chosen side; the word, not the colour, says which.
- * Version: 0.2.0 (the estimate under the button, the button holding only its side)
+ *          the chosen side; the word, not the colour, says which. The cell and its line are the shared `.side-cell` and
+ *          `.side-est` (components.css), as on the cards and the home slide.
+ * Version: 0.2.1 (the shared side cell; 0.2.0, the estimate under the button, the button holding only its side)
  * Sprint:  11 (site: campaign page and entry); the sixth kind's site
  */
 "use client";
@@ -39,7 +40,7 @@ export function SidePicker({
         const line = `${id}-${view.side}`;
         const back = returnOf(view);
         return (
-          <div key={view.side} className="en-side">
+          <div key={view.side} className="side-cell">
             <button
               type="button"
               aria-pressed={value === view.side}
@@ -50,7 +51,7 @@ export function SidePicker({
             >
               {view.side.toUpperCase()}
             </button>
-            <p id={line} className="en-side-est">
+            <p id={line} className="side-est">
               {view.chance !== null ? <b>{view.chance}%</b> : null}
               {view.chance !== null && back ? <span aria-hidden="true">·</span> : null}
               {back}

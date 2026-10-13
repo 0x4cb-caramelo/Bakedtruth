@@ -66,7 +66,16 @@ mesmo ticker, mas não o mesmo pool, e o sufixo está sempre lá para quem não 
 - **Os documentos**: o plano técnico v0.1.10 (a A-11 com a exceção, a seção "Display names" com a tabela da regra e o
   risco escrito, o relay, a tabela do `content/`), o `content/README.md` e o CHANGELOG.
 
+- **Os cartões e o slide da página inicial**, num segundo pedido do mesmo dia ("aplica o visual nos cartões também"):
+  os atalhos SIM e NÃO de cada cartão e do slide "Open now" passam a levar só a palavra, com o que 1 SOL rende
+  embaixo. Um link só cobre o botão e a linha, e o botão acende com o ponteiro em qualquer dos dois. O estilo virou
+  uma peça compartilhada (`.side-cell` e `.side-est`, em `components.css`), usada também pelo painel de entrada.
+
 ## Decisões minhas, e por quê
+
+- **Nos cartões a linha de baixo não repete a chance**: o cartão já a mostra em letra grande logo acima da barra. E
+  o "Join" antes de YES e NO saiu dos cartões vazios, para o botão ter só a palavra, como pedido; o "No entries yet"
+  embaixo continua dizendo que ninguém entrou ainda.
 
 - **O sufixo é o fim do endereço do pool, não do mint.** O pool é o que a campanha guarda e o que a prova mostra
   primeiro, e o fim dele se escreve sem nenhuma leitura, inclusive no `Token (…7Dny)`. O exemplo do pedido (`…7Dny`) é

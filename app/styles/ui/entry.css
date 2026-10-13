@@ -5,15 +5,13 @@
 .en-panel > .panel-head { margin: 0; }
 .panel-head .hint.en-soon { color: var(--st-review-fg); font-weight: 600; }
 
-/* Side toggle: the chosen side in its colour with a ring; the other one quiet. The button holds only its word, centred;
-   the chance and the estimate sit under it in the page's neutral text, so the colour never carries a number. */
+/* Side toggle: the chosen side in its colour with a ring; the other one quiet. Each side is a `.side-cell` (components.css):
+   the button holds only its word; the chance and the estimate sit under it, the line kept even while it is empty. */
 .en-sides { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.en-side { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.en-sides .side-btn { justify-content: center; min-height: 52px; padding: 10px 12px; font: 700 21px/1 var(--display); letter-spacing: 0.3px; text-align: center; }
+.en-sides .side-btn { min-height: 52px; padding: 10px 12px; font: 700 21px/1 var(--display); letter-spacing: 0.3px; }
 .en-sides .side-btn[aria-pressed="false"] { background: var(--raised); color: var(--muted); }
 .en-sides .side-btn[aria-pressed="false"]:hover { color: var(--text); }
-.en-side-est { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 6px; min-height: 17px; margin: 0; color: var(--text); font-size: 12px; font-weight: 500; line-height: 17px; text-align: center; font-variant-numeric: tabular-nums; }
-.en-side-est b { font-weight: 700; } .en-side-est span { color: var(--muted); }
+.en-sides .side-est { min-height: 17px; }
 
 /* Amount. */
 .en-amount-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }

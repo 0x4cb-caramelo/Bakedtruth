@@ -1,10 +1,10 @@
 /**
  * Purpose: one slide of the home page's "Open now" carousel (the approved prototype's `.home-slide`): the kind, the
- *          sentence, each side's share in large type, the pot bar with its legend, YES and NO shortcuts with what
- *          1 SOL returns now, the line under them, the pot and its bakers; the proof panel beside it; and on a phone
- *          the standard card instead (cards.css swaps them).
- * Version: 0.1.0
- * Sprint:  10 (campaign list), in the UI overhaul
+ *          sentence, each side's share in large type, the pot bar with its legend, YES and NO shortcuts (the button holds
+ *          only its side; what 1 SOL returns now sits under it, as in the entry panel), the line under them, the pot
+ *          and its bakers; the proof panel beside it; and on a phone the standard card instead (cards.css swaps them).
+ * Version: 0.1.1 (the estimate under each side's button)
+ * Sprint:  10 (campaign list), in the UI overhaul; the sixth kind's site
  */
 import Link from "next/link";
 
@@ -43,10 +43,11 @@ export function HomeSlide({ card, index, total, now, reading, saved, onToggle }:
   const lone = (card.yesLamports === 0n) !== (card.noLamports === 0n);
   const s = sides(card);
   const empty = yes === null;
+  // As in the entry panel: the button holds only its side, and what 1 SOL returns sits under it; one link takes both.
   const side = (key: "yes" | "no", sub: string) => (
-    <Link className={`side-btn ${key}`} href={`/c/${card.id}?side=${key}`}>
-      <span>{`${empty ? "Join " : ""}${key.toUpperCase()}`}</span>
-      <span className="per">{sub}</span>
+    <Link className="side-cell" href={`/c/${card.id}?side=${key}`}>
+      <span className={`side-btn ${key}`}>{key.toUpperCase()}</span>
+      {sub ? <span className="side-est">{sub}</span> : null}
     </Link>
   );
   return (
