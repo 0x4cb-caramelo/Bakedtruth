@@ -1,14 +1,13 @@
 /**
- * Purpose: the randomized test's operations: the dispatch of every operation to its planner, the money moved by
- *          hand and by the wallets (drain, fund, sweep), the run of one operation against the program, and the
- *          draw of the next one. Openings and joins are in invariant-open.ts, settlements in invariant-settle.ts,
+ * Purpose: the randomized test's operations: the dispatch of every operation to its planner, the run of one
+ *          operation against the program, and the draw of the next one. Openings and joins are in invariant-open.ts,
+ *          the money moved by hand and by the wallets in invariant-wallets.ts, settlements in invariant-settle.ts,
  *          the sealed entry and its held fee (Sprint 15) in invariant-sealed.ts and invariant-sealed-settle.ts.
  * Version: 0.0.2
  * Sprint:  04 (contract freeze, lane E); 15 (the sealed entry, its events checked; lane INV15)
  */
 import { type Address } from "@solana/kit";
 
-import { readConfig } from "./flows";
 import { type Harness, type Plan, type Rng, clock } from "./invariant-harness";
 import { planJoin, planOpenPaid, planOpenTeam, planPause, type JoinOp } from "./invariant-open";
 import { drawPhaseOp } from "./invariant-phase";
@@ -16,9 +15,7 @@ import { drawHandSealed, drawSealed, planHandSealed, planSealed } from "./invari
 import { liveSealed, type HandSealedOp, type SealedOp } from "./invariant-sealed-model";
 import { drawSealedSettle } from "./invariant-sealed-settle";
 import { drawSettleOp, planSettle, type SettleOp } from "./invariant-settle";
-import { sweepFeesIx } from "./instructions-settlement";
-import * as P from "./program";
-import { systemTransferIx } from "./join-campaign-support";
+import { planDrain, planFund, planHand, planSweep } from "./invariant-wallets";
 import { balance, expectError, expectOk, send, setTime } from "./setup";
 
 export type BaseOp =
@@ -66,72 +63,6 @@ export async function planOp(h: Harness, op: Op): Promise<Plan> {
     default:
       return planSettle(h, op);
   }
-}
-
-function planHand(h: Harness, index: number, to: "vault" | "campaign", amount: bigint): Plan {
-  const { campaign, vault } = h.addrs[index];
-  const target = to === "vault" ? vault : campaign;
-  return {
-    ixs: [systemTransferIx(h.bank, target, amount)],
-    deltas: new Map<string, bigint>([
-      [target, amount],
-      [h.bank.address, -amount],
-    ]),
-    apply: () => {
-      const c = h.camps[index];
-      if (to === "vault") c.handSent += amount;
-      else c.handSentCampaign += amount;
-    },
-  };
-}
-
-/** Empties a creator's wallet: a credit below the reserve then has nowhere to land (Q2). */
-function planDrain(h: Harness, creatorIndex: number): Plan {
-  const creator = h.creators[creatorIndex];
-  const amount = balance(h.w, creator.address);
-  return {
-    ixs: [systemTransferIx(creator, h.sink, amount)],
-    deltas: new Map<string, bigint>([
-      [creator.address, -amount],
-      [h.sink, amount],
-    ]),
-    apply: () => {
-      h.drained.add(creator.address);
-    },
-  };
-}
-
-/** Enough for a paid opening (about 4.3 SOL at the captured price): a drained creator can open again (Sprint 15 fix). */
-function planFund(h: Harness, creatorIndex: number): Plan {
-  const creator = h.creators[creatorIndex];
-  const amount = 10n * P.SOL;
-  return {
-    ixs: [systemTransferIx(h.bank, creator.address, amount)],
-    deltas: new Map<string, bigint>([
-      [creator.address, amount],
-      [h.bank.address, -amount],
-    ]),
-    apply: () => {
-      h.drained.delete(creator.address);
-    },
-  };
-}
-
-async function planSweep(h: Harness): Promise<Plan> {
-  const config = await readConfig(h.w);
-  const recipient = config.fee_recipient as Address;
-  const surplus = h.feeVaultModel - h.rent.vault;
-  return {
-    ixs: [sweepFeesIx(await P.configPda(), h.feeVault, recipient)],
-    error: surplus > 0n ? undefined : "NothingToSweep",
-    deltas: new Map<string, bigint>([
-      [h.feeVault, -surplus],
-      [recipient, surplus],
-    ]),
-    apply: () => {
-      h.feeVaultModel -= surplus;
-    },
-  };
 }
 
 /** Runs one operation: sends it, checks the refusal or the balance changes, then moves the model on. */
