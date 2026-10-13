@@ -38,6 +38,7 @@ export const DATA_SIZE: Partial<Record<B, number>> = {
   [B.CloseCampaign]: G.getCloseCampaignInstructionDataDecoder().fixedSize,
   [B.SweepFees]: G.getSweepFeesInstructionDataDecoder().fixedSize,
   [B.TallyLateJoins]: G.getTallyLateJoinsInstructionDataDecoder().fixedSize,
+  [B.UserLinkReferrer]: G.getUserLinkReferrerInstructionDataDecoder().fixedSize,
 };
 
 type Slots = Record<string, { address: string }>;
@@ -118,6 +119,8 @@ export function describeOther(type: B, a: Slots, d: Record<string, any>): string
       return `Sweep the fee vault to ${a.feeRecipient.address}`;
     case B.TallyLateJoins:
       return `Tally ${a.baker.address}'s joins in campaign ${campaign}`;
+    case B.UserLinkReferrer:
+      return `Record ${d.referrer} as the wallet that referred ${a.referee.address}, once and for good (no instruction changes or removes the link); ${a.referee.address} pays the rent of the link's account, which is never returned`;
     default:
       return `Brot Markets instruction ${B[type]}`;
   }

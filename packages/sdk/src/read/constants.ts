@@ -127,6 +127,14 @@ export const EPOCH_START_SLOW_SLOT_MS = 500n;
 export const DBC_MIN_GRADUATION_LAMPORTS = { real: 85_000_000_000n, drill: 1_000_000_000n } as const;
 
 /** Account sizes and type tags (state/*.rs; pinned by programs/brot-markets/tests/layout.rs). */
-export const ACCOUNT_LEN = { globalConfig: 400, campaign: 512, entry: 116, join: 96, vault: 0, feeVault: 0 } as const;
-export const ACCOUNT_TAG = { globalConfig: 1, campaign: 2, entry: 3, join: 5 } as const;
+export const ACCOUNT_LEN = {
+  globalConfig: 400,
+  campaign: 512,
+  entry: 116,
+  join: 96,
+  vault: 0,
+  feeVault: 0,
+  referralLink: 96,
+} as const;
+export const ACCOUNT_TAG = { globalConfig: 1, campaign: 2, entry: 3, join: 5, referralLink: 4 } as const;
 export const LAYOUT_VERSION = 1;
