@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "maxItems": 500,
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "partner": {
+        "type": "string",
+        "pattern": "^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$",
+        "description": "A stable key for the partner: the partner report's file names start with it"
+      },
+      "name": {
+        "type": "string",
+        "pattern": "^(?=.{1,32}$)[A-Za-z0-9][A-Za-z0-9 .$\\-/&+']*$",
+        "description": "The partner's public name, as its project publishes it; never a person"
+      },
+      "link": {
+        "type": "string",
+        "maxLength": 200,
+        "pattern": "^https:\\/\\/[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+(?:\\/[A-Za-z0-9._~\\-/]*)?$",
+        "description": "The partner's own public link, shown with its seal (Sprint 10; a sponsor's, Sprint 15)"
+      },
+      "seal": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]{0,62}\\.(?:svg|png|webp)$",
+        "description": "The partner's seal, an image file the site serves (Sprint 10; a sponsor's, Sprint 15)"
+      },
+      "campaigns": {
+        "maxItems": 50,
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^(0|[1-9]\\d{0,19})$",
+              "description": "The campaign's u64 id"
+            },
+            "opensAt": {
+              "type": "string",
+              "pattern": "^(0|[1-9]\\d{0,11})$",
+              "description": "The campaign's opens_at: with the id, it names one opening of the address"
+            },
+            "highlightFrom": {
+              "type": "string",
+              "pattern": "^(0|[1-9]\\d{0,11})$",
+              "description": "When its highlight starts, Unix seconds UTC"
+            },
+            "highlightUntil": {
+              "type": "string",
+              "pattern": "^(0|[1-9]\\d{0,11})$",
+              "description": "When its highlight ends (excluded), at most 72 hours after it starts"
+            }
+          },
+          "required": [
+            "id",
+            "opensAt",
+            "highlightFrom",
+            "highlightUntil"
+          ],
+          "additionalProperties": false
+        },
+        "description": "The partner's campaigns, each opened by a team key (P-3); empty for a sponsor with no campaign"
+      }
+    },
+    "required": [
+      "partner",
+      "name",
+      "campaigns"
+    ],
+    "additionalProperties": false
+  },
+  "title": "content/partners.json (Brot Markets)",
+  "description": "Generated from packages/sdk/src/schemas/partners.ts by scripts/check-content-schema.ts --write; the zod schema is the check (it also refuses personal data in a name, a partner key or a campaign listed twice, and a highlight longer than 72 hours)."
+}
