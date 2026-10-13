@@ -155,7 +155,9 @@ pinned by digest, compared byte for byte with each other and with the tested bin
 SHA-256 (`scripts/ci/install-pinned.sh`); the publishing build without cache; the `mainnet` variant published apart as
 `programs-mainnet-<sha>` with its own IDL copy and `SHA256SUMS`, built with the same feature list the T12 tests use;
 gitleaks backing the secret scan; `CODEOWNERS`; the registry check on `bun.lock`; `[workspace.metadata.cli]` in
-`Cargo.toml`. Checked locally: shellcheck, actionlint, the pinned installs (a wrong pin, a tampered cache and a wrong
+`Cargo.toml`; and the services' tests in CI (`bun run test` now runs `bun test tests/ app/ services/`: the keeper,
+the API, the relay and the landing, 163 tests on this branch, which no CI step ran since Sprint 06, although
+`docs/SPRINTS.md` §4 listed them; found by the referral lane on 2026-10-13). Checked locally: shellcheck, actionlint, the pinned installs (a wrong pin, a tampered cache and a wrong
 version each fail), a local build byte-identical to CI's artifact of run 38352871035, the T12 tests on the mainnet
 binary (and failing on a drill build), gitleaks over the 510 commits of history (clean). What only CI proves is in
 `docs/technical/verifiable-build.md`; the first run on the branch is 38368538751.
