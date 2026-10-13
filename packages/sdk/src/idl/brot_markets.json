@@ -4906,6 +4906,11 @@
       "code": 6174,
       "name": "WrongSponsor",
       "msg": "The account is not the SealedFee's stored sponsor"
+    },
+    {
+      "code": 6175,
+      "name": "ConfirmWithVoidReason",
+      "msg": "A Confirm decision carries no void reason: its void_reason must be None"
     }
   ],
   "metadata": {

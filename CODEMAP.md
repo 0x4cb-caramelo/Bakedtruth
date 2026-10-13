@@ -18,7 +18,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 - `app/lib/mascot/engine.ts` — 312 linhas
 - `programs/brot-markets/src/constants.rs` — 204 linhas
-- `programs/brot-markets/src/error.rs` — 370 linhas
+- `programs/brot-markets/src/error.rs` — 373 linhas
 - `programs/brot-markets/src/instructions/campaigns/open_campaign.rs` — 209 linhas
 - `programs/brot-markets/src/instructions/entries/join_campaign.rs` — 212 linhas
 - `programs/brot-markets/src/instructions/interface.rs` — 274 linhas
@@ -465,7 +465,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`codes.ts`](packages/sdk/src/read/errors/codes.ts) | the program's custom error codes by name (programs/brot-markets/src/error.rs), so a client names the exact refusal. Codes are appended there and here, never reu | 179 |
+| [`codes.ts`](packages/sdk/src/read/errors/codes.ts) | the program's custom error codes by name (programs/brot-markets/src/error.rs), so a client names the exact refusal. Codes are appended there and here, never reu | 180 |
 | [`index.ts`](packages/sdk/src/read/errors/index.ts) | one message per program error code, read from the IDL, and the refusal the SDK throws when its mirror of a program rule refuses (math, creation checks), carryin | 79 |
 
 ## `packages/sdk/src/read/math/`
@@ -535,7 +535,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`checks.rs`](programs/brot-markets/src/checks.rs) | every account check Anchor used to make, written by hand in one place (TP 3.4.17), each with its own error and a negative test that fails without it (T24, X0.9) | 172 |
 | [`constants.rs`](programs/brot-markets/src/constants.rs) | seeds, program ids, code ceilings and the duration and window constants compiled into the program, with the devnet-only drill values behind the `drill` feature | 204 |
 | [`entrypoint.rs`](programs/brot-markets/src/entrypoint.rs) | the instruction dispatcher: the first byte of the instruction data picks the handler, the rest is that handler's arguments | 97 |
-| [`error.rs`](programs/brot-markets/src/error.rs) | every refusal the program can return, one code per cause, as custom program errors | 370 |
+| [`error.rs`](programs/brot-markets/src/error.rs) | every refusal the program can return, one code per cause, as custom program errors | 373 |
 | [`events.rs`](programs/brot-markets/src/events.rs) | the events, one per instruction, and how they leave the program: a self-CPI signed by the event-authority PDA, so they survive log truncation (T4) | 106 |
 | [`feeds.rs`](programs/brot-markets/src/feeds.rs) | the compiled list of Pyth feeds a price campaign may name (founder answer 1, 2026-10-09; TP 3.4.1, 3.4.10). One list per cluster, chosen by the `mainnet` featur | 147 |
 | [`layout.rs`](programs/brot-markets/src/layout.rs) | zero-copy byte layouts shared by accounts, instruction arguments and events: the little-endian field types and the one place where bytes become a typed view | 126 |
@@ -724,7 +724,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`mod.rs`](programs/brot-markets/src/state/mod.rs) | the accounts the program owns: their type tags, layout version and the one loader that runs the owner, length, tag and PDA checks before any field is read | 113 |
 | [`referral.rs`](programs/brot-markets/src/state/referral.rs) | `ReferralLink` (`["referral", referee]`): who referred a wallet, signed by the referee once and never changed. The indexer compares `linked_slot` and `linked_at | 44 |
 | [`sealed_fee.rs`](programs/brot-markets/src/state/sealed_fee.rs) | `SealedFee` (`["sealed", campaign, sponsor]`): the fee a sponsor's sealed entries hold on one campaign until `settle_sealed_fee` sends it to the sponsor or to t | 49 |
-| [`transitions.rs`](programs/brot-markets/src/state/transitions.rs) | the transition table of TP section 3.4.2 as one function. Every instruction that moves a campaign's status calls `transition` first, so a transition outside the | 31 |
+| [`transitions.rs`](programs/brot-markets/src/state/transitions.rs) | the transition table of TP section 3.4.2 as one function. Every instruction that moves a campaign's status calls `transition` first, so a transition outside the | 34 |
 
 ## `programs/brot-markets/src/state/campaign/`
 
@@ -804,7 +804,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`state_transitions.rs`](programs/brot-markets/tests/state_transitions.rs) | the transition table of TP section 3.4.2, checked over all 25 pairs of statuses: the six edges are allowed, every other pair is refused with `IllegalTransition` | 52 |
 | [`team_keys.rs`](programs/brot-markets/tests/team_keys.rs) | the team rules of `admin_set_team` (Q12, TP section 3.4.9): at most five keys, none zero, none twice, every slot past `team_len` zero; each refusal with its own | 87 |
 | [`team_window_rules.rs`](programs/brot-markets/tests/team_window_rules.rs) | the review window's rules of the team instructions on the host: a team key acts only while `InReview` (`TeamKeyOutsideReview`) and before `review_ends_at` (the  | 172 |
-| [`team_window_transitions.rs`](programs/brot-markets/tests/team_window_transitions.rs) | the status moves of the team instructions go through `state::transitions::transition`: confirm and void move `InReview` to `Settling`, contest moves it to `Cont | 48 |
+| [`team_window_transitions.rs`](programs/brot-markets/tests/team_window_transitions.rs) | the status moves of the team instructions go through `state::transitions::transition`: confirm and void move `InReview` to `Settling`, contest moves it to `Cont | 56 |
 | [`team_window_void_reasons.rs`](programs/brot-markets/tests/team_window_void_reasons.rs) | the class of each `VoidReason` (TP section 3.4.7): one test per reason, for the 10% opening fee (refunded on a house failure, kept on an outside cause), for whe | 86 |
 | [`vault.rs`](programs/brot-markets/tests/vault.rs) | pins what `vault::deposit` does with zero (nothing moves, no System Program call, success) and that any other amount reaches the transfer, which refuses a borro | 43 |
 

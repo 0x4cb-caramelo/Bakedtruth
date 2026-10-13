@@ -353,7 +353,10 @@ pub enum BrotError {
     SealedFeeMismatch = 6173,
     #[error("The account is not the SealedFee's stored sponsor")]
     WrongSponsor = 6174,
-    // New codes are appended here, from 6175, never reusing a number.
+    // Sprint 14, the lead's addendum (2026-10-13).
+    #[error("A Confirm decision carries no void reason: its void_reason must be None")]
+    ConfirmWithVoidReason = 6175,
+    // New codes are appended here, from 6176, never reusing a number.
 }
 
 impl From<BrotError> for ProgramError {

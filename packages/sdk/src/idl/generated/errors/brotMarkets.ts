@@ -308,6 +308,8 @@ export const BROT_MARKETS_ERROR__SEALED_FEES_OPEN = 0x181c; // 6172
 export const BROT_MARKETS_ERROR__SEALED_FEE_MISMATCH = 0x181d; // 6173
 /** WrongSponsor: The account is not the SealedFee's stored sponsor */
 export const BROT_MARKETS_ERROR__WRONG_SPONSOR = 0x181e; // 6174
+/** ConfirmWithVoidReason: A Confirm decision carries no void reason: its void_reason must be None */
+export const BROT_MARKETS_ERROR__CONFIRM_WITH_VOID_REASON = 0x181f; // 6175
 
 export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY
@@ -323,6 +325,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_IN_REVIEW
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_SETTLED
+  | typeof BROT_MARKETS_ERROR__CONFIRM_WITH_VOID_REASON
   | typeof BROT_MARKETS_ERROR__CONTEST_DEADLINE_PASSED
   | typeof BROT_MARKETS_ERROR__CONTEST_EXIT_DISABLED
   | typeof BROT_MARKETS_ERROR__CONTEST_NOT_LAPSED
@@ -474,6 +477,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_IN_REVIEW]: `The campaign is not InReview, so it cannot be finalized`,
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN]: `The campaign is not \`Open\``,
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_SETTLED]: `The campaign's fee, prize and creator share are not all settled`,
+    [BROT_MARKETS_ERROR__CONFIRM_WITH_VOID_REASON]: `A Confirm decision carries no void reason: its void_reason must be None`,
     [BROT_MARKETS_ERROR__CONTEST_DEADLINE_PASSED]: `The contest stage's deadline has passed`,
     [BROT_MARKETS_ERROR__CONTEST_EXIT_DISABLED]: `Contests are disabled until Sprint 14: a contest would freeze the pot`,
     [BROT_MARKETS_ERROR__CONTEST_NOT_LAPSED]: `Stage 2 of the contest has not lapsed yet`,
