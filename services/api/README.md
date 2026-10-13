@@ -8,12 +8,21 @@ every 15 s by default.
 
 | Path                  | Returns                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/health`             | `status` (`starting`, `ok`, `stale`), `as_of_slot`, `taken_at`, `campaigns_total`, `last_refresh_error` (an error name, never a URL)                                                                                                                                                                                                                                                                                                                                                         |
+| `/health`             | `status` (`starting`, `ok`, `stale`), `as_of_slot`, `taken_at`, `campaigns_total`, `last_refresh_error` (an error name, never a URL), `program_last_deploy_slot` and `entries_allowed` (below)                                                                                                                                                                                                                                                                                              |
 | `/campaigns`          | `campaigns` with `total`, `offset`, `limit`, `as_of_slot`, `chain_time`. Filters: `state` = `open`, `closed`, `in_review`, `paid`, `void`, `active` (open or closed), `resolved` (in review, paid or void); `limit` 1 to 100 (default 50); `offset`                                                                                                                                                                                                                                          |
 | `/campaigns/:address` | one campaign, or 404                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `/leaderboard`        | devnet points (Sprint 13): `rows` (`rank`, `wallet`, `points`, `entered`) of the wallets with points, with `total`, `offset`, `limit`, `complete`, `rule`, `both_sides_score` (false: the founder's answer 3a, which also leaves out refunded pots and the creator's own wallet on a burn, lock or stake campaign), `as_of_slot`, `chain_time`. `limit` 1 to 100 (default 50); `offset`. No `wallet` parameter, and no success rate (the privacy review). 503 until the history's first read |
 | `/names`              | `names` (`address`, `kind`, `name`: the reviewed names of `content/account-names.json`, checked by the SDK's `parseAccountNames`) and `feeds` (`feed_id`, `symbol`, `account`: the Pyth feeds the program lists, each with its sponsored account), with `chain_time`. No parameters (a query is a 400)                                                                                                                                                                                       |
 | `/price`              | `price`: SOL in US$ for display only (`usd`, `source` `pyth`, `published_at`, `fetched_at`, `stale`, `attribution`, `use`), with `chain_time`; 503 until a first price. No parameters                                                                                                                                                                                                                                                                                         |
+
+**`entries_allowed`** (K-11; Sprints 11, 19 and 21 read it) is true only while the snapshot is fresh (`ok`), the
+program has not halted entries (its `GlobalConfig` operating level, read with each snapshot) and the operator's switch
+`API_ENTRIES_ALLOWED` is `on` (the default; `off` hides every entry panel without touching the chain). It fails closed:
+a config the snapshot could not read is false. It is the same for every visitor; the country gate stays in the relay
+and the site. **`program_last_deploy_slot`** is the slot of the program's last deploy, read from ProgramData's first 45
+bytes with each snapshot (A-8: a client built for another deploy pauses signing), as a string, or null when unread.
+Every answer is shaped as its zod schema in `@brot/sdk/schemas` (`read-api.ts`), checked by `tests/contract.test.ts`;
+fields are only ever added (TP §6).
 
 Health also says `names_error` (a missing or broken names file keeps the last good list), `price_source` and
 `price_error` (the last read's, named), `leaderboard_complete` (`null` with no history; `false` while transactions wait
@@ -65,8 +74,8 @@ curl -s http://127.0.0.1:4220/api/v1/health
 
 ## Not in this MVP
 
-The SQLite indexer and its stored history, the activity route, the zod DTOs, the relay (`brot-rpc`, in
-`services/rpc`), and a public address. Those are the rest of Sprint 08 (`docs/sprints/sprint-08-indexer-api-points.md`).
+The SQLite indexer and its stored history (`services/indexer`, which serves the activity routes and the ranking on its
+own port), the relay (`brot-rpc`, in `services/rpc`), and a public address. Those are the rest of Sprint 08 (`docs/sprints/sprint-08-indexer-api-points.md`).
 The state "closed because the outcome is knowable" needs each metric account, so a campaign shows Open until its entries
 close by time or epoch.
 
