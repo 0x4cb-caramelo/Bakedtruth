@@ -50,7 +50,8 @@ mesmo ticker, mas não o mesmo pool, e o sufixo está sempre lá para quem não 
 - **O nome aparece em toda frase** (`curve-names.tsx`): os cartões da lista e da página inicial, o título e o cabeçalho
   da página da campanha (o nome no topo e a regra), a frase da folha de entrada, as linhas de "My entries", a prévia da
   caixa de abertura, o cartão da prévia e a folha "Check before you sign" da abertura. Os nomes revisados vêm do
-  `content/account-names.json`, lido no servidor pelo layout raiz; um pool revisado nunca é lido.
+  `content/account-names.json`, lido no servidor pelo layout raiz; um pool revisado nunca é lido. O post de resolução
+  que a equipe publica à mão (`scripts/team/resolution-post.ts`) nomeia a curva do mesmo jeito.
 - **Os endereços ficam na prova** (`proof-panel.tsx`): nos "Proof details", a conta lida (o pool) e o mint do token,
   "Token mint (CA)", cada um com link para o explorador e botão de copiar. O botão de copiar saiu do painel de
   reconferência para um arquivo próprio (`copy-button.tsx`), com uma versão só de ícone.

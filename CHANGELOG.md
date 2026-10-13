@@ -33,7 +33,8 @@ recomendado (1a a 12a).
     launch curve $TEST (…7Dny) raises its full 85 SOL?", o fim do endereço do pool sempre ao lado; `Token (…7Dny)`
     quando não há ticker para mostrar; o nome revisado sozinho, `$BROT`, para um pool em `content/account-names.json`
     (o de demonstração do devnet entrou). Vale para os cartões, a página da campanha, "My entries", a prévia e a
-    revisão da caixa de abertura. É a única exceção à A-11 (plano técnico v0.1.10, §3.4.10).
+    revisão da caixa de abertura, e o post de resolução da equipe. É a única exceção à A-11 (plano técnico v0.1.10,
+    §3.4.10).
   - **O ticker é lido no navegador** pelo SDK (`token-symbol.ts`): o `base_mint` do pool (byte 136), depois os
     metadados da Metaplex ou a extensão do Token-2022, dono primeiro. O SDK o limpa (`tickerOf`, a mesma regra para o
     site e o app): só de 1 a 10 letras e dígitos ASCII, e nada que imite SOL, WSOL, USDC, USDT ou BROT.
@@ -41,9 +42,10 @@ recomendado (1a a 12a).
   - **O relay serve inteiras as contas da Metaplex e do Token-2022**, pronto para quando ele entrar no ar (hoje o site
     lê a RPC pública do devnet direto).
   - **Os botões SIM e NÃO** levam só a palavra; a chance e a estimativa ficam embaixo de cada um, no texto neutro.
-  - **Testes**: 13 novos (`tests/sdk/token-symbol.test.ts`, `tests/site/curve-name.test.ts`,
-    `tests/site/panels-render.test.ts`), em contas reais da mainnet; dois testes antigos passam a esperar
-    `Token (…XXXX)` no lugar do endereço curto.
+  - **Testes**: 14 novos (`tests/sdk/token-symbol.test.ts`, `tests/site/curve-name.test.ts`,
+    `tests/site/panels-render.test.ts`, um em `tests/ops/resolution-post.test.ts`), em contas reais da mainnet; dois
+    testes antigos passam a esperar `Token (…XXXX)` no lugar do endereço curto. Conferido também num navegador, com o
+    site rodando localmente contra o devnet, a 1280 e a 412 px.
 - **O sexto tipo no site e nos documentos** (branch `feat/dbc-graduation-ui`, 12/10/2026, empilhada sobre a
   `feat/dbc-graduation-reader`; `session-log/2026-10-12-sexto-tipo-no-site-e-nos-documentos.md`).
   - **A caixa de abertura** ganha o modelo "Graduation", com o campo do pool da DBC. O site lê a config que o pool
