@@ -105,7 +105,7 @@ mainnet line, which still says "and a cap" and whose new wording waits for the f
 | 12 | [Site: my entries and campaign states](sprints/sprint-12-site-my-entries-states.md) (merged 2026-10-10, PR #61, tag `sprint-12`; the five-campaign devnet rehearsal is the founder's) | B8 | 11, 06 |
 | 13 | [Site: ranking, notices and copy (closes the devnet MVP)](sprints/sprint-13-site-notices-copy.md) (merged 2026-10-10, PR #63, tag `sprint-13`; the founder's twelve answers the same day, 3a's points rule in a follow-up pull request; waiting: the partner report (L-24 answered, Sprint 08), the full devnet cycle through the site (needs 19 and the founder's devnet writes), X2.2 on real phones, and the corrected legal pages (9a: merged with PR #65 and its follow-up; the founder deploys the landing)) | B8 | 12, 08, 07, 19 |
 | 14 | [Referral and second read](sprints/sprint-14-referral-second-read.md) | B9 | 04, 07, 08, 12 |
-| 15 | [Sponsorship: the sealed entry](sprints/sprint-15-sponsorship.md) | B9 | 04, 05, 12 |
+| 15 | [Sponsorship: the sealed entry](sprints/sprint-15-sponsorship.md) (in progress: the program and the SDK built 2026-10-13; blocked by the founder (late-entry fee, BP-3, L-11, L-18, P-8), the merge and the devnet redeploy) | B9 | 04, 05, 12 |
 | 16 | [Hardening (multisig, pause, incident plan, creation rules frozen)](sprints/sprint-16-hardening.md) | B9 (TP §7, §7.1) | 14, 15, 07 |
 | 17 | [Audits and fixes](sprints/sprint-17-audit-fixes.md) | B9 (TP §7, §8) | 16 |
 | 18 | [Mainnet](sprints/sprint-18-mainnet.md) | B9 (TP §7, §12) | 17 |

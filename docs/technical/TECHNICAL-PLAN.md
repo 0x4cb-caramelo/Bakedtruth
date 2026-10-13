@@ -536,7 +536,8 @@ the same effect whoever calls it: the second keeper to arrive gets an error and 
 | `sweep_fees` | Any wallet | Moves the fee vault's lamports above its rent-exempt minimum to `GlobalConfig.fee_recipient`, and nowhere else | `FeesSwept` | 04 |
 | `reread_campaign` | Any wallet | Contest stage 1 (§3.4.7) | `ContestClosed` or stage-2 `ContestOpened` | 14 |
 | `user_link_referrer(referrer)` | The referee | Creates `ReferralLink` once (§3.4.11) | `ReferralLinked` | 14 |
-| The sealed entry | The sponsor | A join that also charges the 10% (§3.4.12) | `EntryAdded` | 15 |
+| `sponsor_join_campaign(side, entry_usd, max_lamports, min_return_bps, expected_entry_total, expected_params_version)` | The sponsor | The sealed entry (§3.4.12): at least `opening_fee_usd` at the SOL/USD price, the creation rules' version bound; 90% joins the pot through the join's own path, 10% is held in the sponsor's `SealedFee` | `EntryAdded`, then `SealedFeeHeld` | 15 |
+| `settle_sealed_fee` | Any wallet | The campaign finalized: the held fee back to the sponsor on a house-failure void, to the fee vault in every other case; hand-sent lamports to the fee vault; the account closed, its rent to the sponsor; `close_campaign` waits for every held fee | `SealedFeeSettled` | 15 |
 | `sponsor_add_prize(lamports, disclosed)` | A third party | Only if the founder keeps it **[Q]** (P1 §3.7; §3.4.12) | — | 15, if kept |
 
 Gone [FD]: the three proposal and approval instructions of v0.0.1 (replaced by `user_open_campaign`), the cap setter
@@ -685,9 +686,9 @@ house, refunded to whoever opened on a house failure (P-4, P4 §4.6).
 
 | Reason | Written by | Class | The 10% opening fee | Source of the class |
 |---|---|---|---|---|
-| `MissedWindow` | `resolve_campaign` | House failure | Refunded | P1 §3.5: "a janela de leitura foi perdida por falha do serviço" |
+| `MissedWindow` | `resolve_campaign`; a team key may also choose it (`team_may_choose`) | House failure | Refunded | P1 §3.5: "a janela de leitura foi perdida por falha do serviço" |
 | `UnreadableAccount` | `resolve_campaign` | Outside cause | Kept | P1 §3.5: the account can no longer be read |
-| `StaleFeed` | `resolve_campaign` | Outside cause (founder answer 9, 2026-10-09) | Kept | Answer recorded in `session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`: the house keeps the US$ 50 |
+| `StaleFeed` | `resolve_campaign`; a team key may also choose it (`team_may_choose`) | Outside cause (founder answer 9, 2026-10-09) | Kept | Answer recorded in `session-log/2026-10-09-respostas-do-fundador-e-mescla-da-sprint-03.md`: the house keeps the US$ 50 |
 | `TeamHouseFailure` | `team_void_campaign`, `admin_decide_contest` | House failure | Refunded | P1 §3.5: the review found the reading wrong through our fault |
 | `TeamOutsideCause` | `team_void_campaign`, `admin_decide_contest` | Outside cause | Kept | P4 §4.6 |
 
@@ -900,8 +901,17 @@ and its self-cancel (proposal §2.4.8). v0.0.1's four sponsorship instructions a
 - **An undisclosed sponsor** is allowed only with a neutral prize, which an opening's prize always is; the naming is
   off-chain. On mainnet it goes only through the Cloak page (P4 §2.2; Sprint 15, BR-17), once Cloak is checked to
   work with SOL (P-8).
-- **The sealed entry** (`SponsorEntry` in the D6 table) is the sponsor's money on one side, under its name: a
-  `user_join_campaign` that also charges the 10%, held in the vault until the outcome like the opening fee (Q6, a; T23).
+- **The sealed entry** (`SponsorEntry` in the D6 table) is the sponsor's money on one side, under its name. **As built
+  (Sprint 15, 2026-10-13):** its own instruction, `sponsor_join_campaign`, which calls the join's core (the same checks, in
+  the same order, with the same errors as `user_join_campaign`). It pays at least `opening_fee_usd` (US$500, founder
+  answer of 2026-10-13) at the SOL/USD price through the opening's own `charge`, bounded by `max_lamports` and bound to
+  the creation rules' version (`CreationParamsChanged`); 90% (`opening_prize_bps`) is the entry, 10% Brot's fee. The fee
+  waits until the outcome like the opening fee (Q6, a; T23), but in the sponsor's own account, `SealedFee`
+  (`["sealed", campaign, sponsor]`), not in the campaign's vault: the `Campaign` had only four spare bytes, now
+  `sealed_fees_open`, and keeping the fee out of the vault leaves the vault's bookkeeping and its assertion (I1, I15)
+  untouched. `settle_sealed_fee` sends it back to the sponsor on a house-failure void and to the fee vault in every
+  other case; `close_campaign` waits until every held fee is settled. A late sealed entry (after the YES proof) gets its
+  90% back whole, and its 10% follows the mode: the founder's question on it is open.
   It follows the common entry rule in a one-sided pot and on a void (Q5, a). The name and seal live in
   `content/partners.json`. Whether it is a flag on the join or an instruction of its own, and its minimum, are set in
   Sprint 15 **[AC]**.
@@ -938,6 +948,13 @@ winner's wallet, closing (Sprint 04; roadmap gate 1) **[DP]**. V and P are the w
 | I13 | The creator share is paid at most once, only to `creator`, and `from_fee ≤ fee` |
 | I14 | A paid opening moves exactly `opening_paid_lamports` from the signer into the vault, split as `prize_lamports + opening_fee_lamports`; a team opening moves nothing unless it adds a prize (P-3). Rent is separate and returns to `rent_payer` at close |
 | I15 | The vault's lamports minus its rent-exempt minimum are at least the bookkept balance not yet paid. The difference is SOL sent by hand: never an entry, never a change in the chance, swept to the fee vault at close and from there to `fee_recipient` |
+
+**Sprint 15's additions (2026-10-13), checked by the randomized test after every operation:** each `SealedFee` holds
+exactly its rent, its bookkept `fee_lamports` and any SOL sent to it by hand (I1, I15 for that account); `sealed_fees_open`
+equals the number of live `SealedFee` accounts of the campaign, and none is left at close (I6); a held fee goes only to
+its stored sponsor (on a house-failure void) or to the fee vault (I5, I8); the creator share's base holds entry parts,
+never fees (I12); `sponsor_join_campaign` joins the instructions the pause refuses, and `settle_sealed_fee` never pauses
+(I10′).
 
 I3′ and I10′ replace v0.0.1's I3 and I10, which named instructions that no longer exist; I11 to I15 are the proposal's
 (proposal §2.4.4).

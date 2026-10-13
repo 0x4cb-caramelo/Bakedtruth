@@ -27,6 +27,24 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **Sprint 15, a entrada selada do patrocinador** (branch `sprint-15-sponsorship`, 13/10/2026; construída e testada, não
+  publicada no devnet; `docs/sprints/sprint-15-sponsorship.md`, `session-log/2026-10-13-sprint-15-entrada-selada.md`).
+  Base: o andaime das Sprints 14 e 15 (`fd67706`).
+  - **`sponsor_join_campaign`**: o patrocinador entra no SIM ou no NÃO com pelo menos US$ 500 (o `opening_fee_usd`),
+    cobrados ao preço SOL/USD da Pyth pela mesma conversão da abertura, com o teto de lamports e a versão das regras de
+    criação travada entre a prévia e a assinatura; 90% entram no pote pelo mesmo caminho da entrada comum, 10% ficam
+    retidos numa conta do próprio patrocinador (`SealedFee`) até o resultado. A pausa recusa a entrada selada.
+  - **`settle_sealed_fee`**: qualquer carteira liquida depois do resultado; a taxa volta ao patrocinador numa anulação
+    por falha da casa e vai ao cofre de taxas em todo outro caso; o `close_campaign` espera toda taxa retida.
+  - **O núcleo da entrada comum** saiu de `join_campaign.rs` para `join_core.rs` e `join_slots.rs`, na mesma ordem e com
+    os mesmos erros: nenhum dos 40 testes da entrada comum mudou.
+  - **O SDK**: o construtor, a cotação, a conferência na ordem do programa, a preparação segura (`prepareSealedEntry`:
+    "ok" só quando conferência, resumo e simulação concordam) e o resumo do que se assina com a parte da taxa em
+    números; o relay passa a barrar a entrada selada de um país bloqueado.
+  - **O teste de dinheiro** (I1 a I15) sorteia a entrada selada, a liquidação da taxa, SOL mandado à mão para a conta e
+    o fechamento esperando a taxa; verde em 35 sementes. A revisão adversária não achou nada grave; as quatro melhorias
+    que ela pediu entraram antes do PR.
+
 - **A curva da graduação pelo ticker, e os botões SIM e NÃO limpos** (branch `feat/curve-ticker-side-buttons`,
   13/10/2026; `session-log/2026-10-13-ticker-da-curva-e-botoes-de-lado.md`). Responde ao nome legível que o registro
   do upgrade deixou em aberto, pelo caminho que muda a A-11, aprovado pelo fundador, o Lucas, no mesmo dia.

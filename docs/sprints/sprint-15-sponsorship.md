@@ -1,6 +1,6 @@
 # Sprint 15 — Sponsorship: the sealed entry
 
-**Status:** planned · **Branch:** `sprint-15-sponsorship` · **Dates:** none, by the founder's decision
+**Status:** in progress: the program and the SDK built and tested (2026-10-13); blocked by the founder (the late sealed entry's 10%, the perks BP-3, the screens L-11 and L-18, Cloak P-8), the merge into `main` and Ronaldo's words for the devnet redeploy · **Branch:** `sprint-15-sponsorship` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -128,4 +128,29 @@ IDL and generated client, `CODEMAP.md`.
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+**2026-10-13, built in the lead's parallel run** (branch `sprint-15-sponsorship`: the scaffold `fd67706` shared with
+Sprint 14, lane L15, the lead's integration, the randomized test's extension). Founder answers of 2026-10-13: the US$500
+floor priced on-chain (yes); `sponsor_add_prize` deferred (not built, nothing reserved; if kept, appended later).
+
+- **The shape, recorded at the sprint's opening as the DoD asked:** its own instruction, `sponsor_join_campaign`, calling
+  the join's core, which was extracted from `join_campaign.rs` without changing a single plain-join test. The 10% is
+  held in the sponsor's `SealedFee` (`["sealed", campaign, sponsor]`), not in the campaign vault: the `Campaign` had
+  four spare bytes, now `sealed_fees_open`, and the vault's bookkeeping and assertion stay untouched (TP §3.4.12).
+- **The rules as built:** at least `opening_fee_usd` at the SOL/USD price through the opening's `charge` (the row-7
+  codes kept; the floor and the bound renamed `SealedEntryBelowFloor` and `SealedEntryAboveMaxLamports`); the creation
+  rules' version bound (`CreationParamsChanged`, added after the red-team review); 90/10 by `opening_prize_bps`; the
+  entry follows the common rule in a one-sided pot and on a void; `settle_sealed_fee` refunds the fee to the sponsor on
+  a house-failure void and sends it to the fee vault otherwise; `close_campaign` waits for every held fee; the pause
+  refuses the sealed entry and never the settlement.
+- **Evidence:** the brief's named tests ("sealed entry holds its 10 percent until the outcome", "sealed entry follows
+  the common rule", "paused campaign refuses new money, never payouts"), two-user tests, the SDK's parity with the
+  program on every refusal, the randomized test green on 35 seeds, the negative suite on Surfpool (461 of 461 refused
+  with their own error), the mutation proof of the eleven new checks, and a red-team review with no critical or high
+  finding (its four lower findings fixed before the PR).
+- **Not built here:** the site's sealed-entry screens (L-11, open), the seal on cards and pages (needs the partner data
+  and BP-3), the Cloak page (P-8, open), the devnet redeploy (after the merge, Ronaldo's key).
+
+**Open, with owners.** The founder: whether a late sealed entry's 10% is kept or refunded; BP-3 (perks); L-11 and L-18
+(screens); P-8 (Cloak with SOL); `sponsor_add_prize`. The lead, after the merge: the devnet redeploy with Ronaldo; the
+keeper's settlement must call `settle_sealed_fee` before `close_campaign` once the keeper (PR #88) and this sprint are
+both on `main`.
