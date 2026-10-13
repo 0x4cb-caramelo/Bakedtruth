@@ -168,6 +168,28 @@ export const DISTINCT: Record<string, [string, string][]> = {
   // Sprint 14, lane L14B: the re-read and the admin's decision check their two writable slots differ first.
   RereadCampaign: [["campaign", "config"]],
   AdminDecideContest: [["config", "campaign"]],
+  // Lane L15 (Sprint 15): the join's own pairs, the Join slot's (`check_join_slot`), and the SealedFee slot against
+  // every other writable slot (`sealed_fee_account::check_slot`); `settle_sealed_fee` keeps its SealedFee apart from
+  // the campaign and from both recipients.
+  SponsorJoinCampaign: [
+    ["campaign", "vault"],
+    ["entry", "vault"],
+    ["entry", "campaign"],
+    ["join", "sponsor"],
+    ["join", "campaign"],
+    ["join", "vault"],
+    ["join", "entry"],
+    ["sealedFee", "sponsor"],
+    ["sealedFee", "campaign"],
+    ["sealedFee", "vault"],
+    ["sealedFee", "entry"],
+    ["sealedFee", "join"],
+  ],
+  SettleSealedFee: [
+    ["campaign", "sealedFee"],
+    ["sponsor", "sealedFee"],
+    ["feeVault", "sealedFee"],
+  ],
 };
 
 /**
@@ -268,6 +290,26 @@ export const OVERRIDES: Record<string, { expect: string; why: string }> = {
     expect: "FeeRecipientMismatch",
     why: "the stored fee recipient is checked before distinct",
   },
+  // Lane L15 (Sprint 15): an Entry or a SealedFee the program owns is loaded (owner, length, tag, PDA) before any
+  // creation; a system-owned empty SealedFee was closed by an earlier settle; a campaign the program owns is compared
+  // with the SealedFee's stored one before it is loaded.
+  "SponsorJoinCampaign|type|entry|Config": { expect: "WrongLength", why: "length is checked before the PDA" },
+  "SponsorJoinCampaign|type|entry|Campaign": { expect: "WrongLength", why: "length is checked before the PDA" },
+  "SponsorJoinCampaign|type|entry|Join": { expect: "WrongLength", why: "a Join is 96 bytes, not an Entry's 116" },
+  "SponsorJoinCampaign|type|sealedFee|Config": { expect: "WrongLength", why: "an owned SealedFee is loaded first" },
+  "SponsorJoinCampaign|type|sealedFee|Campaign": { expect: "WrongLength", why: "an owned SealedFee is loaded first" },
+  "SponsorJoinCampaign|type|sealedFee|Entry": { expect: "WrongLength", why: "an owned SealedFee is loaded first" },
+  "SponsorJoinCampaign|type|sealedFee|Join": { expect: "WrongLength", why: "an owned SealedFee is loaded first" },
+  "SettleSealedFee|stranger|sealedFee": {
+    expect: "AlreadySettled",
+    why: "a system-owned empty account is a SealedFee an earlier call closed",
+  },
+  "SettleSealedFee|type|campaign|Config": {
+    expect: "SealedFeeMismatch",
+    why: "the SealedFee's stored campaign is compared before the campaign's length (as settle_entry)",
+  },
+  "SettleSealedFee|type|campaign|Entry": { expect: "SealedFeeMismatch", why: "as above" },
+  "SettleSealedFee|type|campaign|Join": { expect: "SealedFeeMismatch", why: "as above" },
 };
 
 export const overrideOf = (key: string, generic: string) => OVERRIDES[key]?.expect ?? generic;
@@ -277,10 +319,7 @@ export const overrideOf = (key: string, generic: string) => OVERRIDES[key]?.expe
  * case is refused with the one error. The baseline is refused too, so the matrix checks that the refusal moves no
  * lamport. One entry per line: each lane deletes its own when it lands.
  */
-export const DISABLED: Record<string, string> = {
-  SponsorJoinCampaign: "UnknownInstruction",
-  SettleSealedFee: "UnknownInstruction",
-};
+export const DISABLED: Record<string, string> = {};
 
 /** The source type of a slot's current account, as a type case or an alias sees it. */
 export function typeOf(slot: Slot): Source {

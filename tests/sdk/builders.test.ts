@@ -4,7 +4,8 @@
  *          the same data bytes and the same slots with the same roles, for all 22 instructions. Needs
  *          no binary.
  * Version: 0.1.1
- * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13) names its five stubs, which have no builder yet
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13) names its five stubs, which have no builder yet;
+ *          lane L15 adds the sealed entry's two
  */
 import { describe, expect, test } from "bun:test";
 import { generateKeyPairSigner, type Instruction } from "@solana/kit";
@@ -27,7 +28,7 @@ const shape = (ix: Instruction) => ({
  * The scaffold's stubs of Sprints 14–15 (2026-10-13): in the IDL, refused by the program, with no SDK builder until
  * their lanes. Each lane deletes its own name when it adds the builder and its pair below.
  */
-const NO_BUILDER_YET = ["SponsorJoinCampaign", "SettleSealedFee"];
+const NO_BUILDER_YET: string[] = [];
 const params = Object.fromEntries(
   Object.entries(DEFAULT_PARAMS).map(([k, v]) => [camel(k), v]),
 ) as unknown as T.CreationParamsArgs;
@@ -52,6 +53,14 @@ describe("sdk builders match the test kit", () => {
       expectedParamsVersion: 3,
     };
     const join = { side: P.Side.No, amount: 25_000_000n, minReturnBps: 12_345, expectedEntryTotal: 10_000_000n };
+    const sealed = {
+      side: P.Side.Yes,
+      entryUsd: 750n,
+      maxLamports: 9n * P.SOL,
+      minReturnBps: 7,
+      expectedEntryTotal: 3n,
+      expectedParamsVersion: 4,
+    };
     const pairs: [Promise<Instruction> | Instruction, Promise<Instruction> | Instruction][] = [
       [
         T.buildInitializeConfig({ authority: who, admin: other, feeRecipient: other, params }),
@@ -115,6 +124,21 @@ describe("sdk builders match the test kit", () => {
           voidReason: P.VoidReason.TeamHouseFailure,
           noteHash: new Uint8Array(32).fill(5),
         }),
+      ],
+      // Lane L15 (Sprint 15): the sealed entry and its fee's settlement.
+      [
+        T.buildSponsorJoinCampaign({
+          sponsor: who,
+          campaign,
+          metricAccount: P.BTC_USD_ACCOUNT,
+          ...sealed,
+          joinIndex: 4,
+        }),
+        IL.sponsorJoinCampaignIx(who, campaign, P.BTC_USD_ACCOUNT, { ...sealed, joinIndex: 4 }),
+      ],
+      [
+        T.buildSettleSealedFee({ campaign, sponsor: other }),
+        IL.settleSealedFeeIx(await P.sealedFeePda(campaign, other), campaign, other, feeVault),
       ],
     ];
     expect(NO_BUILDER_YET.filter((name) => !IDL.instructions.some((ix) => ix.name === name))).toEqual([]);

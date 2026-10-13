@@ -1,45 +1,31 @@
 //! Purpose: `user_join_campaign`: a baker joins YES or NO with at least `min_entry_lamports` while
 //!          the outcome is not knowable; the entry moves from the baker's wallet into the vault
 //!          by System Program transfer, and the pot is bookkept, never read from the vault.
-//! Version: 0.0.5
+//! Version: 0.0.6
 //! Sprint: 02 (pot core on Pinocchio), accounts and arguments frozen at its opening, body by
 //!         lane E; 03 (readers and resolution) adds the join lock (BR-06), lane E; 04 (lane G)
 //!         reads the campaign's own minimum (question 5) and the proximity buffer (question 7).
 //!         The `Join` record (`join_record.rs`) is created at slot 6 with the entry's join count as its index.
+//!         15 (lane L15): the slot checks move to `join_slots.rs` and the rules and effects to
+//!         `join_core.rs`, shared with the sealed entry, in the same order with the same errors.
 //!
-//! Order: the arguments, the slots and the loads, as `checks.rs` orders them; then the
-//! campaign's rules: the metric account's address, `Open`, the entry close, the join lock (the
-//! reader's error, or `OutcomeKnowable`; `join_lock.rs`), the pause and the minimum. Then the
-//! baker's `Entry` (`entry_account.rs`), created on the first join with its rent, the only
-//! lamports that move before the estimate; the first baker; the return estimate; and only then
-//! the deposit, the bookkeeping and the event. A refusal after the creation reverts it with the
-//! rest of the transaction. Every refusal has its own error. There is no cap of any kind (D-h),
-//! and no instruction moves an entry out (A-1).
+//! Order: the arguments, the slots and the side byte; then the slot checks (`join_slots.rs`); then the
+//! join's rules, its effects and its event (`join_core.rs`, whose module note gives their order), with
+//! the signed `amount` as the amount the join enters. Every refusal has its own error. There is no
+//! cap of any kind (D-h), and no instruction moves an entry out (A-1).
 
 use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 use shank::ShankType;
 
 use super::{
-    entry_account::{create_entry, load_entry},
-    join_lock::require_outcome_open,
-    join_record::{check_join_slot, open_join, JoinFields},
-    join_rules,
+    join_core,
+    join_slots::{check_slots, JoinAccounts, JoinTerms},
 };
 use crate::{
-    checks,
-    constants::VAULT_SEED,
-    error::BrotError,
-    events::{self, EntryAdded},
     instructions::args,
     layout::{LeU32, LeU64},
-    math::payout::{estimate_return_bps, JoinedPot},
-    readers::ChainTime,
-    state::{
-        campaign::Campaign,
-        config::GlobalConfig,
-        enums::{OperatingLevel, Side, Status},
-    },
-    vault, zero_copy,
+    state::enums::Side,
+    zero_copy,
 };
 
 #[derive(ShankType)]
@@ -76,136 +62,23 @@ pub fn user_join_campaign(
     };
     let side = Side::try_from(args.side)?;
     let amount = args.amount.get();
-
-    checks::signer(baker)?;
-    checks::writable(baker)?;
-    checks::writable(campaign)?;
-    checks::writable(vault)?;
-    checks::writable(entry)?;
-    checks::distinct(campaign, vault)?;
-    checks::distinct(entry, vault)?;
-    checks::distinct(entry, campaign)?;
-    check_join_slot(join, &[&*baker, &*vault, &*entry, &*campaign])?;
-    checks::system_program(system_program)?;
-    checks::event_accounts(event_authority, program, program_id)?;
-
-    // The config is only read for the pause; the minimum is the campaign's own (question 5).
-    let paused = {
-        let config = GlobalConfig::load(config, program_id)?;
-        config.operating_level != OperatingLevel::Normal as u8
+    let slots = JoinAccounts {
+        baker,
+        config,
+        campaign,
+        vault,
+        entry,
+        metric_account,
+        join,
+        system_program,
+        event_authority,
+        program,
     };
-    let campaign_key = *campaign.address();
-    let baker_key = *baker.address();
-    let mut campaign = Campaign::load_mut(campaign, program_id)?;
-    let vault_seeds: [&[u8]; 2] = [VAULT_SEED, campaign_key.as_ref()];
-    checks::owned_by(vault, program_id)?;
-    checks::pda(vault, &vault_seeds, campaign.vault_bump, program_id)?;
-    // Only the account locked at opening is read. For a price campaign that is the sponsored
-    // account, derived on-chain from the push oracle, shard 0 and the feed (Sprint 02): this
-    // comparison is what makes the price join accept only the sponsored account.
-    if metric_account.address() != &campaign.metric_account {
-        return Err(BrotError::MetricAccountMismatch.into());
-    }
-
-    if campaign.status != Status::Open as u8 {
-        return Err(BrotError::CampaignNotOpen.into());
-    }
-    // One clock read serves the entry close and the join lock.
-    let time = ChainTime::now()?;
-    if time.unix_timestamp >= campaign.entries_close_at.get() {
-        return Err(BrotError::EntriesClosed.into());
-    }
-    // The join lock (BR-06).
-    require_outcome_open(metric_account, &campaign, time)?;
-    if paused {
-        return Err(BrotError::JoinWhilePaused.into());
-    }
-    join_rules::require_min_entry(amount, campaign.min_entry_lamports.get())?;
-
-    let expected_total = args.expected_entry_total.get();
-    let mut entry = if entry.owned_by(program_id) {
-        load_entry(entry, &campaign_key, &baker_key, expected_total, program_id)?
-    } else {
-        let created = create_entry(baker, entry, &campaign_key, expected_total, program_id)?;
-        let entries_open = add_u32(campaign.entries_open.get(), 1)?;
-        campaign.entries_open.set(entries_open);
-        // A new entry is untallied until its joins are tallied after the proof (`tally_late_joins`).
-        let untallied = add_u32(campaign.entries_untallied.get(), 1)?;
-        campaign.entries_untallied.set(untallied);
-        created
+    check_slots(&slots, program_id)?;
+    let terms = JoinTerms {
+        side,
+        min_return_bps: args.min_return_bps.get(),
+        expected_entry_total: args.expected_entry_total.get(),
     };
-
-    // The first baker: the entry that lands in an empty pot, by the books, never by the vault's
-    // balance (I15). The exemption covers that wallet's whole entry, both sides (Q3).
-    let (pool_yes, pool_no) = (campaign.pool_yes.get(), campaign.pool_no.get());
-    if add(pool_yes, pool_no)? == 0 {
-        campaign.first_baker = baker_key;
-        entry.is_first = 1;
-    }
-
-    let (side_pool, other_pool) = match side {
-        Side::Yes => (pool_yes, pool_no),
-        Side::No => (pool_no, pool_yes),
-    };
-    let side_after = add(side_pool, amount)?;
-    let estimate = estimate_return_bps(&JoinedPot {
-        amount,
-        side_after,
-        other: other_pool,
-        prize: campaign.prize_lamports.get(),
-        fee_bps: campaign.fee_bps.get(),
-        one_sided_fee_bps: campaign.one_sided_fee_bps.get(),
-        creator_share_bps: campaign.creator_share_bps.get(),
-        is_first: entry.is_first != 0,
-    })?;
-    if estimate < u64::from(args.min_return_bps.get()) {
-        return Err(BrotError::ReturnBelowMinimum.into());
-    }
-
-    // Effects. Every new value is computed with checked math before the entry moves.
-    let (entry_yes, entry_no) = (entry.amount_yes.get(), entry.amount_no.get());
-    let (pool_yes, pool_no, entry_yes, entry_no) = match side {
-        Side::Yes => (side_after, pool_no, add(entry_yes, amount)?, entry_no),
-        Side::No => (pool_yes, side_after, entry_yes, add(entry_no, amount)?),
-    };
-    let seq = campaign.event_seq.get();
-    let next_seq = add(seq, 1)?;
-    let fields = JoinFields {
-        side: args.side,
-        joined_at: time.unix_timestamp,
-        amount,
-    };
-    open_join(baker, join, &campaign_key, &mut entry, fields, program_id)?;
-    let vault_before = vault.lamports();
-    vault::deposit(baker, vault, amount)?;
-    // The vault moves by exactly the entry this join books (TP 3.4.13; a lamport sent by hand is in vault_before).
-    crate::math::invariant::vault_change_matches(vault_before, vault.lamports(), amount, 0)?;
-    entry.amount_yes.set(entry_yes);
-    entry.amount_no.set(entry_no);
-    campaign.pool_yes.set(pool_yes);
-    campaign.pool_no.set(pool_no);
-    campaign.event_seq.set(next_seq);
-    let event = EntryAdded {
-        campaign: campaign_key,
-        seq: LeU64::new(seq),
-        baker: baker_key,
-        side: args.side,
-        is_first: entry.is_first,
-        amount: LeU64::new(amount),
-        pool_yes: LeU64::new(pool_yes),
-        pool_no: LeU64::new(pool_no),
-        entry_yes: LeU64::new(entry_yes),
-        entry_no: LeU64::new(entry_no),
-    };
-    drop(entry);
-    drop(campaign);
-    events::emit(&event, event_authority, program, program_id)
-}
-
-fn add(a: u64, b: u64) -> Result<u64, BrotError> {
-    a.checked_add(b).ok_or(BrotError::MathOverflow)
-}
-
-fn add_u32(a: u32, b: u32) -> Result<u32, BrotError> {
-    a.checked_add(b).ok_or(BrotError::MathOverflow)
+    join_core::join(slots, terms, program_id, |_, _| Ok((amount, ())))
 }

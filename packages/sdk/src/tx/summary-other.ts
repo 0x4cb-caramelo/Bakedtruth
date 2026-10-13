@@ -4,9 +4,10 @@
  *          recipient, the team keys, every creation parameter, the admin's decision on a contest. Also the exact
  *          data size of every instruction, so a summary never describes bytes the program would refuse as
  *          `BadInstructionData`.
- * Version: 0.1.6 (Sprint 14 review fixes: the link's rent is counted and named, F7; the contest's texts moved to
- *          ./summary-contest.ts with the campaign the screen read, F6 and F9; D2: the opening or the escalation)
- * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 14 (lane L14B)
+ * Version: 0.1.7 (Sprint 14 review fixes: the link's rent is counted and named, F7; the contest's texts moved to
+ *          ./summary-contest.ts with the campaign the screen read, F6 and F9; D2: the opening or the escalation;
+ *          the sealed entry's two instructions sized, lane L15)
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 14 (lane L14B); 15 (lane L15)
  */
 import * as G from "../idl/generated/instructions";
 import { BrotMarketsInstruction as B } from "../idl/generated/programs";
@@ -50,6 +51,9 @@ export const DATA_SIZE: Partial<Record<B, number>> = {
   // Sprint 14, lane L14B: the contest's re-read and the admin's decision.
   [B.RereadCampaign]: G.getRereadCampaignInstructionDataDecoder().fixedSize,
   [B.AdminDecideContest]: G.getAdminDecideContestInstructionDataDecoder().fixedSize,
+  // Lane L15 (Sprint 15): the sealed entry (said by ./summary-sealed.ts) and its fee's settlement.
+  [B.SponsorJoinCampaign]: G.getSponsorJoinCampaignInstructionDataDecoder().fixedSize,
+  [B.SettleSealedFee]: G.getSettleSealedFeeInstructionDataDecoder().fixedSize,
 };
 
 /**
@@ -152,6 +156,8 @@ export function describeOther(type: B, a: Slots, d: Record<string, any>, ctx: Ot
       const rent = ctx.linkRent === undefined ? `at most ${formatSol(DEFAULT_LINK_RENT)}` : formatSol(ctx.linkRent);
       return `Record ${d.referrer} as the wallet that referred ${a.referee.address}, once and for good (no instruction changes or removes the link); ${a.referee.address} pays the rent of the link's account, ${rent} SOL, which is never returned`;
     }
+    case B.SettleSealedFee:
+      return `Settle ${a.sponsor.address}'s held fee on campaign ${campaign}: back to that sponsor on a void the house caused, else to Brot's fee vault; the SealedFee closes, its rent back to the sponsor`;
     default:
       return `Brot Markets instruction ${B[type]}`;
   }

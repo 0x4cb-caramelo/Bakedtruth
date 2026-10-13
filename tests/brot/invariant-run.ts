@@ -3,9 +3,9 @@
  *          changes checked, the model moved on, then its events: exactly the ones the plan names, and for each
  *          campaign as many as the model's event count moved, numbered on from the campaign's last `seq` (X0.4). An
  *          operation that must touch nothing else (a referral link) also finds every other account of the world as it
- *          was: config, fee vault, campaigns, vaults, entries and joins.
- * Version: 0.1.0
- * Sprint:  14 (lane INV14; runOp moved here from invariant-ops.ts)
+ *          was: config, fee vault, campaigns, vaults, entries, joins and the sponsors' SealedFees (Sprint 15).
+ * Version: 0.1.1
+ * Sprint:  14 (lane INV14; runOp moved here from invariant-ops.ts); 15 (lane INV15: the SealedFees in the world)
  */
 import { type Address } from "@solana/kit";
 
@@ -13,6 +13,7 @@ import { readConfig } from "./flows";
 import { entryOf, type Harness, type Plan } from "./invariant-harness";
 import { bakersOf } from "./invariant-model";
 import { planOp, type Op } from "./invariant-ops";
+import { sealedOf } from "./invariant-sealed-model";
 import * as P from "./program";
 import { balance, expectError, expectOk, send, type Event } from "./setup";
 
@@ -118,6 +119,7 @@ async function worldState(h: Harness): Promise<Map<string, string>> {
     addresses.push(campaign, vault);
     for (const baker of bakersOf(h.camps[i])) addresses.push(await entryOf(h, campaign, baker));
     for (const join of h.camps[i].joins) if (join.address) addresses.push(join.address);
+    for (const sealed of sealedOf(h.camps[i]).values()) addresses.push(sealed.address);
   }
   const state = new Map<string, string>();
   for (const address of addresses) {

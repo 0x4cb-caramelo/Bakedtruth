@@ -38,7 +38,7 @@ describe("test kit", () => {
     expect(layoutSize(SL.SEALED_FEE)).toBe(112);
     expect(layoutSize(SL.LINK_REFERRER_ARGS)).toBe(32);
     expect(layoutSize(SL.DECIDE_CONTEST_ARGS)).toBe(34);
-    expect(layoutSize(SL.SPONSOR_JOIN_ARGS)).toBe(29);
+    expect(layoutSize(SL.SPONSOR_JOIN_ARGS)).toBe(33); // 29 + expected_params_version (lane L15, red team L2)
     const events = Object.fromEntries(Object.entries(EVENTS).map(([n, e]) => [n, layoutSize(e.layout)]));
     expect(events).toEqual({
       ConfigInitialized: 166,

@@ -27,6 +27,55 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **13/10/2026, ações em produção pedidas pelo Ronaldo, nas palavras dele** (`session-log/2026-10-13-landing-tags-e-pr-88.md`):
+  o landing de `brot.markets` passou de `ab764ab` para a `main` em `395efa5`, depois do teste na porta 4239: a página
+  de privacidade corrigida está no ar e `/terms` responde 404 (a resposta 9a); as tags `sprint--1` (`635c77a`),
+  `sprint-09` (`368a76a`) e `sprint-10` (`b4f3b55`) foram criadas com as listas do que fica; o PR #88 (o keeper das
+  Sprints 06 e 07) entrou na `main` (`88a00f9`). O pagamento automático do keeper no devnet ainda não foi ligado: o
+  servidor continua com o keeper antigo, à espera da palavra do Ronaldo para a instalação.
+
+- **Sprint 15, a entrada selada do patrocinador** (branch `sprint-15-sponsorship`, 13/10/2026; construída e testada, não
+  publicada no devnet; `docs/sprints/sprint-15-sponsorship.md`, `session-log/2026-10-13-sprint-15-entrada-selada.md`).
+  Base: o andaime das Sprints 14 e 15 (`fd67706`).
+  - **`sponsor_join_campaign`**: o patrocinador entra no SIM ou no NÃO com pelo menos US$ 500 (o `opening_fee_usd`),
+    cobrados ao preço SOL/USD da Pyth pela mesma conversão da abertura, com o teto de lamports e a versão das regras de
+    criação travada entre a prévia e a assinatura; 90% entram no pote pelo mesmo caminho da entrada comum, 10% ficam
+    retidos numa conta do próprio patrocinador (`SealedFee`) até o resultado. A pausa recusa a entrada selada.
+  - **`settle_sealed_fee`**: qualquer carteira liquida depois do resultado; a taxa volta ao patrocinador numa anulação
+    por falha da casa e vai ao cofre de taxas em todo outro caso; o `close_campaign` espera toda taxa retida.
+  - **O núcleo da entrada comum** saiu de `join_campaign.rs` para `join_core.rs` e `join_slots.rs`, na mesma ordem e com
+    os mesmos erros: nenhum dos 40 testes da entrada comum mudou.
+  - **O SDK**: o construtor, a cotação, a conferência na ordem do programa, a preparação segura (`prepareSealedEntry`:
+    "ok" só quando conferência, resumo e simulação concordam) e o resumo do que se assina com a parte da taxa em
+    números; o relay passa a barrar a entrada selada de um país bloqueado.
+  - **O teste de dinheiro** (I1 a I15) sorteia a entrada selada, a liquidação da taxa, SOL mandado à mão para a conta e
+    o fechamento esperando a taxa; verde em 35 sementes. A revisão adversária não achou nada grave: o achado médio (o
+    teste de dinheiro) e quatro menores entraram antes do PR, revistos numa segunda passada; a taxa da entrada selada
+    feita tarde ficou com o fundador, presa por um teste.
+  - **O andaime das Sprints 14 e 15 vem junto** (`fd67706`): se esta sprint entrar na `main` antes da 14, as três
+    instruções da 14 (`user_link_referrer`, `reread_campaign`, `admin_decide_contest`) chegam como esboços que recusam
+    tudo, com os erros 6153 a 6165 e os eventos 18 a 20.
+  - **O `bun run test` passa a rodar também `services/`** (a mesma linha do PR #87).
+- **O keeper liquida, envia com orçamento e vigia a cadeia** (branch `sprint-07-keeper-carryover`, 13/10/2026; itens
+  abertos das Sprints 06 e 07). Nada instalado no servidor; nada enviado à devnet.
+  - **Liquidação atrás de `KEEPER_SETTLE`, desligada por padrão** (se o keeper da devnet paga é decisão do fundador):
+    tally (o de um SIM de preço espera o fim da janela, para o corte ainda poder voltar a uma prova anterior; os outros
+    resultados na hora), finalize depois da janela, `settle_entry` em lotes, parte do criador, prêmio, taxa, fechamento
+    e sweep, cada passo só quando o estado permite e com o destino gravado na cadeia. Testado em LiteSVM: Split,
+    OneSided, Refund por causa externa e falha da casa, cada lamport contra a matemática do SDK; dois keepers ao mesmo
+    tempo (um aterrissa, o outro recebe `AlreadySettled` e nada se move duas vezes).
+  - **Envio**: limite de unidades pela simulação, taxa de prioridade presa por tipo de instrução e por teto em
+    lamports, reenvio até o `lastValidBlockHeight`, instrução que falha sai do lote; repetição com espera crescente.
+  - **Leituras em lote**: um `getProgramAccounts` e `getMultipleAccounts` de 100; só simula a resolução de quem pode
+    resolver. Medido em processo: 1.000 campanhas abertas, 14 chamadas de RPC por ciclo.
+  - **Alertas novos**, cada um com runbook e teste: campanha parada (10 e 30 minutos), NÃO com `met_late`, 80% de
+    `max_open_campaigns`, aberturas por hora, abertura por chave do time, exposição nos cofres, crédito reservado
+    antigo, SOL/USD velho, mudança no programa da Pyth, segunda leitura sem conferência. Os campos da própria linha do
+    alerta não podem mais ser sobrescritos pelo detalhe.
+  - **Segunda leitura**: a campanha de preço contra a transação que gravou a prova no `posted_slot`, pelo RPC B; os
+    outros tipos pelo `recheck` do SDK; o diário diz qual RPC respondeu.
+  - **Unidades** `brot-keeper` e `brot-keeper-standby` com usuário próprio, segredos por `LoadCredential=` e
+    `ProtectProc=invisible`; não instaladas.
 - **O keeper paga sozinho no devnet** (13/10/2026, a pedido do Ronaldo; `deploy/vps/README.md`,
   `docs/sprints/sprint-06-keeper-server.md`). O código do keeper do PR #88 (as pendências das Sprints 06 e 07, release
   `88a00f9`) entrou no servidor às 19h03 UTC, na unidade de sempre e com `KEEPER_SETTLE=on`, depois de um ensaio sem

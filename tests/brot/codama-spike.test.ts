@@ -59,7 +59,13 @@ describe("codama client matches the test kit", () => {
     const accounts = { config, campaign, vault, metricAccount };
     // Sprints 14 and 15: the admin's decision and a sealed entry.
     const decide = { voidReason: P.VoidReason.TeamOutsideCause, noteHash: new Uint8Array(32).fill(7) };
-    const sealed = { entryUsd: 750n, maxLamports: 9n * P.SOL, minReturnBps: 12_345, expectedEntryTotal: 10_000_000n };
+    const sealed = {
+      entryUsd: 750n,
+      maxLamports: 9n * P.SOL,
+      minReturnBps: 12_345,
+      expectedEntryTotal: 10_000_000n,
+      expectedParamsVersion: 5,
+    };
     const sealedFee = await P.sealedFeePda(campaign, who.address);
     const pairs: [Instruction, Instruction][] = [
       [

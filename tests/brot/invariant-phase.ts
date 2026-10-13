@@ -3,13 +3,16 @@
  *          an operation the campaign's phase refuses, so the run would never reach settlement or close; the
  *          phase-directed draw names the operation that moves a campaign on, most of the time: the resolution, the
  *          tally, the window's acts or a contest, the contest's stages and the lapse, the payouts and the close.
- * Version: 0.1.2 (Sprint 14: the tally, the contest, the re-read, the admin's decision and the lapse; review fix F3,
- *          the lapse of an unread stage 1 and the clock run to its edge; D2: the team's escalation, stage 1's edge)
- * Sprint:  04 (closure review); 14 (lane INV14; the uniform draw moved here from invariant-settle.ts)
+ * Version: 0.1.3 (Sprint 14: the tally, the contest, the re-read, the admin's decision and the lapse; review fix F3,
+ *          the lapse of an unread stage 1 and the clock run to its edge; D2: the team's escalation, stage 1's edge;
+ *          Sprint 15: a held sponsor fee settled while settling and before the close, which waits for it)
+ * Sprint:  04 (closure review); 14 (lane INV14; the uniform draw moved here from invariant-settle.ts); 15 (lane INV15)
  */
 import { type Harness, type Rng, clock } from "./invariant-harness";
 import { bakersOf, PROOF_DELAY, untallied } from "./invariant-model";
 import { shareDue } from "./invariant-payouts";
+import { liveSealed, type SealedSettleOp } from "./invariant-sealed-model";
+import { drawSealedSettle } from "./invariant-sealed-settle";
 import { SETTLE_KINDS, type SettleOp } from "./invariant-settle";
 import { lapsesAt } from "./invariant-window";
 
@@ -25,6 +28,8 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
   const t = clock(h);
   const member = r.int(0, h.team.length - 1);
   const unsettled = bakersOf(c).filter((b) => !c.settled.has(b));
+  // An honest settlement of a live held fee (the random draws put a thief in the sponsor's slot).
+  const sealedSettle = (): SealedSettleOp => ({ ...drawSealedSettle(h, r, index), thief: null });
   switch (c.phase) {
     case "Open":
       if (t < c.deadline && r.next() < 0.5) return { k: "resolveYes", c: index, back: r.big(0n, 50n) };
@@ -83,11 +88,14 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
     case "Settling":
       if (unsettled.length > 0 && r.next() < 0.8)
         return { k: "settle", c: index, baker: bakerIndex(h, r.pick(unsettled)) };
+      if (liveSealed(c).length > 0 && r.next() < 0.5) return sealedSettle();
       return r.next() < 0.5 ? { k: "prize", c: index } : null;
     case "Settled":
       if (!c.feeMoved) return { k: "collect", c: index };
       if (!c.prizeSettled) return { k: "prize", c: index };
       if (shareDue(c) > 0n && (!c.shareSettled || (c.reserved > 0n && r.next() < 0.5))) return { k: "share", c: index };
+      // Close waits for every held fee (`SealedFeesOpen`): most draws settle one first, some try the close anyway.
+      if (liveSealed(c).length > 0 && r.next() < 0.7) return sealedSettle();
       return { k: "close", c: index };
     default:
       return null;
@@ -140,6 +148,8 @@ export function drawSettleOp(h: Harness, r: Rng, index: number): SettleOp | Adva
       return { k: "prize", c: index };
     case "close":
       return { k: "close", c: index };
+    case "sealedSettle":
+      return drawSealedSettle(h, r, index);
     default:
       return advance;
   }

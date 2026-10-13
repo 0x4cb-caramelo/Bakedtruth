@@ -23,3 +23,6 @@ export * from "./prepare-claim";
 export * from "./link-referrer";
 export * from "./reread";
 export * from "./decide-contest";
+export * from "./sponsor-join";
+export * from "./settle-sealed-fee";
+export * from "./prepare-sealed";

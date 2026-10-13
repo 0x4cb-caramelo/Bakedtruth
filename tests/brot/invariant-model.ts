@@ -16,8 +16,8 @@ import { oneSidedFee, settleSplit, splitIsViable } from "./money-model";
 export type Phase = "Open" | "InReview" | "Contested" | "Settling" | "Settled" | "Closed";
 export type Outcome = "Unresolved" | "Yes" | "No" | "Void";
 export type Mode = "Split" | "OneSided" | "Refund";
-/** One join; `address` is its `Join` account (the harness keeps it for the tally). */
-export type Join = { baker: string; side: 0 | 1; amount: bigint; at: bigint; address?: string };
+/** One join; `address` is its `Join` account (kept for the tally); `sealed`, a sealed entry's part (Sprint 15). */
+export type Join = { baker: string; side: 0 | 1; amount: bigint; at: bigint; address?: string; sealed?: true };
 
 export type Snapshot = {
   mode: Mode;

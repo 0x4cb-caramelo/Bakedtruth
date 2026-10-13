@@ -250,3 +250,17 @@ Written 2026-10-10, before closure, at the founder's request to wrap up. **Not c
   server; the server runs this branch's commit, not `main`; the cycle is 15 s on the server and 60 s in the code.
 - **Retrospective:** the proof window is the real constraint, not the RPC or the key. A 429 after a send does not mean
   failure: check the signer's recent transactions before retrying.
+
+### 2026-10-13, the carry-over (lane L07 of the lead's run, branch `sprint-07-keeper-carryover`)
+
+Built and tested, not installed: settlement behind `KEEPER_SETTLE` (off unless exactly "on"): tally (a YES price
+result only after its window, so the cut-off can still move to an earlier proof), finalize, `settle_entry` in batches,
+the creator share, the prize, the fee, close and sweep, every destination the stored one, every lamport checked against
+the SDK's math on LiteSVM (Split, OneSided, Refund by an outside cause, a house-failure void, a reserved creator share);
+batched reads (one `getProgramAccounts`, `getMultipleAccounts` by 100: 1,000 open campaigns cost 14 RPC calls a cycle,
+measured in process); landing (the compute limit from the simulation, a bounded priority fee, rebroadcast until the
+blockhash expires, a failing instruction dropped from its batch); `/healthz` with pending work, `max_open_campaigns`
+usage, exposure and the settle switch; the unit with its own user and `LoadCredential=` (the steps are in its header;
+not to be copied to the server before them). 131 keeper tests pass. Open: the server owner's agreement and the
+install; the founder's switch; concurrent landing for the Surfpool 1,000-campaign run (X1.8); `scripts/team/confirm.ts`
+does not tally first.

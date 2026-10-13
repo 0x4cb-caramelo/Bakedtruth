@@ -1,31 +1,33 @@
 /**
- * Purpose: the randomized test's operations: the dispatch of every operation to its planner, the money moved by
- *          hand and by the wallets (drain, fund, sweep), and the draw of the next one. Openings and joins are in
- *          invariant-open.ts, the lifecycle in invariant-settle.ts and the files it dispatches to, the referral links
- *          in invariant-referral.ts; invariant-run.ts runs one operation.
- * Version: 0.1.0 (Sprint 14: the referral links; the run moved to invariant-run.ts, the lifecycle draw to -phase.ts)
- * Sprint:  04 (contract freeze, lane E); 14 (lane INV14)
+ * Purpose: the randomized test's operations: the dispatch of every operation to its planner and the draw of the
+ *          next one. Openings and joins are in invariant-open.ts, the money moved by hand and by the wallets in
+ *          invariant-wallets.ts, the lifecycle in invariant-settle.ts and the files it dispatches to, the referral links
+ *          in invariant-referral.ts, the sealed entry and its held fee in invariant-sealed*.ts; invariant-run.ts runs one.
+ * Version: 0.1.1 (Sprint 14: the referral links; the run moved to invariant-run.ts, the lifecycle draw to -phase.ts;
+ *          Sprint 15: the sealed entry, SOL sent by hand to a SealedFee, a held fee settled at any phase)
+ * Sprint:  04 (contract freeze, lane E); 14 (lane INV14); 15 (lane INV15, with Sprint 14 in one branch)
  */
-import { type Address } from "@solana/kit";
-
-import { readConfig } from "./flows";
 import { type Harness, type Plan, type Rng, clock } from "./invariant-harness";
 import { planJoin, planOpenPaid, planOpenTeam, planPause, type JoinOp } from "./invariant-open";
 import { drawPhaseOp, drawSettleOp } from "./invariant-phase";
 import { drawLinkOp, planLink, type LinkOp } from "./invariant-referral";
+import { drawHandSealed, drawSealed, planHandSealed, planSealed } from "./invariant-sealed";
+import { liveSealed, type HandSealedOp, type SealedOp } from "./invariant-sealed-model";
+import { drawSealedSettle } from "./invariant-sealed-settle";
 import { planSettle, type SettleOp } from "./invariant-settle";
-import { sweepFeesIx } from "./instructions-settlement";
+import { planDrain, planFund, planHand, planSweep } from "./invariant-wallets";
 import * as P from "./program";
-import { systemTransferIx } from "./join-campaign-support";
 import { balance, setTime } from "./setup";
 
 export type BaseOp =
   | { k: "openPaid"; creator: number; days: number }
   | { k: "openTeam"; member: number }
   | JoinOp
+  | SealedOp
   | { k: "pause" }
   | { k: "resume" }
   | { k: "hand"; c: number; to: "vault" | "campaign"; amount: bigint }
+  | HandSealedOp
   | { k: "advance"; seconds: bigint }
   | { k: "drain"; creator: number }
   | { k: "fund"; creator: number }
@@ -44,6 +46,10 @@ export async function planOp(h: Harness, op: Op): Promise<Plan> {
       return planOpenTeam(h, op.member);
     case "join":
       return planJoin(h, op);
+    case "sealed":
+      return planSealed(h, op);
+    case "handSealed":
+      return planHandSealed(h, op);
     case "pause":
       return planPause(h, true);
     case "resume":
@@ -63,73 +69,6 @@ export async function planOp(h: Harness, op: Op): Promise<Plan> {
   }
 }
 
-function planHand(h: Harness, index: number, to: "vault" | "campaign", amount: bigint): Plan {
-  const { campaign, vault } = h.addrs[index];
-  const target = to === "vault" ? vault : campaign;
-  return {
-    ixs: [systemTransferIx(h.bank, target, amount)],
-    deltas: new Map<string, bigint>([
-      [target, amount],
-      [h.bank.address, -amount],
-    ]),
-    apply: () => {
-      const c = h.camps[index];
-      if (to === "vault") c.handSent += amount;
-      else c.handSentCampaign += amount;
-    },
-  };
-}
-
-/** Empties a creator's wallet: a credit below the reserve then has nowhere to land (Q2). */
-function planDrain(h: Harness, creatorIndex: number): Plan {
-  const creator = h.creators[creatorIndex];
-  const amount = balance(h.w, creator.address);
-  return {
-    ixs: [systemTransferIx(creator, h.sink, amount)],
-    deltas: new Map<string, bigint>([
-      [creator.address, -amount],
-      [h.sink, amount],
-    ]),
-    apply: () => {
-      h.drained.add(creator.address);
-    },
-  };
-}
-
-/** Funds a creator with enough for about twenty paid openings, so a wallet once drained opens again. */
-function planFund(h: Harness, creatorIndex: number): Plan {
-  const creator = h.creators[creatorIndex];
-  const amount = 100n * P.SOL;
-  return {
-    ixs: [systemTransferIx(h.bank, creator.address, amount)],
-    deltas: new Map<string, bigint>([
-      [creator.address, amount],
-      [h.bank.address, -amount],
-    ]),
-    apply: () => {
-      h.drained.delete(creator.address);
-    },
-  };
-}
-
-async function planSweep(h: Harness): Promise<Plan> {
-  const config = await readConfig(h.w);
-  const recipient = config.fee_recipient as Address;
-  const surplus = h.feeVaultModel - h.rent.vault;
-  return {
-    ixs: [sweepFeesIx(await P.configPda(), h.feeVault, recipient)],
-    error: surplus > 0n ? undefined : "NothingToSweep",
-    deltas: new Map<string, bigint>([
-      [h.feeVault, -surplus],
-      [recipient, surplus],
-    ]),
-    events: ["FeesSwept"],
-    apply: () => {
-      h.feeVaultModel -= surplus;
-    },
-  };
-}
-
 /** The draw of the next operation: its kind by weight, then the campaign or wallet it names (seeded). */
 export function drawOp(h: Harness, r: Rng): Op {
   const open = h.camps.map((_, i) => i).filter((i) => !h.camps[i].closed);
@@ -147,7 +86,7 @@ export function drawOp(h: Harness, r: Rng): Op {
   // Most joins go to campaigns still taking entries; the rest name any open campaign, so refusals still run.
   const taking = open.filter((i) => h.camps[i].phase === "Open");
   const joinPool = taking.length > 0 && r.next() < 0.8 ? taking : open;
-  if (roll < 0.47 && joinPool.length > 0)
+  if (roll < 0.4 && joinPool.length > 0)
     return {
       k: "join",
       c: r.pick(joinPool),
@@ -155,15 +94,23 @@ export function drawOp(h: Harness, r: Rng): Op {
       side: r.next() < 0.5 ? 0 : 1,
       amount: r.big(10_000_000n, 3_000_000_000n),
     };
+  // Sprint 15: a sealed entry, by any baker (a sponsor may also join plainly: one Entry holds both).
+  const sealed = roll >= 0.4 && roll < 0.47 ? drawSealed(h, r, open) : null;
+  if (sealed) return sealed;
   // Sprint 14: a referral link, at any phase of any campaign and paused or not.
   if (roll < 0.5) return drawLinkOp(h, r);
   if (roll < 0.53) return { k: "pause" };
   if (roll < 0.56) return { k: "resume" };
-  if (roll < 0.6 && open.length > 0)
+  if (roll < 0.6 && open.length > 0) {
+    if (r.next() < 0.3) return drawHandSealed(h, r, open);
     return { k: "hand", c: r.pick(open), to: r.next() < 0.6 ? "vault" : "campaign", amount: r.big(1n, 500_000_000n) };
+  }
   if (roll < 0.62 && live.length > 0) return { k: "drain", creator: r.pick(live) };
   if (roll < 0.64) return { k: "fund", creator: anyCreator };
   if (roll < 0.66) return { k: "sweep" };
+  // Sprint 15: a held fee settled at any phase (refused before the snapshot), sometimes by a thief in the sponsor's slot.
+  const holding = open.filter((i) => liveSealed(h.camps[i]).length > 0);
+  if (roll < 0.68 && holding.length > 0) return drawSealedSettle(h, r, r.pick(holding));
   if (open.length === 0) {
     return payers.length > 0 ? { k: "openPaid", creator: r.pick(payers), days: 3 } : { k: "fund", creator: 0 };
   }

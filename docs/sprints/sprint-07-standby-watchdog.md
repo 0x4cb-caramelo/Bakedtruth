@@ -184,3 +184,16 @@ Written 2026-10-10, during the sprint. **Not closed:** most of the Definition of
 - **Retrospective (so far):** the gate is the rule that matters most, so it sits at the send and not in the loop. A
   second read that compares two providers is weaker than the one the proposal describes, and the sprint should say so
   rather than claim the stronger check.
+
+### 2026-10-13, the carry-over (lane L07 of the lead's run, branch `sprint-07-keeper-carryover`)
+
+Built and tested: every declared alert now fires, each with a runbook and a test (a campaign idle 10 and 30 minutes,
+NO with `met_late`, 80% of `max_open_campaigns`, openings per hour, an opening by a team key, the exposure in the
+vaults, a reserved credit older than seven days, a stale SOL/USD, a change in Pyth's programs, an unchecked second
+read); an alert's own fields can no longer be overwritten by its detail (found by the indexer lane); the second read
+fetches a price campaign's proof transaction at `posted_slot` through `RPC_B_URL` and compares its signed message with
+what the campaign recorded (a forged price lands in the review queue), and re-checks the other kinds through the SDK;
+two keepers at once: one lands, the other gets `AlreadySettled`, no lamport moves twice; the Pyth watch on the
+receiver's and the push oracle's ProgramData. Open: the receiver's config account (its layout is unverified); the
+standby's VM, wallet 2, RPC B and email (D4); the [AC] thresholds for the founder (exposure 100 SOL, 20 openings an
+hour, sweep minimum 0.01 SOL, priority fee ceilings).

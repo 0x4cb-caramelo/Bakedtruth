@@ -102,6 +102,7 @@ describe("sdk events and addresses match the program", () => {
       ["entry", 116],
       ["join", 96],
       ["referralLink", 96],
+      ["sealedFee", 112],
     ]);
   });
 });

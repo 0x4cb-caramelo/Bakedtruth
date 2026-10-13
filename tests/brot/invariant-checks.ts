@@ -2,8 +2,9 @@
  * Purpose: the money invariants I1 to I15 (TP section 3.4.13) as small functions of the model state and
  *          the chain state. The randomized test runs them after every operation; a violation names the
  *          invariant and the values that broke it.
- * Version: 0.1.0 (Sprint 14: the creator share's reserve in I6 and I13; the campaign's record, invariant-state.ts)
- * Sprint:  04 (contract freeze, lane E); 14 (lane INV14)
+ * Version: 0.1.1 (Sprint 14: the creator share's reserve in I6 and I13; the campaign's record, invariant-state.ts;
+ *          Sprint 15: the sealed entry's checks, invariant-sealed-checks.ts)
+ * Sprint:  04 (contract freeze, lane E); 14 (lane INV14); 15 (lane INV15)
  */
 import { booked, earlyJoins, joinedTotal, type ModelCampaign, sideTotal, sumOf } from "./invariant-model";
 import { shareDue, winnersOf } from "./invariant-payouts";
@@ -11,6 +12,7 @@ import { payoutOf } from "./money-model";
 import type { Harness } from "./invariant-harness";
 import type { ChainView } from "./invariant-view";
 import { countOpen } from "./invariant-open";
+import { SEALED_CHECKS } from "./invariant-sealed-checks";
 import { stateCheck } from "./invariant-state";
 
 type Check = (c: ModelCampaign, v: ChainView, h: Harness) => string | null;
@@ -171,9 +173,9 @@ const CHECKS: [number, Check][] = [
   [15, i15],
 ];
 
-/** Runs the per-campaign invariants; throws naming the first one that fails. */
+/** Runs the per-campaign invariants, the sealed entry's too (Sprint 15); throws naming the first one that fails. */
 export function checkCampaign(c: ModelCampaign, v: ChainView, h: Harness, label: string) {
-  for (const [n, check] of CHECKS) {
+  for (const [n, check] of [...CHECKS, ...SEALED_CHECKS]) {
     const failure = check(c, v, h);
     if (failure) throw new Error(`I${n} (${label}): ${failure}`);
   }

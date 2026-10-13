@@ -48,6 +48,8 @@ export type SponsorJoinArgs = {
   maxLamports: bigint;
   minReturnBps?: number;
   expectedEntryTotal?: bigint;
+  /** `GlobalConfig.params_version` as read for the preview; 0 until the params change (lane L15, red team L2). */
+  expectedParamsVersion?: number;
   /** The Join account's index: the sponsor's `join_count` before this join (0 for the first). */
   joinIndex?: number;
 };
@@ -66,6 +68,7 @@ export async function sponsorJoinCampaignIx(
     max_lamports: a.maxLamports,
     min_return_bps: a.minReturnBps ?? 0,
     expected_entry_total: a.expectedEntryTotal ?? 0n,
+    expected_params_version: a.expectedParamsVersion ?? 0,
   });
   const accounts = [signer(sponsor, true), ro(await P.configPda()), rw(campaign), rw(await P.vaultPda(campaign))];
   accounts.push(

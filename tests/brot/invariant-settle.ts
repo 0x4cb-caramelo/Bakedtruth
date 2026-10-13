@@ -1,29 +1,26 @@
 /**
  * Purpose: the randomized test's settlement operations: the payouts out of order and twice, the fee, the prize,
- *          the creator share (paid, or held in the vault for a wallet that could not take it, then claimed) and the
- *          close, each with its expected refusal, balance changes and events; and the dispatch of every lifecycle
- *          operation to its planner (review, window, contest, payout).
- * Version: 0.1.0 (Sprint 14: the contest dispatched, the share's reserve and claim, the events of each payout)
- * Sprint:  04 (contract freeze, lane E); 14 (lane INV14)
+ *          each with its expected refusal, balance changes and events; and the dispatch of every lifecycle operation
+ *          to its planner (review, window, contest, payout). The creator share and the close are in invariant-close.ts,
+ *          a sponsor's held fee (Sprint 15) in invariant-sealed-settle.ts.
+ * Version: 0.1.1 (Sprint 14: the contest dispatched, the share's reserve and claim, the events of each payout;
+ *          Sprint 15: the held fee's settlement, the share and the close moved to invariant-close.ts)
+ * Sprint:  04 (contract freeze, lane E); 14 (lane INV14); 15 (lane INV15, with Sprint 14 in one branch)
  */
 import { type Address } from "@solana/kit";
 
-import { booked, type ModelCampaign } from "./invariant-model";
-import { collectDue, entryPayout, prizeDue, shareDue } from "./invariant-payouts";
-import {
-  closeCampaignIx,
-  collectFeeIx,
-  settleCreatorShareIx,
-  settleEntryIx,
-  settlePrizeIx,
-} from "./instructions-settlement";
+import type { ModelCampaign } from "./invariant-model";
+import { collectDue, entryPayout, prizeDue } from "./invariant-payouts";
+import { collectFeeIx, settleEntryIx, settlePrizeIx } from "./instructions-settlement";
 import type { BrotErrorName } from "./errors";
+import { credit, planClose, planShare } from "./invariant-close";
 import { CONTEST_KINDS, planContest, type ContestOp } from "./invariant-contest";
 import { entryOf, type Harness, type Plan } from "./invariant-harness";
 import { planReview, REVIEW_KINDS, type ReviewOp } from "./invariant-review";
-import { balance } from "./setup";
+import type { SealedSettleOp } from "./invariant-sealed-model";
+import { planSealedSettle } from "./invariant-sealed-settle";
 
-export const PAYOUT_KINDS = ["settle", "collect", "share", "prize", "close"] as const;
+export const PAYOUT_KINDS = ["settle", "collect", "share", "prize", "close", "sealedSettle"] as const;
 export const SETTLE_KINDS = [...REVIEW_KINDS, ...CONTEST_KINDS, ...PAYOUT_KINDS] as const;
 
 export type PayoutOp =
@@ -31,13 +28,9 @@ export type PayoutOp =
   | { k: "collect"; c: number }
   | { k: "share"; c: number }
   | { k: "prize"; c: number }
-  | { k: "close"; c: number };
+  | { k: "close"; c: number }
+  | SealedSettleOp;
 export type SettleOp = ReviewOp | ContestOp | PayoutOp;
-
-/** A payment that clears the reserve (Q2) frees a drained wallet; one below it stays reserved. */
-function credit(h: Harness, address: string, amount: bigint) {
-  if (amount > 0n && h.drained.has(address) && amount >= h.rent.wallet) h.drained.delete(address);
-}
 
 /** Plans one lifecycle operation: a review step, a contest step, or a payment. */
 export async function planSettle(h: Harness, op: SettleOp): Promise<Plan> {
@@ -119,82 +112,7 @@ async function planPayout(h: Harness, op: PayoutOp, c: ModelCampaign, campaign: 
     }
     case "close":
       return planClose(h, c, campaign, vault);
+    case "sealedSettle":
+      return planSealedSettle(h, op);
   }
-}
-
-/**
- * `settle_creator_share`, in the program's order: finalized; a share due (none for a team, a mode other than Split
- * or a zero share: `CreatorShareNotDue`); once settled, only a reserved share can be claimed (`AlreadySettled`
- * otherwise), when the wallet can take it (`ReserveNotClaimable`). A first credit that would leave the wallet below its
- * rent-exempt minimum is held in the vault (`creator_share_reserved`), with no event; close pays it to the rent payer.
- */
-function planShare(h: Harness, c: ModelCampaign, campaign: Address, vault: Address, notFinal?: BrotErrorName): Plan {
-  const due = shareDue(c);
-  const wallet = balance(h.w, c.creator as Address);
-  const claim = c.shareSettled && c.reserved > 0n;
-  const error: BrotErrorName | undefined =
-    notFinal ??
-    (due === 0n ? "CreatorShareNotDue" : undefined) ??
-    (!c.shareSettled
-      ? undefined
-      : c.reserved === 0n
-        ? "AlreadySettled"
-        : wallet + c.reserved < h.rent.wallet
-          ? "ReserveNotClaimable"
-          : undefined);
-  const reserve = error === undefined && !c.shareSettled && wallet + due < h.rent.wallet;
-  const paid = reserve ? 0n : claim ? c.reserved : due;
-  return {
-    ixs: [settleCreatorShareIx(campaign, vault, c.creator as Address)],
-    error,
-    deltas: new Map<string, bigint>([
-      [vault, -paid],
-      [c.creator, paid],
-    ]),
-    label: reserve ? "share-reserve" : claim ? "share-claim" : undefined,
-    events: reserve ? [] : ["CreatorShareSettled"],
-    apply: () => {
-      c.shareSettled = true;
-      c.reserved = reserve ? due : 0n;
-      if (reserve) return;
-      c.seq += 1n;
-      c.ledger.push({ to: c.creator, amount: paid, kind: "share" });
-      c.paidOut += paid;
-      credit(h, c.creator, paid);
-    },
-  };
-}
-
-/**
- * `close_campaign`: once settled, the rent and any reserved creator share go to rent_payer (the creator, in this
- * run); the dust and any hand-sent SOL go to the fee vault.
- */
-function planClose(h: Harness, c: ModelCampaign, campaign: Address, vault: Address): Plan {
-  const reserved = c.reserved;
-  const dust = booked(c) - reserved;
-  const waiting = shareDue(c) > 0n && !c.shareSettled;
-  const payer = c.creator;
-  return {
-    ixs: [closeCampaignIx(campaign, vault, payer as Address, h.feeVault)],
-    error: c.phase !== "Settled" || !c.feeMoved || !c.prizeSettled || waiting ? "CampaignNotSettled" : undefined,
-    deltas: new Map<string, bigint>([
-      [vault, -(h.rent.vault + dust + reserved + c.handSent)],
-      [campaign, -(h.rent.campaign + c.handSentCampaign)],
-      [payer, h.rent.campaign + h.rent.vault + reserved],
-      [h.feeVault, dust + c.handSent + c.handSentCampaign],
-    ]),
-    events: ["CampaignClosed"],
-    apply: () => {
-      const surplus = dust + c.handSent + c.handSentCampaign;
-      c.seq += 1n;
-      c.ledger.push({ to: "fee", amount: surplus, kind: "close" });
-      if (reserved > 0n) c.ledger.push({ to: payer, amount: reserved, kind: "share" });
-      c.paidOut += dust + reserved + c.handSent;
-      h.feeVaultModel += surplus;
-      c.reserved = 0n;
-      c.closed = true;
-      c.phase = "Closed";
-      credit(h, payer, h.rent.campaign + reserved);
-    },
-  };
 }

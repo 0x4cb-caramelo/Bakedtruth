@@ -57,6 +57,27 @@ describe("createAlerter", () => {
     expect(TRANSPORTS).toEqual(["journal"]);
   });
 
+  test("a detail key named like the line's own fields never overwrites them; its value is kept under detail_<name>", () => {
+    const { alerter, lines } = harness();
+    alerter.alert("campaign_idle", "campaign-a", {
+      kind: "primary_down",
+      key: "other",
+      event: "x",
+      ts: "t",
+      transports: "email",
+    });
+    const parsed = JSON.parse(lines[0]!);
+    expect(parsed).toMatchObject({ event: "alert", kind: "campaign_idle", key: "campaign-a", transports: "journal" });
+    expect(parsed.ts).not.toBe("t");
+    expect(parsed).toMatchObject({
+      detail_kind: "primary_down",
+      detail_key: "other",
+      detail_event: "x",
+      detail_ts: "t",
+      detail_transports: "email",
+    });
+  });
+
   test("a detail key that looks like a secret, a token or a URL is refused and nothing is emitted", () => {
     const { alerter, lines } = harness();
     expect(() => alerter.alert("restart_failed", "primary", { apiKey: "x" })).toThrow('"apiKey"');

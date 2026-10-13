@@ -42,7 +42,7 @@ const sendOk = async (env: Env, ix: Instruction, label: string) =>
 const ZERO = address("11111111111111111111111111111111");
 
 /** The default paid opening of the kit: BTC/USD above 110% of the captured price, seven days, US$500. */
-async function btcOpening(env: Env, creator: KeyPairSigner, id: bigint) {
+export async function btcOpening(env: Env, creator: KeyPairSigner, id: bigint) {
   await refreshPrices(env.rpc);
   const now = (await clock(env.rpc)).unixTimestamp;
   const args = { id, feedId: P.BTC_USD_FEED_ID, direction: P.Direction.Above, target: (BTC_PRICE * 11n) / 10n };

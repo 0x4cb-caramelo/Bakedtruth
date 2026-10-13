@@ -2,9 +2,9 @@
  * Purpose: the world of the randomized test: a seeded generator, the wallets, the price accounts the
  *          operations refresh, the reference model of every campaign and of every referral link, and the chain
  *          view the invariant checks read. Operations live in invariant-ops.ts and the files it dispatches to.
- * Version: 0.1.1 (Sprint 14: the referees and their links, cached addresses, the config read once per check; the
- *          event-field checks, moved from invariant-contest.ts for D2)
- * Sprint:  04 (contract freeze, lane E); 14 (lane INV14)
+ * Version: 0.1.2 (Sprint 14: the referees and their links, cached addresses, the config read once per check; the
+ *          event-field checks, moved from invariant-contest.ts for D2; Sprint 15: a SealedFee's rent and address)
+ * Sprint:  04 (contract freeze, lane E); 14 (lane INV14); 15 (lane INV15, with Sprint 14 in one branch)
  */
 import { type Address, type KeyPairSigner, type Instruction } from "@solana/kit";
 
@@ -16,7 +16,7 @@ import * as P from "./program";
 import type { BrotErrorName } from "./errors";
 import { balance, createWorld, fundedWallet, now, rentFor, setPriceAccount, type Event, type World } from "./setup";
 import { CAMPAIGN, ENTRY, JOIN } from "./structs";
-import { REFERRAL_LINK } from "./structs-14-15";
+import { REFERRAL_LINK, SEALED_FEE } from "./structs-14-15";
 
 /** A seeded generator (mulberry32): the same seed gives the same operations on every machine. */
 export function seededRandom(seed: number) {
@@ -79,8 +79,8 @@ export type Harness = {
   feeVault: Address;
   feeVaultModel: bigint;
   /** Rent of the 512-byte campaign, of the data-less vault, of an Entry, of a data-less wallet (the reserve), of a
-   *  Join and of a ReferralLink. */
-  rent: { campaign: bigint; vault: bigint; entry: bigint; wallet: bigint; join: bigint; link: bigint };
+   *  Join, of a ReferralLink and of a sponsor's SealedFee (Sprint 15). */
+  rent: { campaign: bigint; vault: bigint; entry: bigint; wallet: bigint; join: bigint; link: bigint; sealed: bigint };
   drained: Set<string>;
   nextId: bigint;
   trace: string[];
@@ -112,6 +112,7 @@ export async function makeHarness(): Promise<Harness> {
     join: rentFor(w, layoutSize(JOIN)),
     wallet: rentFor(w, 0),
     link: rentFor(w, layoutSize(REFERRAL_LINK)),
+    sealed: rentFor(w, layoutSize(SEALED_FEE)),
   };
   const feeVaultModel = balance(w, feeVault);
   refreshBase(w);
@@ -157,6 +158,9 @@ export const entryOf = (h: Harness, campaign: Address, baker: string) =>
   cached(h, `${campaign}|${baker}`, () => P.entryPda(campaign, baker as Address));
 export const linkOf = (h: Harness, referee: string) =>
   cached(h, `link|${referee}`, () => P.referralLinkPda(referee as Address));
+/** A sponsor's SealedFee on a campaign, `["sealed", campaign, sponsor]` (Sprint 15). */
+export const sealedAt = (h: Harness, campaign: Address, sponsor: string) =>
+  cached(h, `sealed|${campaign}|${sponsor}`, () => P.sealedFeePda(campaign, sponsor as Address));
 
 /** The sponsored BTC/USD account at `price`, published at `publishTime`, in the current slot. */
 export function setBtc(w: World, price: bigint, publishTime: bigint) {
