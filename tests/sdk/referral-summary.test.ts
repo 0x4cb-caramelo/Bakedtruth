@@ -4,7 +4,7 @@
  *          in words from its own bytes: the referrer, the referee, once and for good, and the link's rent, which is
  *          never returned. Needs no binary.
  *          Filter: `bun test tests/ -t "the summary of a referral link"`.
- * Version: 0.1.0
+ * Version: 0.1.1 (review fix F7 of Sprint 14, lane L14B: the rent counted in lamportsAtMost and named)
  * Sprint:  14 (referral), lane L14A
  */
 import { describe, expect, test } from "bun:test";
@@ -42,10 +42,19 @@ describe("the summary of a referral link", () => {
     const [item] = summary.items;
     expect(item.name).toBe("UserLinkReferrer");
     expect(item.text).toBe(
-      `Record ${referrer} as the wallet that referred ${referee.address}, once and for good (no instruction changes or removes the link); ${referee.address} pays the rent of the link's account, which is never returned`,
+      `Record ${referrer} as the wallet that referred ${referee.address}, once and for good (no instruction changes or removes the link); ${referee.address} pays the rent of the link's account, at most 0.001559040 SOL, which is never returned`,
     );
-    // Only the rent leaves the referee's wallet, and the summary keeps rents apart from what it can take.
-    expect([item.lamportsAtMost, summary.lamportsAtMost]).toEqual([0n, 0n]);
+    // Review fix F7: the rent never comes back, so it counts in what the link takes from the referee's wallet. With
+    // no cluster figure read, the runtime's default rent bounds it: (96 + 128) bytes × 6,960 lamports.
+    expect([item.lamportsAtMost, summary.lamportsAtMost]).toEqual([1_559_040n, 1_559_040n]);
+  });
+
+  test("a link names and counts the rent the screen read from its cluster", async () => {
+    const { referee, ix } = await aLink();
+    // Devnet's rent on 2026-10-08 (TP 3.4.4): 5,080 lamports a byte, so 1,137,920 for the link's 96 bytes.
+    const [item] = T.summarizeInstructions([ix], { context: { linkRent: 1_137_920n } }).items;
+    expect(item.text).toContain(`${referee.address} pays the rent of the link's account, 0.001137920 SOL, which is`);
+    expect(item.lamportsAtMost).toBe(1_137_920n);
   });
 
   test("a link of another shape is not trusted", async () => {

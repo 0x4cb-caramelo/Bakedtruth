@@ -4,13 +4,22 @@
  *          and says what each signs (the decision, its reason and what happens to the 10% opening fee); a changed
  *          role, a decision byte no variant has, or a hand-built pair the program refuses is flagged. Needs no binary.
  *          Filter: `bun test tests/ -t "contest sdk"`.
- * Version: 0.1.0
+ * Version: 0.1.1 (review fixes F6, the fee's branch, and F9, no proof offered by default)
  * Sprint:  14 (lane L14B)
  */
 import { describe, expect, test } from "bun:test";
 import { AccountRole, generateKeyPairSigner, type Instruction } from "@solana/kit";
 
-import { campaignAddress, ContestDecision, VoidReason } from "@brot/sdk/read";
+import {
+  ACCOUNT_TAG,
+  campaignAddress,
+  ContestDecision,
+  getCampaignDecoder,
+  LAYOUT_VERSION,
+  PROGRAM_ID,
+  VoidReason,
+  type Campaign,
+} from "@brot/sdk/read";
 import * as T from "@brot/sdk/tx";
 
 import * as IL from "../brot/instructions-14-15";
@@ -28,6 +37,13 @@ async function world() {
 }
 
 const item = (ix: Instruction) => T.summarizeInstructions([ix]).items[0];
+
+/** A campaign as the program stores one, every field zero (no entry: `firstBaker` all zeros) but the tag, then `over`. */
+function stored(over: Partial<Campaign>): Campaign {
+  const data = new Uint8Array(512);
+  data.set([ACCOUNT_TAG.campaign, LAYOUT_VERSION]);
+  return { ...getCampaignDecoder().decode(data), ...over };
+}
 
 describe("contest sdk", () => {
   test("contest sdk: the decision builder refuses what the program refuses from the arguments", async () => {
@@ -47,16 +63,22 @@ describe("contest sdk", () => {
     await expect(T.buildAdminDecideContest(short)).rejects.toThrow("32 bytes");
   });
 
-  test("contest sdk: the summary trusts a re-read and says what it does", async () => {
+  test("contest sdk: the summary trusts a re-read, offers no proof unless asked, and names any proof offered", async () => {
     const { campaign } = await world();
     const reread = await T.buildRereadCampaign({ campaign, metricAccount: P.BTC_USD_ACCOUNT });
+    // Review fix F9: the default proof slot is the program's own address, which the program reads as none offered.
+    expect(reread.accounts![3].address).toBe(PROGRAM_ID);
     expect(item(reread)).toMatchObject({ name: "RereadCampaign", trusted: true, lamportsAtMost: 0n });
     expect(item(reread).text).toBe(
-      `Run the reading of contested campaign ${campaign} again from ${P.BTC_USD_ACCOUNT}: the same result pays out as stored; a different one opens 48 hours for the admin to confirm or void`,
+      `Run the reading of contested campaign ${campaign} again from ${P.BTC_USD_ACCOUNT}: the same result pays out as stored; a different one opens stage 2, where the admin may confirm or void for 48 hours (counted from stage 1's deadline once that has passed)`,
     );
-    const proof = (await generateKeyPairSigner()).address;
-    const offered = await T.buildRereadCampaign({ campaign, metricAccount: P.BTC_USD_ACCOUNT, proofAccount: proof });
-    expect(item(offered).text).toContain(`, with ${proof} offered as proof:`);
+    // Any proof offered is named, the metric account itself included.
+    for (const proof of [(await generateKeyPairSigner()).address, P.BTC_USD_ACCOUNT]) {
+      const offered = await T.buildRereadCampaign({ campaign, metricAccount: P.BTC_USD_ACCOUNT, proofAccount: proof });
+      expect(item(offered).text).toContain(
+        `, with ${proof} offered as proof (a proof the reader refuses refuses the re-read):`,
+      );
+    }
   });
 
   test("contest sdk: the summary trusts the admin's decision and names the fee's way", async () => {
@@ -66,12 +88,27 @@ describe("contest sdk", () => {
     expect(confirm.text).toBe(
       `As the admin, confirm the stored result of contested campaign ${campaign}: it pays out as stored; note hash ${NOTE_HEX}`,
     );
-    const house = item(await decide(ContestDecision.Void, VoidReason.TeamHouseFailure)).text;
-    expect(house).toBe(
-      `As the admin, void contested campaign ${campaign} (TeamHouseFailure): every entry and the prize go back, and the 10% opening fee goes back to whoever opened; note hash ${NOTE_HEX}`,
-    );
     const outside = item(await decide(ContestDecision.Void, VoidReason.TeamOutsideCause)).text;
     expect(outside).toContain("(TeamOutsideCause): every entry and the prize go back, and the 10% opening fee stays");
+  });
+
+  test("contest sdk: a house-failure void promises the fee's refund only when an entry landed (review fix F6)", async () => {
+    const { campaign, decide } = await world();
+    const house = await decide(ContestDecision.Void, VoidReason.TeamHouseFailure);
+    const voidText = (context?: T.SummaryContext) => T.summarizeInstructions([house], { context }).items[0].text;
+    const prefix = `As the admin, void contested campaign ${campaign} (TeamHouseFailure): `;
+    // The campaign not read: the rule, both branches.
+    expect(voidText()).toBe(
+      `${prefix}every entry and the prize go back, and the 10% opening fee goes back to whoever opened if any entry landed (with no entry, Brot keeps it); note hash ${NOTE_HEX}`,
+    );
+    // Read: the branch the program takes (founder answer 8 keeps the fee of a pot nobody joined).
+    const withEntries = stored({ firstBaker: (await generateKeyPairSigner()).address });
+    expect(voidText({ campaigns: new Map([[campaign, withEntries]]) })).toBe(
+      `${prefix}every entry and the prize go back, and the 10% opening fee goes back to whoever opened; note hash ${NOTE_HEX}`,
+    );
+    expect(voidText({ campaigns: new Map([[campaign, stored({})]]) })).toBe(
+      `${prefix}the prize goes back, and with no entry in the pot Brot keeps the 10% opening fee; note hash ${NOTE_HEX}`,
+    );
   });
 
   test("contest sdk: a pair the program refuses, a decision byte no variant has, or a changed role is flagged", async () => {

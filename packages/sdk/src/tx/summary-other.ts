@@ -4,16 +4,20 @@
  *          recipient, the team keys, every creation parameter, the admin's decision on a contest. Also the exact
  *          data size of every instruction, so a summary never describes bytes the program would refuse as
  *          `BadInstructionData`.
- * Version: 0.1.4 (the contest's re-read and the admin's decision, Sprint 14 lane L14B; the other stubs still have
- *          no size, so they are never trusted until their lanes)
+ * Version: 0.1.5 (Sprint 14 review fixes: the link's rent is counted and named, F7; the contest's texts moved to
+ *          ./summary-contest.ts with the campaign the screen read, F6 and F9)
  * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 14 (lane L14B)
  */
 import * as G from "../idl/generated/instructions";
 import { BrotMarketsInstruction as B } from "../idl/generated/programs";
 import { bytesToHex, type Bytes } from "../read/bytes";
-import { ContestDecision, VoidReason } from "../read/constants";
+import { ACCOUNT_LEN } from "../read/constants";
 import { formatBps, formatSol } from "../read/format";
-import { TEAM_VOID_REASONS } from "./decide-contest";
+import type { Campaign } from "../read/accounts";
+import { decisionText, rereadText } from "./summary-contest";
+
+/** The part of the summary's context these instructions read (`SummaryContext`, ./summary-brot.ts). */
+type OtherContext = { campaigns?: ReadonlyMap<string, Campaign>; linkRent?: bigint };
 
 /**
  * Each instruction's data size, discriminator included, from the generated decoders. The scaffold's stubs of Sprints
@@ -48,25 +52,17 @@ export const DATA_SIZE: Partial<Record<B, number>> = {
   [B.AdminDecideContest]: G.getAdminDecideContestInstructionDataDecoder().fixedSize,
 };
 
-/** A void reason's class decides the 10% opening fee (the program's `void_reason.rs`). */
-const HOUSE_FAILURES: readonly VoidReason[] = [VoidReason.MissedWindow, VoidReason.TeamHouseFailure];
+/**
+ * The rent a referral link's account (96 bytes) takes from the referee, never returned (review fix F7): the cluster's
+ * own figure when the screen read it (`SummaryContext.linkRent`, ./summary-brot.ts), else the runtime's default rent,
+ * 6,960 lamports a byte with the 128-byte account header (1,559,040), above what devnet charged on 2026-10-08
+ * (TP 3.4.4).
+ */
+export const DEFAULT_LINK_RENT = (BigInt(ACCOUNT_LEN.referralLink) + 128n) * 6_960n;
 
-/** The admin's decision at stage 2 of a contest, in words, from the bytes signed. */
-function decisionText(campaign: string | undefined, d: Record<string, any>): string {
-  const note = `note hash ${bytesToHex(d.noteHash)}`;
-  if (d.decision === ContestDecision.Confirm) {
-    const refused =
-      d.voidReason === VoidReason.None
-        ? ""
-        : ` with void reason ${VoidReason[d.voidReason]}, which the program refuses (ConfirmWithVoidReason)`;
-    return `As the admin, confirm the stored result of contested campaign ${campaign}${refused}: it pays out as stored; ${note}`;
-  }
-  const reason = VoidReason[d.voidReason];
-  if (!TEAM_VOID_REASONS.includes(d.voidReason)) {
-    return `As the admin, void contested campaign ${campaign} (${reason}), which the program refuses (VoidReasonNotForTeam); ${note}`;
-  }
-  const fee = HOUSE_FAILURES.includes(d.voidReason) ? "goes back to whoever opened" : "stays with Brot";
-  return `As the admin, void contested campaign ${campaign} (${reason}): every entry and the prize go back, and the 10% opening fee ${fee}; ${note}`;
+/** The most an instruction described here takes from a signer's wallet: only a link's rent, which never comes back. */
+export function otherLamports(type: B, ctx: OtherContext = {}): bigint {
+  return type === B.UserLinkReferrer ? (ctx.linkRent ?? DEFAULT_LINK_RENT) : 0n;
 }
 
 type Slots = Record<string, { address: string }>;
@@ -106,7 +102,7 @@ function teamText(teamLen: number, team: readonly string[]): string {
 }
 
 /** One line for an instruction that takes nothing from the signer's wallet but the network fee. */
-export function describeOther(type: B, a: Slots, d: Record<string, any>): string {
+export function describeOther(type: B, a: Slots, d: Record<string, any>, ctx: OtherContext = {}): string {
   const campaign = a.campaign?.address;
   switch (type) {
     case B.AdminInitializeConfig:
@@ -131,13 +127,10 @@ export function describeOther(type: B, a: Slots, d: Record<string, any>): string
       return `Confirm the result of campaign ${campaign} and end its review window`;
     case B.TeamOpenContest:
       return `Contest the result of campaign ${campaign}: its payout pauses until the reading is run again (the same reading pays out; a different one gives the admin 48 hours to confirm or void, never to invert)`;
-    case B.RereadCampaign: {
-      const proof =
-        a.proofAccount.address === a.metricAccount.address ? "" : `, with ${a.proofAccount.address} offered as proof`;
-      return `Run the reading of contested campaign ${campaign} again from ${a.metricAccount.address}${proof}: the same result pays out as stored; a different one opens 48 hours for the admin to confirm or void`;
-    }
+    case B.RereadCampaign:
+      return rereadText(campaign, a);
     case B.AdminDecideContest:
-      return decisionText(campaign, d);
+      return decisionText(campaign, d, campaign === undefined ? undefined : ctx.campaigns?.get(campaign));
     case B.FinalizeCampaign:
       return `Finalize campaign ${campaign} after its review window`;
     case B.SettleEntry:
@@ -154,8 +147,10 @@ export function describeOther(type: B, a: Slots, d: Record<string, any>): string
       return `Sweep the fee vault to ${a.feeRecipient.address}`;
     case B.TallyLateJoins:
       return `Tally ${a.baker.address}'s joins in campaign ${campaign}`;
-    case B.UserLinkReferrer:
-      return `Record ${d.referrer} as the wallet that referred ${a.referee.address}, once and for good (no instruction changes or removes the link); ${a.referee.address} pays the rent of the link's account, which is never returned`;
+    case B.UserLinkReferrer: {
+      const rent = ctx.linkRent === undefined ? `at most ${formatSol(DEFAULT_LINK_RENT)}` : formatSol(ctx.linkRent);
+      return `Record ${d.referrer} as the wallet that referred ${a.referee.address}, once and for good (no instruction changes or removes the link); ${a.referee.address} pays the rent of the link's account, ${rent} SOL, which is never returned`;
+    }
     default:
       return `Brot Markets instruction ${B[type]}`;
   }

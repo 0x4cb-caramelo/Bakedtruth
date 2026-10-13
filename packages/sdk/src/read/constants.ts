@@ -100,6 +100,12 @@ export const LIMITS = {
 /** The sentence template a campaign is rendered with (D-j); the program sets it. */
 export const CAMPAIGN_TEMPLATE_VERSION = 1;
 
+/**
+ * A contest's two stages (constants.rs, Sprint 14): stage 1's hour for the re-read, stage 2's 48 hours for the admin.
+ * An unread stage 1 lapses `stage2` after its own deadline, the latest any stage 2 can end (review fix F3).
+ */
+export const CONTEST_SECONDS = { stage1: 3_600n, stage2: 172_800n } as const;
+
 /** Price rules (constants.rs, "Prices"; join_rules.rs). */
 export const PRICE_RULES = {
   /** Row 4: a price campaign's own feed within 0.5% at opening. */

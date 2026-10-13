@@ -5,8 +5,8 @@
  *          a signer's wallet: a join names its campaign, side, amount, guards and rents; an opening names its
  *          target in the feed's units, its deadline, its creator, what it pays, the SOL price below which the
  *          payment is refused, and the terms it binds (review, M3 and L7).
- * Version: 0.1.3 (an instruction the summary does not describe yet is refused by name)
- * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13)
+ * Version: 0.1.4 (Sprint 14 review fixes: the context reaches the other instructions; a link's rent is counted)
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 14 (lane L14B)
  *
  * The context (the campaign a join points at; an opening's price exponent and terms) is what the screen read
  * through its RPC. Without it the summary still says everything the bytes hold, in raw units.
@@ -24,12 +24,14 @@ import { bytesToHex, type Bytes } from "../read/bytes";
 import { Direction, ReaderKind, Side, VoidReason } from "../read/constants";
 import { feedSymbol } from "../read/feeds";
 import { formatBps, formatScaled, formatSol, formatUsdCents, formatUtc } from "../read/format";
-import { DATA_SIZE, describeOther } from "./summary-other";
+import { DATA_SIZE, describeOther, otherLamports } from "./summary-other";
 
 /** What the screen read, so the summary can name it in words. */
 export type SummaryContext = {
-  /** The campaign at each address a join points at, as read. */
+  /** The campaign at each address a join, or the admin's decision on a contest, points at, as read. */
   campaigns?: ReadonlyMap<string, Campaign>;
+  /** A referral link: the cluster's rent for its 96-byte account (`rentExemptMinimum`), which the referee pays. */
+  linkRent?: bigint;
   /** An opening on the price kind: the price account's exponent (`validateOpenCampaign`'s `priceExponent`). */
   priceExponent?: number;
   /** An opening: the config's terms, shown when their version is the one the opening binds. */
@@ -157,7 +159,10 @@ function describe(parsed: Parsed, ctx: SummaryContext, ix: Instruction): { text:
         lamports: 0n,
       };
     default:
-      return { text: describeOther(parsed.instructionType, a, d), lamports: 0n };
+      return {
+        text: describeOther(parsed.instructionType, a, d, ctx),
+        lamports: otherLamports(parsed.instructionType, ctx),
+      };
   }
 }
 
