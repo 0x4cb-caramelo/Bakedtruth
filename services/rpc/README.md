@@ -43,8 +43,9 @@ identity and its own provider account, so `/rpc` traffic can never starve the ke
 
 Then the upstream. Account answers are cut by owner (`src/accounts.ts`, D-i: there is no list of accounts): an
 account owned by the program, a reader's program (the Pyth receiver, SPL Token, Meteora DAMM v2, SPL Stake Pool,
-Vote) or the Sysvar program comes back whole; any other comes back with its owner and size but no data, so the
-creation box can still say whose it is. The program's ProgramData is the one exception by address (A-8): only as a
+Vote, Meteora DBC), a program that holds a token's symbol (Metaplex Token Metadata and Token-2022, which name a
+graduation curve on the site) or the Sysvar program comes back whole; any other comes back with its owner and size but
+no data, so the creation box can still say whose it is. The program's ProgramData is the one exception by address (A-8): only as a
 slice of offset 0 and at most 45 bytes.
 
 ## Answers

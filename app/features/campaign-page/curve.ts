@@ -2,11 +2,12 @@
  * Purpose: what the site shows of a Meteora DBC launch curve (`DbcGraduated`), read through the SDK's copy of the
  *          program's reader (owner first, then the layout): the quote raised against the curve's threshold, which is the
  *          campaign's target, the share filled, what is still missing, whether the curve has completed and the second the
- *          pool stamped it, and what the program would record if it read the pool now (`stamped_resolution`).
- * Version: 0.1.0
+ *          pool stamped it, and what the program would record if it read the pool now (`stamped_resolution`). And the
+ *          token the curve sells, its base mint, which the proof's details show with the pool.
+ * Version: 0.1.1 (the base mint)
  * Sprint:  the sixth kind's site, after 05 (docs/technical/meteora-readers-plan.md)
  */
-import { curveGraduated, readCurvePool, type FetchedAccount } from "@brot/sdk/read";
+import { curveGraduated, isRefusal, readCurveBaseMint, readCurvePool, type FetchedAccount } from "@brot/sdk/read";
 
 export type CurveFacts = {
   /** The quote raised so far (`quote_reserve`), in lamports. */
@@ -49,6 +50,17 @@ export function curveIfReadNow(facts: CurveFacts, deadlineAt: bigint, now: bigin
   if (!facts.graduated) return "NO";
   if (now <= deadlineAt) return "YES";
   return facts.completedAt !== null && facts.completedAt <= deadlineAt ? "YES" : "NO";
+}
+
+/** The token the curve sells (the pool's base mint), for the proof's details; `null` when the pool does not read. */
+export function curveMintOf(pool: FetchedAccount | null): string | null {
+  if (!pool) return null;
+  try {
+    return readCurveBaseMint(pool.owner, pool.data);
+  } catch (error) {
+    if (isRefusal(error)) return null;
+    throw error;
+  }
 }
 
 /** The share filled as the page writes it, never rounded up to look complete: "0.02%", "1.5%", "47.5%", "99.9%". */

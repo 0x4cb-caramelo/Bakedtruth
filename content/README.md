@@ -40,17 +40,25 @@ A name helps a creator find an account in the creation box (`/abrir`); it is not
 name still opens a campaign and shows its shortened address with an explorer link. Price accounts are named by Pyth's
 list, which the program compiles, never here.
 
+A Meteora launch curve (`curve`, the graduation kind) needs no entry to be named: the site reads its token's ticker
+from the token's own metadata and shows it with the pool's last four characters, `$TEST (…7Dny)`, or `Token (…7Dny)`
+when the ticker is missing, unprintable, longer than 10 characters or claims a reserved one: SOL, wrapped SOL, BROT
+and the dollar tokens (`RESERVED_TICKERS` in `packages/sdk/src/read/chain/token-symbol.ts`; the A-11 exception, TP
+§3.4.10). A reviewed entry drops the suffix: the title then reads `$BROT` alone, so review only a pool
+whose token the team knows.
+
 1. Read the account on an explorer: its owner is the kind's program (SPL Token for a burn, Meteora DAMM v2 for a lock,
-   SPL Stake Pool for a stake pool, Vote for a validator), and the name is the one its own project publishes.
+   SPL Stake Pool for a stake pool, Vote for a validator, Meteora DBC for a curve), and the name is the one its own
+   project publishes (for a curve, the token's ticker with its `$`).
 2. Add one entry to `account-names.json`:
 
    ```json
    { "address": "<base58 address>", "kind": "burn", "name": "<short public name>" }
    ```
 
-   `kind` is `burn`, `lock`, `pool` or `stake`; `name` is 1 to 32 plain characters (letters, digits, spaces, `.`,
-   `$`, `-`, `/`), never a link, an @handle or a person. The second reviewer confirms the name is a project's or an
-   organization's: a validator named after a person stays unnamed, since Git keeps every name for good and the code
-   cannot tell a person's name from a project's (the Sprint 08 legal review).
+   `kind` is `burn`, `lock`, `pool`, `stake` or `curve`; `name` is 1 to 32 plain characters (letters, digits, spaces,
+   `.`, `$`, `-`, `/`, and a `$` may come first), never a link, an @handle or a person. The second reviewer confirms
+   the name is a project's or an organization's: a validator named after a person stays unnamed, since Git keeps every
+   name for good and the code cannot tell a person's name from a project's (the Sprint 08 legal review).
 
 3. Open a pull request; a second person reviews the address and the name; merge; build and deploy the site.

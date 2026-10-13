@@ -9,37 +9,18 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Copy, Terminal } from "lucide-react";
+import { ChevronDown, Terminal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Segmented } from "@/components/ui/segmented";
 import { Outcome, recheck, type Recheck } from "@/lib/brot";
 import { CLUSTER, RPC_URL } from "@/lib/config";
 import { RECHECK } from "./copy";
+import { CopyButton } from "./copy-button";
 import { grouped, rawText } from "./format";
 import type { PageData } from "./load";
 import { READER, type Proof } from "./proof";
 import { DECODE, recheckCommands } from "./recheck-commands";
-
-function CopyButton({ text, label }: { text: string; label: string }) {
-  const [said, setSaid] = useState<string | null>(null);
-  const copy = () =>
-    navigator.clipboard
-      .writeText(text)
-      .then(() => setSaid(RECHECK.copied))
-      .catch(() => setSaid(RECHECK.copyBlocked));
-  return (
-    <span className="inline-flex items-center gap-2">
-      <Button variant="secondary" small onClick={copy} aria-label={`${RECHECK.copy} ${label}`}>
-        <Copy className="size-3.5" aria-hidden="true" />
-        {RECHECK.copy}
-      </Button>
-      <span aria-live="polite" className="text-xs text-muted">
-        {said}
-      </span>
-    </span>
-  );
-}
 
 export function RecheckPanel({ data, proof }: { data: PageData; proof: Proof }) {
   const c = data.campaign;

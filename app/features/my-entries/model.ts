@@ -3,13 +3,14 @@
  *          with its sides and amounts, its public state (the SDK's, against chain time), what the entry returns (an
  *          estimate while it can move, the exact amount once final), what it received (from the wallet's settlement
  *          events only), and, for the campaign's creator, the 1% and any prize or opening fee returned. The same
- *          rules as the campaign page (campaign-page/states.ts), so both screens say the same thing.
- * Version: 0.1.0
- * Sprint:  12 (site: my entries and campaign states)
+ *          rules as the campaign page (campaign-page/states.ts), so both screens say the same thing. Each row keeps its
+ *          sentence's fields, so the screen names a graduation curve by its ticker once read (curve-names.tsx).
+ * Version: 0.1.1 (the sentence's fields)
+ * Sprint:  12 (site: my entries and campaign states); the sixth kind's site
  */
 import { bytesToHex, Direction, ReaderKind, type DecodedEvent } from "@brot/sdk/read";
 
-import { sentenceOf } from "../campaigns/sentence";
+import { sentenceOf, type SentenceInput } from "../campaigns/sentence";
 import { stateChip, type ChipState } from "../campaign-page/format";
 import { openerViewOf, pageStateOf, yourPayoutOf, type OpenerView, type YourPayout } from "../campaign-page/states";
 import type { CampaignRead, MyEntriesData } from "./load";
@@ -20,6 +21,8 @@ export type Row = {
   /** The u64 id for the campaign page's link; `null` when the account is closed and no opening event was read. */
   id: string | null;
   title: string;
+  /** The fields `title` is written from, so the screen can name a graduation curve once it is read. */
+  sentence: SentenceInput | null;
   /** The chip, or `closedAccount` once the program closed the campaign after every payout. */
   state: ChipState | "closedAccount";
   sides: Put;
@@ -36,10 +39,11 @@ export type Summary = { rows: Row[]; received: bigint; waiting: bigint };
 
 type Opened = Extract<DecodedEvent, { name: "CampaignOpened" }>;
 
-function titleOf(read: CampaignRead, opened: Opened | undefined): string {
+/** The sentence's fields, from the campaign or its opening event; `null` when neither was read. */
+function sentenceInputOf(read: CampaignRead, opened: Opened | undefined): SentenceInput | null {
   const src = read.campaign ?? opened?.data;
-  if (!src) return `Campaign ${read.address.slice(0, 4)}…${read.address.slice(-4)}`;
-  return sentenceOf({
+  if (!src) return null;
+  return {
     kind: ReaderKind[src.kind],
     direction: Direction[src.direction],
     feedIdHex: bytesToHex(src.feedId),
@@ -47,8 +51,11 @@ function titleOf(read: CampaignRead, opened: Opened | undefined): string {
     priceExponent: src.priceExponent,
     metricAccount: src.metricAccount,
     epoch: src.epoch.toString(),
-  });
+  };
 }
+
+const titleOf = (address: string, sentence: SentenceInput | null): string =>
+  sentence ? sentenceOf(sentence) : `Campaign ${address.slice(0, 4)}…${address.slice(-4)}`;
 
 function rowOf(
   read: CampaignRead,
@@ -64,7 +71,8 @@ function rowOf(
   const sides = entry ? { yes: entry.amountYes, no: entry.amountNo } : (put ?? { yes: 0n, no: 0n });
   const c = read.campaign;
   const isCreator = (c?.creator ?? opened?.data.creator) === wallet;
-  const base = { campaign: read.address, title: titleOf(read, opened), sides, received, isCreator };
+  const sentence = sentenceInputOf(read, opened);
+  const base = { campaign: read.address, title: titleOf(read.address, sentence), sentence, sides, received, isCreator };
   if (!c || !read.view) {
     const payout: YourPayout = received.entrySettled
       ? { kind: "received", amount: received.asBaker }

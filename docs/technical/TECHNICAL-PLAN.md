@@ -1,6 +1,6 @@
 # Brot Markets — Technical Plan
 
-**Version:** 0.1.9 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
+**Version:** 0.1.10 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
 todo em ingles") from the architecture proposal 0.4 the founder approved that day ("sim para todos") and from BP
 v0.0.4, merged into `main` with PR #35 on 2026-10-08; v0.1.1 aligns it with what Sprint 02 built and measured
 (`docs/sprints/sprint-02-pot-core.md`, "TP to align"); v0.1.2 aligns it with what Sprint 03 built and to the founder's
@@ -12,8 +12,10 @@ the founder's answers to Sprint 13's twelve questions, given after its merge (§
 §13, §14.2); v0.1.7 records what Sprint 19 built (§3.6, the creation box), what its reviews deferred (§7.5) and its
 privacy review (§8.3); v0.1.8 adds the sixth kind, `DbcGraduated`, a Meteora DBC curve's graduation (§3.4.6, §3.4.8,
 §3.4.10; `docs/technical/meteora-readers-plan.md`); v0.1.9 counts six kinds where the plan still said five and
-records the sixth kind's site (§3.6: the creation box and the campaign page) · **Date:**
-2026-10-12 · **Supersedes:** v0.0.1 of 2026-10-05,
+records the sixth kind's site (§3.6: the creation box and the campaign page); v0.1.10 records A-11's one exception,
+approved by the founder on 2026-10-13: a graduation curve named by its token's ticker (§2 A-11, §3.4.10 "Display
+names", §3.5 the relay, the content table)
+· **Date:** 2026-10-13 · **Supersedes:** v0.0.1 of 2026-10-05,
 written in Portuguese, approved by the founder ("docs aprovados, podemos dar início"). Its last text, with §8.1, is in
 git history at commit `2089b81` (`git show 2089b81:docs/technical/TECHNICAL-PLAN.md`), the last commit that changed it;
 `0b40554`, the `main` before v0.1.0, holds the same text; tag `sprint-01` holds it before §8.1 was added
@@ -241,7 +243,10 @@ program before the Sprint 04 randomized money test passes.
 - **A-10** No creation rule lives only in the site: every rule of §3.4.10 is checked in `user_open_campaign`; the SDK
   mirrors them for the preview, and a test feeds each refused case straight to the program.
 - **A-11** No creator-supplied text is stored or shown. Names come from `content/account-names.json` or the pinned Pyth
-  feed list, never from token metadata the token's owner can change.
+  feed list, never from token metadata the token's owner can change. **One exception, the graduation kind's curve**
+  (`DbcGraduated`, approved by the founder on 2026-10-13): it is named by the ticker its token's metadata stores, cleaned
+  and always beside the pool's last four characters, `$TEST (…7Dny)`, or `Token (…7Dny)` when there is none to show;
+  only a reviewed pool shows its name alone (§3.4.10, "Display names"). Nothing is stored, and the program never reads it.
 
 **Data contracts that prevent desync [DP]** (proposal §2.3). Each contract has one source; consumers derive from it; a
 check fails when they drift.
@@ -823,6 +828,30 @@ page lives at `/c/{id}`.
 **Display names (A-11).** `content/account-names.json` holds names and explorer links of accounts two people reviewed.
 It is not a gate (D-i): an unnamed account can still be used, and shows its shortened address.
 
+**A-11's exception: a graduation curve's ticker (2026-10-13) [F].** A Meteora launch curve is a brand-new token by
+nature, so no team could review its name before a campaign on it opens, and a title like "Meteora launch curve 12uL…7Dny
+raises its full 85 SOL?" names nothing a baker recognises. The request of 2026-10-13, approved by the founder the
+same day (`session-log/2026-10-13-ticker-da-curva-e-botoes-de-lado.md`): any curve any creator pastes is named by its
+token's ticker, automatically. The site reads it for the screens only (the program never does, and nothing is
+stored): the pool's `base_mint` (byte 136 of the `VirtualPool`), then the TokenMetadata extension of a Token-2022 mint
+or, for a classic mint, its Metaplex Token Metadata account (`["metadata", metaqbx…, mint]`), each read owner first
+through the SDK (`packages/sdk/src/read/chain/token-symbol.ts`, whose `tickerOf` also says what of a symbol a screen
+may print, the same rule for the site and the app). The rule (`app/features/campaigns/curve-name.ts`):
+
+| The pool | Its name in every title, card, row and rule |
+|---|---|
+| In `content/account-names.json`, kind `curve` (two people reviewed it) | The reviewed name alone: `$BROT` |
+| Any other, its ticker printable | `$TICKER (…7Dny)`, the pool's last four characters always beside it |
+| Any other, no ticker to show | `Token (…7Dny)` |
+
+A ticker is shown only after its control characters and one leading `$` are dropped, and only as 1 to 10 ASCII letters
+and digits: a byte past ASCII (an emoji, a look-alike letter, a direction mark) or a longer text shows nothing. A
+ticker that claims SOL, WSOL, USDC, USDT or BROT, in any case, shows nothing either. The suffix is the anti-spoofing
+guard: two tokens may share a ticker, never a pool. The pool's address and the token's mint (its CA) stay whole in the
+campaign page's proof details, each linked to the explorer with a copy button. Written risk: a token's update
+authority may change its symbol after the campaign opens; the site reads it again on each page view, and the suffix
+and the proof's addresses never change. The relay serves the two owners whole (§3.5).
+
 **What the checks do not stop [FD, written risk]** (P1 §4.2; P4 §4.3; proposal §2.4.7). Whoever controls the measured
 thing can push it: a token team can burn its own token, a pool owner can lock liquidity, a staker can move stake. With
 no list, any token qualifies, including a worthless one the creator can burn for free. The creator pays US$500, of
@@ -1295,7 +1324,8 @@ from a browser or the app to a paid provider.
   and `/rpc` traffic can never starve the keeper.
 - **Reads:** the program's accounts, the caller's balance, the Pyth feeds (SOL/USD included) and the metric accounts the
   creation preview needs. With no list (D-i), a metric read is allowed by owner program: the relay returns an account
-  only if one of the six readers accepts its owner. Methods: `getLatestBlockhash`, `getBlockHeight`,
+  only if one of the six readers accepts its owner, or if it holds a token's symbol (Metaplex Token Metadata and
+  Token-2022, since 2026-10-13: a graduation curve's ticker, A-11's exception). Methods: `getLatestBlockhash`, `getBlockHeight`,
   `getSignatureStatuses`, `getRecentPrioritizationFees`, balances. The final allowlist comes from a trace of the real
   client in Sprint 11; the new client polls signature status instead of opening a WebSocket, which today's client does
   (`app/lib/hooks.ts:228`) **[F]**. The trace, taken on 2026-10-10 from the site's tests and its web smoke, is
@@ -1829,7 +1859,7 @@ sign-in challenges, if H1 is ever approved, is a separate, backed-up file owned 
 
 | File | Holds | Read by | Rule |
 |---|---|---|---|
-| `content/account-names.json` | Display names and explorer links of accounts that two people reviewed | Indexer (`/api/v1/names`), site, app | Not a gate (D-i): an unnamed account can still be used and shows its shortened address (A-11). Never token metadata the token's owner can change |
+| `content/account-names.json` | Display names and explorer links of accounts that two people reviewed (kinds `burn`, `lock`, `pool`, `stake`, `curve`) | Indexer (`/api/v1/names`), site, app | Not a gate (D-i): an unnamed account can still be used and shows its shortened address (A-11). Never token metadata the token's owner can change, but for a graduation curve's ticker, always beside its pool's last characters (A-11's exception, §3.4.10) |
 | `content/partners.json` | Which campaign belongs to which launch partner; the sealed entry's name and seal; highlight dates | Indexer (ranking, partner report), site | A team key opens each partner campaign and stays its `creator` with `creator_share_bps = 0` (P-3) |
 | `content/void-log/` | The public text of each void, next to the on-chain `VoidReason` | Site (register) | Every void records its reason (P4 §4.6; BR-45) |
 | `content/powers.md` | Who holds which key and power | Site (register) | BR-41; P4 §4.2 |

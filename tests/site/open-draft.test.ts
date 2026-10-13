@@ -62,8 +62,9 @@ describe("open campaign box: templates and slots", () => {
     expect(at("StakePoolTvlAtLeast", "431880500000000", "Above", null)).toBe(
       "Stake pool So11…1112 holds at least 431,880.5 SOL at the start of epoch (epoch)",
     );
-    // The sixth: a Meteora launch curve, its target the curve's threshold in SOL.
-    expect(at("DbcGraduated", "85000000000")).toBe("Meteora launch curve So11…1112 raises its full 85 SOL");
+    // The sixth: a Meteora launch curve, its target the curve's threshold in SOL. Never named by its address alone:
+    // until its token's ticker is read, "Token" and the pool's last four characters (curve-name.ts).
+    expect(at("DbcGraduated", "85000000000")).toBe("Meteora launch curve Token (…1112) raises its full 85 SOL");
     expect(TEMPLATES.map((t) => t.readerKind)).toEqual([0, 1, 2, 3, 4, 5]);
     expect(templateById("validator-stake")?.opens).toBe("after-devnet-yes");
     // Every build but mainnet's opens it; the tests run as devnet's site.

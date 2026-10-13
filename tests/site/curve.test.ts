@@ -3,8 +3,8 @@
  *          DBC pool captured from mainnet: the campaign page's proof (the SOL raised against the curve's threshold, the
  *          share filled, what is still missing, "if read now" by the pool's own stamp before and after the deadline, a
  *          pool the reader refuses shown as such), the share as the page writes it, a card's reading and the sentence
- *          every page shows. Filter: `bun test tests/ -t "a graduation campaign on the site"`.
- * Version: 0.1.0
+ *          every page shows, its curve named by ticker. Filter: `bun test tests/ -t "a graduation campaign on the site"`.
+ * Version: 0.1.1 (the curve named by its ticker, never its address)
  * Sprint:  the sixth kind's site, after 05 (docs/technical/meteora-readers-plan.md)
  */
 import { describe, expect, test } from "bun:test";
@@ -130,7 +130,10 @@ describe("a graduation campaign on the site", () => {
       priceExponent: 0,
       metricAccount: c.metric,
     };
-    expect(sentenceOf(input)).toBe("Meteora launch curve mxGZ…P8S6 raises its full 85 SOL");
-    expect(questionOf(input)).toBe("Meteora launch curve mxGZ…P8S6 raises its full 85 SOL?");
+    // The curve by its token's ticker and the pool's last characters, or by "Token" until that is read; never its address.
+    expect(sentenceOf(input)).toBe("Meteora launch curve Token (…P8S6) raises its full 85 SOL");
+    expect(questionOf({ ...input, accountName: "$WIF (…P8S6)" })).toBe(
+      "Meteora launch curve $WIF (…P8S6) raises its full 85 SOL?",
+    );
   });
 });

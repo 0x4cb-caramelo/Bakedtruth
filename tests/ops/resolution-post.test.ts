@@ -3,21 +3,28 @@
  *          the program in LiteSVM behind the recording RPC through whole cycles, the post names the campaign, the
  *          result the program recorded, the value read and the target, the review window or the void's public reason,
  *          and the account anyone can re-check. It refuses a campaign with no result, promises no payout and no time,
- *          posts nothing, and fits X's 280 characters as X counts them (a link is 23). Filter: `bun test tests/ -t "resolution post"`.
- * Version: 0.2.0 (the Sprint 13 reviews: a price NO says why, one link, the devnet line before it, a 20-digit id)
- * Sprint:  13 (site: ranking, notices and copy)
+ *          posts nothing, and fits X's 280 characters as X counts them (a link is 23). A graduation campaign's curve is
+ *          named as the site names it. Filter: `bun test tests/ -t "resolution post"`.
+ * Version: 0.2.1 (the curve's name; 0.2.0, the Sprint 13 reviews: a price NO says why, one link, a 20-digit id)
+ * Sprint:  13 (site: ranking, notices and copy); the sixth kind's site
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { createSolanaRpc } from "@solana/kit";
+import { address, createSolanaRpc, type Address } from "@solana/kit";
 
-import { Side, Status, VoidReason } from "@brot/sdk/read";
+import { decodeCampaign, Outcome, ReaderKind, Side, Status, VoidReason } from "@brot/sdk/read";
 
 import { POST_LIMIT, readForPost, resolutionPost, xLength } from "../../scripts/team/resolution-post";
 import { openingWorld, type OpeningWorld } from "../brot/opening";
+import { setFixture } from "../brot/readers";
+import { campaignOn } from "../brot/resolve-support";
 import { runCycle, SOL } from "../site/cycle-run";
 import { startFakeChain, type FakeChain } from "../site/fake-chain";
 import { injectState } from "../site/state-world";
+import { rawOf } from "../site/support";
+
+/** The devnet demo pool, reviewed as "$BROT" in content/account-names.json. */
+const DEMO_POOL = "12uLN2texEDbadM4WzJm6Dry8Quc8qFpDQEwhSdi7Dny";
 
 let w: OpeningWorld;
 let chain: FakeChain;
@@ -96,6 +103,23 @@ describe("resolution post", () => {
     );
     expect(inReview).toContain("Review ends ");
     expect(xLength(inReview)).toBeLessThanOrEqual(POST_LIMIT);
+  });
+
+  test("a graduation campaign's post names its curve as the site does, never by its address alone", async () => {
+    const rpc = createSolanaRpc(chain.url);
+    const idOf = (c: { campaign: Address }) => decodeCampaign(rawOf(w, c.campaign)).id;
+    // The devnet demo pool is reviewed in content/account-names.json: its name, with nothing read.
+    const demo = await campaignOn(w, ReaderKind.DbcGraduated, address(DEMO_POOL), 85n * SOL);
+    expect((await readForPost(rpc, idOf(demo))).curveName).toBe("$BROT");
+    // Any other pool: its token's ticker read now, here none to show, so "Token" with the pool's last characters.
+    const pool = setFixture(w.client, "dbc-pool-stage0").address;
+    const read = await readForPost(rpc, idOf(await campaignOn(w, ReaderKind.DbcGraduated, pool, 85n * SOL)));
+    expect(read.curveName).toBe("Token (…P8S6)");
+    const post = resolutionPost({ ...read.campaign, outcome: Outcome.No }, read.address, read.chain, {
+      cluster: "devnet",
+      curveName: "$TEST (…P8S6)",
+    });
+    expect(post).toContain("Meteora launch curve $TEST (…P8S6) raises its full 85 SOL");
   });
 
   test("a campaign whose result was not read is refused; the template posts nothing by itself", async () => {
