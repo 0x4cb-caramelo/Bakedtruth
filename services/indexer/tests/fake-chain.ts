@@ -4,8 +4,8 @@
  *          its event authority, so the SDK's decoder reads them under its rules), and a Kit-shaped scripted RPC that
  *          lists and returns them, with what the ingest must survive: pages shorter than asked, a node that ignores
  *          `until`, a transaction that does not read back, a call that fails, one the program's listing leaves out,
- *          a failed one.
- * Version: 0.1.0
+ *          a failed one. Since slice 3, a resolution, a finalization and a late tally too, for the points rule.
+ * Version: 0.2.0 (slice 3: CampaignResolved, CampaignFinalized, LateTallied; an opening's kind and creator)
  * Sprint:  08 (indexer, API, relay and points)
  */
 import { getBase58Decoder } from "@solana/kit";
@@ -25,11 +25,14 @@ const ENCODERS: Record<string, { encode(value: never): Iterable<number> }> = {
   CampaignOpened: T.getCampaignOpenedEncoder(),
   EntryAdded: T.getEntryAddedEncoder(),
   CampaignClosed: T.getCampaignClosedEncoder(),
+  CampaignResolved: T.getCampaignResolvedEncoder(),
+  CampaignFinalized: T.getCampaignFinalizedEncoder(),
+  LateTallied: T.getLateTalliedEncoder(),
 };
 export type FakeEvent = { name: keyof typeof ENCODERS; data: Record<string, unknown> };
 
-/** A `CampaignOpened` at seq 0 for a paid price campaign at `campaign`. */
-export const opened = (campaign: string): FakeEvent => ({
+/** A `CampaignOpened` at seq 0 for a paid price campaign at `campaign`, unless `over` says otherwise. */
+export const opened = (campaign: string, over: Record<string, unknown> = {}): FakeEvent => ({
   name: "CampaignOpened",
   data: {
     ...{ campaign, seq: 0n, id: 7n, creator: CREATOR, creatorIsTeam: false, kind: T.ReaderKind.PriceTouch },
@@ -39,6 +42,7 @@ export const opened = (campaign: string): FakeEvent => ({
     ...{ openingPaidLamports: 5n * SOL, openingPrice: 10_000_000_000n, openingPriceExponent: -8 },
     ...{ openingPricePublishTime: 1_799_999_990n, prizeLamports: 4_500_000_000n, openingFeeLamports: 500_000_000n },
     epoch: 0n,
+    ...over,
   },
 });
 
@@ -48,6 +52,35 @@ export const entry = (campaign: string, seq: bigint, baker: string, side: 0 | 1,
     name: "EntryAdded",
     data: { campaign, seq, baker, side, isFirst: true, amount, poolYes: pools[0], poolNo: pools[1] },
   }) as FakeEvent;
+
+/** The program's word on `campaign`: `outcome` 1 is YES, 2 NO, 3 Void (Outcome); in review until finalized. */
+export const resolved = (
+  campaign: string,
+  seq: bigint,
+  outcome: number,
+  kind = T.ReaderKind.PriceTouch,
+): FakeEvent => ({
+  name: "CampaignResolved",
+  data: {
+    ...{ campaign, seq, kind, outcome, voidReason: T.VoidReason.None, metLate: false, observedValue: 0n },
+    ...{ readAccount: ADDR(9), publishTime: 0n, postedSlot: 0n, resolvedAt: 0n, reviewEndsAt: 0n, slot: 0n, epoch: 0n },
+  },
+});
+
+/** Finalize's mode: `settleMode` 1 is Split, 2 OneSided, 3 Refund (SettleMode). */
+export const finalized = (campaign: string, seq: bigint, settleMode: number): FakeEvent => ({
+  name: "CampaignFinalized",
+  data: {
+    ...{ campaign, seq, settleMode, winningTotal: 0n, losingTotal: 0n, refundedLate: 0n, feeTotal: 0n },
+    ...{ fromPot: 0n, fromFee: 0n, distributable: 0n },
+  },
+});
+
+/** A baker's joins tallied as late: those lamports come back whole. */
+export const lateTallied = (campaign: string, seq: bigint, baker: string, yes: bigint, no: bigint): FakeEvent => ({
+  name: "LateTallied",
+  data: { campaign, seq, baker, joinsClosed: 1, lateYesAdded: yes, lateNoAdded: no },
+});
 
 export const closed = (campaign: string, seq: bigint): FakeEvent => ({
   name: "CampaignClosed",
