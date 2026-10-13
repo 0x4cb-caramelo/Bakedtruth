@@ -3,7 +3,7 @@
  *          reserved credit, and "never send to a destination the program did not fix"): what each status plans, the
  *          YES price cut-off that holds the tally until the window ends, the joins chunked per tally, the steps the
  *          program would refuse never planned, every destination a stored field (and the built instruction's account
- *          slot the same one), the sweep's minimum, the backoff and the daily clock. No cluster.
+ *          slot the same one), the sweep's minimum and the daily clock. No cluster.
  * Version: 0.1.0
  * Sprint:  07 carry-over (Sprint 06 DoD: the keeper's settlement)
  */
@@ -11,7 +11,7 @@ import { describe, expect, test } from "bun:test";
 import { AccountRole } from "@solana/kit";
 import { Outcome, ReaderKind, SettleMode, Status } from "@brot/sdk/read";
 
-import { Backoff, DailyClock } from "../src/backoff";
+import { DailyClock } from "../src/backoff";
 import { buildStep } from "../src/settle";
 import { JOINS_PER_TALLY, pendingOf, planCampaign, planSweep, type Step } from "../src/settle-plan";
 import { at, entryAt, KEY } from "./kit/accounts";
@@ -155,7 +155,7 @@ describe("destinations", () => {
   });
 });
 
-describe("planSweep, pendingOf and Backoff", () => {
+describe("planSweep and pendingOf", () => {
   test("the sweep waits for a surplus above the rent of at least the minimum", () => {
     expect(planSweep(null, 10n, 0n, OTHER)).toBeNull();
     expect(planSweep(10n, 10n, 0n, OTHER)).toBeNull();
@@ -182,18 +182,5 @@ describe("planSweep, pendingOf and Backoff", () => {
       close: 1,
       reserved: 1,
     });
-  });
-
-  test("a failing step waits one period, doubled per failure up to the cap; a success clears it", () => {
-    const backoff = new Backoff(100, 350);
-    backoff.failed("k", 0);
-    expect([backoff.ready("k", 99), backoff.ready("k", 100)]).toEqual([false, true]);
-    backoff.failed("k", 100);
-    expect([backoff.ready("k", 299), backoff.ready("k", 300)]).toEqual([false, true]);
-    backoff.failed("k", 300);
-    backoff.failed("k", 300);
-    expect([backoff.ready("k", 649), backoff.ready("k", 650)]).toEqual([false, true]); // capped at 350
-    backoff.succeeded("k");
-    expect(backoff.ready("k", 0)).toBe(true);
   });
 });
