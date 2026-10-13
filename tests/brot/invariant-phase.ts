@@ -3,8 +3,8 @@
  *          an operation the campaign's phase refuses, so the run would never reach settlement or close; the
  *          phase-directed draw names the operation that moves a campaign on, most of the time: the resolution, the
  *          tally, the window's acts or a contest, the contest's stages and the lapse, the payouts and the close.
- * Version: 0.1.1 (Sprint 14: the tally, the contest, the re-read, the admin's decision and the lapse; review fix F3,
- *          the lapse of an unread stage 1 and the clock run to its edge)
+ * Version: 0.1.2 (Sprint 14: the tally, the contest, the re-read, the admin's decision and the lapse; review fix F3,
+ *          the lapse of an unread stage 1 and the clock run to its edge; D2: the team's escalation, stage 1's edge)
  * Sprint:  04 (closure review); 14 (lane INV14; the uniform draw moved here from invariant-settle.ts)
  */
 import { type Harness, type Rng, clock } from "./invariant-harness";
@@ -53,9 +53,14 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
         // Stage 2's act is refused at stage 1 (WrongContestStage), and so is the lapse before its time (ContestNotLapsed).
         if (x < 0.08) return { k: "decide", c: index, decision: 0, reason: 0, signer: "admin" };
         if (x < 0.12) return { k: "finalize", c: index };
-        // Now and then the keeper is down: the clock runs to the lapse's edge (a later re-read adds no time).
+        // D2: a team key sends it to stage 2, until stage 1's deadline (ContestDeadlinePassed from it on).
+        if (x < 0.18) return { k: "contest", c: index, member: r.next() < 0.1 ? -1 : member };
+        // A matching re-read pays only from stage 1's deadline on (RereadBeforeTimelock before it): the clock runs to
+        // that edge; now and then the keeper is down, and it runs to the lapse's edge (a later re-read adds no time).
+        const wait = c.contestEndsAt - t + r.pick([-1n, 0n, 1n]);
+        if (x < 0.32 && wait > 0n) return { k: "advance", seconds: wait };
         const edge = lapse - t + r.pick([-1n, 0n, 1n]);
-        if (x < 0.17 && edge > 0n) return { k: "advance", seconds: edge };
+        if (x < 0.37 && edge > 0n) return { k: "advance", seconds: edge };
         // A proof up to 90 s old: past 60 s the reader refuses it, and so does the re-read (review fix F4).
         const variant = r.pick(["same", "same", "moved", "none", "moved"] as const);
         return { k: "reread", c: index, variant, back: r.big(0n, 90n) };
@@ -67,9 +72,11 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
       }
       if (x < 0.25) return { k: "decide", c: index, decision: 0, reason: 0, signer: "admin" };
       if (x < 0.5) return { k: "decide", c: index, decision: 1, reason: r.pick(TEAM_REASONS), signer: "admin" };
-      // Before the deadline the lapse is refused (ContestNotLapsed), and so is a second re-read (WrongContestStage).
+      // Before the deadline the lapse is refused (ContestNotLapsed), and so are a second re-read and a second
+      // escalation (WrongContestStage).
       if (x < 0.57) return { k: "finalize", c: index };
       if (x < 0.62) return { k: "reread", c: index, variant: "same", back: 0n };
+      if (x < 0.65) return { k: "contest", c: index, member };
       // Stage 2's edges: a second before the deadline the admin still decides; at it, only the lapse remains.
       return { k: "advance", seconds: c.contestEndsAt - t + r.pick([-1n, 0n, 1n]) };
     }

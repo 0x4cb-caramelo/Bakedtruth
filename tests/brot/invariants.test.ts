@@ -3,7 +3,7 @@
  *          the whole lifecycle, and I1 to I15, the campaign's record (X0.4) and every referral link are checked
  *          after each one against the reference model. Needs the program binary (target/deploy/brot_markets.so).
  *          `INVARIANT_SEED` and `INVARIANT_OPERATIONS` replay another seed or length without editing the file.
- * Version: 0.1.0 (Sprint 14: the contest, the re-read, the admin's decision, the lapse, the tally, the links)
+ * Version: 0.1.1 (Sprint 14: the contest, the re-read, the admin's decision, the lapse, the tally, the links; D2)
  * Sprint:  04 (contract freeze, lane E); 14 (lane INV14)
  */
 import { describe, expect, test } from "bun:test";
@@ -21,8 +21,8 @@ import { balance } from "./setup";
 export const SEED = Number(process.env.INVARIANT_SEED ?? 0x0b_ad_c0de);
 /**
  * The number of operations drawn from the seed: 1,200 until Sprint 14, 2,000 since, because a contest adds three
- * steps to a campaign's life and the fixed seed should take every exit from it (a same re-read, the admin's confirm
- * and void, the lapse) within one run.
+ * steps to a campaign's life and the fixed seed should take every exit from it (a same re-read once stage 1's 24 hours
+ * are over, the team's escalation, the admin's confirm and void, the lapse) within one run.
  */
 export const OPERATIONS = Number(process.env.INVARIANT_OPERATIONS ?? 2_000);
 

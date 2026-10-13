@@ -36,7 +36,7 @@ export function takeSnapshot(c: ModelCampaign) {
 
 export const inWindow = (c: ModelCampaign, t: bigint) => t < c.reviewEndsAt;
 
-/** Stage 2's 48 hours (constants.rs): from `min(re-read, stage 1's deadline)` (review fix F3, the 55-hour bound). */
+/** Stage 2's 48 hours (constants.rs): from `min(re-read, stage 1's deadline)` (review fix F3, the 78-hour bound). */
 export const STAGE2_SECONDS = 48n * 3_600n;
 export const stage2EndsAt = (c: ModelCampaign, t: bigint) =>
   (t < c.contestEndsAt ? t : c.contestEndsAt) + STAGE2_SECONDS;

@@ -8,13 +8,12 @@
  */
 import { type Address } from "@solana/kit";
 
-import { clock, linkOf, type Harness, type Plan, type Rng } from "./invariant-harness";
+import { clock, field, linkOf, type Harness, type Plan, type Rng } from "./invariant-harness";
 import { withSlot } from "./instructions";
 import { userLinkReferrerIx } from "./instructions-14-15";
 import type { BrotErrorName } from "./errors";
 import { systemTransferIx } from "./join-campaign-support";
 import * as P from "./program";
-import { field } from "./invariant-contest";
 import { decode } from "./layouts";
 import { REFERRAL_LINK } from "./structs-14-15";
 

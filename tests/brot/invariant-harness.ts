@@ -2,7 +2,8 @@
  * Purpose: the world of the randomized test: a seeded generator, the wallets, the price accounts the
  *          operations refresh, the reference model of every campaign and of every referral link, and the chain
  *          view the invariant checks read. Operations live in invariant-ops.ts and the files it dispatches to.
- * Version: 0.1.0 (Sprint 14: the referees and their links, cached addresses, the config read once per check)
+ * Version: 0.1.1 (Sprint 14: the referees and their links, cached addresses, the config read once per check; the
+ *          event-field checks, moved from invariant-contest.ts for D2)
  * Sprint:  04 (contract freeze, lane E); 14 (lane INV14)
  */
 import { type Address, type KeyPairSigner, type Instruction } from "@solana/kit";
@@ -174,3 +175,15 @@ export function refreshSol(w: World) {
 
 /** The opening's price: SOL/USD minus its confidence (TP section 3.4.16). */
 export const OPENING_PRICE = SOL_PRICE - SOL_CONF;
+
+/** The event field `snake` (the kit's layout) or `camel` (the SDK's decoder), whichever the event carries. */
+export const field = (e: Event, snake: string, camel = snake) => e.data[snake] ?? e.data[camel];
+
+/** Throws unless each field of the event holds its expected value (`[value, camelCase name]`). */
+export function expectFields(e: Event, want: Record<string, [unknown, string?]>) {
+  for (const [snake, [value, camel]] of Object.entries(want)) {
+    const have = field(e, snake, camel);
+    const equal = typeof have === "boolean" ? Number(have) === value : have === value;
+    if (!equal) throw new Error(`${e.name}.${snake} is ${have}, the model expects ${value}`);
+  }
+}
