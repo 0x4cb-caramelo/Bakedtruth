@@ -14,4 +14,6 @@ pub mod join_record;
 pub mod join_rules;
 mod join_slots;
 pub mod join_tally;
+pub mod sealed_charge;
+pub mod sealed_fee_account;
 pub mod sponsor_join_campaign;
