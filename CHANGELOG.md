@@ -1021,7 +1021,8 @@ recomendado (1a a 12a).
   Quem não tem carteira vê o aviso logo depois da carga. Conferido: no modo de desenvolvimento, as oito páginas
   hidratam sem diferença; no build de produção com as configurações do servidor, `/dev0x`, a página da campanha e
   `/fees` não dão erro de página; e "Connect" abre a lista com a Solflare e a Phantom. Teste novo:
-  `tests/site/wallet-render.test.ts`, que falha no código anterior. Vale no ar a partir da próxima versão publicada.
+  `tests/site/wallet-render.test.ts`, que falha no código anterior. No ar desde as 05h33min49s UTC de 13/10/2026, na
+  versão `353c2a3a1b90`: as páginas no ar já não dão o erro.
 - **O ranking da API perdia mais da metade do histórico para o limite da RPC pública** (13/10/2026, achado na
   publicação do ticker; `session-log/2026-10-13-publicacao-do-ticker-no-dev0x.md`). A RPC pública do devnet aceita dez
   `getTransaction` a cada dez segundos por endereço (`x-ratelimit-method-limit: 10`) e responde 429 ao resto. O
@@ -1030,8 +1031,9 @@ recomendado (1a a 12a).
   dos 53 eventos que conta. Agora um 429 não gasta tentativa: a transação guarda o lugar e a rodada para de ler até a
   próxima (`services/api/src/history.ts` 0.3.0). Qualquer outra recusa continua contando. Contra a RPC pública, a
   leitura completa terminou em nove rodadas, uns dois minutos e quinze segundos, com os 53 eventos e nenhuma pulada.
-  Testes: três novos em `services/api/tests/history.test.ts`; os dois do 429 falham no código anterior. Vale no
-  servidor a partir da próxima versão publicada.
+  Testes: três novos em `services/api/tests/history.test.ts`; os dois do 429 falham no código anterior. No ar desde as
+  05h33min49s UTC de 13/10/2026, na versão `353c2a3a1b90`: depois do reinício, o ranking ficou completo em 2min07s,
+  com os 53 eventos e nenhuma transação pulada.
 - **`CampaignFinalized` também na confirmação e na anulação pela equipe** (9/10/2026; achado da revisão da Sprint
   05, feito como PR à parte a pedido do Ronaldo). O plano técnico (§3.4.3, §3.4.14) promete que `team_confirm_result`
   e `team_void_campaign` emitem o próprio evento e depois `CampaignFinalized`; o programa rodava o snapshot e emitia só
