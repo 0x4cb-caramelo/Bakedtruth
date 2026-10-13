@@ -1,15 +1,19 @@
 /**
  * Purpose: what the summary says for the instructions that move no money out of a signer's wallet (the
  *          admin, team and settlement instructions), each with the values it signs: the new admin, the fee
- *          recipient, the team keys, every creation parameter. Also the exact data size of every instruction,
- *          so a summary never describes bytes the program would refuse as `BadInstructionData`.
- * Version: 0.1.3 (no size, so never trusted, for the scaffold's five stubs until their lanes)
- * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13)
+ *          recipient, the team keys, every creation parameter, the admin's decision on a contest. Also the exact
+ *          data size of every instruction, so a summary never describes bytes the program would refuse as
+ *          `BadInstructionData`.
+ * Version: 0.1.4 (the contest's re-read and the admin's decision, Sprint 14 lane L14B; the other stubs still have
+ *          no size, so they are never trusted until their lanes)
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 14 (lane L14B)
  */
 import * as G from "../idl/generated/instructions";
 import { BrotMarketsInstruction as B } from "../idl/generated/programs";
 import { bytesToHex, type Bytes } from "../read/bytes";
+import { ContestDecision, VoidReason } from "../read/constants";
 import { formatBps, formatSol } from "../read/format";
+import { TEAM_VOID_REASONS } from "./decide-contest";
 
 /**
  * Each instruction's data size, discriminator included, from the generated decoders. The scaffold's stubs of Sprints
@@ -38,7 +42,31 @@ export const DATA_SIZE: Partial<Record<B, number>> = {
   [B.CloseCampaign]: G.getCloseCampaignInstructionDataDecoder().fixedSize,
   [B.SweepFees]: G.getSweepFeesInstructionDataDecoder().fixedSize,
   [B.TallyLateJoins]: G.getTallyLateJoinsInstructionDataDecoder().fixedSize,
+  // Sprint 14, lane L14B: the contest's re-read and the admin's decision.
+  [B.RereadCampaign]: G.getRereadCampaignInstructionDataDecoder().fixedSize,
+  [B.AdminDecideContest]: G.getAdminDecideContestInstructionDataDecoder().fixedSize,
 };
+
+/** A void reason's class decides the 10% opening fee (the program's `void_reason.rs`). */
+const HOUSE_FAILURES: readonly VoidReason[] = [VoidReason.MissedWindow, VoidReason.TeamHouseFailure];
+
+/** The admin's decision at stage 2 of a contest, in words, from the bytes signed. */
+function decisionText(campaign: string | undefined, d: Record<string, any>): string {
+  const note = `note hash ${bytesToHex(d.noteHash)}`;
+  if (d.decision === ContestDecision.Confirm) {
+    const refused =
+      d.voidReason === VoidReason.None
+        ? ""
+        : ` with void reason ${VoidReason[d.voidReason]}, which the program refuses (ConfirmWithVoidReason)`;
+    return `As the admin, confirm the stored result of contested campaign ${campaign}${refused}: it pays out as stored; ${note}`;
+  }
+  const reason = VoidReason[d.voidReason];
+  if (!TEAM_VOID_REASONS.includes(d.voidReason)) {
+    return `As the admin, void contested campaign ${campaign} (${reason}), which the program refuses (VoidReasonNotForTeam); ${note}`;
+  }
+  const fee = HOUSE_FAILURES.includes(d.voidReason) ? "goes back to whoever opened" : "stays with Brot";
+  return `As the admin, void contested campaign ${campaign} (${reason}): every entry and the prize go back, and the 10% opening fee ${fee}; ${note}`;
+}
 
 type Slots = Record<string, { address: string }>;
 type Params = {
@@ -101,7 +129,14 @@ export function describeOther(type: B, a: Slots, d: Record<string, any>): string
     case B.TeamConfirmResult:
       return `Confirm the result of campaign ${campaign} and end its review window`;
     case B.TeamOpenContest:
-      return `Open a contest on campaign ${campaign} (refused until Sprint 14)`;
+      return `Contest the result of campaign ${campaign}: its payout pauses until the reading is run again (the same reading pays out; a different one gives the admin 48 hours to confirm or void, never to invert)`;
+    case B.RereadCampaign: {
+      const proof =
+        a.proofAccount.address === a.metricAccount.address ? "" : `, with ${a.proofAccount.address} offered as proof`;
+      return `Run the reading of contested campaign ${campaign} again from ${a.metricAccount.address}${proof}: the same result pays out as stored; a different one opens 48 hours for the admin to confirm or void`;
+    }
+    case B.AdminDecideContest:
+      return decisionText(campaign, d);
     case B.FinalizeCampaign:
       return `Finalize campaign ${campaign} after its review window`;
     case B.SettleEntry:

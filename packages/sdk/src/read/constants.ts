@@ -15,6 +15,7 @@ import idl from "../idl/brot_markets.json";
 
 export {
   ConfigChange,
+  ContestDecision,
   ContestStage,
   Direction,
   OperatingLevel,

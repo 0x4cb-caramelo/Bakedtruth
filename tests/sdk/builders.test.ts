@@ -14,6 +14,7 @@ import { IDL } from "../brot/idl";
 import { DEFAULT_PARAMS } from "../brot/flows";
 import { camel } from "../brot/idl";
 import * as I from "../brot/instructions";
+import * as IL from "../brot/instructions-14-15";
 import * as IS from "../brot/instructions-settlement";
 import * as P from "../brot/program";
 
@@ -26,13 +27,7 @@ const shape = (ix: Instruction) => ({
  * The scaffold's stubs of Sprints 14–15 (2026-10-13): in the IDL, refused by the program, with no SDK builder until
  * their lanes. Each lane deletes its own name when it adds the builder and its pair below.
  */
-const NO_BUILDER_YET = [
-  "UserLinkReferrer",
-  "RereadCampaign",
-  "AdminDecideContest",
-  "SponsorJoinCampaign",
-  "SettleSealedFee",
-];
+const NO_BUILDER_YET = ["UserLinkReferrer", "SponsorJoinCampaign", "SettleSealedFee"];
 const params = Object.fromEntries(
   Object.entries(DEFAULT_PARAMS).map(([k, v]) => [camel(k), v]),
 ) as unknown as T.CreationParamsArgs;
@@ -101,6 +96,25 @@ describe("sdk builders match the test kit", () => {
       [T.buildSettlePrize({ campaign, recipient: other }), IS.settlePrizeIx(campaign, vault, other)],
       [T.buildCloseCampaign({ campaign, rentPayer: other }), IS.closeCampaignIx(campaign, vault, other, feeVault)],
       [T.buildSweepFees({ feeRecipient: other }), IS.sweepFeesIx(config, feeVault, other)],
+      // Sprint 14, lane L14B: the contest's re-read and the admin's decision.
+      [
+        T.buildRereadCampaign({ campaign, metricAccount: P.BTC_USD_ACCOUNT, proofAccount: other }),
+        IL.rereadCampaignIx(campaign, config, P.BTC_USD_ACCOUNT, other),
+      ],
+      [
+        T.buildAdminDecideContest({
+          admin: who,
+          campaign,
+          decision: P.ContestDecision.Void,
+          voidReason: P.VoidReason.TeamHouseFailure,
+          noteHash: new Uint8Array(32).fill(5),
+        }),
+        IL.adminDecideContestIx(who, config, campaign, {
+          decision: P.ContestDecision.Void,
+          voidReason: P.VoidReason.TeamHouseFailure,
+          noteHash: new Uint8Array(32).fill(5),
+        }),
+      ],
     ];
     expect(NO_BUILDER_YET.filter((name) => !IDL.instructions.some((ix) => ix.name === name))).toEqual([]);
     expect(pairs.length).toBe(IDL.instructions.length - NO_BUILDER_YET.length);
