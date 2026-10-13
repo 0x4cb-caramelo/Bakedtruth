@@ -3,10 +3,13 @@
  *          /api/v1/campaigns/:address, since Sprint 13 /api/v1/leaderboard (leaderboard.ts), and since Sprint 08's
  *          second part /api/v1/names and /api/v1/price. Every answer is JSON with CORS for the site; errors are
  *          {"error": {"code", "message"}}, never a stack trace. Reads only what is in memory: the chain snapshot, the
- *          program's history, the names and the last display price.
- * Version: 0.3.2 (2b: no price gap in health; 0.3.1, names and price, any throw a JSON 500)
- * Sprint:  08 (indexer and API, hackathon MVP); 13
+ *          program's history, the names and the last display price. Health's body is health.ts's: since Sprint 08's
+ *          third part it adds `program_last_deploy_slot` and `entries_allowed`; every answer keeps its fields (TP §6:
+ *          change only by adding), each shaped as its schema in @brot/sdk/schemas (read-api.ts).
+ * Version: 0.4.0 (health.ts: the deploy slot and entries_allowed; 0.3.2, 2b; 0.3.1, names and price)
+ * Sprint:  08 (indexer and API, hackathon MVP; the third part); 13
  */
+import { healthBody } from "./health";
 import type { Hidden } from "./hidden";
 import type { History } from "./history";
 import { createBoard, leaderboardOf, parseLeaderboardQuery } from "./leaderboard";
@@ -29,6 +32,8 @@ export type RouteOptions = {
   names?: Names;
   price?: Price;
   now?: () => bigint;
+  /** K-11's switch (API_ENTRIES_ALLOWED): false turns `entries_allowed` off whatever the chain says; true if unset. */
+  entriesSwitch?: boolean;
 };
 
 const json = (body: unknown, status: number, cors: string) =>
@@ -61,27 +66,7 @@ function route(store: Store, options: RouteOptions, board: ReturnType<typeof cre
     if (request.method !== "GET" && request.method !== "HEAD") return fail(405, "method_not_allowed", "GET only", cors);
     const url = new URL(request.url);
     const snap = store.current();
-    if (url.pathname === "/api/v1/health") {
-      const status = snap ? (store.lastError() ? "stale" : "ok") : "starting";
-      return json(
-        {
-          status,
-          cluster: options.cluster,
-          schema_version: 1,
-          as_of_slot: snap ? snap.asOfSlot : null,
-          taken_at: snap ? snap.takenAt : null,
-          campaigns_total: snap ? snap.rows.length : null,
-          last_refresh_error: store.lastError(),
-          leaderboard_complete: options.history?.ready() ? options.history.complete() : null,
-          leaderboard_skipped: options.history?.ready() ? options.history.skipped() : null,
-          names_error: options.names ? options.names.lastError() : null,
-          price_source: options.price?.current()?.source ?? null,
-          price_error: options.price ? options.price.lastError() : null,
-        },
-        snap ? 200 : 503,
-        cors,
-      );
-    }
+    if (url.pathname === "/api/v1/health") return json(healthBody(store, options), snap ? 200 : 503, cors);
     if (url.pathname === "/api/v1/campaigns") {
       if (!snap) return fail(503, "starting", "the first chain read has not finished", cors);
       let query;

@@ -3,7 +3,7 @@
  *          API_REFRESH_MS, reads the program's new history and the hide list for the leaderboard on a loop of their own
  *          (Sprint 13), the names file with it and the display price on a loop of its own (Sprint 08), and serves
  *          /api/v1 on the loopback address. Logs one JSON line per refresh, never the RPC URL, a key or a wallet.
- * Version: 0.4.2 (2b: the price from Pyth only; 0.4.1, names and price, no development error page)
+ * Version: 0.4.3 (the entries switch reaches health; 0.4.2, 2b: the price from Pyth only)
  * Sprint:  08 (indexer and API, hackathon MVP); 13
  *
  * Run: API_RPC_URL=... bun services/api/src/main.ts
@@ -38,6 +38,7 @@ const handle = createHandler(store, {
   names,
   price,
   now: unixNow,
+  entriesSwitch: config.entriesSwitch,
 });
 
 // development: false whatever NODE_ENV says, so no error page can ever show a stack trace (the security review, M1/M2).

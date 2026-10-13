@@ -1952,10 +1952,10 @@ exposes only `GET /healthz` and `POST /restart` (TP v0.0.1 §5, §12) **[DP]**.
 |---|---|---|
 | `GET /api/v1/campaigns` | Campaigns with `rank`, `listed` and filters | 08 |
 | `GET /api/v1/campaigns/:id` | One `CampaignDTO` (Appendix B) | 08 |
-| `GET /api/v1/campaigns/:id/activity` | Entries, settlements and events of one campaign | 08 |
-| `GET /api/v1/campaigns/:id/chance` | The history of the YES/NO split | 08 |
-| `GET /api/v1/activity` | Recent activity across campaigns (X1.4) | 08 |
-| `GET /api/v1/wallets/:address/entries` | One wallet's entries, results and payouts ("my entries"). Not built yet: Sprint 12's page reads the chain meanwhile | 08 |
+| `GET /api/v1/campaigns/:id/activity` | Entries, settlements and events of one campaign. **Built in Sprint 08's slice 2 (2026-10-11) [F]** in `services/indexer` (by address, the latest opening unless `?opening=`), on loopback; not public yet | 08 |
+| `GET /api/v1/campaigns/:id/chance` | The history of the YES/NO split. **Built in slice 2 [F]**, as the line above | 08 |
+| `GET /api/v1/activity` | Recent activity across campaigns (X1.4). **Built in slice 2 [F]**: the newest entries, as the line above | 08 |
+| `GET /api/v1/wallets/:address/entries` | One wallet's entries, results and payouts ("my entries"). **Built in slice 2 [F]** in `services/indexer`, as the lines above; Sprint 12's page still reads the chain | 08 |
 | `GET /api/v1/leaderboard` | Devnet points. **Built in Sprint 13 [F]** in `services/api` from the program's own history (`history.ts`: in memory, on its own loop, incremental by `until`, every call with a timeout) and the live accounts, until the indexer takes it over; paged; each row is a rank, a wallet, its points and the campaigns it entered; it takes no wallet parameter and drops the wallets on the hide list (§8.2) | 08; 13 |
 | `GET /api/v1/names` | Display names from `content/account-names.json` and the pinned Pyth feed list. **Built in Sprint 08 (2026-10-11) [F]** in `services/api`: the names checked by the SDK's `parseAccountNames` (the site's rules), the feeds with their sponsored accounts; a broken file keeps the last good list | 08 |
 | `GET /api/v1/price` | SOL in US$, with source and time. **Built in Sprint 08 (2026-10-11) [F]** in `services/api`: Pyth SOL/USD, the price the program charges at (no CoinGecko: 2b, 2026-10-11, §3.5); source, times, staleness and attribution in each answer; a failed read keeps the last price; none older than a day | 08 |
