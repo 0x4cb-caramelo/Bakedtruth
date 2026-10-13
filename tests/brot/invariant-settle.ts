@@ -2,9 +2,9 @@
  * Purpose: the randomized test's settlement operations: the payouts out of order and twice, the fee, the prize,
  *          the creator share and the close, each with its expected refusal and balance changes; the draw of
  *          every settlement operation. The review operations are in invariant-review.ts, the creator share and
- *          the close in invariant-close.ts.
+ *          the close in invariant-close.ts, a sponsor's held fee (Sprint 15) in invariant-sealed-settle.ts.
  * Version: 0.0.2
- * Sprint:  04 (contract freeze, lane E); 15 (the creator share's reserve, moved to invariant-close.ts; lane INV15)
+ * Sprint:  04 (contract freeze, lane E); 15 (close waits for the held fees; the creator share's reserve; lane INV15)
  */
 import { type Address } from "@solana/kit";
 
@@ -14,9 +14,11 @@ import type { BrotErrorName } from "./errors";
 import { credit, planClose, planShare } from "./invariant-close";
 import { clock, type Harness, type Plan, type Rng } from "./invariant-harness";
 import { planReview, REVIEW_KINDS, type ReviewOp } from "./invariant-review";
+import type { SealedSettleOp } from "./invariant-sealed-model";
+import { drawSealedSettle, planSealedSettle } from "./invariant-sealed-settle";
 import * as P from "./program";
 
-export const PAYOUT_KINDS = ["settle", "collect", "share", "prize", "close"] as const;
+export const PAYOUT_KINDS = ["settle", "collect", "share", "prize", "close", "sealedSettle"] as const;
 export const SETTLE_KINDS = [...REVIEW_KINDS, ...PAYOUT_KINDS] as const;
 
 export type PayoutOp =
@@ -24,7 +26,8 @@ export type PayoutOp =
   | { k: "collect"; c: number }
   | { k: "share"; c: number }
   | { k: "prize"; c: number }
-  | { k: "close"; c: number };
+  | { k: "close"; c: number }
+  | SealedSettleOp;
 export type SettleOp = ReviewOp | PayoutOp;
 
 /** Plans one settlement operation: a review step, or a payment. The refusals follow the program's order of checks. */
@@ -109,6 +112,8 @@ async function planPayout(
     }
     case "close":
       return planClose(h, c, campaign, vault);
+    case "sealedSettle":
+      return planSealedSettle(h, op);
   }
 }
 
@@ -153,6 +158,8 @@ export function drawSettleOp(h: Harness, r: Rng, index: number): SettleOp | Adva
       return { k: "prize", c: index };
     case "close":
       return { k: "close", c: index };
+    case "sealedSettle":
+      return drawSealedSettle(h, r, index);
     default:
       return advance;
   }

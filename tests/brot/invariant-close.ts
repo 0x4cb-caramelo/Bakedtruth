@@ -1,9 +1,9 @@
 /**
  * Purpose: the randomized test's last two settlements of a campaign: the creator share (paid, or reserved for a
- *          wallet it would leave below rent and claimed later: TP 3.4.5) and `close_campaign`, each with its
- *          expected refusal and balance changes.
+ *          wallet it would leave below rent and claimed later: TP 3.4.5) and `close_campaign` (after every held
+ *          sponsor fee is settled, Sprint 15), each with its expected refusal and balance changes.
  * Version: 0.0.1
- * Sprint:  15 (moved out of invariant-settle.ts with the reserve path; lane INV15)
+ * Sprint:  15 (moved out of invariant-settle.ts with the reserve path and `SealedFeesOpen`; lane INV15)
  */
 import { type Address } from "@solana/kit";
 
@@ -11,6 +11,7 @@ import type { BrotErrorName } from "./errors";
 import { closeCampaignIx, settleCreatorShareIx } from "./instructions-settlement";
 import type { Harness, Plan } from "./invariant-harness";
 import { booked, shareDue, type ModelCampaign } from "./invariant-model";
+import { liveSealed } from "./invariant-sealed-model";
 import { balance } from "./setup";
 
 /** A payment that clears the reserve (Q2) frees a drained wallet; one below it stays reserved and is refused. */
@@ -61,8 +62,8 @@ export function planShare(
 }
 
 /**
- * `close_campaign`: once settled, the rent and a reserved creator share go to rent_payer (the creator here); the dust
- * and any hand-sent SOL go to the fee vault.
+ * `close_campaign`: once settled and every sponsor's held fee settled (`SealedFeesOpen`, Sprint 15), the rent and a
+ * reserved creator share go to rent_payer (the creator here); the dust and any hand-sent SOL go to the fee vault.
  */
 export function planClose(h: Harness, c: ModelCampaign, campaign: Address, vault: Address): Plan {
   const reserved = c.reserved;
@@ -70,7 +71,11 @@ export function planClose(h: Harness, c: ModelCampaign, campaign: Address, vault
   const waiting = shareDue(c) > 0n && !c.shareSettled;
   const payer = c.creator;
   const error: BrotErrorName | undefined =
-    c.phase !== "Settled" || !c.feeMoved || !c.prizeSettled || waiting ? "CampaignNotSettled" : undefined;
+    c.phase !== "Settled" || !c.feeMoved || !c.prizeSettled || waiting
+      ? "CampaignNotSettled"
+      : liveSealed(c).length > 0
+        ? "SealedFeesOpen"
+        : undefined;
   return {
     ixs: [closeCampaignIx(campaign, vault, payer as Address, h.feeVault)],
     error,

@@ -1,9 +1,10 @@
 /**
  * Purpose: the randomized test of the money (Sprint 04, gate 1, X0.1): a fixed seed draws operations over
- *          the whole sprint, and I1 to I15 are checked after each one against the reference model.
+ *          the whole sprint, and I1 to I15 are checked after each one against the reference model. Since Sprint 15
+ *          the run carries sealed entries and their held fees, and the default seed must reach each of their cases.
  *          Needs the program binary (target/deploy/brot_markets.so): run it at integration.
  * Version: 0.0.2
- * Sprint:  04 (contract freeze, lane E); 15 (the cases a success reached, apart from the refusals; lane INV15)
+ * Sprint:  04 (contract freeze, lane E); 15 (the sealed entry, the coverage of the default seed; lane INV15)
  */
 import { describe, expect, test } from "bun:test";
 
@@ -20,6 +21,32 @@ export const DEFAULT_SEED = 0x0b_ad_c0de;
 export const SEED = process.env.INVARIANT_SEED ? Number(process.env.INVARIANT_SEED) >>> 0 : DEFAULT_SEED;
 /** The number of operations drawn from the seed. */
 export const OPERATIONS = 1_200;
+
+/**
+ * What the default seed's run must reach at least once (Sprint 15): a sealed entry and each of its refusals, a held
+ * fee settled to each destination and under the pause (I10′), its refusals, the close that waits for it, SOL sent by
+ * hand to a SealedFee before and after its creation, and the team's confirm and void, which tally first.
+ */
+export const MUST_REACH = [
+  /^sealed ok$/,
+  /^sealed JoinWhilePaused$/,
+  /^sealed SealedEntryBelowFloor$/,
+  /^sealed SolUsdStale$/,
+  /^sealed SolUsdConfidenceTooWide$/,
+  /^sealed SealedEntryAboveMaxLamports$/,
+  /^sealed EntryTotalMismatch$/,
+  /^sealedSettle ok refunded/,
+  /^sealedSettle ok kept/,
+  /^sealedSettle ok \w+ paused$/,
+  /^sealedSettle NotFinalized$/,
+  /^sealedSettle WrongSponsor$/,
+  /^sealedSettle AlreadySettled$/,
+  /^close SealedFeesOpen$/,
+  /^handSealed ok funded$/,
+  /^handSealed ok live$/,
+  /^confirm ok$/,
+  /^void ok$/,
+];
 
 async function checkAll(h: Harness) {
   const config = await readConfig(h.w);
@@ -75,5 +102,9 @@ describe("money invariants", () => {
     console.log(`cases: ${histogram(cases)}`);
     console.log(`refusals: ${histogram(refusals, " | ")}`);
     expect(h.camps.length).toBeGreaterThan(0);
+    if (SEED === DEFAULT_SEED) {
+      const missed = MUST_REACH.filter((want) => !h.trace.some((line) => want.test(line)));
+      expect(missed.map(String)).toEqual([]);
+    }
   }, 600_000);
 });

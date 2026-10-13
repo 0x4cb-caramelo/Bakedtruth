@@ -11,11 +11,13 @@
  * `OneSided`; a void is `Refund`.
  */
 import { oneSidedFee, payoutOf, settleSplit, splitIsViable } from "./money-model";
+import type { SealedModel } from "./invariant-sealed-model";
 
 export type Phase = "Open" | "InReview" | "Contested" | "Settling" | "Settled" | "Closed";
 export type Outcome = "Unresolved" | "Yes" | "No" | "Void";
 export type Mode = "Split" | "OneSided" | "Refund";
-export type Join = { baker: string; side: 0 | 1; amount: bigint; at: bigint };
+/** One join; `sealed` marks a sealed entry's entry part (Sprint 15), a join like any other in the pot. */
+export type Join = { baker: string; side: 0 | 1; amount: bigint; at: bigint; sealed?: true };
 
 export type Snapshot = {
   mode: Mode;
@@ -55,6 +57,8 @@ export type ModelCampaign = {
   shareSettled: boolean;
   /** A creator share kept in the vault for a wallet it would have left below rent (TP 3.4.5, the reserve path). */
   reserved: bigint;
+  /** Sprint 15: each sponsor's SealedFee on this campaign, by sponsor address (invariant-sealed-model.ts). */
+  sealed: Map<string, SealedModel>;
   handSent: bigint;
   handSentCampaign: bigint;
   paidOut: bigint;
@@ -95,6 +99,7 @@ export function newCampaign(p: CampaignSetup): ModelCampaign {
     prizeSettled: false,
     shareSettled: false,
     reserved: 0n,
+    sealed: new Map(),
     handSent: 0n,
     handSentCampaign: 0n,
     paidOut: 0n,

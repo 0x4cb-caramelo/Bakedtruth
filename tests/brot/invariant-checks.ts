@@ -18,6 +18,7 @@ import {
 import { payoutOf } from "./money-model";
 import type { ChainView, Harness } from "./invariant-harness";
 import { countOpen } from "./invariant-open";
+import { SEALED_CHECKS } from "./invariant-sealed-checks";
 
 type Check = (c: ModelCampaign, v: ChainView, h: Harness) => string | null;
 const ledgerTo = (c: ModelCampaign, kind: string) => c.ledger.filter((l) => l.kind === kind);
@@ -177,9 +178,9 @@ const CHECKS: [number, Check][] = [
   [15, i15],
 ];
 
-/** Runs the per-campaign invariants; throws naming the first one that fails. */
+/** Runs the per-campaign invariants, the sealed entry's too (Sprint 15); throws naming the first one that fails. */
 export function checkCampaign(c: ModelCampaign, v: ChainView, h: Harness, label: string) {
-  for (const [n, check] of CHECKS) {
+  for (const [n, check] of [...CHECKS, ...SEALED_CHECKS]) {
     const failure = check(c, v, h);
     if (failure) throw new Error(`I${n} (${label}): ${failure}`);
   }
