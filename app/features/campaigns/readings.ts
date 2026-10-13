@@ -4,9 +4,10 @@
  *          readers (owner first, then the layout), against the target, with "if read now" (the price's confidence band
  *          on a price campaign, as the program reads it) and the distance in percent for a price. Pure: the fetch is
  *          use-readings.ts. A stake pool shows its total now, not the measured epoch's snapshot, and a validator's
- *          stake shows none (it is a syscall in the measured epoch, not account bytes), as the campaign page does.
- * Version: 0.1.0
- * Sprint:  10 (campaign list), in the UI overhaul
+ *          stake shows none (it is a syscall in the measured epoch, not account bytes), as the campaign page does. A
+ *          graduation campaign shows the SOL its curve raised, YES once the curve completed in time.
+ * Version: 0.2.0 (the sixth kind, a Meteora DBC curve)
+ * Sprint:  10 (campaign list), in the UI overhaul; the sixth kind's site
  */
 import {
   bandCrossesTarget,
@@ -19,6 +20,7 @@ import {
   type FetchedAccount,
 } from "@brot/sdk/read";
 
+import { curveFacts } from "@/features/campaign-page/curve";
 import type { KindName } from "@/features/campaign-page/proof";
 import type { Card } from "./model";
 
@@ -28,6 +30,7 @@ export const KIND_NAME: Record<string, KindName> = {
   DammV2LockedAtLeast: "lock",
   StakePoolTvlAtLeast: "pool",
   StakeAtLeast: "stake",
+  DbcGraduated: "curve",
 };
 
 export type Reading = {
@@ -67,6 +70,12 @@ export function readingOf(card: Card, account: FetchedAccount | null): Reading |
       }
       case "pool":
         return { value: readStakePool(account.owner, account.data).totalLamports, exponent: 0, ifReadNow: null };
+      case "curve": {
+        const curve = curveFacts(account, target);
+        // A curve stamped after the deadline completed late: NO (the page, with the chain's clock, uses curveIfReadNow).
+        const late = curve.completedAt !== null && card.deadlineAt !== null && curve.completedAt > card.deadlineAt;
+        return { value: curve.raised, exponent: 0, ifReadNow: verdict(curve.graduated && !late) };
+      }
       default:
         return null;
     }

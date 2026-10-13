@@ -5,8 +5,9 @@
  *          the program's actual errors. Row 6 has no refusal: the fees and the share are read from the program, never
  *          typed. tests/site/open-refusals.test.ts checks every error with a row has its message here, and sends each
  *          refused case straight to the program.
- * Version: 0.3.0 (the sixth kind's refusals: a Meteora launch curve's own words; Sprint 19's copy review before it)
- * Sprint:  19 (site: open a campaign); the sixth kind (`DbcGraduated`), whose box comes later
+ * Version: 0.4.0 (the sixth kind in the box: a curve's target refusals and its opening, in its own words; 0.3.0, its
+ *          refusals; Sprint 19's copy review before them)
+ * Sprint:  19 (site: open a campaign); the sixth kind (`DbcGraduated`)
  */
 import type { BrotErrorName } from "@brot/sdk/read";
 
@@ -23,15 +24,20 @@ const fixed = (place: RefusalPlace, tag: string, text: string): RefusalCopy => (
 const RELOAD = "Reload the page and try again.";
 const SOL_USD_UNUSABLE = `The SOL/USD price account isn't one the program reads. ${RELOAD}`;
 const SOL_USD_SHAKY = "Pyth's SOL/USD price is too uncertain right now. Try again in a minute.";
+/** A graduation campaign's account in words (KIND_WORDS.curve.phrase): its target refusals are its curve's. */
+const CURVE = "DBC pool";
 
 export const REFUSALS: Partial<Record<BrotErrorName, RefusalCopy>> = {
   // Row 1: the kind.
   UnknownReaderKind: fixed("kind", "Unknown kind", `That kind doesn't exist. ${RELOAD}`),
-  ReaderKindNotOpen: fixed(
-    "kind",
-    "Opens later",
-    "This kind isn't open yet. It opens once a YES has been recorded for it on devnet. The other four kinds are open.",
-  ),
+  ReaderKindNotOpen: {
+    place: "kind",
+    tag: "Opens later",
+    text: ({ phrase }) =>
+      phrase === CURVE
+        ? "Graduation campaigns aren't open on this network yet. They open on mainnet once the audits cover their reader."
+        : "This kind isn't open yet. It opens once a YES has been recorded for it on devnet. The kinds marked open are.",
+  },
   // Row 2: the account fits the kind.
   ReaderWrongOwner: {
     place: "account",
@@ -75,16 +81,22 @@ export const REFUSALS: Partial<Record<BrotErrorName, RefusalCopy>> = {
     "This curve graduates below 85 SOL. Graduation campaigns need a curve of at least 85 SOL.",
   ),
   // Row 3: the target.
-  TargetAlreadyTouched: fixed(
-    "target",
-    "Already met",
-    "Already met: the campaign would be decided the moment it opens. Pick a target the account hasn't reached yet.",
-  ),
-  TargetTooClose: fixed(
-    "target",
-    "Too close",
-    "Too close to the value now. Keep at least 1% between them; for a price, from the edge of Pyth's confidence band.",
-  ),
+  TargetAlreadyTouched: {
+    place: "target",
+    tag: "Already met",
+    text: ({ phrase }) =>
+      phrase === CURVE
+        ? "This curve has already completed, so the campaign would be decided the moment it opens. Pick a launch still on its curve."
+        : "Already met: the campaign would be decided the moment it opens. Pick a target the account hasn't reached yet.",
+  },
+  TargetTooClose: {
+    place: "target",
+    tag: "Too close",
+    text: ({ phrase }) =>
+      phrase === CURVE
+        ? "This curve is more than 90% full. Graduation campaigns need at least 10% of the curve still to raise."
+        : "Too close to the value now. Keep at least 1% between them; for a price, from the edge of Pyth's confidence band.",
+  },
   TargetUnreachable: fixed(
     "target",
     "Too far",

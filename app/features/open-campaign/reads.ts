@@ -2,10 +2,11 @@
  * Purpose: what the creation box reads through the site's RPC (the public devnet one until Sprint 08's `/rpc` relay
  *          exists; TP §7.2): the program's config, the chain's clock and epoch schedule, Pyth's sponsored SOL/USD account
  *          (the one the program charges at), each listed feed's sponsored account (row 4), the rents of the two new
- *          accounts, and, for a draft, the account in its slot and whether the campaign's address and its vault are
- *          still free (row 10). Reads only; the SDK's preparation reads all of it again before signing (A-3).
- * Version: 0.1.0
- * Sprint:  19 (site: open a campaign)
+ *          accounts, and, for a draft, the account in its slot (with, for a graduation campaign, the config its pool
+ *          names) and whether the campaign's address and its vault are still free (row 10). Reads only; the SDK's
+ *          preparation reads all of it again before signing (A-3).
+ * Version: 0.2.0 (the sixth kind: a curve's config)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
 import type { Address } from "@solana/kit";
 import {
@@ -13,6 +14,7 @@ import {
   bytesToHex,
   campaignAddress,
   configAddress,
+  curveConfigOf,
   decodeGlobalConfig,
   feedsOf,
   fetchRaw,
@@ -31,6 +33,8 @@ import {
   type GlobalConfig,
   type SolanaRpc,
 } from "@brot/sdk/read";
+
+import type { KindName } from "../campaign-page/proof";
 
 /** The build the site talks to: devnet's feed list on every cluster but mainnet (programs/brot-markets/src/feeds.rs). */
 export const FEED_CLUSTER: FeedCluster = process.env.NEXT_PUBLIC_CLUSTER === "mainnet-beta" ? "mainnet" : "devnet";
@@ -94,8 +98,14 @@ export async function readWorld(rpc: SolanaRpc): Promise<BoxWorld> {
 const shape = (account: FetchedAccount | null): AccountShape =>
   account ? { owner: account.owner, dataLength: account.data.length } : null;
 
-/** The account in the draft's slot, and the campaign's address and vault for `id` as they stand (row 10). */
-export async function readDraftAccounts(rpc: SolanaRpc, id: bigint, metric: Address | null) {
+/** A graduation campaign's curve config: the address its pool names, and the account there (`null`: none). */
+export type CurveConfigRead = { address: Address; account: FetchedAccount | null };
+
+/**
+ * The account in the draft's slot, and the campaign's address and vault for `id` as they stand (row 10). For `kind`
+ * "curve", also the config the pool names, which the opening passes after the nine slots (`null`: no pool to name one).
+ */
+export async function readDraftAccounts(rpc: SolanaRpc, id: bigint, metric: Address | null, kind?: KindName) {
   const campaign = await campaignAddress(id);
   const vault = await vaultAddress(campaign);
   const [campaignAccount, vaultAccount, metricAccount] = await fetchRawMany(rpc, [
@@ -103,12 +113,12 @@ export async function readDraftAccounts(rpc: SolanaRpc, id: bigint, metric: Addr
     vault,
     ...(metric ? [metric] : []),
   ]);
-  return {
-    campaign: shape(campaignAccount),
-    vault: shape(vaultAccount),
-    metric: metric ? (metricAccount ?? null) : null,
-  };
+  const read = metric ? (metricAccount ?? null) : null;
+  const configAt = kind === "curve" ? curveConfigOf(read) : null;
+  const curveConfig: CurveConfigRead | null = configAt ? { address: configAt, account: await fetchRaw(rpc, configAt) } : null;
+  return { campaign: shape(campaignAccount), vault: shape(vaultAccount), metric: read, curveConfig };
 }
+export type DraftAccounts = Awaited<ReturnType<typeof readDraftAccounts>>;
 
 /** The campaign's own account at `id`, for the retry guard (`null`: it does not exist). */
 export const readCampaignAt = async (rpc: SolanaRpc, id: bigint) => fetchRaw(rpc, await campaignAddress(id));

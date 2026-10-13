@@ -27,6 +27,27 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **O sexto tipo no site e nos documentos** (branch `feat/dbc-graduation-ui`, 12/10/2026, empilhada sobre a
+  `feat/dbc-graduation-reader`; `session-log/2026-10-12-sexto-tipo-no-site-e-nos-documentos.md`).
+  - **A caixa de abertura** ganha o modelo "Graduation", com o campo do pool da DBC. O site lê a config que o pool
+    aponta e confere os dois na ordem do leitor (`account-check.ts`). A meta não se digita: é o limite da curva,
+    mostrado só para leitura com quanto a curva já juntou (`curve-target.tsx`). As recusas da curva (6148 a 6152, a
+    curva já completa e a curva cheia demais) aparecem junto ao campo do pool, com texto próprio. O modelo abre em todo
+    cluster menos a mainnet, como o programa.
+  - **A página da campanha** mostra a curva (`curve-progress.tsx`): a barra de `quote_reserve` sobre
+    `migration_quote_threshold`, a fatia preenchida (nunca arredondada para cima), o que falta ou o segundo em que a
+    curva completou, o estágio, e sempre o aviso "YES can be bought by anyone who pays the rest of the curve." O "se
+    lido agora" segue o carimbo do pool, antes e depois do prazo.
+  - **A lista e a página inicial** leem quanto a curva juntou; o filtro ganha o tipo "Graduation", com cor própria
+    (`--k-curve-*`, contraste conferido nos dois temas); o post de resolução e a revisão antes de assinar passam a
+    aceitar o tipo.
+  - **Os documentos contam seis tipos**: o BP v0.0.4 (o índice, a Parte 1 com a descrição do tipo na seção 4.2, a
+    Parte 4), o resumo de produto (R-13), os Termos (seção 4, com a nota de que o texto precisa de revisão jurídica
+    final antes de qualquer publicação), o `PITCH.md`, o README, a página dos tipos do docs e o HTML gerado, o plano
+    técnico v0.1.9 e a lista do relay. Os registros históricos (session logs, sprints, versões antigas do BP, a
+    proposta de arquitetura) ficaram como estavam.
+  - **Testes**: 13 novos (`tests/site/curve.test.ts` e `tests/site/open-curve.test.ts`), entre eles a abertura feita
+    pela caixa e aceita pelo programa no LiteSVM, de graça e paga, e cada recusa da caixa recusada igual pelo programa.
 - **O sexto tipo de campanha, `DbcGraduated`: "a curva de lançamento da Meteora (DBC) do token X completa até a data
   D?"** (branch `feat/dbc-graduation-reader`, 12/10/2026; `docs/technical/meteora-readers-plan.md`,
   `session-log/2026-10-12-sexto-tipo-dbc-graduated.md`). Entra no programa, nos testes, no IDL e no SDK; a caixa de

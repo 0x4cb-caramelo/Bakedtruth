@@ -7,9 +7,9 @@
  *          program refuses one): a target below the price reads "falls to". An empty box starts with examples a fair
  *          way off the price. Outside the grammar, "we can't check this on-chain" and the three nearest templates.
  *          Pure and local: the query is never sent or stored (D-j); a pick fills only these fields, which the box then
- *          checks like typed ones.
- * Version: 0.2.0 (the UI overhaul: direction, duration, "k", live prices and examples; 0.1.1, the comma rule)
- * Sprint:  19 (site: open a campaign), in the UI overhaul
+ *          checks like typed ones. A graduation campaign is offered no target: its curve's threshold is its target.
+ * Version: 0.3.0 (the sixth kind; 0.2.0, the UI overhaul: direction, duration, "k", live prices and examples)
+ * Sprint:  19 (site: open a campaign), in the UI overhaul; the sixth kind's site
  */
 import type { KindName } from "../campaign-page/proof";
 import { TEMPLATES } from "./kinds";
@@ -157,7 +157,8 @@ export function search(query: string, sources: SearchSources, limit = 12): Searc
   }
   for (const t of TEMPLATES) {
     const named = items.some((it) => it.kind === t.kind);
-    if (!named && hit([...t.words])) items.push({ kind: t.kind, target: t.kind === "price" ? undefined : target });
+    const typed = t.kind === "price" || t.kind === "curve" ? undefined : target;
+    if (!named && hit([...t.words])) items.push({ kind: t.kind, target: typed });
   }
   const withDays = (list: Suggestion[]) => (days ? list.map((it) => ({ ...it, days })) : list);
   if (items.length > 0) return { outside: false, items: withDays(grouped(items.slice(0, limit))) };

@@ -1,6 +1,6 @@
 # Brot Markets — Technical Plan
 
-**Version:** 0.1.8 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
+**Version:** 0.1.9 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
 todo em ingles") from the architecture proposal 0.4 the founder approved that day ("sim para todos") and from BP
 v0.0.4, merged into `main` with PR #35 on 2026-10-08; v0.1.1 aligns it with what Sprint 02 built and measured
 (`docs/sprints/sprint-02-pot-core.md`, "TP to align"); v0.1.2 aligns it with what Sprint 03 built and to the founder's
@@ -11,7 +11,8 @@ its reviews deferred (§7.4), its privacy review (§8.2), a new economic risk (�
 the founder's answers to Sprint 13's twelve questions, given after its merge (§3.4.7, §3.5 points, §3.6, §7.4, §8.2,
 §13, §14.2); v0.1.7 records what Sprint 19 built (§3.6, the creation box), what its reviews deferred (§7.5) and its
 privacy review (§8.3); v0.1.8 adds the sixth kind, `DbcGraduated`, a Meteora DBC curve's graduation (§3.4.6, §3.4.8,
-§3.4.10; `docs/technical/meteora-readers-plan.md`) · **Date:**
+§3.4.10; `docs/technical/meteora-readers-plan.md`); v0.1.9 counts six kinds where the plan still said five and
+records the sixth kind's site (§3.6: the creation box and the campaign page) · **Date:**
 2026-10-12 · **Supersedes:** v0.0.1 of 2026-10-05,
 written in Portuguese, approved by the founder ("docs aprovados, podemos dar início"). Its last text, with §8.1, is in
 git history at commit `2089b81` (`git show 2089b81:docs/technical/TECHNICAL-PLAN.md`), the last commit that changed it;
@@ -687,7 +688,7 @@ house, refunded to whoever opened on a house failure (P-4, P4 §4.6).
 
 The prize returns whole to whoever opened on every void (P-4). In a one-sided pot, the 10% is kept (P-4).
 
-#### 3.4.8 Readers (the five kinds; price split; SOL/USD at opening)
+#### 3.4.8 Readers (the six kinds; price split; SOL/USD at opening)
 
 `ReaderKind` is closed, with no generic reader [FD] (P1 §4.2; D-k). Each reader checks the owner and the layout of its
 account before reading a field and returns an error, never a panic, on unexpected bytes [F]
@@ -749,7 +750,7 @@ sponsored account, and older ones are skipped; only the push oracle writes it [E
 | Power | Who | Limit in code |
 |---|---|---|
 | Upgrade the program; act as `admin` | Devnet: a file key held for the company; Lucas and Ronaldo hold the keys, and which of them holds the upgrade key on deploy day is set in Sprint 05 (Q12). Mainnet: the 2-of-3 multisig on hardware devices, with the three partners, and a public wait of 24 to 48 hours before an upgrade takes effect [FD] (P4 §4.1) | Verifiable build (Sprint 16); two-step `admin` change |
-| Open a campaign, paying | Any wallet | Five kinds; an account the reader accepts; 3 to 90 days; fees from config; US$500 at the Pyth price (§3.4.10) |
+| Open a campaign, paying | Any wallet | Six kinds (`DbcGraduated` off in the mainnet build, M-7); an account the reader accepts; 3 to 90 days; fees from config; US$500 at the Pyth price (§3.4.10) |
 | Open without paying | One team key, for the team or a launch partner | `creator_share_bps = 0`; no prize unless the team adds one (P-3). Every team-key opening raises an alert (§3.5) |
 | Confirm, void, contest | One team key | Only in `InReview`; never inverts |
 | Pause | One team key, to be fast | Only `Normal` → `EntriesHalted` |
@@ -981,7 +982,7 @@ Requirements use the proposal's BR-xx IDs (Appendix A). The Product Brief's R-xx
 | BR-17 neutral prize or sealed entry | The opening's prize; the sealed entry; Cloak off-chain | 02; 15 |
 | BR-19 launch partners | Team-key opening; `content/partners.json` | 02; 08 |
 | BR-20 referral | `ReferralLink`; `user_link_referrer`; the weekly routine | 14 |
-| BR-21 five kinds; a fresh price on every entry | `readers/*`; the join check of §3.4.8 | 01, 02, 03 |
+| BR-21 six kinds; a fresh price on every entry | `readers/*`; the join check of §3.4.8 | 01, 02, 03 |
 | BR-22 exclusions | Closed `ReaderKind`; classic SPL Token only | 03 |
 | BR-23 the program reads; anyone re-checks | `resolve_campaign`; `observed_value`; the `CampaignResolved` evidence | 03 |
 | BR-25 six-hour window; confirm or void only; two-stage contest | `InReview`; team instructions; `reread_campaign`; `admin_decide_contest` | 04; 14 |
@@ -1294,7 +1295,7 @@ from a browser or the app to a paid provider.
   and `/rpc` traffic can never starve the keeper.
 - **Reads:** the program's accounts, the caller's balance, the Pyth feeds (SOL/USD included) and the metric accounts the
   creation preview needs. With no list (D-i), a metric read is allowed by owner program: the relay returns an account
-  only if one of the five readers accepts its owner. Methods: `getLatestBlockhash`, `getBlockHeight`,
+  only if one of the six readers accepts its owner. Methods: `getLatestBlockhash`, `getBlockHeight`,
   `getSignatureStatuses`, `getRecentPrioritizationFees`, balances. The final allowlist comes from a trace of the real
   client in Sprint 11; the new client polls signature status instead of opening a WebSocket, which today's client does
   (`app/lib/hooks.ts:228`) **[F]**. The trace, taken on 2026-10-10 from the site's tests and its web smoke, is
@@ -1457,6 +1458,15 @@ system of Sprint -1; it replaces the provisional `services/landing` on `127.0.0.
   - **The share-card preview** waits for the share card itself (Sprint 10, carried); the preview shows the list card.
   - **A team key opens free** only, as the DoD says (no `opening_usd`): a team key's prize (C44), which the program
     accepts, has neither a screen nor a script yet (`scripts/team/open.ts` opens free too).
+- **The sixth kind's site (2026-10-12) [F]** (branch `feat/dbc-graduation-ui`): the Graduation template takes a Meteora
+  DBC pool; the box reads the config the pool names (one more `getAccountInfo`) and checks both in the reader's order
+  (`account-check.ts`). The target is not typed: it is the curve's threshold, shown read-only with what the curve has
+  raised (`curve-target.tsx`), and a refusal of it (a completed curve, one more than 90% full) shows by the pool's
+  slot. The template opens on every cluster but mainnet (`DBC_GRADUATED_OPENS`, as the program's M-7). The campaign
+  page shows the curve as a progress bar of `quote_reserve` over `migration_quote_threshold`, its stage, the second the
+  pool stamped its completion, and always the risk, "YES can be bought by anyone who pays the rest of the curve."
+  (`app/features/campaign-page/curve-progress.tsx`); "if read now" follows `stamped_resolution` (`curve.ts`). The cards
+  and the home page read the curve's raise, with YES only for a curve completed in time.
 
 **The share card** (proposal §2.9) **[DP]**.
 
@@ -1970,7 +1980,7 @@ checkable. Mainnet needs both audit reports and the 2-of-3 multisig; there is no
 
 | Requirement | What counts as done |
 |---|---|
-| External audit | Both firms report on the exact version; every serious finding is fixed and re-checked by whoever raised it; the reports are public. Minimum scope: `checks`, opening (with the Pyth charge and the creator share), joining, resolution, settlement, payout, the five readers, sponsorship and configuration. Whether both firms review Pinocchio was not found (P4 §8) |
+| External audit | Both firms report on the exact version; every serious finding is fixed and re-checked by whoever raised it; the reports are public. Minimum scope: `checks`, opening (with the Pyth charge and the creator share), joining, resolution, settlement, payout, the six readers, sponsorship and configuration. Whether both firms review Pinocchio was not found (P4 §8) |
 | 2-of-3 multisig | Owns the upgrade authority, `admin` and the `fee_recipient` account, on hardware devices, with a public 24–48 h wait and a test signature. The product is chosen in Sprint 16 (T7, C11) |
 | Creation rules in the audited version | Proposed by the BP (BP-17, open in P-9): the opening rules, the Pyth charge and the 1% are frozen into the audited version (Sprint 16) |
 | Verifiable build | `solana-verify build` in CI and `verify-from-repo` after deploy [E82]; a public repository at the deployed commit |
@@ -2700,7 +2710,7 @@ Android app comes from D-n, which BP v0.0.4 records in P1 §2.2 and places after
 | ID | Requirement (short) | BP source | Component | TP section | Sprint |
 |---|---|---|---|---|---|
 | BR-01 | Any wallet opens a campaign for US$500 in SOL, inside the rules | P1 §4.1; D-b | `user_open_campaign`; the creation box | §3.4.10, §3.4.16, §3.6 | 02–03; -1 and 19 |
-| BR-02 | Creation rules in the program: five kinds, the account checked by its reader, no free text, 3–90 days, fixed fees; no list | P1 §4.2; P4 §4.3; D-i, D-k | The opening checks; A-10, A-11 | §3.4.8, §3.4.10 | 02–03 |
+| BR-02 | Creation rules in the program: six kinds, the account checked by its reader, no free text, 3–90 days, fixed fees; no list | P1 §4.2; P4 §4.3; D-i, D-k | The opening checks; A-10, A-11 | §3.4.8, §3.4.10 | 02–03 |
 | BR-03 | The creator's 1% of entries, from the pot while winners stay whole, the shortfall from Brot's fee (never reached since the Economic Viability Rule, §3.4.18: a pot that cannot pay both is refunded); none for the team or launch partners | P1 §3.4; D-g; P-2, P-3 (decided) | `creator_share()`; `settle_creator_share`; I11–I13 | §3.4.5, §3.4.13, §3.4.16 | 04 |
 | BR-04 | The opening: 90% prize, 10% to Brot, held in the campaign vault and collected at the outcome (T23); priced and shown by Pyth (D-f; 2b, 2026-10-11); treasury per P-7 (open) | P1 §4.1; P4 §4.7; D-b, D-e, D-f | Opening conversion; `sweep_fees`; refill and conversion runbook | §3.4.4, §3.4.10, §3.4.16, §12 | 02; 04; 06; 18 |
 | BR-05 | YES/NO; five public states; at most 90 days | P1 §3.1, §3.6 | State machine; `math/schedule.rs`; SDK `view` | §3.4.2, §3.6 | 02–05 |
@@ -2719,7 +2729,7 @@ Android app comes from D-n, which BP v0.0.4 records in P1 §2.2 and places after
 | BR-18 | Sponsor perks: seal, name and link; posts case by case (BP-3) | P1 §3.7 | `content/partners.json` | §4 | 15 |
 | BR-19 | 20–30 launch partners with a free campaign and a 72-hour highlight | P1 §3.8; D-d | Team-key campaigns; `content/partners.json`; ranking | §3.4.10, §3.5, §4 | 02; 08; 10 |
 | BR-20 | Referral: 20% of the fee for 90 days; rebate up to 0.05 SOL (P-6, open); from day one on mainnet (BP-9) | P1 §3.9 | `ReferralLink`; indexer `referrals`; weekly routine; snapshot | §3.4.11, §3.5, §4 | 14 |
-| BR-21 | Five campaign kinds; price by touch, with a fresh price on every entry | P1 §4.2 | `readers/*`; the price split | §3.4.8 | 01; 03 |
+| BR-21 | Six campaign kinds; price by touch, with a fresh price on every entry | P1 §4.2 | `readers/*`; the price split | §3.4.8 | 01; 03 |
 | BR-22 | Exclusions: single-key outcomes, opinion, sports (phase 2), Token-2022 for now, small-token prices by steps | P1 §4.3 | Closed `ReaderKind` | §3.4.8 | 03 |
 | BR-23 | The program reads and compares; anyone can re-check the same account | P1 §4.4 | `resolve_campaign`; re-check panel; `recheck` | §3.4.6, §3.6 | 03; 05; 11 |
 | BR-24 | Two scheduled services on different providers; no public resolve button | P1 §4.4; P4 §4.5 | Keeper primary, standby, watchdog | §3.5 | 06–07 |

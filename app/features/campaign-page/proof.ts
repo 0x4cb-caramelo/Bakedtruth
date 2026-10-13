@@ -4,13 +4,14 @@
  *          "if read now". On a price campaign, the price facts the join applies: the price and its confidence, its
  *          publish time and posted slot, its age against the campaign's maximum age (30 s floor, Q4), whether a join
  *          would take it (fresh by time and by slot), and the 1% buffer near the target (question 7).
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry)
+ * Version: 0.2.0 (the sixth kind: a Meteora DBC curve's raise against its threshold, ./curve.ts)
+ * Sprint:  11 (site: campaign page and entry); the sixth kind's site
  */
 import {
   bandCrossesTarget,
   bytesToHex,
   DAMM_V2_PROGRAM_ID,
+  DBC_PROGRAM_ID,
   Direction,
   feedSymbol,
   isRefusal,
@@ -32,24 +33,24 @@ import {
   type FetchedAccount,
 } from "@brot/sdk/read";
 
-export type KindName = "price" | "burn" | "lock" | "pool" | "stake";
+import { curveFacts, curveIfReadNow, type CurveFacts } from "./curve";
 
-/**
- * The site's name for each reader kind it shows. The sixth, `DbcGraduated`, has none yet: its creation box and its
- * campaign page come later, and `kindOf` refuses it until then.
- */
-export const KIND_OF: Partial<Record<ReaderKind, KindName>> = {
+export type KindName = "price" | "burn" | "lock" | "pool" | "stake" | "curve";
+
+/** The site's name for each reader kind; `curve` is the sixth, a Meteora DBC launch curve's graduation. */
+export const KIND_OF: Record<ReaderKind, KindName> = {
   [ReaderKind.PriceTouch]: "price",
   [ReaderKind.SupplyAtMost]: "burn",
   [ReaderKind.DammV2LockedAtLeast]: "lock",
   [ReaderKind.StakePoolTvlAtLeast]: "pool",
   [ReaderKind.StakeAtLeast]: "stake",
+  [ReaderKind.DbcGraduated]: "curve",
 };
 
-/** The site's name for `kind`; throws for a kind the site does not show yet. */
+/** The site's name for `kind`; throws for a byte no reader has (a program newer than this site). */
 export function kindOf(kind: ReaderKind): KindName {
-  const name = KIND_OF[kind];
-  if (name === undefined) throw new Error(`the site does not show ${ReaderKind[kind] ?? kind} campaigns yet`);
+  const name = KIND_OF[kind] as KindName | undefined;
+  if (name === undefined) throw new Error(`the site does not know the campaign kind ${kind}`);
   return name;
 }
 
@@ -60,6 +61,7 @@ export const READER: Record<KindName, { owner: string; ownerId: string; field: s
   lock: { owner: "Meteora DAMM v2", ownerId: DAMM_V2_PROGRAM_ID, field: "permanent_lock_liquidity (u128 at byte 552)" },
   pool: { owner: "SPL Stake Pool", ownerId: STAKE_POOL_PROGRAM_ID, field: "last_epoch_total_lamports (u64)" },
   stake: { owner: "Vote program", ownerId: VOTE_PROGRAM_ID, field: "epoch stake (read by sol_get_epoch_stake)" },
+  curve: { owner: "Meteora DBC", ownerId: DBC_PROGRAM_ID, field: "quote_reserve (u64 at byte 240), stage at byte 308" },
 };
 
 export type PriceFacts = {
@@ -91,6 +93,8 @@ export type Proof = {
   price: PriceFacts | null;
   /** The epoch kinds: the epoch whose start is measured. */
   measuredEpoch: bigint | null;
+  /** A graduation campaign: the curve's raise against its threshold, its stage and when it completed. */
+  curve: CurveFacts | null;
 };
 
 const verdict = (yes: boolean): "YES" | "NO" => (yes ? "YES" : "NO");
@@ -139,6 +143,10 @@ function read(c: Campaign, kind: KindName, metric: FetchedAccount, chain: ChainT
       }
       return { value: pool.totalLamports, ifReadNow: null };
     }
+    case "curve": {
+      const curve = curveFacts(metric, c.target);
+      return { value: curve.raised, ifReadNow: curveIfReadNow(curve, c.deadlineAt, chain.unixTimestamp), curve };
+    }
     default:
       // The epoch stake is read by a syscall in the measured epoch, not from the vote account's bytes.
       return { value: null, ifReadNow: null };
@@ -158,6 +166,7 @@ export function proofOf(campaign: Campaign, metric: FetchedAccount | null, chain
     problem: metric ? null : "missing",
     price: null,
     measuredEpoch: kind === "pool" || kind === "stake" ? campaign.epoch : null,
+    curve: null,
   };
   if (!metric) return base;
   try {

@@ -11,7 +11,7 @@ import { KindTile } from "@/components/ui/kind-tile";
 import { asset } from "@/lib/base-path";
 import { KIND_NAME } from "../campaign-page/copy";
 import { WHAT } from "./copy";
-import { templateOf } from "./kinds";
+import { opensText, templateOf } from "./kinds";
 import type { SearchResult, Suggestion } from "./search";
 import { suggestionParts } from "./suggestion-text";
 
@@ -72,7 +72,7 @@ export function WhatList(props: {
             <ul role="group" aria-labelledby={`${id}-g-${k}`}>
               <li role="presentation" className="op-grp-h" id={`${id}-g-${k}`}>
                 {KIND_NAME[k]}
-                <em>{templateOf(k).opens === "now" ? WHAT.opensNow : WHAT.opensLater}</em>
+                <em>{opensText(templateOf(k))}</em>
               </li>
               {result.items
                 .filter((s) => s.kind === k)

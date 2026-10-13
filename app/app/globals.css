@@ -68,6 +68,8 @@
   --color-k-pool-fg: var(--k-pool-fg);
   --color-k-stake-bg: var(--k-stake-bg);
   --color-k-stake-fg: var(--k-stake-fg);
+  --color-k-curve-bg: var(--k-curve-bg);
+  --color-k-curve-fg: var(--k-curve-fg);
   --color-yes-bar: var(--yes-bar);
   --color-no-bar: var(--no-bar);
   --color-prize-bar: var(--prize-bar);

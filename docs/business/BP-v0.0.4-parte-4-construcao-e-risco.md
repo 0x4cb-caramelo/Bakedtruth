@@ -247,7 +247,7 @@ A administração do programa precisa ser pública.
 | Poder | Quem | Limite |
 |---|---|---|
 | Trocar o código | A carteira com várias assinaturas | Espera pública antes de valer |
-| Abrir campanha | Qualquer carteira, pagando US$ 500 em SOL ao preço lido na hora | Cinco tipos; contas que o leitor aceita; frase do site; de 3 a 90 dias |
+| Abrir campanha | Qualquer carteira, pagando US$ 500 em SOL ao preço lido na hora | Seis tipos (o sexto, a graduação de uma curva da Meteora, desde 12/10/2026, fechado na rede principal até as auditorias); contas que o leitor aceita; frase do site; de 3 a 90 dias |
 | Abrir sem pagar | Uma chave da equipe, para a equipe e os parceiros | Sem prêmio no pote, salvo se a equipe puser um, e sem o 1% do criador (P-3) |
 | Confirmar ou anular na janela | Uma chave da equipe | Nunca inverte. Toda anulação fica registrada, com o motivo |
 | Pausar | Uma chave da equipe, para ser rápido | Nunca trava pagamento nem devolução |
@@ -266,7 +266,7 @@ meio, "inside the rules" só existe no programa.
 
 | Regra no programa | O que impede |
 |---|---|
-| Só os cinco tipos | Campanha de opinião, que o slide do problema critica |
+| Só os seis tipos (cinco até 12/10/2026) | Campanha de opinião, que o slide do problema critica |
 | A conta é conferida na abertura: dono e formato certos para o tipo | Conta que o leitor não sabe ler |
 | Sem texto livre: "10 - site monta a frase" | O criador escrever uma coisa e o programa ler outra |
 | De 3 a 90 dias | Campanha curta demais para entrar com calma |

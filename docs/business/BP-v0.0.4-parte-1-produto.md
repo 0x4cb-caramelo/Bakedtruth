@@ -9,7 +9,7 @@ Substitui a Parte 1 da v0.0.3. As Partes 2 (negócio), 3 (tokens) e 4 (construç
 7/10/2026, citada em inglês. **Decisão, de 8/10/2026** é o que ele decidiu ao ler a v0.0.3, com as palavras como ele
 escreveu. **Proposta, aguardando decisão** é sugestão ainda não aprovada. **Proposta, a partir da pesquisa pedida
 pelo fundador** é a da fonte do preço do SOL (seção 4.1). As decisões de 8/10/2026 têm código de D-a a D-t, e as
-propostas abertas, de P-1 a P-9 (seção 5; a P-1 e a P-3 foram decididas depois); os números de 1 a 19 são as decisões pendentes da v0.0.3. Números de fora
+propostas abertas, de P-1 a P-9 (seção 5; a P-1 e a P-3 foram decididas depois); os números de 1 a 19 são as decisões pendentes da v0.0.3. **Acréscimo de 12/10/2026** é o sexto tipo (seção 4.2), fixado no pedido desse dia e fora das decisões de 8/10/2026. Números de fora
 trazem etiqueta: FATO (lido na fonte), FATO SECUNDÁRIO (lido em quem citou a fonte) e INFERÊNCIA (conta ou conclusão
 nossa). "v0.0.3, P1 §3.4" quer dizer Parte 1, seção 3.4.
 
@@ -40,6 +40,7 @@ o dinheiro.
 9. Citados aqui, mas fora do produto: app de celular só para Android (seção 2.2) e programa em Pinocchio (seção 2.3).
 10. Não mudaram: a taxa de 10% do lado perdedor, os cinco estados, o pote de um lado só, a campanha anulada, o
     fechamento, a indicação (salvo a moeda), os cinco tipos, a resolução e a janela de 6 horas.
+11. **Acréscimo de 12/10/2026:** um sexto tipo, a graduação de uma curva de lançamento da Meteora (seção 4.2).
 
 ## 1. Resumo
 
@@ -87,7 +88,8 @@ Sem prêmio e sem o 1%, como numa campanha de parceiro, são 960, ou 1,60 por 1,
 - A taxa do Brot é de 10% do lado perdedor: 25% para a tesouraria e 75% para a operação, até o equilíbrio (Parte 2,
   seção 4.2). Como guardar a tesouraria em SOL está em aberto (P-7).
 - O criador fica com 1% das entradas, tirado do pote, ou da taxa do Brot no caso raro.
-- Só os cinco tipos, conta conferida, sem texto livre, de 3 a 90 dias, taxas fixas. Sem teto e sem lista.
+- Só os seis tipos (o sexto, a graduação de uma curva da Meteora, desde 12/10/2026), conta conferida, sem texto
+  livre, de 3 a 90 dias, taxas fixas. Sem teto e sem lista.
 - Sem saída antecipada no MVP; uma regra só de fechamento; o que uma única chave decide de graça fica fora.
 - Pote de um lado só devolve as entradas, com 1% de taxa a partir da segunda carteira. Campanha anulada devolve tudo.
 - Dois serviços agendados resolvem; depois vêm a janela de 6 horas e o pagamento automático.
@@ -588,6 +590,18 @@ staked SOL").
 | Liquidez travada na Meteora | Uma pool tem pelo menos X de liquidez travada para sempre? | "A pool T/SOL chega a X de liquidez travada até o dia 30?" | Quem põe liquidez e trava. O dinheiro fica preso |
 | Tamanho de pool de staking | A pool tem pelo menos X SOL no começo de uma época? | "O JitoSOL começa a época E com X SOL ou mais?" | Quem deposita. O dinheiro precisa atravessar a virada da época |
 | Stake de validador | O validador tem pelo menos X SOL confiados a ele numa época? | "O validador V entra na época E com X SOL ou mais?" | Quem confia SOL ao validador antes de a época virar |
+| Graduação de uma curva da Meteora (acréscimo de 12/10/2026) | A curva de lançamento de um token na Meteora completa até a data? | "A curva do token T completa até o dia 30?" | Quem pagar o resto da curva: o SIM pode ser comprado, e o time do token é quem está mais perto de fazer isso |
+
+**O sexto tipo. Acréscimo de 12/10/2026** (M-1 a M-7 de [`docs/technical/meteora-readers-plan.md`](../technical/meteora-readers-plan.md)).
+Muitos lançamentos de token na Solana usam a DBC, a curva de lançamento da Meteora: o token é vendido a preço
+crescente até a curva juntar o valor que a configuração do lançamento marca; aí a curva completa, e o token
+**gradua** para uma pool. O programa lê a conta da curva e a configuração dela. Só aceita curvas cotadas em SOL e de
+85 SOL para cima, recusa as de token com transfer hook, e na abertura ainda falta ao menos 10% do valor. A meta é o
+próprio valor da curva: o site não deixa digitar outra, e o programa recusa qualquer outra. As entradas fecham quando
+a curva completa. A resolução usa o segundo que a própria conta gravou: completou até o prazo é SIM, mesmo lida
+depois; completou depois é NÃO. O SIM pode ser comprado, porque quem pagar o resto da curva a completa na hora, e a
+página da campanha diz isso com todas as letras. O tipo abre no devnet e fica fechado na rede principal até as
+auditorias cobrirem o leitor.
 
 Na campanha de preço, a modalidade é a de **toque**: dá SIM se o preço encostar no alvo em qualquer momento do prazo,
 e toda entrada exige um preço fresco. Em 4/10/2026 a Pyth tinha 1.881 preços, 423 deles de cripto (FATO, consulta
@@ -595,7 +609,7 @@ direta). As campanhas de época dependem do serviço agendado: a janela para ler
 
 **As regras mínimas. Decisão, de 8/10/2026 (D-j e D-k).** Com qualquer carteira abrindo, o critério está no código:
 
-1. **Só os cinco tipos.** O programa recusa qualquer outro.
+1. **Só os tipos da tabela:** cinco na decisão de 8/10/2026, seis desde 12/10/2026. O programa recusa qualquer outro.
 2. **A conta é conferida na abertura**: dono e formato certos para o tipo.
 3. **Sem texto livre.** "10 - site monta a frase": o site a monta com o tipo, a conta, a meta e a data. Com texto
    livre, quem abre escreveria uma coisa e o programa leria outra.
@@ -603,7 +617,7 @@ direta). As campanhas de época dependem do serviço agendado: a janela para ler
 5. **Taxas fixadas pelo programa.** O criador não escolhe a taxa nem a própria parte.
 
 **Sem lista e sem teto. Decisão, de 8/10/2026 (D-h e D-i).** "8 nao tem lista de contas aprovadas, nao lidaremos com
-tokenomics"; "7 sem teto, nem global nem individual". Qualquer conta que o leitor do tipo aceita serve, nos cinco
+tokenomics"; "7 sem teto, nem global nem individual". Qualquer conta que o leitor do tipo aceita serve, em todos os
 tipos, e nenhum pote tem limite. A lista e o teto por campanha que a v0.0.3 propunha saem.
 
 **O risco, sem rodeio.** Na v0.0.2, a defesa contra quem empurra o resultado era a equipe só abrir metas caras. Com a
@@ -624,8 +638,8 @@ lado, menos 10% de taxa, e sem teto não há limite para O.
   1 e o limite voltar para perto de US$ 56.
 
 A defesa que sobra é pequena: o custo de abrir, que pode ser de só US$ 50, e um aviso na tela. O preço pela Pyth
-continua seguro, porque ninguém controla o preço de um ativo grande. Nos outros quatro tipos, num token ou validador
-pequeno, quem entra corre esse risco, e a tela precisa dizer isso.
+continua seguro, porque ninguém controla o preço de um ativo grande. Nos outros cinco tipos, num token ou validador
+pequeno, ou numa curva que o próprio time pode completar, quem entra corre esse risco, e a tela precisa dizer isso.
 
 **O criador pode ter entrado na própria campanha. Proposta, aguardando decisão (decisão 14, P-9).** É o risco do
 patrocinador não divulgado (seção 3.7), agora sem ninguém identificado. Sem cadastro não há como proibir. A proposta:
@@ -760,7 +774,7 @@ entra com SOL de teste, que não vale dinheiro."
 | D-h | Sem teto, nem global nem por campanha; dois critérios para a rede principal | 7 e 18 | 2.3, 3.2, 4.2 |
 | D-i | Sem lista de contas aprovadas | 7 | 4.2 |
 | D-j | Sem texto livre | 13 | 4.2 |
-| D-k | Regras mínimas: cinco tipos, conta conferida, 3 a 90 dias, taxas fixas | 15 | 3.6, 4.2 |
+| D-k | Regras mínimas: cinco tipos (seis desde 12/10/2026), conta conferida, 3 a 90 dias, taxas fixas | 15 | 3.6, 4.2 |
 | D-l | Abertura, taxa de abertura e 1% do criador no núcleo (Sprint 02) | 16 | 2.3 |
 | D-m | Vocabulário: campanha on-chain, baker, criador | — | 4.6 |
 | D-n | App de celular só para Android; iPhone pelo site | — | 2.2 |

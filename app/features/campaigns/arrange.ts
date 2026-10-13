@@ -1,5 +1,5 @@
 /**
- * Purpose: what the list shows and in which order (Sprint 10): the five states and "saved", the five kinds, the search, the
+ * Purpose: what the list shows and in which order (Sprint 10): the five states and "saved", the six kinds, the search, the
  *          unlisted switch, and the sort. The default order is the ranking of the sprint's definition of done: two-sided
  *          campaigns first (by entries, then by time left before entries close), then one-sided, then empty ones. A
  *          partner highlight does not exist yet (no partners file), so no card moves up for it.

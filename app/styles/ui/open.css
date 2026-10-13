@@ -1,4 +1,4 @@
-/* Purpose: the creation box at /abrir (spec 3.12): the four numbered sections, the combobox and the five kinds, the typed slots and the account picker, the sticky preview with the rule, the card and the share image's thumbnail, the money table, the phone's price bar, the refusals table and the signing sheets. Tokens only; breakpoints 1100 / 860 / 700 / 412. From prototype-lab/campaigns/css/open.css (Sprint -1, approved 2026-10-10), as is, in the `components` layer;
+/* Purpose: the creation box at /abrir (spec 3.12): the four numbered sections, the combobox and the six kinds, the typed slots and the account picker, the sticky preview with the rule, the card and the share image's thumbnail, the money table, the phone's price bar, the refusals table and the signing sheets. Tokens only; breakpoints 1100 / 860 / 700 / 412. From prototype-lab/campaigns/css/open.css (Sprint -1, approved 2026-10-10), as is, in the `components` layer;
    colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.0 · Sprint 09 (the UI overhaul) */
 @layer components {
 .op-head { display: grid; gap: 6px; max-width: 720px; margin: 10px 0 20px; }
@@ -37,7 +37,7 @@
 .op-out { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--r-sm); background: var(--danger-bg); box-shadow: var(--shadow-pop); font-size: 12.5px; }
 .op-out img { flex-shrink: 0; width: 64px; height: auto; } .op-out p { margin: 0; } .op-out b { color: var(--error); }
 
-/* The five kinds: a radio card each; the four the program does not open yet say when. */
+/* The six kinds: a radio card each; those the program does not open yet say when. */
 .op-kinds { grid-template-columns: repeat(auto-fit, minmax(122px, 1fr)); }
 .op-kind, .op-feed, .op-amt { border: var(--bw) solid var(--line); border-radius: var(--r-sm); background: var(--bg); cursor: pointer;
   transition: border-color 0.15s, background-color 0.15s; }

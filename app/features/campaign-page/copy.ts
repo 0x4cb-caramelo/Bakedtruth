@@ -18,6 +18,7 @@ export const KIND_NAME: Record<KindName, string> = {
   lock: "Lock",
   pool: "Stake pool",
   stake: "Stake",
+  curve: "Graduation",
 };
 
 /** BR-26, on burn, lock and stake kinds: factual, not alarming. */
@@ -27,6 +28,8 @@ export const creatorHasEntry = (sides: string) => `The creator's wallet has an e
 const UNREADABLE = "If the account cannot be read, the campaign is voided.";
 /** Burn and lock (TP §3.4.6): a read after the deadline records NO, even when the target was met by then. */
 const BEFORE = "YES counts only if the program reads it before the deadline; read later, it resolves NO.";
+/** The graduation kind's risk, said on every page that states its rule (the Meteora plan, M-6). */
+export const BOUGHT = "YES can be bought by anyone who pays the rest of the curve.";
 const EPOCH =
   "Entries close when that epoch starts, or earlier on the campaign's schedule. If Brot's service misses its reading, the campaign is voided and every entry refunded.";
 
@@ -45,6 +48,7 @@ export function ruleText(a: {
     lock: `YES if the Meteora pool ${a.name} has at least ${a.target} liquidity units locked for good before ${a.deadline}. Locked liquidity only grows; entries lock the moment the target is reached. ${BEFORE}`,
     pool: `YES if the stake pool ${a.name} records at least ${a.target} at the start of epoch ${a.epoch}. NO if less. ${EPOCH}`,
     stake: `YES if the vote account ${a.name} has at least ${a.target} of active stake in epoch ${a.epoch}. NO if less. ${EPOCH}`,
+    curve: `YES if the Meteora launch curve ${a.name} raises its full ${a.target} and completes by ${a.deadline}. The program reads the second the pool itself stamped, so a curve completed in time is YES even when it is read later; one completed after the deadline is NO. Entries lock the moment the curve completes. ${BOUGHT}`,
   };
   return `${rules[a.kind]} ${UNREADABLE}`;
 }
@@ -67,6 +71,7 @@ export function ruleShort(a: {
     lock: `YES if the Meteora pool ${a.name} has at least ${a.target} liquidity units locked for good before ${a.deadline}.`,
     pool: `YES if the stake pool ${a.name} holds at least ${a.target} at the start of epoch ${a.epoch}.`,
     stake: `YES if the vote account ${a.name} has at least ${a.target} of active stake in epoch ${a.epoch}.`,
+    curve: `YES if the Meteora launch curve ${a.name} raises its full ${a.target} by ${a.deadline}.`,
   };
   return `${rules[a.kind]} Otherwise NO.`;
 }
