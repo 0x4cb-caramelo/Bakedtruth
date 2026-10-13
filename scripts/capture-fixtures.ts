@@ -1,8 +1,8 @@
 // Purpose: capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party
 //          programs actually write instead of a layout someone typed from memory.
-// Version: 0.3.0
+// Version: 0.4.0
 // Sprint:  01 (price reader proof); the mainnet set came from upstream pred-provable; mints, a vote account and the
-//          mainnet price accounts added in Sprint 03
+//          mainnet price accounts added in Sprint 03; the Meteora DBC set (./capture-fixtures-dbc.ts) for the sixth kind
 //
 // Usage:   bun run scripts/capture-fixtures.ts            every fixture, all clusters
 //          bun run scripts/capture-fixtures.ts pyth       only the fixtures whose name starts with "pyth"
@@ -15,6 +15,8 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { Connection, PublicKey } from "@solana/web3.js";
+
+import { DBC_FIXTURES } from "./capture-fixtures-dbc";
 
 type Cluster = "mainnet" | "devnet";
 type Entry = {
@@ -132,6 +134,7 @@ const FIXTURES: Record<string, [string, string, Cluster]> = {
     "Vote account with the most active stake on 2026-10-09, 3,762 bytes, version tag 3",
     "mainnet",
   ],
+  ...DBC_FIXTURES,
 };
 
 const prefix = process.argv[2] ?? "";

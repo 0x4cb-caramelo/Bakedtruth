@@ -3,7 +3,7 @@
  *          the SDK, the site, the app and the preview: what a creator may choose, per kind, as JSON-safe
  *          strings, and its conversion to the SDK's `OpenArgs`. No field carries text (D-j); the fees,
  *          the share, the price and the template are the program's, never the input's.
- * Version: 0.1.0
+ * Version: 0.1.1 (the sixth kind: `DbcGraduated` names its pool, and its target is the curve's threshold)
  * Sprint:  05 (SDK); the read API's schemas join in Sprint 08
  *
  * Its own entry point, `@brot/sdk/schemas`, so `read` and `tx` stay free of zod: zod 4's ESM build uses
@@ -13,7 +13,8 @@
  * Departs from the sketch in one place, as the program does: every kind passes `deadlineAt`, the epoch
  * kinds too (row 5 holds for every kind; Sprint 03). Amounts and ids are decimal strings, so no JSON
  * number loses precision. Range checks beyond the types are the program's rules, mirrored by
- * `validateOpenCampaign`, not repeated here.
+ * `validateOpenCampaign`, not repeated here. A `DbcGraduated` input has no target: the program takes only
+ * the curve's own threshold, which the caller reads from the pool's config and hands to `toOpenArgs`.
  */
 import { address } from "@solana/kit";
 import { z } from "zod";
@@ -73,6 +74,7 @@ export const OpenCampaignParams = z.discriminatedUnion("kind", [
       deadlineAt: UnixSeconds,
     })
     .strict(),
+  z.object({ kind: z.literal("DbcGraduated"), pool: Base58, deadlineAt: UnixSeconds }).strict(),
 ]);
 
 export const OpenCampaignInput = z
@@ -89,23 +91,29 @@ export const OpenCampaignInput = z
 
 export type OpenCampaignInput = z.infer<typeof OpenCampaignInput>;
 
-/** A parsed input as the SDK's `OpenArgs` and the metric account it names (the price kind's is derived). */
-export function toOpenArgs(input: OpenCampaignInput, expectedParamsVersion: number) {
+/**
+ * A parsed input as the SDK's `OpenArgs` and the metric account it names (the price kind's is derived).
+ * `curveThreshold`: `DbcGraduated` only, the `migration_quote_threshold` of the pool's config, its target.
+ */
+export function toOpenArgs(input: OpenCampaignInput, expectedParamsVersion: number, curveThreshold?: bigint) {
   const p = input.params;
   const metricAccount =
     p.kind === "SupplyAtMost"
       ? p.mint
-      : p.kind === "DammV2LockedAtLeast" || p.kind === "StakePoolTvlAtLeast"
+      : p.kind === "DammV2LockedAtLeast" || p.kind === "StakePoolTvlAtLeast" || p.kind === "DbcGraduated"
         ? p.pool
         : p.kind === "StakeAtLeast"
           ? p.voteAccount
           : null;
+  if (p.kind === "DbcGraduated" && curveThreshold === undefined) {
+    throw new RangeError("DbcGraduated takes the curve's threshold as its target");
+  }
   const args: OpenArgs = {
     id: BigInt(input.id),
     kind: ReaderKind[p.kind],
     direction: p.kind === "PriceTouch" && p.direction === "below" ? Direction.Below : Direction.Above,
     feedId: p.kind === "PriceTouch" ? hexToBytes(p.feedId) : new Uint8Array(32),
-    target: BigInt(p.target),
+    target: p.kind === "DbcGraduated" ? (curveThreshold as bigint) : BigInt(p.target),
     deadlineAt: BigInt(p.deadlineAt),
     openingUsd: BigInt(input.openingUsd ?? "0"),
     maxLamports: BigInt(input.maxLamports ?? "0"),

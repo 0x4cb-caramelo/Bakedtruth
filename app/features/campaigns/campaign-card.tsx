@@ -1,11 +1,13 @@
 /**
  * Purpose: one campaign's card (Sprint 10), in the approved prototype's structure (prototype-lab/campaigns, ui/card.js
  *          and css/card.css): kind and state, the sentence, the value read now against the target, each side's share
- *          of the entries with the pot bar, YES and NO shortcuts with what 1 SOL returns now (the entry panel's own
- *          estimate) while entries are open, the line past entries otherwise (Sprint 12), the creator notice on burn,
- *          lock and stake campaigns (BR-26, as a chip with the campaign page's words), the pot, the close and the save.
- * Version: 0.3.0 (the UI overhaul: the prototype's card; 0.2.1, Sprint 13's creator notice)
- * Sprint:  10 (site: campaign list); 12; 13
+ *          of the entries with the pot bar, YES and NO shortcuts while entries are open (the button holds only its
+ *          side; what 1 SOL returns now, the entry panel's own estimate, sits under it, as in the entry panel), the
+ *          line past entries otherwise (Sprint 12), the creator notice on burn, lock and stake campaigns (BR-26, as a
+ *          chip with the campaign page's words), the pot, the close and the save.
+ * Version: 0.3.1 (the estimate under each side's button; 0.3.0, the UI overhaul: the prototype's card; 0.2.1, Sprint
+ *          13's creator notice)
+ * Sprint:  10 (site: campaign list); 12; 13; the sixth kind's site
  */
 import Link from "next/link";
 import { AlertTriangle, Bookmark, Check, Clock, X } from "lucide-react";
@@ -32,12 +34,16 @@ function Sides({ card }: { card: Card }) {
     const bps = side === "yes" ? card.estYesBps : card.estNoBps;
     return bps === null ? "" : PANEL.perOne(perOne(bps));
   };
-  const button = (side: "yes" | "no") => (
-    <Link className={`side-btn ${side}`} href={`/c/${card.id}?side=${side}`}>
-      <span>{`${empty ? "Join " : ""}${side.toUpperCase()}`}</span>
-      <span className="per">{per(side)}</span>
-    </Link>
-  );
+  // As in the entry panel: the button holds only its side, and what 1 SOL returns sits under it; one link takes both.
+  const button = (side: "yes" | "no") => {
+    const line = per(side);
+    return (
+      <Link className="side-cell" href={`/c/${card.id}?side=${side}`}>
+        <span className={`side-btn ${side}`}>{side.toUpperCase()}</span>
+        {line ? <span className="side-est">{line}</span> : null}
+      </Link>
+    );
+  };
   const note = empty ? "No entries yet" : card.yesLamports === 0n || card.noLamports === 0n ? "One-sided so far" : "";
   return (
     <>

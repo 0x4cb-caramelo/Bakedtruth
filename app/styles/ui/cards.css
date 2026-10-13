@@ -1,5 +1,5 @@
 /* Purpose: the home page and the list of all campaigns: the top line, the mosaic (the "Open now" carousel with its proof panel, "Closing soon", "Answered recently"), how it works, the principles, the toolbar and the grid's states, then the dense list with its stacked phone rows. The card itself is css/card.css. Tokens only; see ../README.md for the contract. From prototype-lab/campaigns/css/cards.css (Sprint -1, approved 2026-10-10), as is, in the `components` layer;
-   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.0 · Sprint 09 (the UI overhaul) */
+   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.1 (each side's estimate under its button) · Sprint 09 (the UI overhaul) */
 @layer components {
 /* Top line: what it is, and the opening action with its cost. */
 .home-lead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 40px; margin: 4px 0 88px; } /* Baked perches above the carousel */
@@ -42,7 +42,7 @@
 .home-chance .n { text-align: right; } .home-chance .n strong { color: var(--no-fg); } .home-chance .chip { margin-bottom: 4px; }
 .home-chance.none { color: var(--muted); font: 700 32px/1 var(--display); }
 .home-sides { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.home-sides .side-btn { flex-wrap: wrap; text-decoration: none; } .home-sides .per { font-weight: 500; font-size: 12px; font-variant-numeric: tabular-nums; }
+.home-sides .side-btn { min-height: 46px; font: 700 19px/1 var(--display); }
 .home-note, .home-pot { margin: 0; color: var(--muted); font-size: 12px; } .home-pot { margin-top: auto; } .home-pot b { margin-right: 2px; color: var(--text); font: 700 24px/1 var(--display); }
 .home-proof { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 16px 18px; border: var(--bw) solid var(--line);
   border-radius: var(--r); background: var(--panel); box-shadow: var(--shadow); }

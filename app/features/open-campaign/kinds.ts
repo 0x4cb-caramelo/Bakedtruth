@@ -1,16 +1,17 @@
 /**
- * Purpose: the five templates of the creation box (D-k; P1 §4.2; TP §3.4.10 row 1), one per kind: its reader kind, the
+ * Purpose: the six templates of the creation box (D-k; P1 §4.2; TP §3.4.10 row 1), one per kind: its reader kind, the
  *          template id a link may name, what the account slot is, the program that must own it, the target's unit, and
  *          whether the kind opens in this build. `StakeAtLeast` stays closed until its devnet YES (TP §3.4.10 row 1: no
- *          build enables `stake-at-least` yet), so the box shows it and says when it opens, and never sends it. The words
- *          a creator reads (the slot, the owner) come from copy.ts.
- * Version: 0.2.0 (the Sprint 19 copy review: the words moved to copy.ts)
- * Sprint:  19 (site: open a campaign)
+ *          build enables `stake-at-least` yet), so the box shows it and says when it opens, and never sends it. The
+ *          sixth, `DbcGraduated` (a Meteora launch curve's graduation), opens in every build but mainnet's until the
+ *          audits cover its reader. The words a creator reads (the slot, the owner) come from copy.ts.
+ * Version: 0.3.0 (the sixth kind; 0.2.0, the Sprint 19 copy review: the words moved to copy.ts)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
 import { creatorCanControl, ReaderKind } from "@brot/sdk/read";
 
 import type { KindName } from "../campaign-page/proof";
-import { KIND_WORDS } from "./copy";
+import { KIND_WORDS, WHAT } from "./copy";
 
 /**
  * Whether this build of the program opens `StakeAtLeast` (the `stake-at-least` feature; off in every build today).
@@ -18,6 +19,12 @@ import { KIND_WORDS } from "./copy";
  * SDK's preparation: without it the SDK's mirror throws instead of refusing (the Sprint 19 adversarial review, L9).
  */
 export const STAKE_AT_LEAST_OPENS = false;
+
+/**
+ * Whether the program's build the site talks to opens `DbcGraduated` (`DBC_GRADUATED_OPENS`, M-7): every build but
+ * mainnet's, until the audits cover its reader. The cluster is the site's own (`NEXT_PUBLIC_CLUSTER`, as reads.ts).
+ */
+export const DBC_GRADUATED_OPENS = process.env.NEXT_PUBLIC_CLUSTER !== "mainnet-beta";
 
 /** How a target is typed: a price in US$, a raw whole number (a supply, a liquidity), or SOL. */
 export type TargetUnit = "usd" | "raw" | "sol";
@@ -34,8 +41,8 @@ export type Template = {
   unit: TargetUnit;
   /** Read at the start of a named epoch. */
   epoch: boolean;
-  /** "now" opens in this build; "after-devnet-yes" waits for a YES recorded on devnet. */
-  opens: "now" | "after-devnet-yes";
+  /** "now" opens in this build; "after-devnet-yes" waits for a devnet YES; "after-audits", for the audits. */
+  opens: "now" | "after-devnet-yes" | "after-audits";
   /** The words the typeahead matches, lower case. */
   words: readonly string[];
 };
@@ -96,11 +103,26 @@ export const TEMPLATES: readonly Template[] = [
     opens: STAKE_AT_LEAST_OPENS ? "now" : "after-devnet-yes",
     words: ["validator", "vote", "stake", "staked", "delegate", "delegation", "epoch", "active"],
   },
+  {
+    kind: "curve",
+    readerKind: ReaderKind.DbcGraduated,
+    id: "dbc-graduation",
+    slot: KIND_WORDS.curve.slot,
+    owner: KIND_WORDS.curve.owner,
+    unit: "sol",
+    epoch: false,
+    opens: DBC_GRADUATED_OPENS ? "now" : "after-audits",
+    words: ["graduate", "graduation", "curve", "bonding", "dbc", "launch", "launchpad", "meteora", "migrate", "fill"],
+  },
 ];
+
+/** When a template opens, as the kind lists say it. */
+export const opensText = (t: Template): string =>
+  t.opens === "now" ? WHAT.opensNow : t.opens === "after-audits" ? WHAT.opensAfterAudits : WHAT.opensLater;
 
 export const templateOf = (kind: KindName): Template => TEMPLATES.find((t) => t.kind === kind) as Template;
 export const templateById = (id: string | null | undefined): Template | null =>
   TEMPLATES.find((t) => t.id === id) ?? null;
 
-/** Every kind but price (burn, lock, stake pool, validator stake): whoever opened can push the number (BR-26, BP-14). */
+/** Every kind but price: whoever opened can push the number (BR-26, BP-14), a curve's by paying the rest of it. */
 export const creatorCanPush = (kind: KindName): boolean => creatorCanControl(templateOf(kind).readerKind);

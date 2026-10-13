@@ -18,7 +18,7 @@ import type { Issue } from "./check";
 import { SLOTS } from "./copy";
 import { DAY_SECONDS, daysFrom, type Draft } from "./draft";
 import { IssueList } from "./issue-list";
-import { useIsClient } from "./use-is-client";
+import { useIsClient } from "@/lib/use-is-client";
 
 const QUICK = [7, 14, 30, 60, 90];
 const pad = (n: number) => String(n).padStart(2, "0");

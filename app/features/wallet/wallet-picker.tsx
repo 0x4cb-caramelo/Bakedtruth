@@ -4,8 +4,10 @@
  *          and connected (S1: only from that click; no auto-connect). What the wallet answers when it does not connect
  *          shows here, never swallowed: a refusal, a locked wallet or the wrong network used to look like nothing. On
  *          Android the Mobile Wallet Adapter is one of the rows. One list for the whole site, opened by every Connect.
- * Version: 0.1.0
- * Sprint:  09 (site shell, theme and wallet), in the UI overhaul
+ *          The rows wait for hydration: on the server every adapter is "Unsupported", so a list built there differed
+ *          from the browser's first render (React #418) and made the whole page render again.
+ * Version: 0.1.1 (the rows after hydration; 0.1.0, the UI overhaul)
+ * Sprint:  09 (site shell, theme and wallet), in the UI overhaul; the 2026-10-13 hydration fix
  */
 "use client";
 
@@ -15,6 +17,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { AlertTriangle, ShieldCheck } from "lucide-react";
 
 import { Dialog } from "@/components/ui/dialog";
+import { useIsClient } from "@/lib/use-is-client";
 import { PICKER } from "./copy";
 
 const Picker = createContext<{ open: () => void }>({ open: () => undefined });
@@ -58,9 +61,12 @@ export function WalletPickerProvider({ children }: { children: ReactNode }) {
     select(name as Parameters<typeof select>[0]);
   };
 
-  const rows = [...wallets]
-    .filter((w) => w.readyState !== WalletReadyState.Unsupported)
-    .sort((a, b) => RANK[a.readyState] - RANK[b.readyState]);
+  const client = useIsClient();
+  const rows = client
+    ? [...wallets]
+        .filter((w) => w.readyState !== WalletReadyState.Unsupported)
+        .sort((a, b) => RANK[a.readyState] - RANK[b.readyState])
+    : [];
   return (
     <Picker.Provider value={{ open: () => (setFailure(null), setOpen(true)) }}>
       {children}

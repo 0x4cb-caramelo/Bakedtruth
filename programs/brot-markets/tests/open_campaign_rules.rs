@@ -1,16 +1,16 @@
-//! Purpose: the rules of `user_open_campaign` that read no account, on the host: row 1 (the five
-//!          kinds, `StakeAtLeast` behind its feature), the canonical arguments (D-j), the terms the
-//!          creator saw (`params_version`), and the fields `record` stores for each kind.
-//! Version: 0.0.1
-//! Sprint: 03 (readers and resolution), lane F. The handler runs the same rules in LiteSVM
-//!         (tests/brot/open-campaign-kinds.test.ts and its siblings), after the SBF build.
+//! Purpose: the rules of `user_open_campaign` that read no account, on the host: row 1 (the six
+//!          kinds, `StakeAtLeast` behind its feature, `DbcGraduated` off mainnet), the canonical
+//!          arguments (D-j), the terms the creator saw, and the fields `record` stores per kind.
+//! Version: 0.0.2
+//! Sprint: 03 (readers and resolution), lane F; the sixth kind. The handler runs the same rules
+//!         in LiteSVM (tests/brot/open-campaign-kinds.test.ts and its siblings), after the build.
 
 use brot_markets::{
     error::BrotError,
     instructions::campaigns::open_campaign::{
         payment::Payment,
         record::{opened_event, write, Opening},
-        rules::{canonical_direction, opening_kind, terms_unchanged, STAKE_AT_LEAST_OPENS},
+        rules::*,
         OpenCampaignArgs,
     },
     layout::{LeI128, LeI64, LeU16, LeU32, LeU64, ZeroCopy},
@@ -22,31 +22,35 @@ use brot_markets::{
 };
 use pinocchio::Address;
 
-const KINDS: [ReaderKind; 5] = [
+const KINDS: [ReaderKind; 6] = [
     ReaderKind::PriceTouch,
     ReaderKind::SupplyAtMost,
     ReaderKind::DammV2LockedAtLeast,
     ReaderKind::StakePoolTvlAtLeast,
     ReaderKind::StakeAtLeast,
+    ReaderKind::DbcGraduated,
 ];
 const NO_FEED: [u8; 32] = [0; 32];
 const FEED: [u8; 32] = [7; 32];
 const UNUSED: Result<Direction, BrotError> = Err(BrotError::UnusedArgumentNotZero);
 const ABOVE: Result<Direction, BrotError> = Ok(Direction::Above);
 
+/// What row 1 answers for `kind`, whether or not it opens in this build.
+fn row_1(kind: ReaderKind, opens: bool) -> Result<ReaderKind, BrotError> {
+    opens.then_some(kind).ok_or(BrotError::ReaderKindNotOpen)
+}
+
 #[test]
-fn row_1_four_kinds_open_and_stake_at_least_only_with_its_feature() {
+fn row_1_four_kinds_open_stake_at_least_with_its_feature_and_dbc_off_mainnet() {
     assert_eq!(STAKE_AT_LEAST_OPENS, cfg!(feature = "stake-at-least"));
+    assert_eq!(DBC_GRADUATED_OPENS, !cfg!(feature = "mainnet"));
     for kind in &KINDS[..4] {
         assert_eq!(opening_kind(*kind as u8), Ok(*kind));
     }
-    let stake = opening_kind(ReaderKind::StakeAtLeast as u8);
-    if cfg!(feature = "stake-at-least") {
-        assert_eq!(stake, Ok(ReaderKind::StakeAtLeast));
-    } else {
-        assert_eq!(stake, Err(BrotError::ReaderKindNotOpen));
-    }
-    for byte in 5..=u8::MAX {
+    let (stake, dbc) = (ReaderKind::StakeAtLeast, ReaderKind::DbcGraduated);
+    assert_eq!(opening_kind(4), row_1(stake, STAKE_AT_LEAST_OPENS));
+    assert_eq!(opening_kind(5), row_1(dbc, DBC_GRADUATED_OPENS));
+    for byte in 6..=u8::MAX {
         assert_eq!(opening_kind(byte), Err(BrotError::UnknownReaderKind));
     }
 }

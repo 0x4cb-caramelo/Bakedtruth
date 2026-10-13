@@ -25,8 +25,9 @@ import type { DecodedEvent } from "./decoder";
 export const BOTH_SIDES_SCORE = false;
 
 /**
- * Whether whoever opened a campaign of this kind can control its result (a burn, a lock, a stake): every kind but a
- * price, the kinds whose pages carry the creator notice. The creator's own wallet never scores on them.
+ * Whether whoever opened a campaign of this kind can control its result (a burn, a lock, a stake, a curve's graduation,
+ * which whoever pays the rest of the curve completes): every kind but a price, the kinds whose pages carry the creator
+ * notice. The creator's own wallet never scores on them.
  */
 export const creatorCanControl = (kind: ReaderKind): boolean => kind !== ReaderKind.PriceTouch;
 

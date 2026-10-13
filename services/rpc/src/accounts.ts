@@ -1,23 +1,28 @@
 /**
  * Purpose: what an account read may return through brot-rpc (TP §3.5, by owner, since there is no list of accounts,
- *          D-i): an account owned by the program, one of the five readers' programs or the Sysvar program comes back
- *          whole; any other comes back with its owner and size but no data, so the creation box can still say whose it
- *          is while the relay serves no other program's bytes; a missing one stays null. The program's ProgramData is
- *          the one exception by address (A-8), and only as a slice of offset 0 and at most 45 bytes. What may be
- *          cached: another program's account and the sysvars, never the program's own (a page acts on its config, its
- *          campaigns and its entries: the web smoke through the relay saw a reload inside the cache's life keep a pause
- *          that had ended), a missing account or ProgramData. Pure.
- * Version: 0.1.0
- * Sprint:  08 (indexer, API, relay and points)
+ *          D-i): an account owned by the program, one of the six readers' programs or the Sysvar program comes back
+ *          whole, and so do the two that hold a token's symbol, which names a graduation campaign's curve (Metaplex
+ *          Token Metadata, and Token-2022 for a mint that keeps its metadata in itself); any other comes back with its
+ *          owner and size but no data, so the creation box can still say whose it is while the relay serves no other
+ *          program's bytes; a missing one stays null. The program's ProgramData is the one exception by address (A-8),
+ *          and only as a slice of offset 0 and at most 45 bytes. What may be cached: another program's account and the
+ *          sysvars, never the program's own (a page acts on its config, its campaigns and its entries: the web smoke
+ *          through the relay saw a reload inside the cache's life keep a pause that had ended), a missing account or
+ *          ProgramData. Pure.
+ * Version: 0.1.2 (a token's symbol: Token Metadata and Token-2022; 0.1.1, the sixth reader's program, Meteora DBC)
+ * Sprint:  08 (indexer, API, relay and points); the sixth kind's site
  */
 import {
   BPF_LOADER_UPGRADEABLE_ID,
   DAMM_V2_PROGRAM_ID,
+  DBC_PROGRAM_ID,
   PROGRAM_DATA_METADATA_LEN,
   PROGRAM_ID,
   PYTH_RECEIVER_ID,
   SPL_TOKEN_PROGRAM_ID,
   STAKE_POOL_PROGRAM_ID,
+  TOKEN_2022_PROGRAM_ID,
+  TOKEN_METADATA_PROGRAM_ID,
   VOTE_PROGRAM_ID,
 } from "@brot/sdk/read";
 
@@ -28,9 +33,12 @@ const SERVED = new Set<string>([
   PYTH_RECEIVER_ID,
   SPL_TOKEN_PROGRAM_ID,
   DAMM_V2_PROGRAM_ID,
+  DBC_PROGRAM_ID,
   STAKE_POOL_PROGRAM_ID,
   VOTE_PROGRAM_ID,
   SYSVAR_OWNER,
+  TOKEN_METADATA_PROGRAM_ID,
+  TOKEN_2022_PROGRAM_ID,
 ]);
 
 export type AccountInfo = { owner?: unknown; data?: unknown; [field: string]: unknown } | null;

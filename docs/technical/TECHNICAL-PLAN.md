@@ -1,6 +1,6 @@
 # Brot Markets — Technical Plan
 
-**Version:** 0.1.7 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
+**Version:** 0.1.10 · **Status:** v0.1.0, written on 2026-10-08 at the founder's request ("faca o plano de implementacao.
 todo em ingles") from the architecture proposal 0.4 the founder approved that day ("sim para todos") and from BP
 v0.0.4, merged into `main` with PR #35 on 2026-10-08; v0.1.1 aligns it with what Sprint 02 built and measured
 (`docs/sprints/sprint-02-pot-core.md`, "TP to align"); v0.1.2 aligns it with what Sprint 03 built and to the founder's
@@ -10,8 +10,12 @@ v0.1.4 with Sprint 05 (§3.4.19); v0.1.5 records what Sprint 13 built (§3.5 poi
 its reviews deferred (§7.4), its privacy review (§8.2), a new economic risk (§13) and C13 (§14.4); v0.1.6 records
 the founder's answers to Sprint 13's twelve questions, given after its merge (§3.4.7, §3.5 points, §3.6, §7.4, §8.2,
 §13, §14.2); v0.1.7 records what Sprint 19 built (§3.6, the creation box), what its reviews deferred (§7.5) and its
-privacy review (§8.3) · **Date:**
-2026-10-10 · **Supersedes:** v0.0.1 of 2026-10-05,
+privacy review (§8.3); v0.1.8 adds the sixth kind, `DbcGraduated`, a Meteora DBC curve's graduation (§3.4.6, §3.4.8,
+§3.4.10; `docs/technical/meteora-readers-plan.md`); v0.1.9 counts six kinds where the plan still said five and
+records the sixth kind's site (§3.6: the creation box and the campaign page); v0.1.10 records A-11's one exception,
+approved by the founder on 2026-10-13: a graduation curve named by its token's ticker (§2 A-11, §3.4.10 "Display
+names", §3.5 the relay, the content table)
+· **Date:** 2026-10-13 · **Supersedes:** v0.0.1 of 2026-10-05,
 written in Portuguese, approved by the founder ("docs aprovados, podemos dar início"). Its last text, with §8.1, is in
 git history at commit `2089b81` (`git show 2089b81:docs/technical/TECHNICAL-PLAN.md`), the last commit that changed it;
 `0b40554`, the `main` before v0.1.0, holds the same text; tag `sprint-01` holds it before §8.1 was added
@@ -239,7 +243,10 @@ program before the Sprint 04 randomized money test passes.
 - **A-10** No creation rule lives only in the site: every rule of §3.4.10 is checked in `user_open_campaign`; the SDK
   mirrors them for the preview, and a test feeds each refused case straight to the program.
 - **A-11** No creator-supplied text is stored or shown. Names come from `content/account-names.json` or the pinned Pyth
-  feed list, never from token metadata the token's owner can change.
+  feed list, never from token metadata the token's owner can change. **One exception, the graduation kind's curve**
+  (`DbcGraduated`, approved by the founder on 2026-10-13): it is named by the ticker its token's metadata stores, cleaned
+  and always beside the pool's last four characters, `$TEST (…7Dny)`, or `Token (…7Dny)` when there is none to show;
+  only a reviewed pool shows its name alone (§3.4.10, "Display names"). Nothing is stored, and the program never reads it.
 
 **Data contracts that prevent desync [DP]** (proposal §2.3). Each contract has one source; consumers derive from it; a
 check fails when they drift.
@@ -626,6 +633,7 @@ frozen program's guard, kept [F]). The two keepers on two providers are BR-24 (�
 | Family | Before the deadline | After the deadline |
 |---|---|---|
 | Irreversible fact (`SupplyAtMost`, `DammV2LockedAtLeast`) | Target met: `Yes`. Otherwise: refused, not resolvable yet | `No`. If the late read shows the target met, `No` with `met_late` set; the watchdog alerts and the team may void within the window |
+| Stamped fact (`DbcGraduated`, 2026-10-12) | Curve completed (stage 1 or later): `Yes`. Otherwise: refused, not resolvable yet | Completed with `finish_curve_timestamp` at or before the deadline: still `Yes`, the pool says when [F] (DBC's `process_swap.rs` stamps it from the clock). Completed later, or with no stamp: `No` with `met_late`. Not completed: `No` (`readers/shared.rs`, `stamped_resolution`) |
 | Epoch snapshot (`StakePoolTvlAtLeast`, `StakeAtLeast`) | In the measured epoch: `Yes` or `No` | Epoch missed: `Void` (`MissedWindow`). The frozen code records NO here [F] (`resolve_stake_pool`), which in a pot would pay out without a reading |
 | Price touch (`PriceTouch`) | A valid proof of a touch: `Yes` (§3.4.8) | `No`, or `Void` (`StaleFeed`) by the test below (D7, option b) |
 | Any | Unreadable account: refused | Unreadable account: `Void` (`UnreadableAccount`) |
@@ -685,7 +693,7 @@ house, refunded to whoever opened on a house failure (P-4, P4 §4.6).
 
 The prize returns whole to whoever opened on every void (P-4). In a one-sided pot, the 10% is kept (P-4).
 
-#### 3.4.8 Readers (the five kinds; price split; SOL/USD at opening)
+#### 3.4.8 Readers (the six kinds; price split; SOL/USD at opening)
 
 `ReaderKind` is closed, with no generic reader [FD] (P1 §4.2; D-k). Each reader checks the owner and the layout of its
 account before reading a field and returns an error, never a panic, on unexpected bytes [F]
@@ -700,6 +708,7 @@ bounds-checked `Cursor`, never by slicing [F] (`CLAUDE.md`).
 | `DammV2LockedAtLeast { shift }` | Liquidity locked on Meteora | DAMM v2, `cpamdpZC…` | Reads `permanent_lock_liquidity`, which only grows; 1,112-byte pool [F] (`tests/fixtures/index.json`) | 03 |
 | `StakePoolTvlAtLeast { epoch }` | Stake pool size | SPL Stake Pool, `SPoo1Ku8…` | Reads the snapshot the pool writes at its first update of an epoch [F] (`resolver.rs`) | 03 |
 | `StakeAtLeast { epoch }` | Validator stake | Vote program | Through `sol_get_epoch_stake`. Never returned YES in a test: LiteSVM's npm package returns zero [F] (`CLAUDE.md`); the crate's `set_epoch_stake` may allow it **[AC]**. Opens for real only after a YES checked on devnet (check 1, §3.4.10) | 03 |
+| `DbcGraduated` (byte 5, 2026-10-12) | A Meteora launch curve graduates | Meteora DBC, `dbcij3LW…` | Reads a 424-byte `VirtualPool` (a `TransferHookPool` is refused, `CurveHasTransferHook`): `quote_reserve` at 240, `migration_progress` at 308, `finish_curve_timestamp` at 344. The opening also reads the pool's own `PoolConfig` (1,048 bytes) passed after the nine slots: priced in wSOL (`CurveNotInSol`), threshold at least `DBC_MIN_GRADUATION_LAMPORTS`, 85 SOL (1 SOL in `drill`; `CurveTooSmall`); the target is that threshold (`TargetNotThreshold`), and at least 10% of it is still missing (`TargetTooClose`). Entries lock at stage 1. YES can be bought: whoever pays the rest of the curve completes it. Offsets checked on 12 mainnet accounts [F] (`tests/fixtures/dbc-*`); `readers/dbc_graduation.rs` | after 05 |
 
 **Kept out [FD]** (P1 §4.3): single-key outcomes (mint or freeze authority revoked, immutable program, immutable
 metadata), locked tokens, Token-2022 for now, small-token prices (three steps, later), opinion, sports (phase 2).
@@ -746,7 +755,7 @@ sponsored account, and older ones are skipped; only the push oracle writes it [E
 | Power | Who | Limit in code |
 |---|---|---|
 | Upgrade the program; act as `admin` | Devnet: a file key held for the company; Lucas and Ronaldo hold the keys, and which of them holds the upgrade key on deploy day is set in Sprint 05 (Q12). Mainnet: the 2-of-3 multisig on hardware devices, with the three partners, and a public wait of 24 to 48 hours before an upgrade takes effect [FD] (P4 §4.1) | Verifiable build (Sprint 16); two-step `admin` change |
-| Open a campaign, paying | Any wallet | Five kinds; an account the reader accepts; 3 to 90 days; fees from config; US$500 at the Pyth price (§3.4.10) |
+| Open a campaign, paying | Any wallet | Six kinds (`DbcGraduated` off in the mainnet build, M-7); an account the reader accepts; 3 to 90 days; fees from config; US$500 at the Pyth price (§3.4.10) |
 | Open without paying | One team key, for the team or a launch partner | `creator_share_bps = 0`; no prize unless the team adds one (P-3). Every team-key opening raises an alert (§3.5) |
 | Confirm, void, contest | One team key | Only in `InReview`; never inverts |
 | Pause | One team key, to be fast | Only `Normal` → `EntriesHalted` |
@@ -794,7 +803,7 @@ the program (X0.7); the SDK mirrors them for the preview and must refuse at leas
 
 | # | Check | Rule | Source | Sprint |
 |---|---|---|---|---|
-| 1 | The kind is one of five; four open. `StakeAtLeast` opens only in a build with the feature `stake-at-least`, which no build enables until a devnet YES (Sprint 05) | Closed `ReaderKind`; `ReaderKindNotOpen` | P1 §4.2; D-k | 02 (price), 03 |
+| 1 | The kind is one of six; four open everywhere. `StakeAtLeast` opens only in a build with the feature `stake-at-least`, which no build enables until a devnet YES (Sprint 05); `DbcGraduated` opens in every build but `mainnet` (`DBC_GRADUATED_OPENS`, until the audits cover it) | Closed `ReaderKind`; `ReaderKindNotOpen` | P1 §4.2; D-k; the Meteora plan, M-7 | 02 (price), 03 |
 | 2 | The account fits the kind: owner, size, discriminator, through the reader's `validate_at_creation` | With no list, the only gate on the account (D-i), except the price kind's feed list (row 4) | P1 §4.2; D-i, D-k | 02, 03 |
 | 3 | The target is not met yet and sits a minimum distance from the current value. Built (Sprint 03): a target already met, including zero or less on an "at least" kind, is `TargetAlreadyTouched`; a negative supply target and a `Below` price target at or below zero are `TargetUnreachable`; the minimum distance is 1% of the current value for each non-price kind (`MIN_DISTANCE_BPS_*`), and for the price kind it is measured from the edge of the confidence band **[AC]** | Otherwise the campaign is decided at birth | proposal §2.4.3 (OCR) | 02, 03 |
 | 4 | Price kind: `feed_id` is on the program's compiled feed list (founder answer 1, 2026-10-09; day one: Pyth's official sponsored list, 62 feeds on mainnet and 17 on devnet on that date, built in Sprint 04); the sponsored account of `feed_id` exists, owner `rec2HH…`, Full, fresh, confidence ≤ 0.5% of the price | §3.4.8, §3.4.1 | P1 §4.2; proposal §2.5 | 02; 04 (list) |
@@ -818,6 +827,30 @@ page lives at `/c/{id}`.
 
 **Display names (A-11).** `content/account-names.json` holds names and explorer links of accounts two people reviewed.
 It is not a gate (D-i): an unnamed account can still be used, and shows its shortened address.
+
+**A-11's exception: a graduation curve's ticker (2026-10-13) [F].** A Meteora launch curve is a brand-new token by
+nature, so no team could review its name before a campaign on it opens, and a title like "Meteora launch curve 12uL…7Dny
+raises its full 85 SOL?" names nothing a baker recognises. The request of 2026-10-13, approved by the founder the
+same day (`session-log/2026-10-13-ticker-da-curva-e-botoes-de-lado.md`): any curve any creator pastes is named by its
+token's ticker, automatically. The site reads it for the screens only (the program never does, and nothing is
+stored): the pool's `base_mint` (byte 136 of the `VirtualPool`), then the TokenMetadata extension of a Token-2022 mint
+or, for a classic mint, its Metaplex Token Metadata account (`["metadata", metaqbx…, mint]`), each read owner first
+through the SDK (`packages/sdk/src/read/chain/token-symbol.ts`, whose `tickerOf` also says what of a symbol a screen
+may print, the same rule for the site and the app). The rule (`app/features/campaigns/curve-name.ts`):
+
+| The pool | Its name in every title, card, row and rule |
+|---|---|
+| In `content/account-names.json`, kind `curve` (two people reviewed it) | The reviewed name alone: `$BROT` |
+| Any other, its ticker printable | `$TICKER (…7Dny)`, the pool's last four characters always beside it |
+| Any other, no ticker to show | `Token (…7Dny)` |
+
+A ticker is shown only after its control characters and one leading `$` are dropped, and only as 1 to 10 ASCII letters
+and digits: a byte past ASCII (an emoji, a look-alike letter, a direction mark) or a longer text shows nothing. A
+ticker that claims SOL, WSOL, USDC, USDT or BROT, in any case, shows nothing either. The suffix is the anti-spoofing
+guard: two tokens may share a ticker, never a pool. The pool's address and the token's mint (its CA) stay whole in the
+campaign page's proof details, each linked to the explorer with a copy button. Written risk: a token's update
+authority may change its symbol after the campaign opens; the site reads it again on each page view, and the suffix
+and the proof's addresses never change. The relay serves the two owners whole (§3.5).
 
 **What the checks do not stop [FD, written risk]** (P1 §4.2; P4 §4.3; proposal §2.4.7). Whoever controls the measured
 thing can push it: a token team can burn its own token, a pool owner can lock liquidity, a staker can move stake. With
@@ -978,7 +1011,7 @@ Requirements use the proposal's BR-xx IDs (Appendix A). The Product Brief's R-xx
 | BR-17 neutral prize or sealed entry | The opening's prize; the sealed entry; Cloak off-chain | 02; 15 |
 | BR-19 launch partners | Team-key opening; `content/partners.json` | 02; 08 |
 | BR-20 referral | `ReferralLink`; `user_link_referrer`; the weekly routine | 14 |
-| BR-21 five kinds; a fresh price on every entry | `readers/*`; the join check of §3.4.8 | 01, 02, 03 |
+| BR-21 six kinds; a fresh price on every entry | `readers/*`; the join check of §3.4.8 | 01, 02, 03 |
 | BR-22 exclusions | Closed `ReaderKind`; classic SPL Token only | 03 |
 | BR-23 the program reads; anyone re-checks | `resolve_campaign`; `observed_value`; the `CampaignResolved` evidence | 03 |
 | BR-25 six-hour window; confirm or void only; two-stage contest | `InReview`; team instructions; `reread_campaign`; `admin_decide_contest` | 04; 14 |
@@ -1291,7 +1324,8 @@ from a browser or the app to a paid provider.
   and `/rpc` traffic can never starve the keeper.
 - **Reads:** the program's accounts, the caller's balance, the Pyth feeds (SOL/USD included) and the metric accounts the
   creation preview needs. With no list (D-i), a metric read is allowed by owner program: the relay returns an account
-  only if one of the five readers accepts its owner. Methods: `getLatestBlockhash`, `getBlockHeight`,
+  only if one of the six readers accepts its owner, or if it holds a token's symbol (Metaplex Token Metadata and
+  Token-2022, since 2026-10-13: a graduation curve's ticker, A-11's exception). Methods: `getLatestBlockhash`, `getBlockHeight`,
   `getSignatureStatuses`, `getRecentPrioritizationFees`, balances. The final allowlist comes from a trace of the real
   client in Sprint 11; the new client polls signature status instead of opening a WebSocket, which today's client does
   (`app/lib/hooks.ts:228`) **[F]**. The trace, taken on 2026-10-10 from the site's tests and its web smoke, is
@@ -1454,6 +1488,15 @@ system of Sprint -1; it replaces the provisional `services/landing` on `127.0.0.
   - **The share-card preview** waits for the share card itself (Sprint 10, carried); the preview shows the list card.
   - **A team key opens free** only, as the DoD says (no `opening_usd`): a team key's prize (C44), which the program
     accepts, has neither a screen nor a script yet (`scripts/team/open.ts` opens free too).
+- **The sixth kind's site (2026-10-12) [F]** (branch `feat/dbc-graduation-ui`): the Graduation template takes a Meteora
+  DBC pool; the box reads the config the pool names (one more `getAccountInfo`) and checks both in the reader's order
+  (`account-check.ts`). The target is not typed: it is the curve's threshold, shown read-only with what the curve has
+  raised (`curve-target.tsx`), and a refusal of it (a completed curve, one more than 90% full) shows by the pool's
+  slot. The template opens on every cluster but mainnet (`DBC_GRADUATED_OPENS`, as the program's M-7). The campaign
+  page shows the curve as a progress bar of `quote_reserve` over `migration_quote_threshold`, its stage, the second the
+  pool stamped its completion, and always the risk, "YES can be bought by anyone who pays the rest of the curve."
+  (`app/features/campaign-page/curve-progress.tsx`); "if read now" follows `stamped_resolution` (`curve.ts`). The cards
+  and the home page read the curve's raise, with YES only for a curve completed in time.
 
 **The share card** (proposal §2.9) **[DP]**.
 
@@ -1816,7 +1859,7 @@ sign-in challenges, if H1 is ever approved, is a separate, backed-up file owned 
 
 | File | Holds | Read by | Rule |
 |---|---|---|---|
-| `content/account-names.json` | Display names and explorer links of accounts that two people reviewed | Indexer (`/api/v1/names`), site, app | Not a gate (D-i): an unnamed account can still be used and shows its shortened address (A-11). Never token metadata the token's owner can change |
+| `content/account-names.json` | Display names and explorer links of accounts that two people reviewed (kinds `burn`, `lock`, `pool`, `stake`, `curve`) | Indexer (`/api/v1/names`), site, app | Not a gate (D-i): an unnamed account can still be used and shows its shortened address (A-11). Never token metadata the token's owner can change, but for a graduation curve's ticker, always beside its pool's last characters (A-11's exception, §3.4.10) |
 | `content/partners.json` | Which campaign belongs to which launch partner; the sealed entry's name and seal; highlight dates | Indexer (ranking, partner report), site | A team key opens each partner campaign and stays its `creator` with `creator_share_bps = 0` (P-3) |
 | `content/void-log/` | The public text of each void, next to the on-chain `VoidReason` | Site (register) | Every void records its reason (P4 §4.6; BR-45) |
 | `content/powers.md` | Who holds which key and power | Site (register) | BR-41; P4 §4.2 |
@@ -1967,7 +2010,7 @@ checkable. Mainnet needs both audit reports and the 2-of-3 multisig; there is no
 
 | Requirement | What counts as done |
 |---|---|
-| External audit | Both firms report on the exact version; every serious finding is fixed and re-checked by whoever raised it; the reports are public. Minimum scope: `checks`, opening (with the Pyth charge and the creator share), joining, resolution, settlement, payout, the five readers, sponsorship and configuration. Whether both firms review Pinocchio was not found (P4 §8) |
+| External audit | Both firms report on the exact version; every serious finding is fixed and re-checked by whoever raised it; the reports are public. Minimum scope: `checks`, opening (with the Pyth charge and the creator share), joining, resolution, settlement, payout, the six readers, sponsorship and configuration. Whether both firms review Pinocchio was not found (P4 §8) |
 | 2-of-3 multisig | Owns the upgrade authority, `admin` and the `fee_recipient` account, on hardware devices, with a public 24–48 h wait and a test signature. The product is chosen in Sprint 16 (T7, C11) |
 | Creation rules in the audited version | Proposed by the BP (BP-17, open in P-9): the opening rules, the Pyth charge and the 1% are frozen into the audited version (Sprint 16) |
 | Verifiable build | `solana-verify build` in CI and `verify-from-repo` after deploy [E82]; a public repository at the deployed commit |
@@ -2697,7 +2740,7 @@ Android app comes from D-n, which BP v0.0.4 records in P1 §2.2 and places after
 | ID | Requirement (short) | BP source | Component | TP section | Sprint |
 |---|---|---|---|---|---|
 | BR-01 | Any wallet opens a campaign for US$500 in SOL, inside the rules | P1 §4.1; D-b | `user_open_campaign`; the creation box | §3.4.10, §3.4.16, §3.6 | 02–03; -1 and 19 |
-| BR-02 | Creation rules in the program: five kinds, the account checked by its reader, no free text, 3–90 days, fixed fees; no list | P1 §4.2; P4 §4.3; D-i, D-k | The opening checks; A-10, A-11 | §3.4.8, §3.4.10 | 02–03 |
+| BR-02 | Creation rules in the program: six kinds, the account checked by its reader, no free text, 3–90 days, fixed fees; no list | P1 §4.2; P4 §4.3; D-i, D-k | The opening checks; A-10, A-11 | §3.4.8, §3.4.10 | 02–03 |
 | BR-03 | The creator's 1% of entries, from the pot while winners stay whole, the shortfall from Brot's fee (never reached since the Economic Viability Rule, §3.4.18: a pot that cannot pay both is refunded); none for the team or launch partners | P1 §3.4; D-g; P-2, P-3 (decided) | `creator_share()`; `settle_creator_share`; I11–I13 | §3.4.5, §3.4.13, §3.4.16 | 04 |
 | BR-04 | The opening: 90% prize, 10% to Brot, held in the campaign vault and collected at the outcome (T23); priced and shown by Pyth (D-f; 2b, 2026-10-11); treasury per P-7 (open) | P1 §4.1; P4 §4.7; D-b, D-e, D-f | Opening conversion; `sweep_fees`; refill and conversion runbook | §3.4.4, §3.4.10, §3.4.16, §12 | 02; 04; 06; 18 |
 | BR-05 | YES/NO; five public states; at most 90 days | P1 §3.1, §3.6 | State machine; `math/schedule.rs`; SDK `view` | §3.4.2, §3.6 | 02–05 |
@@ -2716,7 +2759,7 @@ Android app comes from D-n, which BP v0.0.4 records in P1 §2.2 and places after
 | BR-18 | Sponsor perks: seal, name and link; posts case by case (BP-3) | P1 §3.7 | `content/partners.json` | §4 | 15 |
 | BR-19 | 20–30 launch partners with a free campaign and a 72-hour highlight | P1 §3.8; D-d | Team-key campaigns; `content/partners.json`; ranking | §3.4.10, §3.5, §4 | 02; 08; 10 |
 | BR-20 | Referral: 20% of the fee for 90 days; rebate up to 0.05 SOL (P-6, open); from day one on mainnet (BP-9) | P1 §3.9 | `ReferralLink`; indexer `referrals`; weekly routine; snapshot | §3.4.11, §3.5, §4 | 14 |
-| BR-21 | Five campaign kinds; price by touch, with a fresh price on every entry | P1 §4.2 | `readers/*`; the price split | §3.4.8 | 01; 03 |
+| BR-21 | Six campaign kinds; price by touch, with a fresh price on every entry | P1 §4.2 | `readers/*`; the price split | §3.4.8 | 01; 03 |
 | BR-22 | Exclusions: single-key outcomes, opinion, sports (phase 2), Token-2022 for now, small-token prices by steps | P1 §4.3 | Closed `ReaderKind` | §3.4.8 | 03 |
 | BR-23 | The program reads and compares; anyone can re-check the same account | P1 §4.4 | `resolve_campaign`; re-check panel; `recheck` | §3.4.6, §3.6 | 03; 05; 11 |
 | BR-24 | Two scheduled services on different providers; no public resolve button | P1 §4.4; P4 §4.5 | Keeper primary, standby, watchdog | §3.5 | 06–07 |

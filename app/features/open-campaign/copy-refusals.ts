@@ -5,8 +5,9 @@
  *          the program's actual errors. Row 6 has no refusal: the fees and the share are read from the program, never
  *          typed. tests/site/open-refusals.test.ts checks every error with a row has its message here, and sends each
  *          refused case straight to the program.
- * Version: 0.2.0 (the Sprint 19 copy review: the reader's own words for an account, a price target too far, plainer)
- * Sprint:  19 (site: open a campaign)
+ * Version: 0.4.0 (the sixth kind in the box: a curve's target refusals and its opening, in its own words; 0.3.0, its
+ *          refusals; Sprint 19's copy review before them)
+ * Sprint:  19 (site: open a campaign); the sixth kind (`DbcGraduated`)
  */
 import type { BrotErrorName } from "@brot/sdk/read";
 
@@ -23,15 +24,20 @@ const fixed = (place: RefusalPlace, tag: string, text: string): RefusalCopy => (
 const RELOAD = "Reload the page and try again.";
 const SOL_USD_UNUSABLE = `The SOL/USD price account isn't one the program reads. ${RELOAD}`;
 const SOL_USD_SHAKY = "Pyth's SOL/USD price is too uncertain right now. Try again in a minute.";
+/** A graduation campaign's account in words (KIND_WORDS.curve.phrase): its target refusals are its curve's. */
+const CURVE = "DBC pool";
 
 export const REFUSALS: Partial<Record<BrotErrorName, RefusalCopy>> = {
   // Row 1: the kind.
   UnknownReaderKind: fixed("kind", "Unknown kind", `That kind doesn't exist. ${RELOAD}`),
-  ReaderKindNotOpen: fixed(
-    "kind",
-    "Opens later",
-    "This kind isn't open yet. It opens once a YES has been recorded for it on devnet. The other four kinds are open.",
-  ),
+  ReaderKindNotOpen: {
+    place: "kind",
+    tag: "Opens later",
+    text: ({ phrase }) =>
+      phrase === CURVE
+        ? "Graduation campaigns aren't open on this network yet. They open on mainnet once the audits cover their reader."
+        : "This kind isn't open yet. It opens once a YES has been recorded for it on devnet. The kinds marked open are.",
+  },
   // Row 2: the account fits the kind.
   ReaderWrongOwner: {
     place: "account",
@@ -57,21 +63,49 @@ export const REFUSALS: Partial<Record<BrotErrorName, RefusalCopy>> = {
     "Pool not updating",
     "This stake pool stopped updating: its last update is more than one epoch old.",
   ),
+  // Row 2, a Meteora launch curve (the graduation kind).
+  CurveHasTransferHook: fixed(
+    "account",
+    "Transfer hook",
+    "This Meteora launch uses a transfer-hook token. Graduation campaigns take plain launch pools only, for now.",
+  ),
+  CurveConfigMismatch: fixed("after", "Wrong curve config", `This isn't the config this Meteora pool uses. ${RELOAD}`),
+  CurveNotInSol: fixed(
+    "account",
+    "Not priced in SOL",
+    "This launch curve is priced in another token. Graduation campaigns take curves priced in SOL only.",
+  ),
+  CurveTooSmall: fixed(
+    "account",
+    "Curve too small",
+    "This curve graduates below 85 SOL. Graduation campaigns need a curve of at least 85 SOL.",
+  ),
   // Row 3: the target.
-  TargetAlreadyTouched: fixed(
-    "target",
-    "Already met",
-    "Already met: the campaign would be decided the moment it opens. Pick a target the account hasn't reached yet.",
-  ),
-  TargetTooClose: fixed(
-    "target",
-    "Too close",
-    "Too close to the value now. Keep at least 1% between them; for a price, from the edge of Pyth's confidence band.",
-  ),
+  TargetAlreadyTouched: {
+    place: "target",
+    tag: "Already met",
+    text: ({ phrase }) =>
+      phrase === CURVE
+        ? "This curve has already completed, so the campaign would be decided the moment it opens. Pick a launch still on its curve."
+        : "Already met: the campaign would be decided the moment it opens. Pick a target the account hasn't reached yet.",
+  },
+  TargetTooClose: {
+    place: "target",
+    tag: "Too close",
+    text: ({ phrase }) =>
+      phrase === CURVE
+        ? "This curve is more than 90% full. Graduation campaigns need at least 10% of the curve still to raise."
+        : "Too close to the value now. Keep at least 1% between them; for a price, from the edge of Pyth's confidence band.",
+  },
   TargetUnreachable: fixed(
     "target",
     "Too far",
     "Too far from the price now. The target must be within ten times the price, up or down, and above zero.",
+  ),
+  TargetNotThreshold: fixed(
+    "target",
+    "Not the threshold",
+    "A graduation campaign's target is the curve's own graduation threshold, and nothing else.",
   ),
   // Row 4: the price kind's feed.
   FeedNotOnList: fixed("feed", "Feed not listed", "This feed isn't on the program's list of Pyth feeds."),

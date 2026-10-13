@@ -4,9 +4,10 @@
  *          bigint, a comma only as a thousands group, no more precision than the sentence prints); the quick deadlines
  *          inside the program's bounds; a team key's free opening; the prefill a link may carry (never the amount) and
  *          what it drops; the typeahead's search; the reviewed names file, the committed one included; the US$ split
- *          of the opening's terms. Filter: `bun test tests/ -t "open campaign box"`.
- * Version: 0.2.0 (the Sprint 19 reviews)
- * Sprint:  19 (site: open a campaign)
+ *          of the opening's terms; the sixth kind, whose target is its curve's threshold, never typed nor linked.
+ *          Filter: `bun test tests/ -t "open campaign box"`.
+ * Version: 0.3.0 (the sixth kind; 0.2.0, the Sprint 19 reviews)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
 import { describe, expect, test } from "bun:test";
 
@@ -61,8 +62,13 @@ describe("open campaign box: templates and slots", () => {
     expect(at("StakePoolTvlAtLeast", "431880500000000", "Above", null)).toBe(
       "Stake pool So11…1112 holds at least 431,880.5 SOL at the start of epoch (epoch)",
     );
-    expect(TEMPLATES.map((t) => t.readerKind)).toEqual([0, 1, 2, 3, 4]);
+    // The sixth: a Meteora launch curve, its target the curve's threshold in SOL. Never named by its address alone:
+    // until its token's ticker is read, "Token" and the pool's last four characters (curve-name.ts).
+    expect(at("DbcGraduated", "85000000000")).toBe("Meteora launch curve Token (…1112) raises its full 85 SOL");
+    expect(TEMPLATES.map((t) => t.readerKind)).toEqual([0, 1, 2, 3, 4, 5]);
     expect(templateById("validator-stake")?.opens).toBe("after-devnet-yes");
+    // Every build but mainnet's opens it; the tests run as devnet's site.
+    expect(templateById("dbc-graduation")?.opens).toBe("now");
   });
 
   test("numbers are parsed as text, exactly, in the kind's unit", () => {
@@ -111,6 +117,13 @@ describe("open campaign box: templates and slots", () => {
       { priceExponent: null, chainNow: null, isTeam: false },
     );
     expect(empty).toEqual({ ok: false, missing: ["account", "target", "epoch", "deadline"] });
+    // A graduation campaign's target is its curve's threshold, whatever was typed; 0 until its config is read.
+    const curve = { ...EMPTY_DRAFT, kind: "curve" as const, account: MINT, target: "1" };
+    const ctx = { priceExponent: 0, chainNow: 1_000n, isTeam: true };
+    const graduation = choiceOf(curve, { ...ctx, curveThreshold: 85n * P.SOL });
+    expect(graduation.ok && [graduation.choice.kind, graduation.choice.target]).toEqual([5, 85n * P.SOL]);
+    const unread = choiceOf(curve, { ...ctx, curveThreshold: null });
+    expect(unread.ok && unread.choice.target).toBe(0n);
     expect(resolveDeadline({ days: 7 }, null)).toBeNull();
     expect(resolveDeadline({ at: 5n }, null)).toBe(5n);
   });
@@ -139,6 +152,9 @@ describe("open campaign box: templates and slots", () => {
     ]);
     expect(prefillOf({}).fromLink).toBe(false);
     expect(prefillOf({ kind: "lock", account: MINT }).draft.account).toBe(MINT);
+    // A graduation campaign takes its pool from a link, never a target: the target is the curve's threshold.
+    const curve = prefillOf({ t: "dbc-graduation", account: MINT, target: "85" }).draft;
+    expect([curve.kind, curve.account, curve.target]).toEqual(["curve", MINT, ""]);
   });
 
   test("the search suggests feeds, names and templates; outside the grammar, the three nearest", () => {
@@ -150,7 +166,10 @@ describe("open campaign box: templates and slots", () => {
     const outside = search("will it rain in paris tomorrow", { feeds: FEEDS, names });
     expect(outside.outside).toBe(true);
     expect(outside.items).toHaveLength(3);
-    expect(search("", { feeds: FEEDS, names }).items).toHaveLength(5);
+    expect(search("", { feeds: FEEDS, names }).items).toHaveLength(6);
+    // A launch curve is found by its words, and offered no target: its threshold is the target.
+    const curve = search("meteora curve graduates 85", { feeds: FEEDS, names }).items.find((i) => i.kind === "curve");
+    expect(curve).toEqual({ kind: "curve", target: undefined });
     // A comma in the query only groups thousands, as in the target field.
     expect(search("BTC 120,000", { feeds: FEEDS, names }).items[0].target).toBe("120000");
     expect(search("BTC 0,5", { feeds: FEEDS, names }).items[0].target).toBeUndefined();

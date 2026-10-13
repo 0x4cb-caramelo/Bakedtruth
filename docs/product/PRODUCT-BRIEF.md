@@ -3,6 +3,10 @@
 **Versão:** 0.0.1 · **Estado:** aprovado pelo fundador em 5/10/2026 ("docs aprovados, podemos dar início") · **Data:** 5 de outubro de 2026 · **Etapa:** Fase 4,
 etapa 4.1 do wizard
 
+**Acréscimo de 12/10/2026, sem nova versão:** R-13 passa a seis tipos, com a graduação de uma curva de lançamento da
+Meteora (DBC), e o F7, a seção 6.1 e a linha das categorias na comparação com o protótipo contam seis. O resto continua
+a v0.0.1, ainda com USDC e o teto, até a revisão para a BP v0.0.4.
+
 Diz a agentes e desenvolvedores o que construir. Não é texto para investidor (isso é o plano de negócio) nem
 arquitetura (isso é o plano técnico, que vem depois e lê este documento).
 
@@ -143,7 +147,7 @@ em que fase ele entra (seção 6).
 
 - **Quem e gatilho:** duas pessoas da equipe, uma propõe e outra aprova (R-32), por escolha própria, por sugestão
   aceita (F11) ou por combinação com um parceiro (F9).
-- **Passos:** (1) escolhe um dos cinco tipos (R-13); (2) informa a conta da Solana que será lida, a meta e a data
+- **Passos:** (1) escolhe um dos seis tipos (R-13); (2) informa a conta da Solana que será lida, a meta e a data
   final, de até 90 dias (R-06); (3) o programa confere, na criação, se a conta serve para o tipo (P1 §4.1); (4) a
   segunda pessoa aprova; (5) a pergunta nasce "aberta", com o fechamento de R-07.
 - **Regra de escolha:** nos tipos em que empurrar o resultado custa dinheiro, só metas caras de empurrar (P4 §4.4).
@@ -224,7 +228,7 @@ V é o total apostado no lado que ganhou; P, o total no lado que perdeu.
 | R-10 | Pote de um lado só | Devolve. O primeiro apostador não paga taxa; os demais pagam 1% do que apostaram | P1 §3.4 |
 | R-11 | Pergunta anulada | Devolve tudo, sem taxa | P1 §3.4 |
 | R-12 | Prêmio do patrocinador em R-10 e R-11 | Volta inteiro ao patrocinador | P1 §3.4 |
-| R-13 | Tipos do primeiro dia | Cinco: preço de ativo grande, queima de oferta, liquidez travada na Meteora, tamanho de pool de staking e stake de validador. Queima, só em tokens do padrão clássico. O leitor de preço é construído primeiro | P1 §4.2, §4.3 |
+| R-13 | Tipos do primeiro dia | Seis: preço de ativo grande, queima de oferta, liquidez travada na Meteora, tamanho de pool de staking, stake de validador e, desde 12/10/2026, a graduação de uma curva de lançamento da Meteora (DBC: SIM se a curva completa até a data, pelo segundo que a própria conta gravou; só curvas cotadas em SOL, de 85 SOL para cima, com ao menos 10% faltando na abertura; a meta é o valor da própria curva; o SIM pode ser comprado por quem pagar o resto da curva, e a página da campanha diz isso; aberto no devnet, fechado na rede principal até as auditorias). Queima, só em tokens do padrão clássico. O leitor de preço é construído primeiro | P1 §4.2, §4.3; `docs/technical/meteora-readers-plan.md` (M-1 a M-7) |
 | R-14 | Tipos fora | Decididos de graça por uma chave: renúncia de emissão, renúncia de congelamento, programa imutável e metadados imutáveis. Tokens travados: fora no primeiro dia. Preço de token pequeno: depois, em três degraus. Geopolítica e política: por desenho. Esportes: fase 2 | P1 §4.3 |
 | R-15 | Faixas de patrocínio | 500, 1.500 e 5.000 dólares | P1 §3.7 |
 | R-16 | Divisão do patrocínio | 70% para o pote e 30% para a plataforma: 350 e 150; 1.050 e 450; 3.500 e 1.500. Os 30% vão para a operação | P1 §3.7, P2 §4.2 |
@@ -252,11 +256,12 @@ fundador.
 
 A ordem vem de P4 §3.1 e §3.3: núcleo primeiro.
 
-**6.1 MVP na devnet (fase 1, cerca de um mês).** O usuário aposta USDC de teste em perguntas reais dos cinco tipos,
+**6.1 MVP na devnet (fase 1, cerca de um mês).** O usuário aposta USDC de teste em perguntas reais dos seis tipos,
 acompanha a resolução, recebe sozinho e soma pontos. Os parceiros ganham a pergunta gratuita. Precisa estar pronto:
 
 - O pote: aposta, registro por apostador, taxa, fechamento, pote de um lado só e o resultado "anulada".
-- Os cinco leitores: o de preço, novo e construído primeiro, e os quatro reaproveitados do programa atual.
+- Os seis leitores: o de preço, novo e construído primeiro, os quatro reaproveitados do programa atual e, desde
+  12/10/2026, o da graduação de uma curva da Meteora (DBC).
 - Os dois serviços agendados, a janela de 6 horas com confirmar e anular, e o pagamento automático.
 - A pontuação, com classificação pública.
 - O site novo, na direção Ledger², com o aviso de fase de testes em toda tela.
@@ -422,7 +427,7 @@ Veredito: **mantém**, **muda** (a forma fica, o conteúdo troca) ou **cortado**
 | 4 | "How it works" | Três passos: patrocinar, cumprir, ler | Muda | Os passos do pote: apostar, fechar, ler, janela, pagar (P1 §1.2) |
 | 5 | "Connect wallet" | Só um aviso | Mantém | É a única forma de entrar (P1 §2.2). Falta o estado conectado (L-02) |
 | 6 | Alternador de tema (só na N) | Claro e escuro | Mantém | O plano não trata |
-| 7 | Categorias | Trending, Burn, Renounce, Lock, Immutable, Stake | Muda | Os cinco tipos de R-13. "Renounce" e "Immutable" saem (R-14). "Lock" passa de tokens travados a liquidez travada na Meteora. Faltam preço e pool de staking |
+| 7 | Categorias | Trending, Burn, Renounce, Lock, Immutable, Stake | Muda | Os seis tipos de R-13. "Renounce" e "Immutable" saem (R-14). "Lock" passa de tokens travados a liquidez travada na Meteora. Faltam preço, pool de staking e a graduação de uma curva da Meteora |
 | 8 | "Sponsor a goal" | Só um aviso | Muda | O pedido de pergunta (F8), fora do MVP da devnet |
 | 9 | Carrossel "Trading now" | As cinco perguntas de maior volume, com preço do SIM e gráfico | Muda | Perguntas em destaque. O destaque passa a ter dono: parceiro e patrocinador (P1 §3.7). "Trading" sai |
 | 10 | Caixa "Upcoming" | Perguntas que vão abrir, com orçamento e "Notify" | Cortado | Não há estado antes de "aberta" (P1 §3.1), nem orçamento de patrocinador, nem canal para notificar (L-16) |

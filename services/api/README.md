@@ -25,8 +25,11 @@ to the first, and each landed transaction read once and decoded by the SDK; only
 kept, in memory, in the order the signatures were listed. It runs on its own loop, so it never holds the campaign
 snapshot, with a timeout on every call. A refresh asks only for signatures newer than the last one listed, remembers
 every signature it listed, and reads at most `API_HISTORY_PER_REFRESH` transactions (default 200); one that does not
-read back goes to the back of the queue and is skipped after five tries. A first start on a long history takes several
-refreshes. A restart reads the history again. Set `API_HISTORY_RPC_URL` to read the history through another RPC (or
+read back goes to the back of the queue and is skipped after five tries. A 429 is the node's rate limit, not the
+transaction's: it spends no try, the transaction keeps its place, and the refresh reads nothing more until the next
+one. The public devnet RPC allows ten `getTransaction` per ten seconds per address, so a first start on its 70
+transactions took nine refreshes (2026-10-13); counting 429s as tries had skipped 36 to 40 of them. A first start on a
+long history takes several refreshes. A restart reads the history again. Set `API_HISTORY_RPC_URL` to read the history through another RPC (or
 another key), so its bursts never spend the snapshot's rate limit: the public devnet RPC answers 429 under load, and a
 429 on the snapshot turns health "stale", which hides the entry panel.
 

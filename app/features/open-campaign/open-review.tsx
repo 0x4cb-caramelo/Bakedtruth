@@ -21,7 +21,8 @@ import { Button } from "@/components/ui/button";
 import { shortAddress } from "@/lib/brot";
 import { CLUSTER, explorerAddress } from "@/lib/config";
 import { KIND_NAME } from "../campaign-page/copy";
-import { KIND_OF } from "../campaign-page/proof";
+import { kindOf } from "../campaign-page/proof";
+import { useCurveNames } from "../campaigns/curve-names";
 import { local } from "../campaign-page/format";
 import { AGE_NOTICE } from "@/components/copy-site";
 import { BOX, PREVIEW, SLOTS } from "./copy";
@@ -64,9 +65,18 @@ export function OpenReview(p: {
   onSign: () => void;
 }) {
   const { ready, choice } = p;
+  // A curve's name is read for the signed pool itself (the box's read, kept by curve-tokens.ts), never the draft's.
+  const pool = choice.kind === ReaderKind.DbcGraduated ? p.metric : null;
+  const nameOf = useCurveNames(pool ? [pool] : []);
   // From the signed arguments only (H1): never the draft, which may have changed while this was prepared.
-  const facts = reviewFacts({ choice, priceExponent: ready.check.priceExponent, metric: p.metric, names: p.names });
-  const kind = KIND_OF[choice.kind as ReaderKind];
+  const facts = reviewFacts({
+    choice,
+    priceExponent: ready.check.priceExponent,
+    metric: p.metric,
+    names: p.names,
+    curveName: pool ? nameOf(pool) : null,
+  });
+  const kind = kindOf(choice.kind as ReaderKind);
   const t = templateOf(kind);
   const pay = ready.check.payment;
   const free = ready.check.isTeam && choice.openingUsd === 0n;

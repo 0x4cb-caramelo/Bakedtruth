@@ -7,7 +7,7 @@
  * exit plays skips it. An exit and the scene that follows it last 1.5 seconds together, at most.
  */
 import { still, wordsAway } from "./market.js?v=3";
-import { landed } from "./moon.js?v=1";
+import { landed } from "./moon.js?v=2";
 import { place, running, sprite, url } from "./sprites.js?v=1";
 
 /** Cover: the mascot leaves its sticker, drops to the floor and runs off to the right. The empty sticker stays. */

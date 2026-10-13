@@ -3,10 +3,11 @@
  *          the site serves itself, the theme script in <head> before the stylesheet, the skip link, the devnet strip,
  *          the sticky top bar, the page and the footer (site-footer.tsx: not an offer, the privacy page, the age rule),
  *          over the prototype's dot field (pointer-effects.tsx). Providers wrap the page; the wallet is registered once
- *          in them, and Baked is mounted once.
- * Version: 0.3.1 (the UI overhaul: the dot field and the spotlight; 0.3.0, the prototype's frame; 0.2.3, the privacy
- *          link and the age rule)
- * Sprint:  09 (site shell, theme and wallet)
+ *          in them, and Baked is mounted once. The reviewed names of graduation curves (content/account-names.json)
+ *          are read here, on the server, so every page's titles name a reviewed curve at once (curve-names.tsx).
+ * Version: 0.3.2 (the reviewed curve names; 0.3.1, the UI overhaul: the dot field and the spotlight; 0.3.0, the
+ *          prototype's frame; 0.2.3, the privacy link and the age rule)
+ * Sprint:  09 (site shell, theme and wallet); the sixth kind's site
  */
 import type { Metadata } from "next";
 import "./globals.css";
@@ -19,11 +20,22 @@ import { Providers } from "@/components/providers";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SiteNotice } from "@/components/site-notice";
+import { loadNames, type KnownName } from "@/features/open-campaign/names";
 
 export const metadata: Metadata = {
   title: `${BRAND.name} · ${BRAND.tagline}`,
   description: `${BRAND.tagline}, on Solana devnet with test SOL. ${BRAND.motto}`,
 };
+
+/** The reviewed curve names; a file that cannot be read leaves every curve named by its ticker, and is logged. */
+function curveNames(): KnownName[] {
+  try {
+    return loadNames().filter((n) => n.kind === "curve");
+  } catch (error) {
+    console.error(`layout: the reviewed names could not be read (${error instanceof Error ? error.message : "Error"})`);
+    return [];
+  }
+}
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -32,7 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_HEAD_SCRIPT }} />
       </head>
       <body>
-        <Providers>
+        <Providers curveNames={curveNames()}>
           <a className="skip" href="#main">
             Skip to content
           </a>

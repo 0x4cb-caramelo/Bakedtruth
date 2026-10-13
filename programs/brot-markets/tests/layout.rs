@@ -100,10 +100,11 @@ fn instruction_discriminators_follow_the_shank_enum_order() {
 
 #[test]
 fn enum_bytes_round_trip_and_refuse_the_rest() {
-    for byte in 0..=4u8 {
+    for byte in 0..=5u8 {
         assert_eq!(ReaderKind::try_from(byte).unwrap() as u8, byte);
     }
-    assert_eq!(ReaderKind::try_from(5), Err(BrotError::UnknownReaderKind));
+    assert_eq!(ReaderKind::try_from(5), Ok(ReaderKind::DbcGraduated));
+    assert_eq!(ReaderKind::try_from(6), Err(BrotError::UnknownReaderKind));
     assert_eq!(Side::try_from(0), Ok(Side::Yes));
     assert_eq!(Side::try_from(1), Ok(Side::No));
     assert_eq!(Side::try_from(2), Err(BrotError::InvalidSide));

@@ -1,5 +1,5 @@
 /* Purpose: the primitives every screen shares: buttons, the kind tile, state chips, fields, the segmented control, notices, the YES/NO split bar with the prize, skeletons, the dialog and bottom sheet, menus and toasts. One primitive here becomes one file in app/components/ui. From prototype-lab/campaigns/css/components.css (Sprint -1, approved 2026-10-10), as is, in the `components` layer;
-   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.0 · Sprint 09 (the UI overhaul) */
+   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.1 (the side cell: a button with its line under it) · Sprint 09 (the UI overhaul) */
 @layer components {
 /* Buttons. The primary keeps the approved orbiting edge; secondary and quiet ones are flat. */
 .cta { position: relative; display: inline-block; padding: 1.5px; border-radius: var(--r-sm); background: var(--cta-ring);
@@ -25,6 +25,16 @@
 .side-btn.yes { background: var(--yes-bg); color: var(--yes-fg); } .side-btn.no { background: var(--no-bg); color: var(--no-fg); }
 .side-btn:hover { filter: brightness(1.15); } [data-theme="light"] .side-btn:hover { filter: brightness(0.96); }
 .side-btn[aria-pressed="true"] { box-shadow: inset 0 0 0 2px currentColor; }
+/* A side with its line under it (the entry panel, the cards, the home slide): the button holds only its word, centred;
+   what the side returns sits below in the page's neutral text, so the side's colour never carries a number. A link
+   (`a.side-cell`) takes the button and the line, and lights the button whichever one the pointer is on. */
+.side-cell { display: flex; flex-direction: column; gap: 6px; min-width: 0; color: var(--text); text-decoration: none; }
+.side-cell:hover { text-decoration: none; }
+.side-cell > .side-btn { justify-content: center; letter-spacing: 0.3px; text-align: center; }
+a.side-cell:hover > .side-btn { filter: brightness(1.15); } [data-theme="light"] a.side-cell:hover > .side-btn { filter: brightness(0.96); }
+.side-est { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 6px; margin: 0; color: var(--text); font-size: 12px;
+  font-weight: 500; line-height: 17px; text-align: center; font-variant-numeric: tabular-nums; }
+.side-est b { font-weight: 700; } .side-est span { color: var(--muted); }
 
 /* The kind tile: a letter on the kind's colour, never colour alone (the label sits next to it). */
 .kind-tile { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: var(--r-sm);
@@ -32,7 +42,7 @@
 .kind-tile.sm { width: 30px; height: 30px; font-size: 16px; }
 .kind-price { --kb: var(--k-price-bg); --kf: var(--k-price-fg); } .kind-burn { --kb: var(--k-burn-bg); --kf: var(--k-burn-fg); }
 .kind-lock { --kb: var(--k-lock-bg); --kf: var(--k-lock-fg); } .kind-pool { --kb: var(--k-pool-bg); --kf: var(--k-pool-fg); }
-.kind-stake { --kb: var(--k-stake-bg); --kf: var(--k-stake-fg); }
+.kind-stake { --kb: var(--k-stake-bg); --kf: var(--k-stake-fg); } .kind-curve { --kb: var(--k-curve-bg); --kf: var(--k-curve-fg); }
 
 /* Chips: the public state, the partner seal, small facts. */
 .chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: var(--r-pill);

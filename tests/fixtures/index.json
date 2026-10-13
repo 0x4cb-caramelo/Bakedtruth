@@ -160,5 +160,113 @@
     "slot": 454743027,
     "note": "Vote account with the most active stake on 2026-10-09, 3,762 bytes, version tag 3",
     "cluster": "mainnet"
+  },
+  "dbc-pool-stage0": {
+    "address": "mxGZ5hpgCENm94f19rp8NoBd14E4YLXVe4ZFJXQP8S6",
+    "owner": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+    "length": 424,
+    "sha256": "d990294cb84b5e19a6afc71494b25d6541b36faf6bed80d4be4e67e95aed48a6",
+    "slot": 456186130,
+    "note": "Meteora DBC VirtualPool on the curve (stage 0), SPL Token base, 0.019 SOL raised of its config's 85",
+    "cluster": "mainnet"
+  },
+  "dbc-config-85sol": {
+    "address": "4hHU3Uu4THMoWUG8fpTfbT921PeYJ1yni6NZEGfTLYRm",
+    "owner": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+    "length": 1048,
+    "sha256": "67d956a77314e0cb0b5dca16aace6a69fc89467cbee165bf43e2fb6caf736b72",
+    "slot": 456186130,
+    "note": "Meteora DBC PoolConfig of dbc-pool-stage0: quote wSOL, migration_quote_threshold 85 SOL",
+    "cluster": "mainnet"
+  },
+  "dbc-pool-stage1": {
+    "address": "5sNKeCx162vt6rJmiz2gARcax74HFtwPjGkxDg3zurdf",
+    "owner": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+    "length": 424,
+    "sha256": "d05ce4bb1feae5668c64ef06c3e65fe5cefdb357403b8ac767564977d02cc540",
+    "slot": 456186130,
+    "note": "Meteora DBC VirtualPool past the curve (stage 1, PostBondingCurve), on a 0.5 SOL config",
+    "cluster": "mainnet"
+  },
+  "dbc-pool-stage2": {
+    "address": "9A3dtuE7mtdAShFDoVtZEyBdG1kJHym8DUkeR4VqxwF",
+    "owner": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+    "length": 424,
+    "sha256": "1f84f55eb252d5563ca3625f48a3d197c09b365125132b43980e9055998185eb",
+    "slot": 456186130,
+    "note": "Meteora DBC VirtualPool in locked vesting (stage 2), on a 1 SOL config",
+    "cluster": "mainnet"
+  },
+  "dbc-pool-stage3": {
+    "address": "2GDDUim6HEM58k1vwFcAZ8KT79jXic6eJiLWkgbBaNo9",
+    "owner": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+    "length": 424,
+    "sha256": "077d83f0ee5554779705830942d76bd8872c0f49a190d6ea02b2bf336bfd4df7",
+    "slot": 456186130,
+    "note": "Meteora DBC VirtualPool migrated (stage 3, CreatedPool), 85 SOL raised on an 85 SOL config",
+    "cluster": "mainnet"
+  },
+  "dbc-config-stage3": {
+    "address": "GXn7ng2QbEoGqUcNpuc2v7iqnez71waBsxEH4obiHVAB",
+    "owner": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+    "length": 1048,
+    "sha256": "7db6c51350f24b942ccda70a2a2e05d5fab4c0a15d4551e4cdf44641a07bf0ef",
+    "slot": 456186130,
+    "note": "Meteora DBC PoolConfig of dbc-pool-stage3: quote wSOL, migration_quote_threshold 85 SOL",
+    "cluster": "mainnet"
+  },
+  "dbc-pool-11sol": {
+    "address": "5r3zMQNJBDyyVThjK2ba3mffxKkE97x9Jvx6QVo8h8i5",
+    "owner": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+    "length": 424,
+    "sha256": "1f6e6e0ab672514cf6d9c35df8b32382984627ef426d105f460e9ba63ac82a2e",
+    "slot": 456186130,
+    "note": "Meteora DBC VirtualPool on an 11 SOL config, a curve below the 85 SOL floor",
+    "cluster": "mainnet"
+  },
+  "dbc-config-11sol": {
+    "address": "EiN7QibVnPq8kYUmxB8KtFCt9WgXpz17QyQRmapPnCUW",
+    "owner": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+    "length": 1048,
+    "sha256": "13b1495a24c16ceab1c1459a344aee9c33924bdb5dcf24245771608b5cd872ce",
+    "slot": 456186130,
+    "note": "Meteora DBC PoolConfig of dbc-pool-11sol: quote wSOL, migration_quote_threshold 11 SOL",
+    "cluster": "mainnet"
+  },
+  "dbc-pool-usdc": {
+    "address": "7CLJhnNdfzr91eibB4L8r5PKP1L4nNmkjpWJCiGF1Sca",
+    "owner": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+    "length": 424,
+    "sha256": "9bbf939bf5a44eab0daccdb59d37d7553b3385447e01581bfa3fb3d03f9268c3",
+    "slot": 456186130,
+    "note": "Meteora DBC VirtualPool on the curve (stage 0) of a curve priced in USDC",
+    "cluster": "mainnet"
+  },
+  "dbc-config-usdc": {
+    "address": "4Tr44n6TUwQvihe4vuBpNWvwUkHip5fyMCkrubXhseqt",
+    "owner": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+    "length": 1048,
+    "sha256": "bc6ebcafad1e89a920ba9b85c19ea6ead4c17c2b7bab0657059a546b77d2bd9a",
+    "slot": 456186130,
+    "note": "Meteora DBC PoolConfig of dbc-pool-usdc: quote USDC, migration_quote_threshold 1 USDC",
+    "cluster": "mainnet"
+  },
+  "dbc-hook-pool": {
+    "address": "19FgvYumZoSwc5hxxH18QPsowjYURDAPHrPydSJ79Nv",
+    "owner": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+    "length": 424,
+    "sha256": "688643b51791369e5d7cf4c4a562227ea40fca11128e98a4cd46eee81ebc7b2c",
+    "slot": 456186130,
+    "note": "Meteora DBC TransferHookPool on the curve (stage 0), Token-2022 base: the same layout, refused",
+    "cluster": "mainnet"
+  },
+  "dbc-hook-config": {
+    "address": "HKf3CHysP3YbCudWnYuBBwHSwSGE2GpjxmRakefUhjyX",
+    "owner": "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN",
+    "length": 1128,
+    "sha256": "84c81d739358945ba1866809bad4fd1ad52f7c970faa70413d3fcf3f7c5141cd",
+    "slot": 456186130,
+    "note": "Meteora DBC ConfigWithTransferHook of dbc-hook-pool, 1,128 bytes: quote wSOL, 10 SOL",
+    "cluster": "mainnet"
   }
 }

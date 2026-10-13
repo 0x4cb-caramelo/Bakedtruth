@@ -3,7 +3,7 @@
  *          (from the world's accounts and clock, read before anything is sent) and the program in
  *          LiteSVM, and the two verdicts compared: the same refusal, or both accepting with the same
  *          charge and entry close.
- * Version: 0.1.0
+ * Version: 0.1.1 (the graduation kind's curve config, after the nine slots, fed to both)
  * Sprint:  05 (SDK)
  */
 import { expect } from "bun:test";
@@ -16,6 +16,7 @@ import {
   validateOpenCampaign,
   type FetchedAccount,
   type OpenCampaignCheck,
+  type OpenCampaignCheckInput,
 } from "@brot/sdk/read";
 
 import type { BrotErrorName } from "../brot/errors";
@@ -25,7 +26,7 @@ import { openArgs } from "../brot/opening";
 import * as P from "../brot/program";
 import { send, type World } from "../brot/setup";
 
-type Slots = { metric?: Address; solUsd?: Address };
+type Slots = { metric?: Address; solUsd?: Address; curveConfig?: Address };
 
 /** An account as the SDK reads it; one that does not exist reads as the System Program's, empty. */
 function fetched(w: World, address: Address): FetchedAccount {
@@ -39,8 +40,14 @@ function shape(w: World, address: Address) {
   return account.exists ? { owner: account.programAddress as string, dataLength: account.data.length } : null;
 }
 
-/** The SDK's verdict on `args`, from what the world holds now. */
-export async function sdkVerdict(w: World, signer: KeyPairSigner, args: I.OpenArgs, slots: Slots = {}) {
+/** The SDK's verdict on `args`, from what the world holds now, for the default build unless `build` says. */
+export async function sdkVerdict(
+  w: World,
+  signer: KeyPairSigner,
+  args: I.OpenArgs,
+  slots: Slots = {},
+  build: OpenCampaignCheckInput["build"] = {},
+) {
   const metricAddress = slots.metric ?? (await P.sponsoredPriceAccount(args.feedId));
   const config = w.client.svm.getAccount(await P.configPda());
   const clock = w.client.svm.getClock();
@@ -67,7 +74,7 @@ export async function sdkVerdict(w: World, signer: KeyPairSigner, args: I.OpenAr
     solUsd: fetched(w, slots.solUsd ?? P.SOL_USD_ACCOUNT),
     campaignAccount: shape(w, campaign),
     vaultAccount: shape(w, await P.vaultPda(campaign)),
-    build: { feeds: "devnet", stakeAtLeastOpens: false },
+    build: { feeds: "devnet", stakeAtLeastOpens: false, ...build },
     epochSchedule: {
       slotsPerEpoch: schedule.slotsPerEpoch,
       leaderScheduleSlotOffset: schedule.leaderScheduleSlotOffset,
@@ -75,6 +82,8 @@ export async function sdkVerdict(w: World, signer: KeyPairSigner, args: I.OpenAr
       firstNormalEpoch: schedule.firstNormalEpoch,
       firstNormalSlot: schedule.firstNormalSlot,
     },
+    curveConfigAddress: slots.curveConfig,
+    curveConfig: slots.curveConfig ? fetched(w, slots.curveConfig) : null,
   });
 }
 

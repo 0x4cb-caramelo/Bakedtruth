@@ -4,9 +4,11 @@
  *          It reads the campaign by its id through the SDK (the sentence, the result the program recorded, the value
  *          read and the target, the review window or a void's public reason) and prints the post and its length. It
  *          refuses a campaign whose result has not been read, and it promises no payout and no time.
- * Version: 0.2.0 (the Sprint 13 reviews: a price NO and a target met late say why; the devnet line before the link; one
- *          link; the length as X counts it)
- * Sprint:  13 (site: ranking, notices and copy)
+ *          A graduation campaign's curve is named as the site names it: its reviewed name, else its token's ticker with
+ *          the pool's last characters (app/features/campaigns/curve-name.ts), never its address alone.
+ * Version: 0.2.1 (the curve's name; 0.2.0, the Sprint 13 reviews: a price NO and a target met late say why; the
+ *          devnet line before the link; one link; the length as X counts it)
+ * Sprint:  13 (site: ranking, notices and copy); the sixth kind's site
  *
  * Usage: bun run scripts/team/resolution-post.ts --campaign <id> [--site https://<the site>] --cluster devnet
  *        [--url ...]
@@ -34,8 +36,11 @@ import {
 } from "@brot/sdk/read";
 
 import { valueText } from "../../app/features/campaign-page/format";
-import { KIND_OF } from "../../app/features/campaign-page/proof";
+import { kindOf } from "../../app/features/campaign-page/proof";
+import { curveName, reviewedCurves } from "../../app/features/campaigns/curve-name";
+import { readCurveTokens } from "../../app/features/campaigns/curve-tokens";
 import { sentenceOf } from "../../app/features/campaigns/sentence";
+import { loadNames } from "../../app/features/open-campaign/names";
 import { clusterArgs, openCluster } from "../validator/clusters";
 import { runCli } from "./common";
 
@@ -58,13 +63,14 @@ export const POST_REASON: Record<VoidReason, string> = {
   [VoidReason.TeamOutsideCause]: "The team recorded the cause as outside Brot.",
 };
 
-export type PostOptions = { cluster: "devnet" | "local"; site?: string };
+/** `curveName`: a graduation campaign's curve as every page names it (curve-name.ts), read by `readForPost`. */
+export type PostOptions = { cluster: "devnet" | "local"; site?: string; curveName?: string };
 
 /** The post for a campaign whose result was read, from the template; lines left empty are dropped. */
 export function resolutionPost(campaign: Campaign, address: string, chain: ChainTime, options: PostOptions): string {
   if (campaign.outcome === Outcome.Unresolved) throw new Error("nothing to post yet: the result has not been read");
   const view = publicState(campaign, chain);
-  const kind = KIND_OF[campaign.kind];
+  const kind = kindOf(campaign.kind);
   const sentence = sentenceOf({
     kind: ReaderKind[campaign.kind],
     direction: Direction[campaign.direction],
@@ -73,6 +79,7 @@ export function resolutionPost(campaign: Campaign, address: string, chain: Chain
     priceExponent: campaign.priceExponent,
     metricAccount: campaign.metricAccount,
     epoch: campaign.epoch.toString(),
+    accountName: options.curveName,
   });
   const voided = campaign.outcome === Outcome.Void;
   const value = (v: bigint) => valueText(kind, v, campaign.priceExponent);
@@ -105,12 +112,22 @@ export function resolutionPost(campaign: Campaign, address: string, chain: Chain
     .join("\n");
 }
 
-/** The campaign at `id`, read through `rpc`, with the chain's time. */
+/** A graduation campaign's curve, named as the site names it: its reviewed name, else its token's ticker read now. */
+async function curveNameOf(rpc: SolanaRpc, campaign: Campaign): Promise<string | undefined> {
+  if (campaign.kind !== ReaderKind.DbcGraduated) return undefined;
+  const pool = campaign.metricAccount;
+  const reviewed = reviewedCurves(loadNames()).get(pool);
+  return reviewed ?? curveName(pool, { symbol: (await readCurveTokens(rpc, [pool])).get(pool)?.symbol });
+}
+
+/** The campaign at `id`, read through `rpc`, with the chain's time and, for a graduation campaign, its curve's name. */
 export async function readForPost(rpc: SolanaRpc, id: bigint) {
   const address = await campaignAddress(id);
   const raw = await fetchRaw(rpc, address);
   if (!raw) throw new Error(`no campaign ${id} on this cluster (it may be closed after its payouts)`);
-  return { campaign: decodeCampaign(raw), address: address as string, chain: await readChainTime(rpc) };
+  const campaign = decodeCampaign(raw);
+  const chain = await readChainTime(rpc);
+  return { campaign, address: address as string, chain, curveName: await curveNameOf(rpc, campaign) };
 }
 
 async function main() {
@@ -126,7 +143,7 @@ async function main() {
   const { url, cluster } = clusterArgs();
   const ops = await openCluster(url, cluster);
   const read = await readForPost(rpcFor(ops.url), BigInt(id));
-  const post = resolutionPost(read.campaign, read.address, read.chain, { cluster, site });
+  const post = resolutionPost(read.campaign, read.address, read.chain, { cluster, site, curveName: read.curveName });
   console.log(`\n${post}\n`);
   const length = xLength(post);
   console.log(`${length} characters as X counts them${length > POST_LIMIT ? `: over ${POST_LIMIT}, shorten it` : ""}.`);

@@ -27,6 +27,103 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **A curva da graduação pelo ticker, e os botões SIM e NÃO limpos** (branch `feat/curve-ticker-side-buttons`,
+  13/10/2026; `session-log/2026-10-13-ticker-da-curva-e-botoes-de-lado.md`). Responde ao nome legível que o registro
+  do upgrade deixou em aberto, pelo caminho que muda a A-11, aprovado pelo fundador, o Lucas, no mesmo dia.
+  - **O título de uma campanha de graduação nomeia a curva pelo ticker do token**, e nunca só pelo endereço: "Meteora
+    launch curve $TEST (…7Dny) raises its full 85 SOL?", o fim do endereço do pool sempre ao lado; `Token (…7Dny)`
+    quando não há ticker para mostrar; o nome revisado sozinho, `$BROT`, para um pool em `content/account-names.json`
+    (o de demonstração do devnet entrou). Vale para os cartões, a página da campanha, "My entries", a prévia e a
+    revisão da caixa de abertura, e o post de resolução da equipe. É a única exceção à A-11 (plano técnico v0.1.10,
+    §3.4.10).
+  - **O ticker é lido no navegador** pelo SDK (`token-symbol.ts`): o `base_mint` do pool (byte 136), depois os
+    metadados da Metaplex ou a extensão do Token-2022, dono primeiro. O SDK o limpa (`tickerOf`, a mesma regra para o
+    site e o app): só de 1 a 10 letras e dígitos ASCII, e nada que imite SOL, WSOL, USDC, USDT ou BROT.
+  - **Os endereços ficam na prova**: o pool e o mint do token ("Token mint (CA)"), com link e botão de copiar.
+  - **O relay serve inteiras as contas da Metaplex e do Token-2022**, pronto para quando ele entrar no ar (hoje o site
+    lê a RPC pública do devnet direto).
+  - **Os botões SIM e NÃO** levam só a palavra; a chance e a estimativa ficam embaixo de cada um, no texto neutro. O
+    mesmo nos cartões e no slide "Open now" da página inicial (sem a chance, que o cartão já mostra em destaque, e sem
+    o "Join" antes da palavra), num estilo só para os três (`.side-cell` e `.side-est`).
+  - **Testes**: 15 novos (`tests/sdk/token-symbol.test.ts`, `tests/site/curve-name.test.ts`,
+    `tests/site/panels-render.test.ts`, um em `tests/ops/resolution-post.test.ts`), em contas reais da mainnet; dois
+    testes antigos passam a esperar `Token (…XXXX)` no lugar do endereço curto. Conferido também num navegador, com o
+    site rodando localmente contra o devnet, a 1280 e a 412 px.
+  - **No ar em `brot.markets/dev0x`** desde as 04h45min20s UTC de 13/10/2026, na versão `df09357435d5` (a mescla do
+    PR #80, CI verde), publicada da máquina do Ronaldo a pedido dele: montada ao lado da anterior, construída para o
+    slot 510.454.676 (A-8; o programa não mudou) e testada na porta 4239 antes da troca. A versão anterior
+    (`570fa306b4d3`) ficou no servidor. O erro #418 do React visto no navegador já existia na versão anterior
+    (`session-log/2026-10-13-publicacao-do-ticker-no-dev0x.md`).
+- **O sexto tipo no ar no devnet e no `/dev0x`** (12/10/2026 em Brasília, 13/10 em UTC; a pedido do Ronaldo, que
+  confirmou antes de qualquer envio; `session-log/2026-10-12-upgrade-devnet-sexto-tipo.md`).
+  - **O programa** `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o` foi atualizado com o artefato do CI da `main` em
+    `91a5bed` (a mescla do PR #76, execução 38327381894), `brot_markets.so` com sha256
+    `63610a32d6dfa243af80f741dad328645e49fdd3c2d34173e0471c4a2982d7e4` e o IDL igual ao da `main`. Primeiro a
+    ProgramData foi aumentada à mão em 10.240 bytes, porque o loader recusa um aumento menor e o automático do CLI pede
+    só o que falta (`51gvu4iQRg9eULzdKZPxjatZVo2j9UwvJmKCNCtJVfL15PU96L3A1iuZs4wXBW5yZ95sXuVCbZrG2c1y2K5UDCG2`); depois
+    veio o upgrade (`2GkUHe1U4DwM62rEWembKtu9QSfjgMiV3jw7AgZzM7eynyCXD5DxgWqQL8dBUT8UjgMbbWsnJKePk5F7pezvtyLm`). O
+    último deploy agora é o slot 510.454.676. A autoridade continua a mesma, e os bytes na rede são os do artefato. A
+    chave de upgrade, a de devnet do Ronaldo (`6N7r…`), ficou na máquina dele; o custo foi de 0,0529 SOL de teste.
+  - **O PR #78** (o site e os documentos do sexto tipo) entrou na `main` depois do upgrade (`570fa306`), com o CI verde.
+  - **O site em `brot.markets/dev0x`** passou para a versão `570fa306b4d3` às 01h18min24s UTC de 13/10, construída
+    para o slot novo (A-8) e testada numa porta interna antes da troca. A versão anterior (`6a52505c9aba`) ficou no
+    servidor. Entre o upgrade e a troca, uns nove minutos e meio, o site no ar não assinava nada.
+  - **A campanha de demonstração** `8670587885290160238`, no pool `12uLN2texEDbadM4WzJm6Dry8Quc8qFpDQEwhSdi7Dny`,
+    foi aberta pelo Ronaldo no site, com a carteira da equipe, às 02h34 UTC de 13/10: grátis, meta de 85 SOL, prazo em
+    20/10. A página mostra a barra da curva e o aviso "YES can be bought by anyone who pays the rest of the curve.".
+    Ficam em aberto um nome legível no lugar do endereço na frase e os avisos que garantem o pool certo.
+  - **`deploy/devnet/README.md`** ganhou a seção "Upgrading", com os passos de hoje e o porquê.
+- **O sexto tipo no site e nos documentos** (branch `feat/dbc-graduation-ui`, 12/10/2026, empilhada sobre a
+  `feat/dbc-graduation-reader`; `session-log/2026-10-12-sexto-tipo-no-site-e-nos-documentos.md`).
+  - **A caixa de abertura** ganha o modelo "Graduation", com o campo do pool da DBC. O site lê a config que o pool
+    aponta e confere os dois na ordem do leitor (`account-check.ts`). A meta não se digita: é o limite da curva,
+    mostrado só para leitura com quanto a curva já juntou (`curve-target.tsx`). As recusas da curva (6148 a 6152, a
+    curva já completa e a curva cheia demais) aparecem junto ao campo do pool, com texto próprio. O modelo abre em todo
+    cluster menos a mainnet, como o programa.
+  - **A página da campanha** mostra a curva (`curve-progress.tsx`): a barra de `quote_reserve` sobre
+    `migration_quote_threshold`, a fatia preenchida (nunca arredondada para cima), o que falta ou o segundo em que a
+    curva completou, o estágio, e sempre o aviso "YES can be bought by anyone who pays the rest of the curve." O "se
+    lido agora" segue o carimbo do pool, antes e depois do prazo.
+  - **A lista e a página inicial** leem quanto a curva juntou; o filtro ganha o tipo "Graduation", com cor própria
+    (`--k-curve-*`, contraste conferido nos dois temas); o post de resolução e a revisão antes de assinar passam a
+    aceitar o tipo.
+  - **Os documentos contam seis tipos**: o BP v0.0.4 (o índice, a Parte 1 com a descrição do tipo na seção 4.2, a
+    Parte 4), o resumo de produto (R-13), os Termos (seção 4, com a nota de que o texto precisa de revisão jurídica
+    final antes de qualquer publicação), o `PITCH.md`, o README, a página dos tipos do docs e o HTML gerado, o plano
+    técnico v0.1.9 e a lista do relay. Os registros históricos (session logs, sprints, versões antigas do BP, a
+    proposta de arquitetura) ficaram como estavam.
+  - **Testes**: 13 novos (`tests/site/curve.test.ts` e `tests/site/open-curve.test.ts`), entre eles a abertura feita
+    pela caixa e aceita pelo programa no LiteSVM, de graça e paga, e cada recusa da caixa recusada igual pelo programa.
+- **O sexto tipo de campanha, `DbcGraduated`: "a curva de lançamento da Meteora (DBC) do token X completa até a data
+  D?"** (branch `feat/dbc-graduation-reader`, 12/10/2026; `docs/technical/meteora-readers-plan.md`,
+  `session-log/2026-10-12-sexto-tipo-dbc-graduated.md`). Entra no programa, nos testes, no IDL e no SDK; a caixa de
+  abertura, a página da campanha, o upgrade no devnet, o BP, o resumo de produto e os Termos ficam para depois.
+  - **O leitor** (`readers/dbc_graduation.rs` e `dbc_graduation/config.rs`) lê o `VirtualPool` da DBC (o
+    `TransferHookPool` é recusado) e, na abertura, o `PoolConfig` do próprio pool, passado como décima conta: só curvas
+    em SOL, de 85 SOL para cima (1 SOL no build `drill`); o alvo é o limite da curva; ao abrir, falta ao menos 10% dele.
+    As entradas travam quando a curva completa. A resolução lê o segundo que o próprio pool gravou
+    (`finish_curve_timestamp`), e não a hora de quem resolve: completou até o prazo é SIM, mesmo resolvido depois.
+  - **Cinco erros novos, 6148 a 6152**, acrescentados no fim (`CurveHasTransferHook`, `CurveConfigMismatch`,
+    `CurveNotInSol`, `CurveTooSmall`, `TargetNotThreshold`), cada um com teste no host, teste no LiteSVM, a mesma recusa
+    no `validateOpenCampaign` e o texto do site.
+  - **Abre em todo build menos o de mainnet** (`DBC_GRADUATED_OPENS`), até as auditorias cobrirem o leitor.
+  - **Doze contas reais da mainnet** em `tests/fixtures/dbc-*` (`scripts/capture-fixtures-dbc.ts`): pools nos estágios
+    0 a 3, configs de 85 SOL, 11 SOL e em USDC, e um pool com transfer hook.
+  - **A demonstração no Surfpool** (`scripts/surfpool/dbc-graduation.ts`): num fork da mainnet, uma campanha abre num
+    pool real ainda na curva, duas pessoas entram (SIM e NÃO), uma carteira completa a curva com o swap da própria DBC,
+    a resolução grava SIM, e quem entrou no SIM recebe o pote.
+- **A página inicial "ainda assando"** (branch `feat/landing-still-baking`, 12/10/2026, a pedido do Lucas;
+  `session-log/2026-10-12-pagina-inicial-ainda-assando.md`). A página inicial foi publicada no mesmo dia, sozinha; o ícone do `/dev0x` entrou no ar à tarde, numa versão nova do site (`6a52505c9aba`).
+  - **A marca da barra do topo** é o pão simples (`img/brot-loaf.webp`), como o `BRAND.md` diz; o Baked segue andando
+    pela página.
+  - **A faixa "Still baking."**, nas cores da casca, entre a barra do topo e a página: inteira um link para `/dev0x`,
+    dizendo que lá se entra e se abre campanha com SOL de teste, sem valor.
+  - **Quatro exemplos novos rodando no topo** (`examples.js`, `live.css`), com a mecânica do demo do deck: um ponteiro
+    entra num lado, a cadeia resolve, e o cartão mostra para onde foi o pote. Preço, stake pool, queima e liquidez
+    travada; dois acertos e dois erros; a conta é a do programa (10% do lado perdedor e 1% das entradas, tirados do
+    pote), e não a do deck. A `/2` recebeu o mesmo, porque diz o que a página inicial diz.
+  - **O ícone da aba do `/dev0x`** (`app/app/favicon.ico`) deixou de ser o triângulo do Next e é o do `brot.markets`.
+  - 51 testes no site provisório (4 novos, `tests/home.test.mjs`); conferido num navegador nos dois temas e no celular.
 - **Sprint 08, terceira parte, segunda fatia: as rotas de leitura do indexador** (mesma branch, PR #72 em rascunho,
   11/10/2026; construídas e testadas, não implantadas): a atividade de uma campanha e a divisão depois de cada entrada,
   as entradas recentes de todas as campanhas e as entradas de uma carteira, com os esquemas em `@brot/sdk/schemas` e
@@ -310,6 +407,11 @@ recomendado (1a a 12a).
 
 ### Changed
 
+- **O último desenho do modo foguete do deck** (11/10/2026, pedido do fundador). No fim do slide 5 o mascote passa a
+  bater na lua rindo, no lugar do rosto em pânico. O desenho novo tem o mesmo enquadramento do anterior, então o
+  tamanho, o ponto de apoio, o ângulo e a lua que espera na borda do slide não mudaram. O arquivo ganhou outro nome
+  (`28-batendo-na-lua-feliz.webp`) para nenhum navegador mostrar o antigo guardado. O quadro anterior à batida
+  continua sendo o do foguete em pânico.
 - **Sprint 19: a frase das campanhas de queima, trava e stake** (10/10/2026). O cartão e a página dessas campanhas
   diziam só o tipo e o endereço ("Burn campaign So11…1112"); agora dizem a frase do modelo v1, com o alvo e a unidade
   ("So11…1112 supply falls to 1,000 raw units"; "Stake pool … holds at least … SOL at the start of epoch 812"). A frase
@@ -932,6 +1034,30 @@ recomendado (1a a 12a).
 
 ### Fixed
 
+- **O erro #418 do React em todas as páginas do site** (13/10/2026, achado na publicação do ticker;
+  `session-log/2026-10-13-publicacao-do-ticker-no-dev0x.md`). O servidor não vê carteira nenhuma, e o navegador quase
+  sempre vê uma: o adaptador da Solflare fica "Loadable" em qualquer navegador de computador. Por isso duas partes da
+  moldura comum saíam diferentes no HTML do servidor e na primeira renderização do navegador. Uma era o botão da barra
+  do topo ("No installed wallet found", desligado, contra "Connect"). A outra era a lista "Connect a wallet", fechada
+  mas renderizada (um aviso contra os botões das carteiras). Em toda carga, o React jogava fora a árvore e
+  renderizava a página inteira de novo. Agora o `useInstalledWallet` diz que há carteira até a hidratação terminar, e
+  a lista monta as linhas só depois dela, com o `useIsClient`, que saiu de `features/open-campaign` para `app/lib`.
+  Quem não tem carteira vê o aviso logo depois da carga. Conferido: no modo de desenvolvimento, as oito páginas
+  hidratam sem diferença; no build de produção com as configurações do servidor, `/dev0x`, a página da campanha e
+  `/fees` não dão erro de página; e "Connect" abre a lista com a Solflare e a Phantom. Teste novo:
+  `tests/site/wallet-render.test.ts`, que falha no código anterior. No ar desde as 05h33min49s UTC de 13/10/2026, na
+  versão `353c2a3a1b90`: as páginas no ar já não dão o erro.
+- **O ranking da API perdia mais da metade do histórico para o limite da RPC pública** (13/10/2026, achado na
+  publicação do ticker; `session-log/2026-10-13-publicacao-do-ticker-no-dev0x.md`). A RPC pública do devnet aceita dez
+  `getTransaction` a cada dez segundos por endereço (`x-ratelimit-method-limit: 10`) e responde 429 ao resto. O
+  histórico lê quatro de cada vez, até 200 por rodada, contava cada 429 como uma tentativa perdida e, depois de cinco,
+  pulava a transação até o próximo reinício. No servidor, eram 36 a 40 puladas desde 11/10, e o ranking no ar tinha 20
+  dos 53 eventos que conta. Agora um 429 não gasta tentativa: a transação guarda o lugar e a rodada para de ler até a
+  próxima (`services/api/src/history.ts` 0.3.0). Qualquer outra recusa continua contando. Contra a RPC pública, a
+  leitura completa terminou em nove rodadas, uns dois minutos e quinze segundos, com os 53 eventos e nenhuma pulada.
+  Testes: três novos em `services/api/tests/history.test.ts`; os dois do 429 falham no código anterior. No ar desde as
+  05h33min49s UTC de 13/10/2026, na versão `353c2a3a1b90`: depois do reinício, o ranking ficou completo em 2min07s,
+  com os 53 eventos e nenhuma transação pulada.
 - **`CampaignFinalized` também na confirmação e na anulação pela equipe** (9/10/2026; achado da revisão da Sprint
   05, feito como PR à parte a pedido do Ronaldo). O plano técnico (§3.4.3, §3.4.14) promete que `team_confirm_result`
   e `team_void_campaign` emitem o próprio evento e depois `CampaignFinalized`; o programa rodava o snapshot e emitia só

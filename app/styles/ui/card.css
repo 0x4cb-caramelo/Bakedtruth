@@ -1,5 +1,5 @@
 /* Purpose: the campaign card and the one-line campaign row: kind, state, sentence, live value against the target, each side's share, the pot bar, the per-side return of 1 SOL, the status line past entries, and the footer. The spotlight follows the pointer (js/effects.js). From prototype-lab/campaigns/css/card.css (Sprint -1, approved 2026-10-10), as is, in the `components` layer;
-   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.0 · Sprint 09 (the UI overhaul) */
+   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.1 (each side's estimate under its button) · Sprint 09 (the UI overhaul) */
 @layer components {
 .card { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 15px; border: var(--bw) solid var(--line);
   border-radius: var(--r); background: var(--panel); box-shadow: var(--shadow); isolation: isolate; }
@@ -25,7 +25,7 @@
 .card-chance strong { font-size: 30px; line-height: 0.95; } .card-chance .y strong { color: var(--yes-fg); }
 .card-chance .n { text-align: right; } .card-chance .n strong { color: var(--no-fg); }
 .card-sides { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.card-sides .side-btn { text-decoration: none; } .card-sides .per { font-weight: 500; font-size: 11.5px; opacity: 0.92; font-variant-numeric: tabular-nums; }
+.card-sides .side-btn { min-height: 40px; font: 700 17px/1 var(--display); } .card-sides .side-est { font-size: 11.5px; }
 .card-note { margin: -4px 0 0; color: var(--muted); font-size: 11.5px; }
 .card-status { display: flex; align-items: center; gap: 7px; margin: 0; min-height: 40px; padding: 9px 11px; border-radius: var(--r-sm);
   background: var(--raised); color: var(--text); font-size: 12px; font-weight: 600; }

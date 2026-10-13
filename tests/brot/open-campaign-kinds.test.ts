@@ -64,7 +64,7 @@ describe("open campaign refuses: the other four kinds", () => {
     const vote = setFixture(w.client, "vote-mainnet-top").address;
     expectError(await open(w, StakeAtLeast, vote, P.SOL, { epoch: 2n }), "ReaderKindNotOpen");
     expectError(await open(w, StakeAtLeast, vote, P.SOL, { feedId: P.BTC_USD_FEED_ID }), "ReaderKindNotOpen");
-    for (const kind of [5, 255]) expectError(await open(w, kind, vote, P.SOL), "UnknownReaderKind");
+    for (const kind of [6, 255]) expectError(await open(w, kind, vote, P.SOL), "UnknownReaderKind");
   });
 
   test("canonical arguments: a feed, a direction or an epoch the kind does not use", async () => {

@@ -102,7 +102,7 @@ export const BROT_MARKETS_ERROR__ALREADY_PAUSED = 0x1799; // 6041
 export const BROT_MARKETS_ERROR__NOT_PAUSED = 0x179a; // 6042
 /** UnknownReaderKind: Row 1: the kind byte names no reader */
 export const BROT_MARKETS_ERROR__UNKNOWN_READER_KIND = 0x179b; // 6043
-/** ReaderKindNotOpen: Row 1: this kind does not open yet (`StakeAtLeast` until a devnet YES is recorded) */
+/** ReaderKindNotOpen: Row 1: this kind does not open in this build (`StakeAtLeast` until a devnet YES is recorded; `DbcGraduated` not on mainnet) */
 export const BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN = 0x179c; // 6044
 /** MetricAccountMismatch: Row 2: the metric account is not the one the campaign's parameters name */
 export const BROT_MARKETS_ERROR__METRIC_ACCOUNT_MISMATCH = 0x179d; // 6045
@@ -274,6 +274,16 @@ export const BROT_MARKETS_ERROR__FEED_NOT_ON_LIST = 0x17fd; // 6141
 export const BROT_MARKETS_ERROR__ILLEGAL_TRANSITION = 0x1802; // 6146
 /** CutoffNotMovable: The proof does not move the cut-off back: not earlier, not a YES price result, or a tally has started */
 export const BROT_MARKETS_ERROR__CUTOFF_NOT_MOVABLE = 0x1803; // 6147
+/** CurveHasTransferHook: Row 2: the DBC pool is a transfer-hook pool, which this kind does not accept */
+export const BROT_MARKETS_ERROR__CURVE_HAS_TRANSFER_HOOK = 0x1804; // 6148
+/** CurveConfigMismatch: Row 2: the config account passed after the nine slots is not the DBC pool's own */
+export const BROT_MARKETS_ERROR__CURVE_CONFIG_MISMATCH = 0x1805; // 6149
+/** CurveNotInSol: Row 2: the curve is not priced in SOL: its config's quote mint is not wSOL */
+export const BROT_MARKETS_ERROR__CURVE_NOT_IN_SOL = 0x1806; // 6150
+/** CurveTooSmall: Row 2: the curve's graduation threshold is below `DBC_MIN_GRADUATION_LAMPORTS` */
+export const BROT_MARKETS_ERROR__CURVE_TOO_SMALL = 0x1807; // 6151
+/** TargetNotThreshold: Row 3: the target is not the curve's graduation threshold (`migration_quote_threshold`) */
+export const BROT_MARKETS_ERROR__TARGET_NOT_THRESHOLD = 0x1808; // 6152
 
 export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY
@@ -294,6 +304,10 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__CREATION_PARAMS_CHANGED
   | typeof BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING
   | typeof BROT_MARKETS_ERROR__CREATOR_SHARE_NOT_DUE
+  | typeof BROT_MARKETS_ERROR__CURVE_CONFIG_MISMATCH
+  | typeof BROT_MARKETS_ERROR__CURVE_HAS_TRANSFER_HOOK
+  | typeof BROT_MARKETS_ERROR__CURVE_NOT_IN_SOL
+  | typeof BROT_MARKETS_ERROR__CURVE_TOO_SMALL
   | typeof BROT_MARKETS_ERROR__CUTOFF_NOT_MOVABLE
   | typeof BROT_MARKETS_ERROR__DUPLICATE_ACCOUNT
   | typeof BROT_MARKETS_ERROR__DUPLICATE_TEAM_KEY
@@ -383,6 +397,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__STAKE_POOL_NOT_UPDATING
   | typeof BROT_MARKETS_ERROR__TALLY_NOT_READY
   | typeof BROT_MARKETS_ERROR__TARGET_ALREADY_TOUCHED
+  | typeof BROT_MARKETS_ERROR__TARGET_NOT_THRESHOLD
   | typeof BROT_MARKETS_ERROR__TARGET_TOO_CLOSE
   | typeof BROT_MARKETS_ERROR__TARGET_UNREACHABLE
   | typeof BROT_MARKETS_ERROR__TEAM_KEY_OUTSIDE_REVIEW
@@ -428,6 +443,10 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__CREATION_PARAMS_CHANGED]: `The creation parameters changed since the client read them (\`expected_params_version\`)`,
     [BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING]: `\`creator_share_bps\` is above \`MAX_CREATOR_SHARE_BPS\``,
     [BROT_MARKETS_ERROR__CREATOR_SHARE_NOT_DUE]: `No creator share is due: team, one-sided, void or refund`,
+    [BROT_MARKETS_ERROR__CURVE_CONFIG_MISMATCH]: `Row 2: the config account passed after the nine slots is not the DBC pool's own`,
+    [BROT_MARKETS_ERROR__CURVE_HAS_TRANSFER_HOOK]: `Row 2: the DBC pool is a transfer-hook pool, which this kind does not accept`,
+    [BROT_MARKETS_ERROR__CURVE_NOT_IN_SOL]: `Row 2: the curve is not priced in SOL: its config's quote mint is not wSOL`,
+    [BROT_MARKETS_ERROR__CURVE_TOO_SMALL]: `Row 2: the curve's graduation threshold is below \`DBC_MIN_GRADUATION_LAMPORTS\``,
     [BROT_MARKETS_ERROR__CUTOFF_NOT_MOVABLE]: `The proof does not move the cut-off back: not earlier, not a YES price result, or a tally has started`,
     [BROT_MARKETS_ERROR__DUPLICATE_ACCOUNT]: `The same account was passed in two slots that must differ`,
     [BROT_MARKETS_ERROR__DUPLICATE_TEAM_KEY]: `The same team key appears twice`,
@@ -496,7 +515,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__PROOF_OUTSIDE_WINDOW]: `Proof: the publish time is outside the campaign's window`,
     [BROT_MARKETS_ERROR__PROOF_STALE]: `Proof: more than 60 s old, too far ahead of the clock, or too many slots old`,
     [BROT_MARKETS_ERROR__READER_BAD_LAYOUT]: `Account data does not match the layout this reader expects`,
-    [BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN]: `Row 1: this kind does not open yet (\`StakeAtLeast\` until a devnet YES is recorded)`,
+    [BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN]: `Row 1: this kind does not open in this build (\`StakeAtLeast\` until a devnet YES is recorded; \`DbcGraduated\` not on mainnet)`,
     [BROT_MARKETS_ERROR__READER_NOT_READY]: `Unused since Sprint 03: the reader methods returned it before they were ported`,
     [BROT_MARKETS_ERROR__READER_WRONG_OWNER]: `Account is not owned by the program this reader trusts`,
     [BROT_MARKETS_ERROR__RENT_PAYER_NOT_STORED]: `The rent payer is not the one stored at opening`,
@@ -517,6 +536,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__STAKE_POOL_NOT_UPDATING]: `Row 2: the stake pool stopped updating and cannot write the epoch's snapshot`,
     [BROT_MARKETS_ERROR__TALLY_NOT_READY]: `The campaign is not InReview with its publish time recorded, so its joins cannot be tallied`,
     [BROT_MARKETS_ERROR__TARGET_ALREADY_TOUCHED]: `Row 3: the target is already touched or met; the campaign would be decided at birth`,
+    [BROT_MARKETS_ERROR__TARGET_NOT_THRESHOLD]: `Row 3: the target is not the curve's graduation threshold (\`migration_quote_threshold\`)`,
     [BROT_MARKETS_ERROR__TARGET_TOO_CLOSE]: `Row 3: the target is within the minimum distance of the current value`,
     [BROT_MARKETS_ERROR__TARGET_UNREACHABLE]: `Row 3: the target is out of reach (a price at or below zero, or past the far bound)`,
     [BROT_MARKETS_ERROR__TEAM_KEY_OUTSIDE_REVIEW]: `The team key acts only while the campaign is InReview`,

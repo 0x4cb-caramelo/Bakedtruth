@@ -4,9 +4,10 @@
  *          the box's id), the site's switch, the wallet and its balance, and the verdict `checkBox` returns on every
  *          change (A-10: the SDK's mirror of the program, in its order). A deadline given in days becomes a moment, on
  *          the minute, once the chain's clock is known (A-7). The id is this wallet's saved one, or one drawn for this
- *          page, saved only when "Sign in wallet" hands the transaction over (submit.ts).
- * Version: 0.1.1 (the Sprint 19 coordinator review: the header says when the id is saved)
- * Sprint:  19 (site: open a campaign)
+ *          page, saved only when "Sign in wallet" hands the transaction over (submit.ts). A graduation campaign's
+ *          accounts include its pool's config, so a read is the draft's only for the kind it was made for.
+ * Version: 0.1.2 (the sixth kind; 0.1.1, the Sprint 19 coordinator review: the header says when the id is saved)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -25,6 +26,9 @@ import { loadOpening, pruneSettledOpenings } from "./retry-guard";
 const REFRESH_MS = 15_000;
 const ACCOUNT_DEBOUNCE_MS = 400;
 
+/** The draft's accounts as read, with the slot value, the kind and the id they were read for. */
+type AccountsRead = { metric: string; kind: Draft["kind"]; id: bigint; value: BoxInputs["accounts"] };
+
 /** The browser's store with this page's memory first; opening records saved more than a day ago are deleted. */
 export function openingStore(): KeyValueStore & { persists: boolean } {
   const local = browserStore();
@@ -42,7 +46,7 @@ export function useOpenBox(initial: Draft) {
   const [draft, setDraft] = useState<Draft>(initial);
   const [world, setWorld] = useState<BoxWorld | null>(null);
   const [readFailed, setReadFailed] = useState(false);
-  const [accounts, setAccounts] = useState<{ metric: string; id: bigint; value: BoxInputs["accounts"] } | null>(null);
+  const [accounts, setAccounts] = useState<AccountsRead | null>(null);
   const [check, setCheck] = useState<BoxCheck | null>(null);
   const [tick, setTick] = useState(0);
   const pageIds = useRef(new Map<string, bigint>());
@@ -86,14 +90,15 @@ export function useOpenBox(initial: Draft) {
   }, [tick]);
 
   const metric = accountOf(draft);
+  const kind = draft.kind;
   const accountsKey = `${wallet ?? ""}|${draft.kind}|${metric ?? ""}|${world?.clock.slot ?? ""}|${landings}`;
   useEffect(() => {
     let live = true;
     const timer = setTimeout(() => {
       const id = idNow();
-      readDraftAccounts(rpc, id, metric)
-        .then((value) => live && setAccounts({ metric: metric ?? "", id, value }))
-        .catch(() => live && setAccounts({ metric: metric ?? "", id, value: null }));
+      readDraftAccounts(rpc, id, metric, kind)
+        .then((value) => live && setAccounts({ metric: metric ?? "", kind, id, value }))
+        .catch(() => live && setAccounts({ metric: metric ?? "", kind, id, value: null }));
     }, ACCOUNT_DEBOUNCE_MS);
     return () => {
       live = false;
@@ -103,8 +108,8 @@ export function useOpenBox(initial: Draft) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountsKey]);
 
-  // The accounts read for another slot value are not this draft's: the account check waits for its own read.
-  const current = accounts && accounts.metric === (metric ?? "") ? accounts : null;
+  // The accounts read for another slot value or kind are not this draft's: the account check waits for its own read.
+  const current = accounts && accounts.metric === (metric ?? "") && accounts.kind === kind ? accounts : null;
   const draftAccounts = current?.value ?? null;
   /** Read the chain again now (after an opening landed, or "Check again"). */
   const refresh = useCallback(() => {

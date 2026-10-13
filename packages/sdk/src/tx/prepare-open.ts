@@ -4,7 +4,7 @@
  *          of TP 3.4.10 with `validateOpenCampaign`, in the program's order; then build, summarise the very bytes
  *          the wallet signs, simulate, and show the whole debit (the payment, the two rents, the network fee)
  *          before the wallet. `ok` only when all of it passed.
- * Version: 0.3.0 (Sprint 11: A-8, the deploy a client was built for is checked first when it names one)
+ * Version: 0.3.1 (the sixth kind: a graduation opening reads and passes its pool's own config)
  * Sprint:  05 (SDK)
  *
  * The opening's id is drawn here when not given and returned: the client saves it before signing and reuses
@@ -16,15 +16,18 @@ import { compileTransaction, type Address, type Transaction, type TransactionSig
 import { ACCOUNT_LEN, Direction, ReaderKind, SOL_USD_ACCOUNT } from "../read/constants";
 import { decodeGlobalConfig, isTeamKey } from "../read/accounts";
 import { hexToBytes } from "../read/bytes";
+import { curveConfigOf } from "../read/chain/dbc";
 import { isRefusal } from "../read/errors";
-import type { FeedCluster } from "../read/feeds";
 import { U64_MAX } from "../read/math/integers";
-import type { ScheduleConstants } from "../read/math/schedule";
 import { campaignAddress, configAddress, sponsoredPriceAddress, vaultAddress } from "../read/pdas";
 import { assertDeploy } from "../read/program-data";
 import { openingDebit, openingQuote, type OpeningDebit, type OpeningQuote } from "../read/quote";
 import { fetchRaw, readChainTime, readEpochSchedule, rentExemptMinimum, type SolanaRpc } from "../read/rpc";
-import { validateOpenCampaign, type OpenCampaignCheck } from "../read/validate/open-campaign";
+import {
+  validateOpenCampaign,
+  type OpenCampaignCheck,
+  type OpenCampaignCheckInput,
+} from "../read/validate/open-campaign";
 import { buildOpenCampaign, randomCampaignId } from "./builders/campaign";
 import { messageFor } from "./message";
 import { simulate, type ReadyMessage, type Simulation } from "./simulate";
@@ -79,8 +82,8 @@ export async function prepareOpenCampaign(a: {
   choice: OpeningChoice;
   id?: bigint;
   marginBps?: number;
-  /** The target cluster's build: its feed list, whether `StakeAtLeast` opens, its schedule (drill or real). */
-  build?: { feeds?: FeedCluster; stakeAtLeastOpens?: boolean; schedule?: ScheduleConstants };
+  /** The target cluster's build: its feed list, which kinds open, the curve floor, its schedule (drill or real). */
+  build?: OpenCampaignCheckInput["build"];
   voteStake?: bigint | null;
   /** A-8: the program deploy this client was built for (`null`: none known); checked first when given. */
   deploySlot?: bigint | null;
@@ -104,6 +107,9 @@ export async function prepareOpenCampaign(a: {
     read(rpc, await vaultAddress(campaign)),
   ]);
   if (!config.account) throw new Error("the program's config does not exist on this cluster");
+  // A graduation opening passes the config its pool names: the program refuses any other.
+  const curveAt = choice.kind === ReaderKind.DbcGraduated ? curveConfigOf(metric.account) : null;
+  const curve = curveAt ? await read(rpc, curveAt) : null;
   const decoded = decodeGlobalConfig(config.account);
   const [clock, epochSchedule] = await Promise.all([readChainTime(rpc), readEpochSchedule(rpc)]);
   const isTeam = isTeamKey(decoded, a.creator.address);
@@ -151,10 +157,13 @@ export async function prepareOpenCampaign(a: {
     build: a.build,
     epochSchedule,
     voteStake: a.voteStake ?? null,
+    curveConfigAddress: curve?.at,
+    curveConfig: curve?.account ?? null,
   });
   if (!check.ok) return { ok: false, stage: "check", id, check };
   if (quoteRefused) throw new Error("the quote refused an opening the checks accept: nothing was built");
-  const ix = await buildOpenCampaign({ creator: a.creator, args, metricAccount: metricAddress });
+  const built = { creator: a.creator, args, metricAccount: metricAddress, curveConfig: curve?.at };
+  const ix = await buildOpenCampaign(built);
   const message = await messageFor(rpc, a.creator, ix);
   const transaction = compileTransaction(message);
   const p = decoded.params;

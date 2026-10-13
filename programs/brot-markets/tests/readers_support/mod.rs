@@ -69,6 +69,7 @@ pub fn open(kind: ReaderKind, account: &mut HostAccount, target: i128) -> Res<Cr
         epoch: 0,
         deadline_at: DEADLINE,
         time: at(NOW),
+        curve_config: None,
     };
     validate_at_creation(kind, &context)
 }

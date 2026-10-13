@@ -2,16 +2,17 @@
 //!          campaign's reader says the outcome is knowable (`OutcomeKnowable`), and with the reader's
 //!          own error when it cannot read the metric account; for a price campaign it is also refused
 //!          while the sponsored band edge is within `JOIN_BUFFER_BPS` of the target (`JoinBufferRefused`).
-//! Version: 0.0.2
-//! Sprint: 03 (readers and resolution), lane E; 04 (the buffer), lane G
+//! Version: 0.0.3
+//! Sprint: 03 (readers and resolution), lane E; 04 (the buffer), lane G; the sixth kind's lock
 //!
 //! What each reader answers is its own (`readers/`, TP section 3.4.8). The price kind reads the
 //! sponsored account, Full, of the campaign's feed, with the exponent stored at opening
 //! (`PriceExponentChanged`), at most `max_age` old, at most 60 s ahead of the clock and posted
 //! within the slot bound (`JoinPriceStale`), and knows the outcome once price ± confidence
 //! reaches the target in the campaign's direction. `SupplyAtMost` knows it once the supply is at
-//! or below the target, `DammV2LockedAtLeast` once the locked liquidity reaches the target, and
-//! the two epoch kinds once the measured epoch has started. A join never offers a YES proof.
+//! or below the target, `DammV2LockedAtLeast` once the locked liquidity reaches the target, the
+//! two epoch kinds once the measured epoch has started, and `DbcGraduated` once the curve has
+//! completed (its stage at 1 or later), and not before. A join never offers a YES proof.
 //!
 //! Outcome of the buffer and the refund, for each case the sprint changes (lane G):
 //!

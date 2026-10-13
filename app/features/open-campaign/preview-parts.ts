@@ -1,13 +1,15 @@
 /**
  * Purpose: the pieces of the creation box's preview that read what the box fetched, as pure values (Sprint 19): the
  *          listed feeds with their state read live (TP §3.4.10 row 4) and a feed's price now, a raw amount with its
- *          unit, the account slot's state (row 2), and the list card the campaign will have with no entry yet, built
- *          from the arguments the transaction carries.
- * Version: 0.2.0
- * Sprint:  19 (site: open a campaign)
+ *          unit, the account slot's state (row 2; a curve's with the config its pool names), how the preview names the
+ *          account (a curve by its ticker, never its address alone), and the list card the campaign will have with no
+ *          entry yet, built from the arguments the transaction carries.
+ * Version: 0.3.1 (the curve's name; 0.3.0, the sixth kind's curve)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
-import type { FetchedAccount, OpenArgs } from "@brot/sdk/read";
+import { shortAddress, type OpenArgs } from "@brot/sdk/read";
 
+import { curveName } from "../campaigns/curve-name";
 import { formatTarget, type SentenceInput } from "../campaigns/sentence";
 import type { Card } from "../campaigns/model";
 import { ageText } from "../campaign-page/format";
@@ -15,7 +17,7 @@ import { accountState, feedState, type AccountState } from "./account-check";
 import { KIND_WORDS, SLOTS } from "./copy";
 import { refusalCopy } from "./copy-refusals";
 import type { Draft } from "./draft";
-import type { BoxWorld } from "./reads";
+import type { BoxWorld, DraftAccounts } from "./reads";
 
 /** A price in US$ with the feed's own exponent, as the page writes a target. */
 export const usd = (price: bigint, exponent: number) => `US$${formatTarget(price, exponent)}`;
@@ -24,7 +26,7 @@ export const pct = (bps: number) => `${bps / 100}%`;
 
 /** A raw amount with its unit (the copy review, M8): burn and lock targets are raw units, not tokens. */
 export const withUnit = (kind: Draft["kind"], text: string) =>
-  KIND_WORDS[kind].unit && kind !== "pool" && kind !== "stake" ? `${text} ${KIND_WORDS[kind].unit}` : text;
+  KIND_WORDS[kind].unit && KIND_WORDS[kind].unit !== "SOL" ? `${text} ${KIND_WORDS[kind].unit}` : text;
 
 /** The feed's price now, when its sponsored account is fresh enough to back a campaign (row 4). */
 export function priceReading(world: BoxWorld | null, feedHex: string | null) {
@@ -61,16 +63,23 @@ export function feedOptions(world: BoxWorld | null): FeedOption[] {
   return options.sort((a, b) => Number(b.usable) - Number(a.usable) || a.symbol.localeCompare(b.symbol));
 }
 
+/** How the preview names the draft's account: a curve as its sentence does (curve-name.ts), the others by address. */
+export function accountShown(kind: Draft["kind"], input: SentenceInput): string | null {
+  if (!input.metricAccount) return null;
+  return kind === "curve" ? (input.accountName ?? curveName(input.metricAccount)) : shortAddress(input.metricAccount);
+}
+
 /** The account slot's state: checking until the read for this exact address is back, then the reader's answer. */
 export function slotReadOf(
   draft: Draft,
-  accounts: { metric: FetchedAccount | null } | null,
+  accounts: (Pick<DraftAccounts, "metric"> & Partial<Pick<DraftAccounts, "curveConfig">>) | null,
   read: boolean,
   epoch: bigint | null,
 ): SlotRead {
   if (draft.kind === "price" || !read) return { status: "checking" };
   if (accounts === null) return { status: "failed" };
-  return { status: "read", state: accountState(draft.kind, accounts.metric, epoch ?? 0n) };
+  const config = accounts.curveConfig?.account ?? null;
+  return { status: "read", state: accountState(draft.kind, accounts.metric, epoch ?? 0n, config) };
 }
 
 /** The list's card for the campaign the arguments open, before any entry (spec 3.12, "as it will appear"). */

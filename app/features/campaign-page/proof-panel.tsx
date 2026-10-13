@@ -4,8 +4,11 @@
  *          and its confidence, when it was published and posted, the campaign's maximum price age (30 s floor), and what
  *          the screen says when no fresh price exists (L-22) or the price sits within 1% of the target. Then, folded
  *          under "Proof details" (Ronaldo, 2026-10-11), when the price was published, the account read with its
- *          explorer link, the owner checked first, and entries close and the deadline in UTC and local time.
- * Version: 0.3.0 (the details folded; 0.2.0, the UI overhaul: the approved prototype's `.cp-proof`)
+ *          explorer link and a copy button, the owner checked first, and entries close and the deadline in UTC and
+ *          local time. On a graduation campaign, the curve's progress and the risk that anyone may pay its rest
+ *          (./curve-progress.tsx), and in the details the token's mint (its CA) beside the pool: the title names the
+ *          curve by its ticker, so its addresses live here.
+ * Version: 0.4.1 (the token's mint and the copy buttons; 0.4.0, the sixth kind's curve; 0.3.0, the details folded)
  * Sprint:  11 (site: campaign page and entry)
  */
 "use client";
@@ -17,6 +20,9 @@ import { cx } from "@/components/ui/cx";
 import { Outcome, shortAddress } from "@/lib/brot";
 import { explorerAddress } from "@/lib/config";
 import { PRICE, PROOF, RAW_UNIT } from "./copy";
+import { CopyButton } from "./copy-button";
+import { curveMintOf } from "./curve";
+import { CurveProgress } from "./curve-progress";
 import { ageText, grouped, local, priceAsset, utc, valueText, valueWithUnit } from "./format";
 import type { PageData } from "./load";
 import { READER, type Proof } from "./proof";
@@ -26,6 +32,23 @@ const Row = ({ label, children }: { label: string; children: ReactNode }) => (
     <dt>{label}</dt>
     <dd>{children}</dd>
   </div>
+);
+
+/** An address in the details: shortened, linked to the explorer, and copied whole by its button. */
+const AddressLinks = ({ address, label }: { address: string; label: string }) => (
+  <span className="inline-flex flex-wrap items-center justify-end gap-x-2 gap-y-1">
+    <a
+      href={explorerAddress(address)}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex items-center gap-1 font-mono underline"
+      title={address}
+    >
+      {shortAddress(address)}
+      <ArrowUpRight className="size-3" aria-hidden="true" />
+    </a>
+    <CopyButton text={address} label={label} compact />
+  </span>
 );
 
 const When = ({ at }: { at: bigint }) => (
@@ -44,6 +67,8 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
   const value = proof.value === null ? null : valueText(proof.kind, proof.value, exponent, asset);
   const reader = READER[proof.kind];
   const unit = RAW_UNIT[proof.kind];
+  // A graduation campaign's token: its address stays here, with the pool's, never in the title.
+  const mint = proof.kind === "curve" ? curveMintOf(data.metric) : null;
   return (
     <section aria-labelledby="proof-title" className="panel cp-proof">
       <h2 id="proof-title" className="panel-head">
@@ -74,6 +99,7 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
           {unit ? <small className="mt-1">{unit}</small> : null}
         </div>
       </div>
+      {proof.curve ? <CurveProgress curve={proof.curve} /> : null}
       {proof.problem ? (
         <p className="cp-gap is-off">{proof.problem === "missing" ? PROOF.missing : PROOF.problem(proof.problem)}</p>
       ) : null}
@@ -99,17 +125,13 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
         {before && proof.price ? <PriceTimes proof={proof} maxAge={c.maxAge} /> : null}
         <dl className="rows cp-rows">
           <Row label={PROOF.account}>
-            <a
-              href={explorerAddress(proof.account)}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 font-mono underline"
-              title={proof.account}
-            >
-              {shortAddress(proof.account)}
-              <ArrowUpRight className="size-3" aria-hidden="true" />
-            </a>
+            <AddressLinks address={proof.account} label={PROOF.account} />
           </Row>
+          {mint ? (
+            <Row label={PROOF.tokenMint}>
+              <AddressLinks address={mint} label={PROOF.tokenMint} />
+            </Row>
+          ) : null}
           <Row label={PROOF.owner}>
             {reader.owner}{" "}
             <span className="font-mono text-xs text-muted" title={reader.ownerId}>

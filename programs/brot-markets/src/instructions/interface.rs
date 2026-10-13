@@ -82,7 +82,8 @@ pub enum BrotInstruction {
     AdminResumeEntries,
 
     /// Opens a campaign: the ten checks of TP section 3.4.10, then the campaign, its vault and
-    /// the opening payment into the vault.
+    /// the opening payment into the vault. `DbcGraduated` reads one more account, after the nine
+    /// listed: the pool's `PoolConfig`, read only.
     #[account(0, writable, signer, name = "creator", desc = "Any wallet, or a team key; pays the opening and both rents")]
     #[account(1, writable, name = "config", desc = "GlobalConfig")]
     #[account(2, writable, name = "campaign", desc = "Campaign, PDA [\"campaign\", id], created")]

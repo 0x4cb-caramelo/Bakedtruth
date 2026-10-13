@@ -27,6 +27,15 @@ inferência.
 é um **baker**; quem a abre é o **criador**; os lados são **SIM** e **NÃO**; o dinheiro fica no **pote**. A marca
 continua Brot Markets. Para o nosso produto, os documentos não usam mais "mercado", "aposta" nem "escolher um lado".
 
+**Acréscimo de 12/10/2026, sem nova versão: o sexto tipo.** O programa ganhou um sexto tipo de campanha, a graduação
+de uma curva de lançamento da Meteora (DBC): "a curva do token T completa até a data D?". As escolhas M-1 a M-7 de
+[`docs/technical/meteora-readers-plan.md`](../technical/meteora-readers-plan.md) vieram fixadas no pedido desse dia
+(`session-log/2026-10-12-sexto-tipo-dbc-graduated.md`): só curvas cotadas em SOL, de 85 SOL para cima, com ao menos
+10% do valor ainda faltando na abertura; o SIM pode ser comprado por quem pagar o resto da curva, e a página da
+campanha diz isso; o tipo abre no devnet e fica fechado na rede principal até as auditorias cobrirem o leitor. A Parte
+1 o descreve na seção 4.2, e a Parte 4 o conta nas seções 4.2 e 4.3. Como o resto da v0.0.4, espera a leitura do
+fundador.
+
 ## As quatro partes
 
 | Parte | Arquivo | O que responde |
@@ -85,8 +94,9 @@ não custa nada ao Brot, porque sai do pote.
 O critério de parada continua: aos 180 dias na rede principal, com volume mensal de até US$ 45 mil, a empresa para ou
 muda de rumo.
 
-**As regras de abertura.** Só os cinco tipos que a rede responde: preço de ativo grande pela Pyth, queima de tokens,
-liquidez travada na Meteora, tamanho de pool de staking e stake de validador. A conta lida é conferida na abertura. O
+**As regras de abertura.** Só os seis tipos que a rede responde: preço de ativo grande pela Pyth, queima de tokens,
+liquidez travada na Meteora, tamanho de pool de staking, stake de validador e, desde 12/10/2026, a graduação de uma
+curva de lançamento da Meteora, fechada na rede principal até as auditorias. A conta lida é conferida na abertura. O
 site monta a frase, sem texto livre. A campanha dura de 3 a 90 dias. As taxas são fixas. **Decisão, de 8/10/2026:** não
 há lista de contas aprovadas ("nao lidaremos com tokenomics") e não há teto, nem global nem por campanha.
 
@@ -142,7 +152,8 @@ sai do pote até onde der e só a diferença sai da taxa; os US$ 450 voltam a qu
 um lado só, e os US$ 50 seguem a causa; entrada mínima de 0,01 SOL; o preço para cobrar a abertura vem da Pyth, e a
 CoinGecko só mostra preço no site; a proposta de arquitetura 0.4 aprovada, e com ela o site em Bun se passar no teste,
 com o Node de reserva; sem teto global nem por campanha; sem lista de contas aprovadas; sem texto livre; as regras
-mínimas de abertura (cinco tipos, conta conferida, 3 a 90 dias, taxas fixas); abertura, taxa e 1% no núcleo; o pedido de
+mínimas de abertura (cinco tipos, seis desde 12/10/2026, conta conferida, 3 a 90 dias, taxas fixas); abertura, taxa e
+1% no núcleo; o pedido de
 pergunta sai e o patrocínio 90/10 fica; o vocabulário das campanhas; Pinocchio; Bun; app Android; sem IA; sem prazo;
 advogado na equipe. Das dezenove decisões da v0.0.3, ficam resolvidas a 1, a 2, a 4, a 7, a 13, a 15, a 16 e a 18; a 6
 (a equipe abre, de graça e sem o 1%); a 10, repetida como P-1, foi decidida; e a 19 virou a P-7.
@@ -160,6 +171,7 @@ advogado na equipe. Das dezenove decisões da v0.0.3, ficam resolvidas a 1, a 2,
 | R4 | Taxa reduzida nos três primeiros meses: qual valor e de qual taxa (revisão dos mentores de 8/10/2026) | Zerar só a taxa de abertura nas três primeiras campanhas de cada criador; mexer na taxa do pote mexe no equilíbrio | `_review/revisao-do-pitch-2026-10-08.md` |
 | Nova | "nao lidaremos com tokenomics" vale também para os tokens A e B, ou só para a lista de contas? | Confirmar que foi só sobre a lista | P3 |
 | 3, 5, 8, 9, 11, 12, 14, 17 | As da v0.0.3 que continuam | As recomendações da v0.0.3 | Cada parte |
+| M-1 a M-7 | O sexto tipo, a graduação de uma curva da Meteora, e as suas regras, fixados no pedido de 12/10/2026 | Ler e confirmar, como as outras decisões deste rascunho | P1 4.2 |
 
 Faltam ainda quem assina a carteira de várias assinaturas e o acordo escrito entre os sócios.
 

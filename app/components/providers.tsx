@@ -5,15 +5,18 @@ import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
 import { SolflareWalletAdapter } from "@solana/wallet-adapter-solflare";
+import type { AccountName } from "@brot/sdk/schemas";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
 import { ToastProvider } from "@/components/toast";
 import { CLUSTER, RPC_URL } from "@/lib/config";
+import { CurveNamesProvider } from "@/features/campaigns/curve-names";
 import { registerMwaOnce } from "@/features/wallet/register-mwa";
 import { SolBalanceProvider } from "@/features/wallet/sol-balance-provider";
 import { WalletPickerProvider } from "@/features/wallet/wallet-picker";
 
-export function Providers({ children }: { children: ReactNode }) {
+/** `curveNames`: the reviewed names of graduation curves, read by the root layout on the server. */
+export function Providers({ children, curveNames }: { children: ReactNode; curveNames: readonly AccountName[] }) {
   // Phantom and Solflare are always listed (with an install link when missing); any other
   // Wallet Standard wallet (Backpack, ...) is discovered automatically.
   const wallets = useMemo(() => [new PhantomWalletAdapter(), new SolflareWalletAdapter()], []);
@@ -33,7 +36,9 @@ export function Providers({ children }: { children: ReactNode }) {
           <WalletPickerProvider>
             {/* One balance for the whole site, refreshed after a landing, on a timer and on return to the tab. */}
             <SolBalanceProvider>
-              <ToastProvider>{children}</ToastProvider>
+              <CurveNamesProvider names={curveNames}>
+                <ToastProvider>{children}</ToastProvider>
+              </CurveNamesProvider>
             </SolBalanceProvider>
           </WalletPickerProvider>
         </WalletModalProvider>

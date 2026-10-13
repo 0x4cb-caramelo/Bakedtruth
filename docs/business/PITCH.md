@@ -39,8 +39,9 @@ O Brot Markets só abre perguntas cuja resposta fica gravada na Solana, e o prog
 juiz nem oráculo de opinião (Resumo). As perguntas de preço usam um oráculo de preço conferido na própria rede (P1
 §4.7). Entra-se só com a carteira, sem cadastro.
 
-No primeiro dia são cinco tipos de pergunta: preço de ativo grande, queima de tokens, liquidez travada na Meteora,
-tamanho de pool de staking e stake de validador (P1 §4.2). Ficam fora os tipos em que uma pessoa decide o resultado
+São seis tipos de pergunta: preço de ativo grande, queima de tokens, liquidez travada na Meteora, tamanho de pool de
+staking, stake de validador e, desde 12/10/2026, a graduação de uma curva de lançamento da Meteora, fechada na rede
+principal até as auditorias (P1 §4.2). Ficam fora os tipos em que uma pessoa decide o resultado
 de graça (P1 §4.3). Não há saída antecipada nesta versão (P1 §3.6).
 
 ## 5. Como funciona

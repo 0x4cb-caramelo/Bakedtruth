@@ -5,9 +5,9 @@
  *          Pyth's SOL/USD; on a phone a sticky bar keeps the total and the button. The program decides: the box mirrors
  *          its refusals (A-10), shows the deterministic summary of the very bytes (A-3), and never opens twice (T17).
  *          A prefilled box says so and never signs by itself. Only the verdict of the draft on screen opens the review,
- *          and the box is inert while the opening is prepared.
- * Version: 0.2.0 (the Sprint 19 adversarial review, H1)
- * Sprint:  19 (site: open a campaign)
+ *          and the box is inert while the opening is prepared. A curve the slot accepted is named by its token's ticker.
+ * Version: 0.2.1 (the curve's name; 0.2.0, the Sprint 19 adversarial review, H1)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
 "use client";
 
@@ -16,10 +16,12 @@ import { useMemo } from "react";
 import { Notice } from "@/components/ui/notice";
 import { useInstalledWallet } from "@/features/wallet/use-installed-wallet";
 import { KIND_NAME } from "../campaign-page/copy";
+import { useCurveNames } from "../campaigns/curve-names";
 import { issuesAt, readyToReview } from "./check";
 import { BOX, KIND_WORDS } from "./copy";
 import { CostSection } from "./cost-section";
 import { DetailsSection } from "./details-section";
+import { accountOf } from "./draft";
 import { feedSources } from "./feed-sources";
 import { templateOf } from "./kinds";
 import type { KnownName } from "./names";
@@ -43,7 +45,10 @@ export function OpenBox({ prefill, names }: { prefill: Prefilled; names: KnownNa
   const sources = useMemo(() => ({ feeds: feedSources(world), names }), [world, names]);
   const feeds = useMemo(() => feedOptions(world), [world]);
   const slot = slotReadOf(draft, box.accounts, box.accountsRead, world?.clock.epoch ?? null);
-  const inputs = { draft, check, world, slot, names, wallet };
+  // A curve the slot accepted is named by its token's ticker (curve-names.tsx); nothing is read for a refused one.
+  const pool = draft.kind === "curve" && slot.status === "read" && slot.state.state === "ok" ? accountOf(draft) : null;
+  const nameOf = useCurveNames(pool ? [pool] : []);
+  const inputs = { draft, check, world, slot, names, wallet, curveName: pool ? nameOf(pool) : null };
   const facts = previewFacts(inputs);
   const t = templateOf(draft.kind);
   const team = check?.isTeam ?? false;
