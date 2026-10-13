@@ -32,7 +32,10 @@ export type ChainRpc = {
   calls: string[];
   /** Recent prioritization fees the next calls answer (micro-lamports per unit). */
   setFees(fees: bigint[]): void;
-  /** Extra answers for methods the world cannot give (a recorded `getBlock`, another program's transaction). */
+  /**
+   * Extra answers for what the world cannot give (a recorded `getBlock`, another program's transaction); a handler
+   * that returns `undefined` lets the world answer.
+   */
   answer(method: string, handler: Handler): void;
   beforeSend?: (signature: string) => Promise<void>;
 };
@@ -175,7 +178,10 @@ export function chainRpc(w: World): ChainRpc {
   const transport = async ({ payload }: { payload: unknown }) => {
     const { id, method, params } = payload as { id: number; method: string; params: any[] };
     calls.push(method);
-    const handler = extra.get(method) ?? (method === "sendTransaction" ? sendTransaction : handlers[method]);
+    const own = extra.get(method);
+    const answered = own ? await own(params ?? []) : undefined;
+    if (answered !== undefined) return { jsonrpc: "2.0", id, result: wire(answered) };
+    const handler = method === "sendTransaction" ? sendTransaction : handlers[method];
     if (!handler) return { jsonrpc: "2.0", id, error: { code: -32601, message: `fake RPC: no ${method}` } };
     return { jsonrpc: "2.0", id, result: wire(await handler(params ?? [])) };
   };
