@@ -115,7 +115,9 @@ async function settleOne(ctx: SettleContext, first: OpenCampaign, chainNow: bigi
       ? await withRetry(() => listEntries(rpc, current.address))
       : null;
     const claimKey = `claim:${current.address}`;
-    const steps = planCampaign(current, entries, chainNow, ctx.claims.due(claimKey, wall()));
+    // The daily clock starts only once a reserve is seen (its first sighting waits a day, backoff.ts).
+    const claimDue = current.campaign.creatorShareReserved > 0n && ctx.claims.due(claimKey, wall());
+    const steps = planCampaign(current, entries, chainNow, claimDue);
     const eligible = steps.filter((step) => ctx.backoff.ready(stepKey(step), wall()));
     if (eligible.length === 0) return;
     if (eligible.some((step) => step.kind === "creatorShare" && step.claim)) ctx.claims.mark(claimKey, wall());
