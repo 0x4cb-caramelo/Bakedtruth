@@ -27,6 +27,30 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **O roteiro da mainnet e o ensaio dele num fork do Surfpool** (branch `sprint-18-mainnet`, 13/10/2026; Sprint 18,
+  a parte que não depende de ninguém; `deploy/mainnet/README.md`; `session-log/2026-10-13-auditoria-do-roteiro-e-faixas.md`).
+  Nunca executado: nada foi enviado à mainnet nem ao devnet, e nenhuma chave de verdade foi usada.
+  - **O roteiro** (`deploy/mainnet/README.md`): as condições do dia com a evidência de cada uma (os dois relatórios,
+    o multisig 2 de 3 em carteiras de hardware, a empresa, a revisão do advogado, a regra de tesouraria), os passos do
+    artefato do CI ao primeiro ciclo de 0,01 SOL, os pontos de parada e a atualização depois do lançamento.
+  - **Três decisões tomadas pelas fontes:** o primeiro deploy não pode ser uma proposta do multisig (o loader do Agave
+    3.1.10 não aceita `DeployWithMaxDataLen` por CPI), então uma carteira de hardware publica a partir de um buffer e
+    passa a autoridade de upgrade ao cofre do Squads na mesma sessão; o cofre inicializa o `GlobalConfig` (admin e
+    `fee_recipient` = cofre, sem chave de admin intermediária); o time lock do Squads é o último ato da sessão.
+  - **Os scripts** (`scripts/deploy/mainnet-*.ts`, `bun run deploy:mainnet`): só a mainnet-beta pelo hash de gênese,
+    o fork do Surfpool reconhecido à parte, a autoridade de upgrade só numa carteira de hardware, o binário amarrado
+    ao SHA-256 digitado, simulação por padrão.
+  - **O ensaio** (`scripts/mainnet/`, `bun run mainnet:rehearse`): num fork da mainnet no Surfpool, com o binário do
+    recurso `mainnet`, o programa Squads v4 de verdade e contas reais (SOL/USD, mints): deploy, passagem da autoridade,
+    inicialização pelo cofre, abertura paga de US$ 500 ao preço da Pyth igual à cotação do SDK, um ciclo inteiro, o
+    time lock recusando antes da hora, a pausa e a retomada. Passou de ponta a ponta quatro vezes (43 conferências em
+    13 passos). Não ensaiado: as carteiras de hardware, as esperas de verdade, o app e a CLI do Squads, o
+    `solana-verify` (precisa de Docker) e os serviços na mainnet.
+  - **Os parâmetros da mainnet** propostos em `deploy/mainnet/init-params.mainnet.json`, cada um marcado para o
+    fundador confirmar: `max_open_campaigns` 1.000, `max_price_age` 60 s, `max_price_conf_bps` 50,
+    `campaign_max_age` 30 s.
+  - **Teste:** 4 novos (`tests/ops/mainnet-deploy.test.ts`), as guardas sem rede.
+
 - **A curva da graduação pelo ticker, e os botões SIM e NÃO limpos** (branch `feat/curve-ticker-side-buttons`,
   13/10/2026; `session-log/2026-10-13-ticker-da-curva-e-botoes-de-lado.md`). Responde ao nome legível que o registro
   do upgrade deixou em aberto, pelo caminho que muda a A-11, aprovado pelo fundador, o Lucas, no mesmo dia.

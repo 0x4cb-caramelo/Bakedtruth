@@ -27,6 +27,8 @@
     "settle-batch:devnet": "bun run scripts/devnet-settle-batch.ts",
     "deploy:devnet": "bun run scripts/deploy/devnet-deploy.ts",
     "deploy:rehearse": "bun run scripts/deploy/rehearse.ts",
+    "deploy:mainnet": "bun run scripts/deploy/mainnet-deploy.ts",
+    "mainnet:rehearse": "bun run scripts/mainnet/rehearse.ts",
     "team:rehearse": "bun run scripts/team/rehearse.ts",
     "validator:negative": "bun run scripts/validator/negative-run.ts",
     "dev": "bun --filter @pred-provable/app dev",

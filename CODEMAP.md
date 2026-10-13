@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **939** |
+| Arquivos mapeados | **958** |
 | Acima de 200 linhas | **42** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -1072,9 +1072,32 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`devnet-deploy.ts`](scripts/deploy/devnet-deploy.ts) | the first deploy of brot-markets to devnet from CI's artifact, and its initialization in the same session (TP §10, §12; deploy/devnet/README.md): the artifact b | 156 |
 | [`finish.ts`](scripts/deploy/finish.ts) | the deploy's second half, shared by the first run and a resume (`devnet-deploy.ts --resume`): the program at the declared id read back (loader v3, the expected  | 83 |
 | [`initialize.ts`](scripts/deploy/initialize.ts) | the two writes the deploy makes in the same session as the deploy itself (TP §3.4.3, §7; Sprint 05): `admin_initialize_config`, signed by the program's upgrade  | 142 |
+| [`mainnet-cluster.ts`](scripts/deploy/mainnet-cluster.ts) | which cluster a mainnet run talks to, checked before anything else (Sprint 18; deploy/mainnet/README.md): the RPC's genesis hash must be mainnet-beta's. A Surfp | 68 |
+| [`mainnet-deploy.ts`](scripts/deploy/mainnet-deploy.ts) | the mainnet deploy of brot-markets (deploy/mainnet/README.md, steps 4 to 7), checking the cluster first: the RPC must be mainnet-beta by its genesis hash (or, f | 154 |
+| [`mainnet-init.ts`](scripts/deploy/mainnet-init.ts) | the deploy's second half on mainnet, done by the multisig (deploy/mainnet/README.md, step 7): one vault transaction holding `admin_initialize_config` (the vault | 116 |
+| [`mainnet-loader.ts`](scripts/deploy/mainnet-loader.ts) | the loader-v3 steps of the mainnet deploy, as Solana CLI commands with every key and the RPC named, and the reads that check each one landed as planned: the buf | 131 |
+| [`mainnet-preflight.ts`](scripts/deploy/mainnet-preflight.ts) | what the mainnet deploy reads before it plans anything, sending nothing (Sprint 18): the binary and its SHA-256, how the declared program id, its ProgramData an | 83 |
+| [`mainnet-signers.ts`](scripts/deploy/mainnet-signers.ts) | who signs a mainnet deploy, held to Sprint 18's gate "the upgrade key was never in a file nor on an internet-connected machine": on mainnet the upgrade authorit | 88 |
+| [`mainnet-squads.ts`](scripts/deploy/mainnet-squads.ts) | what the mainnet scripts need of Squads v4, the multisig that holds the upgrade authority, `admin` and `fee_recipient` (Sprint 18): its program id, its PDAs (mu | 121 |
 | [`preflight.ts`](scripts/deploy/preflight.ts) | what the deploy checks on the cluster and on this machine before it plans anything (Sprint 05 deploy review, F4, F5, F8, F11): how the program id, its ProgramDa | 122 |
 | [`rehearse-funded.ts`](scripts/deploy/rehearse-funded.ts) | rehearse what a stranger's lamports do to a deploy (Sprint 05 deploy review, F4), on the offline surfnet, with the real `solana program deploy` at throwaway ids | 89 |
 | [`rehearse.ts`](scripts/deploy/rehearse.ts) | rehearse every step of the devnet deploy on a local offline surfnet, inside a loopback-only network namespace: the artifact check (and its refusal of a changed  | 181 |
+
+## `scripts/mainnet/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`actors.ts`](scripts/mainnet/actors.ts) | who acts in the mainnet rehearsal, all throwaway and funded on the fork only: the session payer and the stand-in for the deploy-day hardware wallet (key files,  | 73 |
+| [`cycle.ts`](scripts/mainnet/cycle.ts) | the first mainnet cycle of the runbook (step 12) rehearsed on the fork with the `mainnet` binary: a team key opens a free `SupplyAtMost` campaign on a real main | 137 |
+| [`deploy.ts`](scripts/mainnet/deploy.ts) | the deploy steps of the runbook (4 to 6) rehearsed on the mainnet fork with the `mainnet` binary and throwaway keys, through the same step builders and read-bac | 107 |
+| [`entry-checks.ts`](scripts/mainnet/entry-checks.ts) | the mainnet deploy script's guards, rehearsed: its pure refusals (a cluster that is not mainnet-beta, a fork passed off as mainnet, a loopback RPC for a real ru | 97 |
+| [`fork.ts`](scripts/mainnet/fork.ts) | the mainnet fork the rehearsal runs on: a Surfpool surfnet forking mainnet-beta (accounts fetched on first read; nothing is ever sent to mainnet), bound to 127. | 95 |
+| [`incident.ts`](scripts/mainnet/incident.ts) | the incident powers rehearsed on the fork (runbook step 13 and option B): one team key pauses entries at once and a join is refused; the multisig resumes them,  | 73 |
+| [`multisig.ts`](scripts/mainnet/multisig.ts) | the multisig's acts in the rehearsal, each sent through the real Squads v4 program on the mainnet fork: create the 2-of-3 multisig, propose a vault transaction  | 130 |
+| [`paid.ts`](scripts/mainnet/paid.ts) | the paid opening rehearsed on the fork with mainnet's real SOL/USD sponsored account (the founder's open question whether the first mainnet cycle includes one): | 74 |
+| [`rehearse.ts`](scripts/mainnet/rehearse.ts) | the mainnet runbook (deploy/mainnet/README.md) rehearsed end to end on a Surfpool fork of mainnet-beta, with the `mainnet` feature binary and throwaway keys, ne | 136 |
+| [`squads.ts`](scripts/mainnet/squads.ts) | the Squads v4 instructions the rehearsal sends on the mainnet fork, encoded by hand (Anchor discriminators and Borsh arguments) from Squads' published IDL, so n | 121 |
+| [`upgrade.ts`](scripts/mainnet/upgrade.ts) | an upgrade as it happens once the multisig holds the upgrade authority (runbook, "Upgrading"), rehearsed on the fork: the session payer writes a buffer, hands i | 65 |
 
 ## `scripts/rehearsal/`
 
@@ -1464,6 +1487,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`check-opening.test.ts`](tests/ops/check-opening.test.ts) | scripts/team/check-opening.ts, the read-only check of an opening the founder runs on devnet (Sprint 19 DoD; I14): on campaigns the program opened in LiteSVM, a  | 35 |
 | [`deploy-checks.test.ts`](tests/ops/deploy-checks.test.ts) | the pure checks of the devnet deploy (scripts/deploy/checks.ts), each refusal with its own case: SHA256SUMS parsing, the artifact folder against its sums, the p | 99 |
 | [`deploy-preflight.test.ts`](tests/ops/deploy-preflight.test.ts) | the deploy's preflight and bindings (Sprint 05 deploy review, F1, F4, F6, F7, F8, F9, F11), each refusal with its own case: a key file in any Git work tree or r | 120 |
+| [`mainnet-deploy.test.ts`](tests/ops/mainnet-deploy.test.ts) | the mainnet deploy's pure guards, without a cluster (Sprint 18, lane L18): the cluster rule (mainnet-beta by genesis hash, a Surfpool fork told apart), the upgr | 81 |
 | [`rehearsal.test.ts`](tests/ops/rehearsal.test.ts) | the devnet rehearsal's two scripts run against the program in LiteSVM behind the recording RPC before the founder runs them on devnet (Sprint 12): `open-paid` o | 89 |
 | [`resolution-post.test.ts`](tests/ops/resolution-post.test.ts) | scripts/team/resolution-post.ts writes a resolution post from its template (Sprint 13 DoD; BR-33): read from the program in LiteSVM behind the recording RPC thr | 133 |
 

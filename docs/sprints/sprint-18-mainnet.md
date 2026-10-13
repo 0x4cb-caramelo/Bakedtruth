@@ -1,6 +1,6 @@
 # Sprint 18 — Mainnet
 
-**Status:** planned · **Branch:** `sprint-18-mainnet` · **Dates:** none, by the founder's decision
+**Status:** in progress; the runbook and its Surfpool rehearsal are built (2026-10-13); everything else is blocked by Sprint 17, the founder and outside parties (see "Record") · **Branch:** `sprint-18-mainnet` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -122,4 +122,29 @@ production environment files in `/etc/brot-markets` (never in the repository).
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+**2026-10-13, the part that depends on no one (lane L18).** `deploy/mainnet/README.md` is the runbook, never
+executed; `scripts/deploy/mainnet-*.ts` deploy only to mainnet-beta (checked by genesis hash), with the upgrade
+authority on a hardware wallet and the binary bound to its typed SHA-256; `scripts/mainnet/` rehearses the whole day on
+a Surfpool fork of mainnet (the `mainnet` build, the real Squads v4 program, real SOL/USD and mint accounts). The
+rehearsal passed end to end four times, 43 checks in 13 steps. Sources settled three steps: the first deploy cannot be a
+multisig proposal (Agave 3.1.10 refuses `DeployWithMaxDataLen` by CPI), so a hardware wallet deploys from a buffer and
+hands the upgrade authority to the Squads vault in the same session; the vault initializes the config (admin and
+`fee_recipient` are the vault); the Squads time lock is the session's last act.
+
+Not rehearsed: hardware wallets (key files stood in), the real waits (the fork's clock jumps), the Squads app and CLI,
+`solana-verify` (Docker; Sprint 16's CI job), the services on mainnet, and a deploy at the real mainnet id (no keypair
+exists yet).
+
+Open, with owners:
+- **Before the freeze (Sprint 16, the lead):** a mainnet program id (a fresh keypair generated offline by a person) in
+  `declare_id!` and `EVENT_AUTHORITY` under the `mainnet` feature; an IDL and an SDK program id per cluster;
+  `[workspace.metadata.cli] solana = "3.1.10"` for `solana-verify`; CI's `brot_markets.mainnet.so`; a `mainnet` value
+  for `KEEPER_CLUSTER`, `API_CLUSTER` and `scripts/validator/clusters.ts`, each checking the genesis hash; a
+  hardware-signing path for `scripts/team`.
+- **Founder (new, from the runbook):** M-1, one multisig or two (recommended: the same three devices in two 2-of-3
+  multisigs, the locked one holding the upgrade authority and the unlocked one holding admin and fees, so a pause's
+  resume, a leaked team key's removal and keeper refills do not wait the lock); M-2, the lock (24 h proposed); M-3, the
+  four parameter proposals in `deploy/mainnet/init-params.mainnet.json`; M-4, who holds the deploy-day device, and
+  whether the first cycle includes a paid opening.
+- **Outside parties:** both audit reports (Sprint 17), the company, the lawyer's review (L0), the treasury rule (P-7),
+  the paid RPC accounts and the Hermes key (D4), the three hardware wallets.
