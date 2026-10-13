@@ -10,6 +10,21 @@ What runs on the server for Brot Markets, and where each secret lives. No value 
 | Keeper keypair (devnet, throwaway) | `/etc/brot-markets/keeper-devnet.json` | `root:brot`, 0640 | A 64-byte array; never in the repository or a log |
 | Unit | `/etc/systemd/system/brot-keeper.service` (a copy of `brot-keeper.service` here) | `root`, 0644 | `Restart=on-failure`, sandboxed, port 4210 on loopback |
 
+**The keeper's own identity (not installed).** `brot-keeper.service` in this directory now runs the keeper as the user
+`brot-keeper`, with its own copy of the pinned Bun (`/usr/local/lib/brot-keeper/bun`) and its three secrets as systemd
+credentials (`LoadCredential=`, root-only `0400` files): `/etc/brot-markets/keeper-devnet.json` (the keypair),
+`/etc/brot-markets/keeper-rpc-url` (the RPC URL with its key, out of `keeper.env`) and
+`/etc/brot-markets/restart-secret`. `keeper.env` (root, `0600`) keeps only settings, and none of the variables the unit
+sets (a value there overrides the unit's `Environment=`). The restart flag moves to the unit's runtime directory,
+`/run/brot-keeper/restart.flag`. The steps, in order, are in the unit's header; installing it needs the server owner's
+agreement to one identity per unit. Rotating the RPC key: write the new URL to `keeper-rpc-url` as root, then
+`sudo systemctl restart brot-keeper`.
+
+**Settlement (`KEEPER_SETTLE`).** Off by default: the keeper resolves and reports the pending settlement work on
+`/healthz` (`last.settle.pending`), and sends nothing for it. Whether the devnet keeper pays is the founder's decision;
+once taken, `KEEPER_SETTLE=on` in `keeper.env` and a restart make it tally, finalize, pay, collect, close and sweep.
+`curl -s http://127.0.0.1:4210/healthz` then shows `"settle":"on"`.
+
 ## Rotating the RPC URL
 
 Edit `/etc/brot-markets/keeper.env` as root, change `KEEPER_RPC_URL`, then `sudo systemctl restart brot-keeper`.
@@ -46,10 +61,10 @@ The files below are in the repository. None of the rest is installed on the serv
 
 | What | File | Where it goes | Status |
 |---|---|---|---|
-| Restart flag watcher (root) | `brot-keeper-restart.path` | `/etc/systemd/system/` | Not installed, by decision (2026-10-10) |
+| Restart flag watcher (root; watches `/run/brot-keeper/restart.flag` since the keeper's own identity) | `brot-keeper-restart.path` | `/etc/systemd/system/` | Not installed, by decision (2026-10-10) |
 | Restart action (root, oneshot) | `brot-keeper-restart.service` | `/etc/systemd/system/` | Not installed, by decision (2026-10-10) |
 | Standby unit for VM 2 | `brot-keeper-standby.service` | VM 2's `/etc/systemd/system/` | Not installed; deferred to Post-Hackathon (D4) |
-| Alert runbooks | `runbooks/` | repository only | Written; the e-mail channel is not chosen |
+| Alert runbooks, one per alert kind | `runbooks/` | repository only | Written; the e-mail channel is not chosen |
 
 **The restart flag.** The keeper's `POST /restart` (signed with HMAC-SHA256) writes `/run/brot-markets/restart.flag`.
 The path unit sees the file and starts `brot-keeper-restart.service` as root, which removes the flag and restarts

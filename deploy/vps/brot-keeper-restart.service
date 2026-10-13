@@ -1,5 +1,6 @@
-# Purpose: restarts brot-keeper when the restart flag appears. Runs as root so the keeper's user needs no sudo;
-#          it does one thing: remove the flag, then restart the keeper unit.
+# Purpose: restarts brot-keeper when the restart flag appears. Runs as root so the keeper's user needs no sudo; it
+#          does one thing: remove the flag, then restart the keeper unit (whose stop also removes the runtime
+#          directory the flag lives in, so a stale flag cannot trigger a second restart).
 # Installs: root, into /etc/systemd/system/, with brot-keeper-restart.path. NOT INSTALLED: needs the server owner's
 #           notice first (see README, "Sprint 07").
 
@@ -8,5 +9,5 @@ Description=Brot Markets: restart the keeper on request (POST /restart)
 
 [Service]
 Type=oneshot
-ExecStartPre=/bin/rm -f /run/brot-markets/restart.flag
+ExecStartPre=/bin/rm -f /run/brot-keeper/restart.flag
 ExecStart=/bin/systemctl restart brot-keeper.service
