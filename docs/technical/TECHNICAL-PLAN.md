@@ -160,8 +160,10 @@ What the repository pins today stays, unless a decision of 2026-10-08 changes it
 | Removed | `anchor-lang`, `anchor-spl` and their `event-cpi` feature; the Anchor CLI; `@anchor-lang/core`; SPL Token CPIs for the pot; the USDC mint constant; every AI package and the inherited chat route | **[FD]** D-o, D-a, D-q |
 | Not used | Quasar; gill (needs Kit ^5); Seeker Connect 0.1.x; Redis or Valkey; PostgreSQL | **[DP]** §2 |
 
-Nothing alpha or beta [DP]. Pinocchio is below 1.0 but published, audited by Zellic **[AC: link the report]** and the
-base of p-token [E73]. Bun 1.4.2 is the current stable release of its Rust port [E52]. A version marked "pinned after"
+Nothing alpha or beta [DP]. Pinocchio is below 1.0 but published and the base of p-token [E73]. Its public audits
+(Zellic, report of 2025-06-30; Neodyme, 2025-06-12) cover `pinocchio` 0.8.4 and `pinocchio-system` 0.2.3, not the
+0.11.2 and 0.6.1 this program pins, and no later audit was found on 2026-10-13 [F] (`docs/audit/PINOCCHIO.md`, with
+the report URLs): the firms read the newer crate code as part of this program's scope. Bun 1.4.2 is the current stable release of its Rust port [E52]. A version marked "pinned after"
 enters only after its spike or check passes (§14.4).
 
 ## 2. Stack rationale
@@ -2419,6 +2421,21 @@ artifact with `brot_markets.so`, its IDL (`brot_markets.json`, the committed one
 build. *Mobile bundle* (added in Sprint 05; green on its pull request, PR #43, run 38009888067): Node 24.21.0,
 `npm ci --ignore-scripts` in `tests/react-native`, then `node run.mjs`.
 
+**Sprint 16, release integrity (2026-10-13)** **[F]** (`docs/technical/verifiable-build.md`). Every tool CI downloads
+is pinned by SHA-256 and installed by `scripts/ci/install-pinned.sh` (the Solana CLI and platform-tools, Bun, Node,
+gitleaks, `solana-verify` 0.5.2's release binary); `setup-bun` and `setup-node` left the workflow. `solana-verify build`
+runs twice from a clean state, in the Docker image pinned by digest (`--base-image`, because the image solana-verify
+would pick from `Cargo.lock` is 3.0.1's), and the job fails unless both hashes and the tested binaries are byte for
+byte the same. The devnet binary published in `programs-<sha>` now comes from that build; the `mainnet` build is
+published apart, as `programs-mainnet-<sha>` (`brot_markets.mainnet.so`, its IDL and its own `SHA256SUMS`), built
+with the one `MAINNET_FEATURES` list that the T12 tests also use, so the bytes the check tested are the bytes
+published. gitleaks backs the secret scan (`.gitleaks.toml`: Solana secret keys as JSON arrays and base58, keyed
+URLs, hex secrets, key stores); `CODEOWNERS` covers `.github/`, the secret scan and `.claude/hooks/`; a check refuses any
+`bun.lock` entry outside registry.npmjs.org. **Not done:** the provenance attestation, which GitHub offers only to
+public repositories or Enterprise Cloud organisations; it waits for the founder's choice (a public repository, which
+mainnet's `verify-from-repo` needs anyway, or a paid organisation). `CODEOWNERS` binds only with branch protection,
+which this plan lacks for a private repository.
+
 **What changes** **[DP]** (proposal §2.1, §2.3, §6).
 
 | Step | Change | Sprint |
@@ -2431,7 +2448,7 @@ build. *Mobile bundle* (added in Sprint 05; green on its pull request, PR #43, r
 | Services | `bun test services/` | 06–08 |
 | Web | The Playwright smoke at desktop and Android widths | 11 |
 | Lockfile | `bun install --frozen-lockfile` resolving from npmjs.org (T15) | 02, at its opening, before the Codama spike (done, `7d770ce`) |
-| Release integrity | `solana-verify build`, provenance attestation, pinned SHA-256 of downloaded tools, gitleaks or equivalent | 16 |
+| Release integrity | `solana-verify build`, provenance attestation, pinned SHA-256 of downloaded tools, gitleaks or equivalent | 16 (done 2026-10-13 but the attestation, which waits for the founder) |
 | Landing | Its tests leave with it | 09 |
 
 **How code reaches each place** **[DP]**.
@@ -2791,7 +2808,7 @@ Closed in Sprint 05 (`docs/sprints/sprint-05-sdk-devnet-cycle.md`; `session-log/
 | C35 | The App Links certificate fingerprint and `assetlinks.json` | 20 |
 | C36 | MWA gives the wallet no verified web origin | Before any H1 |
 | C37 | The publisher wallet on hardware or offline; `dapp-store-cli` flags; the App NFT in the portal | 22 |
-| C38 | Pinocchio's Zellic audit report, to link [E73] | 16 |
+| C38 | Pinocchio's audit reports, to link [E73]. **Done 2026-10-13:** `docs/audit/PINOCCHIO.md` (Zellic and Neodyme, both on 0.8.4; this program pins 0.11.2) | 16 |
 | C39 | Helius and other plan limits, which are per plan [E40] | 06; 18 |
 | C40 | Who controls the Pyth receiver's upgrade authority on mainnet | 16 |
 | C45 | The minimum distance between the target and the current value, per kind (check 3, §3.4.10) | 03 |

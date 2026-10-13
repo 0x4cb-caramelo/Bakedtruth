@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **1167** |
+| Arquivos mapeados | **1199** |
 | Acima de 200 linhas | **44** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -1105,7 +1105,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party programs actually write instead of a layout someone typed f | 185 |
 | [`check-content-schema.ts`](scripts/check-content-schema.ts) | the JSON Schema check of content/ (TP §4 "Content files", §3.1's data contracts; Sprint 08 DoD): every `content/<name>.json` beside a `content/<name>.schema.jso | 81 |
 | [`checks-mutation.mjs`](scripts/checks-mutation.mjs) | the X0.9 evidence for the checks module: removes each check of programs/brot-markets/src/checks.rs and its submodules (checks/top_level.rs) in turn, rebuilds th | 295 |
-| [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns | 74 |
+| [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns, | 98 |
 | [`codama-spike.ts`](scripts/codama-spike.ts) | the Codama spike (T9): renders a Kit client from the Shank IDL of brot-markets into packages/sdk/src/idl/generated. T9, decided in Sprint 05: the generated clie | 61 |
 | [`codemap.js`](scripts/codemap.js) | let an AI locate the right file without reading every file. Pairs with the 200-line limit in .claude/rules/code-style.md — small files plus a one-line index mea | 223 |
 | [`detach-os.ps1`](scripts/detach-os.ps1) | detach-os.ps1 — desconecta seu projeto do repositório AI Dev Operating System | 161 |
@@ -1139,6 +1139,23 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`tokenomics-model.ts`](scripts/tokenomics-model.ts) | Quantitative model behind ECONOMICS.md: protocol fees, revenue split, staker yield, the token unlock curve and the | 584 |
 | [`void-log-schema.ts`](scripts/void-log-schema.ts) | writes content/void-log/record.schema.json, the JSON Schema of a void-log record, from the zod schema in packages/sdk/src/schemas/void-log.ts (Sprint 12: the re | 33 |
 
+## `scripts/ci/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`artifact-layout.ts`](scripts/ci/artifact-layout.ts) | proves the folders CI publishes are what the deploy scripts read (Sprint 16): `programs/` passes verifyArtifactDir of scripts/deploy/checks.ts, the devnet deplo | 49 |
+| [`assemble-artifacts.sh`](scripts/ci/assemble-artifacts.sh) | lays out the two program artifacts CI publishes from main (Sprint 16): `programs/` is exactly what scripts/deploy/artifact.ts expects (brot_markets.so, brot_mar | 53 |
+| [`compare-builds.sh`](scripts/ci/compare-builds.sh) | the reproducibility gate of the verifiable build (Sprint 16): two clean builds of the commit, made on two runners by scripts/ci/verifiable-build.sh, must be byt | 55 |
+| [`file-rules.js`](scripts/ci/file-rules.js) | beyond the commit hook's list (.env, keypair JSON, .pem, .key, .p12, .pfx), refuse Android and Java key stores, compiled binaries and archives by name, and any  | 47 |
+| [`gitleaks.js`](scripts/ci/gitleaks.js) | gitleaks (the version scripts/ci/pins.sh pins) with the repository's .gitleaks.toml, over `<base>..HEAD` without merges, the commits scripts/ci-secret-scan.js w | 73 |
+| [`install-pinned.sh`](scripts/ci/install-pinned.sh) | install one tool CI downloads, pinned by version and SHA-256 (scripts/ci/pins.sh): the download lands in a new empty folder, its hash is checked before anything | 165 |
+| [`lockfile-registry.js`](scripts/ci/lockfile-registry.js) | T15 moved bun.lock off registry.npmmirror.com at the opening of Sprint 02; this keeps it there, and holds the React Native check's lockfile to the same rule. bu | 126 |
+| [`lockfile-registry.test.js`](scripts/ci/lockfile-registry.test.js) | shows the check accepts what this repository's lockfiles hold (npmjs.org entries, workspaces, an empty URL under a pinned bunfig.toml) and refuses a mirror, a g | 67 |
+| [`pins.sh`](scripts/ci/pins.sh) | every tool CI downloads, pinned by version, URL and SHA-256, in one place. Sourced by scripts/ci/install-pinned.sh and scripts/ci/verifiable-build.sh. docs/tech | 60 |
+| [`secret-scan.test.js`](scripts/ci/secret-scan.test.js) | shows each new check of scripts/ci-secret-scan.js catches what it is for and lets through what this repository holds on purpose (signatures in session logs, sha | 156 |
+| [`solana-keys.js`](scripts/ci/solana-keys.js) | a Solana keypair is 64 bytes, a 32-byte seed and then the ed25519 public key of that seed. This decodes every 64-byte value the added lines hold (base58, hex, b | 103 |
+| [`verifiable-build.sh`](scripts/ci/verifiable-build.sh) | the verifiable build of brot-markets (Sprint 16): `solana-verify build` in the image pinned by digest (scripts/ci/pins.sh), once its Solana CLI and platform-too | 81 |
+
 ## `scripts/deploy/`
 
 | Arquivo | Núcleo | Linhas |
@@ -1149,6 +1166,13 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`devnet-deploy.ts`](scripts/deploy/devnet-deploy.ts) | the first deploy of brot-markets to devnet from CI's artifact, and its initialization in the same session (TP §10, §12; deploy/devnet/README.md): the artifact b | 156 |
 | [`finish.ts`](scripts/deploy/finish.ts) | the deploy's second half, shared by the first run and a resume (`devnet-deploy.ts --resume`): the program at the declared id read back (loader v3, the expected  | 83 |
 | [`initialize.ts`](scripts/deploy/initialize.ts) | the two writes the deploy makes in the same session as the deploy itself (TP §3.4.3, §7; Sprint 05): `admin_initialize_config`, signed by the program's upgrade  | 142 |
+| [`mainnet-cluster.ts`](scripts/deploy/mainnet-cluster.ts) | which cluster a mainnet run talks to, checked before anything else (Sprint 18; deploy/mainnet/README.md): the RPC's genesis hash must be mainnet-beta's. A Surfp | 68 |
+| [`mainnet-deploy.ts`](scripts/deploy/mainnet-deploy.ts) | the mainnet deploy of brot-markets (deploy/mainnet/README.md, steps 4 to 9), checking the cluster first: the RPC must be mainnet-beta by its genesis hash (or, f | 152 |
+| [`mainnet-init.ts`](scripts/deploy/mainnet-init.ts) | the deploy's second half on mainnet, done by the two multisigs the founder chose (M-1, 2026-10-13; deploy/mainnet/README.md, step 7): the upgrade multisig's vau | 140 |
+| [`mainnet-loader.ts`](scripts/deploy/mainnet-loader.ts) | the loader-v3 steps of the mainnet deploy, as Solana CLI commands with every key and the RPC named, and the reads that check each one landed as planned: the buf | 131 |
+| [`mainnet-preflight.ts`](scripts/deploy/mainnet-preflight.ts) | what the mainnet deploy reads before it plans anything, sending nothing (Sprint 18): the binary and its SHA-256, how the declared program id, its ProgramData an | 107 |
+| [`mainnet-signers.ts`](scripts/deploy/mainnet-signers.ts) | who signs a mainnet deploy, held to Sprint 18's gate "the upgrade key was never in a file nor on an internet-connected machine": on mainnet the upgrade authorit | 88 |
+| [`mainnet-squads.ts`](scripts/deploy/mainnet-squads.ts) | what the mainnet scripts need of Squads v4, whose two multisigs hold the upgrade authority (with the 24 h lock) and `admin` and `fee_recipient` (without one), a | 125 |
 | [`preflight.ts`](scripts/deploy/preflight.ts) | what the deploy checks on the cluster and on this machine before it plans anything (Sprint 05 deploy review, F4, F5, F8, F11): how the program id, its ProgramDa | 122 |
 | [`rehearse-funded.ts`](scripts/deploy/rehearse-funded.ts) | rehearse what a stranger's lamports do to a deploy (Sprint 05 deploy review, F4), on the offline surfnet, with the real `solana program deploy` at throwaway ids | 89 |
 | [`rehearse.ts`](scripts/deploy/rehearse.ts) | rehearse every step of the devnet deploy on a local offline surfnet, inside a loopback-only network namespace: the artifact check (and its refusal of a changed  | 181 |
@@ -1158,6 +1182,23 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`open-campaigns.ts`](scripts/load/open-campaigns.ts) | one keeper cycle over many open campaigns (Sprint 06 DoD, the load run, X1.8), measured in-process: N open BTC/USD campaigns are written into a LiteSVM world wi | 88 |
+
+## `scripts/mainnet/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`actors.ts`](scripts/mainnet/actors.ts) | who acts in the mainnet rehearsal, all throwaway and funded on the fork only: the session payer and the stand-in for the deploy-day hardware wallet (key files,  | 73 |
+| [`cycle.ts`](scripts/mainnet/cycle.ts) | the first mainnet cycle of the runbook (step 12) rehearsed on the fork with the `mainnet` binary: a team key opens a free `SupplyAtMost` campaign on a real main | 78 |
+| [`deploy.ts`](scripts/mainnet/deploy.ts) | the deploy steps of the runbook (4 to 6) rehearsed on the mainnet fork with the `mainnet` binary and throwaway keys, through the same step builders and read-bac | 108 |
+| [`entry-checks.ts`](scripts/mainnet/entry-checks.ts) | the mainnet deploy script's guards, rehearsed: its pure refusals (a cluster that is not mainnet-beta, a fork passed off as mainnet, a loopback RPC for a real ru | 113 |
+| [`fork.ts`](scripts/mainnet/fork.ts) | the mainnet fork the rehearsal runs on: a Surfpool surfnet forking mainnet-beta (accounts fetched on first read; nothing is ever sent to mainnet), bound to 127. | 97 |
+| [`incident.ts`](scripts/mainnet/incident.ts) | the pause and resume of the runbook (step 13), rehearsed on the fork: one team key pauses entries at once and a join is refused; the admin multisig, which the f | 46 |
+| [`multisig.ts`](scripts/mainnet/multisig.ts) | the multisig's acts in the rehearsal, each sent through the real Squads v4 program on the mainnet fork: create the 2-of-3 multisig, propose a vault transaction  | 130 |
+| [`paid.ts`](scripts/mainnet/paid.ts) | the paid opening of the first mainnet cycle (M-4, the founder, 2026-10-13: the first cycle includes one), rehearsed on the fork with mainnet's real SOL/USD spon | 77 |
+| [`rehearse.ts`](scripts/mainnet/rehearse.ts) | the mainnet runbook (deploy/mainnet/README.md) rehearsed end to end on a Surfpool fork of mainnet-beta, with the `mainnet` feature binary and throwaway keys, ne | 137 |
+| [`settle.ts`](scripts/mainnet/settle.ts) | a resolved campaign of the first mainnet cycle settled on the fork (runbook step 12), every lamport checked against the SDK: `finalize_campaign` refused a minut | 77 |
+| [`squads.ts`](scripts/mainnet/squads.ts) | the Squads v4 instructions the rehearsal sends on the mainnet fork, encoded by hand (Anchor discriminators and Borsh arguments) from Squads' published IDL, so n | 121 |
+| [`upgrade.ts`](scripts/mainnet/upgrade.ts) | an upgrade as it happens once the upgrade multisig holds the upgrade authority (runbook, "Upgrading"), rehearsed on the fork: the session payer writes a buffer, | 65 |
 
 ## `scripts/referral/`
 
@@ -1754,6 +1795,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`check-opening.test.ts`](tests/ops/check-opening.test.ts) | scripts/team/check-opening.ts, the read-only check of an opening the founder runs on devnet (Sprint 19 DoD; I14): on campaigns the program opened in LiteSVM, a  | 35 |
 | [`deploy-checks.test.ts`](tests/ops/deploy-checks.test.ts) | the pure checks of the devnet deploy (scripts/deploy/checks.ts), each refusal with its own case: SHA256SUMS parsing, the artifact folder against its sums, the p | 99 |
 | [`deploy-preflight.test.ts`](tests/ops/deploy-preflight.test.ts) | the deploy's preflight and bindings (Sprint 05 deploy review, F1, F4, F6, F7, F8, F9, F11), each refusal with its own case: a key file in any Git work tree or r | 120 |
+| [`mainnet-deploy.test.ts`](tests/ops/mainnet-deploy.test.ts) | the mainnet deploy's pure guards, without a cluster (Sprint 18, lane L18): the cluster rule (mainnet-beta by genesis hash, a Surfpool fork told apart), the upgr | 98 |
 | [`rehearsal.test.ts`](tests/ops/rehearsal.test.ts) | the devnet rehearsal's two scripts run against the program in LiteSVM behind the recording RPC before the founder runs them on devnet (Sprint 12): `open-paid` o | 89 |
 | [`resolution-post.test.ts`](tests/ops/resolution-post.test.ts) | scripts/team/resolution-post.ts writes a resolution post from its template (Sprint 13 DoD; BR-33): read from the program in LiteSVM behind the recording RPC thr | 133 |
 

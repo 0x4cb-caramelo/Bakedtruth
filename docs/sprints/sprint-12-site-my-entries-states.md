@@ -2,6 +2,8 @@
 
 **Status:** merged 2026-10-10 (PR #61, tag `sprint-12` on `107fec2`); the founder's answers applied (1a, 2a, 3a; the Phantom signature stays open without blocking); the devnet rehearsal is the founder's, run after the merge · **Branch:** `sprint-12-site-my-entries-states`, cut from `origin/main` at `sprint-11` · **Dates:** none, by the founder's decision
 
+**Final state (audit of 2026-10-13):** closed: merged by PR #61 and tagged `sprint-12` (`107fec2`). Carried: the five-campaign devnet rehearsal (the founder's devnet writes, about 10.7 SOL over about 82 h); the keeper's settlement is built since 2026-10-13 (PR #88), off until the founder decides whether the devnet keeper pays.
+
 ## Record (2026-10-10)
 
 - **Built:** every public state of `/c/[id]` (`app/features/campaign-page/states.ts`, `state-panel.tsx`,
