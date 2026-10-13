@@ -139,12 +139,14 @@ pub enum BrotInstruction {
     #[account(4, name = "program", desc = "This program")]
     TeamVoidCampaign(TeamVoidCampaignArgs),
 
-    /// Enters Contested inside the window, once every entry is tallied: payout paused, stage 1 starts.
-    /// It leaves by reread_campaign (the same reading pays, a different one opens stage 2),
-    /// admin_decide_contest (stage 2) or finalize_campaign (the lapse).
+    /// Enters Contested inside the window, once every entry is tallied: payout paused, stage 1 starts
+    /// and lasts 24 hours. A second call by a team key on a contest at stage 1, before its deadline,
+    /// sends it to stage 2 (the escalation, D2). It leaves by reread_campaign (the same reading pays
+    /// from stage 1's deadline on, a different one opens stage 2), admin_decide_contest (stage 2) or
+    /// finalize_campaign (the lapse).
     #[account(0, signer, name = "team_member", desc = "A key in GlobalConfig.team")]
     #[account(1, name = "config", desc = "GlobalConfig, read")]
-    #[account(2, writable, name = "campaign", desc = "Campaign, InReview")]
+    #[account(2, writable, name = "campaign", desc = "Campaign, InReview; or Contested at stage 1 (the escalation)")]
     #[account(3, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
     #[account(4, name = "program", desc = "This program")]
     TeamOpenContest,
@@ -231,7 +233,8 @@ pub enum BrotInstruction {
     UserLinkReferrer(LinkReferrerArgs),
 
     /// Sprint 14 (lane L14B; a stub until then): in stage 1 of a contest, runs the reading again and
-    /// compares it with the stored result. Any wallet, top level only.
+    /// compares it with the stored result: the same reading pays only from stage 1's deadline on
+    /// (RereadBeforeTimelock), a different one opens stage 2. Any wallet, top level only.
     #[account(0, writable, name = "campaign", desc = "Campaign, Contested, stage 1")]
     #[account(1, writable, name = "config", desc = "GlobalConfig: the open count")]
     #[account(2, name = "metric_account", desc = "Campaign.metric_account")]

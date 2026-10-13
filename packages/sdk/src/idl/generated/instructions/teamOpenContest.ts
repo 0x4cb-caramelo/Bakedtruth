@@ -101,7 +101,7 @@ export type TeamOpenContestInput<
   teamMember: TAccountTeamMember;
   /** GlobalConfig, read */
   config: TAccountConfig;
-  /** Campaign, InReview */
+  /** Campaign, InReview; or Contested at stage 1 (the escalation) */
   campaign: TAccountCampaign;
   /** PDA ["__event_authority"] */
   eventAuthority?: TAccountEventAuthority;
@@ -189,7 +189,7 @@ export type ParsedTeamOpenContestInstruction<
     teamMember: TAccountMetas[0];
     /** GlobalConfig, read */
     config: TAccountMetas[1];
-    /** Campaign, InReview */
+    /** Campaign, InReview; or Contested at stage 1 (the escalation) */
     campaign: TAccountMetas[2];
     /** PDA ["__event_authority"] */
     eventAuthority: TAccountMetas[3];

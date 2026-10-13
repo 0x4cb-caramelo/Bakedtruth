@@ -764,7 +764,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Campaign, InReview"
+            "Campaign, InReview; or Contested at stage 1 (the escalation)"
           ]
         },
         {
