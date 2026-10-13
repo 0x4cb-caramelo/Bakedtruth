@@ -1,8 +1,9 @@
 //! Purpose: the re-read's comparison and acts on the host (Sprint 14, lane L14B): "the same reading" is the stored
 //!          outcome, void reason, `met_late` and observed value exactly, and a reader that refuses is a different
 //!          reading; `reread_act`, the one place a comparison becomes an act (D2, open), pays the same reading and
-//!          escalates any difference; stage 2 opens for 48 hours without touching the result.
-//! Version: 0.0.1
+//!          escalates any difference; stage 2 opens for 48 hours from the re-read, or from stage 1's deadline when the
+//!          re-read is late (review fix F3), without touching the result.
+//! Version: 0.0.2
 //! Sprint: 14 (lane L14B)
 
 use brot_markets::{
@@ -142,10 +143,27 @@ const MAY_CHANGE: [core::ops::Range<usize>; 3] = [
 #[test]
 fn contest_reread_stage_two_deadline_overflow_writes_nothing() {
     let mut bytes = contested();
+    Campaign::from_bytes_mut(&mut bytes)
+        .unwrap()
+        .contest_ends_at = LeI64::new(i64::MAX);
     let before = bytes.clone();
     let c = Campaign::from_bytes_mut(&mut bytes).unwrap();
     assert_eq!(open_stage2(c, i64::MAX), Err(MathOverflow));
     assert_eq!(bytes, before);
+}
+
+#[test]
+fn contest_reread_late_starts_stage_two_from_stage_one_deadline() {
+    // Review fix F3: a re-read a week after stage 1's deadline (here `NOW`) adds nothing: stage 2 still ends 48 hours
+    // after that deadline, already past, so only the lapse remains. An early re-read counts from itself.
+    let mut bytes = contested();
+    let c = Campaign::from_bytes_mut(&mut bytes).unwrap();
+    assert_eq!(open_stage2(c, NOW + 7 * 86_400), Ok(5));
+    assert_eq!(c.contest_ends_at.get(), NOW + CONTEST_STAGE2_SECONDS);
+    let mut early = contested();
+    let c = Campaign::from_bytes_mut(&mut early).unwrap();
+    assert_eq!(open_stage2(c, NOW - 600), Ok(5));
+    assert_eq!(c.contest_ends_at.get(), NOW - 600 + CONTEST_STAGE2_SECONDS);
 }
 
 #[test]

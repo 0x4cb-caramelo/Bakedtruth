@@ -1,9 +1,9 @@
 //! Purpose: stage 2 of a contest on the program's SBF binary in Mollusk (Sprint 14, lane L14B): the admin confirms
 //!          (the stored outcome is snapshotted) or voids with a team reason (the reason and the note's hash stored,
 //!          `Refund`); every refusal with its own error, a team key and a stranger included; and the lapse through
-//!          `finalize_campaign`, from the deadline's own second on, never before, never at stage 1. The pause never
-//!          blocks either.
-//! Version: 0.0.1
+//!          `finalize_campaign`, from stage 2's deadline on, or 48 hours after an unread stage 1's (review fix F3),
+//!          never before. The pause never blocks either.
+//! Version: 0.0.2
 //! Sprint: 14 (lane L14B). Runs after the SBF build (`BROT_MARKETS_SO`, else `target/deploy/brot_markets.so`).
 
 #[allow(unused_imports)]
@@ -14,6 +14,7 @@ mod world;
 mod contest;
 
 use brot_markets::{
+    constants::CONTEST_STAGE2_SECONDS,
     error::BrotError,
     layout::ZeroCopy,
     state::{
@@ -28,6 +29,7 @@ const NOTE: [u8; 32] = [9; 32];
 /// Stage 2's deadline: the decision comes before it, the lapse from it on.
 const ENDS: i64 = NOW + 24 * HOUR;
 const CONFIRM: [u8; 2] = [0, VoidReason::None as u8];
+const STAGE2: i64 = CONTEST_STAGE2_SECONDS;
 
 fn stage_two() -> Vec<u8> {
     contested_data(ContestStage::Stage2, ENDS, |_| {})
@@ -169,11 +171,28 @@ fn lapse_deadline_refuses_one_second_before() {
 }
 
 #[test]
-fn lapse_stage_refuses_a_campaign_at_stage_one() {
+fn lapse_stage_refuses_a_contest_with_no_stage() {
     let mut w = World::new();
-    let campaign = contested_data(ContestStage::Stage1, NOW, |_| {});
-    let result = finalize(&w, campaign).at(&mut w, ENDS);
+    let campaign = contested_data(ContestStage::None, NOW, |_| {});
+    let result = finalize(&w, campaign).at(&mut w, ENDS + STAGE2);
     assert_refused(&result, BrotError::CampaignNotInReview);
+}
+
+#[test]
+fn lapse_of_an_unread_stage_one_comes_48_hours_after_its_deadline() {
+    // Review fix F3: nobody re-read, so the stored result stands where the latest stage 2 would end.
+    let mut w = World::new();
+    let unread = || contested_data(ContestStage::Stage1, NOW, |_| {});
+    let early = finalize(&w, unread()).at(&mut w, NOW + STAGE2 - 1);
+    assert_refused(&early, BrotError::ContestNotLapsed);
+    let result = finalize(&w, unread()).at(&mut w, NOW + STAGE2);
+    assert_ok(&result);
+    let bytes = stored(&result);
+    let c = Campaign::from_bytes(&bytes).unwrap();
+    assert_eq!(
+        (c.status, c.outcome, c.settle_mode),
+        (Status::Settling as u8, Outcome::No as u8, 1)
+    );
 }
 
 #[test]

@@ -1,7 +1,7 @@
 //! Purpose: what `reread_campaign` compares and does (TP section 3.4.7): the stored result against the reading run
 //!          now, exactly (outcome, void reason, `met_late`, observed value); `reread_act`, the ONE function that turns
 //!          the comparison into an act (D2, open); stage 2's opening; and the `CampaignReread` event.
-//! Version: 0.0.1
+//! Version: 0.0.2 (review fix F3: stage 2 counts from stage 1's deadline when the re-read comes late)
 //! Sprint: 14 (lane L14B, the two-stage dispute). What "the same reading" means per kind is in `reread_campaign.rs`.
 //!
 //! The re-read never writes a result: the reading run now goes to the comparison and to the event, never into the
@@ -75,10 +75,13 @@ pub fn reread_act(same: bool) -> RereadAct {
     }
 }
 
-/// A different reading: the campaign stays `Contested`, at stage 2, its deadline `CONTEST_STAGE2_SECONDS` from
-/// `now`, and takes the event's number, which is returned. The deadline is computed before any field is written.
+/// A different reading: the campaign stays `Contested`, at stage 2, its deadline `CONTEST_STAGE2_SECONDS` from the
+/// re-read, or from stage 1's deadline when the re-read comes after it (review fix F3: a late keeper adds no time,
+/// so the payout is never more than 55 hours after the resolution), and takes the event's number, which is returned.
+/// The deadline is computed before any field is written; it may already have passed, and then only the lapse remains.
 pub fn open_stage2(campaign: &mut Campaign, now: i64) -> Result<u64, BrotError> {
-    let ends_at = now
+    let from = now.min(campaign.contest_ends_at.get());
+    let ends_at = from
         .checked_add(CONTEST_STAGE2_SECONDS)
         .ok_or(BrotError::MathOverflow)?;
     transition(Status::Contested, Status::Contested)?;

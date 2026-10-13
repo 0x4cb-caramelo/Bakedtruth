@@ -3,13 +3,15 @@
  *          an operation the campaign's phase refuses, so the run would never reach settlement or close; the
  *          phase-directed draw names the operation that moves a campaign on, most of the time: the resolution, the
  *          tally, the window's acts or a contest, the contest's stages and the lapse, the payouts and the close.
- * Version: 0.1.0 (Sprint 14: the tally, the contest, the re-read, the admin's decision and the lapse)
+ * Version: 0.1.1 (Sprint 14: the tally, the contest, the re-read, the admin's decision and the lapse; review fix F3,
+ *          the lapse of an unread stage 1 and the clock run to its edge)
  * Sprint:  04 (closure review); 14 (lane INV14; the uniform draw moved here from invariant-settle.ts)
  */
 import { type Harness, type Rng, clock } from "./invariant-harness";
 import { bakersOf, PROOF_DELAY, untallied } from "./invariant-model";
 import { shareDue } from "./invariant-payouts";
 import { SETTLE_KINDS, type SettleOp } from "./invariant-settle";
+import { lapsesAt } from "./invariant-window";
 
 export type AdvanceOp = { k: "advance"; seconds: bigint };
 
@@ -45,11 +47,18 @@ export function drawPhaseOp(h: Harness, r: Rng, index: number): SettleOp | Advan
     case "Contested": {
       const x = r.next();
       if (c.stage === 1) {
-        // Stage 2's acts are refused at stage 1: a decision (WrongContestStage) and the lapse (CampaignNotInReview).
+        // An unread stage 1 lapses 48 hours after its deadline (review fix F3): from then on, mostly the lapse.
+        const lapse = lapsesAt(c)!;
+        if (t >= lapse && x < 0.6) return { k: "finalize", c: index };
+        // Stage 2's act is refused at stage 1 (WrongContestStage), and so is the lapse before its time (ContestNotLapsed).
         if (x < 0.08) return { k: "decide", c: index, decision: 0, reason: 0, signer: "admin" };
         if (x < 0.12) return { k: "finalize", c: index };
+        // Now and then the keeper is down: the clock runs to the lapse's edge (a later re-read adds no time).
+        const edge = lapse - t + r.pick([-1n, 0n, 1n]);
+        if (x < 0.17 && edge > 0n) return { k: "advance", seconds: edge };
+        // A proof up to 90 s old: past 60 s the reader refuses it, and so does the re-read (review fix F4).
         const variant = r.pick(["same", "same", "moved", "none", "moved"] as const);
-        return { k: "reread", c: index, variant, back: r.big(0n, 50n) };
+        return { k: "reread", c: index, variant, back: r.big(0n, 90n) };
       }
       // From the deadline on only the lapse remains: a decision then is refused (ContestDeadlinePassed).
       if (t >= c.contestEndsAt) {
@@ -105,7 +114,7 @@ export function drawSettleOp(h: Harness, r: Rng, index: number): SettleOp | Adva
       // Now and then the admin, who holds no team key, tries.
       return { k: "contest", c: index, member: r.next() < 0.15 ? -1 : member, tally: r.next() < 0.5 };
     case "reread":
-      return { k: "reread", c: index, variant: r.pick(["same", "moved", "none"] as const), back: r.big(0n, 50n) };
+      return { k: "reread", c: index, variant: r.pick(["same", "moved", "none"] as const), back: r.big(0n, 90n) };
     case "decide": {
       // Raw bytes: an unknown decision, an unknown reason, a reason that does not fit, a team key signing.
       const decision = r.pick([0, 0, 1, 1, 2]);

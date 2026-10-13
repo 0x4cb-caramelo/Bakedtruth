@@ -1,6 +1,6 @@
 //! Purpose: the closed set of readers that turn an on-chain account into a YES/NO answer, and the
 //!          interface each one exposes: `validate_at_creation`, `outcome_knowable`, `try_resolve`.
-//! Version: 0.0.4
+//! Version: 0.0.5 (`reads_proof`, for the contest's re-read; review fix F4 of Sprint 14)
 //! Sprint: 00 (setup); the price read in 01; the interface in 02; Sprint 03 ports the four other
 //!         kinds, the join lock and resolution, with these signatures frozen at its opening; the
 //!         sixth kind, `DbcGraduated`, adds its reader and the curve config of the opening.
@@ -133,5 +133,19 @@ pub fn try_resolve(kind: ReaderKind, ctx: &ReadContext) -> Result<Resolution, Pr
         ReaderKind::StakePoolTvlAtLeast => stake_pool::try_resolve(ctx),
         ReaderKind::StakeAtLeast => vote_stake::try_resolve(ctx),
         ReaderKind::DbcGraduated => dbc_graduation::try_resolve(ctx),
+    }
+}
+
+/// Whether `try_resolve` reads the proof slot at `time` (Sprint 14): only the price kind, while its proof window
+/// is open, and then the proof is the one account it reads. An error is then the offered proof's, which the
+/// contest's re-read refuses instead of taking it for a different reading.
+pub fn reads_proof(
+    kind: ReaderKind,
+    campaign: &Campaign,
+    time: &ChainTime,
+) -> Result<bool, ProgramError> {
+    match kind {
+        ReaderKind::PriceTouch => price_touch::proof_window_open(campaign, time),
+        _ => Ok(false),
     }
 }

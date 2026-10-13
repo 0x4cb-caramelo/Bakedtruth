@@ -1,15 +1,16 @@
 /**
  * Purpose: the randomized test's contest (Sprint 14; TP section 3.4.7): a team key opens it inside the review window
  *          (stage 1), any wallet re-reads the campaign (the same reading pays with the stored result, a different one
- *          opens stage 2 for 48 hours, and no re-read writes a result), and the admin confirms or voids before stage
+ *          opens stage 2 for 48 hours from the re-read or from stage 1's deadline if that passed, a proof the reader
+ *          refuses refuses the re-read, and no re-read writes a result), and the admin confirms or voids before stage
  *          2's deadline, never inverting. Each with the program's order of refusals; none moves a lamport (I1, I15).
- *          Stage 2's lapse is finalize's (invariant-window.ts).
- * Version: 0.1.0
+ *          The lapse of either stage is finalize's (invariant-window.ts).
+ * Version: 0.1.1 (review fixes F3 and F4, lane L14B)
  * Sprint:  14 (lane INV14)
  */
-import { isTeamReason, type ModelCampaign, type Outcome } from "./invariant-model";
-import { priceReading, rereadAccount, type RereadVariant } from "./invariant-reader";
-import { takeSnapshot, tallyFirst } from "./invariant-window";
+import { inProofWindow, isTeamReason, type ModelCampaign, type Outcome } from "./invariant-model";
+import { priceReading, proofRefusal, rereadAccount, type RereadVariant } from "./invariant-reader";
+import { stage2EndsAt, takeSnapshot, tallyFirst } from "./invariant-window";
 import { adminDecideContestIx, rereadCampaignIx } from "./instructions-14-15";
 import { teamOpenContestIx } from "./instructions-settlement";
 import type { BrotErrorName } from "./errors";
@@ -28,7 +29,6 @@ export type ContestOp =
   | { k: "decide"; c: number; decision: number; reason: number; signer: "admin" | "team" };
 
 export const STAGE1_SECONDS = 3_600n;
-export const STAGE2_SECONDS = 48n * 3_600n;
 const ADMIN_NOTE = 9;
 
 /** The event field `snake` (the kit's layout) or `camel` (the SDK's decoder), whichever the event carries. */
@@ -83,17 +83,20 @@ export async function planContest(h: Harness, op: ContestOp): Promise<Plan> {
       const account = rereadAccount(c, t, op);
       setBtc(h.w, account.price, account.publish);
       const offered = op.variant !== "none";
+      // Review fix F4: a proof offered inside the window and refused by the reader refuses the re-read.
+      const refused = offered && inProofWindow(c, t) ? proofRefusal(c, t, account) : null;
       const reading = priceReading(c, t, account, offered);
       const same =
         reading !== null &&
         reading.outcome === c.outcome &&
         reading.voidReason === c.voidReason &&
         reading.observed === c.observed;
-      const ends = same ? c.contestEndsAt : t + STAGE2_SECONDS;
+      // Review fix F3: stage 2 counts from stage 1's deadline when the re-read comes after it.
+      const ends = same ? c.contestEndsAt : stage2EndsAt(c, t);
       const OUTCOMES: Outcome[] = ["Unresolved", "Yes", "No", "Void"];
       return {
         ixs: [rereadCampaignIx(campaign, config, P.BTC_USD_ACCOUNT, offered ? P.BTC_USD_ACCOUNT : P.PROGRAM_ID)],
-        error: c.phase !== "Contested" ? "NotContested" : c.stage !== 1 ? "WrongContestStage" : undefined,
+        error: c.phase !== "Contested" ? "NotContested" : c.stage !== 1 ? "WrongContestStage" : (refused ?? undefined),
         deltas: still,
         label: same ? "reread-pay" : "reread-escalate",
         exit: same ? op.c : undefined,

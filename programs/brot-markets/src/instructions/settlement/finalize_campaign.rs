@@ -1,13 +1,14 @@
 //! Purpose: `finalize_campaign`: the snapshot of a reviewed campaign once its window has ended, or of a contested
-//!          one once stage 2 has lapsed with no decision (Sprint 14). Any wallet, permissionless; it chooses
+//!          one once its contest has lapsed with no decision (Sprint 14). Any wallet, permissionless; it chooses
 //!          nothing. It runs `finalize_snapshot`, then emits `CampaignFinalized` with the next seq (TP 3.4.3, I7).
-//! Version: 0.0.4 (the stage-2 lapse: the stored result stands, worst case 55 hours after resolution)
+//! Version: 0.0.5 (review fix F3: an unread stage 1 lapses too, so the payout is due 55 hours after resolution)
 //! Sprint: 04 (lane C); accounts frozen at the sprint's opening; 14 (lane L14B) adds the lapse
 //!
 //! Accounts: 0 campaign (writable), 1 config (writable, the open count), 2 event authority, 3 program.
 //! Refusals: `CampaignNotInReview` (the status), `ReviewNotEnded` (the clock), then the snapshot's own. A `Contested`
-//! campaign: `CampaignNotInReview` unless at stage 2, `ContestNotLapsed` before its `contest_ends_at`
-//! (`contest_rules::require_lapsed`); the tally rule (`NotTallied`) is the snapshot's, as for every path.
+//! campaign lapses with its stored result at stage 2's `contest_ends_at`, or 48 hours after stage 1's when nobody ran
+//! its re-read (`contest_rules::require_lapsed`): `ContestNotLapsed` before, `CampaignNotInReview` with no stage; the
+//! tally rule (`NotTallied`) is the snapshot's, as for every path.
 
 use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 
@@ -43,7 +44,7 @@ pub fn finalize_campaign(
     let mut settings = GlobalConfig::load_mut(config, program_id)?;
     let now = ChainTime::now()?.unix_timestamp;
     if stored.status == Status::Contested as u8 {
-        // Sprint 14: stage 2 of a contest ended with no decision, so the stored result stands.
+        // Sprint 14: the contest lapsed with no decision (stage 2, or an unread stage 1), so the stored result stands.
         require_lapsed(stored.contest_stage, now, stored.contest_ends_at.get())?;
     } else {
         if stored.status != Status::InReview as u8 {

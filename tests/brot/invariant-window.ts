@@ -1,9 +1,9 @@
 /**
  * Purpose: the randomized test's review window and its exits: the late-join tally, the team's confirm and void, and
- *          finalize, after the window or once a contest's stage 2 has lapsed (TP sections 3.4.3, 3.4.7, 3.4.16); the
+ *          finalize, after the window or once a contest has lapsed (TP sections 3.4.3, 3.4.7, 3.4.16); the
  *          snapshot every exit takes. Split out of invariant-review.ts, which resolves and dispatches here.
- * Version: 0.1.0
- * Sprint:  04 (contract freeze, lane E); 14 (lane INV14: the tally, NotTallied, the lapse)
+ * Version: 0.1.1 (review fix F3: an unread stage 1 lapses too; stage 2 counts from stage 1's deadline at the latest)
+ * Sprint:  04 (contract freeze, lane E); 14 (lane INV14: the tally, NotTallied, the lapse; lane L14B: F3)
  */
 import { type Address } from "@solana/kit";
 
@@ -35,6 +35,14 @@ export function takeSnapshot(c: ModelCampaign) {
 }
 
 export const inWindow = (c: ModelCampaign, t: bigint) => t < c.reviewEndsAt;
+
+/** Stage 2's 48 hours (constants.rs): from `min(re-read, stage 1's deadline)` (review fix F3, the 55-hour bound). */
+export const STAGE2_SECONDS = 48n * 3_600n;
+export const stage2EndsAt = (c: ModelCampaign, t: bigint) =>
+  (t < c.contestEndsAt ? t : c.contestEndsAt) + STAGE2_SECONDS;
+/** When a contest lapses with its stored result: stage 2 at its deadline, an unread stage 1 48 hours after its own. */
+export const lapsesAt = (c: ModelCampaign) =>
+  c.stage === 2 ? c.contestEndsAt : c.stage === 1 ? c.contestEndsAt + STAGE2_SECONDS : null;
 
 /** The Join accounts a tally of `baker` closes, and the balance changes: their rent moves into the Entry. */
 export async function tallyOf(h: Harness, index: number, baker: string, deltas: Map<string, bigint>) {
@@ -151,17 +159,18 @@ export async function planWindow(
 }
 
 /**
- * `finalize_campaign`: after the review window, or a contest's stage 2 once its deadline has passed (the lapse: the
- * stored result stands). In review, when it will succeed, the same transaction first tallies every baker not yet
- * tallied (amendment 2026-10-09); a contest opened only once every entry was tallied.
+ * `finalize_campaign`: after the review window, or once a contest has lapsed (the stored result stands): stage 2 at its
+ * deadline, an unread stage 1 48 hours after its own. In review, when it will succeed, the same transaction first
+ * tallies every baker not yet tallied (amendment 2026-10-09); a contest opened only once every entry was tallied.
  */
 async function planFinalize(h: Harness, index: number, t: bigint): Promise<Plan> {
   const c = h.camps[index];
   const contested = c.phase === "Contested";
+  const lapse = lapsesAt(c);
   const error: BrotErrorName | undefined = contested
-    ? c.stage !== 2
+    ? lapse === null
       ? "CampaignNotInReview"
-      : t < c.contestEndsAt
+      : t < lapse
         ? "ContestNotLapsed"
         : undefined
     : c.phase !== "InReview"
@@ -177,7 +186,7 @@ async function planFinalize(h: Harness, index: number, t: bigint): Promise<Plan>
     ixs: [...tallies, finalizeCampaignIx(h.addrs[index].campaign, await P.configPda())],
     error,
     deltas,
-    label: contested ? "lapse" : undefined,
+    label: contested ? (c.stage === 1 ? "lapse-stage1" : "lapse") : undefined,
     exit: index,
     events: [...pending.map(() => "LateTallied"), "CampaignFinalized"],
     apply: () => {

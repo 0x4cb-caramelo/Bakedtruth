@@ -2,9 +2,10 @@
  * Purpose: the price reader's decision on the harness's own BTC/USD account, for the contest's re-read (TP sections
  *          3.4.6, 3.4.7): the account a re-read finds (the stored reading again, or moved) and what the reader
  *          decides from it now, so the model knows whether the reading is the same as the stored one.
- * Version: 0.1.0
- * Sprint:  14 (lane INV14)
+ * Version: 0.1.1 (review fix F4: the offered proof's refusal, which refuses a re-read)
+ * Sprint:  14 (lane INV14; lane L14B: F4)
  */
+import type { BrotErrorName } from "./errors";
 import { BTC_PRICE } from "./flows";
 import { inProofWindow, type ModelCampaign, type Outcome } from "./invariant-model";
 import { TARGET } from "./invariant-open";
@@ -26,14 +27,24 @@ export type Account = { price: bigint; publish: bigint };
  */
 export function priceReading(c: ModelCampaign, t: bigint, account: Account, offered: boolean): Reading {
   if (inProofWindow(c, t)) {
-    if (!offered) return null;
-    const p = account.publish;
-    const fresh = t - p <= PROOF_AGE && p - t <= PROOF_AGE;
-    if (p < c.opensAt || p > c.deadline || !fresh || account.price < TARGET) return null;
+    if (!offered || proofRefusal(c, t, account) !== null) return null;
     return { outcome: "Yes", voidReason: 0, observed: account.price };
   }
   const stale = account.publish <= c.deadline && account.publish < c.deadline - STALE_AGE;
   return { outcome: stale ? "Void" : "No", voidReason: stale ? 3 : 0, observed: account.price };
+}
+
+/**
+ * The reader's refusal of a proof offered inside the window, in yes_proof's order for the harness's own BTC/USD
+ * account (a Full update of the right feed and exponent, a positive price, posted now): the publish time outside
+ * `[opens_at, deadline]`, then more than 60 s from the clock, then a price below the target. A contest's re-read is
+ * refused with it (review fix F4); null when the proof stands.
+ */
+export function proofRefusal(c: ModelCampaign, t: bigint, account: Account): BrotErrorName | null {
+  const p = account.publish;
+  if (p < c.opensAt || p > c.deadline) return "ProofOutsideWindow";
+  if (t - p > PROOF_AGE || p - t > PROOF_AGE) return "ProofStale";
+  return account.price < TARGET ? "ProofDoesNotTouch" : null;
 }
 
 /** The sponsored account a re-read finds: the stored reading again (`same`, `none`), or a moved one (`moved`). */

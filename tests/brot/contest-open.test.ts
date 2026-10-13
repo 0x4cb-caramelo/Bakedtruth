@@ -77,8 +77,9 @@ describe("contest opens", () => {
   test("contest opens: while contested, at either stage, no payout moves a lamport", async () => {
     const cw = await C.contestWorld();
     const feeVault = await P.feeVaultPda();
+    // Before its lapse a contest at either stage refuses finalize (an unread stage 1 lapses 48 hours after its deadline).
     for (const [stage, refusesFinalize] of [
-      [1, "CampaignNotInReview"],
+      [1, "ContestNotLapsed"],
       [2, "ContestNotLapsed"],
     ] as const) {
       const c = await C.contested(cw, stage, C.NOW + C.HOUR);

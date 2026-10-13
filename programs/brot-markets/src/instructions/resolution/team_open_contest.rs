@@ -65,7 +65,9 @@ pub fn team_open_contest(
     )?;
     require_tallied(stored.entries_untallied.get())?;
 
-    // From the stored status, so the table refuses on its own whatever the window check let through.
+    // The guard is `require_contest_window` (InReview, inside the window). The table, given the stored status, also
+    // refuses an Open, Settling or Settled campaign, but not a re-opened contest: `Contested` to `Contested` is an
+    // edge (stage 2 needs it), so only the window rule keeps a contest from being opened twice.
     transition(Status::try_from(stored.status)?, Status::Contested)?;
     let ends_at = time
         .unix_timestamp

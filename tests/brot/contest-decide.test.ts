@@ -1,11 +1,10 @@
 /**
- * Purpose: stage 2 of a contest on the binary (Sprint 14, lane L14B): the admin confirms (`ContestClosed`, then
- *          `CampaignFinalized`) or voids, and the opening fee follows the void's cause (a house failure refunds it to
- *          whoever opened, an outside cause keeps it); "decide contest never inverts" over every decision and reason
- *          for a stored YES, NO and void; a stranger and a team key cannot decide; each refusal with its own error;
- *          the lapse through `finalize_campaign`; the pause never blocks the decision or the lapse.
- *          Filter: `bun test tests/ -t "contest decide"`, `-t "decide contest never inverts"`.
- * Version: 0.1.0
+ * Purpose: stage 2 of a contest on the binary (Sprint 14, lane L14B): the admin confirms or voids (`ContestClosed`,
+ *          then `CampaignFinalized`), the opening fee following the void's cause; "decide contest never inverts" over
+ *          every decision and reason for a stored YES, NO and void; a stranger and a team key cannot decide; each
+ *          refusal with its own error; the lapse of stage 2 at its deadline and of an unread stage 1 48 hours after
+ *          its own (fix F3); the pause blocks neither. Filter: `-t "contest decide"`, `-t "decide contest never inverts"`.
+ * Version: 0.1.1 (review fix F3)
  * Sprint:  14 (lane L14B). Needs target/deploy/brot_markets.so.
  */
 import { describe, expect, test } from "bun:test";
@@ -179,17 +178,23 @@ describe("contest decide", () => {
     expect(readCampaign(cw.w, lapsed.campaign).status).toBe(P.Status.Settling);
   });
 
-  test("contest lapse: finalize takes stage 2 from its deadline on, with the stored result, never at stage 1", async () => {
+  test("contest lapse: finalize takes stage 2 from its deadline on, and an unread stage 1 48 hours after its own", async () => {
     const cw = await C.contestWorld();
     const stage1 = await C.contested(cw, 1, ENDS);
     const c = await C.contested(cw, 2, ENDS);
     at(cw.w, ENDS - 1n);
     await expectRefused(cw.w, c, IS.finalizeCampaignIx(c.campaign, cw.config), "ContestNotLapsed");
     at(cw.w, ENDS);
-    await expectRefused(cw.w, stage1, IS.finalizeCampaignIx(stage1.campaign, cw.config), "CampaignNotInReview");
+    // Review fix F3: stage 1 lapses where the latest stage 2 would end, not at its own deadline.
+    await expectRefused(cw.w, stage1, IS.finalizeCampaignIx(stage1.campaign, cw.config), "ContestNotLapsed");
     const sent = expectOk(await send(cw.w, [IS.finalizeCampaignIx(c.campaign, cw.config)]));
     expect(sent.events.map((e) => [e.name, e.data.seq])).toEqual([["CampaignFinalized", C.SEQ]]);
     const after = readCampaign(cw.w, c.campaign);
     expect([after.status, after.outcome, after.settle_mode]).toEqual([P.Status.Settling, No, 1]);
+    at(cw.w, ENDS + C.STAGE2_SECONDS - 1n);
+    await expectRefused(cw.w, stage1, IS.finalizeCampaignIx(stage1.campaign, cw.config), "ContestNotLapsed");
+    at(cw.w, ENDS + C.STAGE2_SECONDS);
+    expectOk(await send(cw.w, [IS.finalizeCampaignIx(stage1.campaign, cw.config)]));
+    expect(readCampaign(cw.w, stage1.campaign)).toMatchObject({ status: P.Status.Settling, outcome: No });
   });
 });
