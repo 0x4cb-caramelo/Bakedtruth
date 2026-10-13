@@ -73,7 +73,13 @@ function main() {
   }
 
   // gitleaks reads the same commits from history, with the configuration at the repository root.
-  const leaks = runGitleaks(base, { required: requireGitleaks, root: path.resolve(__dirname, '..') });
+  let leaks;
+  try {
+    leaks = runGitleaks(base, { required: requireGitleaks, root: path.resolve(__dirname, '..') });
+  } catch (error) {
+    console.error(`secret scan: ${error.message}`);
+    process.exit(1);
+  }
   if (leaks) leaks.forEach(record);
   const gitleaks = leaks ? 'gitleaks over the same commits' : 'gitleaks NOT run: it is not installed here';
 
