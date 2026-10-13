@@ -1,9 +1,9 @@
 /**
  * Purpose: the team's acts inside a campaign's review window, built by the Codama client: confirm the
- *          result, void it with a reason and the hash of its public note, open a contest (disabled in
- *          the program until Sprint 14: it refuses with `ContestExitDisabled`).
- * Version: 0.1.0
- * Sprint:  05 (SDK)
+ *          result, void it with a reason and the hash of its public note, open a contest (enabled in
+ *          Sprint 14 with its exits: `../reread.ts` and `../decide-contest.ts`).
+ * Version: 0.1.1 (the contest is no longer refused, Sprint 14 lane L14B)
+ * Sprint:  05 (SDK); 14 (lane L14B)
  *
  * A team key voids only an automatic void (`TeamVoidNotAutomatic` for a YES or NO, decision of
  * 2026-10-09). The note's text lives in content/void-log/ and only its hash goes on-chain (TP 3.4.7).
@@ -44,7 +44,10 @@ export async function buildTeamVoidCampaign(a: {
   });
 }
 
-/** `team_open_contest`: refused by the program until Sprint 14 (`ContestExitDisabled`). */
+/**
+ * `team_open_contest`: inside the window, once every entry is tallied (`NotTallied` before); payout pauses and stage 1
+ * starts: the reading is run again (`buildRereadCampaign`).
+ */
 export async function buildTeamOpenContest(a: { teamMember: TransactionSigner; campaign: Address }) {
   return getTeamOpenContestInstruction({
     teamMember: a.teamMember,
