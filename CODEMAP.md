@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **986** |
+| Arquivos mapeados | **987** |
 | Acima de 200 linhas | **44** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -1473,6 +1473,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`resolve-support.ts`](tests/brot/resolve-support.ts) | what the resolution tests share: a world at a mainnet-like slot and epoch, a campaign of each kind written into it with its metric account (a synthetic mint, th | 205 |
 | [`sealed-entry.test.ts`](tests/brot/sealed-entry.test.ts) | the sealed entry on the program (Sprint 15; TP 3.4.12): its 10% held in the sponsor's `SealedFee`, never in the vault, while the 90% joins the pot as a join doe | 192 |
 | [`sealed-flows.ts`](tests/brot/sealed-flows.ts) | the whole life of a campaign that carries a sealed entry, on the program (Sprint 15): resolved YES by a touching sponsored price, NO after the deadline, or void | 76 |
+| [`sealed-late.test.ts`](tests/brot/sealed-late.test.ts) | today's rule for a LATE sealed entry, pinned so a change is deliberate (the coordinator's closure review; red team L1, a founder question still open). A YES pri | 100 |
 | [`sealed-outcomes.test.ts`](tests/brot/sealed-outcomes.test.ts) | a sealed entry follows the common rule of any entry (TP v0.0.1 Q5, answered a; P-4), on the program, from the entry to `close_campaign`: in a split it is paid a | 128 |
 | [`sealed-pause.test.ts`](tests/brot/sealed-pause.test.ts) | I10′ with the sealed entry (TP 3.4.13; Sprint 15 DoD): with the pause on, a sealed entry fails as a join and an opening do, before its price is even read, and m | 76 |
 | [`sealed-settle.test.ts`](tests/brot/sealed-settle.test.ts) | `settle_sealed_fee` and the SealedFee slot of a sealed entry, on the program (Sprint 15): the fee waits for the campaign to be finalized; two sponsors' fees on  | 146 |

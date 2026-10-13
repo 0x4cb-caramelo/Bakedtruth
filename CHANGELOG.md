@@ -42,8 +42,13 @@ recomendado (1a a 12a).
     "ok" só quando conferência, resumo e simulação concordam) e o resumo do que se assina com a parte da taxa em
     números; o relay passa a barrar a entrada selada de um país bloqueado.
   - **O teste de dinheiro** (I1 a I15) sorteia a entrada selada, a liquidação da taxa, SOL mandado à mão para a conta e
-    o fechamento esperando a taxa; verde em 35 sementes. A revisão adversária não achou nada grave; as quatro melhorias
-    que ela pediu entraram antes do PR.
+    o fechamento esperando a taxa; verde em 35 sementes. A revisão adversária não achou nada grave: o achado médio (o
+    teste de dinheiro) e quatro menores entraram antes do PR, revistos numa segunda passada; a taxa da entrada selada
+    feita tarde ficou com o fundador, presa por um teste.
+  - **O andaime das Sprints 14 e 15 vem junto** (`fd67706`): se esta sprint entrar na `main` antes da 14, as três
+    instruções da 14 (`user_link_referrer`, `reread_campaign`, `admin_decide_contest`) chegam como esboços que recusam
+    tudo, com os erros 6153 a 6165 e os eventos 18 a 20.
+  - **O `bun run test` passa a rodar também `services/`** (a mesma linha do PR #87).
 
 - **A curva da graduação pelo ticker, e os botões SIM e NÃO limpos** (branch `feat/curve-ticker-side-buttons`,
   13/10/2026; `session-log/2026-10-13-ticker-da-curva-e-botoes-de-lado.md`). Responde ao nome legível que o registro
