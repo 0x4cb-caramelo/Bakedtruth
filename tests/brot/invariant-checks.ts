@@ -19,6 +19,7 @@ import { payoutOf } from "./money-model";
 import type { ChainView, Harness } from "./invariant-harness";
 import { countOpen } from "./invariant-open";
 import { SEALED_CHECKS } from "./invariant-sealed-checks";
+import { balance } from "./setup";
 
 type Check = (c: ModelCampaign, v: ChainView, h: Harness) => string | null;
 const ledgerTo = (c: ModelCampaign, kind: string) => c.ledger.filter((l) => l.kind === kind);
@@ -186,7 +187,10 @@ export function checkCampaign(c: ModelCampaign, v: ChainView, h: Harness, label:
   }
 }
 
-/** I7 and I10′, about the whole world: the valve counts the open paid campaigns; the pause is the chain's. */
+/**
+ * I7, I10′ and I8 about the whole world: the valve counts the open paid campaigns; the pause is the chain's; the fee
+ * vault holds exactly what the model sent it, after every operation (a held sponsor fee reaches it only at settlement).
+ */
 export function checkWorld(h: Harness, config: Record<string, any>) {
   const open = countOpen(h);
   if (Number(config.open_campaigns) !== open) {
@@ -196,6 +200,9 @@ export function checkWorld(h: Harness, config: Record<string, any>) {
   if (config.operating_level !== (h.paused ? 1 : 0)) {
     throw new Error(`I10′: operating level ${config.operating_level}, the model paused ${h.paused}`);
   }
+  const feeVault = balance(h.w, h.feeVault);
+  if (feeVault !== h.feeVaultModel)
+    throw new Error(`I8: the fee vault holds ${feeVault}, the model ${h.feeVaultModel}`);
 }
 
 /**
