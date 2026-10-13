@@ -2,14 +2,15 @@
  * Purpose: the sealed entry on the program (Sprint 15; TP 3.4.12): its 10% held in the sponsor's `SealedFee`, never in
  *          the vault, while the 90% joins the pot as a join does; a second sealed entry tops the account up; a plain
  *          join by the same wallet shares its `Entry`; the floor, `max_lamports` and the SOL/USD account refuse with
- *          their own codes and move nothing; the retry guard (`expected_entry_total`).
+ *          their own codes and move nothing; the retry guard (`expected_entry_total`); the creation rules' version
+ *          bound as an opening binds it (red team L2).
  *          Filter: `bun test tests/ -t "sealed entry holds its 10 percent until the outcome"`.
- * Version: 0.0.1
+ * Version: 0.0.2 (red team L2: the creation rules' version)
  * Sprint:  15 (lane L15). Needs the SBF build: `bun run build:program` first.
  */
 import { describe, expect, test } from "bun:test";
 
-import { join, readCampaign, readEntry, SOL_CHARGED } from "./flows";
+import { DEFAULT_PARAMS, join, readCampaign, readEntry, SOL_CHARGED } from "./flows";
 import * as I from "./instructions";
 import { ENTRY_LEN, JOIN_LEN } from "./join-campaign-support";
 import * as P from "./program";
@@ -169,5 +170,22 @@ describe("sealed entry", () => {
     const replay = { side: P.Side.No, expectedEntryTotal: 0n, joinIndex: 1 };
     expectError(await sealedEntry(w, sponsor, campaign, replay), "EntryTotalMismatch");
     expectOk(await sealedEntry(w, sponsor, campaign, { ...replay, expectedEntryTotal: entry }));
+  });
+
+  test("the creation rules signed are the config's: a change between the preview and the landing refuses it", async () => {
+    const { w, admin, campaign, sponsor } = await sealedWorld();
+    const kept = await sealedState(w, sponsor.address, campaign);
+    // The sponsor previewed version 0 (a 10% fee); the admin moves the split to 95/5 (version 1) before it lands.
+    expectOk(await send(w, [await I.setCreationParamsIx(admin, { ...DEFAULT_PARAMS, opening_prize_bps: 9_500 })]));
+    const signedAt = (version: number) =>
+      sealedEntry(w, sponsor, campaign, { side: P.Side.Yes, expectedParamsVersion: version });
+    expectError(await signedAt(0), "CreationParamsChanged");
+    expectError(await signedAt(2), "CreationParamsChanged");
+    expect(await sealedState(w, sponsor.address, campaign)).toEqual(kept);
+    // Signed at the version it now reads, it lands under the new split: the same charge, a 5% fee.
+    const sent = expectOk(await signedAt(1));
+    const { paid } = sealedCharge(500n);
+    const entry = (paid * 9_500n) / 10_000n;
+    expect(sent.events[1].data).toMatchObject({ paid, entry_lamports: entry, fee_lamports: paid - entry });
   });
 });

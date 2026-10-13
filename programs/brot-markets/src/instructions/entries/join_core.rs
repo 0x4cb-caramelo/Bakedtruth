@@ -1,9 +1,10 @@
 //! Purpose: the core of a join, shared by `user_join_campaign` and `sponsor_join_campaign`: every join
 //!          rule in `user_join_campaign`'s order with its own error, the baker's `Entry` and `Join`
 //!          records, the deposit into the vault, the bookkeeping and `EntryAdded`.
-//! Version: 0.0.1
+//! Version: 0.0.2
 //! Sprint: 15 (lane L15): moved out of `join_campaign.rs` 0.0.5 unchanged in order, errors and
-//!         effects, so the sealed entry joins the pot through the very same path
+//!         effects, so the sealed entry joins the pot through the very same path; `amount_of` also
+//!         gets the parameters' version (red team L2)
 //!
 //! Order, after the slots (`join_slots.rs`): the config, read for the pause and the creation
 //! parameters; the campaign and its vault; the metric account's address, `Open`, the entry close,
@@ -22,7 +23,7 @@ use super::{
     join_lock::require_outcome_open,
     join_record::{open_join, JoinFields},
     join_rules,
-    join_slots::{JoinAccounts, JoinTerms},
+    join_slots::{ConfigTerms, JoinAccounts, JoinTerms},
 };
 use crate::{
     checks,
@@ -34,21 +35,22 @@ use crate::{
     readers::ChainTime,
     state::{
         campaign::Campaign,
-        config::{CreationParams, GlobalConfig},
+        config::GlobalConfig,
         enums::{OperatingLevel, Side, Status},
     },
     vault,
 };
 
 /// Every rule of a join after its slots, in order, then its effects and `EntryAdded`. `amount_of`
-/// is called once the campaign takes joins and entries are not paused, with the config's creation
-/// parameters and the clock this join read: it names the lamports the join enters, and a value the
-/// caller gets back (a sealed entry's charge). Its refusals come before the campaign's minimum.
+/// is called once the campaign takes joins and entries are not paused, with the config's terms (its
+/// creation parameters and their version) and the clock this join read: it names the lamports the join
+/// enters, and a value the caller gets back (a sealed entry's charge). Its refusals come before the
+/// campaign's minimum.
 pub fn join<T>(
     a: JoinAccounts,
     terms: JoinTerms,
     program_id: &Address,
-    amount_of: impl FnOnce(&CreationParams, &ChainTime) -> Result<(u64, T), ProgramError>,
+    amount_of: impl FnOnce(&ConfigTerms, &ChainTime) -> Result<(u64, T), ProgramError>,
 ) -> Result<T, ProgramError> {
     let JoinAccounts {
         baker,
@@ -62,14 +64,15 @@ pub fn join<T>(
         program,
         ..
     } = a;
-    // The config is read for the pause and the creation parameters; the minimum is the campaign's
-    // own (question 5).
-    let (paused, params) = {
+    // The config is read for the pause and its terms (the parameters and their version); the minimum
+    // is the campaign's own (question 5).
+    let (paused, config_terms) = {
         let config = GlobalConfig::load(config, program_id)?;
-        (
-            config.operating_level != OperatingLevel::Normal as u8,
-            config.params,
-        )
+        let read = ConfigTerms {
+            params: config.params,
+            version: config.params_version.get(),
+        };
+        (config.operating_level != OperatingLevel::Normal as u8, read)
     };
     let campaign_key = *campaign.address();
     let baker_key = *baker.address();
@@ -97,7 +100,7 @@ pub fn join<T>(
     if paused {
         return Err(BrotError::JoinWhilePaused.into());
     }
-    let (amount, kept) = amount_of(&params, &time)?;
+    let (amount, kept) = amount_of(&config_terms, &time)?;
     join_rules::require_min_entry(amount, campaign.min_entry_lamports.get())?;
 
     let expected_total = terms.expected_entry_total;

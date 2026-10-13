@@ -48,4 +48,5 @@ export const SPONSOR_JOIN_ARGS: Layout = [
   ["max_lamports", "u64"],
   ["min_return_bps", "u32"],
   ["expected_entry_total", "u64"],
+  ["expected_params_version", "u32"], // lane L15, red team L2: the creation rules' version, as an opening binds it
 ];

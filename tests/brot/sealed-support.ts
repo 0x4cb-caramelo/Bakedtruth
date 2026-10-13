@@ -11,7 +11,7 @@ import { getAddressEncoder, getProgramDerivedAddress, lamports, type Address, ty
 
 import { buildSettleSealedFee, buildSponsorJoinCampaign } from "@brot/sdk/tx";
 
-import { nextJoinIndex, openingLamports, readCampaign, SOL_CHARGED } from "./flows";
+import { nextJoinIndex, openingLamports, readCampaign, readConfig, SOL_CHARGED } from "./flows";
 import { joinWorld, snapshot } from "./join-campaign-support";
 import { decode, encode, layoutSize } from "./layouts";
 import * as I from "./instructions";
@@ -56,6 +56,8 @@ export type SealedArgs = {
   expectedEntryTotal?: bigint;
   /** The Join's index; the sponsor's `join_count` unless a test tampers with it. */
   joinIndex?: number;
+  /** The creation rules' version signed; the config's own unless a test tampers with it (red team L2). */
+  expectedParamsVersion?: number;
 };
 
 /** A sealed entry by `sponsor`: US$500 and at most 100 SOL unless `a` says otherwise. */
@@ -69,6 +71,7 @@ export async function sealedEntryIx(w: World, sponsor: KeyPairSigner, campaign: 
     maxLamports: a.maxLamports ?? 100n * P.SOL,
     minReturnBps: a.minReturnBps ?? 0,
     expectedEntryTotal: a.expectedEntryTotal ?? (await entryTotal(w, campaign, sponsor.address)),
+    expectedParamsVersion: a.expectedParamsVersion ?? Number((await readConfig(w)).params_version),
     joinIndex: a.joinIndex ?? (await nextJoinIndex(w, campaign, sponsor.address)),
   });
 }

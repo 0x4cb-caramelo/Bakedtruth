@@ -94,6 +94,7 @@ export type SponsorJoinCampaignInstructionData = {
   maxLamports: bigint;
   minReturnBps: number;
   expectedEntryTotal: bigint;
+  expectedParamsVersion: number;
 };
 
 export type SponsorJoinCampaignInstructionDataArgs = {
@@ -102,6 +103,7 @@ export type SponsorJoinCampaignInstructionDataArgs = {
   maxLamports: number | bigint;
   minReturnBps: number;
   expectedEntryTotal: number | bigint;
+  expectedParamsVersion: number;
 };
 
 export function getSponsorJoinCampaignInstructionDataEncoder(): FixedSizeEncoder<SponsorJoinCampaignInstructionDataArgs> {
@@ -113,6 +115,7 @@ export function getSponsorJoinCampaignInstructionDataEncoder(): FixedSizeEncoder
       ["maxLamports", getU64Encoder()],
       ["minReturnBps", getU32Encoder()],
       ["expectedEntryTotal", getU64Encoder()],
+      ["expectedParamsVersion", getU32Encoder()],
     ]),
     (value) => ({ ...value, discriminator: SPONSOR_JOIN_CAMPAIGN_DISCRIMINATOR }),
   );
@@ -126,6 +129,7 @@ export function getSponsorJoinCampaignInstructionDataDecoder(): FixedSizeDecoder
     ["maxLamports", getU64Decoder()],
     ["minReturnBps", getU32Decoder()],
     ["expectedEntryTotal", getU64Decoder()],
+    ["expectedParamsVersion", getU32Decoder()],
   ]);
 }
 
@@ -179,6 +183,7 @@ export type SponsorJoinCampaignInput<
   maxLamports: SponsorJoinCampaignInstructionDataArgs["maxLamports"];
   minReturnBps: SponsorJoinCampaignInstructionDataArgs["minReturnBps"];
   expectedEntryTotal: SponsorJoinCampaignInstructionDataArgs["expectedEntryTotal"];
+  expectedParamsVersion: SponsorJoinCampaignInstructionDataArgs["expectedParamsVersion"];
 };
 
 export function getSponsorJoinCampaignInstruction<

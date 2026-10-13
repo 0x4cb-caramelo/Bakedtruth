@@ -157,7 +157,7 @@ function describe(parsed: Parsed, ctx: SummaryContext, ix: Instruction): { text:
       };
     }
     case B.SponsorJoinCampaign:
-      return describeSealedEntry(d, a, about(ctx, a.campaign.address));
+      return describeSealedEntry(d, a, about(ctx, a.campaign.address), ctx.terms);
     case B.TeamVoidCampaign:
       return {
         text: `Void campaign ${a.campaign.address} (${VoidReason[d.reason]}), note hash ${bytesToHex(d.noteHash)}`,

@@ -59,6 +59,7 @@ describe("sdk builders match the test kit", () => {
       maxLamports: 9n * P.SOL,
       minReturnBps: 7,
       expectedEntryTotal: 3n,
+      expectedParamsVersion: 4,
     };
     const pairs: [Promise<Instruction> | Instruction, Promise<Instruction> | Instruction][] = [
       [

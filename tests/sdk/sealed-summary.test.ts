@@ -1,10 +1,12 @@
 /**
  * Purpose: the summary of the sealed entry's two instructions (Sprint 15; A-3): both are trusted only as the IDL shapes
- *          them; a sealed entry says its campaign, side, sponsor, US$, the most it takes (`max_lamports`, entry and
- *          fee together) and the SOL price below which that bound refuses it, where each part goes, its guards and its
- *          rents; the fee's settlement says where the fee can go and takes nothing from a signer. Needs no binary.
+ *          them; a sealed entry says its campaign, side, sponsor, the creation rules' version, US$, the most it takes
+ *          (`max_lamports`, entry and fee together) and the SOL price below which that bound refuses it, Brot's fee
+ *          share in numbers (exact with the config of that version, its ceiling otherwise), where each part goes, its
+ *          guards (the estimate in bps of the entry part) and its rents; the fee's settlement says where the fee can
+ *          go and takes nothing from a signer. Needs no binary.
  *          Filter: `bun test tests/ -t "the summary says what a sealed entry signs"`.
- * Version: 0.1.0
+ * Version: 0.1.1 (red team L2 and L3)
  * Sprint:  15 (lane L15)
  */
 import { describe, expect, test } from "bun:test";
@@ -29,6 +31,7 @@ async function built(expectedEntryTotal = 0n) {
     maxLamports: 9n * P.SOL,
     minReturnBps: 9_500,
     expectedEntryTotal,
+    expectedParamsVersion: 3,
     joinIndex: expectedEntryTotal === 0n ? 0 : 2,
   });
   const settle = await T.buildSettleSealedFee({ campaign, sponsor: sponsor.address });
@@ -41,18 +44,38 @@ describe("the summary says what a sealed entry signs", () => {
     const item = one(sealed);
     expect(item).toMatchObject({ name: "SponsorJoinCampaign", trusted: true, lamportsAtMost: 9n * P.SOL });
     for (const said of [
-      `Sealed entry in campaign ${campaign} on NO from ${sponsor.address}: US$750`,
+      `Sealed entry in campaign ${campaign} on NO from ${sponsor.address} under creation rules version 3: US$750`,
       "at most 9.000000000 SOL in all",
       // US$750 for at most 9 SOL: a SOL/USD price under US$83.33 would cost more than the bound.
       "refused if Pyth's SOL/USD price less its confidence is below US$83.33 when it lands",
-      "the entry part joins the pot",
-      "back to the sponsor only on a void the house caused",
-      "refused if the return estimate is below 95.00% or the entry total is not 0.000000000 SOL",
+      // Without the config read, the fee's ceiling: the opening's split never leaves the entry under 90%.
+      "; at most 10.00% of it is Brot's fee, held in the sponsor's SealedFee until the outcome",
+      "back to the sponsor only on a void the house caused; the rest is the entry, which joins the pot",
+      "refused if the return estimate, in bps of the entry part (not of what is paid), is below 95.00%",
+      "or if the entry total is not 0.000000000 SOL",
       "the rents of the entry, of the join's record and of the sponsor's SealedFee",
     ])
       expect(item.text).toContain(said);
     const later = one((await built(5n * P.SOL)).sealed);
     expect(later.text).toContain("the rent of the join's record, and of the sponsor's SealedFee on its first sealed");
+  });
+
+  test("with the config of the version it binds, the fee's share is said exactly; another version's is not used", async () => {
+    const { sealed } = await built();
+    const terms = (version: number, openingPrizeBps: number) => ({
+      version,
+      openingPrizeBps,
+      feeBps: 1_000,
+      oneSidedFeeBps: 100,
+      creatorShareBps: 100,
+      minEntryLamports: 10_000_000n,
+    });
+    const read = (version: number, openingPrizeBps: number) =>
+      T.summarizeInstructions([sealed], { context: { terms: terms(version, openingPrizeBps) } }).items[0].text;
+    expect(read(3, 9_500)).toContain("; 5.00% of it is Brot's fee, held in the sponsor's SealedFee");
+    expect(read(3, 9_000)).toContain("; 10.00% of it is Brot's fee, held in the sponsor's SealedFee");
+    // The screen read another version than the one signed: its numbers are not the ones the program will apply.
+    expect(read(2, 9_500)).toContain("; at most 10.00% of it is Brot's fee");
   });
 
   test("the fee's settlement is trusted, says where the fee can go, and takes nothing from a signer", async () => {

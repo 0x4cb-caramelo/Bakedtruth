@@ -3,10 +3,13 @@
 //!          3.4.10, `open_campaign/payment.rs`, reused as it is), at least the config's
 //!          `opening_fee_usd` (the US$500 floor) and at most the signed `max_lamports`, split by the
 //!          config's `opening_prize_bps`: the prize part is the entry, the fee part is held.
-//! Version: 0.0.1
-//! Sprint: 15 (lane L15)
+//! Version: 0.0.2
+//! Sprint: 15 (lane L15); the creation rules bound as an opening binds them (red team L2)
 //!
-//! Row 7's two refusals that name the opening get the sealed entry's own codes: `OpeningUsdBelowFee`
+//! The sponsor signs the version of the creation rules it previewed (`expected_params_version`): the
+//! split, the floor and the price rules change only with that version, so an admin change between
+//! the preview and the landing refuses the entry (`CreationParamsChanged`) instead of charging it a
+//! larger fee. Then row 7's two refusals that name the opening get the sealed entry's own codes: `OpeningUsdBelowFee`
 //! becomes `SealedEntryBelowFloor` (a zero entry included: a sealed entry is never free) and
 //! `OpeningAboveMaxLamports` becomes `SealedEntryAboveMaxLamports`. Every refusal of the SOL/USD
 //! account keeps its row 7 code, so the error still names the account at fault.
@@ -20,6 +23,13 @@ use crate::{
     readers::ChainTime,
     state::config::CreationParams,
 };
+
+/// The creation rules the sponsor previewed are the config's (`CreationParamsChanged`), checked as
+/// `open_campaign/rules.rs` checks an opening's.
+pub fn require_terms(expected: u32, current: u32) -> ProgramResult {
+    // X0.9 sealed_terms
+    checks::require(expected == current, BrotError::CreationParamsChanged)
+}
 
 /// The sealed entry's charge: row 7 for a wallet that is not a team key, so a US$ of zero is refused
 /// too, with the floor and the bound renamed. Never inlined: the price read keeps its own frame.

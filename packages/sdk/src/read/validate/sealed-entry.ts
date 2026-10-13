@@ -4,12 +4,13 @@
  *          clock, the first refusal the program would return, or the charge and the return estimate the sealed entry
  *          will be checked against. Mirrors programs/brot-markets/src/instructions/entries/sponsor_join_campaign.rs,
  *          join_core.rs, sealed_charge.rs and sealed_fee_account.rs, as checkJoin (./join.ts) mirrors the join.
- * Version: 0.1.0
+ * Version: 0.1.1 (the creation rules' version, red team L2)
  * Sprint:  15 (lane L15)
  *
  * Order, as the handler runs it after its slot checks: the metric account is the campaign's; `Open`; before the entry
- * close; the join lock (the reader's errors, `OutcomeKnowable`, then the price buffer); the pause; the charge (the
- * floor, the SOL/USD account, `max_lamports`); the SealedFee (an existing one is the sponsor's, on this campaign); the
+ * close; the join lock (the reader's errors, `OutcomeKnowable`, then the price buffer); the pause; the creation
+ * rules' version the client signs (`CreationParamsChanged`); the charge (the floor, the SOL/USD account,
+ * `max_lamports`); the SealedFee (an existing one is the sponsor's, on this campaign); the
  * campaign's minimum, on the entry part; the entry total the client signs; the estimate, on the entry part.
  */
 import type { Address } from "@solana/kit";
@@ -44,6 +45,8 @@ export type SealedEntryCheckInput = {
   /** What the client will sign; omit to learn the estimate first. */
   minReturnBps?: number;
   expectedEntryTotal?: bigint;
+  /** The creation rules' version the client will sign; omitted, the config's own. */
+  expectedParamsVersion?: number;
 };
 
 export type SealedEntryCheck =
@@ -84,6 +87,8 @@ function check(input: SealedEntryCheckInput): Extract<SealedEntryCheck, { ok: tr
     if (joinBufferRefuses(campaign, joinPriceReading(campaign, input.metric, chain))) refuse("JoinBufferRefused");
   }
   if (input.config.operatingLevel !== OperatingLevel.Normal) refuse("JoinWhilePaused");
+  const version = input.config.paramsVersion;
+  if ((input.expectedParamsVersion ?? version) !== version) refuse("CreationParamsChanged");
   const charge = chargeSealedEntry({
     params: input.config.params,
     entryUsd: input.entryUsd,

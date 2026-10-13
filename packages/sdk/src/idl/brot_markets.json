@@ -3795,6 +3795,13 @@
             "attrs": [
               "idl-type"
             ]
+          },
+          {
+            "name": "expectedParamsVersion",
+            "type": "u32",
+            "attrs": [
+              "idl-type"
+            ]
           }
         ]
       }
