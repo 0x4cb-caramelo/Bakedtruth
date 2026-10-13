@@ -27,6 +27,23 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **O sexto tipo no ar no devnet e no `/dev0x`** (12/10/2026 em Brasília, 13/10 em UTC; a pedido do Ronaldo, que
+  confirmou antes de qualquer envio; `session-log/2026-10-12-upgrade-devnet-sexto-tipo.md`).
+  - **O programa** `5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o` foi atualizado com o artefato do CI da `main` em
+    `91a5bed` (a mescla do PR #76, execução 38327381894), `brot_markets.so` com sha256
+    `63610a32d6dfa243af80f741dad328645e49fdd3c2d34173e0471c4a2982d7e4` e o IDL igual ao da `main`. Primeiro a
+    ProgramData foi aumentada à mão em 10.240 bytes, porque o loader recusa um aumento menor e o automático do CLI pede
+    só o que falta (`51gvu4iQRg9eULzdKZPxjatZVo2j9UwvJmKCNCtJVfL15PU96L3A1iuZs4wXBW5yZ95sXuVCbZrG2c1y2K5UDCG2`); depois
+    veio o upgrade (`2GkUHe1U4DwM62rEWembKtu9QSfjgMiV3jw7AgZzM7eynyCXD5DxgWqQL8dBUT8UjgMbbWsnJKePk5F7pezvtyLm`). O
+    último deploy agora é o slot 510.454.676. A autoridade continua a mesma, e os bytes na rede são os do artefato. A
+    chave de upgrade, a de devnet do Ronaldo (`6N7r…`), ficou na máquina dele; o custo foi de 0,0529 SOL de teste.
+  - **O PR #78** (o site e os documentos do sexto tipo) entrou na `main` depois do upgrade (`570fa306`), com o CI verde.
+  - **O site em `brot.markets/dev0x`** passou para a versão `570fa306b4d3` às 01h18min24s UTC de 13/10, construída
+    para o slot novo (A-8) e testada numa porta interna antes da troca. A versão anterior (`6a52505c9aba`) ficou no
+    servidor. Entre o upgrade e a troca, uns nove minutos e meio, o site no ar não assinava nada.
+  - **A campanha de demonstração**, no pool `12uLN2texEDbadM4WzJm6Dry8Quc8qFpDQEwhSdi7Dny`, ainda não foi aberta: o
+    Ronaldo quer decidir antes como o pool aparece na frase (um nome no lugar do endereço) e que avisos a caixa dá.
+  - **`deploy/devnet/README.md`** ganhou a seção "Upgrading", com os passos de hoje e o porquê.
 - **O sexto tipo no site e nos documentos** (branch `feat/dbc-graduation-ui`, 12/10/2026, empilhada sobre a
   `feat/dbc-graduation-reader`; `session-log/2026-10-12-sexto-tipo-no-site-e-nos-documentos.md`).
   - **A caixa de abertura** ganha o modelo "Graduation", com o campo do pool da DBC. O site lê a config que o pool
