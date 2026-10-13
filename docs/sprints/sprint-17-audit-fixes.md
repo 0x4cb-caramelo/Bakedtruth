@@ -1,6 +1,6 @@
 # Sprint 17 — Audits and fixes
 
-**Status:** planned · **Branch:** `sprint-17-audit-fixes` · **Dates:** none, by the founder's decision
+**Status:** in progress; the audit package is written (2026-10-13); the audits, the fixes and the legal texts wait for outside parties (see "Record") · **Branch:** `sprint-17-audit-fixes` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -121,4 +121,17 @@ page), `CODEMAP.md`.
 
 ## Record and retrospective
 
-Filled in during the sprint and at closure.
+**2026-10-13, the audit package (lane L17).** `docs/audit/` holds the scope (every instruction, the ten creation rules
+of TP §3.4.10 with their code and error, every parameter ceiling, the readers, the money paths, I1–I15), the threat
+model, Pinocchio's own audits (Zellic and Neodyme, both on 0.8.4; this program pins 0.11.2), the fix workflow, and a
+README whose release-candidate block is filled at the freeze (Sprint 16). Its section 17 lists the gaps found while
+mapping the code; the lead confirmed four (the vault assertion in `pay_from_vault` compares a value with itself and
+`move_lamports` checks only the balance; `tally_late_joins` has no negative test for its two refusals; the mutation
+script misses `checks/close.rs` and `checks/paying.rs`; free team openings sit outside the open-campaign limit, a
+founder decision of 2026-10-09 whose mitigation is the team-key opening alert). They go to Sprint 16's pre-freeze
+hardening, after 14 and 15.
+
+Open, with owners: the Sprint 14 and 15 sections and the release-candidate block (the lead, at the freeze); the two
+audit firms, their dates, scope and reports (the founder, outside parties); the lawyer's review L0, which gives the
+terms, the country list and the log rules (outside party); the SODAX page (P-8); the one-report exception (founder);
+the country switch and the mainnet notices (code, after L0).
