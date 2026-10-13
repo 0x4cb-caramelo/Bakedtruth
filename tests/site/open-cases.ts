@@ -3,8 +3,8 @@
  *          box builds it, the box's verdict on a draft read through the site's RPC with its arguments then sent straight
  *          to the program, the SDK's verdict on arguments built earlier against the chain as it is now, and one refused
  *          case per row the box can be led into, each with the world it needs.
- * Version: 0.1.0
- * Sprint:  19 (site: open a campaign)
+ * Version: 0.1.1 (the sixth kind: a graduation draft reads its pool's config and sends it after the nine slots)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
 import { expect } from "bun:test";
 import { createSolanaRpc, type KeyPairSigner } from "@solana/kit";
@@ -49,7 +49,10 @@ export async function boxThenProgram(w: OpeningWorld, signer: KeyPairSigner, dra
   const chain = startFakeChain(w);
   chains.push(chain);
   const rpc = createSolanaRpc(chain.url);
-  const [world, accounts] = await Promise.all([readWorld(rpc), readDraftAccounts(rpc, id, accountOf(draft))]);
+  const [world, accounts] = await Promise.all([
+    readWorld(rpc),
+    readDraftAccounts(rpc, id, accountOf(draft), draft.kind),
+  ]);
   const check = await checkBox({
     draft,
     world,
@@ -61,8 +64,9 @@ export async function boxThenProgram(w: OpeningWorld, signer: KeyPairSigner, dra
     siteAllows: true,
   });
   if (!check.args) throw new Error(`the box built no arguments: ${check.issues.map((i) => i.text).join(" | ")}`);
-  const metric = accountOf(draft) ?? undefined;
-  const program = async () => send(w, [await I.openCampaignIx(signer, check.args as I.OpenArgs, { metric })]);
+  // A graduation campaign passes the config its pool names after the nine slots, as the SDK's builder does.
+  const slots = { metric: accountOf(draft) ?? undefined, curveConfig: accounts.curveConfig?.address };
+  const program = async () => send(w, [await I.openCampaignIx(signer, check.args as I.OpenArgs, slots)]);
   return { check, program, rpc };
 }
 

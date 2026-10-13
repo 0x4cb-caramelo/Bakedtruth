@@ -4,8 +4,8 @@
  *          the transaction, never from what was typed into the search: the value now and "if resolved now", the rule in
  *          the campaign page's words, the money, the creator notice and the list card (preview-parts.ts) as it will
  *          look with no entry yet.
- * Version: 0.2.0 (the Sprint 19 reviews: units on raw targets, the team variant, never "free" by default)
- * Sprint:  19 (site: open a campaign)
+ * Version: 0.2.1 (the sixth kind: a curve's target is its threshold; 0.2.0, the Sprint 19 reviews: units, the team)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
 import { Direction, entriesCloseAt, formatUtc, ReaderKind, shortAddress } from "@brot/sdk/read";
 
@@ -13,7 +13,7 @@ import { sentenceOf, sentenceParts, type SentenceInput } from "../campaigns/sent
 import type { Card } from "../campaigns/model";
 import { ruleText } from "../campaign-page/copy";
 import { valueText } from "../campaign-page/format";
-import { ifResolvedNow, type AccountState } from "./account-check";
+import { curveTarget, ifResolvedNow, type AccountState } from "./account-check";
 import type { BoxCheck } from "./check";
 import { PREVIEW } from "./copy";
 import { MONEY } from "./copy-money";
@@ -60,7 +60,7 @@ export function sentenceInput(a: Inputs): SentenceInput {
   const { draft, world } = a;
   const t = templateOf(draft.kind);
   const exponent = draft.kind === "price" ? (a.check?.priceExponent ?? null) : 0;
-  const raw = parseTarget(t.unit, draft.target, exponent);
+  const raw = draft.kind === "curve" ? curveTarget(a.slot) : parseTarget(t.unit, draft.target, exponent);
   const feed = world?.feeds.find((f) => f.hex === draft.feedHex);
   return {
     kind: ReaderKind[t.readerKind],

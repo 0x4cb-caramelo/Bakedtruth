@@ -1,9 +1,9 @@
 /**
  * Purpose: the small pieces the approved prototype's cards, rows and slides share (ui/parts.js): the kind tile with its
- *          letter on the kind's colour ($, B, L, P, V), the kind's label, and the state chip with its dot and words,
+ *          letter on the kind's colour ($, B, L, P, V, G), the kind's label, and the state chip with its dot and words,
  *          never colour alone. The chip's words are the app's own (components/ui/state-chip.tsx, Sprint 12).
- * Version: 0.1.0
- * Sprint:  10 (campaign list), in the UI overhaul
+ * Version: 0.1.1 (the sixth kind, G for a Meteora launch curve's graduation)
+ * Sprint:  10 (campaign list), in the UI overhaul; the sixth kind's site
  */
 import { cx } from "@/components/ui/cx";
 import type { KindName } from "@/features/campaign-page/proof";
@@ -17,6 +17,7 @@ export const KINDS: Record<KindName, { label: string; long: string; tile: string
   lock: { label: "Locked liquidity", long: "Liquidity locked on Meteora", tile: "L" },
   pool: { label: "Stake pool", long: "Size of a stake pool", tile: "P" },
   stake: { label: "Validator stake", long: "Stake on a validator", tile: "V" },
+  curve: { label: "Graduation", long: "A Meteora launch curve fills", tile: "G" },
 };
 
 export const kindLabel = (card: Pick<Card, "kind">): string => KINDS[kindName(card)].label;

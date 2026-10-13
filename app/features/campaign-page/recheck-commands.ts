@@ -22,6 +22,7 @@ export const SLICE: Record<KindName, readonly [number, number] | null> = {
   lock: [552, 16], // permanent_lock_liquidity u128
   pool: null,
   stake: null,
+  curve: [240, 112], // quote_reserve u64 · … · migration_progress u8 at 308 · … · finish_curve_timestamp u64 at 344
 };
 
 /** How to read the fetched bytes, per kind. */
@@ -32,6 +33,8 @@ export const DECODE: Record<KindName, string> = {
   pool: "The pool's last_epoch_total_lamports (u64) follows its optional fields: the SDK's readStakePool walks them.",
   stake:
     "activatedStake is the vote account's stake this epoch, in lamports; the program reads it with sol_get_epoch_stake.",
+  curve:
+    "Bytes 0–7: quote_reserve (u64, lamports raised) · byte 68: the stage (0 on the curve, 1 to 3 completed) · 104–111: finish_curve_timestamp (u64, the second it completed).",
 };
 
 const cliUrl = (rpcUrl: string, cluster: string) =>

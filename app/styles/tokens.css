@@ -28,12 +28,13 @@
   --st-paid-bg: #2c2a25; --st-paid-fg: #f7eedb;
   --st-void-bg: #1f2836; --st-void-fg: #a3acba;
   --st-contest-bg: #33291a; --st-contest-fg: #f0c75e;
-  /* The five kinds (P1 §4.2): tile background and letter. None uses YES/NO green or red. */
+  /* The six kinds (P1 §4.2, and the Meteora graduation): tile background and letter. None uses YES/NO green or red. */
   --k-price-bg: #2f3a4e; --k-price-fg: #f7eedb;
   --k-burn-bg: #4a2d26; --k-burn-fg: #f7b778;
   --k-lock-bg: #393746; --k-lock-fg: #c6c0e5;
   --k-pool-bg: #3a3424; --k-pool-fg: #e2c77e;
   --k-stake-bg: #383440; --k-stake-fg: #d0b9dc;
+  --k-curve-bg: #3a332e; --k-curve-fg: #e9cfb3;
   /* Borders of fields and controls: 3:1 against their surface (WCAG 1.4.11). */
   --field-line: #6b7890;
   /* Chrome. The brand's notice green is the waitlist's "you joined"; here an info box is navy-grey, not YES. */
@@ -77,6 +78,7 @@
   --k-lock-bg: #e8e4f7; --k-lock-fg: #4f3f9a;
   --k-pool-bg: #f8ecc9; --k-pool-fg: #7a5005;
   --k-stake-bg: #f3e6f6; --k-stake-fg: #74398a;
+  --k-curve-bg: #ece2d6; --k-curve-fg: #6b4a2f;
   --field-line: #968669;
   --strip-bg: #efe2c8; --strip-fg: var(--muted);
   --feature-bg: linear-gradient(115deg, #fffaf0, #f3e7d0 70%);

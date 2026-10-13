@@ -16,7 +16,7 @@ import { prepareOpenCampaign, type OpeningChoice, type PreparedOpening } from "@
 import { fromError, nothingSent, type Failure } from "../entry/failures";
 import { BLOCKHASH_LIFE } from "../entry/submit";
 import type { KeyValueStore } from "../entry/retry-guard";
-import { STAKE_AT_LEAST_OPENS } from "./kinds";
+import { DBC_GRADUATED_OPENS, STAKE_AT_LEAST_OPENS } from "./kinds";
 import { MARGIN_BPS } from "./quote";
 import { FEED_CLUSTER } from "./reads";
 import { clearAttemptOpening, handedRecord, saveOpening, updateOpening, type PendingOpening } from "./retry-guard";
@@ -39,7 +39,7 @@ export function prepareOpening(a: {
     choice: a.choice,
     id: a.id,
     marginBps: MARGIN_BPS,
-    build: { feeds: FEED_CLUSTER, stakeAtLeastOpens: STAKE_AT_LEAST_OPENS },
+    build: { feeds: FEED_CLUSTER, stakeAtLeastOpens: STAKE_AT_LEAST_OPENS, dbcGraduatedOpens: DBC_GRADUATED_OPENS },
     deploySlot: a.deploySlot,
   });
 }

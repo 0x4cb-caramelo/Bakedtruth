@@ -2,9 +2,9 @@
  * Purpose: section 1 of the creation box, "What" (spec 3.12; TP §3.6): the combobox "What should the chain answer?"
  *          over the templates, the pinned Pyth feeds and the reviewed names, with the keyboard of a listbox (arrows,
  *          Enter, Escape) and a polite count for screen readers; outside the grammar, "we can't check this on-chain"
- *          and the nearest templates. Then the five kinds; `StakeAtLeast` says when it opens. What is typed in the
- *          combobox stays in this component's memory and is never sent or stored (D-j); a picked suggestion fills only
- *          what search.ts says, checked like a typed field.
+ *          and the nearest templates. Then the six kinds; one closed in this build says when it opens. What is typed
+ *          in the combobox stays in this component's memory and is never sent or stored (D-j); a picked suggestion
+ *          fills only what search.ts says, checked like a typed field.
  * Version: 0.2.0 (the UI overhaul: the prototype's list, each suggestion a whole campaign sentence; Enter takes the
  *          first; after a pick the cursor moves to the account or the target; 0.1.1, the Sprint 19 reviews)
  * Sprint:  19 (site: open a campaign)
@@ -22,7 +22,7 @@ import type { KindName } from "../campaign-page/proof";
 import type { Issue } from "./check";
 import { BOX, WHAT } from "./copy";
 import { IssueList } from "./issue-list";
-import { TEMPLATES } from "./kinds";
+import { opensText, TEMPLATES } from "./kinds";
 import { search, type SearchSources, type Suggestion } from "./search";
 import { WhatList } from "./what-list";
 
@@ -129,7 +129,7 @@ export function WhatSection({
                 <b className="block">{KIND_NAME[t.kind]}</b>
                 <small className="block text-xs text-muted">{WHAT.kindLong[t.kind]}</small>
                 <em className={cx("block text-xs not-italic", t.opens === "now" ? "text-dim" : "text-st-review-fg")}>
-                  {t.opens === "now" ? WHAT.opensNow : WHAT.opensLater}
+                  {opensText(t)}
                 </em>
               </span>
             </label>

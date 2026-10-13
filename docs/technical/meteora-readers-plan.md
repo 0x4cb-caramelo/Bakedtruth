@@ -2,7 +2,8 @@
 
 Plan, written 2026-10-12. Status: **the graduation kind is built** (branch `feat/dbc-graduation-reader`, 2026-10-12:
 phases 1 to 3 of section 6 and the Surfpool run of phase 5, with M-1 to M-7 taken as section 1 proposes); the site
-(phase 4), the devnet upgrade and phase 0's BP, Product Brief and Terms remain. Where the build departs from this text
+(phase 4) and phase 0's BP, Product Brief and Terms followed on branch `feat/dbc-graduation-ui` the same day (the Terms
+awaiting their legal review); the devnet upgrade remains. Where the build departs from this text
 is in `session-log/2026-10-12-sexto-tipo-dbc-graduated.md`. Section 5, the fees kind, is still a proposal. It adds a
 sixth question kind beside the five of TP §3.4.8, so it needed the founder's approval first (section 1). Labels: **[F]** a fact read on the date, with where it
 was read (section 9); **[INF]** an inference; **[OPEN]** a decision that is still open.

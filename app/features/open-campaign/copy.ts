@@ -1,10 +1,10 @@
 /**
  * Purpose: the creation box's words (spec 3.12 of Sprint -1; BR-01, BR-02, BR-26; D-m vocabulary; English per L-01): the
- *          four sections, the five kinds' words, the fields and their help by unit, the account check's states and the
+ *          four sections, the six kinds' words, the fields and their help by unit, the account check's states and the
  *          preview. The money, the notices before paying and what the box stops on its own are in copy-money.ts; the
  *          program's refusals in copy-refusals.ts; the signing steps in copy-sheet.ts.
- * Version: 0.2.0 (the Sprint 19 copy, legal and adversarial reviews: plainer words, help by unit, the team variant)
- * Sprint:  19 (site: open a campaign)
+ * Version: 0.3.0 (the sixth kind, a Meteora launch curve; 0.2.0, the Sprint 19 copy, legal and adversarial reviews)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
 import { CREATOR_NOTICE, RAW_UNIT } from "../campaign-page/copy";
 import type { KindName } from "../campaign-page/proof";
@@ -44,12 +44,14 @@ export const WHAT = {
   orPick: "Or pick a kind",
   opensNow: "Open now",
   opensLater: "Opens after a test YES on devnet",
+  opensAfterAudits: "Opens on mainnet after the audits",
   kindLong: {
     price: "A Pyth price reaches a target",
     burn: "A token's supply falls to a target",
     lock: "A Meteora pool's locked liquidity reaches a target",
     pool: "A stake pool's SOL reaches a target at an epoch's start",
     stake: "A validator's stake reaches a target in an epoch",
+    curve: "A Meteora launch curve fills and graduates",
   },
 } as const;
 
@@ -60,6 +62,7 @@ export const KIND_WORDS: Record<KindName, { slot: string | null; owner: string; 
   lock: { slot: "DAMM v2 pool", owner: "Meteora DAMM v2", phrase: "DAMM v2 pool", unit: RAW_UNIT.lock ?? "" },
   pool: { slot: "Stake pool", owner: "the SPL Stake Pool program", phrase: "stake pool", unit: "SOL" },
   stake: { slot: "Vote account", owner: "the Vote program", phrase: "vote account", unit: "SOL" },
+  curve: { slot: "Meteora DBC pool", owner: "Meteora DBC", phrase: "DBC pool", unit: "SOL" },
 };
 
 export const SLOTS = {
@@ -80,6 +83,7 @@ export const SLOTS = {
     lock: "Target liquidity locked for good (liquidity units)",
     pool: "Target (SOL in the pool)",
     stake: "Target (SOL staked)",
+    curve: "Target (the curve's own threshold, in SOL)",
   },
   targetHelp: {
     price:
@@ -88,6 +92,8 @@ export const SLOTS = {
     lock: "A whole number of liquidity units, no decimals. Commas only group thousands.",
     pool: "SOL, with a dot for decimals: at most 4 of them. Commas only group thousands.",
     stake: "SOL, with a dot for decimals: at most 4 of them. Commas only group thousands.",
+    curve:
+      "Not typed: a graduation campaign's target is the curve's threshold, read from the pool's config. The curve must be priced in SOL, graduate at 85 SOL or more, and have at least 10% still to raise.",
   },
   now: (value: string, below: boolean) => `Now ${value}; the target must be ${below ? "below" : "above"} it.`,
   epoch: "Epoch",
@@ -140,6 +146,8 @@ export const PREVIEW = {
     pool: "Others can also deposit into this stake pool, where it accepts deposits, or withdraw from it before the measured epoch, and the prize you put in goes to the side that was right.",
     stake:
       "Anyone can also delegate stake to this validator, and its stakers can take theirs away, before the measured epoch, and the prize you put in goes to the side that was right.",
+    curve:
+      "YES can be bought by anyone who pays the rest of the curve, and the prize you put in goes to the side that was right.",
   },
   money: "The money",
   theAsset: "The asset",

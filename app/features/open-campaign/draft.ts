@@ -5,8 +5,9 @@
  *          price target in the feed's own exponent, a raw supply or liquidity as a whole number, a stake target in
  *          lamports, whole US$. A comma only groups thousands, and a target has no more precision than the sentence
  *          prints. What a person types in the search box is never sent; a picked suggestion fills fields (search.ts).
- * Version: 0.2.0 (the Sprint 19 reviews: commas as thousands only, the sentence's precision, the 90-day bound)
- * Sprint:  19 (site: open a campaign)
+ *          A graduation campaign's target is never typed: it is its curve's threshold, read from the pool's config.
+ * Version: 0.3.0 (the sixth kind; 0.2.0, the Sprint 19 reviews: commas as thousands only, the sentence's precision)
+ * Sprint:  19 (site: open a campaign); the sixth kind's site
  */
 import { isAddress, type Address } from "@solana/kit";
 import { Direction, hexToBytes } from "@brot/sdk/read";
@@ -117,11 +118,13 @@ export type ChoiceResult = { ok: true; choice: OpeningChoice } | { ok: false; mi
 
 /**
  * The SDK's `OpeningChoice` from the draft, or the slots still missing. `priceExponent`: the feed's, read from its
- * account (`null` until read). `isTeam`: a team key opens free and sends no `opening_usd` (P-3).
+ * account (`null` until read). `isTeam`: a team key opens free and sends no `opening_usd` (P-3). `curveThreshold`: a
+ * graduation campaign's target, from its pool's config; 0 while unknown, which the program never takes, since it
+ * refuses a pool or a config it cannot read before it reads the target.
  */
 export function choiceOf(
   draft: Draft,
-  ctx: { priceExponent: number | null; chainNow: bigint | null; isTeam: boolean },
+  ctx: { priceExponent: number | null; chainNow: bigint | null; isTeam: boolean; curveThreshold?: bigint | null },
 ): ChoiceResult {
   const template = templateOf(draft.kind);
   const missing: Slot[] = [];
@@ -130,7 +133,10 @@ export function choiceOf(
   if (!feedOk) missing.push("feed");
   const metric = accountOf(draft);
   if (!isPrice && metric === null) missing.push("account");
-  const target = parseTarget(template.unit, draft.target, isPrice ? ctx.priceExponent : 0);
+  const target =
+    draft.kind === "curve"
+      ? (ctx.curveThreshold ?? 0n)
+      : parseTarget(template.unit, draft.target, isPrice ? ctx.priceExponent : 0);
   if (target === null) missing.push("target");
   const epoch = template.epoch ? (/^\d{1,19}$/.test(draft.epoch.trim()) ? BigInt(draft.epoch.trim()) : null) : 0n;
   if (epoch === null) missing.push("epoch");

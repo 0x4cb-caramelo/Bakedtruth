@@ -94,7 +94,7 @@ describe("open campaign search", () => {
       ["SOL/USD", "140", "above", true],
       ["ETH/USD", "3300", "above", true],
     ]);
-    expect(items.slice(3).map((s) => s.kind)).toEqual(["price", "burn", "lock", "pool", "stake"]);
+    expect(items.slice(3).map((s) => s.kind)).toEqual(["price", "burn", "lock", "pool", "stake", "curve"]);
     expect(first("SOL falls").target).toBe("93");
     // A tiny price is written out, never as "1.5e-7", which the target field refuses.
     const tiny = search("BONK", { feeds: [{ hex: JUP, symbol: "BONK/USD", usable: true, price: 1.2e-7 }], names });

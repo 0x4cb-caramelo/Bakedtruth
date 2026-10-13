@@ -1,17 +1,17 @@
 ---
 title: Market types
-description: The five kinds of market Brot Markets opens, what each one reads on Solana, who could push its result, and what stays out on purpose.
+description: The six kinds of market Brot Markets opens, what each one reads on Solana, who could push its result, and what stays out on purpose.
 ---
 
 # Market types
 
-> **In one bite:** five kinds of question, each with its answer already written on-chain. If we can't read it, we
+> **In one bite:** six kinds of question, each with its answer already written on-chain. If we can't read it, we
 > don't list it.
 
 Each market type has a reader: a piece of the program that opens one kind of Solana account, reads one number and
 answers YES or NO. No reader, no market type.
 
-## The five types
+## The six types
 
 | Type | What it asks | Example | Who could push the result |
 |---|---|---|---|
@@ -20,6 +20,7 @@ answers YES or NO. No reader, no market type.
 | **Locked liquidity** | Does a Meteora pool have at least X locked forever? | "Does the T/SOL pool reach X locked liquidity by the 30th?" | Whoever adds liquidity and locks it. The money stays locked |
 | **Stake pool size** | Does a stake pool hold at least X SOL at the start of an epoch? | "Does JitoSOL start epoch E with X SOL or more?" | Whoever deposits. The money has to stay through the epoch change |
 | **Validator stake** | Does a validator have at least X SOL staked with it in an epoch? | "Does validator V enter epoch E with X SOL or more?" | Whoever stakes with it before the epoch changes |
+| **Launch graduation** | Does a token's Meteora launch curve complete by the end date? | "Does token T's Meteora curve complete by the 30th?" | Anyone who pays the rest of the curve. The token's own team is best placed to do it |
 
 A few words, if you're new to Solana:
 
@@ -29,6 +30,8 @@ A few words, if you're new to Solana:
 - A **validator** is a computer that confirms the network's transactions. **Stake** is the SOL people entrust to it.
   A **stake pool** gathers many people's SOL and spreads it across validators.
 - An **epoch** is Solana's "day" for stake. It lasts about two days.
+- A **launch curve** sells a new token at a rising price until it raises the amount its launchpad set. Then the curve
+  is complete, and the token **graduates** to a trading pool. Meteora's Dynamic Bonding Curve (DBC) is one of them.
 
 ## Notes on each type
 
@@ -39,6 +42,13 @@ feeds, 423 of them crypto.
 
 **Epoch markets** (stake pool size and validator stake) are read when an epoch begins, and the window to read them
 lasts about two days.
+
+**Launch graduations** read the curve's own account on Meteora's DBC. Only curves priced in SOL, of 85 SOL or more,
+with at least 10% still to raise when the question opens. The target is the curve's own threshold, nothing else.
+Entries close the moment the curve completes. The answer goes by the second the curve's account recorded: completed by
+the end date is YES, even when it is read later. **YES can be bought:** anyone who pays the rest of the curve completes
+it at once, and the question's page says so. This type opens on devnet first, and on mainnet once the audits cover its
+reader.
 
 **Projects can push their own results, and that's the point.** A project that promises a burn controls whether it
 happens. That's what it's putting money behind. Markets where the opener may control the result carry a warning:

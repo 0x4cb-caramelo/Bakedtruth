@@ -32,7 +32,7 @@
 .kind-tile.sm { width: 30px; height: 30px; font-size: 16px; }
 .kind-price { --kb: var(--k-price-bg); --kf: var(--k-price-fg); } .kind-burn { --kb: var(--k-burn-bg); --kf: var(--k-burn-fg); }
 .kind-lock { --kb: var(--k-lock-bg); --kf: var(--k-lock-fg); } .kind-pool { --kb: var(--k-pool-bg); --kf: var(--k-pool-fg); }
-.kind-stake { --kb: var(--k-stake-bg); --kf: var(--k-stake-fg); }
+.kind-stake { --kb: var(--k-stake-bg); --kf: var(--k-stake-fg); } .kind-curve { --kb: var(--k-curve-bg); --kf: var(--k-curve-fg); }
 
 /* Chips: the public state, the partner seal, small facts. */
 .chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: var(--r-pill);

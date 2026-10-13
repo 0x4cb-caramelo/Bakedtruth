@@ -84,7 +84,7 @@ When it does not go to plan:
 
 > _"I only believe accounts."_ — Baked
 
-Five kinds. The list is closed on purpose: one reader per file, and no generic "read anything" reader.
+Six kinds. The list is closed on purpose: one reader per file, and no generic "read anything" reader.
 
 | Kind | The question | What the program reads | On devnet today |
 | --- | --- | --- | --- |
@@ -93,11 +93,12 @@ Five kinds. The list is closed on purpose: one reader per file, and no generic "
 | `DammV2LockedAtLeast` | Is at least X of liquidity permanently locked? | A Meteora DAMM v2 pool | Tested on mainnet account bytes; there is no devnet pool to read |
 | `StakePoolTvlAtLeast` | Does the stake pool hold at least X in epoch N? | An SPL stake pool | Tested on mainnet account bytes |
 | `StakeAtLeast` | Does the validator have at least X staked in epoch N? | The epoch stake of a vote account | Switched off until a YES is recorded on devnet |
+| `DbcGraduated` | Does a Meteora launch curve complete by the deadline? (the graduation) | A Meteora DBC pool and the config it names: priced in SOL, 85 SOL or more, at least 10% still to raise when it opens | Tested on mainnet account bytes and on Surfpool's mainnet fork; on devnet after its upgrade; off in the mainnet build until the audits cover it. YES can be bought by anyone who pays the rest of the curve |
 
 What it will not answer: elections, football, "is this a good project", holder counts, a dashboard's TVL, or anything a
 human would have to type in. If no Solana account holds the answer, there is no campaign.
 
-Every third-party layout (Pyth, SPL mints, stake pools, DAMM v2, vote accounts) is tested against real mainnet account
+Every third-party layout (Pyth, SPL mints, stake pools, DAMM v2, vote accounts, DBC pools and configs) is tested against real mainnet account
 bytes kept in `tests/fixtures`, with a SHA-256 per file.
 
 ## Can it be rigged?

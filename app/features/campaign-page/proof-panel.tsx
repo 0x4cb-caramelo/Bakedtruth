@@ -4,8 +4,9 @@
  *          and its confidence, when it was published and posted, the campaign's maximum price age (30 s floor), and what
  *          the screen says when no fresh price exists (L-22) or the price sits within 1% of the target. Then, folded
  *          under "Proof details" (Ronaldo, 2026-10-11), when the price was published, the account read with its
- *          explorer link, the owner checked first, and entries close and the deadline in UTC and local time.
- * Version: 0.3.0 (the details folded; 0.2.0, the UI overhaul: the approved prototype's `.cp-proof`)
+ *          explorer link, the owner checked first, and entries close and the deadline in UTC and local time. On a
+ *          graduation campaign, the curve's progress and the risk that anyone may pay its rest (./curve-progress.tsx).
+ * Version: 0.4.0 (the sixth kind's curve; 0.3.0, the details folded; 0.2.0, the approved prototype's `.cp-proof`)
  * Sprint:  11 (site: campaign page and entry)
  */
 "use client";
@@ -17,6 +18,7 @@ import { cx } from "@/components/ui/cx";
 import { Outcome, shortAddress } from "@/lib/brot";
 import { explorerAddress } from "@/lib/config";
 import { PRICE, PROOF, RAW_UNIT } from "./copy";
+import { CurveProgress } from "./curve-progress";
 import { ageText, grouped, local, priceAsset, utc, valueText, valueWithUnit } from "./format";
 import type { PageData } from "./load";
 import { READER, type Proof } from "./proof";
@@ -74,6 +76,7 @@ export function ProofPanel({ data, proof }: { data: PageData; proof: Proof }) {
           {unit ? <small className="mt-1">{unit}</small> : null}
         </div>
       </div>
+      {proof.curve ? <CurveProgress curve={proof.curve} /> : null}
       {proof.problem ? (
         <p className="cp-gap is-off">{proof.problem === "missing" ? PROOF.missing : PROOF.problem(proof.problem)}</p>
       ) : null}
