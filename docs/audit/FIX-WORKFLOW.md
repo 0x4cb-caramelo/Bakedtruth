@@ -1,6 +1,7 @@
 # How an audit finding becomes a fix
 
-**Status:** written on 2026-10-13 for Sprint 17 (`docs/sprints/sprint-17-audit-fixes.md`). Items marked **[to decide]**
+**Status:** written on 2026-10-13 for Sprint 17 (`docs/sprints/sprint-17-audit-fixes.md`); its `file:line` references point
+at `main` at `8af10e2`. Items marked **[to decide]**
 need the lead's or the founder's choice before the first finding arrives; items marked **[proposed]** are conventions
 this document suggests where the repository has none yet.
 
@@ -15,8 +16,9 @@ this document suggests where the repository has none yet.
 - **Mainnet waits for both reports** on the exact version, every serious finding fixed and confirmed (gate 6,
   `docs/SPRINTS.md` §4; TP §7 "Before mainnet").
 - **House rules** (`CLAUDE.md`): one instruction and one reader per file, under 200 lines, a `Purpose:` header, checked
-  math, the owner checked before any byte; error codes appended from 6153 and never reused (`src/error.rs:328`); enum
-  variants appended, never reordered (`src/state/enums.rs:6-8`); `gh` commands pass `--repo 0x4cb-caramelo/Bakedtruth`.
+  math, the owner checked before any byte; error codes appended from 6178 (from 6179 once the pre-freeze hardening, PR #93, is merged) and never reused
+  (`src/error.rs:365`); enum
+  variants appended, never reordered (`src/state/enums.rs:7-9`); `gh` commands pass `--repo 0x4cb-caramelo/Bakedtruth`.
   No secret, key or RPC URL with a key in a finding, a commit, a log or a report.
 
 ## 1. Intake
@@ -62,7 +64,7 @@ this document suggests where the repository has none yet.
   reproduces the finding.
 - **If the finding is in a check** (`src/checks.rs`, `src/checks/`): the fixed check gets a `// X0.9 <id>` marker, a
   negative test per slot that reaches it (T24), and a row in `scripts/checks-mutation.mjs` (`PLAN`, and the file in
-  `SOURCES` if it is new: `scripts/checks-mutation.mjs:26`, `:40-69`).
+  `SOURCES` if it is new: `scripts/checks-mutation.mjs:26-37`, `:80-165`).
 - **If the finding is about money:** add the scenario to the randomized test's operations or as a fixed case next to it
   (`tests/brot/invariant-ops.ts`, `tests/brot/invariant-program.test.ts`), so I1–I15 keep watching it.
 
@@ -77,8 +79,8 @@ this document suggests where the repository has none yet.
 - **Commit:** Conventional Commits with a Portuguese subject, like the history, ending with `[STAGE:CHEGADA]`; the id in
   the subject **[proposed]**, for example `fix(programa): … (poe-3) [STAGE:CHEGADA]`.
 - **What a program change regenerates in the same branch:** the IDL and Codama client (`bun run idl`; CI fails on a
-  stale IDL, `.github/workflows/ci.yml:121-128`); the slot matrix (`bun scripts/slot-matrix.ts`; CI check at
-  `ci.yml:130-131`); the SDK's mirror when a rule or the math changes, since the SDK must refuse at least what the program
+  stale IDL, `.github/workflows/ci.yml:141-148`); the slot matrix (`bun scripts/slot-matrix.ts`; CI check at
+  `ci.yml:150-151`); the SDK's mirror when a rule or the math changes, since the SDK must refuse at least what the program
   refuses (A-10; `tests/sdk/validate-open-*.test.ts`, `tests/sdk/join-parity.test.ts`); the math vectors when the math
   changes (`tests/math_vectors.rs`, `tests/math_vectors_snapshot.rs`); `CODEMAP.md` (`node scripts/codemap.js`, in the
   same commit as the code).
@@ -103,13 +105,17 @@ All of them, on the fix branch, recorded in the pull request:
 
 2. **The reproducing test** now passes, and every earlier test still does.
 3. **The seeded randomized invariant test, I1 to I15:** `bun test tests/brot/invariants.test.ts` (seed `0x0badc0de`,
-   1,200 operations, `tests/brot/invariants.test.ts:16-18`). The seed is a constant in the file; for a money fix, also
-   run a few other seeds by changing it locally, and record which **[proposed]**.
+   2,000 operations since Sprint 14, `tests/brot/invariants.test.ts:25-31`). `INVARIANT_SEED` and
+   `INVARIANT_OPERATIONS` replay another seed or length without editing the file (`:5`); for a money fix, also run a
+   few other seeds, and record which **[proposed]** (Sprints 14 and 15 recorded theirs:
+   `docs/sprints/sprint-14-referral-second-read.md:80-81`; `docs/sprints/sprint-15-sponsorship.md:156`).
 4. **The negative tests and the mutation proof:** `bun test tests/ -t "checks refuse"`; `cargo test -p brot-markets
-   --features no-entrypoint --test checks_mollusk --test checks_mollusk_init`; the slot matrix,
-   `bun test tests/brot/slot-matrix.test.ts`; and `node scripts/checks-mutation.mjs`, exit 0, whenever the fix touches
-   `src/checks.rs`, `src/checks/` or a check's call site (after `SCOPE.md` gap G-1 is closed, the script also covers
-   `checks/close.rs` and `checks/paying.rs`).
+   --features no-entrypoint` with the Mollusk targets the mutation script lists (`scripts/checks-mutation.mjs:42-55`);
+   the slot matrix, `bun test tests/brot/slot-matrix.test.ts`; and `node scripts/checks-mutation.mjs`, exit 0, whenever
+   the fix touches a file of its `SOURCES` (`:26-37`: `src/checks.rs`, `src/checks/top_level.rs`, `src/checks/upgrade.rs`
+   and, since Sprints 14 and 15, the rule modules of the new instructions) or a check's call site. On the pre-freeze
+   branch (PR #93) the script also covers `checks/close.rs`, `checks/paying.rs` and the hardening's own markers
+   (`SCOPE.md` G-1).
 5. **The mainnet binary:** built by CI as `brot_markets.mainnet.so` with its `SHA256SUMS` and provenance attestation
    (Sprint 16 deliverables; README, note 1).
 6. **`solana-verify build`**, run twice, gives the same hash, equal to CI's (Sprint 16 DoD; Sprint 17: "After the fixes,

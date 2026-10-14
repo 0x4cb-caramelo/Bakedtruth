@@ -1,7 +1,8 @@
 # Pinocchio: its own audits, and the versions this program pins
 
 **Status:** written on 2026-10-13. Every outside fact below names the URL it was read from on that date. **[to verify]**
-marks what was not checked.
+marks what was not checked. This program's `file:line` references point at `main` at `8af10e2`; the files the pre-freeze
+hardening (PR #93) rewrites are cited by function (`file.rs::name`), as in `SCOPE.md`.
 
 ## In short
 
@@ -123,13 +124,13 @@ What a firm reviewing the library as a dependency should look at, with where thi
 |---|---|---|
 | `pinocchio::entrypoint!` (input deserialization, duplicate accounts aliased, the std panic hook) | `pinocchio` | `lib.rs:25-26`; the crate links `std` (`lib.rs:7-8`) |
 | `declare_id!` | `pinocchio` / `solana-address` | `lib.rs:23` |
-| `AccountView`: `owned_by`, `is_signer`, `is_writable`, `address`, `owner`, `lamports`, `set_lamports`, `is_data_empty`, `try_borrow`, `try_borrow_mut`, `close` | `solana-account-view` | `checks.rs:48-171`; `state/mod.rs:49-105`; `instructions/settlement/bookkeeping.rs:27-53`; `instructions/settlement/collect_fee/moves.rs:19-34`; `checks/close.rs:17-23` |
-| `Ref::try_map`, `RefMut::try_map` | `solana-account-view` | `state/mod.rs:58-61`, `:78-81`, `:101-104` |
+| `AccountView`: `owned_by`, `is_signer`, `is_writable`, `address`, `owner`, `lamports`, `set_lamports`, `is_data_empty`, `try_borrow`, `try_borrow_mut`, `close` | `solana-account-view` | `checks.rs:48-171`; `state/mod.rs:56-112`; `instructions/settlement/bookkeeping.rs::pay_from_vault`, `::credit`; `instructions/settlement/collect_fee/moves.rs::move_lamports` (with `::moved_exactly` on the pre-freeze branch); `instructions/entries/sealed_fee_account.rs:66-73`, `:140-142`; `checks/close.rs:17-23` |
+| `Ref::try_map`, `RefMut::try_map` | `solana-account-view` | `state/mod.rs:65-68`, `:85-88`, `:108-111` |
 | `Address::derive_address` (no curve check), `Address::try_find_program_address` | `solana-address` | `checks.rs:101`, `:113-114`; `checks/upgrade.rs:25`; `readers/price_update.rs:120-125` |
 | `cpi::invoke_signed`, `Seed`, `Signer`, `InstructionAccount`, `InstructionView` | `pinocchio` with `solana-instruction-view` | `events/self_cpi.rs:11-16`, `:49-57`; `checks.rs:144-147` |
-| Sysvars: `Clock::get`, `Rent::get`, `get_sysvar` (EpochSchedule) | `pinocchio` | `readers/mod.rs:50-57`; `instructions/settlement/collect_fee/moves.rs:36-39`; `instructions/settlement/settle_creator_share.rs:75`; `instructions/settlement/close_campaign.rs:80`; `readers/epoch.rs:90-95` |
-| Syscalls `sol_get_stack_height`, `sol_get_epoch_stake` (the program's only `unsafe` calls into the library) | `pinocchio::syscalls` | `checks/top_level.rs:24-28`; `readers/vote_stake.rs:89-95` |
-| `ProgramError` | `solana-program-error` | `error.rs:13`, `:331-335` |
+| Sysvars: `Clock::get`, `Rent::get`, `get_sysvar` (EpochSchedule) | `pinocchio` | `readers/mod.rs:50-57`; `instructions/settlement/collect_fee/moves.rs::empty_rent`; `instructions/settlement/settle_creator_share.rs:75`; `instructions/settlement/close_campaign.rs:82`; `instructions/settlement/settle_sealed_fee.rs:83`; `readers/epoch.rs:90-95` |
+| Syscalls `sol_get_stack_height`, `sol_get_epoch_stake` (the program's only `unsafe` calls into the library) | `pinocchio::syscalls` | `checks/top_level.rs:23-27`; `readers/vote_stake.rs:89-95` |
+| `ProgramError` | `solana-program-error` | `error.rs:14`, `:368-372` |
 | `create_account_with_minimum_balance_signed` (create, or top up, allocate and assign) | `pinocchio-system` | `checks.rs:20`, `:132-148` |
 | `instructions::Transfer` | `pinocchio-system` | `vault.rs:11`, `:22-32` |
 
