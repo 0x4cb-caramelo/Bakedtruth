@@ -33,7 +33,8 @@ EnvironmentFile=/etc/brot-markets/indexer.env
 LoadCredential=rpc-url:/etc/brot-markets/indexer-rpc-url
 # The credentials' directory is spelled out: systemd 249 (the server's) does not expand its specifier in Environment=.
 Environment=INDEXER_RPC_URL_FILE=/run/credentials/brot-indexer.service/rpc-url
-# Set here, after the env file, so a stray line there cannot move the file or open the port beyond loopback.
+# Defaults: a line in the env file would override them (EnvironmentFile= wins over Environment= whatever the order),
+# but the indexer refuses a non-loopback host and ProtectSystem=strict keeps its file in the StateDirectory.
 Environment=INDEXER_DB_PATH=/var/lib/brot-indexer/indexer.sqlite
 Environment=INDEXER_API_HOST=127.0.0.1
 Environment=INDEXER_API_PORT=4201

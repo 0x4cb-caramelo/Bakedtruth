@@ -4,7 +4,7 @@
  *          the line, which is how the indexer failed its first start on 2026-10-14. No unit uses `%d` in an
  *          `Environment=` line; every `/run/credentials/<unit>/<name>` path names the unit's own file and a credential
  *          the same unit loads (`LoadCredential=<name>:`). Reads the files only.
- * Version: 0.0.1
+ * Version: 0.0.2 (the third review's P4: `%d` refused in every directive, not only `Environment=`)
  * Sprint:  16 (lane L16P, the last changes before the freeze)
  */
 import { describe, expect, test } from "bun:test";
@@ -23,14 +23,15 @@ const directives = (unit: string) =>
     .filter((line) => line !== "" && !line.startsWith("#"));
 
 describe("the units' credentials", () => {
-  test("no Environment= line uses %d; each credentials path is the unit's own and names a credential it loads", () => {
+  test("no directive uses %d; each credentials path is the unit's own and names a credential it loads", () => {
     const problems: string[] = [];
     let paths = 0;
     for (const unit of units) {
       const lines = directives(unit);
       const loaded = new Set(lines.flatMap((line) => line.match(/^LoadCredential=([^:]+):/)?.slice(1) ?? []));
-      for (const line of lines.filter((l) => l.startsWith("Environment="))) {
-        if (line.includes("%d")) problems.push(`${unit}: ${line}`);
+      // %d fails the same way in any directive on systemd 249 (`%%d` is a literal and stays allowed).
+      for (const line of lines) {
+        if (/(^|[^%])%d/.test(line)) problems.push(`${unit}: ${line}`);
       }
       for (const [, owner, name] of lines.join("\n").matchAll(/\/run\/credentials\/([^/\s]+)\/([^\s/"']+)/g)) {
         paths++;
