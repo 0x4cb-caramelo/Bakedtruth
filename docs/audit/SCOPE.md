@@ -643,6 +643,9 @@ again on the candidate):
 | S-2 | closed on the follow-up branch, `addf462` |
 | S-3 | closed on the follow-up branch, `27e42aa` |
 | S-4 | informative: what the randomized run and the pause walk still do not draw |
+| S-5 | low, from the second review: the payout cap is a running total. It keeps every payout off Brot's fee and the opener's prize and fee, but one baker overpaid within the dust and the creator share would be refused only at a later payout (the share's, the last entry's, the close). A per-entry check in `settle_entry` for `Split` (`share × V ≤ early × D`) and a keeper alert for 6179 and 6101 would catch it at the entry: before the freeze, or sent to the firms |
+| S-6 | informative: the pause's static test pins the files that name `operating_level`, not the places that read it (a helper in `state/config.rs` would pass) |
+| S-7 | informative: if the rent-exempt minimum falls, the difference goes to the fee vault, not the rent payer (I14); after a rise, SOL sent by hand that fills the gap goes to the rent payer (I15): each under one rent, never money the books owe; the rule to state in I14 and I15 |
 
 **O-1. Prize harvesting** (TP §13; TP §14.2 "Prize harvesting", founder answer 12a: "choose the rule before mainnet").
 One wallet with a minimum entry on each side of a paid campaign nobody else joins splits a viable pot and takes the
@@ -821,7 +824,9 @@ count (points, the referral basis), never on what the program pays.
 
 **S-2. A moved cut-off keeps the first proof's price** (low). The re-proof writes only `publish_time`
 (`resolve_campaign/record.rs::move_cutoff`), so the stored `observed_value` stays the first proof's price, while the
-re-read compares `observed_value` (§18.3) and the event of the move carries the earlier proof's reading.
+re-read compares `observed_value` (§18.3) and the event of the move carries the earlier proof's reading. **Closed on the
+follow-up branch** (`addf462`): the move also stores that proof's price; `observed_value` is read only by the re-read's
+`same_reading`, never by a snapshot or a payout.
 
 **S-3. On the branch, a rise of the rent-exempt minimum above the SOL sent by hand would refuse a close**
 (informative). `close_campaign` compares the vault above its current rent with what the books still hold

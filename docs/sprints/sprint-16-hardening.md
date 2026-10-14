@@ -241,7 +241,11 @@ findings go to a follow-up before the freeze:
   - the keeper tallying a YES price result once the cut-off is final.
 
   1,134 TypeScript, 565 Rust and 567 mainnet tests; the fixed seed and 12 more; the mutation run on the changed ids.
-  A second adversarial review read these changes before the PR.
+  **A second adversarial review** read the program's follow-ups before the PR. No settlement the program can
+  produce, in any mode or order, reaches the new cap, and the new close never pays out what the books owe. It left one
+  Low and three Info, recorded in `docs/audit/SCOPE.md` §17 as S-5 to S-7, to fix before the freeze or send to the
+  firms: a per-entry check behind the running cap, a stricter static test of the pause, and the rent rule in I14 and
+  I15.
 
 Still open:
 - the other event readers that ask for version 0 (the app's activity and my entries, the indexer, the API's history,

@@ -72,3 +72,9 @@ ali poderia pagar duas vezes. A faixa P2 fez o resto: o teto por pagamento a par
 com o aluguel limitado ao que sobra, o preço guardado no corte movido, a pausa com a abertura grátis e o keeper
 contando assim que o corte fica final. Uma segunda revisão adversária leu essas mudanças antes do PR.
 
+A segunda revisão adversária confirmou que as correções se sustentam. Nenhum pagamento que o programa produz, em
+qualquer modo ou ordem, chega ao teto novo, e o fechamento novo nunca paga o que os livros devem. Ficaram um achado
+baixo e três informativos, anotados no escopo da auditoria (S-5 a S-7). O teto cobre o total, e não cada padeiro, e
+uma checagem por entrada fecharia isso. O teste estático da pausa pode ser mais estrito. A regra do aluguel precisa ser
+escrita em I14 e I15.
+

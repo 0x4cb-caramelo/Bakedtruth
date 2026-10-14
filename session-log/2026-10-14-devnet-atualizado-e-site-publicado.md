@@ -27,9 +27,10 @@ publicar o site". Ele havia pedido, na noite anterior, que a atualização esper
    respondem 503, como devem enquanto ele não estiver instalado.
 6. **O keeper** recusou uma simulação no slot exato da atualização (`UnsupportedProgramId`) e seguiu normal.
 
-## O que não foi conferido
+## O que foi conferido depois, por quem
 
-Uma entrada de verdade no site novo, com uma carteira, fica com o Ronaldo.
+Uma entrada de verdade no site novo, com uma carteira, ficou com o Ronaldo. Ele respondeu "its working", relatado por
+ele e não conferido pelo líder.
 
 ## O caminho de volta
 
