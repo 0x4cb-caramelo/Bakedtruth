@@ -36,6 +36,8 @@ async function settledWithReserve(
     status: P.Status.Settled,
     extra: {
       rent_payer: rentPayer,
+      // Only a Split pays a creator share; close reads the books against the vault (G-2), so the mode is set.
+      settle_mode: 1,
       fee_collected: 1,
       prize_settled: 1,
       creator_share_settled: 1,

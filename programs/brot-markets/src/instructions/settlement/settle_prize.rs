@@ -1,18 +1,22 @@
 //! Purpose: `settle_prize`: returns the prize to whoever opened in `OneSided` and `Refund`, and the opening
 //!          fee too on a house-failure void (TP sections 3.4.7, 3.4.16; P-4). Any wallet may call; the
 //!          destination is the stored creator, who opened.
-//! Version: 0.0.1
-//! Sprint: 04 (lane C's stub, body by lane D)
+//! Version: 0.0.2 (G-2: the vault's change asserted against the books, `VaultWatch`)
+//! Sprint: 04 (lane C's stub, body by lane D); 16 (lane L16P)
 //!
 //! Order: no arguments (`BadInstructionData`); the five slots (`NotEnoughAccountKeys`); the campaign,
 //! the vault and the recipient writable; the event slots; the campaign loaded; `Settling` or `Settled`
 //! (`NotFinalized` before); `prize_settled` not yet set (`PrizeAlreadySettled`); the recipient is the
 //! stored creator (`WrongCreator`); `paying_vault` before the transfer. A `Split` returns nothing: its
-//! prize is inside the distributable amount, and the flag is set so that close can run.
+//! prize is inside the distributable amount, and the flag is set so that close can run. Before the event, the
+//! vault's change equals what the flag books out (`VaultWatch`, `InvariantViolated`).
 
 use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 
-use super::collect_fee::{amount, moves};
+use super::{
+    bookkeeping::VaultWatch,
+    collect_fee::{amount, moves},
+};
 use crate::{
     checks,
     error::BrotError,
@@ -60,9 +64,11 @@ pub fn settle_prize(
         .ok_or(BrotError::MathOverflow)?;
     let seq = stored.event_seq.get();
     let next = seq.checked_add(1).ok_or(BrotError::MathOverflow)?;
+    let watch = VaultWatch::start(vault, &stored)?;
     moves::move_lamports(vault, recipient, total)?;
     stored.prize_settled = 1;
     stored.event_seq = LeU64::new(next);
+    watch.check(vault, &stored)?;
     drop(stored);
 
     let event = PrizeSettled {

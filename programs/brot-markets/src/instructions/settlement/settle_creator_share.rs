@@ -2,15 +2,16 @@
 //!          A credit that would leave the creator's wallet below its rent-exempt minimum is reserved in the vault
 //!          (bookkept in `creator_share_reserved`) instead of paid; the creator claims it by calling this again from
 //!          a wallet that can take it (`ReserveNotClaimable` otherwise).
-//! Version: 0.0.1
-//! Sprint: 04 (lane C)
+//! Version: 0.0.2 (G-2: the vault's change asserted against the books, `VaultWatch`, on each of the three paths)
+//! Sprint: 04 (lane C); 16 (lane L16P)
 //!
 //! Accounts: 0 campaign (writable), 1 vault (writable), 2 creator (writable; the stored creator), 3 event
 //! authority, 4 program. Any wallet; it chooses nothing.
 //! Refusals: `NotFinalized` (status before Settling), `WrongCreator`, `CreatorShareNotDue` (a team opening, a
 //! one-sided pot, a void, a refund, or a zero share), `AlreadySettled` (paid, or nothing reserved to claim).
 //! The event `CreatorShareSettled` is emitted when lamports reach the creator; a reserve emits nothing and is read
-//! from the campaign.
+//! from the campaign. On every path the vault's change equals what the books record in `paid_out_total` (a reserve:
+//! nothing; `VaultWatch`, `InvariantViolated`).
 
 use pinocchio::{
     error::ProgramError,
@@ -19,7 +20,7 @@ use pinocchio::{
 };
 
 use super::{
-    bookkeeping::{bump, pay_from_vault, take_seq},
+    bookkeeping::{bump, pay_from_vault, take_seq, VaultWatch},
     rules::{claimable, plan_credit, Credit},
 };
 use crate::{
@@ -74,6 +75,7 @@ pub fn settle_creator_share(
     }
     let rent_min = Rent::get()?.try_minimum_balance(0)?;
     let reserved = stored.creator_share_reserved.get();
+    let watch = VaultWatch::start(vault, &stored)?;
 
     // A reserved credit: the creator's claim. Paid only when the wallet, with it, reaches the minimum.
     if stored.creator_share_settled != 0 {
@@ -85,6 +87,7 @@ pub fn settle_creator_share(
         pay_from_vault(vault, creator, reserved)?;
         stored.creator_share_reserved.set(0);
         bump(&mut stored.paid_out_total, reserved)?;
+        watch.check(vault, &stored)?;
         let seq = take_seq(&mut stored)?;
         let event = CreatorShareSettled {
             campaign: campaign_key,
@@ -103,12 +106,14 @@ pub fn settle_creator_share(
     match plan_credit(creator.lamports(), share, rent_min)? {
         Credit::Reserve => {
             stored.creator_share_reserved.set(share);
+            watch.check(vault, &stored)?;
             drop(stored);
             Ok(())
         }
         Credit::Pay => {
             pay_from_vault(vault, creator, share)?;
             bump(&mut stored.paid_out_total, share)?;
+            watch.check(vault, &stored)?;
             let seq = take_seq(&mut stored)?;
             let event = CreatorShareSettled {
                 campaign: campaign_key,

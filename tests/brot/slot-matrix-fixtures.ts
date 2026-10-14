@@ -256,7 +256,8 @@ export const BASELINES: Record<string, () => Promise<Baseline>> = {
     const { campaign, vault } = await injectCampaign(w.client, {
       ...c,
       status: P.Status.Settled,
-      extra: { rent_payer: c.creator, fee_collected: 1, prize_settled: 1, creator_share_settled: 1 },
+      // A finalized campaign has a mode: close reads its books against the vault (G-2). No entry: Refund (3).
+      extra: { rent_payer: c.creator, settle_mode: 3, fee_collected: 1, prize_settled: 1, creator_share_settled: 1 },
     });
     return { w, ix: S.closeCampaignIx(campaign, vault, c.creator as Address, await P.feeVaultPda()) };
   },

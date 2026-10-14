@@ -1,21 +1,23 @@
 //! Purpose: `collect_fee`: moves what Brot keeps to the fee vault, once, after the entries are settled:
 //!          the house fee net of the creator's share from it, the opening fee unless refunded, and (from
 //!          lane C's running total) the one-sided fees (TP sections 3.4.3, 3.4.16).
-//! Version: 0.0.2
-//! Sprint: 04 (lane D). Accounts frozen at the sprint's opening.
+//! Version: 0.0.3 (G-2: the vault's change asserted against the books, `VaultWatch`)
+//! Sprint: 04 (lane D). Accounts frozen at the sprint's opening. 16 (lane L16P).
 //!
 //! Order: no arguments (`BadInstructionData`); the five slots (`NotEnoughAccountKeys`); the campaign and
 //! the vault writable, the fee vault writable; the event slots; the campaign loaded (owner, length,
 //! tag, PDA); `Settling` or `Settled` with `entries_open` zero (`CampaignNotSettled`, `NotFinalized`
 //! before finalize); `fee_collected` not yet set (`FeeAlreadyCollected`); the vault's PDA and the fee
-//! vault's address; `paying_vault` before the transfer. Then the amount, the move, the flag, the event.
-//! The caller chooses nothing: the amount and the destination are the campaign's.
+//! vault's address; `paying_vault` before the transfer. Then the amount, the move, the flag, the event; before the
+//! event, the vault's change equals what the flag books out (`VaultWatch`, `InvariantViolated`). The caller chooses
+//! nothing: the amount and the destination are the campaign's.
 
 pub mod amount;
 pub mod moves;
 
 use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 
+use super::bookkeeping::VaultWatch;
 use crate::{
     checks,
     error::BrotError,
@@ -52,9 +54,11 @@ pub fn collect_fee(
     let kept = amount::kept(&stored)?;
     let seq = stored.event_seq.get();
     let next = seq.checked_add(1).ok_or(BrotError::MathOverflow)?;
+    let watch = VaultWatch::start(vault, &stored)?;
     moves::move_lamports(vault, fee_vault, kept.amount)?;
     stored.fee_collected = 1;
     stored.event_seq = LeU64::new(next);
+    watch.check(vault, &stored)?;
     drop(stored);
 
     let event = FeeCollected {
