@@ -60,7 +60,9 @@ release candidate. The version that leaves this sprint is the one the two firms 
       stops and what it never stops, who resumes (`admin`), what a team key can do in the window, and the record
       afterwards. Its **[F]** blanks are the founder's: who speaks, where and how fast it is published, who backs up
       the CTO, and the leader's proposed rule "pause first, investigate after". The site's page waits for them and
-      for the two-person review of `content/`.
+      for the two-person review of `content/`. **Answered on 2026-10-14 (Ronaldo):** Bernardo speaks for the house, then
+      Lucas, then Ronaldo; "pause first, investigate after" is approved. The CTO's backup on alerts (Lucas or
+      Bernardo), and where and how fast to publish, are left to the team, with a reminder.
 - [ ] Every alert reaches two inboxes, and the review queue has a named reviewer per day (proposal §2.11; T22).
 - [ ] `deploy/vps/README.md` says where each key lives and how to rotate it. No internet-connected key has power over
       money. The keeper's wallet sits in a key vault **[AC: which one]** (TP v0.0.1 §7, deferred to before mainnet).
