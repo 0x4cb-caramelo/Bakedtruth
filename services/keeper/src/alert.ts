@@ -5,8 +5,8 @@
  *          the caller's to choose; a detail key that names a secret, a token or a URL is refused by name, never echoed.
  *          The line's own fields (ts, event, kind, key, transports) always win: a detail key with one of those names
  *          is written as `detail_<name>` instead, so a caller can never relabel an alert, and nothing is lost.
- * Version: 0.3.0 (Sprints 14 and 15: the contest's and the sealed fee's alerts)
- * Sprint:  07 (standby keeper and watchdog)
+ * Version: 0.3.1 (Sprint 16: `settle_invariant`, a settlement refused for a money invariant)
+ * Sprint:  07 (standby keeper and watchdog); 16 (lane L16P)
  */
 
 /** Each kind has its runbook in deploy/vps/runbooks/, the kind's name with dashes (tests/runbooks.test.ts checks). */
@@ -29,6 +29,7 @@ export const ALERT_KINDS = [
   "contest_reread_differs",
   "contest_stage2_ending",
   "sealed_fee_open",
+  "settle_invariant",
   "restart_requested",
   "restart_failed",
 ] as const;

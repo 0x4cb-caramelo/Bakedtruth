@@ -30,6 +30,7 @@ nome, com `-` no lugar de `_`.
 | Releitura de disputa deu diferente | [contest-reread-differs.md](contest-reread-differs.md) |
 | Estágio 2 perto do prazo, sem decisão | [contest-stage2-ending.md](contest-stage2-ending.md) |
 | Taxa de entrada selada aberta numa campanha finalizada | [sealed-fee-open.md](sealed-fee-open.md) |
+| Liquidação recusada por um invariante de dinheiro | [settle-invariant.md](settle-invariant.md) |
 
 Quem recebe: o CTO. O revisor do dia ainda não tem nome (Sprint 16 exige um antes do mainnet). Os alertas de
 e-mail dependem do provedor (decisão do fundador, D4); até lá o alerta aparece como linha `alert` no diário.

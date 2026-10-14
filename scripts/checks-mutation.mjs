@@ -5,7 +5,7 @@
  *          rebuilds the program with cargo build-sbf, and shows that the check's own negative tests
  *          (Mollusk and LiteSVM) fail without it. Each source is restored byte for byte after each
  *          mutant, on error and on Ctrl-C.
- * Version: 0.0.4 (Sprint 16: G-1, the pre-freeze markers of lane L16P, and the review's F4 payout cap with LiteSVM rows)
+ * Version: 0.0.5 (Sprint 16: G-1, lane L16P's pre-freeze markers, F4's cap with LiteSVM rows, R1's per-entry share)
  * Sprint:  02 (pot core on Pinocchio), lane A; `top_level` in 03, lane D. Run by hand, never by CI.
  *
  * Usage:  node scripts/checks-mutation.mjs [--plan] [--only id,id] [--jobs N]
@@ -41,6 +41,7 @@ const SOURCES = [
   "instructions/settlement/bookkeeping.rs",
   "instructions/settlement/collect_fee/moves.rs",
   "instructions/settlement/payout_cap.rs",
+  "instructions/settlement/rules.rs",
 ].map((file) => join(ROOT, "programs/brot-markets/src", file));
 const DEPLOY = join(ROOT, "target/deploy");
 const SO = join(DEPLOY, "brot_markets.so");
@@ -63,6 +64,7 @@ const RUST_TARGETS = [
   "prefreeze_vault",
   "prefreeze_tally",
   "prefreeze_payout_cap",
+  "prefreeze_entry_share",
 ];
 const TS_FILES = [
   "tests/brot/checks.test.ts",
@@ -192,6 +194,8 @@ paid_out_within_snapshot fail prefreeze_payout_cap_one_sided_and_refund_count_pa
 paid_out_within_snapshot fail - | collect_fee and settle_prize: a campaign already paid past the snapshot's cap
 close_books_covered   fail  - | close_campaign: a reserve larger than what the books still hold
 close_books_covered   keeps - | close_campaign: a vault holding less than its books still owe
+entry_within_share    fail  prefreeze_entry_share_every_payout_the_program_computes_passes_and_one_lamport_more_does_not | -
+entry_within_share    fail  prefreeze_entry_share_counts_the_winning_side_and_refunds_late_parts_whole | -
 `;
 
 const args = process.argv.slice(2);

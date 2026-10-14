@@ -14,7 +14,8 @@
 # Secrets: the RPC URL of the indexer's account (it carries the key) is a credential (LoadCredential=, a root-owned
 #          0400 file), never in the environment (T13). The WebSocket URL is the same URL over wss unless set; if it
 #          differs, add `LoadCredential=ws-url:/etc/brot-markets/indexer-ws-url` and
-#          `Environment=INDEXER_WS_URL_FILE=%d/ws-url`. The indexer logs counts and error names only.
+#          `Environment=INDEXER_WS_URL_FILE=/run/credentials/brot-indexer.service/ws-url`. The indexer logs counts and
+#          error names only.
 # State: /var/lib/brot-indexer (StateDirectory, 0750): the SQLite file, its WAL, and the nightly snapshots
 #        (`bun src/snapshot.ts <file> <snapshot>`, timer not written) until they reach VM 2. feed_history cannot be
 #        rebuilt from RPC, so the directory is kept across releases; the rest can be rebuilt (src/rebuild.ts).
@@ -30,8 +31,10 @@ Group=brot-indexer
 WorkingDirectory=/srv/brot-markets/indexer/current/services/indexer
 EnvironmentFile=/etc/brot-markets/indexer.env
 LoadCredential=rpc-url:/etc/brot-markets/indexer-rpc-url
-Environment=INDEXER_RPC_URL_FILE=%d/rpc-url
-# Set here, after the env file, so a stray line there cannot move the file or open the port beyond loopback.
+# The credentials' directory is spelled out: systemd 249 (the server's) does not expand its specifier in Environment=.
+Environment=INDEXER_RPC_URL_FILE=/run/credentials/brot-indexer.service/rpc-url
+# Defaults: a line in the env file would override them (EnvironmentFile= wins over Environment= whatever the order),
+# but the indexer refuses a non-loopback host and ProtectSystem=strict keeps its file in the StateDirectory.
 Environment=INDEXER_DB_PATH=/var/lib/brot-indexer/indexer.sqlite
 Environment=INDEXER_API_HOST=127.0.0.1
 Environment=INDEXER_API_PORT=4201

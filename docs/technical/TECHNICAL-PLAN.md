@@ -957,6 +957,10 @@ when it pays, reserves or is claimed, `collect_fee`, `settle_prize`) asserts two
   `OneSided` and `Refund`, `paid_out_total` plus the one-sided fees is at most both pools.
 - **The vault.** Its lamport change equals the change in the books (`paid_out_total`, the collected fee and the
   returned prize).
+- **Each entry, in `Split`.** Before paying, `settle_entry` checks that the entry gets at most its share of the stored
+  snapshot: `payout × V ≤ early × D` (`EntryPayoutAboveShare`, 6180). It is a guard against a regression in the
+  payout's formula. The snapshot's own inputs, and the other modes, stay covered by the cap above and by
+  `check_snapshot` at finalize; the audit scope lists that as S-8.
 
 `close_campaign` requires the vault to cover what the books still hold, and returns the vault's rent as
 `min(rent, vault − held)`, so a rise in the rent-exempt minimum never blocks a close. Before, the payout checked a

@@ -7,8 +7,8 @@
  *          creator share, the prize and the sealed fees, the fee, the close), then sweeps the fee vault to the config's
  *          fee recipient. Every step is the program's to accept: a second keeper, or a retry, gets the program's
  *          refusal and nothing moves twice.
- * Version: 0.2.0 (Sprints 14 and 15: the lapsed contest's finalize, the sealed fees listed and settled)
- * Sprint:  07 carry-over (Sprint 06 DoD); 14 and 15 (lane L14K)
+ * Version: 0.2.1 (Sprint 16: a refusal for a money invariant raises `settle_invariant`, settle-alert.ts)
+ * Sprint:  07 carry-over (Sprint 06 DoD); 14 and 15 (lane L14K); 16 (lane L16P)
  */
 import { address, type Address } from "@solana/kit";
 import { decodeCampaign, feeVaultAddress, fetchRaw, rentExemptMinimum, type SolanaRpc } from "@brot/sdk/read";
@@ -30,6 +30,7 @@ import { listEntries, listSealedFees, type OpenCampaign } from "./campaigns";
 import type { ChainView } from "./chain";
 import { landItems, type Item, type ItemResult, type LandingContext } from "./landing";
 import { log as journal } from "./log";
+import { alertInvariants, type InvariantAlerts } from "./settle-alert";
 import {
   inSettlement,
   needsEntries,
@@ -52,6 +53,8 @@ export type SettleContext = {
   sweepMinLamports: bigint;
   now?: () => number;
   log?: (event: string, fields: Record<string, unknown>) => void;
+  /** `settle_invariant` once per campaign (settle-alert.ts); absent: refusals are only logged. */
+  invariants?: InvariantAlerts;
 };
 
 export type SettleReport = {
@@ -129,6 +132,7 @@ async function settleOne(ctx: SettleContext, first: OpenCampaign, chainNow: bigi
     if (eligible.some((step) => step.kind === "creatorShare" && step.claim)) ctx.claims.mark(claimKey, wall());
     const results = await landItems(ctx.landing, await Promise.all(eligible.map(buildStep)));
     record(ctx, report, results);
+    alertInvariants(ctx.invariants, current.address, results);
     if (!results.some((result) => result.outcome === "landed")) return;
     at = await reread(rpc, current.address);
   }

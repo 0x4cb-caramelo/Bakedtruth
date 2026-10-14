@@ -27,6 +27,25 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **As últimas mudanças antes do congelamento** (14/10/2026). Num `Split`, o pagamento de cada entrada é conferido
+  contra a parte dela no snapshot guardado (`EntryPayoutAboveShare`, 6180). O keeper avisa (`settle_invariant`) quando
+  uma liquidação é recusada por uma dessas checagens de segurança. O teste da pausa fixa a contagem de cada arquivo que
+  nomeia o campo. Os arquivos de unidade leem as credenciais pelo caminho completo, porque o systemd 249 do servidor
+  ignora o `%d`. Uma terceira revisão adversária não achou pagamento legítimo que esbarre na checagem nova; o achado
+  baixo que ela deixou (as entradas do próprio snapshot) fica no escopo da auditoria, para os sócios decidirem junto
+  com o congelamento.
+- **O indexador no ar, e a segunda atualização do dia no devnet** (14/10/2026;
+  `session-log/2026-10-14-indexador-no-ar-e-segunda-atualizacao.md`). Com as palavras do Ronaldo ("pode instalar o
+  indexador", "pode mergear a 94", "e todo o resto atualizar ci etc publicar site"):
+  - **O #94 entrou na `main`** (`2e7a28c`).
+  - **O programa do devnet.** Recebeu o binário do CI dela (`9c5e9ffb…`, o mesmo do build local), sem extensão, no
+    slot 510.880.658, com o hash conferido na rede.
+  - **O site e o keeper.** Foram publicados nesse commit, cada um ensaiado antes na porta 4239.
+  - **O indexador.** Roda no servidor desde as 05h22 UTC, com usuário próprio e a RPC pública do devnet, e as rotas
+    dele (atividade, ranking, entradas por carteira) respondem em público pelo `brot-api`. A primeira partida falhou:
+    o systemd 249 do servidor não entende o `%d` nas linhas `Environment=`. Um complemento da unidade resolveu no
+    servidor, e os quatro arquivos de unidade do repositório passam a usar o caminho completo das credenciais.
+
 - **O programa do devnet atualizado e o site publicado** (14/10/2026;
   `session-log/2026-10-14-devnet-atualizado-e-site-publicado.md`). Com a palavra do Ronaldo, o #93 entrou na `main`
   (`a5e6014`) e o binário do CI dela (`86ecf1c8…`, o mesmo do build local) foi implantado no devnet: a conta do

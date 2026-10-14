@@ -318,6 +318,8 @@ export const BROT_MARKETS_ERROR__CONTEST_ALREADY_OPEN = 0x1821; // 6177
 export const BROT_MARKETS_ERROR__CUTOFF_NOT_FINAL = 0x1822; // 6178
 /** PaidOutAboveSnapshot: The payouts would exceed what the snapshot shares out to the entries and the creator */
 export const BROT_MARKETS_ERROR__PAID_OUT_ABOVE_SNAPSHOT = 0x1823; // 6179
+/** EntryPayoutAboveShare: A Split entry's payout would exceed its exact share of distributable plus its late parts */
+export const BROT_MARKETS_ERROR__ENTRY_PAYOUT_ABOVE_SHARE = 0x1824; // 6180
 
 export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY
@@ -357,6 +359,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ENTRY_BELOW_MINIMUM
   | typeof BROT_MARKETS_ERROR__ENTRY_MISMATCH
   | typeof BROT_MARKETS_ERROR__ENTRY_NOT_ON_CAMPAIGN
+  | typeof BROT_MARKETS_ERROR__ENTRY_PAYOUT_ABOVE_SHARE
   | typeof BROT_MARKETS_ERROR__ENTRY_TOTAL_MISMATCH
   | typeof BROT_MARKETS_ERROR__EPOCH_AFTER_DEADLINE
   | typeof BROT_MARKETS_ERROR__EPOCH_ALREADY_STARTED
@@ -513,6 +516,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__ENTRY_BELOW_MINIMUM]: `The entry is below \`min_entry_lamports\``,
     [BROT_MARKETS_ERROR__ENTRY_MISMATCH]: `The \`Entry\` account belongs to another campaign or another baker`,
     [BROT_MARKETS_ERROR__ENTRY_NOT_ON_CAMPAIGN]: `The entry belongs to another campaign`,
+    [BROT_MARKETS_ERROR__ENTRY_PAYOUT_ABOVE_SHARE]: `A Split entry's payout would exceed its exact share of distributable plus its late parts`,
     [BROT_MARKETS_ERROR__ENTRY_TOTAL_MISMATCH]: `The baker's entry total is not the \`expected_entry_total\` the client signed`,
     [BROT_MARKETS_ERROR__EPOCH_AFTER_DEADLINE]: `Row 5: the measured epoch may start after the deadline`,
     [BROT_MARKETS_ERROR__EPOCH_ALREADY_STARTED]: `Row 5: the measured epoch has already started`,

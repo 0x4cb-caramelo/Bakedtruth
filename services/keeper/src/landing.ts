@@ -6,8 +6,8 @@
  *          never sinks the others; then sets the compute limit from the simulation and the priority fee from
  *          `getRecentPrioritizationFees`, and sends through the gated path of send.ts. A dry run stops after the
  *          simulation. Each instruction gets one result.
- * Version: 0.1.0
- * Sprint:  07 carry-over (Sprint 06 DoD: transaction landing, "drop the failing instruction")
+ * Version: 0.1.1 (Sprint 16: each refused or failed item carries the program's error code)
+ * Sprint:  07 carry-over (Sprint 06 DoD: transaction landing, "drop the failing instruction"); 16 (lane L16P)
  *
  * The keeper chooses no destination: every instruction comes from the SDK's builders with the addresses stored on
  * chain (settle-plan.ts). A batch the cluster then refuses fails whole (a transaction is atomic), and its items are
@@ -40,7 +40,15 @@ export type LandingContext = {
 
 export type Item = { key: string; kind: TaskKind; ix: Instruction };
 export type Outcome = "landed" | "wouldSend" | "refused" | "failed";
-export type ItemResult = { key: string; kind: TaskKind; outcome: Outcome; detail: string | null; signature?: string };
+export type ItemResult = {
+  key: string;
+  kind: TaskKind;
+  outcome: Outcome;
+  detail: string | null;
+  signature?: string;
+  /** The program's custom error of a refused or failed item, when it is one (the settlement's invariant alert). */
+  code?: number | null;
+};
 
 /** The wire limit of a version-0 transaction. */
 export const TX_BYTES = 1_232;
@@ -103,11 +111,13 @@ async function settleOnPassing(
     const index = failedIndex(sim.err);
     if (index === null || index >= live.length) {
       // Not one instruction's refusal (an empty fee payer, a missing account): every item fails, nothing is sent.
-      for (const item of live.splice(0)) results.push({ ...meta(item), outcome: "failed", detail: why(sim) });
+      for (const item of live.splice(0)) {
+        results.push({ ...meta(item), outcome: "failed", detail: why(sim), code: sim.errorCode });
+      }
       return null;
     }
     const [dropped] = live.splice(index, 1);
-    results.push({ ...meta(dropped!), outcome: "refused", detail: why(sim) });
+    results.push({ ...meta(dropped!), outcome: "refused", detail: why(sim), code: sim.errorCode });
   }
   return null;
 }
@@ -156,7 +166,13 @@ export async function landItems(ctx: LandingContext, items: readonly Item[]): Pr
       results.push(
         landed.ok
           ? { ...meta(item), outcome: "landed", detail: null, signature: landed.signature }
-          : { ...meta(item), outcome: "failed", detail: failure(landed), signature: landed.signature },
+          : {
+              ...meta(item),
+              outcome: "failed",
+              detail: failure(landed),
+              signature: landed.signature,
+              code: landed.err === undefined ? null : customErrorCode(landed.err),
+            },
       );
     }
   }

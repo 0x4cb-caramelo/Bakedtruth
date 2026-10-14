@@ -128,6 +128,14 @@ second time put Sprints 14, 15 and 16's pre-freeze hardening (`main` `a5e6014`) 
 - **The keyed RPC.** It reached the CLI through a private temporary config (mode 600, deleted after), never on a
   command line, with every output filtered.
 - **The keeper.** It refused one simulation in the upgrade's own slot (`UnsupportedProgramId`) and ran normally after. The script above deploys and initializes a new id
+- **A third time the same morning** (`main` `2e7a28c`, PR #94: the review's follow-ups), at Ronaldo's word ("pode
+  mergear a 94" and "e todo o resto atualizar ci etc publicar site"):
+  - **The artifact.** Run 38516025275, 206,112 bytes, sha256 `9c5e9ffb…1610`, equal to the local build, with its IDL
+    identical to the repository's.
+  - **No extension.** The binary fits in the 210,776 bytes the morning's extension left.
+  - **The upgrade.** Transaction
+    `3BE3oCbwNYEXKZEPFnNvCkPysKWTx6FN6LnjPbnue18gotAgofugwWJUm1ESz6aNW9vojLQ3feLZxaTUubdf2PZo`, deployed in slot
+    510880658, with the on-chain hash checked again. It cost only the fees.
 only, so an upgrade is these CLI steps, each command with `--url "$DEVNET_RPC_URL"` and the key passed explicitly:
 
 1. **Read first, send nothing.** `solana program show <id>`: loader v3, the expected authority, `Data Length` and

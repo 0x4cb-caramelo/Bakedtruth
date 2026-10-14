@@ -4957,6 +4957,11 @@
       "code": 6179,
       "name": "PaidOutAboveSnapshot",
       "msg": "The payouts would exceed what the snapshot shares out to the entries and the creator"
+    },
+    {
+      "code": 6180,
+      "name": "EntryPayoutAboveShare",
+      "msg": "A Split entry's payout would exceed its exact share of distributable plus its late parts"
     }
   ],
   "metadata": {
