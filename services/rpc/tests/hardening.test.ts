@@ -25,7 +25,8 @@ describe("the security review's fixes", () => {
       ["getBalance", [ADDR, { minContextSlot: { evil: 1 } }]],
       ["getSignatureStatuses", [["1".repeat(88)], { searchTransactionHistory: "yes" }]],
       ["sendTransaction", ["AAAA", { encoding: "base64", maxRetries: 99 }]],
-      ["getTransaction", ["1".repeat(88), { maxSupportedTransactionVersion: 1 }]],
+      ["getTransaction", ["1".repeat(88), { maxSupportedTransactionVersion: 2 }]],
+      ["getTransaction", ["1".repeat(88), { maxSupportedTransactionVersion: "1" }]],
     ] as const;
     for (const [method, params] of refused)
       expect(`${method}: ${(await r.call(method, [...params])).json.error.code}`).toBe(`${method}: ${CODE.params}`);
