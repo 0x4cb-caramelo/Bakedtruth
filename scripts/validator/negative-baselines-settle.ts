@@ -85,7 +85,8 @@ export const SETTLE_BASELINES: [string, Build][] = [
     "TallyLateJoins",
     async (env) => {
       const baker = await funded(env.rpc);
-      const extra = { publish_time: await nowOf(env), entries_untallied: 1 };
+      // The proof is over 60 s old, so the cut-off is final and the tally may run (CutoffNotFinal, Sprint 16's O-3).
+      const extra = { publish_time: (await nowOf(env)) - 61n, entries_untallied: 1 };
       const c = await base(env.rpc, { poolYes: SOL, poolNo: 0n, extra });
       const { campaign } = await injectReviewed(env.sw.w.client, c, P.Outcome.Yes, (await nowOf(env)) + SIX_HOURS);
       const entry = await injectEntry(env.sw.w.client, {
@@ -95,7 +96,7 @@ export const SETTLE_BASELINES: [string, Build][] = [
         joinCount: 1,
       });
       await env.sw.flush();
-      const join = await injectJoin(env, campaign, baker.address, (await nowOf(env)) - 60n);
+      const join = await injectJoin(env, campaign, baker.address, (await nowOf(env)) - 120n);
       return { ix: S.tallyLateJoinsIx(baker.address, campaign, entry, [join]) };
     },
   ],
@@ -143,7 +144,14 @@ export const SETTLE_BASELINES: [string, Build][] = [
     "CloseCampaign",
     async (env) => {
       const c = await base(env.rpc, { poolYes: 0n, poolNo: 0n });
-      const extra = { rent_payer: c.creator, fee_collected: 1, prize_settled: 1, creator_share_settled: 1 };
+      // A finalized campaign has a mode: close reads its books against the vault (Sprint 16's G-2). No entry: Refund.
+      const extra = {
+        rent_payer: c.creator,
+        settle_mode: 3,
+        fee_collected: 1,
+        prize_settled: 1,
+        creator_share_settled: 1,
+      };
       const { campaign, vault } = await injectCampaign(env.sw.w.client, { ...c, status: P.Status.Settled, extra });
       await env.sw.flush();
       return { ix: S.closeCampaignIx(campaign, vault, c.creator as Address, await P.feeVaultPda()) };
