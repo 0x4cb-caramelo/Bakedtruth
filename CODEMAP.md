@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **1203** |
+| Arquivos mapeados | **1208** |
 | Acima de 200 linhas | **44** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -508,7 +508,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`account-names.ts`](packages/sdk/src/schemas/account-names.ts) | the reviewed account names of `content/account-names.json` (A-11; TP §3.4.10 "Display names"): a JSON array of `{ "address", "kind", "name" }`, each address onc | 48 |
 | [`content.ts`](packages/sdk/src/schemas/content.ts) | a value checked against a committed JSON Schema (Sprint 08: the CI check of content/*.json, TP §4 "Content files"), with no library beyond zod: the schema becom | 19 |
 | [`index.ts`](packages/sdk/src/schemas/index.ts) | `@brot/sdk/schemas`, the zod 4 schemas the site, the app and the services share: the opening's input; the public format of a void-log record (Sprint 12); the re | 17 |
-| [`indexer.ts`](packages/sdk/src/schemas/indexer.ts) | the indexer's read routes as zod schemas (TP §6, Appendix B; Sprint 08, slice 2), shared by the indexer that serves them, the site and the app that read them, a | 148 |
+| [`indexer.ts`](packages/sdk/src/schemas/indexer.ts) | the indexer's read routes as zod schemas (TP §6, Appendix B; Sprint 08, slice 2), shared by the indexer that serves them, the site and the app that read them, a | 165 |
 | [`open-campaign.ts`](packages/sdk/src/schemas/open-campaign.ts) | the zod schema of an opening's input (TP Appendix B, written here as Sprint 05 must), shared by the SDK, the site, the app and the preview: what a creator may c | 125 |
 | [`partners.ts`](packages/sdk/src/schemas/partners.ts) | `content/partners.json` (TP §4 "Content files"; BR-19, P-3, D-d; Sprint 08): which campaign belongs to which launch partner, with its highlight window, read by  | 127 |
 | [`read-api.ts`](packages/sdk/src/schemas/read-api.ts) | the read API's answers as zod schemas (TP §6, Appendix B; Sprint 08 DoD "/api/v1"): `/api/v1/health`, the campaign list and one campaign, the leaderboard, the n | 127 |
@@ -1296,18 +1296,19 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`config.ts`](services/api/src/config.ts) | the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only), the port and host (loopback by default), the refresh i | 95 |
+| [`config.ts`](services/api/src/config.ts) | the API's settings, read from its environment only: the RPC URL (a secret, so logs show its origin only), the port and host (loopback by default), the refresh i | 116 |
 | [`dto.ts`](services/api/src/dto.ts) | the JSON shape of a campaign for the site. Amounts are lamport strings, addresses base58, times Unix seconds (strings for the big integers). The state is the SD | 58 |
 | [`health.ts`](services/api/src/health.ts) | what `/api/v1/health` answers (TP §6; Sprint 08), shaped as @brot/sdk/schemas's `ReadApiHealthSchema`: the snapshot's state and freshness, the leaderboard's his | 35 |
 | [`hidden.ts`](services/api/src/hidden.ts) | the wallets left out of the public leaderboard at their owner's request (Sprint 13, the privacy review, TP §8.2 question 8): a JSON array of base58 addresses in | 61 |
 | [`history.ts`](services/api/src/history.ts) | the program's own history, read for the leaderboard (Sprint 13) until Sprint 08's indexer exists: every signature of the program through `getSignaturesForAddres | 170 |
+| [`indexer-proxy.ts`](services/api/src/indexer-proxy.ts) | the indexer's read routes, public through the read API (the founder's routing answer (a), 2026-10-13; Sprint 08): exactly the routes services/indexer serves (it | 102 |
 | [`leaderboard.ts`](services/api/src/leaderboard.ts) | `GET /api/v1/leaderboard` (TP §6; Sprint 13, BR-29): devnet points from the program's events (history.ts) and the live campaign accounts (the snapshot), through | 75 |
-| [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, reads the program's new history and the hide list | 106 |
+| [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, reads the program's new history and the hide list | 109 |
 | [`names.ts`](services/api/src/names.ts) | what /api/v1/names serves (TP §6; A-11; Sprint 08): the reviewed account names of content/account-names.json, checked by the SDK's `parseAccountNames` (the rule | 55 |
 | [`price-source.ts`](services/api/src/price-source.ts) | the display price's source (D-f; Sprint 08): Pyth's SOL/USD sponsored account, read through the API's RPC and decoded by the SDK, the account the program prices | 33 |
 | [`price.ts`](services/api/src/price.ts) | the price /api/v1/price serves (TP §3.5 "Display price", §6; D-f; Sprint 08): SOL in US$, for display only; the program never reads it. It is Pyth's SOL/USD spo | 67 |
 | [`query.ts`](services/api/src/query.ts) | validates the list's query string. An unknown parameter, a bad state, or a limit or offset out of range is a 400 with a named code; nothing is guessed. The stat | 50 |
-| [`routes.ts`](services/api/src/routes.ts) | the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged), /api/v1/campaigns/:address, since Sprint 13 /api/v1/leaderboard  | 134 |
+| [`routes.ts`](services/api/src/routes.ts) | the read API's routes, all GET (HEAD too): /api/v1/health, /api/v1/campaigns (filtered, paged), /api/v1/campaigns/:address, since Sprint 13 /api/v1/leaderboard  | 143 |
 | [`snapshot.ts`](services/api/src/snapshot.ts) | one read of the chain: every campaign account of the program, decoded by the SDK (a wrong owner, tag or version is skipped), with its public state computed from | 82 |
 | [`store.ts`](services/api/src/store.ts) | holds the last good chain snapshot in memory and refreshes it on a timer. A failed refresh keeps the last good snapshot and records the error, so the API answer | 33 |
 
@@ -1317,7 +1318,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`api.test.ts`](services/api/tests/api.test.ts) | the read API's contract with fake data and no cluster: the list's filters and paging, the 400 and 404 answers, the detail route, CORS, the method refusal, the h | 180 |
 | [`board-kit.ts`](services/api/tests/board-kit.ts) | the leaderboard route tests' fake data, with no cluster: campaign rows as the snapshot keeps them (a paid pot with 1 SOL on each side and the devnet rates, open | 110 |
-| [`config.test.ts`](services/api/tests/config.test.ts) | the read API's settings: the refusals (no RPC URL, a public bind, an unknown cluster) and the defaults, since Sprint 13 the leaderboard's and since Sprint 08's  | 49 |
+| [`config.test.ts`](services/api/tests/config.test.ts) | the read API's settings: the refusals (no RPC URL, a public bind, an unknown cluster) and the defaults, since Sprint 13 the leaderboard's and since Sprint 08's  | 63 |
 | [`contract.test.ts`](services/api/tests/contract.test.ts) | the read API's contract (Sprint 08 DoD "/api/v1": zod DTOs with contract tests), no cluster: every /api/v1 answer parses with its schema in @brot/sdk/schemas (r | 173 |
 | [`history.test.ts`](services/api/tests/history.test.ts) | the leaderboard's history reader against a scripted RPC (Sprint 13, the adversarial review's cases): a node that ignores `until` costs a re-listing but never a  | 179 |
 | [`leaderboard-pot.test.ts`](services/api/tests/leaderboard-pot.test.ts) | what the leaderboard route reads from a live account for the founder's answer 3a (2026-10-10), with fake data and no cluster: whether a final pot splits (the mo | 49 |
@@ -1354,10 +1355,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`queries.ts`](services/indexer/src/api/queries.ts) | the indexer's read routes as queries over its SQLite file (TP §6; Sprint 08, slice 2), each row shaped as @brot/sdk/schemas says: one campaign's activity in cha | 197 |
+| [`campaign-pages.ts`](services/indexer/src/api/campaign-pages.ts) | one campaign's lists, in pages (TP §6; Sprint 08: since the routing answer (a), no answer may reach the read API's 1 MB cap): its activity (its entries, its set | 93 |
+| [`queries.ts`](services/indexer/src/api/queries.ts) | the indexer's read routes as queries over its SQLite file (TP §6; Sprint 08, slice 2), each row shaped as @brot/sdk/schemas says: the rows the routes share (an  | 89 |
 | [`ranking.ts`](services/indexer/src/api/ranking.ts) | the home page's order as a read route (TP §6 "Campaigns with rank, listed and filters"; Sprint 08): the live openings the ranking placed (ranking.ts), by rank,  | 33 |
-| [`routes.ts`](services/indexer/src/api/routes.ts) | the indexer's read routes (TP §6; Sprint 08, slice 2), all GET (HEAD too): a campaign's activity and the history of its split (`/api/v1/campaigns/:address/activ | 120 |
+| [`routes.ts`](services/indexer/src/api/routes.ts) | the indexer's read routes (TP §6; Sprint 08, slice 2), all GET (HEAD too): a campaign's activity and the history of its split (`/api/v1/campaigns/:address/activ | 144 |
 | [`server.ts`](services/indexer/src/api/server.ts) | serves the indexer's read routes (routes.ts) on its loopback port (TP §3.5; Sprint 08, slice 2), from the same SQLite handle the ingest writes: bun:sqlite answe | 35 |
+| [`wallet-pages.ts`](services/indexer/src/api/wallet-pages.ts) | one wallet's entries, in pages (TP §6; Sprint 08: since the routing answer (a), no answer may reach the read API's 1 MB cap): one row per opening it entered, wi | 80 |
 
 ## `services/indexer/src/db/`
 
@@ -1398,6 +1401,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`feeds.test.ts`](services/indexer/tests/feeds.test.ts) | the evidence table and its snapshot (Sprint 08 DoD "Evidence and snapshots"), no cluster: `feed_history` watches the feeds of price campaigns whose result is no | 123 |
 | [`ingest.test.ts`](services/indexer/tests/ingest.test.ts) | the ingest against a scripted RPC (Sprint 08), no cluster: pages shorter than asked, chain order and the checkpoint, a node that ignores `until`, each transacti | 130 |
 | [`kpis.test.ts`](services/indexer/tests/kpis.test.ts) | the KPIs and the partner report on a hand-built file (Sprint 08 DoD "Creator columns and KPIs", "The partner report"), no cluster: openings by team and by other | 180 |
+| [`paging.test.ts`](services/indexer/tests/paging.test.ts) | the paged lists of the indexer's read routes (Sprint 08: no answer may reach the read API's 1 MB cap), on a hand-built file where one transaction carries three  | 190 |
 | [`partners.test.ts`](services/indexer/tests/partners.test.ts) | content/partners.json and its checks (Sprint 08 DoD "content/partners.json", "a JSON Schema check in CI covers content/*.json"), no cluster: the SDK's parse acc | 124 |
 | [`points.test.ts`](services/indexer/tests/points.test.ts) | the indexer's points against the SDK's rule (Q7 narrowed by the founder's answer 3a; Sprint 08 DoD "Points"), through the real ingest and decoder with no cluste | 104 |
 | [`ranking.test.ts`](services/indexer/tests/ranking.test.ts) | the home page's order (Sprint 08 DoD "Ranking and listing", X1.9) with no cluster: a partner campaign first during its highlight, only when a team key opened it | 146 |
@@ -1639,6 +1643,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
+| [`indexer-proxy.test.ts`](tests/api/indexer-proxy.test.ts) | the indexer's read routes through the read API (the founder's routing answer (a), 2026-10-13; Sprint 08), against a fake indexer on a free loopback port: each o | 169 |
 | [`leaderboard.test.ts`](tests/api/leaderboard.test.ts) | the read API's leaderboard against the program in LiteSVM behind the recording RPC (Sprint 13 DoD: the leaderboard shows the points of `/api/v1/leaderboard`): w | 174 |
 
 ## `tests/brot/`

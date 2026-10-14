@@ -279,3 +279,29 @@ release on. Decided by Ronaldo on 2026-10-11: the tunnel and systemd (no Nginx, 
 `sudo systemctl disable --now brot-site brot-api`; or point `current` at the previous release and
 `sudo systemctl restart brot-api brot-site`. **A new release:** step 4 with the new commit, then
 `sudo systemctl restart brot-api brot-site`. Build again after every program upgrade (A-8).
+
+## The indexer's routes through the read API (Sprint 08; not live)
+
+The founder's routing answer (a), 2026-10-13: the indexer's read routes (`/api/v1/activity`, `/api/v1/ranking`,
+`/api/v1/wallets/<address>/entries`, `/api/v1/campaigns/<address>/activity` and `/chance`) reach the public through
+`brot-api`, which forwards them to the indexer on loopback. The tunnel's `^/api/v1/` rule already sends them to 4220:
+**no Cloudflare or tunnel change.** `brot-api` reads the indexer's address from `API_INDEXER_URL` in
+`/etc/brot-markets/api.env`: `http://127.0.0.1:4201` when unset, loopback http only (anything else stops its start),
+`off` to stop forwarding. Until the indexer runs, the five routes answer 503 `indexer_unavailable`, and every other
+route of the API is unchanged.
+
+Publishing them is a server act for Ronaldo, in this order:
+
+1. **The indexer**, installed and running on `127.0.0.1:4201` (`brot-indexer.service`; its header lists the steps,
+   with its own RPC account, D4), and caught up: `curl -s http://127.0.0.1:4201/healthz`.
+2. **The read API** at a commit with this forwarding: a new release (step 4 above), then `sudo systemctl restart
+   brot-api`. Leave `API_INDEXER_URL` unset, or set it to the indexer's port if it is not 4201.
+3. **Check** on the server, then from outside:
+
+   ```bash
+   curl -s 'http://127.0.0.1:4220/api/v1/activity?limit=1'; echo
+   curl -s 'https://brot.markets/api/v1/ranking?limit=1'; echo
+   ```
+
+**Rolling back:** `API_INDEXER_URL=off` in `api.env` and `sudo systemctl restart brot-api`; the five routes answer 503
+and the rest of the API does not move.

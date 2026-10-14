@@ -3,17 +3,21 @@
  *          history of its split (`/api/v1/campaigns/:address/activity` and `/chance`, the latest opening unless
  *          `?opening=` names one), the recent entries across campaigns (`/api/v1/activity?limit=`), a wallet's
  *          entries (`/api/v1/wallets/:address/entries`), and since slice 3 the home page's order
- *          (`/api/v1/ranking?listed=&limit=&offset=`). Every answer carries `as_of_slot` and `chain_time`; an unknown
- *          query parameter, a bad address or a bad number is a 400, an unknown campaign or opening a 404, any throw a
- *          JSON 500; errors are `{ error: { code, message } }`, never a stack trace. Cached a few seconds at the edge.
- * Version: 0.2.0 (the ranking)
+ *          (`/api/v1/ranking?listed=&limit=&offset=`). The three lists that grew without bound are paged:
+ *          `?limit=` (100 by default, 1 to 500) and `?before=` (the `next_before` of the page after), with the cursor
+ *          of campaign-pages.ts and wallet-pages.ts. Every answer carries `as_of_slot` and `chain_time`; an unknown
+ *          query parameter, a bad address, number or cursor is a 400, an unknown campaign or opening a 404, any throw
+ *          a JSON 500; errors are `{ error: { code, message } }`, never a stack trace. Cached a few seconds at the edge.
+ * Version: 0.3.0 (paged activity, chance and wallet entries; 0.2.0, the ranking)
  * Sprint:  08 (indexer, API, relay and points), slices 2 and 3
  */
 import { isAddress } from "@solana/kit";
 
 import type { Store } from "../db/store";
-import { campaignActivity, campaignChance, freshness, latestOpening, recentEntries, walletEntries } from "./queries";
+import { campaignActivityPage, campaignChancePage } from "./campaign-pages";
+import { freshness, latestOpening, recentEntries } from "./queries";
 import { rankingPage } from "./ranking";
+import { parseCursor, walletEntriesPage } from "./wallet-pages";
 
 export type RouteOptions = { corsOrigin: string };
 
@@ -22,6 +26,9 @@ const RECENT_DEFAULT = 20;
 const RECENT_MAX = 100;
 /** The ranking's page size: 50 unless `?limit=` asks for 1 to 100, as the campaign list's. */
 const RANKING_DEFAULT = 50;
+/** The paged lists' page size: 100 unless `?limit=` asks for 1 to 500 (500 items stay well under 1 MB). */
+const PAGE_DEFAULT = 100;
+const PAGE_MAX = 500;
 
 class Refusal extends Error {
   constructor(
@@ -57,6 +64,13 @@ function whole(text: string | undefined, name: string, min: number, max: number)
   return Number(text);
 }
 
+/** A campaign list's cursor: the `seq` of an event of the opening, or nothing. */
+const seqOf = (text: string | undefined): number | null => {
+  if (text === undefined) return null;
+  if (!/^\d{1,15}$/.test(text)) throw new Refusal(400, "bad_parameter", "before must be a next_before this route gave");
+  return Number(text);
+};
+
 function addressOf(text: string): string {
   if (!isAddress(text)) throw new Refusal(400, "bad_address", "Not a base58 address of 32 bytes");
   return text;
@@ -75,12 +89,16 @@ function route(store: Store, url: URL): unknown {
   if (parts[0] !== "api" || parts[1] !== "v1") throw new Refusal(404, "not_found", "No such route");
   const [, , head, id, tail] = parts;
   if (head === "campaigns" && id && (tail === "activity" || tail === "chance") && parts.length === 5) {
-    const q = params(url, ["opening"]);
+    const q = params(url, ["opening", "limit", "before"]);
     const campaign = addressOf(id);
+    const page = { limit: whole(q.get("limit"), "limit", 1, PAGE_MAX) ?? PAGE_DEFAULT, before: seqOf(q.get("before")) };
     const opening = openingOf(store, campaign, whole(q.get("opening"), "opening", 1, 1_000_000));
-    return tail === "activity"
-      ? { ...freshness(store), campaign, opening, items: campaignActivity(store, campaign, opening) }
-      : { ...freshness(store), campaign, opening, points: campaignChance(store, campaign, opening) };
+    if (tail === "activity") {
+      const { items, next_before } = campaignActivityPage(store, campaign, opening, page);
+      return { ...freshness(store), campaign, opening, items, next_before };
+    }
+    const { points, next_before } = campaignChancePage(store, campaign, opening, page);
+    return { ...freshness(store), campaign, opening, points, next_before };
   }
   if (head === "activity" && parts.length === 3) {
     const q = params(url, ["limit"]);
@@ -98,9 +116,15 @@ function route(store: Store, url: URL): unknown {
     return { ...freshness(store), total: page.total, offset, limit, items: page.items };
   }
   if (head === "wallets" && id && tail === "entries" && parts.length === 5) {
-    params(url, []);
+    const q = params(url, ["limit", "before"]);
     const wallet = addressOf(id);
-    return { ...freshness(store), wallet, items: walletEntries(store, wallet) };
+    const text = q.get("before");
+    const before = text === undefined ? null : parseCursor(text);
+    if (text !== undefined && before === null)
+      throw new Refusal(400, "bad_parameter", "before must be a next_before this route gave");
+    const limit = whole(q.get("limit"), "limit", 1, PAGE_MAX) ?? PAGE_DEFAULT;
+    const { items, next_before } = walletEntriesPage(store, wallet, { limit, before });
+    return { ...freshness(store), wallet, items, next_before };
   }
   throw new Refusal(404, "not_found", "No such route");
 }

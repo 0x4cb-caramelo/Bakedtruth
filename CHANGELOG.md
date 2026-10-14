@@ -27,6 +27,18 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **As rotas do indexador públicas pela API de leitura** (branch `feat/api-indexer-route`, 13/10/2026; Sprint 08, a
+  resposta (a) do fundador sobre o caminho público; `session-log/2026-10-13-rotas-do-indexador-pela-api.md`). O
+  `brot-api`, já público em `brot.markets/api/v1`, encaminha ao indexador, no loopback, exatamente as cinco rotas de
+  leitura dele (a atividade e a chance de uma campanha, a atividade recente, as entradas de uma carteira e a ordem da
+  página inicial), sem mudança na Cloudflare nem no túnel. Só GET e HEAD; o caminho e a consulta passam como vieram;
+  nenhum cabeçalho do cliente segue adiante além do `accept`; o CORS é o da API; o indexador fora do ar dá 503, a
+  demora 504 e uma resposta acima de 1 MB 502, sempre no formato de erro da API e sem o endereço do indexador
+  (`API_INDEXER_URL`, só no loopback; `off` desliga). As três listas sem limite do indexador ganharam páginas
+  (`?limit=` de 1 a 500, 100 por padrão, e o cursor `?before=`, com `next_before` na resposta), para nenhuma resposta
+  chegar ao teto. Nada foi publicado: vale quando o indexador for instalado e o `brot-api` reiniciado, um ato do
+  Ronaldo no servidor.
+
 - **13/10/2026, ações em produção pedidas pelo Ronaldo, nas palavras dele** (`session-log/2026-10-13-landing-tags-e-pr-88.md`):
   o landing de `brot.markets` passou de `ab764ab` para a `main` em `395efa5`, depois do teste na porta 4239: a página
   de privacidade corrigida está no ar e `/terms` responde 404 (a resposta 9a); as tags `sprint--1` (`635c77a`),
