@@ -2,12 +2,12 @@
  * Purpose: the randomized test's review window and its exits: the late-join tally, the team's confirm and void, and
  *          finalize, after the window or once a contest has lapsed (TP sections 3.4.3, 3.4.7, 3.4.16); the
  *          snapshot every exit takes. Split out of invariant-review.ts, which resolves and dispatches here.
- * Version: 0.1.1 (review fix F3: an unread stage 1 lapses too; stage 2 counts from stage 1's deadline at the latest)
- * Sprint:  04 (contract freeze, lane E); 14 (lane INV14: the tally, NotTallied, the lapse; lane L14B: F3)
+ * Version: 0.1.2 (Sprint 16, O-3: a YES result's tally waits until its proof is over 60 s old, CutoffNotFinal)
+ * Sprint:  04 (contract freeze, lane E); 14 (lane INV14: the tally, NotTallied, the lapse; lane L14B: F3); 16 (L16P)
  */
 import { type Address } from "@solana/kit";
 
-import { bakersOf, isTeamReason, snapshotOf, untallied, type ModelCampaign } from "./invariant-model";
+import { bakersOf, isTeamReason, PROOF_DELAY, snapshotOf, untallied, type ModelCampaign } from "./invariant-model";
 import { shareDue } from "./invariant-payouts";
 import {
   finalizeCampaignIx,
@@ -36,6 +36,11 @@ export function takeSnapshot(c: ModelCampaign) {
 
 export const inWindow = (c: ModelCampaign, t: bigint) => t < c.reviewEndsAt;
 
+/** A YES (price) result is tallied only once its proof is over 60 s old, so no earlier proof can move the cut-off
+ * (`CutoffNotFinal`, O-3, Sprint 16); every other outcome at once. */
+export const cutoffFinal = (c: ModelCampaign, t: bigint) =>
+  c.outcome !== "Yes" || c.publish === null || t > c.publish + PROOF_DELAY;
+
 /** Stage 2's 48 hours (constants.rs): from `min(re-read, stage 1's deadline)` (review fix F3, the 78-hour bound). */
 export const STAGE2_SECONDS = 48n * 3_600n;
 export const stage2EndsAt = (c: ModelCampaign, t: bigint) =>
@@ -58,7 +63,8 @@ export async function tallyOf(h: Harness, index: number, baker: string, deltas: 
 /**
  * The tallies a step sends first in its own transaction when asked (`wanted`), as the keeper does before a confirm,
  * a void or a contest: every baker not yet tallied, and only in review (elsewhere the tally itself would refuse).
- * `left` is how many stay untallied, for the step's `NotTallied`.
+ * `left` is how many stay untallied, for the step's `NotTallied`; `refused`, the first tally's refusal, which the
+ * transaction meets before the step's own (a YES result whose cut-off can still move: `CutoffNotFinal`).
  */
 export async function tallyFirst(h: Harness, index: number, wanted: boolean, deltas: Map<string, bigint>) {
   const c = h.camps[index];
@@ -69,7 +75,15 @@ export async function tallyFirst(h: Harness, index: number, wanted: boolean, del
     c.seq += BigInt(pending.length);
     for (const baker of pending) c.tallied.add(baker);
   };
-  return { ixs, left: untallied(c).length - pending.length, events: pending.map(() => "LateTallied"), tallied };
+  const refused: BrotErrorName | undefined =
+    pending.length > 0 && !cutoffFinal(c, clock(h)) ? "CutoffNotFinal" : undefined;
+  return {
+    ixs,
+    left: untallied(c).length - pending.length,
+    events: pending.map(() => "LateTallied"),
+    tallied,
+    refused,
+  };
 }
 
 /** Plans a step of the window (tally, confirm, void) or finalize; the refusal follows the program's order of checks. */
@@ -89,7 +103,14 @@ export async function planWindow(
       const ix = await tallyOf(h, op.c, baker, deltas);
       return {
         ixs: [ix],
-        error: c.phase !== "InReview" ? "TallyNotReady" : c.tallied.has(baker) ? "EntryAlreadyTallied" : undefined,
+        error:
+          c.phase !== "InReview"
+            ? "TallyNotReady"
+            : !cutoffFinal(c, t)
+              ? "CutoffNotFinal"
+              : c.tallied.has(baker)
+                ? "EntryAlreadyTallied"
+                : undefined,
         deltas,
         events: ["LateTallied"],
         apply: () => {
@@ -103,15 +124,16 @@ export async function planWindow(
       const first = await tallyFirst(h, op.c, op.tally ?? false, deltas);
       return {
         ixs: [...first.ixs, teamConfirmResultIx(h.team[op.member], config, campaign)],
-        // The window's rules, then the snapshot's: every entry tallied.
+        // The tallies first, then the window's rules, then the snapshot's: every entry tallied.
         error:
-          c.phase !== "InReview"
+          first.refused ??
+          (c.phase !== "InReview"
             ? "TeamKeyOutsideReview"
             : !inWindow(c, t)
               ? "OutsideReviewWindow"
               : first.left > 0
                 ? "NotTallied"
-                : undefined,
+                : undefined),
         deltas,
         exit: op.c,
         events: [...first.events, "ResultConfirmed", "CampaignFinalized"],
@@ -128,19 +150,22 @@ export async function planWindow(
       const noteHash = new Uint8Array(32).fill(TEAM_NOTE);
       return {
         ixs: [...first.ixs, teamVoidCampaignIx(h.team[op.member], config, campaign, { reason: op.reason, noteHash })],
-        // The program's order: the reason, the team key, the window, then the outcome (decision of 2026-10-09:
-        // a team key voids only an automatic void, so a YES or NO is refused), then the snapshot's tally rule.
-        error: !isTeamReason(op.reason)
-          ? "VoidReasonNotForTeam"
-          : c.phase !== "InReview"
-            ? "TeamKeyOutsideReview"
-            : !inWindow(c, t)
-              ? "OutsideReviewWindow"
-              : c.outcome !== "Void"
-                ? "TeamVoidNotAutomatic"
-                : first.left > 0
-                  ? "NotTallied"
-                  : undefined,
+        // The tallies first; then the program's order: the reason, the team key, the window, then the outcome
+        // (decision of 2026-10-09: a team key voids only an automatic void, so a YES or NO is refused), then the
+        // snapshot's tally rule.
+        error:
+          first.refused ??
+          (!isTeamReason(op.reason)
+            ? "VoidReasonNotForTeam"
+            : c.phase !== "InReview"
+              ? "TeamKeyOutsideReview"
+              : !inWindow(c, t)
+                ? "OutsideReviewWindow"
+                : c.outcome !== "Void"
+                  ? "TeamVoidNotAutomatic"
+                  : first.left > 0
+                    ? "NotTallied"
+                    : undefined),
         deltas,
         exit: op.c,
         events: [...first.events, "CampaignVoided", "CampaignFinalized"],

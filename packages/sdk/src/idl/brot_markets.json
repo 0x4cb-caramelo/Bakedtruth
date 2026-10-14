@@ -4947,6 +4947,11 @@
       "code": 6177,
       "name": "ContestAlreadyOpen",
       "msg": "The campaign is already Contested: an opening (stage 1) never escalates it; stage 2 is its own byte"
+    },
+    {
+      "code": 6178,
+      "name": "CutoffNotFinal",
+      "msg": "A YES price result is tallied only once its proof is over 60 s old: an earlier proof could still move the cut-off"
     }
   ],
   "metadata": {

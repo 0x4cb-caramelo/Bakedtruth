@@ -55,8 +55,10 @@ export async function planContest(h: Harness, op: ContestOp): Promise<Plan> {
       // The act is the signed byte (S1), never the status: the byte, the team key, then the act against the campaign
       // (a retried opening is refused, never an escalation), then the act's own rules. Byte 2 is the escalation (D2).
       const escalate = op.stage === 2;
+      // The keeper's tallies come first in the transaction: a YES result's may be refused (CutoffNotFinal, Sprint 16).
       const error: BrotErrorName | undefined =
-        op.stage !== 1 && op.stage !== 2
+        first.refused ??
+        (op.stage !== 1 && op.stage !== 2
           ? "BadInstructionData"
           : op.member < 0
             ? "NotTeamMember"
@@ -76,7 +78,7 @@ export async function planContest(h: Harness, op: ContestOp): Promise<Plan> {
                     ? "ContestOutsideReview"
                     : first.left > 0
                       ? "NotTallied"
-                      : undefined;
+                      : undefined);
       const stage = escalate ? 2 : 1;
       const ends = t + (escalate ? STAGE2_SECONDS : STAGE1_SECONDS);
       return {

@@ -85,7 +85,8 @@ export const BASELINES: Record<string, () => Promise<Baseline>> = {
     const baker = await fundedWallet(w);
     const { campaign } = await injectReviewed(
       w.client,
-      await base(w, { poolYes: SOL, poolNo: 0n, extra: { publish_time: now(w.client), entries_untallied: 1 } }),
+      // The proof is over 60 s old, so the cut-off is final and the tally may run (CutoffNotFinal, O-3).
+      await base(w, { poolYes: SOL, poolNo: 0n, extra: { publish_time: now(w.client) - 61n, entries_untallied: 1 } }),
       P.Outcome.Yes,
       now(w.client) + P.HOUR * 6n,
     );
@@ -109,7 +110,7 @@ export const BASELINES: Record<string, () => Promise<Baseline>> = {
       campaign,
       baker: baker.address,
       index: 0,
-      joined_at: now(w.client) - 60n,
+      joined_at: now(w.client) - 120n,
       amount: SOL,
       _reserved: new Uint8Array(8),
     });

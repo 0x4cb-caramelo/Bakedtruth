@@ -41,7 +41,9 @@ describe("late-entry refund on the program", () => {
 
     setBtc(w, TOUCH, bruTime);
     expectOk(await resolveWith(w, campaign));
-    // Each baker's joins are tallied after the proof, before finalize (amendment 2026-10-09).
+    // Each baker's joins are tallied after the proof, before finalize (amendment 2026-10-09), once the proof is over
+    // 60 s old: until then an earlier proof could still move the cut-off (CutoffNotFinal, O-3).
+    setTime(w.client, bruTime + 61n);
     for (const baker of [ana, bruno]) {
       const entry = await P.entryPda(campaign, baker.address);
       const join = await P.joinPda(campaign, baker.address, 0);

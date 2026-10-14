@@ -1,8 +1,8 @@
 //! Purpose: every refusal the program can return, one code per cause, as custom program errors.
-//! Version: 0.0.5
+//! Version: 0.0.6
 //! Sprint: 02 (pot core on Pinocchio); reader errors from 01 keep their codes; 03 appends 6071 on;
 //!         the sixth kind (`DbcGraduated`) appends 6148 to 6152; the scaffold of Sprints 14–15
-//!         (2026-10-13) appends 6153 and 6160 to 6174
+//!         (2026-10-13) appends 6153 and 6160 to 6174; Sprint 16 (lane L16P) appends 6178
 //!
 //! Codes start at 6000 so they never collide with the System Program's own custom errors, which
 //! a failed CPI passes through. A code, once assigned, never changes meaning. Each variant's
@@ -362,7 +362,10 @@ pub enum BrotError {
     // Sprint 14, the second review's S1 (2026-10-13): the act is in the signed bytes, so an opening never escalates.
     #[error("The campaign is already Contested: an opening (stage 1) never escalates it; stage 2 is its own byte")]
     ContestAlreadyOpen = 6177,
-    // New codes are appended here, from 6178, never reusing a number.
+    // Sprint 16, the pre-freeze hardening (numbers from 6178): the audit package's O-3.
+    #[error("A YES price result is tallied only once its proof is over 60 s old: an earlier proof could still move the cut-off")]
+    CutoffNotFinal = 6178,
+    // New codes are appended here, from 6179, never reusing a number.
 }
 
 impl From<BrotError> for ProgramError {
