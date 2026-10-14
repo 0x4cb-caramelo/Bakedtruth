@@ -4,7 +4,7 @@
  *          resolve task, the settlement task when KEEPER_SETTLE=on, the Pyth watch and the chain watch's alerts. A
  *          cycle that throws is logged and the loop goes on. In standby mode (KEEPER_MODE=standby) the send gate
  *          stays closed until the watchdog has taken over and the primary does not answer.
- * Version: 0.4.0 (Sprints 14 and 15: the stage-1 re-read with RPC B; the lapse and the sealed fees in the settlement)
+ * Version: 0.4.1 (Sprint 16: the settlement's `settle_invariant` alert; Sprints 14 and 15: the stage-1 re-read with RPC B)
  * Sprint:  07 (standby keeper and watchdog)
  *
  * Run: KEEPER_RPC_URL=... KEEPER_KEYPAIR=/path/outside/repo.json bun services/keeper/src/main.ts
@@ -51,6 +51,7 @@ const cycle: CycleContext = {
     backoff: new Backoff(config.cycleMs),
     claims: new DailyClock(),
     sweepMinLamports: ops.sweepMinLamports,
+    invariants: { alerter, raised: new Set() },
   },
   watch: createChainWatch(alerter, ops.thresholds, ops.idle),
   pyth: createPythWatch(config.cluster, alerter),
