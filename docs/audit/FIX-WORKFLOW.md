@@ -16,7 +16,7 @@ this document suggests where the repository has none yet.
 - **Mainnet waits for both reports** on the exact version, every serious finding fixed and confirmed (gate 6,
   `docs/SPRINTS.md` §4; TP §7 "Before mainnet").
 - **House rules** (`CLAUDE.md`): one instruction and one reader per file, under 200 lines, a `Purpose:` header, checked
-  math, the owner checked before any byte; error codes appended from 6178 (from 6179 once the pre-freeze hardening, PR #93, is merged) and never reused
+  math, the owner checked before any byte; error codes appended, never reused; the next free one is 6181 (6178 `CutoffNotFinal`, PR #93; 6179 `PaidOutAboveSnapshot`, PR #94; 6180 `EntryPayoutAboveShare`, the last change before the freeze)
   (`src/error.rs:365`); enum
   variants appended, never reordered (`src/state/enums.rs:7-9`); `gh` commands pass `--repo 0x4cb-caramelo/Bakedtruth`.
   No secret, key or RPC URL with a key in a finding, a commit, a log or a report.

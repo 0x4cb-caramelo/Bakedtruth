@@ -250,6 +250,25 @@ findings go to a follow-up before the freeze:
   firms: a per-entry check behind the running cap, a stricter static test of the pause, and the rent rule in I14 and
   I15.
 
+**The last changes before the freeze (2026-10-14, branch `sprint-16-prefreeze-3`).**
+- **The per-entry check.** In `Split`, `settle_entry` checks each payout against its share of the stored snapshot
+  (`EntryPayoutAboveShare`, 6180), and the keeper raises `settle_invariant` when a settlement is refused with 6101,
+  6179 or 6180.
+- **The pause test.** Every file that names the pause's field has its count pinned.
+- **The unit files.** They read their credentials by the spelled-out path, since the server's systemd 249 drops `%d`,
+  as the indexer's first start showed.
+- **Checks.** 1,152 TypeScript, 568 Rust and 570 mainnet tests; the fixed seed and 12 more; the mutation proof of the
+  new check (both of its tests fail when it is removed).
+- **A third adversarial review.** No legitimate payout trips 6180. It left one Low, recorded as S-8 in
+  `docs/audit/SCOPE.md` §17 for the founder to decide with the freeze: the snapshot's own inputs, which the cap and
+  6180 trust. Its Info findings on the tests and the unit comment were fixed. The alert's step attribution in a batch
+  stays as is (info).
+
+**The freeze waits for the founders** (Ronaldo, 2026-10-14): the third-party prize (`sponsor_add_prize`, still
+deferred) and the two audit firms are decided with the partners before the release candidate's tag. Until then the
+audit package cites `8af10e2`, and by function the files the hardening rewrote; the freeze refreshes the lines at the
+tagged commit and fills the candidate block (`docs/audit/README.md`).
+
 Still open:
 - the other event readers that ask for version 0 (the app's activity and my entries, the indexer, the API's history,
   the relay's allowlist);

@@ -2,8 +2,9 @@
 
 **Status:** in progress. The read API (`services/api`) is **live** on the server since 2026-10-11 (`brot-api` on
 127.0.0.1:4220, public at `brot.markets/api/v1`), with `/api/v1/names` and `/api/v1/price` (PR #69). `brot-rpc` is
-built and tested, not installed. The **SQLite indexer** (`services/indexer`, PR #72) is built and tested, not
-deployed: ingest, projections, points, rebuild, ranking (`/api/v1/ranking`), KPIs and the partner report, `feed_history`,
+built and tested, not installed. The **SQLite indexer** (`services/indexer`, PR #72) is built, tested and
+**live on the server since 2026-10-14** (on Solana's public devnet RPC; its routes public through `brot-api`, PR #91):
+ingest, projections, points, rebuild, ranking (`/api/v1/ranking`), KPIs and the partner report, `feed_history`,
 the `logsSubscribe` wake-up, the creator-own-entry alert and its unit file (2026-10-13). What stays open is listed in
 "Record" · **Dates:** none, by the founder's decision
 
