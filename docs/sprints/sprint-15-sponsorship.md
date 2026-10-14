@@ -1,6 +1,6 @@
 # Sprint 15 — Sponsorship: the sealed entry
 
-**Status:** in progress: the program and the SDK built and tested (2026-10-13); merged 2026-10-13 (PR #89, `d648f51`), and the keeper's part with PR #92 (2026-10-14); blocked by the founder (the perks BP-3, the screens L-11 and L-18, Cloak P-8) on devnet since 2026-10-14 (slot 510863588; the late sealed entry's 10% was answered on 2026-10-13: Brot keeps it) · **Branch:** `sprint-15-sponsorship` · **Dates:** none, by the founder's decision
+**Status:** tagged `sprint-15` (`98b6ece`, PR #92, which carried its keeper part) on 2026-10-14 at Ronaldo's request, with a carry list in the tag; the program and the SDK built and tested (2026-10-13); merged 2026-10-13 (PR #89, `d648f51`), and the keeper's part with PR #92 (2026-10-14); blocked by the founder (the perks BP-3, the screens L-11 and L-18, Cloak P-8); on devnet since 2026-10-14 (slot 510863588, now 510894454; the late sealed entry's 10% was answered on 2026-10-13: Brot keeps it) · **Branch:** `sprint-15-sponsorship` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|

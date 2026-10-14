@@ -65,3 +65,19 @@ com contexto curto, e esperas longas em shell.
 O Ronaldo pediu para deixar o PR e o pacote de auditoria prontos e decidir com os sócios, antes da tag do
 congelamento, o prêmio de terceiros e as duas firmas.
 
+## A última rodada no ar, as tags e um PR só
+
+- **O pedido.** O Ronaldo: "pode mesclar o #95, atualizar o programa no devnet com o binário do CI da main depois dele
+  e publicar o site e nao faca mais pr" e "pode pôr as tags das sprints 06, 07, 08, 14 e 15".
+- **O #95** entrou como `6bd0f68`.
+- **O programa.** O binário do CI (`c002c5c3…`, 206.784 bytes, o mesmo do build local) foi implantado no slot
+  510.894.454, sem extensão, com o hash conferido na rede.
+- **O site.** A release `6bd0f68171d2` foi ensaiada na 4239 e posta no ar; a API diz `ok`, com as entradas abertas.
+- **As tags.** `sprint-06` e `sprint-07` em `88a00f9` (o PR #88), `sprint-08` em `8af10e2` (o PR #91), `sprint-14`
+  e `sprint-15` em `98b6ece` (o PR #92). Cada uma é anotada com o que ficou aberto, como as de -1, 09 e 10.
+- **O keeper.** Depois veio: "atualize o keeper abra uma pr e mergeie com admin merge depois. unica pr". A release
+  `6bd0f68` foi ensaiada na 4239 (quatro ciclos, nenhuma falha) e posta no ar, com o alerta `settle_invariant`.
+- **O registro.** Este PR único carrega tudo isso. Os PRs abertos que não são do líder ficam com o Ronaldo: o #96, do
+  Dependabot (duas ações do GitHub, de 7.0.1 para 7.0.2 e de 8.0.1 para 8.0.2, fixadas por hash), e o rascunho #36, da
+  Sprint -1, obsoleto como código, cujas notas de sessão a Sprint -1 pede copiar antes de fechá-lo.
+

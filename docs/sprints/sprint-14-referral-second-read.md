@@ -1,6 +1,6 @@
 # Sprint 14 — Referral and second read
 
-**Status:** in progress: the program, the SDK, the referral routine and the randomized test built and tested (2026-10-13), with the founder's answer to D2 built the same day and the second red-team pass's findings fixed; merged 2026-10-14 with Sprint 15 and the keeper's part (PR #92, `98b6ece`); the keeper is live on the server; on devnet since 2026-10-14 (slot 510863588, with Sprint 16's O-3 fix), the site rebuilt for it the same morning · **Branch:** `sprint-14-referral-second-read` · **Dates:** none, by the founder's decision
+**Status:** tagged `sprint-14` (`98b6ece`, PR #92) on 2026-10-14 at Ronaldo's request, with a carry list in the tag (the site's `?ref=` flow and its notice, the referral balance L-10, the void log's admin form, the ledger's retention); the program, the SDK, the referral routine and the randomized test built and tested (2026-10-13), with the founder's answer to D2 built the same day and the second red-team pass's findings fixed; merged 2026-10-14 with Sprint 15 and the keeper's part (PR #92, `98b6ece`); the keeper is live on the server; on devnet since 2026-10-14 (slot 510863588 first; since slot 510894454 with all of Sprint 16's pre-freeze changes), the site rebuilt for it the same morning · **Branch:** `sprint-14-referral-second-read` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
