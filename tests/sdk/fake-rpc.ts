@@ -3,8 +3,11 @@
  *          URL (`recheck`, the A-3 preparation) run against the program's real state in a test: account
  *          reads, the Clock sysvar, rent, signatures by address and transactions recorded in the RPC's
  *          shape, the latest blockhash and simulation (./fake-simulate.ts). Integers are written as JSON numbers without precision loss, as a node writes them.
- * Version: 0.1.1 (Sprint 13: `until`, for the read API's incremental history)
- * Sprint:  05 (SDK)
+ *          A transaction is recorded with its version, and `getTransaction` answers as a node does: a versioned one
+ *          only to a caller whose `maxSupportedTransactionVersion` reaches it (-32015 otherwise); as the relay does
+ *          when `relayed` names the versions it relays (-32602 for any other).
+ * Version: 0.1.2 (Sprint 16: transaction versions, and the relay's refusal of the option)
+ * Sprint:  05 (SDK); 16 (lane L16P)
  */
 import { getBase64Decoder, type Address } from "@solana/kit";
 
@@ -18,14 +21,30 @@ function stringify(value: unknown): string {
   return marked.replace(/"__big__(-?\d+)__"/g, "$1");
 }
 
-export type FakeRpc = { url: string; record(tx: RpcTransaction): void; close(): void };
+export type FakeRpc = { url: string; record(tx: RpcTransaction, version?: TxVersion): void; close(): void };
+type TxVersion = "legacy" | 0 | 1;
+/** A JSON-RPC error a handler throws, answered as the node or the relay answers it. */
+class RpcError extends Error {
+  constructor(
+    readonly code: number,
+    message: string,
+  ) {
+    super(message);
+  }
+}
 
 /**
- * Starts the endpoint; `record` adds a transaction for `getSignaturesForAddress` and `getTransaction`.
- * `innerShape` is how the simulation writes inner instructions: as a node does (default), or compiled.
+ * Starts the endpoint; `record` adds a transaction for `getSignaturesForAddress` and `getTransaction`, as version 0
+ * unless told. `innerShape` is how the simulation writes inner instructions: as a node does (default), or compiled.
+ * `relayed`: the `maxSupportedTransactionVersion` values the endpoint takes (a relay's allowlist); any by default.
  */
-export function startFakeRpc(w: World, innerShape: InnerShape = "node"): FakeRpc {
+export function startFakeRpc(
+  w: World,
+  innerShape: InnerShape = "node",
+  relayed: readonly number[] | null = null,
+): FakeRpc {
   const recorded: RpcTransaction[] = [];
+  const versions = new Map<string, TxVersion>();
   const account = (at: Address) => {
     const a = w.client.svm.getAccount(at);
     if (!a.exists) return null;
@@ -58,11 +77,22 @@ export function startFakeRpc(w: World, innerShape: InnerShape = "node"): FakeRpc
         confirmationStatus: "confirmed",
       }));
     },
-    getTransaction: ([signature]) => {
+    getTransaction: ([signature, config]) => {
+      const max = config?.maxSupportedTransactionVersion;
+      if (relayed !== null && max !== undefined && !relayed.includes(max)) {
+        throw new RpcError(-32602, `maxSupportedTransactionVersion ${relayed.join(", ")} only`);
+      }
       const tx = recorded.find((t) => t.transaction.signatures[0] === signature);
-      return tx
-        ? { ...tx, version: 0, meta: { ...tx.meta, fee: 5_000n, logMessages: [], status: { Ok: null } } }
-        : null;
+      if (!tx) return null;
+      const version = versions.get(signature) ?? 0;
+      if (version !== "legacy" && (max === undefined || version > max)) {
+        const ask = `Please try the request again with the following configuration parameter: "maxSupportedTransactionVersion": ${version}`;
+        throw new RpcError(
+          -32015,
+          `Transaction version (${version}) is not supported by the requesting client. ${ask}`,
+        );
+      }
+      return { ...tx, version, meta: { ...tx.meta, fee: 5_000n, logMessages: [], status: { Ok: null } } };
     },
   };
   const server = Bun.serve({
@@ -71,15 +101,26 @@ export function startFakeRpc(w: World, innerShape: InnerShape = "node"): FakeRpc
     async fetch(request) {
       const { id, method, params } = (await request.json()) as { id: number; method: string; params: any[] };
       const handler = handlers[method];
+      const answer = (call: (params: any[]) => unknown) => {
+        try {
+          return { jsonrpc: "2.0", id, result: call(params ?? []) };
+        } catch (error) {
+          if (!(error instanceof RpcError)) throw error;
+          return { jsonrpc: "2.0", id, error: { code: error.code, message: error.message } };
+        }
+      };
       const body = handler
-        ? { jsonrpc: "2.0", id, result: handler(params ?? []) }
+        ? answer(handler)
         : { jsonrpc: "2.0", id, error: { code: -32601, message: `fake RPC: no ${method}` } };
       return new Response(stringify(body), { headers: { "content-type": "application/json" } });
     },
   });
   return {
     url: `http://127.0.0.1:${server.port}`,
-    record: (tx) => recorded.push(tx),
+    record: (tx, version = 0) => {
+      recorded.push(tx);
+      versions.set(tx.transaction.signatures[0]!, version);
+    },
     close: () => server.stop(true),
   };
 }

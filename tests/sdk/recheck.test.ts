@@ -3,13 +3,14 @@
  *          local one backed by the LiteSVM world), the account and field the program read to resolve a
  *          campaign, and returns it beside the recorded value: equal right after resolution, and the
  *          documented `null` or mismatch once the account has moved on, still `consistent` when the field
- *          moved the only way it can. The event search pages newest first past newer and malformed answers.
- * Version: 0.1.1
- * Sprint:  05 (SDK)
+ *          moved the only way it can. The event search pages newest first past newer and malformed answers, and
+ *          reads a resolution sent in any transaction version the cluster serves.
+ * Version: 0.1.2 (Sprint 16: a resolution in a v1 transaction; a relay that relays version 0 only)
+ * Sprint:  05 (SDK); 16 (lane L16P)
  */
 import { afterEach, describe, expect, test } from "bun:test";
 
-import { recheck, type RpcTransaction } from "@brot/sdk/read";
+import { MAX_TRANSACTION_VERSION, recheck, type RpcTransaction } from "@brot/sdk/read";
 
 import * as P from "../brot/program";
 import * as R from "../brot/readers";
@@ -110,6 +111,26 @@ describe("recheck reads the same account through any rpc", () => {
     }
     expect(await recheck(c.campaign, rpc.url, { pageSize: 2 })).toMatchObject({ account: proof, matches: true });
     expect(await recheck(c.campaign, rpc.url, { pageSize: 2, maxSignatures: 4 })).toMatchObject({ matches: null });
+  });
+
+  test("a resolution sent in a v1 transaction is found; a relay of version 0 only still finds a v0 one", async () => {
+    const w = await resolveWorld();
+    const c = await priceCampaign(w);
+    const proof = await anyAddress();
+    const touch = PRICE_TARGET + 1_000n;
+    setBtcPrice(w, proof, touch, START_TIME - 5n);
+    const sent = await sendAsRpc(w, [resolveIx(c, proof)]);
+    // The node serves the resolution as a v1 transaction: only a reader asking for version 1 or more gets it.
+    expect(MAX_TRANSACTION_VERSION).toBe(1);
+    rpc = startFakeRpc(w);
+    rpc.record(sent.tx, 1);
+    const found = { account: proof, field: "price", recorded: touch, reread: touch, matches: true };
+    expect(await recheck(c.campaign, rpc.url)).toMatchObject(found);
+    rpc.close();
+    // A relay that relays version 0 only refuses the option (invalid params): the search asks for 0 from then on.
+    rpc = startFakeRpc(w, "node", [0]);
+    rpc.record(sent.tx, 0);
+    expect(await recheck(c.campaign, rpc.url)).toMatchObject(found);
   });
 
   test("a void records nothing to re-read; an unresolved campaign is refused", async () => {
