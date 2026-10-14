@@ -81,3 +81,12 @@ congelamento, o prêmio de terceiros e as duas firmas.
   Dependabot (duas ações do GitHub, de 7.0.1 para 7.0.2 e de 8.0.1 para 8.0.2, fixadas por hash), e o rascunho #36, da
   Sprint -1, obsoleto como código, cujas notas de sessão a Sprint -1 pede copiar antes de fechá-lo.
 
+## Os dois PRs de fora, e o último PR
+
+O Ronaldo pediu: "so deixe em aberto as decisoes com os socios", com no máximo mais um PR, mesclado depois, e nenhum
+outro. O #96, do Dependabot, tinha o CI verde e mesclava sem conflito; entrou como `83d58f3`. As duas ações que ele
+atualiza só rodam nos pushes da `main`, então o CI da `main` depois dele é a prova. Do rascunho #36, as quatro notas
+de sessão da Sprint -1 que não estavam na `main` foram copiadas como estavam, com as linhas do índice. As outras cinco
+notas do rascunho já estavam na `main`; uma delas, a da integração da Sprint 03, numa versão mais nova, que ficou. O
+rascunho fecha com este último PR.
+

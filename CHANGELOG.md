@@ -27,6 +27,15 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **As notas da Sprint -1 na `main`, e os dois últimos PRs de fora resolvidos** (14/10/2026). As quatro notas de
+  sessão da Sprint -1 que só estavam no rascunho #36 (`session-log/2026-10-08-sprint-menos-1-abertura-design.md`,
+  `2026-10-09-sprint-menos-1-porte-e-aprovacoes.md`, `2026-10-09-sprint-menos-1-primitivos-e-registro.md`,
+  `2026-10-09-sprint-menos-1-fechamento.md`) foram copiadas como estavam, com as suas linhas no índice. O rascunho,
+  obsoleto como código, fecha com este PR. O #96, do Dependabot (`actions/upload-artifact` 7.0.2 e
+  `actions/download-artifact` 8.0.2, fixadas por hash), entrou na `main` como `83d58f3` com o CI verde. Este é o último
+  PR, a pedido do Ronaldo ("no maximo mais uma PR, mergeie depois e nao faca mais nenhuma pr"); ficam em aberto só as
+  decisões com os sócios.
+
 - **A última rodada no ar e as tags de cinco sprints** (14/10/2026; `session-log/2026-10-14-indexador-no-ar-e-segunda-atualizacao.md`).
   Com as palavras do Ronaldo, o #95 entrou na `main` (`6bd0f68`), e o binário do CI dela (`c002c5c3…`) foi para o devnet
   no slot 510.894.454, sem extensão e com o hash conferido na rede. O site (`6bd0f68171d2`) e o keeper (`6bd0f68`, com o
