@@ -4,12 +4,15 @@
  *          at 80% of `max_open_campaigns` or more; the SOL held in every campaign's vault above a threshold (no cap
  *          bounds a bug); each opening by a team key (a leaked team key opens for free); openings per hour above a
  *          threshold; a NO recorded with `met_late` in its review window; a reserved creator share older than seven
- *          days; Pyth's SOL/USD sponsored account older than `max_price_age` (paid openings are refused then). Each
- *          finding names its alert kind; `once` findings fire once per campaign per process.
- * Version: 0.1.0
- * Sprint:  07 carry-over (alerts declared, not emitted, in Sprint 07)
+ *          days; Pyth's SOL/USD sponsored account older than `max_price_age` (paid openings are refused then); since
+ *          Sprint 14, a contest opened (at stage 1, and again at stage 2) and a stage 2 with less than six hours left
+ *          before it lapses with no decision. Each finding names its alert kind; `once` findings fire once per
+ *          campaign (per stage) per process.
+ * Version: 0.2.0 (Sprint 14: the contest's alerts)
+ * Sprint:  07 carry-over (alerts declared, not emitted, in Sprint 07); 14 (lane L14K)
  */
 import {
+  ContestStage,
   Outcome,
   SOL_USD_FEED_HEX,
   Status,
@@ -124,4 +127,37 @@ export function solUsdStale(account: FetchedAccount | null, config: GlobalConfig
     const reason = error instanceof Error ? error.message : String(error);
     return { kind: "sol_usd_stale", key: "sol-usd", detail: { reason, maxPriceAge } };
   }
+}
+
+/** A stage 2 this close to its deadline with no decision lapses soon: the stored result will stand. */
+const STAGE2_WARNING_SECONDS = 6n * HOUR;
+
+/** Each contest opened, once per stage: stage 1 (a team key opened it) and stage 2 (escalated, or a re-read differed). */
+export function contestsOpened(campaigns: readonly OpenCampaign[]): Finding[] {
+  return campaigns
+    .filter(({ campaign: c }) => c.status === Status.Contested && c.contestStage !== ContestStage.None)
+    .map(({ address, campaign: c }) => ({
+      kind: "contest_opened" as const,
+      key: `${address}:${c.contestStage}`,
+      once: true,
+      detail: { campaign: address, stage: c.contestStage, contestEndsAt: Number(c.contestEndsAt) },
+    }));
+}
+
+/** A stage-2 contest with less than six hours before its deadline and no decision yet (the admin's to take). */
+export function stage2Ending(campaigns: readonly OpenCampaign[], now: bigint): Finding[] {
+  return campaigns
+    .filter(
+      ({ campaign: c }) =>
+        c.status === Status.Contested &&
+        c.contestStage === ContestStage.Stage2 &&
+        c.contestEndsAt > now &&
+        c.contestEndsAt - now < STAGE2_WARNING_SECONDS,
+    )
+    .map(({ address, campaign: c }) => ({
+      kind: "contest_stage2_ending" as const,
+      key: address,
+      once: true,
+      detail: { contestEndsAt: Number(c.contestEndsAt), minutesLeft: Number((c.contestEndsAt - now) / 60n) },
+    }));
 }

@@ -6,8 +6,10 @@
  *          Idle time is measured on this machine's clock from the first cycle that saw the condition, so a restart
  *          starts the count again. A finding marked `once` fires once per campaign per process; the others repeat
  *          after the alerter's de-duplication window while the condition lasts.
- * Version: 0.1.0
- * Sprint:  07 carry-over (Sprint 07 DoD: liveness alerts; Sprint 16 DoD: exposure, team openings, 80%)
+ *          Since Sprints 14 and 15: a contest opened (each stage), a stage 2 near its deadline, and a sponsor's sealed
+ *          fee still open on a finalized campaign a cycle after the keeper first saw it.
+ * Version: 0.2.0 (Sprints 14 and 15: the contest's alerts; the sealed fee left open)
+ * Sprint:  07 carry-over (Sprint 07 DoD: liveness alerts; Sprint 16 DoD: exposure, team openings, 80%); 14, 15
  */
 import { Status, type Campaign } from "@brot/sdk/read";
 
@@ -16,6 +18,7 @@ import type { ChainView } from "./chain";
 import type { AttemptResult } from "./resolve";
 import { closable, settlementDue, shareDue } from "./settle-plan";
 import {
+  contestsOpened,
   exposureHigh,
   exposureOf,
   metLateNo,
@@ -23,6 +26,7 @@ import {
   openingsPerHour,
   reservedCreditsOld,
   solUsdStale,
+  stage2Ending,
   teamOpenings,
   type Finding,
   type WatchThresholds,
@@ -49,6 +53,8 @@ const fingerprint = (c: Campaign) =>
     c.prizeSettled,
     c.creatorShareSettled,
     c.creatorShareReserved,
+    c.sealedFeesOpen,
+    c.contestStage,
   ].join(":");
 
 export type ChainWatch = {
@@ -63,7 +69,25 @@ export function createChainWatch(
 ): ChainWatch {
   const resolvableSince = new Map<string, number>();
   const settling = new Map<string, { print: string; since: number }>();
+  const sealedOpen = new Map<string, number>();
   const fired = new Set<string>();
+
+  /** A finalized campaign whose sponsors' sealed fees stay open for a second cycle: the close waits on them. */
+  function sealedFindings(view: ChainView): Finding[] {
+    const findings: Finding[] = [];
+    const seen = new Set<string>();
+    for (const { address, campaign: c } of view.campaigns) {
+      const finalized = c.status === Status.Settling || c.status === Status.Settled;
+      if (!finalized || c.sealedFeesOpen === 0) continue;
+      seen.add(address);
+      const cycles = (sealedOpen.get(address) ?? 0) + 1;
+      sealedOpen.set(address, cycles);
+      const detail = { sealedFeesOpen: c.sealedFeesOpen, cycles, status: Status[c.status] ?? null };
+      if (cycles > 1) findings.push({ kind: "sealed_fee_open", key: address, detail });
+    }
+    for (const key of [...sealedOpen.keys()]) if (!seen.has(key)) sealedOpen.delete(key);
+    return findings;
+  }
 
   function idleFindings(view: ChainView, attempts: readonly AttemptResult[], keeperSettles: boolean): Finding[] {
     const now = wall();
@@ -106,6 +130,9 @@ export function createChainWatch(
         ...teamOpenings(view.campaigns, now, thresholds),
         ...metLateNo(view.campaigns),
         ...reservedCreditsOld(view.campaigns, now, thresholds),
+        ...contestsOpened(view.campaigns),
+        ...stage2Ending(view.campaigns, now),
+        ...sealedFindings(view),
         ...idleFindings(view, attempts, keeperSettles),
       ];
       const emitted: Finding[] = [];
