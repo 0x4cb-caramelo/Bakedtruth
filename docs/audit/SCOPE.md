@@ -326,7 +326,9 @@ proof, only while no entry is fully tallied (`entries_untallied == entries_open`
 `CutoffNotMovable` 6147 tests in `resolve_campaign.rs::resolve_campaign`; `resolve_campaign/record.rs::move_cutoff`). A
 partial tally did not lock it (O-3); on the pre-freeze branch the tally of a YES price result waits until its proof is
 more than 60 s old, and from then on no earlier proof is young enough to be accepted, so the cut-off is final before any
-join is classified (`tally_late_joins.rs::require_cutoff_final`, `CutoffNotFinal` 6178, commit `b1650fb`).
+join is classified (`tally_late_joins.rs::require_cutoff_final`, `CutoffNotFinal` 6178, commit `b1650fb`, on `main` since
+PR #93). On the follow-up branch a move also stores the earlier proof's price (`observed_value`, the review's F3,
+`addf462`), so its `CampaignResolved` pairs that proof's account and time with its own price.
 
 Tests: `tests/brot/resolve-campaign.test.ts:45-154` (the table, row by row), `tests/brot/resolve-refuses.test.ts:52-133`
 (top level, every refusal), `tests/brot/price-proof.test.ts:47-134`, `tests/brot/cutoff-reproof.test.ts:21`,
@@ -389,7 +391,7 @@ rely on the amounts being above the minimum (`THREAT-MODEL.md` §5.13).
 `collect_fee/moves.rs::move_lamports`); the runtime checks the instruction's lamport sum. The vault's balance is never
 read as a pot: every amount comes from the campaign's books. At `8af10e2` the deposit at open and join is asserted
 against the amount booked (I1 as a delta, §16), but a payout's assertion compares the change it just made with itself
-(G-2). **On the pre-freeze branch** (`af198a7`, G-2 closed there): `settle_entry`, `settle_creator_share` (pay, reserve
+(G-2). **Since PR #93** (`af198a7`, on `main` as `a5e6014` since 2026-10-14): `settle_entry`, `settle_creator_share` (pay, reserve
 and claim), `collect_fee` and `settle_prize` take a `VaultWatch` before their first write and check at the end that the
 vault's change equals the change of `booked_out` (what the books say has left: `paid_out_total`, the collected fee,
 the returned prize; `bookkeeping.rs::booked_out`); `close_campaign` requires, before it moves anything, the vault above
@@ -398,6 +400,12 @@ level); and `move_lamports` and `pay_from_vault` read both accounts again after 
 on both sides (`collect_fee/moves.rs::moved_exactly`). Each is `InvariantViolated` 6101. These compare changes, never the
 vault's level against the books, so SOL sent by hand never refuses a payout. `sweep_fees` (the fee vault has no books)
 and `settle_sealed_fee` (the `SealedFee`'s fee is bookkept in the account itself) get the both-sides check only.
+**On the follow-up branch** (the review's F4 and F5, `27e42aa`): each paying instruction first checks a cap from the
+snapshot (`settlement/payout_cap.rs`, `PaidOutAboveSnapshot` 6179). In `Split`, `paid_out_total` is at most
+`distributable + late_yes + late_no + creator_share`; in `OneSided` and `Refund`, `paid_out_total + one_sided_fees` is
+at most `pool_yes + pool_no`. So a wrong amount is caught, not only an unbooked move. `close_campaign` requires
+`vault ≥ held` and returns the vault's rent as `min(rent, vault − held)`, so a rise in the rent-exempt minimum never
+blocks a close.
 
 ## 11. The money math: fee, one-sided fee, creator share
 
@@ -614,25 +622,26 @@ house-failure void or to the fee vault (I5, I8); the creator share's base holds 
 
 Each item is to be **fixed in the candidate** or **sent to the firms as a known issue**, decided by the lead and the
 founder before the freeze. O-items are already recorded by the team; G-items were found while writing this package;
-S-1 to S-4 come from the branch's adversarial review. Status on 2026-10-14, at `8af10e2` and on the pre-freeze branch
-(PR #93, head `fcedeaf`, CI green, **not on `main`**: "closed on the branch" means fixed and tested there, to be checked
+S-1 to S-4 come from the branch's adversarial review. Status on 2026-10-14: PR #93 is on `main` (`a5e6014`, and on
+devnet at slot 510863588); the review's follow-ups are on the follow-up branch ("closed on the branch" means fixed and
+tested there, to be checked
 again on the candidate):
 
 | Item | Status |
 |---|---|
 | O-1, O-2, O-4, O-5, G-4, G-6, G-7, G-9, G-11, G-13 | open, unchanged by Sprints 14 and 15 (O-2 now also binds the sealed entry) |
-| O-3 | closed on the branch, `b1650fb` |
-| G-1 | closed on the branch, `5f5cfd1` |
-| G-2 | closed on the branch, `af198a7` |
-| G-10 | closed on the branch, `c45e349` |
-| G-16 | closed on the branch, `c91b3eb` |
+| O-3 | closed on `main`, `b1650fb` (PR #93) |
+| G-1 | closed on `main`, `5f5cfd1` (PR #93) |
+| G-2 | closed on `main`, `af198a7` (PR #93); the cap per payout on the follow-up branch, `27e42aa` |
+| G-10 | closed on `main`, `c45e349` (PR #93); the free opening and a static check on the follow-up branch, `88c8735` |
+| G-16 | closed on `main`, `c91b3eb` (PR #93) |
 | G-8 | closed at `8af10e2` by Sprint 16's CI (PR #87) |
 | G-3, G-12 | changed by Sprint 14: the admin may now void a contested YES or NO, never invert it |
 | G-5, G-14 | open, with new entries from Sprints 14 and 15 (the branch's TP fixes G-5's pause list and G-2's wording) |
 | G-15 | narrowed: the two new accounts are created through `state::init` |
-| S-1 | off-chain, rated high by the review: readers that ask for transaction version 0 only; the SDK's fixed on the branch (`c74ab36`) |
-| S-2 | low: a moved cut-off keeps the first proof's price |
-| S-3 | informative, the branch's close check: a rent rise above the SOL sent by hand would refuse a close |
+| S-1 | closed on the follow-up branch: every reader uses the SDK's version constant and skips an unreadable transaction without stopping (devnet serves v1 since at least 2026-10-14) |
+| S-2 | closed on the follow-up branch, `addf462` |
+| S-3 | closed on the follow-up branch, `27e42aa` |
 | S-4 | informative: what the randomized run and the pause walk still do not draw |
 
 **O-1. Prize harvesting** (TP §13; TP §14.2 "Prize harvesting", founder answer 12a: "choose the rule before mainnet").

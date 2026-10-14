@@ -316,6 +316,8 @@ export const BROT_MARKETS_ERROR__REREAD_BEFORE_TIMELOCK = 0x1820; // 6176
 export const BROT_MARKETS_ERROR__CONTEST_ALREADY_OPEN = 0x1821; // 6177
 /** CutoffNotFinal: A YES price result is tallied only once its proof is over 60 s old: an earlier proof could still move the cut-off */
 export const BROT_MARKETS_ERROR__CUTOFF_NOT_FINAL = 0x1822; // 6178
+/** PaidOutAboveSnapshot: The payouts would exceed what the snapshot shares out to the entries and the creator */
+export const BROT_MARKETS_ERROR__PAID_OUT_ABOVE_SNAPSHOT = 0x1823; // 6179
 
 export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY
@@ -402,6 +404,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__OPEN_WHILE_PAUSED
   | typeof BROT_MARKETS_ERROR__OUTCOME_KNOWABLE
   | typeof BROT_MARKETS_ERROR__OUTSIDE_REVIEW_WINDOW
+  | typeof BROT_MARKETS_ERROR__PAID_OUT_ABOVE_SNAPSHOT
   | typeof BROT_MARKETS_ERROR__PAYOUT_EXCEEDS_SNAPSHOT
   | typeof BROT_MARKETS_ERROR__PDA_MISMATCH
   | typeof BROT_MARKETS_ERROR__PRICE_CONFIDENCE_TOO_WIDE
@@ -557,6 +560,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__OPEN_WHILE_PAUSED]: `Row 8: entries are paused, which also stops openings`,
     [BROT_MARKETS_ERROR__OUTCOME_KNOWABLE]: `Entries are locked: the outcome is already knowable (met, touched, or epoch started)`,
     [BROT_MARKETS_ERROR__OUTSIDE_REVIEW_WINDOW]: `The review window is closed, or the act is outside it`,
+    [BROT_MARKETS_ERROR__PAID_OUT_ABOVE_SNAPSHOT]: `The payouts would exceed what the snapshot shares out to the entries and the creator`,
     [BROT_MARKETS_ERROR__PAYOUT_EXCEEDS_SNAPSHOT]: `A payout would exceed the snapshot's distributable amount`,
     [BROT_MARKETS_ERROR__PDA_MISMATCH]: `The address is not the program-derived address its seeds and bump give`,
     [BROT_MARKETS_ERROR__PRICE_CONFIDENCE_TOO_WIDE]: `Row 4: the confidence interval is wider than 0.5% of the price`,

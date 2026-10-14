@@ -227,6 +227,22 @@ findings go to a follow-up before the freeze:
 - **Info:** a rent rise above the SOL sent by hand would block a close for good; the keeper can tally a YES price
   result from the proof window on, not the review window's end; the pause test with a free opening.
 
+**The follow-ups, fixed the next morning (2026-10-14)**, on the branch `sprint-16-followups`:
+- **The readers (lane R):** one transaction-version constant in every reader. An unreadable transaction is counted
+  and skipped, so it never stops the indexer, the API's history or the team scripts. The referral's payout scan stops
+  and names it, since a skip there could pay twice. The resolve-event search says "incomplete" instead of returning an
+  older event, and checks the publish time. The relay allows versions 0 and 1. Devnet serves v1 transactions: a real
+  one is a fixture now.
+- **The program (lane P2):**
+  - the cap per payout from the snapshot (`PaidOutAboveSnapshot`, 6179), behind LiteSVM tests at every call site;
+  - the close returning `min(rent, vault − held)`;
+  - a cut-off move storing that proof's price;
+  - the pause test with a team key's free opening, plus a static check of the two pause gates;
+  - the keeper tallying a YES price result once the cut-off is final.
+
+  1,134 TypeScript, 565 Rust and 567 mainnet tests; the fixed seed and 12 more; the mutation run on the changed ids.
+  A second adversarial review read these changes before the PR.
+
 Still open:
 - the other event readers that ask for version 0 (the app's activity and my entries, the indexer, the API's history,
   the relay's allowlist);

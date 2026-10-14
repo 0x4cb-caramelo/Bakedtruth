@@ -33,6 +33,12 @@ recomendado (1a a 12a).
   programa foi estendida em 40.960 bytes (0,208 SOL) e a implantação caiu no slot 510.863.588, com o hash conferido na
   rede. O site (release `a5e6014e42f3`) foi compilado para esse slot, testado na porta 4239 e posto no ar; a API diz
   `ok`, com as entradas abertas. As Sprints 14 e 15 e o endurecimento da 16 rodam no devnet desde então.
+- **Os achados da revisão do endurecimento, no programa** (14/10/2026, faixa P2). Cada instrução que paga confere
+  primeiro um teto a partir do snapshot (`PaidOutAboveSnapshot`, 6179), para pegar um valor errado e não só um
+  movimento fora dos livros. O fechamento devolve o aluguel como `min(aluguel, cofre − devido)`, para que um aumento do
+  aluguel mínimo nunca o trave. Mover o corte grava também o preço da prova anterior. O teste da pausa ganhou a abertura
+  grátis e uma checagem estática das duas portas. O keeper conta as entradas de um SIM de preço assim que o corte fica
+  final.
 - **A leitura segura de transações** (14/10/2026; a revisão adversária do endurecimento, F1 e F2). Todo leitor de
   transações do programa usa a mesma constante de versão do SDK; o devnet já serve transações v1, e uma real virou
   fixture. Uma transação ilegível é contada e pulada: nunca para o indexador, o histórico da API nem os scripts da

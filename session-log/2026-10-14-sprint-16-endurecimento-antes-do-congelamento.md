@@ -62,3 +62,13 @@ teste foi enfraquecido. Os achados vão para um passo seguinte, antes do congela
 
 O Ronaldo pediu, em 14/10, para esperar este endurecimento antes de atualizar o programa e publicar o site. Com este
 PR na `main`, o líder volta a pedir a confirmação do commit.
+
+## Os achados, corrigidos na manhã seguinte
+
+Duas faixas, a partir do PR #93. A faixa R tornou segura a leitura de transações. Todo leitor usa uma constante de
+versão do SDK, e o devnet já serve transações v1: uma real virou fixture. Uma transação ilegível é contada e pulada,
+nunca para o indexador nem os scripts; a varredura de pagamentos da indicação para e nomeia a assinatura, porque pular
+ali poderia pagar duas vezes. A faixa P2 fez o resto: o teto por pagamento a partir do snapshot (6179), o fechamento
+com o aluguel limitado ao que sobra, o preço guardado no corte movido, a pausa com a abertura grátis e o keeper
+contando assim que o corte fica final. Uma segunda revisão adversária leu essas mudanças antes do PR.
+

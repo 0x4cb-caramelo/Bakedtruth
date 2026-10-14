@@ -4952,6 +4952,11 @@
       "code": 6178,
       "name": "CutoffNotFinal",
       "msg": "A YES price result is tallied only once its proof is over 60 s old: an earlier proof could still move the cut-off"
+    },
+    {
+      "code": 6179,
+      "name": "PaidOutAboveSnapshot",
+      "msg": "The payouts would exceed what the snapshot shares out to the entries and the creator"
     }
   ],
   "metadata": {

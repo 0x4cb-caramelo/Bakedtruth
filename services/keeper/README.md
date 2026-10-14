@@ -10,7 +10,8 @@ memory, re-reads the chain every cycle, and never creates an account for anyone.
 2. **resolves** (`resolve.ts`): simulates `resolve_campaign` for the open campaigns worth it (`prefilter.ts`: past
    the deadline, or whose outcome the SDK's mirror says is knowable) and sends what the program accepts;
 3. **settles**, only with `KEEPER_SETTLE=on` (`settle-plan.ts`, `settle.ts`): tallies the joins (a YES price result
-   waits for the end of its review window, so its cut-off can still move back to an earlier proof), finalizes after
+   once its proof is over 60 s old, as the program requires: until then an earlier proof can still move its cut-off
+   back, `CutoffNotFinal`), finalizes after
    the window, pays every entry, the creator share and the prize, collects the fee, closes the campaign and sweeps
    the fee vault, each step only when the campaign's state allows it and every destination the stored one. Off by
    default: whether the devnet keeper pays is the founder's decision;

@@ -1,13 +1,14 @@
 /**
  * Purpose: I10′ with every instruction (G-10 of the audit package; the test Sprint 16 names): with entries paused, the
  *          program refuses exactly the three instructions that bring new money, `user_open_campaign`
- *          (`OpenWhilePaused`), `user_join_campaign` and `sponsor_join_campaign` (`JoinWhilePaused`). Every other
+ *          (`OpenWhilePaused`, a paid opening and a team key's free one alike), `user_join_campaign` and
+ *          `sponsor_join_campaign` (`JoinWhilePaused`). Every other
  *          instruction of the IDL runs under the pause, through a real life cycle (a NO split to its close, a stale
  *          feed voided by the team, a NO confirmed, a NO contested to the admin), or refuses for a reason of its own
  *          (the config exists; the pause is on already), never the pause's. The payouts move their lamports. The list
  *          is the IDL's: an instruction added later fails this test until it is walked here.
- * Version: 0.0.1
- * Sprint:  16 (lane L16P, the pre-freeze hardening). Needs target/deploy/brot_markets.so.
+ * Version: 0.0.2 (the review's F7: a team key's free opening; the static check is prefreeze-pause-static.test.ts)
+ * Sprint:  16 (lane L16P, the pre-freeze hardening and its review). Needs target/deploy/brot_markets.so.
  */
 import { describe, expect, test } from "bun:test";
 
@@ -87,6 +88,9 @@ describe("paused campaign refuses new money, never payouts", () => {
 
     // New money stops: an opening, a join, a sealed entry.
     keep("UserOpenCampaign", (await F.openPriceCampaign(w, creator)).sent);
+    // A team key's free opening is refused the same way: the pause stops openings whoever pays (F7).
+    const free = await F.openPriceCampaign(w, team[0], { openingUsd: 0n, maxLamports: 0n });
+    expect(outcome(keep("UserOpenCampaign", free.sent))).toBe("OpenWhilePaused");
     keep("UserJoinCampaign", await F.join(w, ana, a, { side: P.Side.Yes, amount: P.SOL, expectedEntryTotal: P.SOL }));
     keep("SponsorJoinCampaign", await sealedEntry(w, sponsor, a, { side: P.Side.Yes }));
     // Nothing else: a referral link, the team and the creation rules, a second pause, a second config.
