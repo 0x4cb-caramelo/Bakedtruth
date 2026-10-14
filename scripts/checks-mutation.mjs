@@ -5,7 +5,7 @@
  *          rebuilds the program with cargo build-sbf, and shows that the check's own negative tests
  *          (Mollusk and LiteSVM) fail without it. Each source is restored byte for byte after each
  *          mutant, on error and on Ctrl-C.
- * Version: 0.0.2
+ * Version: 0.0.3 (Sprint 16, G-1: the close and paying checks of Sprint 04; the pre-freeze markers of lane L16P)
  * Sprint:  02 (pot core on Pinocchio), lane A; `top_level` in 03, lane D. Run by hand, never by CI.
  *
  * Usage:  node scripts/checks-mutation.mjs [--plan] [--only id,id] [--jobs N]
@@ -34,6 +34,12 @@ const SOURCES = [
   "instructions/entries/sealed_fee_account.rs",
   "instructions/settlement/settle_sealed_fee.rs",
   "instructions/settlement/close_campaign.rs",
+  // Sprint 16: G-1 (Sprint 04's two checks) and lane L16P's markers (O-3, G-2, G-16).
+  "checks/close.rs",
+  "checks/paying.rs",
+  "instructions/settlement/tally_late_joins.rs",
+  "instructions/settlement/bookkeeping.rs",
+  "instructions/settlement/collect_fee/moves.rs",
 ].map((file) => join(ROOT, "programs/brot-markets/src", file));
 const DEPLOY = join(ROOT, "target/deploy");
 const SO = join(DEPLOY, "brot_markets.so");
@@ -52,6 +58,9 @@ const RUST_TARGETS = [
   "sealed_entry",
   "sealed_settle",
   "contest_mollusk_act",
+  "checks_close_paying",
+  "prefreeze_vault",
+  "prefreeze_tally",
 ];
 const TS_FILES = [
   "tests/brot/checks.test.ts",
@@ -69,6 +78,8 @@ const TS_FILES = [
   "tests/brot/sealed-settle.test.ts",
   "tests/brot/sealed-outcomes.test.ts",
   "tests/brot/contest-act.test.ts",
+  "tests/brot/prefreeze-partial-tally.test.ts",
+  "tests/brot/prefreeze-tally-refusals.test.ts",
 ];
 const PATH = `${process.env.HOME}/.bun/bin:${process.env.PATH}`;
 // Mollusk and LiteSVM both run the binary this script builds; logs off and no colours to parse.
@@ -162,6 +173,16 @@ contest_not_open      fail  contest_not_open_refuses_an_escalation_of_a_campaign
 contest_act           fail  contest_act_is_the_byte_and_fits_the_campaign_on_the_host | -
 contest_already_open  fail  contest_act_is_the_byte_and_fits_the_campaign_on_the_host | -
 contest_not_open      fail  contest_act_is_the_byte_and_fits_the_campaign_on_the_host | -
+close_account_lamports fail an_account_still_holding_lamports_is_refused_and_untouched | -
+paying_vault_distinct fail  the_vault_must_belong_to_the_program_and_no_recipient_may_be_it | -
+tally_cutoff_final    fail  prefreeze_tally_waits_until_the_proof_is_over_60_seconds_old | the tally of a YES price result waits until its proof is over 60 s old, to the second
+tally_cutoff_final    fail  - | a partial tally cannot keep a join early once an earlier proof moves the cut-off back
+tally_join_slots      fail  - | tally: a read-only Join slot, or one aliased with a named slot, is refused before any load
+vault_booked_change   fail  prefreeze_vault_watch_refuses_a_payout_the_books_do_not_record | -
+vault_booked_change   fail  prefreeze_vault_watch_refuses_a_flag_the_vault_did_not_follow | -
+vault_booked_change   fail  prefreeze_vault_watch_counts_changes_and_a_reserve_stays_in_the_vault | -
+move_both_sides       fail  prefreeze_vault_move_refuses_the_same_account_on_both_sides | -
+close_books_covered   fail  prefreeze_close_refuses_a_vault_below_what_the_books_hold | -
 `;
 
 const args = process.argv.slice(2);
