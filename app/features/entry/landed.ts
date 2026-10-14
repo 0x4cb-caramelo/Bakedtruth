@@ -3,11 +3,11 @@
  *          the transaction as the cluster recorded it (`getTransaction`, JSON encoding), with the accounts a lookup
  *          table loaded. A wallet may add instructions of its own (Phantom's Lighthouse assertions, a compute budget),
  *          so the failed instruction's index alone does not say whose it was. `null` when the transaction cannot be read.
- * Version: 0.1.0
- * Sprint:  11 (site: campaign page and entry; the Sprint 11 review's finding 4)
+ * Version: 0.1.1 (Sprint 16, the review's F1: read at MAX_TRANSACTION_VERSION, so a v1 transaction reads too)
+ * Sprint:  11 (site: campaign page and entry; the Sprint 11 review's finding 4); 16
  */
 import { signature as toSignature } from "@solana/kit";
-import type { SolanaRpc } from "@brot/sdk/read";
+import { MAX_TRANSACTION_VERSION, type SolanaRpc } from "@brot/sdk/read";
 
 /** The index of the top-level instruction that failed, from `{ InstructionError: [index, …] }`. */
 export function failedIndex(err: unknown): number | null {
@@ -36,7 +36,11 @@ export function programOf(
 /** Reads the landed transaction and returns the program whose instruction failed, or `null`. */
 export async function failedProgram(rpc: SolanaRpc, signature: string, err: unknown): Promise<string | null> {
   try {
-    const options = { encoding: "json", maxSupportedTransactionVersion: 0, commitment: "confirmed" } as const;
+    const options = {
+      encoding: "json",
+      maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION,
+      commitment: "confirmed",
+    } as const;
     const tx = await rpc.getTransaction(toSignature(signature), options).send();
     return programOf(tx as unknown as Parameters<typeof programOf>[0], err);
   } catch {
