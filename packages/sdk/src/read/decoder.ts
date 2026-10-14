@@ -49,7 +49,7 @@ export type RpcParsedInstruction = { readonly programId: string; readonly parsed
 
 export type RpcInnerInstruction = RpcCompiledInstruction | RpcPartiallyDecodedInstruction | RpcParsedInstruction;
 
-/** The part of `getTransaction` (encoding `json`, `maxSupportedTransactionVersion: 0`) the decoder reads. */
+/** The part of `getTransaction` (encoding `json`, `maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION`) it reads. */
 export type RpcTransaction = {
   readonly slot: bigint | number;
   readonly blockTime?: bigint | number | null;

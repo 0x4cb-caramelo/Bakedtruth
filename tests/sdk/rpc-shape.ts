@@ -1,6 +1,6 @@
 /**
  * Purpose: a transaction sent in LiteSVM, returned in the shape the RPC's `getTransaction` (encoding
- *          `json`, `maxSupportedTransactionVersion: 0`) gives it, so the SDK's decoder is tested on what an
+ *          `json`, `maxSupportedTransactionVersion` up to 1) gives it, so the SDK's decoder is tested on what an
  *          indexer reads: static keys, inner instructions grouped by top-level index, `loadedAddresses`
  *          for address lookup tables, `meta.err`. Also writes a lookup table into the world.
  * Version: 0.1.0

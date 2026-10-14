@@ -11,7 +11,13 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { createSolanaRpc, type KeyPairSigner } from "@solana/kit";
 
-import { decodeCampaign, decodeTransactionEvents, Side, type RpcTransaction } from "@brot/sdk/read";
+import {
+  decodeCampaign,
+  decodeTransactionEvents,
+  Side,
+  type RpcTransaction,
+  MAX_TRANSACTION_VERSION,
+} from "@brot/sdk/read";
 import { buildCloseCampaign } from "@brot/sdk/tx";
 
 import { sharesPaidAtClose } from "../../app/features/my-entries/close-share";
@@ -41,7 +47,9 @@ async function allEvents(c: FakeChain, addresses: string[]) {
     for (const s of await rpc.getSignaturesForAddress(at as never).send()) {
       if (seen.has(s.signature)) continue;
       seen.add(s.signature);
-      const tx = await rpc.getTransaction(s.signature, { encoding: "json", maxSupportedTransactionVersion: 0 }).send();
+      const tx = await rpc
+        .getTransaction(s.signature, { encoding: "json", maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION })
+        .send();
       events.push(...decodeTransactionEvents(tx as unknown as RpcTransaction));
     }
   }
@@ -157,7 +165,9 @@ describe("received on screen matches settlement events", () => {
     expect(reserved).toBeGreaterThan(0n);
     const close = await buildCloseCampaign({ campaign: run.campaign, rentPayer: w.creator.address });
     const sig = await landVia(run.chain, run.keeper, [close]);
-    const tx = await rpc.getTransaction(sig as never, { encoding: "json", maxSupportedTransactionVersion: 0 }).send();
+    const tx = await rpc
+      .getTransaction(sig as never, { encoding: "json", maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION })
+      .send();
     const closed = decodeTransactionEvents(tx as unknown as RpcTransaction).find((e) => e.name === "CampaignClosed")!;
     const history = await readWalletHistory(rpc, w.creator.address);
     const atClose = await sharesPaidAtClose(rpc, w.creator.address, history.events);

@@ -15,6 +15,7 @@
 import { createHash } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { MAX_TRANSACTION_VERSION } from "@brot/sdk/read";
 
 const RPC = process.env.CAPTURE_RPC_URL ?? "https://api.devnet.solana.com";
 const OUT = join(import.meta.dir, "../tests/fixtures/tx-v1");
@@ -47,7 +48,12 @@ if (!signature) {
   for (let s = slot - 1; s > slot - 200 && !signature; s--) {
     const block = await call("getBlock", [
       s,
-      { encoding: "json", maxSupportedTransactionVersion: 1, transactionDetails: "accounts", rewards: false },
+      {
+        encoding: "json",
+        maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION,
+        transactionDetails: "accounts",
+        rewards: false,
+      },
     ]);
     const v1 = (block.body.result?.transactions ?? []).find((t: any) => t.version === 1);
     if (v1) signature = v1.transaction.signatures[0];

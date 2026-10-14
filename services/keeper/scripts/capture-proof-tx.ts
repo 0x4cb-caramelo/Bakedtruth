@@ -14,6 +14,7 @@
 import { createHash } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { MAX_TRANSACTION_VERSION } from "@brot/sdk/read";
 
 const RPC = process.env.CAPTURE_RPC_URL ?? "https://api.devnet.solana.com";
 const OUT = join(import.meta.dir, "../tests/fixtures/proof-tx");
@@ -50,7 +51,7 @@ function save(name: string, text: string) {
 }
 
 mkdirSync(OUT, { recursive: true });
-const tx = { encoding: "json", maxSupportedTransactionVersion: 1, commitment: "confirmed" };
+const tx = { encoding: "json", maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION, commitment: "confirmed" };
 const account = await call("getAccountInfo", [ACCOUNT, { encoding: "base64", commitment: "confirmed" }]);
 const data = Buffer.from(account.result.value.data[0], "base64");
 const postedSlot = Number(data.readBigUInt64LE(125));

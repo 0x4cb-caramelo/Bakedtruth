@@ -10,6 +10,7 @@
 // under 1,000 signatures the oldest one created it. The sponsored list is the table Pyth's docs page embeds, never
 // typed by hand. DEVNET_RPC_URL / MAINNET_RPC_URL override the endpoints. Findings: pyth-feeds-patrocinados.md.
 
+import { MAX_TRANSACTION_VERSION } from "@brot/sdk/read";
 import { Connection, PublicKey } from "@solana/web3.js";
 
 type Cluster = "mainnet" | "devnet";
@@ -45,7 +46,10 @@ async function retry<T>(call: () => Promise<T>): Promise<T> {
 }
 /** getTransaction over raw JSON-RPC: web3.js 1.x cannot decode version-1 transactions, which mainnet now carries. */
 async function transaction(cluster: Cluster, signature: string) {
-  const params = [signature, { encoding: "json", maxSupportedTransactionVersion: 1, commitment: "confirmed" }];
+  const params = [
+    signature,
+    { encoding: "json", maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION, commitment: "confirmed" },
+  ];
   const body = JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getTransaction", params });
   const json = await retry(async () => {
     const init = { method: "POST", headers: { "content-type": "application/json" }, body };
