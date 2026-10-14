@@ -1,16 +1,28 @@
 /**
  * Purpose: what the summary says for the instructions that move no money out of a signer's wallet (the
  *          admin, team and settlement instructions), each with the values it signs: the new admin, the fee
- *          recipient, the team keys, every creation parameter. Also the exact data size of every instruction,
- *          so a summary never describes bytes the program would refuse as `BadInstructionData`.
- * Version: 0.1.4 (no size, so never trusted, for the scaffold's stubs until their lanes; the sealed entry's two
- *          instructions sized, lane L15)
- * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 15 (lane L15)
+ *          recipient, the team keys, every creation parameter, the admin's decision on a contest. Also the exact
+ *          data size of every instruction, so a summary never describes bytes the program would refuse as
+ *          `BadInstructionData`.
+ * Version: 0.1.7 (Sprint 14 review fixes: the link's rent is counted and named, F7; the contest's texts moved to
+ *          ./summary-contest.ts with the campaign the screen read, F6 and F9; the contest's act from its byte, S1;
+ *          the sealed entry's two instructions sized, lane L15)
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 14 (lane L14B); 15 (lane L15)
  */
 import * as G from "../idl/generated/instructions";
 import { BrotMarketsInstruction as B } from "../idl/generated/programs";
 import { bytesToHex, type Bytes } from "../read/bytes";
+import { ACCOUNT_LEN } from "../read/constants";
 import { formatBps, formatSol } from "../read/format";
+import type { Campaign } from "../read/accounts";
+import { contestOpenText, decisionText, rereadText } from "./summary-contest";
+
+/** The part of the summary's context these instructions read (`SummaryContext`, ./summary-brot.ts). */
+type OtherContext = {
+  campaigns?: ReadonlyMap<string, Campaign>;
+  contestsOpenedEarlier?: ReadonlySet<string>;
+  linkRent?: bigint;
+};
 
 /**
  * Each instruction's data size, discriminator included, from the generated decoders. The scaffold's stubs of Sprints
@@ -39,10 +51,27 @@ export const DATA_SIZE: Partial<Record<B, number>> = {
   [B.CloseCampaign]: G.getCloseCampaignInstructionDataDecoder().fixedSize,
   [B.SweepFees]: G.getSweepFeesInstructionDataDecoder().fixedSize,
   [B.TallyLateJoins]: G.getTallyLateJoinsInstructionDataDecoder().fixedSize,
+  [B.UserLinkReferrer]: G.getUserLinkReferrerInstructionDataDecoder().fixedSize,
+  // Sprint 14, lane L14B: the contest's re-read and the admin's decision.
+  [B.RereadCampaign]: G.getRereadCampaignInstructionDataDecoder().fixedSize,
+  [B.AdminDecideContest]: G.getAdminDecideContestInstructionDataDecoder().fixedSize,
   // Lane L15 (Sprint 15): the sealed entry (said by ./summary-sealed.ts) and its fee's settlement.
   [B.SponsorJoinCampaign]: G.getSponsorJoinCampaignInstructionDataDecoder().fixedSize,
   [B.SettleSealedFee]: G.getSettleSealedFeeInstructionDataDecoder().fixedSize,
 };
+
+/**
+ * The rent a referral link's account (96 bytes) takes from the referee, never returned (review fix F7): the cluster's
+ * own figure when the screen read it (`SummaryContext.linkRent`, ./summary-brot.ts), else the runtime's default rent,
+ * 6,960 lamports a byte with the 128-byte account header (1,559,040), above what devnet charged on 2026-10-08
+ * (TP 3.4.4).
+ */
+export const DEFAULT_LINK_RENT = (BigInt(ACCOUNT_LEN.referralLink) + 128n) * 6_960n;
+
+/** The most an instruction described here takes from a signer's wallet: only a link's rent, which never comes back. */
+export function otherLamports(type: B, ctx: OtherContext = {}): bigint {
+  return type === B.UserLinkReferrer ? (ctx.linkRent ?? DEFAULT_LINK_RENT) : 0n;
+}
 
 type Slots = Record<string, { address: string }>;
 type Params = {
@@ -81,8 +110,9 @@ function teamText(teamLen: number, team: readonly string[]): string {
 }
 
 /** One line for an instruction that takes nothing from the signer's wallet but the network fee. */
-export function describeOther(type: B, a: Slots, d: Record<string, any>): string {
+export function describeOther(type: B, a: Slots, d: Record<string, any>, ctx: OtherContext = {}): string {
   const campaign = a.campaign?.address;
+  const stored = campaign === undefined ? undefined : ctx.campaigns?.get(campaign);
   switch (type) {
     case B.AdminInitializeConfig:
       return `Initialise the program's config and fee vault: admin ${d.admin}, fee recipient ${d.feeRecipient}; ${paramsText(d.params)} (the upgrade authority pays both rents)`;
@@ -105,7 +135,11 @@ export function describeOther(type: B, a: Slots, d: Record<string, any>): string
     case B.TeamConfirmResult:
       return `Confirm the result of campaign ${campaign} and end its review window`;
     case B.TeamOpenContest:
-      return `Open a contest on campaign ${campaign} (refused until Sprint 14)`;
+      return contestOpenText(campaign, d.stage, stored, ctx.contestsOpenedEarlier?.has(campaign ?? "") ?? false);
+    case B.RereadCampaign:
+      return rereadText(campaign, a, stored);
+    case B.AdminDecideContest:
+      return decisionText(campaign, d, stored);
     case B.FinalizeCampaign:
       return `Finalize campaign ${campaign} after its review window`;
     case B.SettleEntry:
@@ -122,6 +156,10 @@ export function describeOther(type: B, a: Slots, d: Record<string, any>): string
       return `Sweep the fee vault to ${a.feeRecipient.address}`;
     case B.TallyLateJoins:
       return `Tally ${a.baker.address}'s joins in campaign ${campaign}`;
+    case B.UserLinkReferrer: {
+      const rent = ctx.linkRent === undefined ? `at most ${formatSol(DEFAULT_LINK_RENT)}` : formatSol(ctx.linkRent);
+      return `Record ${d.referrer} as the wallet that referred ${a.referee.address}, once and for good (no instruction changes or removes the link); ${a.referee.address} pays the rent of the link's account, ${rent} SOL, which is never returned`;
+    }
     case B.SettleSealedFee:
       return `Settle ${a.sponsor.address}'s held fee on campaign ${campaign}: back to that sponsor on a void the house caused, else to Brot's fee vault; the SealedFee closes, its rent back to the sponsor`;
     default:

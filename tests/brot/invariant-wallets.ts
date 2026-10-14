@@ -1,9 +1,10 @@
 /**
  * Purpose: the randomized test's money moved by hand and by the wallets: SOL sent by hand to a vault or a campaign,
  *          a creator's wallet emptied (a credit below the reserve then has nowhere to land) or funded again, and the
- *          fee vault swept to `fee_recipient`, each with its expected refusal and balance changes.
- * Version: 0.0.1
- * Sprint:  15 (moved out of invariant-ops.ts unchanged, which the sealed entry took past 200 lines; lane INV15)
+ *          fee vault swept to `fee_recipient`, each with its expected refusal, balance changes and events.
+ * Version: 0.1.0
+ * Sprint:  14 (lane INV14; the planners as Sprint 14 left them); 15 (moved out of invariant-ops.ts unchanged, which the
+ *          sealed entry took past 200 lines; lane INV15)
  */
 import { type Address } from "@solana/kit";
 
@@ -47,10 +48,10 @@ export function planDrain(h: Harness, creatorIndex: number): Plan {
   };
 }
 
-/** Enough for a paid opening (about 4.3 SOL at the captured price): a drained creator can open again (Sprint 15 fix). */
+/** Funds a creator with enough for about twenty paid openings, so a wallet once drained opens again. */
 export function planFund(h: Harness, creatorIndex: number): Plan {
   const creator = h.creators[creatorIndex];
-  const amount = 10n * P.SOL;
+  const amount = 100n * P.SOL;
   return {
     ixs: [systemTransferIx(h.bank, creator.address, amount)],
     deltas: new Map<string, bigint>([
@@ -74,6 +75,7 @@ export async function planSweep(h: Harness): Promise<Plan> {
       [h.feeVault, -surplus],
       [recipient, surplus],
     ]),
+    events: ["FeesSwept"],
     apply: () => {
       h.feeVaultModel -= surplus;
     },

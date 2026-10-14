@@ -1,23 +1,23 @@
 /**
  * Purpose: the reference model of one campaign's money, the state the randomized test expects the
- *          program to hold (TP sections 3.4.7, 3.4.13, 3.4.16). It sits on money-model.ts, written in
+ *          program to hold (TP sections 3.4.7, 3.4.13, 3.4.16): the money, the result resolution stored, the
+ *          contest's stage, the tallies and the event count. It sits on money-model.ts, written in
  *          whole-number steps, and never reads the program's Rust or its layouts.
- * Version: 0.0.1
- * Sprint:  04 (contract freeze, lane E)
+ * Version: 0.1.0 (Sprint 14: the contest, the stored result, the tallies, seq; the no-entry refund)
+ * Sprint:  04 (contract freeze, lane E); 14 (the second read and the referral, lane INV14)
  *
  * Reading (decided here, and the test fails when the program reads it otherwise): a join at or after
  * the YES proof's `publish_time` is late; late amounts leave V and P, come back whole to their baker, and
  * pay no fee. The mode is set by the early totals: both sides above zero is `Split`, anything else
- * `OneSided`; a void is `Refund`.
+ * `OneSided`; a void, or a pot nobody joined, is `Refund` (founder answer 8: then Brot keeps the 10%).
  */
-import { oneSidedFee, payoutOf, settleSplit, splitIsViable } from "./money-model";
-import type { SealedModel } from "./invariant-sealed-model";
+import { oneSidedFee, settleSplit, splitIsViable } from "./money-model";
 
 export type Phase = "Open" | "InReview" | "Contested" | "Settling" | "Settled" | "Closed";
 export type Outcome = "Unresolved" | "Yes" | "No" | "Void";
 export type Mode = "Split" | "OneSided" | "Refund";
-/** One join; `sealed` marks a sealed entry's entry part (Sprint 15), a join like any other in the pot. */
-export type Join = { baker: string; side: 0 | 1; amount: bigint; at: bigint; sealed?: true };
+/** One join; `address` is its `Join` account (kept for the tally); `sealed`, a sealed entry's part (Sprint 15). */
+export type Join = { baker: string; side: 0 | 1; amount: bigint; at: bigint; address?: string; sealed?: true };
 
 export type Snapshot = {
   mode: Mode;
@@ -48,17 +48,28 @@ export type ModelCampaign = {
   phase: Phase;
   outcome: Outcome;
   voidReason: number;
+  /** The YES proof's publish time, the late cut-off (null for any other outcome). */
   publish: bigint | null;
+  /** What resolution stored: the value read and the publish time (a NO's too), which a re-read compares. */
+  observed: bigint;
+  storedPublish: bigint;
+  /** The contest (Sprint 14): its stage (0 none, 1, 2) and that stage's deadline, kept after it ends. */
+  stage: 0 | 1 | 2;
+  contestEndsAt: bigint;
+  /** Bakers whose joins are all tallied (`tally_late_joins`); the harness tallies a baker whole. */
+  tallied: Set<string>;
+  /** The campaign's events so far, so the next event's `seq` (X0.4). */
+  seq: bigint;
+  /** The fill byte of the stored note hash: 0 none, the team's or the admin's note. */
+  note: number;
+  /** A creator share held in the vault for a wallet that could not take it (`creator_share_reserved`). */
+  reserved: bigint;
   joins: Join[];
   snapshot: Snapshot | null;
   settled: Set<string>;
   feeMoved: boolean;
   prizeSettled: boolean;
   shareSettled: boolean;
-  /** A creator share kept in the vault for a wallet it would have left below rent (TP 3.4.5, the reserve path). */
-  reserved: bigint;
-  /** Sprint 15: each sponsor's SealedFee on this campaign, by sponsor address (invariant-sealed-model.ts). */
-  sealed: Map<string, SealedModel>;
   handSent: bigint;
   handSentCampaign: bigint;
   paidOut: bigint;
@@ -76,7 +87,7 @@ export const ONE_SIDED_BPS = 100n;
 
 /** Void reasons (P.VoidReason): the house's own failures refund the 10%; the others keep it. */
 export const HOUSE_REASONS = new Set([1, 4]);
-/** A team key may also choose MissedWindow and StaleFeed (resolution/void_reason.rs, `team_may_choose`). */
+/** The reasons a team key (and the admin's void) may choose: `team_may_choose`, not None or UnreadableAccount. */
 const TEAM_REASONS = new Set([1, 3, 4, 5]);
 
 export type CampaignSetup = Pick<
@@ -92,14 +103,21 @@ export function newCampaign(p: CampaignSetup): ModelCampaign {
     outcome: "Unresolved",
     voidReason: 0,
     publish: null,
+    observed: 0n,
+    storedPublish: 0n,
+    stage: 0,
+    contestEndsAt: 0n,
+    tallied: new Set(),
+    // `CampaignOpened` took seq 0.
+    seq: 1n,
+    note: 0,
+    reserved: 0n,
     joins: [],
     snapshot: null,
     settled: new Set(),
     feeMoved: false,
     prizeSettled: false,
     shareSettled: false,
-    reserved: 0n,
-    sealed: new Map(),
     handSent: 0n,
     handSentCampaign: 0n,
     paidOut: 0n,
@@ -116,11 +134,15 @@ export function entriesCloseFor(opensAt: bigint, deadline: bigint): bigint {
   return deadline - clamped;
 }
 
+/** The proof window is open up to and including `deadline + 60 s`: only a YES proof decides inside it (Q4). */
+export const inProofWindow = (c: ModelCampaign, t: bigint) => t <= c.deadline + PROOF_DELAY;
 export const isLate = (c: ModelCampaign, at: bigint) => c.publish !== null && at >= c.publish;
 export const earlyJoins = (c: ModelCampaign) => c.joins.filter((j) => !isLate(c, j.at));
 export const lateJoins = (c: ModelCampaign) => c.joins.filter((j) => isLate(c, j.at));
 export const sumOf = (joins: Join[]) => joins.reduce((n, j) => n + j.amount, 0n);
 export const sideTotal = (joins: Join[], side: 0 | 1) => sumOf(joins.filter((j) => j.side === side));
+export const bakersOf = (c: ModelCampaign) => [...new Set(c.joins.map((j) => j.baker))];
+export const untallied = (c: ModelCampaign) => bakersOf(c).filter((b) => !c.tallied.has(b));
 /** The side that wins for a `Yes` or `No` outcome. */
 export const winningSide = (c: ModelCampaign): 0 | 1 => (c.outcome === "Yes" ? 0 : 1);
 
@@ -134,9 +156,8 @@ export const booked = (c: ModelCampaign) => joinedTotal(c) + c.prize + c.opening
 export function snapshotOf(c: ModelCampaign): Snapshot {
   const late = sumOf(lateJoins(c));
   const firstBaker = c.joins[0]?.baker ?? null;
-  if (c.outcome === "Void") {
-    return blank("Refund", late, firstBaker);
-  }
+  // A void, or a pot nobody joined whatever the outcome (founder answer 8), refunds.
+  if (c.outcome === "Void" || c.joins.length === 0) return blank("Refund", late, firstBaker);
   const early = earlyJoins(c);
   const yes = sideTotal(early, 0);
   const no = sideTotal(early, 1);
@@ -146,10 +167,11 @@ export function snapshotOf(c: ModelCampaign): Snapshot {
   const split = { winning, losing, prize: c.prize, feeBps: FEE_BPS, creatorBps: c.team ? 0n : CREATOR_BPS };
   // One side empty, or a losing side too small to pay its fees (the Economic Viability Rule): one-sided.
   if (yes === 0n || no === 0n || !splitIsViable(split)) {
-    // Taken on each Entry's early total, never join by join (settlement/rules.rs, `entry_payout`).
+    // Each entry pays its fee once, on its whole early amount (settlement/rules.rs `entry_payout`), not per join.
     const byBaker = new Map<string, bigint>();
     for (const j of early) byBaker.set(j.baker, (byBaker.get(j.baker) ?? 0n) + j.amount);
-    const oneSidedFees = [...byBaker].reduce((n, [b, x]) => n + oneSidedFee(x, ONE_SIDED_BPS, b === firstBaker), 0n);
+    let oneSidedFees = 0n;
+    for (const [baker, amount] of byBaker) oneSidedFees += oneSidedFee(amount, ONE_SIDED_BPS, baker === firstBaker);
     const totals = yes === 0n || no === 0n ? { winning: yes + no, losing: 0n } : { winning, losing };
     return { ...blank("OneSided", late, firstBaker), ...totals, oneSidedFees };
   }
@@ -170,61 +192,8 @@ export function snapshotOf(c: ModelCampaign): Snapshot {
 }
 
 function blank(mode: Mode, late: bigint, firstBaker: string | null): Snapshot {
-  return {
-    mode,
-    winning: 0n,
-    losing: 0n,
-    late,
-    fee: 0n,
-    fromPot: 0n,
-    fromFee: 0n,
-    distributable: 0n,
-    firstBaker,
-    oneSidedFees: 0n,
-    winners: 0,
-  };
+  const zero = { winning: 0n, losing: 0n, fee: 0n, fromPot: 0n, fromFee: 0n, distributable: 0n, oneSidedFees: 0n };
+  return { mode, late, firstBaker, winners: 0, ...zero };
 }
 
-/** What `settle_entry` pays one baker: its early share (per mode) plus its late refund. */
-export function entryPayout(c: ModelCampaign, baker: string): bigint {
-  const s = c.snapshot;
-  if (!s) throw new Error("entryPayout before the snapshot");
-  const mine = c.joins.filter((j) => j.baker === baker);
-  const late = sumOf(mine.filter((j) => isLate(c, j.at)));
-  const early = mine.filter((j) => !isLate(c, j.at));
-  if (s.mode === "Refund") return late + sumOf(early);
-  if (s.mode === "OneSided") {
-    const amount = sumOf(early);
-    return amount - oneSidedFee(amount, ONE_SIDED_BPS, baker === s.firstBaker) + late;
-  }
-  const won = sideTotal(early, winningSide(c));
-  return payoutOf(won, s.distributable, s.winning) + late;
-}
-
-/** A void the house caused returns the opening fee, unless no entry ever landed (founder answer 8: kept). */
-const opensBack = (c: ModelCampaign) => HOUSE_REASONS.has(c.voidReason) && c.joins.length > 0;
-
-/** What `collect_fee` moves to the fee vault. */
-export function collectDue(c: ModelCampaign): bigint {
-  const s = c.snapshot;
-  if (!s) return 0n;
-  if (s.mode === "Split") return s.fee - s.fromFee + c.openingFee;
-  if (s.mode === "OneSided") return s.oneSidedFees + c.openingFee;
-  return opensBack(c) ? 0n : c.openingFee;
-}
-
-/** What `settle_prize` pays the opener (Split: none, the prize is in the distributable). */
-export function prizeDue(c: ModelCampaign): bigint {
-  const s = c.snapshot;
-  if (!s || s.mode === "Split") return 0n;
-  if (s.mode === "OneSided") return c.prize;
-  return c.prize + (opensBack(c) ? c.openingFee : 0n);
-}
-
-/** The creator's share (P-1: none on a void, a one-sided pot or a team opening). */
-export const shareDue = (c: ModelCampaign) =>
-  c.snapshot?.mode === "Split" ? c.snapshot.fromPot + c.snapshot.fromFee : 0n;
-
-/** `Split` with a prize, or nothing to return: the prize is settled when the snapshot is taken. */
 export const isTeamReason = (reason: number) => TEAM_REASONS.has(reason);
-export const winnersOf = (c: ModelCampaign) => c.snapshot?.winners ?? 0;

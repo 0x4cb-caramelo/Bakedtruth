@@ -1,8 +1,8 @@
 //! Purpose: resolution of a price campaign (TP section 3.4.6; D7): while the proof window is
 //!          open only a YES proof records anything; after it, the sponsored account gives NO, or a
 //!          void when the feed went stale before the deadline or cannot be read.
-//! Version: 0.0.2
-//! Sprint: 03 (readers and resolution), lane C
+//! Version: 0.0.3 (the window's test is `proof_window_open`, shared with the contest's re-read)
+//! Sprint: 03 (readers and resolution), lane C; 14 (lane L14B, review fix F4)
 //!
 //! The window. With D the campaign's `deadline_at`, up to D + `PROOF_DELAY_SECONDS` (60 s, Q4)
 //! only a YES proof resolves: a price published inside `[opens_at, D]` and at most 60 s old. NO
@@ -41,19 +41,26 @@ use super::{
 use crate::{
     constants::{PROOF_DELAY_SECONDS, STALE_FEED_MIN_SECONDS},
     error::BrotError,
-    readers::{Decision, ReadContext, Reading, Resolution},
-    state::enums::VoidReason,
+    readers::{ChainTime, Decision, ReadContext, Reading, Resolution},
+    state::{campaign::Campaign, enums::VoidReason},
 };
+
+/// The proof window is open at `time`: up to D + `PROOF_DELAY_SECONDS` only a YES proof decides, and the
+/// proof slot is the only account read (module documentation). In i128, so no deadline overflows it.
+/// Also what the contest's re-read asks, to tell an offered proof's error from the metric account's.
+pub fn proof_window_open(campaign: &Campaign, time: &ChainTime) -> Result<bool, ProgramError> {
+    let deadline = i128::from(campaign.deadline_at.get());
+    let window_end = deadline
+        .checked_add(i128::from(PROOF_DELAY_SECONDS))
+        .ok_or(BrotError::MathOverflow)?;
+    Ok(i128::from(time.unix_timestamp) <= window_end)
+}
 
 /// Resolution for the price kind. Up to D + 60 s: `Yes` from a valid proof, `NotYet` without one
 /// (`ctx.proof` is `None`), or the proof's refusal. After it: `No`, or `Void` (`StaleFeed`,
 /// `UnreadableAccount`). Times are compared in i128, so no deadline can overflow the window.
 pub fn try_resolve(ctx: &ReadContext) -> Result<Resolution, ProgramError> {
-    let deadline = i128::from(ctx.campaign.deadline_at.get());
-    let window_end = deadline
-        .checked_add(i128::from(PROOF_DELAY_SECONDS))
-        .ok_or(BrotError::MathOverflow)?;
-    if i128::from(ctx.time.unix_timestamp) <= window_end {
+    if proof_window_open(ctx.campaign, &ctx.time)? {
         return match ctx.proof {
             Some(proof) => Ok(Resolution::Decided(Decision::yes(yes_proof(proof, ctx)?))),
             None => Ok(Resolution::NotYet),

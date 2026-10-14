@@ -1,9 +1,10 @@
 # Sprint 07 — Standby keeper and watchdog
 
 **Status:** closed 2026-10-10 for the Hackathon MVP by the founder's decision; its open code items are built since
-2026-10-13 (the alerts, the second read through RPC B, the two-keepers test, the Pyth watch), on branch
-`sprint-07-keeper-carryover`, not deployed. Not tagged: blocked by D4 (the VM at a second provider with wallet 2, the RPC
-account at another company, the email provider), the founder (the path unit, the tag) and the server owner
+2026-10-13 (the alerts, the second read through RPC B, the two-keepers test, the Pyth watch) and merged with PR #88,
+whose release `88a00f9` runs on the primary since 2026-10-13 19:03 UTC; the standby is not deployed. Not tagged:
+blocked by D4 (the VM at a second provider with wallet 2, the RPC account at another company, the email provider), the
+founder (the path unit, the tag) and the server owner · **Branch:** `sprint-07-standby-watchdog` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -41,8 +42,16 @@ The founder closed this sprint for the Hackathon MVP. The primary's restart endp
 | Carried over: Pyth receiver and push-oracle watch | **Not built.** Carried to Sprint 16 |
 | Common closure: secrets scan, codemap | Done (secrets scan clean on the PR; codemap current) |
 
-**Still open for the program:** Sprint 06 is not closed. Its real resolve on devnet has not been seen yet, and the
-standby code is untested against a live primary.
+**Still open for the program:** Sprint 06 is not closed, and the standby code is untested against a live primary.
+Sprint 06's real resolve was seen after this closure: the keeper resolved `FmDo…` on its own on 2026-10-11 at
+15:59:17 UTC (`23agRJq8nJtzUjNy…`).
+
+**After closure (2026-10-13).** PR #88, the carry-over of Sprints 06 and 07, merged as `88a00f9`. At Ronaldo's
+request that release runs on the server since 19:03 UTC, under the existing unit and with `KEEPER_SETTLE=on`, after a
+dry run on port 4239; it settled the two campaigns that were waiting (Sprint 06's "After closure" lists the
+transactions). The standby, VM 2, wallet 2, RPC B and the email channel stay deferred (D4), and the new unit with its
+own identity is not installed (the server owner). The primary read the public devnet RPC, which answered 429s, until
+later that day, when its RPC became Helius devnet at Ronaldo's request (D4's choice of 2026-10-10).
 
 ## Definition of done
 

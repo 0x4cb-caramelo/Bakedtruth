@@ -18,7 +18,8 @@ use super::{
     entries::{join_campaign::JoinCampaignArgs, sponsor_join_campaign::SponsorJoinArgs},
     referral::link_referrer::LinkReferrerArgs,
     resolution::{
-        admin_decide_contest::DecideContestArgs, team_void_campaign::TeamVoidCampaignArgs,
+        admin_decide_contest::DecideContestArgs, team_open_contest::TeamOpenContestArgs,
+        team_void_campaign::TeamVoidCampaignArgs,
     },
 };
 use crate::state::config::CreationParams;
@@ -139,17 +140,24 @@ pub enum BrotInstruction {
     #[account(4, name = "program", desc = "This program")]
     TeamVoidCampaign(TeamVoidCampaignArgs),
 
-    /// Enters Contested inside the window: payout paused. Nothing leaves Contested before Sprint 14.
+    /// The act is the signed byte `stage`, never the stored status. Stage 1: enters Contested inside
+    /// the window, once every entry is tallied: payout paused, stage 1 lasts 24 hours; on a campaign
+    /// already Contested it is refused (ContestAlreadyOpen), so a retried opening never escalates.
+    /// Stage 2: sends a contest still at stage 1, before its deadline, to the admin for 48 hours (the
+    /// escalation, D2); NotContested on any other campaign. A contest leaves by reread_campaign (the
+    /// same reading pays from stage 1's deadline on, a different one opens stage 2),
+    /// admin_decide_contest (stage 2) or finalize_campaign (the lapse).
     #[account(0, signer, name = "team_member", desc = "A key in GlobalConfig.team")]
     #[account(1, name = "config", desc = "GlobalConfig, read")]
-    #[account(2, writable, name = "campaign", desc = "Campaign, InReview")]
+    #[account(2, writable, name = "campaign", desc = "Campaign: InReview for stage 1; Contested at stage 1 for stage 2")]
     #[account(3, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
     #[account(4, name = "program", desc = "This program")]
-    TeamOpenContest,
+    TeamOpenContest(TeamOpenContestArgs),
 
     /// Snapshots the totals, the mode and the creator share of a reviewed campaign, once the window
-    /// has closed. Any wallet. Decrements the open count for a paid campaign only (I7).
-    #[account(0, writable, name = "campaign", desc = "Campaign, InReview, window closed")]
+    /// has closed, or of a contested one once its contest lapsed (stage 2's deadline, or 48 hours
+    /// after an unread stage 1's). Any wallet. Decrements the open count for a paid campaign only (I7).
+    #[account(0, writable, name = "campaign", desc = "Campaign, InReview with its window closed, or Contested and lapsed")]
     #[account(1, writable, name = "config", desc = "GlobalConfig: the open count")]
     #[account(2, name = "event_authority", desc = "PDA [\"__event_authority\"]")]
     #[account(3, name = "program", desc = "This program")]
@@ -218,7 +226,8 @@ pub enum BrotInstruction {
     #[account(4, name = "program", desc = "This program")]
     TallyLateJoins,
 
-    /// Sprint 14 (lane L14A; a stub until then): the referee records, once, the wallet that referred it.
+    /// Sprint 14: the referee records, once and for good, the wallet that referred it. No instruction
+    /// changes or closes a link; linking is never paused.
     #[account(0, writable, signer, name = "referee", desc = "The signing wallet; pays the rent")]
     #[account(1, writable, name = "referral_link", desc = "ReferralLink, PDA [\"referral\", referee], created")]
     #[account(2, name = "system_program", desc = "System Program")]
@@ -227,7 +236,8 @@ pub enum BrotInstruction {
     UserLinkReferrer(LinkReferrerArgs),
 
     /// Sprint 14 (lane L14B; a stub until then): in stage 1 of a contest, runs the reading again and
-    /// compares it with the stored result. Any wallet, top level only.
+    /// compares it with the stored result: the same reading pays only from stage 1's deadline on
+    /// (RereadBeforeTimelock), a different one opens stage 2. Any wallet, top level only.
     #[account(0, writable, name = "campaign", desc = "Campaign, Contested, stage 1")]
     #[account(1, writable, name = "config", desc = "GlobalConfig: the open count")]
     #[account(2, name = "metric_account", desc = "Campaign.metric_account")]

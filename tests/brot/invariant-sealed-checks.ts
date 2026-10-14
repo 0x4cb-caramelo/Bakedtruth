@@ -5,12 +5,14 @@
  *          are the sponsor's sealed entries (I1, I15, I2); `sealed_fees_open` counts the live ones and none is live
  *          once the campaign is closed (I6); each settled fee went where the cause sends it (I5), only to its sponsor
  *          or the fee vault, once (I8); in a split the creator share's base is the entry parts, never a fee (I12).
- * Version: 0.0.1
+ * Version: 0.1.0 (with Sprint 14 in one branch: the chain view from invariant-view.ts, the SealedFees beside the
+ *          campaign's model)
  * Sprint:  15 (the lead's harness, lane INV15)
  */
-import type { ChainView, Harness } from "./invariant-harness";
+import type { Harness } from "./invariant-harness";
 import { HOUSE_REASONS, sumOf, type ModelCampaign } from "./invariant-model";
-import { liveSealed } from "./invariant-sealed-model";
+import { liveSealed, sealedOf } from "./invariant-sealed-model";
+import type { ChainView } from "./invariant-view";
 import { decode } from "./layouts";
 import * as P from "./program";
 import { balance } from "./setup";
@@ -20,7 +22,7 @@ type Check = (c: ModelCampaign, v: ChainView, h: Harness) => string | null;
 
 /** I1 and I15 for each SealedFee, with I2 for its books: the model's lamports, at least rent + fee, the sums stored. */
 const sealedBooks: Check = (c, _v, h) => {
-  for (const s of c.sealed.values()) {
+  for (const s of sealedOf(c).values()) {
     const held = balance(h.w, s.address);
     if (held !== s.lamports) return `SealedFee of ${s.sponsor} holds ${held}, the model ${s.lamports}`;
     const account = h.w.client.svm.getAccount(s.address);
@@ -54,7 +56,7 @@ const sealedOpen: Check = (c, v) => {
  * sponsor; SOL sent by hand to the fee vault. Nobody else is paid from a SealedFee. */
 const sealedPaid: Check = (c) => {
   const refund = c.snapshot?.mode === "Refund" && HOUSE_REASONS.has(c.voidReason);
-  for (const s of c.sealed.values()) {
+  for (const s of sealedOf(c).values()) {
     if (s.state !== "settled") {
       if (s.paid.length > 0) return `SealedFee of ${s.sponsor} paid out before it was settled`;
       continue;

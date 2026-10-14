@@ -1,7 +1,7 @@
 /**
  * Purpose: the program's custom error codes by name (programs/brot-markets/src/error.rs), so a client
  *          names the exact refusal. Codes are appended there and here, never reused.
- * Version: 0.1.1
+ * Version: 0.1.2
  * Sprint:  05 (SDK); moved from tests/brot/errors.ts, which now re-exports it; the scaffold of Sprints 14–15
  *          (2026-10-13) appends 6153 and 6160 to 6174
  *
@@ -172,6 +172,9 @@ export const BROT_ERROR_CODES = {
   SealedFeesOpen: 6172,
   SealedFeeMismatch: 6173,
   WrongSponsor: 6174,
+  ConfirmWithVoidReason: 6175,
+  RereadBeforeTimelock: 6176,
+  ContestAlreadyOpen: 6177,
 } as const;
 
 /** The name of a program error, as error.rs and the IDL spell it. */

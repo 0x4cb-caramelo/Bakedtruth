@@ -5,9 +5,10 @@
  *          a signer's wallet: a join names its campaign, side, amount, guards and rents; an opening names its
  *          target in the feed's units, its deadline, its creator, what it pays, the SOL price below which the
  *          payment is refused, and the terms it binds (review, M3 and L7).
- * Version: 0.1.4 (an instruction the summary does not describe yet is refused by name; the sealed entry, said by
+ * Version: 0.1.5 (Sprint 14 review fixes: the context reaches the other instructions; a link's rent is counted; an
+ *          instruction the summary does not describe yet is refused by name; the sealed entry, said by
  *          ./summary-sealed.ts, lane L15)
- * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 15 (lane L15)
+ * Sprint:  05 (SDK); the scaffold of Sprints 14–15 (2026-10-13); 14 (lane L14B); 15 (lane L15)
  *
  * The context (the campaign a join points at; an opening's price exponent and terms) is what the screen read
  * through its RPC. Without it the summary still says everything the bytes hold, in raw units.
@@ -25,13 +26,17 @@ import { bytesToHex, type Bytes } from "../read/bytes";
 import { Direction, ReaderKind, Side, VoidReason } from "../read/constants";
 import { feedSymbol } from "../read/feeds";
 import { formatBps, formatScaled, formatSol, formatUsdCents, formatUtc } from "../read/format";
-import { DATA_SIZE, describeOther } from "./summary-other";
+import { DATA_SIZE, describeOther, otherLamports } from "./summary-other";
 import { describeSealedEntry } from "./summary-sealed";
 
 /** What the screen read, so the summary can name it in words. */
 export type SummaryContext = {
-  /** The campaign at each address a join points at, as read. */
+  /** The campaign at each address a join or a contest's act (its opening or escalation, re-read, decision) names. */
   campaigns?: ReadonlyMap<string, Campaign>;
+  /** Set by the summary itself: the campaigns an earlier instruction of the same transaction opens a contest on. */
+  contestsOpenedEarlier?: ReadonlySet<string>;
+  /** A referral link: the cluster's rent for its 96-byte account (`rentExemptMinimum`), which the referee pays. */
+  linkRent?: bigint;
   /** An opening on the price kind: the price account's exponent (`validateOpenCampaign`'s `priceExponent`). */
   priceExponent?: number;
   /** An opening: the config's terms, shown when their version is the one the opening binds. */
@@ -164,7 +169,10 @@ function describe(parsed: Parsed, ctx: SummaryContext, ix: Instruction): { text:
         lamports: 0n,
       };
     default:
-      return { text: describeOther(parsed.instructionType, a, d), lamports: 0n };
+      return {
+        text: describeOther(parsed.instructionType, a, d, ctx),
+        lamports: otherLamports(parsed.instructionType, ctx),
+      };
   }
 }
 

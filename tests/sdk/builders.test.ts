@@ -10,13 +10,14 @@
 import { describe, expect, test } from "bun:test";
 import { generateKeyPairSigner, type Instruction } from "@solana/kit";
 
+import { ContestStage } from "@brot/sdk/read";
 import * as T from "@brot/sdk/tx";
 import { IDL } from "../brot/idl";
 import { DEFAULT_PARAMS } from "../brot/flows";
 import { camel } from "../brot/idl";
 import * as I from "../brot/instructions";
-import * as IS from "../brot/instructions-settlement";
 import * as IL from "../brot/instructions-14-15";
+import * as IS from "../brot/instructions-settlement";
 import * as P from "../brot/program";
 
 const shape = (ix: Instruction) => ({
@@ -28,7 +29,7 @@ const shape = (ix: Instruction) => ({
  * The scaffold's stubs of Sprints 14–15 (2026-10-13): in the IDL, refused by the program, with no SDK builder until
  * their lanes. Each lane deletes its own name when it adds the builder and its pair below.
  */
-const NO_BUILDER_YET = ["UserLinkReferrer", "RereadCampaign", "AdminDecideContest"];
+const NO_BUILDER_YET: string[] = [];
 const params = Object.fromEntries(
   Object.entries(DEFAULT_PARAMS).map(([k, v]) => [camel(k), v]),
 ) as unknown as T.CreationParamsArgs;
@@ -87,7 +88,10 @@ describe("sdk builders match the test kit", () => {
         T.buildTeamVoidCampaign({ teamMember: who, campaign, reason: 5, noteHash: new Uint8Array(32).fill(9) }),
         IS.teamVoidCampaignIx(who, config, campaign, { reason: 5, noteHash: new Uint8Array(32).fill(9) }),
       ],
-      [T.buildTeamOpenContest({ teamMember: who, campaign }), IS.teamOpenContestIx(who, config, campaign)],
+      [
+        T.buildTeamOpenContest({ teamMember: who, campaign, stage: ContestStage.Stage2 }),
+        IS.teamOpenContestIx(who, config, campaign, 2),
+      ],
       [T.buildFinalizeCampaign({ campaign }), IS.finalizeCampaignIx(campaign, config)],
       [
         T.buildTallyLateJoins({ campaign, baker: other, from: 1, to: 3 }),
@@ -105,6 +109,26 @@ describe("sdk builders match the test kit", () => {
       [T.buildSettlePrize({ campaign, recipient: other }), IS.settlePrizeIx(campaign, vault, other)],
       [T.buildCloseCampaign({ campaign, rentPayer: other }), IS.closeCampaignIx(campaign, vault, other, feeVault)],
       [T.buildSweepFees({ feeRecipient: other }), IS.sweepFeesIx(config, feeVault, other)],
+      [T.buildUserLinkReferrer({ referee: who, referrer: other }), IL.userLinkReferrerIx(who, other)],
+      // Sprint 14, lane L14B: the contest's re-read and the admin's decision.
+      [
+        T.buildRereadCampaign({ campaign, metricAccount: P.BTC_USD_ACCOUNT, proofAccount: other }),
+        IL.rereadCampaignIx(campaign, config, P.BTC_USD_ACCOUNT, other),
+      ],
+      [
+        T.buildAdminDecideContest({
+          admin: who,
+          campaign,
+          decision: P.ContestDecision.Void,
+          voidReason: P.VoidReason.TeamHouseFailure,
+          noteHash: new Uint8Array(32).fill(5),
+        }),
+        IL.adminDecideContestIx(who, config, campaign, {
+          decision: P.ContestDecision.Void,
+          voidReason: P.VoidReason.TeamHouseFailure,
+          noteHash: new Uint8Array(32).fill(5),
+        }),
+      ],
       // Lane L15 (Sprint 15): the sealed entry and its fee's settlement.
       [
         T.buildSponsorJoinCampaign({

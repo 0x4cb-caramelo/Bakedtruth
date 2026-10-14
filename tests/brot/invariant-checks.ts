@@ -2,24 +2,18 @@
  * Purpose: the money invariants I1 to I15 (TP section 3.4.13) as small functions of the model state and
  *          the chain state. The randomized test runs them after every operation; a violation names the
  *          invariant and the values that broke it.
- * Version: 0.0.1
- * Sprint:  04 (contract freeze, lane E)
+ * Version: 0.1.1 (Sprint 14: the creator share's reserve in I6 and I13; the campaign's record, invariant-state.ts;
+ *          Sprint 15: the sealed entry's checks, invariant-sealed-checks.ts)
+ * Sprint:  04 (contract freeze, lane E); 14 (lane INV14); 15 (lane INV15)
  */
-import {
-  booked,
-  earlyJoins,
-  joinedTotal,
-  type ModelCampaign,
-  shareDue,
-  sideTotal,
-  sumOf,
-  winnersOf,
-} from "./invariant-model";
+import { booked, earlyJoins, joinedTotal, type ModelCampaign, sideTotal, sumOf } from "./invariant-model";
+import { shareDue, winnersOf } from "./invariant-payouts";
 import { payoutOf } from "./money-model";
-import type { ChainView, Harness } from "./invariant-harness";
+import type { Harness } from "./invariant-harness";
+import type { ChainView } from "./invariant-view";
 import { countOpen } from "./invariant-open";
 import { SEALED_CHECKS } from "./invariant-sealed-checks";
-import { balance } from "./setup";
+import { stateCheck } from "./invariant-state";
 
 type Check = (c: ModelCampaign, v: ChainView, h: Harness) => string | null;
 const ledgerTo = (c: ModelCampaign, kind: string) => c.ledger.filter((l) => l.kind === kind);
@@ -97,7 +91,7 @@ const i6: Check = (c, v, h) => {
     return v.feeVault === h.feeVaultModel ? null : `fee vault ${v.feeVault}, the model ${h.feeVaultModel}`;
   }
   if (c.phase !== "Settled" || !c.feeMoved || !c.prizeSettled || (shareDue(c) > 0n && !c.shareSettled)) return null;
-  // A reserved creator share is still the creator's (close pays it with the rent): it is not dust.
+  // A creator share held for a wallet that could not take it is not dust: close pays it to the rent payer.
   const dust = booked(c) - c.reserved;
   if (dust < 0n) return `dust ${dust} is negative`;
   if (c.snapshot?.mode !== "Split") return dust === 0n ? null : `dust ${dust} outside Split`;
@@ -143,7 +137,7 @@ const i13: Check = (c, v) => {
   if (ledgerTo(c, "share").some((l) => l.to !== c.creator)) return "the share went to someone else";
   if (v.campaign && v.campaign.creator_share_from_fee > v.campaign.fee_total) return "from_fee above the fee";
   if (v.campaign && v.campaign.creator_share_settled !== c.shareSettled) return "creator_share_settled disagrees";
-  if (v.campaign && v.campaign.creator_share_reserved !== c.reserved) return "creator_share_reserved disagrees";
+  if (c.reserved > shareDue(c)) return `reserved ${c.reserved} above the share ${shareDue(c)}`;
   return null;
 };
 
@@ -185,13 +179,15 @@ export function checkCampaign(c: ModelCampaign, v: ChainView, h: Harness, label:
     const failure = check(c, v, h);
     if (failure) throw new Error(`I${n} (${label}): ${failure}`);
   }
+  // Sprint 14: the record itself, so a contest step that rewrote the result, or a seq out of step, fails the run.
+  const state = stateCheck(c, v);
+  if (state) throw new Error(`state (${label}): ${state}`);
 }
 
-/**
- * I7, I10′ and I8 about the whole world: the valve counts the open paid campaigns; the pause is the chain's; the fee
- * vault holds exactly what the model sent it, after every operation (a held sponsor fee reaches it only at settlement).
- */
-export function checkWorld(h: Harness, config: Record<string, any>) {
+/** I6, I7 and I10′, about the whole world: the fee vault's books, the valve's count of the open paid campaigns, the pause. */
+export function checkWorld(h: Harness, config: Record<string, any>, feeVault: bigint) {
+  // The fee vault holds exactly what the model moved into it (collect, close) and out of it (sweep).
+  if (feeVault !== h.feeVaultModel) throw new Error(`I6: fee vault ${feeVault}, the model ${h.feeVaultModel}`);
   const open = countOpen(h);
   if (Number(config.open_campaigns) !== open) {
     throw new Error(`I7: open_campaigns is ${config.open_campaigns}, the model has ${open} open`);
@@ -200,18 +196,4 @@ export function checkWorld(h: Harness, config: Record<string, any>) {
   if (config.operating_level !== (h.paused ? 1 : 0)) {
     throw new Error(`I10′: operating level ${config.operating_level}, the model paused ${h.paused}`);
   }
-  const feeVault = balance(h.w, h.feeVault);
-  if (feeVault !== h.feeVaultModel)
-    throw new Error(`I8: the fee vault holds ${feeVault}, the model ${h.feeVaultModel}`);
-}
-
-/**
- * I9, as a property of the payout rule: an entry split across two wallets never receives more than the
- * whole entry does (the floor of the sum is at least the sum of the floors).
- */
-export function checkSplitNeverPaysMore(amount: bigint, distributable: bigint, winning: bigint) {
-  const half = amount / 2n;
-  const split = payoutOf(half, distributable, winning) + payoutOf(amount - half, distributable, winning);
-  const whole = payoutOf(amount, distributable, winning);
-  if (split > whole) throw new Error(`I9: an entry of ${amount} split in two gets ${split}, whole ${whole}`);
 }

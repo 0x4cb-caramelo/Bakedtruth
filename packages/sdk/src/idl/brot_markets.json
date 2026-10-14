@@ -764,7 +764,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Campaign, InReview"
+            "Campaign: InReview for stage 1; Contested at stage 1 for stage 2"
           ]
         },
         {
@@ -784,7 +784,14 @@
           ]
         }
       ],
-      "args": [],
+      "args": [
+        {
+          "name": "teamOpenContestArgs",
+          "type": {
+            "defined": "TeamOpenContestArgs"
+          }
+        }
+      ],
       "discriminant": {
         "type": "u8",
         "value": 13
@@ -798,7 +805,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "Campaign, InReview, window closed"
+            "Campaign, InReview with its window closed, or Contested and lapsed"
           ]
         },
         {
@@ -3854,6 +3861,18 @@
       }
     },
     {
+      "name": "TeamOpenContestArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stage",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "TeamVoidCampaignArgs",
       "type": {
         "kind": "struct",
@@ -4877,7 +4896,7 @@
     {
       "code": 6163,
       "name": "ContestNotLapsed",
-      "msg": "Stage 2 of the contest has not lapsed yet"
+      "msg": "The contest has not lapsed yet: stage 2 lapses at its deadline, an unread stage 1 48 hours after its own"
     },
     {
       "code": 6164,
@@ -4913,6 +4932,21 @@
       "code": 6174,
       "name": "WrongSponsor",
       "msg": "The account is not the SealedFee's stored sponsor"
+    },
+    {
+      "code": 6175,
+      "name": "ConfirmWithVoidReason",
+      "msg": "A Confirm decision carries no void reason: its void_reason must be None"
+    },
+    {
+      "code": 6176,
+      "name": "RereadBeforeTimelock",
+      "msg": "A matching re-read pays only after stage 1's 24-hour wait"
+    },
+    {
+      "code": 6177,
+      "name": "ContestAlreadyOpen",
+      "msg": "The campaign is already Contested: an opening (stage 1) never escalates it; stage 2 is its own byte"
     }
   ],
   "metadata": {

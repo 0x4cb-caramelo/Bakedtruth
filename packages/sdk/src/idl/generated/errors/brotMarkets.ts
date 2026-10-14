@@ -292,7 +292,7 @@ export const BROT_MARKETS_ERROR__NOT_CONTESTED = 0x1810; // 6160
 export const BROT_MARKETS_ERROR__WRONG_CONTEST_STAGE = 0x1811; // 6161
 /** ContestDeadlinePassed: The contest stage's deadline has passed */
 export const BROT_MARKETS_ERROR__CONTEST_DEADLINE_PASSED = 0x1812; // 6162
-/** ContestNotLapsed: Stage 2 of the contest has not lapsed yet */
+/** ContestNotLapsed: The contest has not lapsed yet: stage 2 lapses at its deadline, an unread stage 1 48 hours after its own */
 export const BROT_MARKETS_ERROR__CONTEST_NOT_LAPSED = 0x1813; // 6163
 /** InvalidContestDecision: The contest decision is neither Confirm nor Void */
 export const BROT_MARKETS_ERROR__INVALID_CONTEST_DECISION = 0x1814; // 6164
@@ -308,6 +308,12 @@ export const BROT_MARKETS_ERROR__SEALED_FEES_OPEN = 0x181c; // 6172
 export const BROT_MARKETS_ERROR__SEALED_FEE_MISMATCH = 0x181d; // 6173
 /** WrongSponsor: The account is not the SealedFee's stored sponsor */
 export const BROT_MARKETS_ERROR__WRONG_SPONSOR = 0x181e; // 6174
+/** ConfirmWithVoidReason: A Confirm decision carries no void reason: its void_reason must be None */
+export const BROT_MARKETS_ERROR__CONFIRM_WITH_VOID_REASON = 0x181f; // 6175
+/** RereadBeforeTimelock: A matching re-read pays only after stage 1's 24-hour wait */
+export const BROT_MARKETS_ERROR__REREAD_BEFORE_TIMELOCK = 0x1820; // 6176
+/** ContestAlreadyOpen: The campaign is already Contested: an opening (stage 1) never escalates it; stage 2 is its own byte */
+export const BROT_MARKETS_ERROR__CONTEST_ALREADY_OPEN = 0x1821; // 6177
 
 export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY
@@ -323,6 +329,8 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_IN_REVIEW
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN
   | typeof BROT_MARKETS_ERROR__CAMPAIGN_NOT_SETTLED
+  | typeof BROT_MARKETS_ERROR__CONFIRM_WITH_VOID_REASON
+  | typeof BROT_MARKETS_ERROR__CONTEST_ALREADY_OPEN
   | typeof BROT_MARKETS_ERROR__CONTEST_DEADLINE_PASSED
   | typeof BROT_MARKETS_ERROR__CONTEST_EXIT_DISABLED
   | typeof BROT_MARKETS_ERROR__CONTEST_NOT_LAPSED
@@ -409,6 +417,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__READER_NOT_READY
   | typeof BROT_MARKETS_ERROR__READER_WRONG_OWNER
   | typeof BROT_MARKETS_ERROR__RENT_PAYER_NOT_STORED
+  | typeof BROT_MARKETS_ERROR__REREAD_BEFORE_TIMELOCK
   | typeof BROT_MARKETS_ERROR__REREAD_NOT_TOP_LEVEL
   | typeof BROT_MARKETS_ERROR__RESERVE_NOT_CLAIMABLE
   | typeof BROT_MARKETS_ERROR__RESOLVE_NOT_TOP_LEVEL
@@ -474,9 +483,11 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_IN_REVIEW]: `The campaign is not InReview, so it cannot be finalized`,
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_OPEN]: `The campaign is not \`Open\``,
     [BROT_MARKETS_ERROR__CAMPAIGN_NOT_SETTLED]: `The campaign's fee, prize and creator share are not all settled`,
+    [BROT_MARKETS_ERROR__CONFIRM_WITH_VOID_REASON]: `A Confirm decision carries no void reason: its void_reason must be None`,
+    [BROT_MARKETS_ERROR__CONTEST_ALREADY_OPEN]: `The campaign is already Contested: an opening (stage 1) never escalates it; stage 2 is its own byte`,
     [BROT_MARKETS_ERROR__CONTEST_DEADLINE_PASSED]: `The contest stage's deadline has passed`,
     [BROT_MARKETS_ERROR__CONTEST_EXIT_DISABLED]: `Contests are disabled until Sprint 14: a contest would freeze the pot`,
-    [BROT_MARKETS_ERROR__CONTEST_NOT_LAPSED]: `Stage 2 of the contest has not lapsed yet`,
+    [BROT_MARKETS_ERROR__CONTEST_NOT_LAPSED]: `The contest has not lapsed yet: stage 2 lapses at its deadline, an unread stage 1 48 hours after its own`,
     [BROT_MARKETS_ERROR__CONTEST_OUTSIDE_REVIEW]: `A contest opens only inside the review window`,
     [BROT_MARKETS_ERROR__CREATION_PARAMS_CHANGED]: `The creation parameters changed since the client read them (\`expected_params_version\`)`,
     [BROT_MARKETS_ERROR__CREATOR_SHARE_BPS_ABOVE_CEILING]: `\`creator_share_bps\` is above \`MAX_CREATOR_SHARE_BPS\``,
@@ -560,6 +571,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__READER_NOT_READY]: `Unused since Sprint 03: the reader methods returned it before they were ported`,
     [BROT_MARKETS_ERROR__READER_WRONG_OWNER]: `Account is not owned by the program this reader trusts`,
     [BROT_MARKETS_ERROR__RENT_PAYER_NOT_STORED]: `The rent payer is not the one stored at opening`,
+    [BROT_MARKETS_ERROR__REREAD_BEFORE_TIMELOCK]: `A matching re-read pays only after stage 1's 24-hour wait`,
     [BROT_MARKETS_ERROR__REREAD_NOT_TOP_LEVEL]: `reread_campaign must run at the transaction's top level, never by CPI`,
     [BROT_MARKETS_ERROR__RESERVE_NOT_CLAIMABLE]: `The wallet is still below its rent-exempt minimum; the reserved credit cannot be claimed yet`,
     [BROT_MARKETS_ERROR__RESOLVE_NOT_TOP_LEVEL]: `\`resolve_campaign\` must be a top-level instruction, never called through a CPI`,

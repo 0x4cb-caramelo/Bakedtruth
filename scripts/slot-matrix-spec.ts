@@ -165,6 +165,9 @@ export const DISTINCT: Record<string, [string, string][]> = {
     ["feeVault", "vault"],
   ],
   SweepFees: [["feeRecipient", "feeVault"]],
+  // Sprint 14, lane L14B: the re-read and the admin's decision check their two writable slots differ first.
+  RereadCampaign: [["campaign", "config"]],
+  AdminDecideContest: [["config", "campaign"]],
   // Lane L15 (Sprint 15): the join's own pairs, the Join slot's (`check_join_slot`), and the SealedFee slot against
   // every other writable slot (`sealed_fee_account::check_slot`); `settle_sealed_fee` keeps its SealedFee apart from
   // the campaign and from both recipients.
@@ -316,12 +319,7 @@ export const overrideOf = (key: string, generic: string) => OVERRIDES[key]?.expe
  * case is refused with the one error. The baseline is refused too, so the matrix checks that the refusal moves no
  * lamport. One entry per line: each lane deletes its own when it lands.
  */
-export const DISABLED: Record<string, string> = {
-  TeamOpenContest: "ContestExitDisabled",
-  UserLinkReferrer: "UnknownInstruction",
-  RereadCampaign: "UnknownInstruction",
-  AdminDecideContest: "UnknownInstruction",
-};
+export const DISABLED: Record<string, string> = {};
 
 /** The source type of a slot's current account, as a type case or an alias sees it. */
 export function typeOf(slot: Slot): Source {

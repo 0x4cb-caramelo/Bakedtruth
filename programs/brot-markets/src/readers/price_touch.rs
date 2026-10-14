@@ -30,7 +30,7 @@ pub use super::price_update::{
     read_price_account, read_price_update, sponsored_account, PriceReading,
     PRICE_UPDATE_V2_DISCRIMINATOR, PRICE_UPDATE_V2_LEN, PYTH_RECEIVER_ID,
 };
-pub use proof::try_resolve;
+pub use proof::{proof_window_open, try_resolve};
 pub use rules::{
     band_crosses_target, band_reaches_target, check_fresh_and_tight, posted_within,
     published_within, PriceRefusal,

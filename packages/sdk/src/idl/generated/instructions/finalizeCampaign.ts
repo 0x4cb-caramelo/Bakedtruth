@@ -89,7 +89,7 @@ export type FinalizeCampaignInput<
   TAccountEventAuthority extends InstructionAccountInput = InstructionAccountInput,
   TAccountProgram extends InstructionAccountInput = InstructionAccountInput,
 > = {
-  /** Campaign, InReview, window closed */
+  /** Campaign, InReview with its window closed, or Contested and lapsed */
   campaign: TAccountCampaign;
   /** GlobalConfig: the open count */
   config: TAccountConfig;
@@ -164,7 +164,7 @@ export type ParsedFinalizeCampaignInstruction<
 > = {
   programAddress: Address<TProgram>;
   accounts: {
-    /** Campaign, InReview, window closed */
+    /** Campaign, InReview with its window closed, or Contested and lapsed */
     campaign: TAccountMetas[0];
     /** GlobalConfig: the open count */
     config: TAccountMetas[1];

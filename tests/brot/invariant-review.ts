@@ -1,32 +1,25 @@
 /**
- * Purpose: the randomized test's review operations: the price touch and the price-proof resolution, the
- *          window (confirm, void, contest) and the snapshot that ends it (TP sections 3.4.6, 3.4.7, 3.4.16).
- * Version: 0.0.1
- * Sprint:  04 (contract freeze, lane E)
+ * Purpose: the randomized test's review operations: the price touch and the price-proof resolution (YES, NO, the
+ *          stale-feed void) with the result each stores, and the dispatch of the window's steps and finalize
+ *          (invariant-window.ts) (TP sections 3.4.6, 3.4.7). The contest's own steps are in invariant-contest.ts.
+ * Version: 0.1.0 (Sprint 14: the stored result, the tally-started rule, the proof window is `t <= D + 60`)
+ * Sprint:  04 (contract freeze, lane E); 14 (lane INV14)
  */
-import type { Address, Instruction } from "@solana/kit";
-
 import { BTC_PRICE } from "./flows";
-import { isTeamReason, PROOF_DELAY, shareDue, SIX_HOURS, snapshotOf, type ModelCampaign } from "./invariant-model";
+import { inProofWindow, SIX_HOURS } from "./invariant-model";
 import * as I from "./instructions";
-import {
-  finalizeCampaignIx,
-  tallyLateJoinsIx,
-  teamConfirmResultIx,
-  teamOpenContestIx,
-  teamVoidCampaignIx,
-} from "./instructions-settlement";
 import type { BrotErrorName } from "./errors";
-import { clock, entryAt, refreshBase, setBtc, type Harness, type Plan } from "./invariant-harness";
+import { clock, refreshBase, setBtc, type Harness, type Plan } from "./invariant-harness";
+import { planWindow } from "./invariant-window";
 import * as P from "./program";
 
 export const REVIEW_KINDS = [
   "resolveYes",
   "resolveNo",
   "resolveStale",
+  "tally",
   "confirm",
   "void",
-  "contest",
   "finalize",
 ] as const;
 
@@ -34,75 +27,51 @@ export type ReviewOp =
   | { k: "resolveYes"; c: number; back: bigint }
   | { k: "resolveNo"; c: number }
   | { k: "resolveStale"; c: number }
-  | { k: "confirm"; c: number; member: number }
-  | { k: "void"; c: number; member: number; reason: number }
-  | { k: "contest"; c: number; member: number }
+  | { k: "tally"; c: number; baker: number }
+  /** `tally`: the keeper's tallies of every baker not yet tallied go first, in the same transaction. */
+  | { k: "confirm"; c: number; member: number; tally?: boolean }
+  | { k: "void"; c: number; member: number; reason: number; tally?: boolean }
   | { k: "finalize"; c: number };
 
 /** The YES price: the target crossed by 1%, with no confidence band. */
-const TOUCH = (BTC_PRICE * 11n * 101n) / (10n * 100n);
-const NOTE_HASH = new Uint8Array(32).fill(7);
+export const TOUCH = (BTC_PRICE * 11n * 101n) / (10n * 100n);
+/** A stale feed: its last update this long before the deadline, past `max(max_age, 600 s)` (StaleFeed). */
+export const STALE_BEFORE = 700n;
+/** A proof's age bound and the clock lead a publish time may have (readers/price_touch/rules.rs). */
+export const PROOF_AGE = 60n;
 const BLANK = new Map<string, bigint>();
 
-/** The snapshot of a reviewed campaign: taken by `team_confirm_result`, `team_void_campaign` and `finalize`. */
-function takeSnapshot(c: ModelCampaign) {
-  c.snapshot = snapshotOf(c);
-  // Finalize marks the creator share settled when none is due (closure fix): close never waits for it.
-  c.shareSettled = shareDue(c) === 0n;
-  // A campaign with no entry has nothing to settle: finalize moves it straight to Settled (decision of 2026-10-09).
-  c.phase = new Set(c.joins.map((j) => j.baker)).size === 0 ? "Settled" : "Settling";
-  c.counted = false;
-  // The prize step sets the flag, also for a Split (it pays nothing then): close waits for it (settle_prize).
-  c.prizeSettled = false;
-}
-
-export const inWindow = (c: ModelCampaign, t: bigint) => t < c.reviewEndsAt;
-
-/**
- * Every snapshot needs each join tallied first (amendment 2026-10-09; `NotTallied` otherwise, for the team's confirm
- * and void as for finalize: settlement/snapshot.rs). When the snapshot will succeed, the same transaction tallies
- * each baker's joins before it. The tally moves each Join's rent into its Entry: no wallet is paid here.
- */
-async function tallied(h: Harness, c: ModelCampaign, campaign: Address, error: unknown, snapshot: Instruction) {
-  if (error !== undefined) return [snapshot];
-  const ixs: Instruction[] = [];
-  for (const baker of h.bakers) {
-    const mine = c.joins.filter((j) => j.baker === baker.address);
-    if (mine.length === 0) continue;
-    const joins = await Promise.all(mine.map((_, index) => P.joinPda(campaign, baker.address, index)));
-    ixs.push(tallyLateJoinsIx(baker.address, campaign, await entryAt(campaign, baker.address), joins));
-  }
-  return [...ixs, snapshot];
-}
-
-/** Plans one settlement operation; the refusal follows the program's order of checks. */
+/** Plans one review operation: a resolution here, any other step in invariant-window.ts. */
 export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
   const t = clock(h);
   const c = h.camps[op.c];
   const { campaign } = h.addrs[op.c];
-  const config = await P.configPda();
+  // In review, the cut-off moves only for a YES price result before any tally starts (2026-10-09); else it is
+  // refused before the reader runs.
+  const movable = c.outcome === "Yes" && c.tallied.size === 0;
   switch (op.k) {
     case "resolveYes": {
       const back = op.back < t - c.opensAt ? op.back : t - c.opensAt;
       const publish = t - back;
       setBtc(h.w, TOUCH, publish);
       // In review, only an earlier YES proof moves the cut-off back (decision of 2026-10-09); the window stays.
-      const moves = c.phase === "InReview" && c.outcome === "Yes" && c.publish !== null && publish < c.publish;
+      const moves = c.phase === "InReview" && movable && c.publish !== null && publish < c.publish;
       const error: BrotErrorName | undefined =
         c.phase === "Open" || moves ? undefined : c.phase === "InReview" ? "CutoffNotMovable" : "CampaignNotOpen";
       return {
         ixs: [I.resolveCampaignIx(campaign, P.BTC_USD_ACCOUNT, P.BTC_USD_ACCOUNT)],
         error,
         deltas: BLANK,
+        events: ["CampaignResolved"],
         after: () => refreshBase(h.w),
         apply: () => {
-          if (c.phase === "InReview") {
-            c.publish = publish;
-            return;
-          }
+          c.seq += 1n;
+          c.publish = publish;
+          c.storedPublish = publish;
+          if (c.phase === "InReview") return;
           c.phase = "InReview";
           c.outcome = "Yes";
-          c.publish = publish;
+          c.observed = TOUCH;
           c.reviewEndsAt = t + SIX_HOURS;
         },
       };
@@ -110,19 +79,25 @@ export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
     case "resolveNo":
     case "resolveStale": {
       const stale = op.k === "resolveStale";
-      if (stale) setBtc(h.w, BTC_PRICE, c.deadline - 700n);
+      const staleAt = c.deadline - STALE_BEFORE;
+      if (stale) setBtc(h.w, BTC_PRICE, staleAt);
       else refreshBase(h.w);
-      // An offered proof that is too old is refused as stale; with no proof the window is simply not over. The window
-      // includes its last second: a NO needs the clock past deadline + 60 s (readers/price_touch/proof.rs).
-      const reader: BrotErrorName | undefined =
-        t <= c.deadline + PROOF_DELAY ? (stale ? "ProofStale" : "NotResolvableYet") : undefined;
-      // In review, a NO (or a void) is decided by the reader first, then refused as a re-proof, unless the outcome is
-      // not a YES: the program's order (decision of 2026-10-09). A campaign in review with a YES reads the same way.
+      // Inside the proof window a NO offers no proof (it waits); the stale account offered is read as a YES proof:
+      // too old or too far ahead, `ProofStale`; fresh, below the target, `ProofDoesNotTouch`.
+      const fresh = t - staleAt <= PROOF_AGE && staleAt - t <= PROOF_AGE;
+      const reader: BrotErrorName | undefined = !inProofWindow(c, t)
+        ? undefined
+        : !stale
+          ? "NotResolvableYet"
+          : fresh
+            ? "ProofDoesNotTouch"
+            : "ProofStale";
+      // In review the reader runs only for a movable YES, and a NO or a void it reads is then refused as a re-proof.
       const error: BrotErrorName | undefined =
         c.phase === "Open"
           ? reader
           : c.phase === "InReview"
-            ? c.outcome === "Yes"
+            ? movable
               ? (reader ?? "CutoffNotMovable")
               : "CutoffNotMovable"
             : "CampaignNotOpen";
@@ -131,65 +106,20 @@ export async function planReview(h: Harness, op: ReviewOp): Promise<Plan> {
         ixs: [I.resolveCampaignIx(campaign, P.BTC_USD_ACCOUNT, stale ? P.BTC_USD_ACCOUNT : P.PROGRAM_ID)],
         error,
         deltas: BLANK,
+        events: ["CampaignResolved"],
         after: () => refreshBase(h.w),
         apply: () => {
+          c.seq += 1n;
           c.phase = "InReview";
           c.outcome = stale ? "Void" : "No";
           c.voidReason = stale ? 3 : 0;
+          c.observed = BTC_PRICE;
+          c.storedPublish = stale ? staleAt : t - 5n;
           c.reviewEndsAt = t + SIX_HOURS;
         },
       };
     }
-    case "confirm": {
-      const error: BrotErrorName | undefined =
-        c.phase !== "InReview" ? "TeamKeyOutsideReview" : !inWindow(c, t) ? "OutsideReviewWindow" : undefined;
-      return {
-        ixs: await tallied(h, c, campaign, error, teamConfirmResultIx(h.team[op.member], config, campaign)),
-        error,
-        deltas: BLANK,
-        apply: () => takeSnapshot(c),
-      };
-    }
-    case "void": {
-      // The program's order: the reason, the team key, the window, then the outcome (decision of 2026-10-09:
-      // a team key voids only an automatic void, so a YES or NO is refused).
-      const error: BrotErrorName | undefined = !isTeamReason(op.reason)
-        ? "VoidReasonNotForTeam"
-        : c.phase !== "InReview"
-          ? "TeamKeyOutsideReview"
-          : !inWindow(c, t)
-            ? "OutsideReviewWindow"
-            : c.outcome !== "Void"
-              ? "TeamVoidNotAutomatic"
-              : undefined;
-      const args = { reason: op.reason, noteHash: NOTE_HASH };
-      return {
-        ixs: await tallied(h, c, campaign, error, teamVoidCampaignIx(h.team[op.member], config, campaign, args)),
-        error,
-        deltas: BLANK,
-        apply: () => {
-          c.voidReason = op.reason;
-          takeSnapshot(c);
-        },
-      };
-    }
-    case "contest":
-      return {
-        ixs: [teamOpenContestIx(h.team[op.member], config, campaign)],
-        // Disabled until Sprint 14 (decision of 2026-10-09): every contest is refused and changes nothing.
-        error: "ContestExitDisabled",
-        deltas: BLANK,
-        apply: () => undefined,
-      };
-    case "finalize": {
-      const error: BrotErrorName | undefined =
-        c.phase !== "InReview" ? "CampaignNotInReview" : t < c.reviewEndsAt ? "ReviewNotEnded" : undefined;
-      return {
-        ixs: await tallied(h, c, campaign, error, finalizeCampaignIx(campaign, config)),
-        error,
-        deltas: BLANK,
-        apply: () => takeSnapshot(c),
-      };
-    }
+    default:
+      return planWindow(h, op);
   }
 }

@@ -3,8 +3,8 @@
  *          version; it opens again as it is; a file of another version, or one that is not the indexer's, is refused
  *          and never changed; a read-only open refuses an empty file and every write; `tx` rolls back on a throw; the
  *          dump lists the rebuildable tables. Filter: `bun test services/indexer`.
- * Version: 0.1.0
- * Sprint:  08 (indexer, API, relay and points)
+ * Version: 0.1.1 (schema 2: the referral tables, rebuildable)
+ * Sprint:  08 (indexer, API, relay and points); 14 (referral, lane L14R)
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { Database } from "bun:sqlite";
@@ -32,8 +32,11 @@ describe("the indexer's SQLite file", () => {
       "events",
       "feed_history",
       "points",
+      "referral_entries",
+      "referrals",
       "settlements",
       "signatures",
+      "tx_positions",
     ]);
     store.db.run("INSERT INTO checkpoints VALUES ('program', 'sig', 7)");
     store.close();
@@ -47,6 +50,9 @@ describe("the indexer's SQLite file", () => {
       "settlements",
       "points",
       "checkpoints",
+      "referrals",
+      "referral_entries",
+      "tx_positions",
     ]);
     again.close();
   });

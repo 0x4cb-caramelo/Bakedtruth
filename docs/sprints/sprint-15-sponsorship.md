@@ -164,6 +164,8 @@ floor priced on-chain (yes); `sponsor_add_prize` deferred (not built, nothing re
   and BP-3), the Cloak page (P-8, open), the devnet redeploy (after the merge, Ronaldo's key).
 
 **Open, with owners.** The founder: BP-3 (perks); L-11 and L-18
-(screens); P-8 (Cloak with SOL); `sponsor_add_prize`. The lead, after the merge: the devnet redeploy with Ronaldo; the
-keeper's settlement must call `settle_sealed_fee` before `close_campaign` once the keeper (PR #88) and this sprint are
-both on `main`.
+(screens); P-8 (Cloak with SOL); `sponsor_add_prize`. The lead, after the merge: the devnet redeploy with Ronaldo. **Done
+2026-10-13 (lane L14K, in PR #92):** the keeper settles every open `SealedFee` of a finalized campaign with
+`settle_sealed_fee`, to its stored sponsor, and plans the close only when none is open, so it never sends a close that
+`SealedFeesOpen` refuses (`services/keeper/tests/sealed-keeper.test.ts`, two sponsors on LiteSVM, every lamport
+against the SDK); a fee still open after a second cycle raises `sealed_fee_open`.

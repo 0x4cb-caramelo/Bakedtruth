@@ -100,11 +100,66 @@ janela de revisão, se a campanha já estiver em revisão.
 | `points` | Devnet points per wallet, with the campaigns entered and decided |
 | `checkpoints` | The newest signature listed for the program |
 | `feed_history` | Evidence (A-4), not rebuildable: each publish time of each watched sponsored feed |
+| `referrals` | One row per `ReferralLinked`: the link, its status against the referee's first entry, the window, the rebate, what it earned its referrer |
+| `referral_entries` | One row per opening an active referee entered: the basis of its winning entry, checked against the snapshot, and its state |
+| `tx_positions` | A transaction's index in its block, read only for a slot where a referee's link and first entry share a slot |
 
 A file carries its schema version in `PRAGMA user_version`; a file of another version is refused, never migrated:
 rebuild it. **Points and the faucet:** many wallets can inflate the ranking, and the brake is the devnet faucet. Read
 on 2026-10-13 at https://faucet.solana.com: "Maximum of 2 requests every 8 hours", and a GitHub sign-in "to unlock a
 higher airdrop limit"; the page gives no amount per request, and solana.com's faucet guide gives no number.
+
+## Referral (Sprint 14)
+
+**The rules, as built** (TP §3.4.11; the founder's answers of 2026-10-13). A link counts when its `ReferralLinked` comes
+before every `EntryAdded` of the referee by chain order: the slot, then the transaction's place in its block (the
+block is read once, `getBlock`, only for a tie), then the instruction; until a tied block is read, the link is
+`undecided` and earns nothing. The referrer earns 20% of the fee Brot kept on each winning entry the referee made in the
+90 days after its first entry's block time, `(fee − from_fee) × entry ÷ V` with V and the fee from the
+`CampaignFinalized` snapshot; only `Split` pots count (a one-sided pot's 1%, a void and a late join earn nothing). Nothing
+is payable until the campaign has no gap, every baker's early sums equal V and P, the referee's `EntrySettled` is what the
+snapshot pays and the `FeeCollected` is `fee − from_fee`; an entry that fails a check is `held`, never paid. The referee's
+rebate is the same kept fee on its first 0.4576 SOL of entries, due once its entries reach 2.2879 SOL, capped at
+0.05 SOL. Every amount rounds down.
+
+**The weekly routine** prepares the transfers; a person signs them from the operations wallet; no payout key is ever on
+the server. The ledger (`referral_payouts`, with its batches) is its own SQLite file, never the indexer's: a rebuilt
+indexer file swapped in can never erase what was paid. "Paid" is read from the chain: every transfer from the
+operations wallet under a `brot-referral:<batch>:<index>` memo counts, by its signature, whatever the ledger says.
+
+```bash
+# On the server, as the indexer's user; the RPC URL from a credential file (REFERRAL_RPC_URL_FILE, else the indexer's).
+bun scripts/referral/prepare.ts --indexer <indexer.sqlite> --ledger <ledger.sqlite> --ops <wallet> --dry-run [--new-ledger]
+bun scripts/referral/prepare.ts --indexer <indexer.sqlite> --ledger <ledger.sqlite> --ops <wallet> --out <dir> [--new-ledger]
+# Where the operations wallet signs (a keypair file or a Ledger), never on the server; ONCE; the URL from a file:
+SIGNER=usb://ledger RPC_URL_FILE=<file holding the RPC URL> bash referral-batch-<n>.sh
+# Back on the server, 2 minutes later: record what landed (and give up what did not with --cancel <n>).
+bun scripts/referral/record.ts --ledger <ledger.sqlite> --ops <wallet> [--cancel <n>]
+bun scripts/referral/report.ts --ledger <ledger.sqlite> --batch <n> --out <public file>   # wallets and amounts only
+bun scripts/referral/snapshot.ts <ledger.sqlite> <new file>                                # the nightly hook
+bun scripts/referral/rehearse.ts   # the signing file with the real CLI on an offline surfnet (throwaway keys)
+```
+
+**The signing file runs once.** Each line is sent once; before it, the file looks for that line's memo in the
+operations wallet's recent history and skips a line already there; a line that fails is listed at the end and the run
+goes on. It refuses another cluster (the genesis hash read at prepare) and another signer, and passes the RPC URL to
+the CLI only through a private temporary config, never a command line. **After any stop or failure, do not run it
+again:** wait 2 minutes (a blockhash expires and the chain finalizes), run `record` (it books what landed, by memo),
+then `record --cancel <n>` (what did not land is owed again), then prepare a new batch. `--cancel` acts only with the
+operations wallet the batch was prepared for. Batch numbers never repeat, even after a new or restored ledger reads the
+old landings back, and `prepare` refuses an `--out` that already holds that batch's files before writing anything. The
+summary says how far back the wallet's history was read: on a node that keeps no full history, the oldest signature
+read is not the wallet's first, and a lost ledger could then miss an old payout.
+
+**A line that cannot be credited is held for a person**: a sysvar, a builtin program or precompile, the incinerator,
+an executable account, the operations wallet itself, or a line whose transfer fails when `prepare` simulates it. It is
+carried with the reason, listed in the summary and never written in the signing file.
+
+A transfer that would leave its wallet below the rent-exempt minimum, read from the RPC for the wallet's size (never a
+constant: devnet and mainnet answer 650,240 lamports for an empty wallet, LiteSVM 890,880), is not sent: it is
+`carried`, pending in the report, and owed again next week. `prepare` refuses while a batch is open, while the
+indexer's file has a transaction pending or skipped or a campaign with a gap, and when the operations wallet cannot pay
+the batch, a 5,000-lamport fee per transfer and its own minimum. Only `--new-ledger` starts a ledger.
 
 ## Run
 
@@ -124,4 +179,6 @@ is `deploy/vps/brot-indexer.service` (not installed).
 rule, the ranking, the KPIs and the partner report, the partners file and the content check, feed_history and the
 snapshot, the wake-up over a real WebSocket, the alert, the read routes, the settings and the server) and
 `bun test tests/indexer` (the program in LiteSVM: whole cycles, each live row against its account and vault, the
-rebuild, the points, the read routes, the ranking, the KPIs and the report on that data).
+rebuild, the points, the read routes, the ranking, the KPIs and the report on that data). The referral's are in
+both: `services/indexer/tests/referral-*.test.ts` over hand-built event streams, `tests/indexer/referral-cycle.test.ts`
+with the real `user_link_referrer` in LiteSVM.

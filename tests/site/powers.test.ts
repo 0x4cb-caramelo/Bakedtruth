@@ -4,7 +4,7 @@
  *          and the page's live check reads the same roles from the program (ProgramData's upgrade authority, the
  *          config's admin, fee recipient and team keys) through an RPC, here the program in LiteSVM.
  *          Filter: `bun test tests/ -t "powers table"`.
- * Version: 0.2.1 (the scaffold of Sprints 14–15, 2026-10-13: two rows mapped, the stage-2 decision pending)
+ * Version: 0.2.2 (Sprint 14, lane L14B: the stage-2 decision mapped to its own row; the scaffold of 2026-10-13 mapped two)
  * Sprint:  13 (site: ranking, notices and copy)
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
@@ -79,10 +79,15 @@ describe("powers table", () => {
       // The scaffold of Sprints 14–15 (2026-10-13): any wallet, and the program chooses every result and destination.
       "resolution/reread_campaign": "Resolve, settle and pay",
       "settlement/settle_sealed_fee": "Resolve, settle and pay",
+      // Sprint 14, lane L14B: the admin's decision at a contest's second stage (a new row: the founders' review).
+      "resolution/admin_decide_contest": "Decide a contest at its second stage",
+      "resolution/contest_decision": null,
+      "resolution/contest_reread": null,
+      "resolution/contest_rules": null,
     };
     // A stub that refuses every call until its lane, which maps it above and names its power in content/powers.md (a
-    // new row needs the founders): the admin's decision at a contest's second stage (lane L14B).
-    const PENDING = ["resolution/admin_decide_contest"];
+    // new row needs the founders).
+    const PENDING: string[] = [];
     const dir = `${import.meta.dir}/../../programs/brot-markets/src/instructions`;
     const files = ["admin", "campaigns", "resolution", "settlement"].flatMap((folder) =>
       [...new Bun.Glob("*.rs").scanSync({ cwd: `${dir}/${folder}` })]

@@ -74,7 +74,7 @@ export const SETTLE_BASELINES: [string, Build][] = [
   [
     "TeamOpenContest",
     async (env) => ({
-      ix: S.teamOpenContestIx(env.team[0], await P.configPda(), await reviewed(env, P.Outcome.Yes, SIX_HOURS)),
+      ix: S.teamOpenContestIx(env.team[0], await P.configPda(), await reviewed(env, P.Outcome.Yes, SIX_HOURS), 1),
     }),
   ],
   [

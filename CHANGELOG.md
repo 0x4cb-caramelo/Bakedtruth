@@ -145,6 +145,78 @@ recomendado (1a a 12a).
   `CODEOWNERS` cobre o `.github/`, a varredura e os hooks; uma checagem recusa no `bun.lock` qualquer registro que não
   seja o npmjs.org. A atestação de origem não sai: o GitHub só a oferece a repositórios públicos ou a organizações
   pagas, e isso é decisão do fundador.
+- **O keeper paga sozinho no devnet** (13/10/2026, a pedido do Ronaldo; `deploy/vps/README.md`,
+  `docs/sprints/sprint-06-keeper-server.md`). O código do keeper do PR #88 (as pendências das Sprints 06 e 07, release
+  `88a00f9`) entrou no servidor às 19h03 UTC, na unidade de sempre e com `KEEPER_SETTLE=on`, depois de um ensaio sem
+  envio na porta 4239. O keeper liquidou sozinho as duas campanhas que esperavam: `FmDo…` (finalize `5Z5zdkN5…`,
+  prêmio e taxa `ZqDWtcrs…`, fechamento `647Zc7S2…`) e `G6Un…` (finalize `3dRvL3Lz…`, prêmio e taxa `4Ev4MJCH…`,
+  fechamento `4XEdx7xh…`). A resolução de verdade da Sprint 06 já tinha sido vista: o keeper resolveu `FmDo…` sozinho
+  em 11/10/2026, às 15h59min17s UTC (`23agRJq8nJtzUjNy…`). Mais tarde no mesmo dia, também a pedido do Ronaldo, a RPC
+  do keeper passou da RPC pública do devnet, que respondia 429, para a da Helius no devnet (a escolha do D4, de
+  10/10): a chave fica só no arquivo de configuração do servidor, e o keeper registra só a origem. Depois da troca, a
+  unidade ativa, nenhum erro e nenhum 429 nos primeiros ciclos, a liquidação ligada e nada pendente. As cópias de
+  segurança e o caminho de volta estão no README. A unidade com identidade própria continua não instalada: depende do
+  dono do servidor.
+
+- **O keeper aprende as Sprints 14 e 15** (13/10/2026, faixa L14K, `a827b1e` e `c6ec66e`; no PR da Sprint 14). Fecha
+  uma campanha só depois de liquidar cada taxa selada aberta (`settle_sealed_fee`, para o patrocinador gravado), para
+  nunca mandar um fechamento que o programa recusa. Numa disputa na etapa 1, um keeper com a RPC B simula a releitura
+  por ela: a mesma leitura, recusada até o fim das 24 horas, espera sem contar como falha; uma diferente vai na hora
+  para a etapa 2 e avisa a equipe; a disputa vencida é finalizada e liquidada. Ele nunca abre nem decide uma disputa.
+  Alertas novos, cada um com o seu runbook: disputa aberta, etapa 2 perto do fim, releitura diferente e taxa selada
+  ainda aberta. Nada muda no `keeper.env`; no servidor ele relê só quando a RPC B for configurada.
+- **Sprint 14: as correções da segunda revisão adversária** (13/10/2026; `docs/sprints/sprint-14-referral-second-read.md`,
+  "Record"). A revisão não achou como pagar cedo, ou para o lado errado, um resultado contestado, nem como travar um
+  pote. **S1:** o `team_open_contest` escolhia abrir ou escalar pelo estado gravado, e uma abertura repetida (um 429
+  depois de ela pousar, ou dois membros da equipe no mesmo alerta) escalava a disputa; agora o ato é o byte assinado
+  (`1` abre, `2` escala), com `ContestAlreadyOpen` (6177) e `NotContested`, o resumo do SDK lê o ato do byte, e
+  `scripts/team/contest.ts --escalate` escala, ou abre e escala na mesma transação (faixa L14B, `9d8df7c` a
+  `9f19d88`). **R1 a R4 e I1**, na rotina semanal da indicação e no indexador: o arquivo de assinatura roda uma vez e
+  confere o memo de cada linha na cadeia antes de enviar; uma linha que não pode ser creditada (um sysvar, por
+  exemplo) fica presa para uma pessoa e as outras são simuladas no preparo; a numeração dos lotes nunca se repete; o
+  arquivo confere o hash de gênese da rede e lê a URL da RPC de um arquivo; o indexador lê a anulação do admin (faixa
+  L14R, `0db32d1`, `f9480d7`, `d3372bc`).
+- **Sprint 14: a resposta do fundador ao D2, construída** (13/10/2026, faixa L14B, `3d524c9` a `05fe0d8`). O Ronaldo
+  respondeu (a), com uma etapa 1 de 24 horas: a releitura igual só paga depois delas (`RereadBeforeTimelock`, erro
+  6176), e nesse prazo uma chave da equipe leva a disputa à etapa 2 chamando `team_open_contest` de novo. O pior caso,
+  do resultado lido ao pagamento, passa de 55 para 78 horas (6 + 24 + 48), garantido na cadeia com ou sem keeper. O SDK
+  mostra o fim da espera e se a escalada ainda cabe (`contestTimelockEndsAt`, `contestEscalable`), e o resumo diz se a
+  assinatura abre ou escala a disputa. Conferido: a escalada e cada recusa dela (LiteSVM e Mollusk), o pior caso de 78
+  horas, o teste aleatório em 12 sementes, o ensaio da equipe (44 de 44) e a prova de mutação dos 17 ids da disputa
+  (37 casos). Antes de enviar uma releitura, o keeper precisa simulá-la: a igual é recusada até `contestTimelockEndsAt`.
+
+- **Sprint 14: as correções da revisão adversária, F3 a F10** (13/10/2026). F3: o pior caso vale na cadeia, com ou sem
+  keeper (uma releitura atrasada não acrescenta tempo, e uma etapa 1 sem releitura vence 48 horas depois do seu
+  prazo). F4: uma prova oferecida que o leitor recusa recusa a releitura, em vez de levá-la à etapa 2. F5: a nota do
+  admin sobre o SIM de fato relido depois do prazo. F6: o resumo da decisão do admin só promete a devolução da taxa de
+  abertura quando entrou alguém. F7: o aluguel do vínculo de indicação entra no máximo que se assina e no texto. F8: o
+  comentário da guarda do `team_open_contest`. F9: a releitura não oferece prova por padrão. F10: os textos da interface
+  e do plano técnico sobre a releitura e o seu `CampaignFinalized`.
+
+- **Sprint 14, indicação e disputa em duas etapas** (branch `sprint-14-referral-second-read`, 13/10/2026; construída
+  e testada, não publicada no devnet; `docs/sprints/sprint-14-referral-second-read.md`,
+  `session-log/2026-10-13-sprint-14-indicacao-e-disputa.md`). Base: o andaime das Sprints 14 e 15 (cinco instruções
+  novas, os erros 6153–6175, os eventos 18–22, as contas `ReferralLink` e `SealedFee`) e o indexador da Sprint 08.
+  - **O vínculo de indicação** (`user_link_referrer`): o indicado assina uma vez, com o próprio aluguel, e nada muda
+    nem fecha o vínculo depois; recusa o endereço zero e o próprio indicado; um endereço pago antes é completado; nunca
+    pausado. 66 casos provam que nenhuma instrução altera um vínculo.
+  - **A disputa em duas etapas**: `team_open_contest` ligado (só depois de toda entrada contada), `reread_campaign`
+    (qualquer carteira, só no nível de cima: a mesma leitura paga com o resultado gravado, depois das 24 horas da etapa
+    1; outra leva à etapa 2, de 48 horas; nunca grava um resultado), `admin_decide_contest` (o admin confirma ou anula, nunca inverte: conferido em
+    todas as 65.536 combinações de argumentos) e o fim da etapa 2 no `finalize_campaign`. A aresta Contested → Settled
+    para a campanha sem entrada, e o erro 6175 para a confirmação com motivo de anulação.
+  - **A indicação fora do programa** (`services/indexer`, `scripts/referral/`): as tabelas de indicação, "antes da
+    primeira entrada" pela ordem da cadeia, a base `(taxa − parte da taxa do criador) × entrada ÷ V` conferida contra o
+    snapshot da campanha, os 20% por 90 dias e a devolução até 0,05 SOL; a rotina semanal prepara o lote para uma
+    pessoa assinar (nenhuma chave no servidor), registra o que pousou pela marca no memo e publica o relatório só com
+    carteiras e valores.
+  - **O teste de dinheiro** (I1 a I15) agora sorteia vincular, contestar, reler, decidir e deixar vencer a etapa 2, e
+    confere o contador de campanhas abertas em toda saída; os scripts da equipe usam a contestação de verdade.
+  - **A revisão adversária** (do andaime à integração da disputa, `fd67706` a `e978f5c`) não achou caminho para mandar
+    SOL ao lugar errado nem para inverter um resultado; achou um problema de desenho grave, a releitura igual que paga um
+    resultado contestado (o D2, respondido e construído em 13/10, acima), e correções menores (F3 a F10, acima). A
+    segunda revisão, das mudanças posteriores, está com o líder.
+
 - **Sprint 08, a terceira fatia do indexador** (branch `sprint-08-indexer`, PR #72, 13/10/2026; construída e testada,
   não implantada; o registro em `docs/sprints/sprint-08-indexer-api-points.md`). A ordem da página inicial calculada
   no indexador e servida em `/api/v1/ranking` (X1.9); os KPIs e o relatório do parceiro sem endereço nenhum; o

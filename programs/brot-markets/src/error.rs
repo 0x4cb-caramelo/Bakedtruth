@@ -336,7 +336,7 @@ pub enum BrotError {
     WrongContestStage = 6161,
     #[error("The contest stage's deadline has passed")]
     ContestDeadlinePassed = 6162,
-    #[error("Stage 2 of the contest has not lapsed yet")]
+    #[error("The contest has not lapsed yet: stage 2 lapses at its deadline, an unread stage 1 48 hours after its own")]
     ContestNotLapsed = 6163,
     #[error("The contest decision is neither Confirm nor Void")]
     InvalidContestDecision = 6164,
@@ -353,7 +353,16 @@ pub enum BrotError {
     SealedFeeMismatch = 6173,
     #[error("The account is not the SealedFee's stored sponsor")]
     WrongSponsor = 6174,
-    // New codes are appended here, from 6175, never reusing a number.
+    // Sprint 14, the lead's addendum (2026-10-13).
+    #[error("A Confirm decision carries no void reason: its void_reason must be None")]
+    ConfirmWithVoidReason = 6175,
+    // Sprint 14, the founder's answer to D2 (2026-10-13): a matching re-read waits for stage 1's end.
+    #[error("A matching re-read pays only after stage 1's 24-hour wait")]
+    RereadBeforeTimelock = 6176,
+    // Sprint 14, the second review's S1 (2026-10-13): the act is in the signed bytes, so an opening never escalates.
+    #[error("The campaign is already Contested: an opening (stage 1) never escalates it; stage 2 is its own byte")]
+    ContestAlreadyOpen = 6177,
+    // New codes are appended here, from 6178, never reusing a number.
 }
 
 impl From<BrotError> for ProgramError {
