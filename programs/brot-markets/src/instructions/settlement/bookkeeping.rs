@@ -1,10 +1,11 @@
 //! Purpose: the moves and counters every settlement instruction shares: the event sequence number, the
 //!          lamport move out of the vault, the credit of lamports that are not from the vault (an Entry's rent,
 //!          back to its baker), and the in-program assertion of TP section 3.4.13 against the books: the vault's
-//!          lamport change across a paying instruction equals the change its books make (`VaultWatch`), and at
-//!          close the vault covers what the books still hold (`books_held`, `require_books_covered`).
-//! Version: 0.0.2 (G-2: the vault's change asserted against the books, not against itself)
-//! Sprint: 04 (lane C); 16 (lane L16P, the audit package's G-2)
+//!          lamport change across a paying instruction equals the change its books make, within the snapshot's cap
+//!          (`VaultWatch`), and at close the vault covers what the books still hold (`books_held`,
+//!          `require_books_covered`).
+//! Version: 0.0.3 (the review's F4: the payout cap in the watch; F5: close takes its rent above the books)
+//! Sprint: 04 (lane C); 16 (lane L16P, the audit package's G-2 and the review's F4, F5)
 //!
 //! Callers run `checks::paying_vault` before `pay_from_vault`, and the stored-key checks before anything here.
 //! The books are the campaign's fields, never the vault's balance (I15): what went in (`booked_in`) and what has
@@ -13,7 +14,10 @@
 
 use pinocchio::{AccountView, ProgramResult};
 
-use super::collect_fee::{amount, moves::moved_exactly};
+use super::{
+    collect_fee::{amount, moves::moved_exactly},
+    payout_cap::require_within_snapshot,
+};
 use crate::{
     error::BrotError, layout::LeU64, math::invariant::vault_change_matches,
     state::campaign::Campaign,
@@ -119,10 +123,12 @@ impl VaultWatch {
         })
     }
 
-    /// At the instruction's end: the vault's lamport change since `start` equals the change of `booked_out` (TP
+    /// At the instruction's end: the payouts are within the snapshot's cap (`require_within_snapshot`,
+    /// `PaidOutAboveSnapshot`), and the vault's lamport change since `start` equals the change of `booked_out` (TP
     /// section 3.4.13, as `user_join_campaign` asserts its deposit). A move the books do not record, a record the
     /// vault did not follow, or the books going backwards is `InvariantViolated`.
     pub fn check(&self, vault: &AccountView, campaign: &Campaign) -> Result<(), BrotError> {
+        require_within_snapshot(campaign)?;
         let out = booked_out(campaign)?
             .checked_sub(self.booked_out)
             .ok_or(BrotError::InvariantViolated)?;
@@ -139,13 +145,14 @@ pub fn books_held(c: &Campaign) -> Result<u64, BrotError> {
         .ok_or(BrotError::InvariantViolated)
 }
 
-/// At close, before any move (I15 there, G-2): the vault's lamports above its rent (`above_rent`) cover what the
-/// books still hold (`books_held`), and the reserve close pays to the rent payer is part of it. What lies above is
-/// SOL sent by hand, which only adds to the vault. `InvariantViolated` when the vault holds less than the books still
+/// At close, before any move (I15 there, G-2): the vault's lamports cover what the books still hold
+/// (`books_held`), and the reserve close pays to the rent payer is part of it. The rent comes back from what lies
+/// above the books only (`close_campaign`, the review's F5): a rent-exempt minimum that rose since the opening never
+/// blocks the close nor takes what the books owe. `InvariantViolated` when the vault holds less than the books still
 /// owe, or when the reserve is not inside them.
-pub fn require_books_covered(above_rent: u64, held: u64, reserved: u64) -> Result<(), BrotError> {
+pub fn require_books_covered(vault: u64, held: u64, reserved: u64) -> Result<(), BrotError> {
     // X0.9 close_books_covered
-    if above_rent < held || reserved > held {
+    if vault < held || reserved > held {
         return Err(BrotError::InvariantViolated);
     }
     Ok(())

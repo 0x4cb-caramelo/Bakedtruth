@@ -2,9 +2,10 @@
 //!          a planted mismatch. A move whose two sides end with other balances than it wrote (the same account on
 //!          both sides: `moved_exactly`); a paying instruction whose vault moved by another amount than its books
 //!          (`VaultWatch`: the payouts, the fee and prize flags, a reserve); a close whose vault holds less than its
-//!          books still owe, or whose reserve is outside them (`books_held`, `require_books_covered`).
-//! Version: 0.0.1
-//! Sprint: 16 (lane L16P, the pre-freeze hardening)
+//!          books still owe, or whose reserve is outside them (`books_held`, `require_books_covered`; since the
+//!          review's F5 the vault's whole balance is compared, its rent coming back from above the books).
+//! Version: 0.0.2 (F5: the close compares the vault itself with the books)
+//! Sprint: 16 (lane L16P, the pre-freeze hardening and the review's follow-ups)
 
 #[path = "checks_support/host.rs"]
 mod host;
@@ -29,7 +30,8 @@ const KEPT: u64 = 100 - 10 + 50;
 const HELD: u64 = 6_550 - 6_300 - KEPT;
 
 /// A finalized campaign in `mode`: 4,000 on YES and 2,000 on NO, a 500 prize, a 50 opening fee, a fee of 100 of
-/// which 10 went to the creator.
+/// which 10 went to the creator; a split shares out 5,000 to the winners and 90 to the creator (the payout cap, F4,
+/// is then 5,090, above every payout these tests book).
 fn finalized(buf: &mut Vec<u8>, mode: SettleMode) -> &mut Campaign {
     buf.clear();
     buf.resize(<Campaign as ZeroCopy>::LEN, 0);
@@ -41,6 +43,10 @@ fn finalized(buf: &mut Vec<u8>, mode: SettleMode) -> &mut Campaign {
     c.opening_fee_lamports = LeU64::new(50);
     c.fee_total = LeU64::new(100);
     c.creator_share_from_fee = LeU64::new(10);
+    if mode == SettleMode::Split {
+        c.distributable = LeU64::new(5_000);
+        c.creator_share = LeU64::new(90);
+    }
     c
 }
 
@@ -150,7 +156,7 @@ fn prefreeze_close_refuses_a_vault_below_what_the_books_hold() {
     c.prize_settled = 1;
     c.creator_share_reserved = LeU64::new(90);
     assert_eq!(books_held(c), Ok(HELD));
-    // The vault above its rent holds the dust and the reserve, or more (SOL sent by hand).
+    // The vault holds the dust and the reserve, or more (its rent, SOL sent by hand).
     assert_eq!(require_books_covered(HELD, HELD, 90), Ok(()));
     assert_eq!(require_books_covered(HELD + 5, HELD, 90), Ok(()));
     // One lamport short of the books, or a reserve larger than what they hold.
