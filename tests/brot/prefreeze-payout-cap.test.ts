@@ -4,7 +4,8 @@
  *          whose fee was collected while an entry is open (the entry's fee would leave the books, not the vault:
  *          `InvariantViolated`); payouts past the snapshot's cap at `settle_entry`, at each of
  *          `settle_creator_share`'s three paths, at `collect_fee` and at `settle_prize` (`PaidOutAboveSnapshot`);
- *          a close whose vault holds less than its books (`InvariantViolated`). Nothing moves in any of them.
+ *          a close whose reserve is more than its books hold, or whose vault holds less than they do
+ *          (`InvariantViolated`). Nothing moves in any of them.
  * Version: 0.0.1
  * Sprint:  16 (lane L16P, the review's follow-ups). Needs target/deploy/brot_markets.so.
  */
@@ -119,6 +120,19 @@ describe("every VaultWatch call site refuses a state no settlement produces", ()
     const prize = await finalized(P.Status.Settled, { paid_out_total: CAP + 1n });
     const prizeIx = S.settlePrizeIx(prize.campaign, prize.vault, prize.creator);
     await refused(prize.w, prizeIx, "PaidOutAboveSnapshot", [prize.vault, prize.creator]);
+  });
+
+  test("close_campaign: a reserve larger than what the books still hold", async () => {
+    // The winners took all but 7 lamports of the split; a 1,000-lamport reserve is more than the books hold.
+    const left = { paid_out_total: 3n * SOL - (SPLIT.fee - SPLIT.creatorFromFee) - 7n };
+    const flags = { fee_collected: 1, prize_settled: 1, creator_share_settled: 1, creator_share_reserved: 1_000n };
+    const s = await finalized(P.Status.Settled, { ...left, ...flags });
+    const rent = s.w.client.svm.minimumBalanceForRentExemption(0n);
+    const vaultBytes = { data: new Uint8Array(0), executable: false, programAddress: P.PROGRAM_ID, space: 0n };
+    s.w.client.svm.setAccount({ address: s.vault, lamports: lamports(rent + 7n + 1_000n), ...vaultBytes });
+    const feeVault = await P.feeVaultPda();
+    const ix = S.closeCampaignIx(s.campaign, s.vault, s.creator, feeVault);
+    await refused(s.w, ix, "InvariantViolated", [s.vault, s.campaign, s.creator, feeVault]);
   });
 
   test("close_campaign: a vault holding less than its books still owe", async () => {

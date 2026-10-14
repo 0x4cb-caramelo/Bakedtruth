@@ -5,7 +5,7 @@
  *          rebuilds the program with cargo build-sbf, and shows that the check's own negative tests
  *          (Mollusk and LiteSVM) fail without it. Each source is restored byte for byte after each
  *          mutant, on error and on Ctrl-C.
- * Version: 0.0.3 (Sprint 16, G-1: the close and paying checks of Sprint 04; the pre-freeze markers of lane L16P)
+ * Version: 0.0.4 (Sprint 16: G-1, the pre-freeze markers of lane L16P, and the review's F4 payout cap with LiteSVM rows)
  * Sprint:  02 (pot core on Pinocchio), lane A; `top_level` in 03, lane D. Run by hand, never by CI.
  *
  * Usage:  node scripts/checks-mutation.mjs [--plan] [--only id,id] [--jobs N]
@@ -40,6 +40,7 @@ const SOURCES = [
   "instructions/settlement/tally_late_joins.rs",
   "instructions/settlement/bookkeeping.rs",
   "instructions/settlement/collect_fee/moves.rs",
+  "instructions/settlement/payout_cap.rs",
 ].map((file) => join(ROOT, "programs/brot-markets/src", file));
 const DEPLOY = join(ROOT, "target/deploy");
 const SO = join(DEPLOY, "brot_markets.so");
@@ -61,6 +62,7 @@ const RUST_TARGETS = [
   "checks_close_paying",
   "prefreeze_vault",
   "prefreeze_tally",
+  "prefreeze_payout_cap",
 ];
 const TS_FILES = [
   "tests/brot/checks.test.ts",
@@ -80,6 +82,7 @@ const TS_FILES = [
   "tests/brot/contest-act.test.ts",
   "tests/brot/prefreeze-partial-tally.test.ts",
   "tests/brot/prefreeze-tally-refusals.test.ts",
+  "tests/brot/prefreeze-payout-cap.test.ts",
 ];
 const PATH = `${process.env.HOME}/.bun/bin:${process.env.PATH}`;
 // Mollusk and LiteSVM both run the binary this script builds; logs off and no colours to parse.
@@ -183,6 +186,12 @@ vault_booked_change   fail  prefreeze_vault_watch_refuses_a_flag_the_vault_did_n
 vault_booked_change   fail  prefreeze_vault_watch_counts_changes_and_a_reserve_stays_in_the_vault | -
 move_both_sides       fail  prefreeze_vault_move_refuses_the_same_account_on_both_sides | -
 close_books_covered   fail  prefreeze_close_refuses_a_vault_below_what_the_books_hold | -
+vault_booked_change   fail  - | settle_entry: a one-sided fee collected while an entry is open leaves the books, not the vault
+paid_out_within_snapshot fail prefreeze_payout_cap_split_counts_distributable_late_parts_and_the_creator_share | settle_entry: a payout past the snapshot's cap
+paid_out_within_snapshot fail prefreeze_payout_cap_one_sided_and_refund_count_payouts_and_fees_against_both_pools | settle_creator_share: a payment, a reserve and a claim past the snapshot's cap
+paid_out_within_snapshot fail - | collect_fee and settle_prize: a campaign already paid past the snapshot's cap
+close_books_covered   fail  - | close_campaign: a reserve larger than what the books still hold
+close_books_covered   keeps - | close_campaign: a vault holding less than its books still owe
 `;
 
 const args = process.argv.slice(2);
