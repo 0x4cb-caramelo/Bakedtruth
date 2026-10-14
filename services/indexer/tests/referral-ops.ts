@@ -52,6 +52,8 @@ export class OpsWallet {
   readonly simulated: string[] = [];
   /** Lamports a byte of the rent-exempt minimum, the 128-byte header included. */
   rentPerByte = 5_080n;
+  /** Its transactions the node cannot return in a version the reader asks for (-32015; Sprint 16, F1). */
+  readonly newer = new Set<string>();
 
   /** One landed transaction from the operations wallet: its transfers, then the memo, if any. */
   send(transfers: { to: string; lamports: bigint }[], memo: string | null, options: { failed?: boolean } = {}): string {
@@ -87,7 +89,7 @@ export class OpsWallet {
 
 /** The routine's RPC over the operations wallet's transactions, with balances and the rent-exempt minimum. */
 export function routineRpc(ops: OpsWallet): SolanaRpc {
-  const { rpc } = scripted({ txs: ops.txs });
+  const { rpc } = scripted({ txs: ops.txs, newer: ops.newer });
   const account = (at: string) => {
     const known = ops.balances.get(at);
     if (!known) return null;

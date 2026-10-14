@@ -7,17 +7,19 @@
  *          lamports) turns that row `landed`; anything else that left the wallet under a payout memo is recorded as
  *          landed too, to whoever received it, with a note (a duplicate, a changed amount, a row this ledger never
  *          had, an irregular shape), so a lost, stale or bypassed ledger can never make the routine pay twice.
- * Version: 0.3.0 (the scan keeps and reports the oldest signature it ever read)
- * Sprint:  14 (referral, lane L14R)
+ * Version: 0.4.0 (Sprint 16, the review's F1: every transaction version the cluster serves; one the node cannot return
+ *          in a version this client reads stops the scan, named: its payouts unknown, skipping it could pay twice)
+ * Sprint:  14 (referral, lane L14R); 16
  *
  * Only transfers under a payout memo are read: a payout sent by hand without one is not seen, so every payout goes
  * through the signing file (signing.ts).
  */
-import { getBase58Encoder, signature as toSignature } from "@solana/kit";
-import { accountKeysOf, type RpcTransaction, type SolanaRpc } from "@brot/sdk/read";
+import { getBase58Encoder } from "@solana/kit";
+import { accountKeysOf, MAX_TRANSACTION_VERSION, type RpcTransaction, type SolanaRpc } from "@brot/sdk/read";
 
 import type { Store } from "../db/store";
 import { listNewer } from "../listing";
+import { isFailed, isUnreadable, readTransaction } from "../read-tx";
 import { MEMO_PREFIX, parseMemo } from "./rules";
 
 const SYSTEM_PROGRAM = "11111111111111111111111111111111";
@@ -25,7 +27,6 @@ const MEMO_PROGRAMS = new Set([
   "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
   "Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo",
 ]);
-const TX = { encoding: "json", maxSupportedTransactionVersion: 0, commitment: "finalized" } as const;
 
 export type Landing = {
   signature: string;
@@ -139,11 +140,15 @@ export async function scanLandings(
     return { ...report, first: at === null ? null : { signature: at.first_signature, slot: at.first_slot } };
   };
   for (const s of listed) {
-    const tx = s.failed
-      ? null
-      : ((await rpc
-          .getTransaction(toSignature(s.signature), TX)
-          .send({ abortSignal: AbortSignal.timeout(o.timeoutMs) })) as unknown as RpcTransaction | null);
+    const read = s.failed ? null : await readTransaction(rpc, s.signature, o.timeoutMs);
+    // Never skipped: a payout this scan does not see could be paid again (the review's F1).
+    if (read !== null && isUnreadable(read))
+      throw new Error(
+        `the payout scan cannot read ${s.signature} (-32015: newer than version ${MAX_TRANSACTION_VERSION}): it stops there`,
+      );
+    if (read !== null && isFailed(read))
+      throw new Error(`the payout scan could not read ${s.signature} (${read.failed})`);
+    const tx = read as RpcTransaction | null;
     if (!s.failed && tx === null) return { ...done(), stoppedAt: s.signature };
     ledger.tx(() => {
       for (const landing of tx === null ? [] : payoutsOf(tx, ops)) {

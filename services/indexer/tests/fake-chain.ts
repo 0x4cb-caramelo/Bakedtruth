@@ -5,10 +5,16 @@
  *          lists and returns them, with what the ingest must survive: pages shorter than asked, a node that ignores
  *          `until`, a transaction that does not read back, a call that fails, one the program's listing leaves out,
  *          a failed one. Since slice 3, a resolution, a finalization and a late tally too, for the points rule.
- * Version: 0.2.0 (slice 3: CampaignResolved, CampaignFinalized, LateTallied; an opening's kind and creator)
+ *          Since Sprint 16 (the review's F1), a transaction of a newer version than the reader asks for (-32015), and
+ *          the version each read asked for.
+ * Version: 0.3.0 (Sprint 16: -32015 and the version asked; 0.2.0, slice 3's events)
  * Sprint:  08 (indexer, API, relay and points)
  */
-import { getBase58Decoder } from "@solana/kit";
+import {
+  getBase58Decoder,
+  SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION,
+  SolanaError,
+} from "@solana/kit";
 import { EVENT_AUTHORITY, EVENT_IX_TAG, EVENTS, PROGRAM_ID, type RpcTransaction, type SolanaRpc } from "@brot/sdk/read";
 
 import * as T from "../../../packages/sdk/src/idl/generated/types";
@@ -121,11 +127,15 @@ export type Script = {
   unreadable?: Map<string, number>;
   /** How many more reads of each signature fail as a call (a timeout, a node down). */
   failing?: Map<string, number>;
+  /** Signatures of a version newer than the reader asks for: the node answers -32015 (Sprint 16, F1). */
+  newer?: Set<string>;
 };
 
 /** A Kit-shaped RPC over `script`, oldest transaction first; `reads` records each signature read, in order. */
 export function scripted(script: Script) {
   const reads: string[] = [];
+  /** The `maxSupportedTransactionVersion` each read asked for. */
+  const versions: (number | undefined)[] = [];
   const send = <T>(work: () => T) => ({ send: async () => work() });
   const rpc = {
     getSignaturesForAddress: (at: string, config: { limit: number; before?: string; until?: string }) =>
@@ -143,9 +153,16 @@ export function scripted(script: Script) {
           .slice(from, from + size)
           .map((tx) => ({ signature: tx.transaction.signatures[0], slot: tx.slot, err: tx.meta!.err }));
       }),
-    getTransaction: (sig: string) =>
+    getTransaction: (sig: string, config: { maxSupportedTransactionVersion?: number }) =>
       send(() => {
         reads.push(sig);
+        versions.push(config?.maxSupportedTransactionVersion);
+        if (script.newer?.has(sig)) {
+          const __serverMessage = "Transaction version (2) is not supported by the requesting client.";
+          throw new SolanaError(SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION, {
+            __serverMessage,
+          });
+        }
         const down = script.failing?.get(sig) ?? 0;
         if (down > 0) {
           script.failing!.set(sig, down - 1);
@@ -159,7 +176,7 @@ export function scripted(script: Script) {
         return script.txs.find((tx) => tx.transaction.signatures[0] === sig) ?? null;
       }),
   };
-  return { rpc: rpc as unknown as SolanaRpc, reads };
+  return { rpc: rpc as unknown as SolanaRpc, reads, versions };
 }
 
 /** The live read a test with no cluster gets: the clock only, no account. */
