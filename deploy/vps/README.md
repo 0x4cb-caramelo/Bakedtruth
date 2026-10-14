@@ -313,7 +313,10 @@ release on. Decided by Ronaldo on 2026-10-11: the tunnel and systemd (no Nginx, 
 
 **Rolling back:** delete the two routes in the dashboard (the landing then answers both paths with 404) and
 `sudo systemctl disable --now brot-site brot-api`; or point `current` at the previous release and
-`sudo systemctl restart brot-api brot-site`. **A new release:** step 4 with the new commit, then
+`sudo systemctl restart brot-api brot-site`. **Since 2026-10-14 ~04:21 UTC:** release `a5e6014e42f3` (`main` after PR
+#93), built for the program deploy at slot 510863588 and tested on port 4239 first, through a transient unit as
+`brot-site`; its eight pages answered as the live release's. The previous release was `353c2a3a1b90`, which is also
+the way back. **A new release:** step 4 with the new commit, then
 `sudo systemctl restart brot-api brot-site`. Build again after every program upgrade (A-8).
 
 ## The indexer's routes through the read API (Sprint 08; not live)
