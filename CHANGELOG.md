@@ -146,6 +146,13 @@ recomendado (1a a 12a).
   segurança e o caminho de volta estão no README. A unidade com identidade própria continua não instalada: depende do
   dono do servidor.
 
+- **O keeper aprende as Sprints 14 e 15** (13/10/2026, faixa L14K, `a827b1e` e `c6ec66e`; no PR da Sprint 14). Fecha
+  uma campanha só depois de liquidar cada taxa selada aberta (`settle_sealed_fee`, para o patrocinador gravado), para
+  nunca mandar um fechamento que o programa recusa. Numa disputa na etapa 1, um keeper com a RPC B simula a releitura
+  por ela: a mesma leitura, recusada até o fim das 24 horas, espera sem contar como falha; uma diferente vai na hora
+  para a etapa 2 e avisa a equipe; a disputa vencida é finalizada e liquidada. Ele nunca abre nem decide uma disputa.
+  Alertas novos, cada um com o seu runbook: disputa aberta, etapa 2 perto do fim, releitura diferente e taxa selada
+  ainda aberta. Nada muda no `keeper.env`; no servidor ele relê só quando a RPC B for configurada.
 - **Sprint 14: as correções da segunda revisão adversária** (13/10/2026; `docs/sprints/sprint-14-referral-second-read.md`,
   "Record"). A revisão não achou como pagar cedo, ou para o lado errado, um resultado contestado, nem como travar um
   pote. **S1:** o `team_open_contest` escolhia abrir ou escalar pelo estado gravado, e uma abertura repetida (um 429

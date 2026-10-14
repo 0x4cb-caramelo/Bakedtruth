@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **1199** |
+| Arquivos mapeados | **1203** |
 | Acima de 200 linhas | **44** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -1427,19 +1427,20 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`alert.ts`](services/keeper/src/alert.ts) | the keeper's alerts. Each alert is one JSON line on the journal, de-duplicated per (kind, key) within a window, so a stuck condition does not flood the log. Ema | 85 |
+| [`alert.ts`](services/keeper/src/alert.ts) | the keeper's alerts. Each alert is one JSON line on the journal, de-duplicated per (kind, key) within a window, so a stuck condition does not flood the log. Ema | 89 |
 | [`backoff.ts`](services/keeper/src/backoff.ts) | the keeper's two kinds of retry. Within a cycle, an RPC call that fails for a transient reason (rate limit, a 5xx, a dropped connection, a timeout) is tried aga | 88 |
-| [`budget.ts`](services/keeper/src/budget.ts) | the compute budget of a keeper transaction (TP §3.5, "Transaction landing"; proposal §2.6), per kind of instruction: the compute-unit limit from the simulation  | 115 |
-| [`campaigns.ts`](services/keeper/src/campaigns.ts) | the keeper's view of the program's own accounts: every campaign (one `getProgramAccounts` filtered by the campaign's size), by status when asked, and a campaign | 88 |
-| [`chain-watch.ts`](services/keeper/src/chain-watch.ts) | the chain watch (TP §3.5, "the chain watch"; Sprint 07 DoD, on-chain liveness): after each cycle it turns the view, the resolve attempts and the settlement plan | 123 |
+| [`budget.ts`](services/keeper/src/budget.ts) | the compute budget of a keeper transaction (TP §3.5, "Transaction landing"; proposal §2.6), per kind of instruction: the compute-unit limit from the simulation  | 127 |
+| [`campaigns.ts`](services/keeper/src/campaigns.ts) | the keeper's view of the program's own accounts: every campaign (one `getProgramAccounts` filtered by the campaign's size), by status when asked, and a campaign | 104 |
+| [`chain-watch.ts`](services/keeper/src/chain-watch.ts) | the chain watch (TP §3.5, "the chain watch"; Sprint 07 DoD, on-chain liveness): after each cycle it turns the view, the resolve attempts and the settlement plan | 150 |
 | [`chain.ts`](services/keeper/src/chain.ts) | what one keeper cycle reads, in as few calls as the chain allows (TP §3.5, "100 per getMultipleAccounts"): every campaign in one `getProgramAccounts`; the confi | 120 |
 | [`config-ops.ts`](services/keeper/src/config-ops.ts) | the keeper's settings beyond the core ones of config.ts, read from its environment only: the settlement switch `KEEPER_SETTLE` (off unless it says "on": whether | 73 |
 | [`config.ts`](services/keeper/src/config.ts) | the keeper's settings, read from its environment only: the RPC URL (a secret, so the log shows its origin and never the path or the query), the keeper's keypair | 126 |
-| [`cycle.ts`](services/keeper/src/cycle.ts) | one keeper cycle: read the chain in batches (chain.ts); simulate `resolve_campaign` for each open campaign worth it (prefilter.ts) and send what the program acc | 115 |
+| [`contest.ts`](services/keeper/src/contest.ts) | the contest exit the keeper takes (Sprint 14; TP §3.4.7, the founder's answer to D2): the stage-1 re-read. It never sends a team's or the admin's act (`team_ope | 90 |
+| [`cycle.ts`](services/keeper/src/cycle.ts) | one keeper cycle: read the chain in batches (chain.ts); simulate `resolve_campaign` for each open campaign worth it (prefilter.ts) and send what the program acc | 132 |
 | [`health.ts`](services/keeper/src/health.ts) | GET /healthz on a loopback address only (TP §3.5, "Health"): the keeper's last full cycle (what it tried, its SOL balance, the pending settlement work, `open_ca | 45 |
 | [`landing.ts`](services/keeper/src/landing.ts) | lands a list of keeper instructions (TP §3.5, "Transaction landing"): packs them in order into transactions that fit the 1,232-byte limit with the two compute-b | 165 |
 | [`log.ts`](services/keeper/src/log.ts) | one JSON line per event on stdout, with a time stamp. The RPC URL and the keypair never reach it: the caller passes only fields it has checked (an origin, a pub | 10 |
-| [`main.ts`](services/keeper/src/main.ts) | the keeper's entry point. Reads its settings and keypair, serves /healthz on loopback (and POST /restart on the primary, when its secret is set), and runs one c | 111 |
+| [`main.ts`](services/keeper/src/main.ts) | the keeper's entry point. Reads its settings and keypair, serves /healthz on loopback (and POST /restart on the primary, when its secret is set), and runs one c | 113 |
 | [`prefilter.ts`](services/keeper/src/prefilter.ts) | which open campaigns are worth a `resolve_campaign` simulation this cycle, from the batched read and the SDK's mirror of the join lock (`outcomeKnowable`), so a | 30 |
 | [`proof-tx.ts`](services/keeper/src/proof-tx.ts) | the proof transaction of a price resolution (the second read; Sprint 07 DoD, proposal §2.11): the transaction that wrote the price account at its `posted_slot`, | 105 |
 | [`pyth-watch.ts`](services/keeper/src/pyth-watch.ts) | the Pyth upgrade watch (Sprint 07, carried item "the watchdog also watches Pyth"; TP §3.5, the chain watch): the price reader trusts Pyth's receiver (`rec2HH…`, | 111 |
@@ -1451,12 +1452,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`second-read.ts`](services/keeper/src/second-read.ts) | the second read of a PRICE campaign (proposal §2.11, Sprint 07): the sponsored or proof price account is read through the primary's RPC and through RPC B, each  | 80 |
 | [`secret.ts`](services/keeper/src/secret.ts) | loads the HMAC secret of POST /restart from the file named by KEEPER_RESTART_SECRET_FILE (a systemd credential, root-owned, 0600). The file is read once at star | 14 |
 | [`send.ts`](services/keeper/src/send.ts) | the keeper's transaction path: a message with a fresh blockhash, signed by the keeper, sent without preflight (the simulation already ran) and `maxRetries: 0`,  | 126 |
-| [`settle-plan.ts`](services/keeper/src/settle-plan.ts) | the settlement plan of one campaign (TP §3.5, the keeper's cycle, steps 2 to 5), from its stored account and its entries alone: each step is planned only when t | 152 |
-| [`settle.ts`](services/keeper/src/settle.ts) | the settlement task (TP §3.5, the keeper's cycle, steps 2 to 5), behind KEEPER_SETTLE (off by default: whether the devnet keeper pays is the founder's decision) | 168 |
+| [`settle-plan.ts`](services/keeper/src/settle-plan.ts) | the settlement plan of one campaign (TP §3.5, the keeper's cycle, steps 2 to 5), from its stored account, its entries and its sponsors' sealed fees alone: each  | 185 |
+| [`settle.ts`](services/keeper/src/settle.ts) | the settlement task (TP §3.5, the keeper's cycle, steps 2 to 5), behind KEEPER_SETTLE (off by default: whether the devnet keeper pays is the founder's decision) | 174 |
 | [`signer.ts`](services/keeper/src/signer.ts) | the keeper's signer, loaded from a keypair file named by KEEPER_KEYPAIR (the standard 64-byte JSON array). The file lives outside the repository; the keeper nev | 22 |
 | [`standby-loop.ts`](services/keeper/src/standby-loop.ts) | the standby's three loops: the watchdog (every 5 minutes, probes the primary and takes over by the rules in standby.ts), the continuous feed watcher for open pr | 108 |
 | [`standby.ts`](services/keeper/src/standby.ts) | the standby's rules, as pure functions with no I/O. The gate: a standby may send only while it has taken over AND the primary does not answer; while the primary | 82 |
-| [`watch-rules.ts`](services/keeper/src/watch-rules.ts) | the chain watch's rules, as pure functions of one cycle's view (TP §3.5, "Observability and alerting"; Sprint 07 DoD, the alert list; Sprint 16 DoD, the exposur | 128 |
+| [`watch-rules.ts`](services/keeper/src/watch-rules.ts) | the chain watch's rules, as pure functions of one cycle's view (TP §3.5, "Observability and alerting"; Sprint 07 DoD, the alert list; Sprint 16 DoD, the exposur | 164 |
 | [`watchdog.ts`](services/keeper/src/watchdog.ts) | the watchdog's I/O. Each tick it probes the primary's GET /healthz (10 s timeout), feeds the answer to the pure rules in standby.ts, and performs what they deci | 80 |
 | [`watcher.ts`](services/keeper/src/watcher.ts) | the standby's continuous feed watcher. Every interval it lists the open campaigns, keeps the price ones (their sponsored feed moves between the primary's 60 s c | 75 |
 
@@ -1467,6 +1468,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`alert.test.ts`](services/keeper/tests/alert.test.ts) | the alerter's rules: a repeat of the same (kind, key) inside the window is suppressed, a new key or a later time emits again, each emitted line is one JSON obje | 90 |
 | [`backoff.test.ts`](services/keeper/tests/backoff.test.ts) | the keeper's retries (Sprint 06 DoD: "with retries and backoff"): a transient RPC error (rate limit, 5xx, dropped connection, timeout) is tried again with a gro | 66 |
 | [`chain-watch.test.ts`](services/keeper/tests/chain-watch.test.ts) | every chain-watch alert fires in a test (Sprint 07 DoD, the alert list; Sprint 16 DoD: the 80% alert, the exposure alert and the team-opening alert): `open_camp | 158 |
+| [`contest-keeper.test.ts`](services/keeper/tests/contest-keeper.test.ts) | the keeper and a contest on the program, on LiteSVM (Sprint 14, D2), with RPC B configured: a matching re-read before stage 1's deadline is refused by design (` | 133 |
+| [`contest-plan.test.ts`](services/keeper/tests/contest-plan.test.ts) | what Sprints 14 and 15 add to the keeper's plan and watch, pure: every open sealed fee settled to its stored sponsor once the campaign is finalized, and the clo | 151 |
 | [`health-cycle.test.ts`](services/keeper/tests/health-cycle.test.ts) | /healthz and the 80% alert from a real cycle on LiteSVM (Sprint 06 DoD: "/healthz returns the last full cycle, the SOL balance, the pending items and the open c | 59 |
 | [`keeper.test.ts`](services/keeper/tests/keeper.test.ts) | the keeper's unit tests: its settings and their refusals, the send-or-skip rule, the signer's input check, the campaign listing (a non-campaign account is skipp | 128 |
 | [`landing-chain.test.ts`](services/keeper/tests/landing-chain.test.ts) | the landing path on the program, on LiteSVM (Sprint 06 DoD: "drop the failing instruction", "retry a reserved credit"): a batch holding one entry another wallet | 113 |
@@ -1475,11 +1478,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`reads-config.test.ts`](services/keeper/tests/reads-config.test.ts) | the batched reads and the settings (Sprint 06 DoD: batched reads; the settlement switch; the credentials). `fetchMany` reads 100 accounts per `getMultipleAccoun | 133 |
 | [`restart.test.ts`](services/keeper/tests/restart.test.ts) | POST /restart's refusals and its one acceptance: an unsigned, wrongly signed, stale, future or re-bodied request is refused with 401 and writes nothing; a valid | 172 |
 | [`runbooks.test.ts`](services/keeper/tests/runbooks.test.ts) | every alert the keeper can raise has its runbook (Sprint 07 DoD: "a runbook per alert in deploy/vps/ says who acts, how, and how fast"): for each kind in `ALERT | 25 |
+| [`sealed-keeper.test.ts`](services/keeper/tests/sealed-keeper.test.ts) | the keeper settles a campaign that carries two sealed entries (Sprint 15), end to end on LiteSVM: two sponsors each enter through `sponsor_join_campaign` next t | 81 |
 | [`second-read-chain.test.ts`](services/keeper/tests/second-read-chain.test.ts) | the second read of a price resolution end to end (Sprint 07 DoD: "tested with a forged mismatch"), on LiteSVM with recorded devnet bytes: a BTC/USD campaign is  | 128 |
 | [`second-read-proof.test.ts`](services/keeper/tests/second-read-proof.test.ts) | the proof transaction of a price resolution, read from recorded devnet answers (no live RPC): the push oracle's `update_price_feed` carries exactly what the spo | 108 |
 | [`second-read.test.ts`](services/keeper/tests/second-read.test.ts) | the second read's rules and the review queue's line: a match, a real difference, a missing account, a difference that a retry at RPC B clears (publish landing b | 130 |
 | [`settle-modes.test.ts`](services/keeper/tests/settle-modes.test.ts) | the keeper settles on the program, end to end on LiteSVM, with nobody else acting (Sprint 06 DoD: resolve, finalize, settle in batches): a paid BTC/USD campaign | 101 |
-| [`settle-plan.test.ts`](services/keeper/tests/settle-plan.test.ts) | the settlement planner's rules, pure (Sprint 06 DoD: finalize, settle in batches, the daily retry of a reserved credit, and "never send to a destination the pro | 187 |
+| [`settle-plan.test.ts`](services/keeper/tests/settle-plan.test.ts) | the settlement planner's rules, pure (Sprint 06 DoD: finalize, settle in batches, the daily retry of a reserved credit, and "never send to a destination the pro | 189 |
 | [`settle-voids.test.ts`](services/keeper/tests/settle-voids.test.ts) | the keeper settles a void on the program, end to end on LiteSVM. A price campaign whose feed stopped before the deadline is voided by the keeper's own resolve ( | 108 |
 | [`standby.test.ts`](services/keeper/tests/standby.test.ts) | the standby's rules: the send gate (a standby refuses to send while the primary is alive), the takeover timeline (restarts, then takeover, then no automatic han | 86 |
 | [`two-keepers.test.ts`](services/keeper/tests/two-keepers.test.ts) | "two keepers change nothing twice" (Sprint 07 DoD): the primary and the standby settle the same finalized campaign at once, on LiteSVM. Both simulate before eit | 125 |
@@ -1493,7 +1497,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`accounts.ts`](services/keeper/tests/kit/accounts.ts) | the program's accounts as plain values for the keeper's pure tests: a campaign, an entry and a config decoded from zeroed bytes by the SDK's own decoders (every | 52 |
 | [`litesvm-rpc.ts`](services/keeper/tests/kit/litesvm-rpc.ts) | a Kit RPC client served in-process by a LiteSVM world, so the keeper's own code (its batched reads, its simulations, its sends, its status checks) runs against  | 197 |
 | [`proof-fixtures.ts`](services/keeper/tests/kit/proof-fixtures.ts) | the recorded devnet answers of the second-read tests (tests/fixtures/proof-tx/, written by scripts/capture-proof-tx.ts): the BTC/USD sponsored account, the bloc | 63 |
-| [`settle-checks.ts`](services/keeper/tests/kit/settle-checks.ts) | the money checks of the keeper's settlement tests: from the state captured when the snapshot landed, the program's stored snapshot equals the SDK's (`snapshotOf | 63 |
+| [`settle-checks.ts`](services/keeper/tests/kit/settle-checks.ts) | the money checks of the keeper's settlement tests: from the state captured when the snapshot landed, the program's stored snapshot equals the SDK's (`snapshotOf | 82 |
 | [`settle-world.ts`](services/keeper/tests/kit/settle-world.ts) | what the keeper's settlement tests share: a LiteSVM world with the founder's config, a team key, a creator, a funded keeper wallet and the in-process RPC; the k | 188 |
 
 ## `services/landing/`

@@ -63,7 +63,12 @@ without the other.
 - [ ] On a price campaign, the second read fetches the proof transaction at `posted_slot` through RPC B, on the
       standby (Sprint 07; proposal §2.5). On the other kinds, it re-reads the account and compares it with
       `observed_value`.
-      *Partly:* the standby's second read through RPC B is built (PR #88, merged 2026-10-13); the keeper calling `reread_campaign` is not wired yet.
+      *Partly:* the standby's second read through RPC B is built (PR #88, merged 2026-10-13); since lane L14K
+      (2026-10-13, in PR #92) a keeper with RPC B simulates `reread_campaign` through it in stage 1, waits out a
+      matching re-read's refusal until stage 1's deadline (`RereadBeforeTimelock`), sends a different reading at once
+      (stage 2) with the alert `contest_reread_differs`, and finalizes a lapsed contest (`contest-keeper.test.ts`). Not
+      yet live: the devnet primary has no RPC B (`KEEPER_RPC_URL_B`), so it does not re-read, and a stage-1 contest
+      lapses 72 hours after opening.
 - [ ] The decision is published, with its reason, on the public record route (`content/void-log/`).
       *Partly:* `scripts/team/decide.ts` writes a void's record only, under a Team key header; a confirm publishes
       nothing; the admin form is a follow-up.
@@ -231,9 +236,9 @@ and 538 mainnet tests). The mutation proof covers every new check: the two refer
   (lane L14R: `0db32d1`, `f9480d7`, `d3372bc`). Info: `ContestNotLapsed`'s message and the stale plan lines fixed.
 - **The founder:** the notice text before the referee signs and on the privacy page; the ledger's retention; where the
   referral balance shows (L-10).
-- **The lead, after the merge:** the devnet redeploy with Ronaldo; the keeper calling `reread_campaign` in stage 1 and
-  `finalize_campaign` after a lapse, simulating each re-read first (a matching one is refused until
-  `contestTimelockEndsAt`); the site's `?ref=` link, the referral balance (L-10) and the contested state.
+- **The lead, after the merge:** the devnet redeploy with Ronaldo; the site's `?ref=` link, the referral balance
+  (L-10) and the contested state. The keeper's part is built (lane L14K: the re-read in stage 1, simulated through RPC
+  B, and the lapse finalized; never a team or admin act); it re-reads on the server once `KEEPER_RPC_URL_B` is set.
 - **A follow-up:** the void log's admin form (`scripts/team/decide.ts` writes a void's record under a Team key header,
   and a confirm publishes nothing).
 - **Sprint 16:** the partial-tally cut-off defect the randomized test reproduced in Sprint 04 code (audit item O-3).
