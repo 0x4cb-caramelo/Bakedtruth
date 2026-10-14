@@ -10,7 +10,13 @@
  */
 import { createSolanaRpc, lamports, type KeyPairSigner } from "@solana/kit";
 
-import { decodeCampaign, decodeTransactionEvents, Side, type RpcTransaction } from "@brot/sdk/read";
+import {
+  decodeCampaign,
+  decodeTransactionEvents,
+  Side,
+  type RpcTransaction,
+  MAX_TRANSACTION_VERSION,
+} from "@brot/sdk/read";
 
 import type { OpeningWorld } from "../brot/opening";
 import * as P from "../brot/program";
@@ -28,7 +34,9 @@ async function receivedFromEvents(chain: FakeChain, wallet: string): Promise<big
   const rpc = createSolanaRpc(chain.url);
   let sum = 0n;
   for (const s of await rpc.getSignaturesForAddress(wallet as never, { limit: 1_000 }).send()) {
-    const tx = await rpc.getTransaction(s.signature, { encoding: "json", maxSupportedTransactionVersion: 0 }).send();
+    const tx = await rpc
+      .getTransaction(s.signature, { encoding: "json", maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION })
+      .send();
     for (const e of decodeTransactionEvents(tx as unknown as RpcTransaction)) {
       if (e.name === "EntrySettled" && e.data.baker === wallet) sum += e.data.amount;
       if (e.name === "CreatorShareSettled" && e.data.creator === wallet) sum += e.data.amount;

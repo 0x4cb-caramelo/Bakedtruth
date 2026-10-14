@@ -1,6 +1,6 @@
 # Sprint 16 — Hardening (multisig, pause, incident plan, creation rules frozen)
 
-**Status:** in progress; the CI and supply-chain items merged 2026-10-13 (PR #87), with the verifiable build, the T12 check, the mainnet parameters and "no cap" done; the pre-freeze hardening of the program (O-3 first) built on Sprints 14 and 15 since 2026-10-14; the incident plan and the key inventory drafted; the rest waits for the founder and the hardware multisig (see "Record") · **Branch:** `sprint-16-hardening` · **Dates:** none, by the founder's decision
+**Status:** in progress; the CI and supply-chain items merged 2026-10-13 (PR #87), with the verifiable build, the T12 check, the mainnet parameters and "no cap" done; the pre-freeze hardening of the program (O-3 first) merged 2026-10-14 (PR #93) and on devnet the same day (slot 510863588), with the adversarial review's follow-ups in progress; the incident plan and the key inventory drafted; the rest waits for the founder and the hardware multisig (see "Record") · **Branch:** `sprint-16-hardening` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -29,7 +29,8 @@ release candidate. The version that leaves this sprint is the one the two firms 
 - [ ] The `.so`'s origin is attested with `actions/attest-build-provenance` in a job of its own, and checked with
       `gh attestation verify` (every `gh` call passes `--repo 0x4cb-caramelo/Bakedtruth`).
       *Built, skipped while the repository is private:* the founder answered (a) on 2026-10-13, public before mainnet;
-      the job runs from the day it is public.
+      the job runs from the day it is public. On 2026-10-14 Ronaldo added "repo publico por hora nao": not public
+      for now.
 - [ ] The 2-of-3 multisig exists, on hardware devices, with a public wait of 24 to 48 hours. On devnet it owns the
       upgrade authority and `admin` (by the two-step handover) and has made a test signature (T7; TP §14.4 C11 **[AC]**:
       a product with a public wait for program upgrades).
@@ -59,7 +60,9 @@ release candidate. The version that leaves this sprint is the one the two firms 
       stops and what it never stops, who resumes (`admin`), what a team key can do in the window, and the record
       afterwards. Its **[F]** blanks are the founder's: who speaks, where and how fast it is published, who backs up
       the CTO, and the leader's proposed rule "pause first, investigate after". The site's page waits for them and
-      for the two-person review of `content/`.
+      for the two-person review of `content/`. **Answered on 2026-10-14 (Ronaldo):** Bernardo speaks for the house, then
+      Lucas, then Ronaldo; "pause first, investigate after" is approved. The CTO's backup on alerts (Lucas or
+      Bernardo), and where and how fast to publish, are left to the team, with a reminder.
 - [ ] Every alert reaches two inboxes, and the review queue has a named reviewer per day (proposal §2.11; T22).
 - [ ] `deploy/vps/README.md` says where each key lives and how to rotate it. No internet-connected key has power over
       money. The keeper's wallet sits in a key vault **[AC: which one]** (TP v0.0.1 §7, deferred to before mainnet).
@@ -226,6 +229,26 @@ findings go to a follow-up before the freeze:
   unbooked moves, not a wrong amount: a cap per payout from the snapshot would.
 - **Info:** a rent rise above the SOL sent by hand would block a close for good; the keeper can tally a YES price
   result from the proof window on, not the review window's end; the pause test with a free opening.
+
+**The follow-ups, fixed the next morning (2026-10-14)**, on the branch `sprint-16-followups`:
+- **The readers (lane R):** one transaction-version constant in every reader. An unreadable transaction is counted
+  and skipped, so it never stops the indexer, the API's history or the team scripts. The referral's payout scan stops
+  and names it, since a skip there could pay twice. The resolve-event search says "incomplete" instead of returning an
+  older event, and checks the publish time. The relay allows versions 0 and 1. Devnet serves v1 transactions: a real
+  one is a fixture now.
+- **The program (lane P2):**
+  - the cap per payout from the snapshot (`PaidOutAboveSnapshot`, 6179), behind LiteSVM tests at every call site;
+  - the close returning `min(rent, vault − held)`;
+  - a cut-off move storing that proof's price;
+  - the pause test with a team key's free opening, plus a static check of the two pause gates;
+  - the keeper tallying a YES price result once the cut-off is final.
+
+  1,134 TypeScript, 565 Rust and 567 mainnet tests; the fixed seed and 12 more; the mutation run on the changed ids.
+  **A second adversarial review** read the program's follow-ups before the PR. No settlement the program can
+  produce, in any mode or order, reaches the new cap, and the new close never pays out what the books owe. It left one
+  Low and three Info, recorded in `docs/audit/SCOPE.md` §17 as S-5 to S-7, to fix before the freeze or send to the
+  firms: a per-entry check behind the running cap, a stricter static test of the pause, and the rent rule in I14 and
+  I15.
 
 Still open:
 - the other event readers that ask for version 0 (the app's activity and my entries, the indexer, the API's history,

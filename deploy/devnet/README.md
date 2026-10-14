@@ -116,7 +116,18 @@ authority, admin and fee recipient, and his team key as the only team key until 
 ## Upgrading
 
 An upgrade puts CI's build of a reviewed `main` commit in place of the program, at the same id, by the upgrade key's
-holder, in one session. Done once, on 2026-10-12 (the sixth kind). The script above deploys and initializes a new id
+holder, in one session. Done on 2026-10-12 (the sixth kind), and again on 2026-10-14 at Ronaldo's word
+("pode mesclar o #93, atualizar o programa no devnet com o binário do CI da main depois dele e publicar o site"). The
+second time put Sprints 14, 15 and 16's pre-freeze hardening (`main` `a5e6014`) in place:
+- **The artifact.** Run 38510105826's `programs-a5e6014…`: `brot_markets.so`, 205,576 bytes, sha256 `86ecf1c8…462a`,
+  the same as the local build, with its IDL identical to the repository's.
+- **The extension.** 169,816 to 210,776 bytes. It cost 0.208 SOL: devnet charges 5,080 lamports a byte, which matches
+  step 1's rate. Transaction `5Tg1LkAdo4sVLsmXTz3DxM2LxnCuDRFsnSDjAyp7DWvYUKZKG83FKzjHmXpHJoZUGGDoMiSrD34dzRDT8S9sPfdu`.
+- **The upgrade.** Transaction `38cCtp8R5zGKjFwSN9rVXCMVVMXhMHzWhtdevRa1d8UPD4s4GV7NyAa2pduHnCL9izyZSFq72YxnCxEeqJiRfM9P`,
+  deployed in slot 510863588. On-chain, the first 205,576 bytes hash to the artifact's value and the rest is zeros.
+- **The keyed RPC.** It reached the CLI through a private temporary config (mode 600, deleted after), never on a
+  command line, with every output filtered.
+- **The keeper.** It refused one simulation in the upgrade's own slot (`UnsupportedProgramId`) and ran normally after. The script above deploys and initializes a new id
 only, so an upgrade is these CLI steps, each command with `--url "$DEVNET_RPC_URL"` and the key passed explicitly:
 
 1. **Read first, send nothing.** `solana program show <id>`: loader v3, the expected authority, `Data Length` and

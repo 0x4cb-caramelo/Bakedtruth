@@ -3,8 +3,9 @@
  *          unless the caller names the cluster on purpose; the genesis hash is printed before anything is
  *          sent), account bytes and the Clock, and a transaction sent, landed and read back with its custom
  *          error code, its logs and the program's events decoded by the SDK (decoder rules of TP 3.4.14).
- * Version: 0.1.3 (a transaction not confirmed in the wait may still land: say so; S1. Its compute units, wire size)
- * Sprint:  05 (SDK and the devnet cycle), lane OPS
+ * Version: 0.1.4 (Sprint 16, the review's F1: a JSON-RPC error keeps its code, so a caller can tell -32015; the
+ *          read-back asks for MAX_TRANSACTION_VERSION; 0.1.3, a transaction not confirmed in the wait may still land)
+ * Sprint:  05 (SDK and the devnet cycle), lane OPS; 16
  *
  * Transactions go out with `skipPreflight`, so a refusal lands as a failed transaction whose error is read
  * from the ledger, the way a keeper sees it. The caller signs; this file never reads a key.
@@ -28,6 +29,7 @@ import {
   customErrorCode,
   decodeTransactionEvents,
   errorName,
+  MAX_TRANSACTION_VERSION,
   type DecodedEvent,
   type RpcTransaction,
 } from "@brot/sdk/read";
@@ -55,7 +57,10 @@ export function connect(url: string, allowRemote: string | null = null): Rpc {
       body: JSON.stringify({ jsonrpc: "2.0", id: ++id, method, params }),
     });
     const body = (await response.json()) as { result?: T; error?: { code: number; message: string } };
-    if (body.error) throw new Error(`${method}: ${body.error.message} (${body.error.code})`);
+    if (body.error)
+      throw Object.assign(new Error(`${method}: ${body.error.message} (${body.error.code})`), {
+        code: body.error.code,
+      });
     return body.result as T;
   };
   return { url, call };
@@ -140,7 +145,11 @@ export async function send(rpc: Rpc, payer: TransactionSigner, ixs: Instruction[
     if (status && (status.confirmationStatus === "confirmed" || status.confirmationStatus === "finalized")) break;
     await sleep(250);
   }
-  const options = { encoding: "json", commitment: "confirmed", maxSupportedTransactionVersion: 0 };
+  const options = {
+    encoding: "json",
+    commitment: "confirmed",
+    maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION,
+  };
   let landed = await rpc.call<any>("getTransaction", [signature, options]);
   for (let retry = 0; !landed && retry < 20; retry++) {
     await sleep(250);

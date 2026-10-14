@@ -1,8 +1,8 @@
 //! Purpose: the effects of `resolve_campaign`: the result group the reader's decision writes into
 //!          the `Campaign`, and the `CampaignResolved` event built from what was stored, so the
 //!          event and the account can never disagree (TP sections 3.4.6, 3.4.7, 3.4.14).
-//! Version: 0.0.4
-//! Sprint: 03 (readers and resolution), lane D; `publish_time` written in 04 (lane D)
+//! Version: 0.0.5 (F3: a cut-off move stores the earlier proof's price with its time)
+//! Sprint: 03 (readers and resolution), lane D; `publish_time` written in 04 (lane D); 16 (lane L16P, F3)
 //!
 //! Every new value is computed with checked math before the first field is written, so a refusal
 //! leaves the campaign as it was. The result group, `publish_time` (the YES proof's, for a price
@@ -94,9 +94,11 @@ fn resolved_event(
     }
 }
 
-/// Moves the cut-off back to an earlier valid YES proof (decision of 2026-10-09, closure review): only the publish
-/// time changes; the outcome and the review window stay as resolved. The caller checks that the proof is an earlier
-/// YES price result and that no tally has started. Returns the event the move leaves (the next `seq`).
+/// Moves the cut-off back to an earlier valid YES proof (decision of 2026-10-09, closure review): the publish time
+/// and the value read change together, so the campaign and its `CampaignResolved` hold that proof's price beside its
+/// account, time and slot (F3: a second read of the account the event names finds the recorded price); the outcome
+/// and the review window stay as resolved. The caller checks that the proof is an earlier YES price result and that
+/// no tally has started. Returns the event the move leaves (the next `seq`).
 pub fn move_cutoff(
     key: &Address,
     campaign: &mut Campaign,
@@ -106,6 +108,7 @@ pub fn move_cutoff(
     let seq = campaign.event_seq.get();
     let next_seq = seq.checked_add(1).ok_or(BrotError::MathOverflow)?;
     campaign.publish_time = LeI64::new(decision.reading.publish_time);
+    campaign.observed_value = LeI128::new(decision.reading.observed);
     campaign.event_seq = LeU64::new(next_seq);
     Ok(resolved_event(key, campaign, decision, time, seq))
 }

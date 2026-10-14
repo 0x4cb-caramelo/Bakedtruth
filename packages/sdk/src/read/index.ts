@@ -41,3 +41,5 @@ export * from "./referral";
 export * from "./sealed-fee";
 export * from "./sealed-quote";
 export * from "./validate/sealed-entry";
+export * from "./tx-version";
+export * from "./resolved-event";

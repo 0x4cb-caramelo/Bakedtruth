@@ -16,7 +16,14 @@
  * the second read then reports it as not checked, never as a match.
  */
 import { getBase58Encoder, type Address } from "@solana/kit";
-import { PYTH_PUSH_ORACLE_ID, PYTH_RECEIVER_ID, accountKeysOf, hexToBytes, type SolanaRpc } from "@brot/sdk/read";
+import {
+  MAX_TRANSACTION_VERSION,
+  PYTH_PUSH_ORACLE_ID,
+  PYTH_RECEIVER_ID,
+  accountKeysOf,
+  hexToBytes,
+  type SolanaRpc,
+} from "@brot/sdk/read";
 
 export type PostedMessage = {
   feedId: Uint8Array;
@@ -84,7 +91,11 @@ export async function findProofUpdate(
   slot: bigint,
   account: Address,
 ): Promise<{ signature: string; message: PostedMessage } | { error: string }> {
-  const config = { encoding: "json", maxSupportedTransactionVersion: 1, commitment: "confirmed" } as const;
+  const config = {
+    encoding: "json",
+    maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION,
+    commitment: "confirmed",
+  } as const;
   const block = (await rpc
     .getBlock(slot, { ...config, transactionDetails: "accounts", rewards: false })
     .send()) as unknown as { transactions: (BlockTransaction & { meta: { err: unknown } | null })[] } | null;

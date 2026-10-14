@@ -5,18 +5,25 @@
  *          of each needed signature kept in `tx_positions`. Nothing else the indexer reads carries a transaction's
  *          index in its block: not `getSignaturesForAddress`, not `getTransaction`, and not the listing's place,
  *          which is wrong for a signature listed late. A position, once read, is never read again; a block the node
- *          does not return leaves the link undecided (earning nothing), and the next refresh tries again.
- * Version: 0.1.0
- * Sprint:  14 (referral, lane L14R)
+ *          does not return leaves the link undecided (earning nothing), and the next refresh tries again. A block is
+ *          read up to the SDK's MAX_TRANSACTION_VERSION; one holding a transaction of a newer version (-32015) is
+ *          skipped and counted, its links undecided until it can be read: safe, since an undecided link earns nothing,
+ *          so nothing is ever paid on a guessed order (Sprint 16, the review's F1).
+ * Version: 0.2.0 (Sprint 16: every transaction version the cluster serves; an unreadable block skipped and counted)
+ * Sprint:  14 (referral, lane L14R); 16
  */
-import type { SolanaRpc } from "@brot/sdk/read";
+import { isUnsupportedVersion, MAX_TRANSACTION_VERSION, type SolanaRpc } from "@brot/sdk/read";
 
 import type { Store } from "../db/store";
 import { joinsOf, linksOf } from "./facts";
 import { positionsNeeded } from "./order";
 
-/** Reads the blocks whose order decides a link and is not stored yet; returns how many it read. */
-export async function readPositions(rpc: SolanaRpc, store: Store, timeoutMs: number): Promise<number> {
+/** Reads the blocks whose order decides a link and is not stored yet; returns how many it read and the unreadable. */
+export async function readPositions(
+  rpc: SolanaRpc,
+  store: Store,
+  timeoutMs: number,
+): Promise<{ read: number; unreadable: number[] }> {
   const known = store.db.prepare("SELECT 1 FROM tx_positions WHERE signature = ?");
   const insert = store.db.prepare("INSERT OR IGNORE INTO tx_positions (signature, slot, position) VALUES (?, ?, ?)");
   const wanted = new Map<number, Set<string>>();
@@ -27,13 +34,21 @@ export async function readPositions(rpc: SolanaRpc, store: Store, timeoutMs: num
     for (const s of need.signatures) slot.add(s);
   }
   let read = 0;
+  const unreadable: number[] = [];
   for (const [slot, signatures] of wanted) {
-    const block = await rpc
-      .getBlock(BigInt(slot), {
-        ...{ commitment: "finalized", transactionDetails: "signatures", rewards: false },
-        maxSupportedTransactionVersion: 0,
-      })
-      .send({ abortSignal: AbortSignal.timeout(timeoutMs) });
+    let block;
+    try {
+      block = await rpc
+        .getBlock(BigInt(slot), {
+          ...{ commitment: "finalized", transactionDetails: "signatures", rewards: false },
+          maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION,
+        })
+        .send({ abortSignal: AbortSignal.timeout(timeoutMs) });
+    } catch (caught) {
+      if (!isUnsupportedVersion(caught)) throw caught;
+      unreadable.push(slot); // its links stay undecided, earning nothing, until it can be read
+      continue;
+    }
     if (!block) continue;
     const order = new Map((block.signatures as readonly string[]).map((s, i) => [s, i] as const));
     store.tx(() => {
@@ -41,5 +56,5 @@ export async function readPositions(rpc: SolanaRpc, store: Store, timeoutMs: num
     });
     read += 1;
   }
-  return read;
+  return { read, unreadable };
 }

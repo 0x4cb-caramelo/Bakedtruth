@@ -949,12 +949,21 @@ Sprint 15 shrinks to the sealed entry and, if kept, `sponsor_add_prize`.
 #### 3.4.13 Money invariants (I1–I15)
 
 The invariants a single instruction can see (I1, I3′, I13, I14, I15) are asserted at the end of every instruction that
-moves SOL. Since Sprint 16's pre-freeze hardening (G-2), each paying instruction (`settle_entry`,
-`settle_creator_share` when it pays, reserves or is claimed, `collect_fee`, `settle_prize`) asserts its vault's lamport
-change against the change in the books (`paid_out_total`, the collected fee and the returned prize), and
-`close_campaign` requires the vault above its rent to cover what the books still hold
-(`settlement/bookkeeping.rs`, `VaultWatch`). Before, the payout checked a value against itself. `move_lamports` and
-`pay_from_vault` read both sides again, so one account on both sides is refused. All fifteen are checked by the seeded randomized test after every operation: joining, opening, pausing,
+moves SOL. Since Sprint 16's pre-freeze hardening, each paying instruction (`settle_entry`, `settle_creator_share`
+when it pays, reserves or is claimed, `collect_fee`, `settle_prize`) asserts two things (`settlement/bookkeeping.rs`,
+`VaultWatch`; `settlement/payout_cap.rs`):
+- **The cap, first.** What the books say has been paid stays under a cap from the snapshot (`PaidOutAboveSnapshot`,
+  6179). In `Split`, `paid_out_total` is at most `distributable` plus the late parts plus `creator_share`. In
+  `OneSided` and `Refund`, `paid_out_total` plus the one-sided fees is at most both pools.
+- **The vault.** Its lamport change equals the change in the books (`paid_out_total`, the collected fee and the
+  returned prize).
+
+`close_campaign` requires the vault to cover what the books still hold, and returns the vault's rent as
+`min(rent, vault − held)`, so a rise in the rent-exempt minimum never blocks a close. Before, the payout checked a
+value against itself. `move_lamports` and `pay_from_vault` read both sides again, so one account on both sides is
+refused.
+
+All fifteen are checked by the seeded randomized test after every operation: joining, opening, pausing,
 sending SOL by hand, moving the clock, resolving, voiding, contesting, settling out of order and twice, emptying a
 winner's wallet, closing (Sprint 04; roadmap gate 1) **[DP]**. V and P are the winning and losing totals, R the prize.
 
@@ -1766,7 +1775,9 @@ the code does.
   refuses a YES price result while the chain time is at most the stored proof's publish time plus the proof window
   (`CutoffNotFinal`, 6178). From then on any earlier proof is staler than the stored one and fails the window, so the
   cut-off is final before the first join is tallied. Other kinds and outcomes tally at once. A team act that tallies
-  first fails inside that window (about two minutes at most); the keeper already waits for it.
+  first fails inside that window, until the proof's publish time plus the proof window; the keeper tallies from
+  `publish_time + 61` (`cutoffFinal`), inside the review window. A move also stores that proof's price, so its
+  `CampaignResolved` pairs the proof's account with its own price (the review's F3).
 - **Team voids and contests.** A team key voids only an automatic void (`TeamVoidNotAutomatic`, 6097 for a YES or
   NO). `team_open_contest` is disabled (`ContestExitDisabled`, 6096) until Sprint 14, because a contest would freeze
   the pot with no exit.

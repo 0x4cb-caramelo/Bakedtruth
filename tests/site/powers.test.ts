@@ -74,6 +74,8 @@ describe("powers table", () => {
       "settlement/close_campaign": "Resolve, settle and pay",
       "settlement/sweep_fees": "Move Brot's fees",
       "settlement/bookkeeping": null,
+      // Sprint 16, the pre-freeze review's F4: the payout cap every paying instruction asserts (a helper, no power).
+      "settlement/payout_cap": null,
       "settlement/rules": null,
       "settlement/snapshot": null,
       // The scaffold of Sprints 14–15 (2026-10-13): any wallet, and the program chooses every result and destination.

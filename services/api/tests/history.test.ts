@@ -4,14 +4,17 @@
  *          listing; a transaction that never reads back neither blocks the others nor keeps the history incomplete
  *          forever (it is skipped after five tries); a 429 spends no try, keeps the transaction's place and ends the
  *          refresh's reads, while any other refusal still costs a try; a failed listing makes the history incomplete
- *          until one succeeds; and a call that hangs is cut by its timeout. What the events say is
- *          tests/api/leaderboard.test.ts.
- * Version: 0.2.0 (the 429 cases, after the 2026-10-13 release)
- * Sprint:  13 (site: ranking, notices and copy)
+ *          until one succeeds; and a call that hangs is cut by its timeout. Since Sprint 16 (the review's F1), every
+ *          read asks for the SDK's MAX_TRANSACTION_VERSION, and a transaction of a newer version (-32015) is skipped at
+ *          once and counted, never a stop. What the events say is tests/api/leaderboard.test.ts.
+ * Version: 0.3.0 (Sprint 16: -32015; 0.2.0, the 429 cases, after the 2026-10-13 release)
+ * Sprint:  13 (site: ranking, notices and copy); 16
  */
 import { describe, expect, test } from "bun:test";
-import { getBase58Decoder, SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR, SolanaError } from "@solana/kit";
-import type { SolanaRpc } from "@brot/sdk/read";
+import { getBase58Decoder, SolanaError } from "@solana/kit";
+import { SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION as NEWER } from "@solana/kit";
+import { SOLANA_ERROR__RPC__TRANSPORT_HTTP_ERROR } from "@solana/kit";
+import { MAX_TRANSACTION_VERSION, type SolanaRpc } from "@brot/sdk/read";
 
 import { createHistory } from "../src/history";
 
@@ -21,6 +24,8 @@ type Script = {
   ignoreUntil?: boolean;
   pageCap?: number;
   unreadable?: Set<string>;
+  /** Transactions of a version newer than the reader asks for: -32015 (Sprint 16, F1). */
+  newer?: Set<string>;
   failList?: boolean;
   hang?: boolean;
   /** Transactions the node answers before it refuses with `status` (429 when unset); unset, it never refuses. */
@@ -42,6 +47,7 @@ const refusal = (statusCode: number) =>
  */
 function scripted(script: Script) {
   const reads: string[] = [];
+  const versions: unknown[] = [];
   const pending = <T>(work: () => T) => ({
     send: (opts?: { abortSignal?: AbortSignal }) =>
       new Promise<T>((resolve, reject) => {
@@ -63,10 +69,15 @@ function scripted(script: Script) {
         const size = Math.min(config.limit, script.pageCap ?? config.limit);
         return list.slice(from, from + size).map((signature) => ({ signature, err: null, slot: 1n }));
       }),
-    getTransaction: (sig: string) =>
+    getTransaction: (sig: string, config?: { maxSupportedTransactionVersion?: number }) =>
       pending(() => {
         const name = NAME.get(sig) ?? "?";
         reads.push(name);
+        versions.push(config?.maxSupportedTransactionVersion);
+        if (script.newer?.has(name))
+          throw new SolanaError(NEWER, {
+            __serverMessage: "Transaction version (2) is not supported by the requesting client.",
+          });
         if (script.budget !== undefined && script.budget-- <= 0) throw refusal(script.status ?? 429);
         if (script.unreadable?.has(name)) return null;
         return {
@@ -77,7 +88,7 @@ function scripted(script: Script) {
         };
       }),
   };
-  return { rpc: rpc as unknown as SolanaRpc, reads };
+  return { rpc: rpc as unknown as SolanaRpc, reads, versions };
 }
 
 describe("history reader", () => {
@@ -151,6 +162,16 @@ describe("history reader", () => {
     expect(reads.length).toBe(5 * 2);
     expect(h.skipped()).toBe(2);
     expect(h.complete()).toBe(true);
+  });
+
+  test("a transaction of a newer version is skipped at once and counted, never a stop; each read asks for v1", async () => {
+    const { rpc, reads, versions } = scripted({ sigs: ["c", "b", "a"], newer: new Set(["b"]) });
+    const h = createHistory(rpc);
+    await h.refresh();
+    await h.refresh();
+    // Each read once, oldest first ("c" was not held back), "b" never asked again; every read asked for v1.
+    expect([reads, h.skipped(), h.complete()]).toEqual([["a", "b", "c"], 1, true]);
+    expect(versions.every((v) => v === MAX_TRANSACTION_VERSION)).toBe(true);
   });
 
   test("a failed listing leaves the history incomplete until a listing succeeds", async () => {

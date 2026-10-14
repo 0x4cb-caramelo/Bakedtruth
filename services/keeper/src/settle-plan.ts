@@ -4,22 +4,22 @@
  *          conditions for it hold, as read in programs/brot-markets/src/instructions/settlement/*.rs, and every
  *          destination is a stored field (the entry's baker, the fee's sponsor, the campaign's creator and rent payer,
  *          the config's fee recipient), never one the keeper chooses. Pure; settle.ts builds and sends what it returns.
- * Version: 0.2.0 (Sprints 14 and 15: a lapsed contest finalized; every sealed fee settled before the close)
- * Sprint:  07 carry-over (Sprint 06 DoD); 14 and 15 (lane L14K)
+ * Version: 0.2.1 (Sprint 16, the review's F6: a YES price result is tallied once its cut-off is final)
+ * Sprint:  07 carry-over (Sprint 06 DoD); 14 and 15 (lane L14K); 16 (lane L16P)
  *
  * Every open `SealedFee` is settled (`settle_sealed_fee`) once the campaign is finalized, and the close is planned
  * only when the campaign counts none open (`SealedFeesOpen` otherwise): the plan reads the fees, it never retries a
  * refused close. A contest that lapsed with no decision (the SDK's view: stage 2's deadline, or 48 hours after an
  * unread stage 1's) is finalized with its stored result; the keeper never opens, escalates or decides a contest.
  *
- * The tally of a YES price campaign waits for the end of its review window: its cut-off can still move back to an
- * earlier YES proof, but only while no tally has started (`CutoffNotMovable`, decision of 2026-10-09), so tallying at
- * once would close that door. Every other outcome cannot move its cut-off and is tallied as soon as it is in review,
- * so a team confirmation or void inside the window (which needs the tallies) is not held up. Finalize waits for the
- * window's end in every case.
+ * The tally of a YES price campaign waits until its proof is over `PRICE_RULES.proofDelaySeconds` (60 s) old, as the
+ * program does (`CutoffNotFinal`, Sprint 16's O-3): until then an earlier proof may still move the cut-off back, and
+ * from then on none can, so the joins are tallied at once, inside the window. Every other outcome cannot move its
+ * cut-off and is tallied as soon as it is in review, so a team confirmation or void inside the window (which needs the
+ * tallies) is not held up. Finalize waits for the window's end in every case.
  */
 import type { Address } from "@solana/kit";
-import { Outcome, ReaderKind, SettleMode, Status, publicState, type Campaign } from "@brot/sdk/read";
+import { Outcome, PRICE_RULES, ReaderKind, SettleMode, Status, publicState, type Campaign } from "@brot/sdk/read";
 
 import type { EntryAt, OpenCampaign, SealedFeeAt } from "./campaigns";
 
@@ -53,12 +53,15 @@ export const closable = (c: Campaign) =>
   c.creatorShareSettled &&
   (c.creatorShareReserved === 0n || c.creator === c.rentPayer);
 
-/** A YES price result whose cut-off can still move back to an earlier proof, while no tally has started. */
+/** A YES price result: its cut-off moves back to an earlier proof until its own proof is too old to be beaten. */
 export const cutoffMayMove = (c: Campaign) => c.kind === ReaderKind.PriceTouch && c.outcome === Outcome.Yes;
 
-/** Joins wait to be tallied, and may be now: in review, and past the window unless the cut-off cannot move. */
+/** The cut-off is final: the proof is over the proof age bound old, `now > publish_time + 60` (`CutoffNotFinal`). */
+export const cutoffFinal = (c: Campaign, now: bigint) => now > c.publishTime + PRICE_RULES.proofDelaySeconds;
+
+/** Joins wait to be tallied, and may be now: in review, and for a YES price result once its cut-off is final. */
 export const tallyOpen = (c: Campaign, now: bigint) =>
-  c.status === Status.InReview && c.entriesUntallied > 0 && (now >= c.reviewEndsAt || !cutoffMayMove(c));
+  c.status === Status.InReview && c.entriesUntallied > 0 && (!cutoffMayMove(c) || cutoffFinal(c, now));
 
 /** A contest that lapsed with no decision, by the SDK's view: the stored result stands and finalize may run. */
 export const contestLapsed = (c: Campaign, now: bigint) =>

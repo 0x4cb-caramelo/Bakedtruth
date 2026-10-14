@@ -1,11 +1,12 @@
 /**
  * Purpose: the settlement planner's rules, pure (Sprint 06 DoD: finalize, settle in batches, the daily retry of a
  *          reserved credit, and "never send to a destination the program did not fix"): what each status plans, the
- *          YES price cut-off that holds the tally until the window ends, the joins chunked per tally, the steps the
+ *          YES price cut-off that holds the tally until its proof is over 60 s old (the program's `CutoffNotFinal`,
+ *          the review's F6), the joins chunked per tally, the steps the
  *          program would refuse never planned, every destination a stored field (and the built instruction's account
  *          slot the same one), the sweep's minimum and the daily clock. No cluster.
- * Version: 0.1.0
- * Sprint:  07 carry-over (Sprint 06 DoD: the keeper's settlement)
+ * Version: 0.1.1
+ * Sprint:  07 carry-over (Sprint 06 DoD: the keeper's settlement); 16 (lane L16P, F6)
  */
 import { describe, expect, test } from "bun:test";
 import { AccountRole } from "@solana/kit";
@@ -27,11 +28,21 @@ describe("planCampaign", () => {
   const review = (over = {}) =>
     at(10, { status: Status.InReview, reviewEndsAt: NOW + 60n, entriesUntallied: 1, entriesOpen: 1, ...over });
 
-  test("a YES price result is left alone in its window (its cut-off may move); any other is tallied at once", () => {
+  test("a YES price result is tallied once its proof is over 60 s old, inside its window; any other at once", () => {
     const entries = [entryAt(KEY(10), BAKER, { joinCount: 2 })];
-    const yesPrice = review({ kind: ReaderKind.PriceTouch, outcome: Outcome.Yes });
+    // Proven 30 s ago, its window open for another 6 hours: the cut-off may still move until 60 s after the proof.
+    const proof = NOW - 30n;
+    const yesPrice = review({
+      kind: ReaderKind.PriceTouch,
+      outcome: Outcome.Yes,
+      publishTime: proof,
+      reviewEndsAt: NOW + 21_600n,
+    });
     expect(planCampaign(yesPrice, entries, NOW, false)).toEqual([]);
-    expect(kinds(planCampaign(yesPrice, entries, NOW + 60n, false))).toEqual(["tally"]);
+    expect(planCampaign(yesPrice, entries, proof + 60n, false)).toEqual([]);
+    expect(kinds(planCampaign(yesPrice, entries, proof + 61n, false))).toEqual(["tally"]);
+    expect(pendingOf([yesPrice], proof + 60n).tally).toBe(0);
+    expect(pendingOf([yesPrice], proof + 61n).tally).toBe(1);
     for (const other of [
       review({ kind: ReaderKind.PriceTouch, outcome: Outcome.No }),
       review({ kind: ReaderKind.SupplyAtMost, outcome: Outcome.Yes }),

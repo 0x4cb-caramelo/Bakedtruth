@@ -27,6 +27,29 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **O programa do devnet atualizado e o site publicado** (14/10/2026;
+  `session-log/2026-10-14-devnet-atualizado-e-site-publicado.md`). Com a palavra do Ronaldo, o #93 entrou na `main`
+  (`a5e6014`) e o binário do CI dela (`86ecf1c8…`, o mesmo do build local) foi implantado no devnet: a conta do
+  programa foi estendida em 40.960 bytes (0,208 SOL) e a implantação caiu no slot 510.863.588, com o hash conferido na
+  rede. O site (release `a5e6014e42f3`) foi compilado para esse slot, testado na porta 4239 e posto no ar; a API diz
+  `ok`, com as entradas abertas. As Sprints 14 e 15 e o endurecimento da 16 rodam no devnet desde então.
+- **Os achados da revisão do endurecimento, no programa** (14/10/2026, faixa P2). Cada instrução que paga confere
+  primeiro um teto a partir do snapshot (`PaidOutAboveSnapshot`, 6179), para pegar um valor errado e não só um
+  movimento fora dos livros. O fechamento devolve o aluguel como `min(aluguel, cofre − devido)`, para que um aumento do
+  aluguel mínimo nunca o trave. Mover o corte grava também o preço da prova anterior. O teste da pausa ganhou a abertura
+  grátis e uma checagem estática das duas portas. O keeper conta as entradas de um SIM de preço assim que o corte fica
+  final.
+- **A leitura segura de transações** (14/10/2026; a revisão adversária do endurecimento, F1 e F2). Todo leitor de
+  transações do programa usa a mesma constante de versão do SDK; o devnet já serve transações v1, e uma real virou
+  fixture. Uma transação ilegível é contada e pulada: nunca para o indexador, o histórico da API nem os scripts da
+  equipe. Onde pular poderia pagar duas vezes (a varredura dos pagamentos da indicação), o leitor para e nomeia a
+  assinatura. A busca do evento de resolução diz "incompleta" em vez de devolver um evento antigo e confere o publish
+  time da campanha. O relay aceita as versões 0 e 1.
+- **O pacote de auditoria em dia com as Sprints 14 e 15** (14/10/2026; `docs/audit/`). O escopo ganhou as seções da
+  indicação, da disputa em duas etapas e da entrada selada, com as citações em `8af10e2`; o modelo de ameaças, três
+  classes novas de ataque; e o mapa das checagens, os ids novos. As linhas dos arquivos que o endurecimento reescreveu
+  são atualizadas no congelamento.
+
 - **Sprint 16, o endurecimento do programa antes do congelamento** (14/10/2026, faixa L16P, branch
   `sprint-16-prefreeze`; `session-log/2026-10-14-sprint-16-endurecimento-antes-do-congelamento.md`). Corrige o que o
   pacote de auditoria listou antes de congelar a versão das firmas. **O-3:** a contagem de um SIM de preço espera a

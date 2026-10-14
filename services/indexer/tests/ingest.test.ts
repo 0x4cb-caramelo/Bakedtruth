@@ -12,6 +12,8 @@
 import { describe, expect, test } from "bun:test";
 
 import { dump, openStore } from "../src/db/store";
+import { MAX_TRANSACTION_VERSION } from "@brot/sdk/read";
+
 import { createIngest } from "../src/ingest";
 import { ADDR, closed, entry, noLive, opened, scripted, SIG, SOL, txOf, type Script } from "./fake-chain";
 
@@ -125,5 +127,19 @@ describe("the ingest", () => {
       { opening: 2, closed: 0, pool_no: "0", last_seq: 0 },
     ]);
     expect(store.db.query("SELECT DISTINCT opening FROM entries").all()).toEqual([{ opening: 1 }]);
+  });
+
+  test("one the node cannot return in a version this client reads (-32015) is skipped and counted, never a stop", async () => {
+    const { rpc, reads, versions } = scripted({ txs: three(), newer: new Set([SIG("b")]) });
+    const store = openStore(":memory:");
+    const ingest = createIngest(rpc, store, { readLive: noLive, pageSize: 1_000 });
+    // "b" (C's first entry) is unreadable: "c" is still read and written; the gap at seq 1 reads "b" once more.
+    expect(await ingest.refresh()).toMatchObject({ processed: 2, waiting: false, unreadable: 2, gaps: [C] });
+    expect(store.db.query("SELECT state FROM signatures WHERE signature = ?").get(SIG("b"))).toEqual({
+      state: "skipped",
+    });
+    expect(store.db.query("SELECT count(*) AS n FROM entries").get()).toEqual({ n: 1 });
+    expect(versions.every((v) => v === MAX_TRANSACTION_VERSION)).toBe(true);
+    expect(reads.length).toBeGreaterThanOrEqual(3);
   });
 });

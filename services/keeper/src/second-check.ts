@@ -6,8 +6,9 @@
  *          (`observed_value`), the exponent and the publish time. Any other kind: the SDK's `recheck` re-reads the
  *          metric account through RPC B and says whether it agrees with `observed_value`, given the only way that
  *          field can move. A disagreement is a mismatch; a read that could not be made is "not checked", final when
- *          nothing can ever be compared (a void that read nothing, the epoch stake read by syscall).
- * Version: 0.1.0
+ *          nothing can ever be compared (a void that read nothing, the epoch stake read by syscall). An event search that
+ *          could not read every newer transaction is "not checked" too, never a mismatch (Sprint 16, the review's F2).
+ * Version: 0.1.1 (an incomplete event search retries)
  * Sprint:  07 carry-over (the second read: the proof transaction and the other kinds)
  */
 import type { Address } from "@solana/kit";
@@ -18,7 +19,7 @@ import {
   bytesToHex,
   decodeCampaign,
   fetchRaw,
-  findResolvedEvent,
+  searchResolvedEvent,
   type Recheck,
   type SolanaRpc,
 } from "@brot/sdk/read";
@@ -41,7 +42,10 @@ export async function checkPrice(rpcB: SolanaRpc, at: Address): Promise<Check> {
   if (c.outcome === Outcome.Void && c.voidReason !== VoidReason.StaleFeed) {
     return { match: null, detail: `voided (${VoidReason[c.voidReason]}): nothing was read`, final: true };
   }
-  const event = await findResolvedEvent(rpcB, at);
+  const search = await searchResolvedEvent(rpcB, at);
+  // A newer transaction RPC B could not return may hold a newer event: never compare an older one (the review's F2).
+  if (search.incomplete) return retry(`the event search through RPC B is incomplete: ${search.incomplete}`);
+  const event = search.found;
   if (!event) return retry("no CampaignResolved event found through RPC B");
   const observed = (event as { observedValue?: unknown }).observedValue;
   if (event.publishTime !== c.publishTime || (typeof observed === "bigint" && observed !== c.observedValue)) {

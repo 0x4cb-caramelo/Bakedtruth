@@ -5,7 +5,7 @@
  *          transaction). Anything else, every subscription and getProgramAccounts included, is refused before the
  *          upstream sees it, and every option's value is typed before it is read. The weights are a working guess until
  *          each provider's are measured (TP C32) [AC]. Pure.
- * Version: 0.2.0 (the Sprint 08 security review: typed options, M1 and L1)
+ * Version: 0.2.1 (Sprint 16, the review's F2: a transaction's version 0 or 1; 0.2.0, the Sprint 08 security review)
  * Sprint:  08 (indexer, API, relay and points)
  */
 
@@ -147,8 +147,13 @@ export function checkParams(method: string, spec: MethodSpec, params: readonly u
     !(Number.isInteger(c.maxRetries) && (c.maxRetries as number) >= 0 && (c.maxRetries as number) <= 5)
   )
     return "maxRetries from 0 to 5";
-  if (c.maxSupportedTransactionVersion !== undefined && c.maxSupportedTransactionVersion !== 0)
-    return "maxSupportedTransactionVersion 0 only";
+  // 0 or 1: the cluster serves v1 transactions, and the SDK asks for MAX_TRANSACTION_VERSION (Sprint 16, the review's F2).
+  if (
+    c.maxSupportedTransactionVersion !== undefined &&
+    c.maxSupportedTransactionVersion !== 0 &&
+    c.maxSupportedTransactionVersion !== 1
+  )
+    return "maxSupportedTransactionVersion 0 or 1 only";
   if (c.dataSlice !== undefined && !isSlice(c.dataSlice)) return "dataSlice needs an offset and a length";
   if (c.limit !== undefined && !(Number.isInteger(c.limit) && (c.limit as number) >= 1 && (c.limit as number) <= 1_000))
     return "limit from 1 to 1000";

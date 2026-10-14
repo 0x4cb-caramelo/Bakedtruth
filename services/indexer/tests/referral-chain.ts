@@ -7,10 +7,16 @@
  *          sets another (`blocks`), and `getBlock` answers it, or fails while `blockDown`. The referral link is signed
  *          at a slot a test may choose; `indexed` reads the chain with the real ingest into a new file. The
  *          campaigns' own events come from referral-campaign.ts.
- * Version: 0.2.0 (several instructions in one transaction; the block's order and getBlock)
+ *          Since Sprint 16, a block that answers -32015 (`blockNewer`) and the version each `getBlock` asked for.
+ * Version: 0.3.0 (Sprint 16: -32015 for a block; 0.2.0, several instructions in one transaction and getBlock)
  * Sprint:  14 (referral, lane L14R)
  */
-import { getBase58Decoder, type Address } from "@solana/kit";
+import {
+  getBase58Decoder,
+  SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION,
+  SolanaError,
+  type Address,
+} from "@solana/kit";
 import { expect } from "bun:test";
 import { EVENT_AUTHORITY, EVENT_IX_TAG, EVENTS, PROGRAM_ID, type RpcTransaction } from "@brot/sdk/read";
 
@@ -49,6 +55,8 @@ export class Chain {
   readonly blocks = new Map<number, string[]>();
   /** `getBlock` fails while set, as a node that does not answer. */
   blockDown = false;
+  /** `getBlock` answers -32015 while set: the block holds a transaction newer than the version asked (Sprint 16, F1). */
+  blockNewer = false;
   private batch: { placed: Placed; groups: Ev[][] } | null = null;
 
   private next(at: At): Placed {
@@ -121,31 +129,37 @@ export class Chain {
 export function rpcOf(chain: Chain) {
   const { rpc } = scripted({ txs: chain.txs });
   const blockReads: number[] = [];
-  const getBlock = (slot: bigint) => ({
+  const blockVersions: unknown[] = [];
+  const getBlock = (slot: bigint, config?: { maxSupportedTransactionVersion?: number }) => ({
     send: async () => {
       blockReads.push(Number(slot));
+      blockVersions.push(config?.maxSupportedTransactionVersion);
       if (chain.blockDown) throw new Error("503");
+      if (chain.blockNewer)
+        throw new SolanaError(SOLANA_ERROR__JSON_RPC__SERVER_ERROR_UNSUPPORTED_TRANSACTION_VERSION, {
+          __serverMessage: "Transaction version (2) is not supported by the requesting client.",
+        });
       return { signatures: chain.blockOf(Number(slot)) };
     },
   });
-  return { rpc: Object.assign(rpc, { getBlock }) as typeof rpc, blockReads };
+  return { rpc: Object.assign(rpc, { getBlock }) as typeof rpc, blockReads, blockVersions };
 }
 
 type Row = Record<string, unknown>;
 
 /** The chain ingested into a new file (in memory, or at `path`); `refresh` reads what was added since. */
 export async function indexed(chain: Chain, path = ":memory:") {
-  const { rpc, blockReads } = rpcOf(chain);
+  const { rpc, blockReads, blockVersions } = rpcOf(chain);
   const store = openStore(path);
   const ingest = createIngest(rpc, store, { readLive: noLive });
   const refresh = async () => {
     const report = await ingest.refresh();
-    expect(report.referralError).toBe(chain.blockDown ? "Error" : null);
+    expect(report.referralError).toBe(chain.blockDown ? "Error" : chain.blockNewer ? "UnreadableBlock" : null);
     return report;
   };
   await refresh();
   const referral = (referee: string) => store.db.query("SELECT * FROM referrals WHERE referee = ?").get(referee) as Row;
   const entries = (referee: string) =>
     store.db.query("SELECT * FROM referral_entries WHERE referee = ? ORDER BY first_slot").all(referee) as Row[];
-  return { store, rpc, refresh, referral, entries, blockReads };
+  return { store, rpc, refresh, referral, entries, blockReads, blockVersions };
 }
