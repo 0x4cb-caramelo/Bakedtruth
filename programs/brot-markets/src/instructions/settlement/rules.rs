@@ -1,8 +1,9 @@
-//! Purpose: the settlement rules as pure functions: what one entry is paid under the snapshot's mode, and
-//!          the reserve path of a credit below rent (TP section 3.4.5; amendment 2026-10-09). No account is
-//!          read here; the instructions call these and host tests check them.
-//! Version: 0.0.1
-//! Sprint: 04 (lane C)
+//! Purpose: the settlement rules as pure functions: what one entry is paid under the snapshot's mode, the check
+//!          that a `Split` payout stays within the entry's exact share, and the reserve path of a credit below rent
+//!          (TP section 3.4.5; amendment 2026-10-09). No account is read here; the instructions call these and host
+//!          tests check them.
+//! Version: 0.0.2 (the second pre-freeze review's R1: `require_within_share`)
+//! Sprint: 04 (lane C); 16 (lane L16P)
 
 use crate::{
     error::BrotError,
@@ -94,6 +95,46 @@ pub fn entry_payout(
         }
         SettleMode::Unset => Err(BrotError::BadAccountData),
     }
+}
+
+/// R1 of the second pre-freeze review (S-5): a `Split` entry is never paid more than its exact share. Its payout is
+/// `floor(early × D ÷ V) + late` (`entry_payout`: D `distributable`, which already holds the prize and leaves out
+/// the house fee and the creator's share from the pot; V `winning_total`; early the entry's early part on the winning
+/// side; late both its late parts, refunded whole). Checked in u128 without the floor division the payout used:
+/// `(payout − late) × V ≤ early × D`. The floor the program pays always passes, the running cap (`payout_cap.rs`)
+/// still bounds the campaign as a whole, and an overpaid entry is refused before any lamport moves
+/// (`EntryPayoutAboveShare`). A payout below its own late parts is `InvariantViolated`. Other modes pay exact sums.
+pub fn require_within_share(
+    rule: &PotRule,
+    entry: &EntryAmounts,
+    payout: &EntryPayout,
+) -> Result<(), BrotError> {
+    if rule.mode != SettleMode::Split {
+        return Ok(());
+    }
+    let late = entry
+        .late_yes
+        .checked_add(entry.late_no)
+        .ok_or(BrotError::MathOverflow)?;
+    let early_winning = match rule.winning {
+        Side::Yes => early(entry.yes, entry.late_yes)?,
+        Side::No => early(entry.no, entry.late_no)?,
+    };
+    let share = payout
+        .amount
+        .checked_sub(late)
+        .ok_or(BrotError::InvariantViolated)?;
+    let paid = u128::from(share)
+        .checked_mul(u128::from(rule.winning_total))
+        .ok_or(BrotError::MathOverflow)?;
+    let owed = u128::from(early_winning)
+        .checked_mul(u128::from(rule.distributable))
+        .ok_or(BrotError::MathOverflow)?;
+    // X0.9 entry_within_share
+    if paid > owed {
+        return Err(BrotError::EntryPayoutAboveShare);
+    }
+    Ok(())
 }
 
 /// What a credit of `amount` to a wallet with `wallet_lamports` does: `Pay` when the wallet ends at or above

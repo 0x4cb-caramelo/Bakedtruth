@@ -1,8 +1,8 @@
 //! Purpose: every refusal the program can return, one code per cause, as custom program errors.
-//! Version: 0.0.7
+//! Version: 0.0.8
 //! Sprint: 02 (pot core on Pinocchio); reader errors from 01 keep their codes; 03 appends 6071 on;
 //!         the sixth kind (`DbcGraduated`) appends 6148 to 6152; the scaffold of Sprints 14–15
-//!         (2026-10-13) appends 6153 and 6160 to 6174; Sprint 16 (lane L16P) appends 6178 and 6179
+//!         (2026-10-13) appends 6153 and 6160 to 6174; Sprint 16 (lane L16P) appends 6178 to 6180
 //!
 //! Codes start at 6000 so they never collide with the System Program's own custom errors, which
 //! a failed CPI passes through. A code, once assigned, never changes meaning. Each variant's
@@ -370,7 +370,12 @@ pub enum BrotError {
         "The payouts would exceed what the snapshot shares out to the entries and the creator"
     )]
     PaidOutAboveSnapshot = 6179,
-    // New codes are appended here, from 6180, never reusing a number.
+    // Sprint 16, the second pre-freeze review (R1, S-5).
+    #[error(
+        "A Split entry's payout would exceed its exact share of distributable plus its late parts"
+    )]
+    EntryPayoutAboveShare = 6180,
+    // New codes are appended here, from 6181, never reusing a number.
 }
 
 impl From<BrotError> for ProgramError {
