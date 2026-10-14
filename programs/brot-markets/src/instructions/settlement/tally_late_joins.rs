@@ -2,11 +2,12 @@
 //!          in index order, adds the late amounts (joined at or after the YES proof's publish time) to the entry
 //!          and the campaign, closes each Join with its rent back to the baker, and marks the entry tallied when
 //!          its last join is closed. Lets the snapshot know the late totals before finalize.
-//! Version: 0.0.4 (O-3: a YES price result is tallied only once its cut-off is final)
-//! Sprint: 04 (contract amendment; the body is lane G's); 16 (lane L16P, the audit package's O-3)
+//! Version: 0.0.5 (O-3: a YES price result is tallied only once its cut-off is final; G-16: the Join slots)
+//! Sprint: 04 (contract amendment; the body is lane G's); 16 (lane L16P, the audit package's O-3 and G-16)
 //!
 //! Accounts: 0 campaign (writable), 1 entry (writable), 2 baker (writable), 3 event authority, 4 program,
-//! then the Join accounts to close, in index order, at least one. Refused unless the campaign is InReview
+//! then the Join accounts to close, in index order, at least one, each writable and none of them a named slot
+//! (`check_join_slots`: `NotWritable`, `DuplicateAccount`). Refused unless the campaign is InReview
 //! (`TallyNotReady`), for every outcome; on a YES price result, also while its cut-off can still move
 //! (`CutoffNotFinal`, `require_cutoff_final`). A join is late only on a YES price campaign, at or after the proof's
 //! publish time (`LateRule`); each join must be the next index (`JoinAccountsMismatch`).
@@ -45,6 +46,7 @@ pub fn tally_late_joins(
     checks::distinct(campaign, baker)?;
     checks::distinct(entry, baker)?;
     checks::event_accounts(event_authority, program, program_id)?;
+    check_join_slots(joins, [&*campaign, &*entry, &*baker])?;
 
     let campaign_key = *campaign.address();
     let baker_key = *baker.address();
@@ -117,6 +119,22 @@ pub fn tally_late_joins(
     };
     drop(campaign_state);
     events::emit(&event, event_authority, program, program_id)
+}
+
+/// The Join slots (G-16, Sprint 16), before any account is loaded: each writable, since the tally closes it
+/// (`NotWritable`; the runtime would refuse the closed balance anyway, with no error of this program), and none of
+/// them the campaign, the entry or the baker (`DuplicateAccount`; a loaded account would otherwise fail its second
+/// borrow). A join passed twice is the same account twice: the first pass closes it, and the second finds it no
+/// longer the program's (`WrongOwner`).
+fn check_join_slots(joins: &[AccountView], named: [&AccountView; 3]) -> ProgramResult {
+    // X0.9 tally_join_slots
+    for join in joins {
+        checks::writable(join)?;
+        for slot in named {
+            checks::distinct(join, slot)?;
+        }
+    }
+    Ok(())
 }
 
 /// The cut-off is final (O-3, Sprint 16). On a YES price result, `resolve_campaign` moves the cut-off back to an

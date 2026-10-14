@@ -2,7 +2,7 @@
  * Purpose: generates tests/brot/slot-matrix.gen.ts, the slot matrix of Sprint 04 (T-lane F), from the
  *          frozen Shank IDL: every signer unsigned, every writable slot read-only, a stranger, an
  *          account of each program type, and every writable pair aliased, each with its BrotError.
- * Version: 0.0.1
+ * Version: 0.0.2 (Sprint 16: slots after the IDL's list, a tally's Join accounts, come from the spec)
  * Sprint:  04 (settlement and invariants), lane F. Regenerate: `bun scripts/slot-matrix.ts`.
  *          The CI step `bun scripts/slot-matrix-check.ts` fails when the committed file is stale.
  */
@@ -58,7 +58,10 @@ export async function buildMatrix() {
   for (const ix of idl.instructions) {
     const spec = SPEC[ix.name];
     if (!spec) throw new Error(`no slot spec for ${ix.name}`);
-    const acc = ix.accounts;
+    // Slots after the IDL's list (the tally's Join accounts, G-16) are named in the spec only: writable, unsigned.
+    const listed = new Set(ix.accounts.map((a) => a.name));
+    const trailing = Object.keys(spec).filter((name) => !listed.has(name));
+    const acc = [...ix.accounts, ...trailing.map((name) => ({ name, isMut: true, isSigner: false }))];
     acc.forEach((a, i) => {
       if ((a.isSigner || a.isMut) && !spec[a.name]) throw new Error(`${ix.name}.${a.name}: no slot kind`);
     });
