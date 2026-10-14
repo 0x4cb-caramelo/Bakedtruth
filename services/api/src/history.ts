@@ -4,10 +4,9 @@
  *          the first one, then each landed transaction through `getTransaction`, decoded by the SDK under its four
  *          decoder rules. Only the events the points rule reads are kept, each once. In memory: a restart reads the
  *          history again, and nothing about a visitor is ever stored.
- * Version: 0.3.0 (a 429 spends no try and ends the refresh's reads; 0.2.0, the Sprint 13 adversarial review: every
- *          signature listed once, paging until an empty page, a capped retry per transaction, a timeout on every call,
- *          and "complete" false after a failed refresh)
- * Sprint:  13 (site: ranking, notices and copy); the 429 fix after the 2026-10-13 release
+ * Version: 0.4.0 (Sprint 16, the review's F1: every transaction version the cluster serves, and one it cannot return
+ *          in a version this client reads skipped at once and counted; 0.3.0, a 429 spends no try)
+ * Sprint:  13 (site: ranking, notices and copy); the 429 fix after the 2026-10-13 release; 16
  *
  * Incremental: a refresh asks only for signatures newer than the newest one listed (`until`), paging back until a page
  * comes back empty, and remembers every signature listed, so a node that ignores `until` costs a re-listing but never a
@@ -15,7 +14,9 @@
  * refresh. One that does not read back goes to the back of the queue, and after `MAX_TRIES` it is skipped and counted.
  * A 429 is the node's rate limit, not the transaction's fault: it spends no try, the transaction keeps its place, and
  * the refresh reads nothing more. The public devnet RPC allows ten `getTransaction` per ten seconds per address
- * (`x-ratelimit-method-limit`); counted as tries, its 429s skipped 36 to 40 of the program's 70 transactions.
+ * (`x-ratelimit-method-limit`); counted as tries, its 429s skipped 36 to 40 of the program's 70 transactions. Each
+ * transaction is asked for up to the SDK's MAX_TRANSACTION_VERSION; one the node cannot return in it (-32015) is
+ * skipped at once and counted: its events miss the board, which pays nothing (points are not money).
  */
 import {
   isSolanaError,
@@ -25,6 +26,8 @@ import {
 } from "@solana/kit";
 import {
   decodeTransactionEvents,
+  isUnsupportedVersion,
+  MAX_TRANSACTION_VERSION,
   PROGRAM_ID,
   uniqueEvents,
   type DecodedEvent,
@@ -44,7 +47,11 @@ const KEPT = new Set([
 const PAGE = 1_000;
 const AT_ONCE = 4;
 const MAX_TRIES = 5;
-const TX = { encoding: "json", maxSupportedTransactionVersion: 0, commitment: "finalized" } as const;
+const TX = {
+  encoding: "json",
+  maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION,
+  commitment: "finalized",
+} as const;
 
 /** A 429: the node's rate limit, which says nothing about the transaction asked for. */
 const throttled = (error: unknown) =>
@@ -103,13 +110,13 @@ export function createHistory(rpc: SolanaRpc, options: HistoryOptions = {}): His
     }
   }
 
-  /** The kept events of `sig`; `null` when it did not read back; "throttled" when the node refused to answer. */
-  async function eventsOf(sig: string): Promise<DecodedEvent[] | null | "throttled"> {
+  /** The kept events of `sig`; `null` when it did not read back; "throttled" or "unreadable" (-32015) when refused. */
+  async function eventsOf(sig: string): Promise<DecodedEvent[] | null | "throttled" | "unreadable"> {
     try {
       const tx = await rpc.getTransaction(toSignature(sig), TX).send(send());
       return tx ? decodeTransactionEvents(tx as unknown as RpcTransaction).filter((e) => KEPT.has(e.name)) : null;
     } catch (error) {
-      return throttled(error) ? "throttled" : null;
+      return throttled(error) ? "throttled" : isUnsupportedVersion(error) ? "unreadable" : null;
     }
   }
 
@@ -148,6 +155,7 @@ export function createHistory(rpc: SolanaRpc, options: HistoryOptions = {}): His
         read.forEach((got, j) => {
           const sig = slice[j];
           if (got === "throttled") return void waiting.push(sig);
+          if (got === "unreadable") return void (skipped++, tries.delete(sig)); // no try can read it: never a stop
           if (got !== null) return void (found.push(...got), tries.delete(sig));
           const n = (tries.get(sig) ?? 0) + 1;
           if (n >= MAX_TRIES) return void (skipped++, tries.delete(sig));

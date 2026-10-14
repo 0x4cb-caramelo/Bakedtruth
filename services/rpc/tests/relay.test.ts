@@ -4,15 +4,17 @@
  *          each refused before the upstream sees it; an account under an owner no reader accepts comes back with its
  *          owner and no data, while a token's metadata comes whole; ProgramData only as its first 45 bytes; the cache
  *          holding a reader's account, never the program's own (config, campaign, entry), a missing account or a
- *          signature status; the upstream's busy, failed and error answers. Filter: `bun test services/rpc`.
- * Version: 0.1.1 (a token's metadata comes whole)
- * Sprint:  08 (indexer, API, relay and points); the sixth kind's site
+ *          signature status; the upstream's busy, failed and error answers. Since Sprint 16 (the review's F2), a
+ *          transaction is read at version 0 or 1, the SDK's MAX_TRANSACTION_VERSION. Filter: `bun test services/rpc`.
+ * Version: 0.1.2 (a transaction's version 0 or 1; 0.1.1, a token's metadata comes whole)
+ * Sprint:  08 (indexer, API, relay and points); the sixth kind's site; 16
  */
 import { describe, expect, test } from "bun:test";
 import {
   ACCOUNT_TAG,
   BPF_LOADER_UPGRADEABLE_ID,
   DBC_PROGRAM_ID,
+  MAX_TRANSACTION_VERSION,
   PROGRAM_ID,
   SPL_TOKEN_PROGRAM_ID,
   TOKEN_2022_PROGRAM_ID,
@@ -48,6 +50,22 @@ describe("brot-rpc refuses what Brot's clients never send", () => {
     ])
       expect(`${method}: ${(await r.call(method, [])).json.error.code}`).toBe(`${method}: ${CODE.method}`);
     expect(r.calls).toEqual([]);
+  });
+
+  test("a transaction is read at version 0 or 1, the SDK's MAX_TRANSACTION_VERSION; no other version", async () => {
+    const r = setup({ answer: () => ({ result: null }) });
+    const sig = "1".repeat(88);
+    for (const version of [0, MAX_TRANSACTION_VERSION]) {
+      const options = { encoding: "json", maxSupportedTransactionVersion: version, commitment: "confirmed" };
+      expect((await r.call("getTransaction", [sig, options])).json.error).toBeUndefined();
+    }
+    expect(
+      r.calls.map((c) => (c.params[1] as { maxSupportedTransactionVersion: number }).maxSupportedTransactionVersion),
+    ).toEqual([0, 1]);
+    expect((await r.call("getTransaction", [sig, { maxSupportedTransactionVersion: 2 }])).json.error.code).toBe(
+      CODE.params,
+    );
+    expect(r.calls).toHaveLength(2);
   });
 
   test("arguments and options the trace never used", async () => {

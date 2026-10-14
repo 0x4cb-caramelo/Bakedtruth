@@ -4,9 +4,13 @@
  *          first, says when it is not due, then simulates and sends only with --yes (scripts/team/common.ts `act`):
  *          status, resolve, tally, finalize, entries, share, prize, fee, close, sweep. The bakers are found in the
  *          campaign's own history (its `EntryAdded` events), so no account scan is needed. Every instruction is
- *          permissionless: the payer chooses nothing, and each payout goes where the program stored it.
- * Version: 0.1.0
- * Sprint:  12 (site: my entries and campaign states)
+ *          permissionless: the payer chooses nothing, and each payout goes where the program stored it. Since Sprint
+ *          16 (the review's F1) the history is read at MAX_TRANSACTION_VERSION, and a transaction the node cannot
+ *          return in it (-32015) is named on stderr while the others go on: safe, since the program refuses confirm and
+ *          finalize until every join is tallied (`NotTallied`), so a baker this list misses can delay an act, never
+ *          change a result or a payout.
+ * Version: 0.2.0 (Sprint 16: every transaction version; an unreadable one named, never a stop)
+ * Sprint:  12 (site: my entries and campaign states); 16
  */
 import { address, type Address } from "@solana/kit";
 
@@ -21,6 +25,8 @@ import {
   entryOwed,
   formatSol,
   formatUtc,
+  isUnsupportedVersion,
+  MAX_TRANSACTION_VERSION,
   Outcome,
   SettleMode,
   Status,
@@ -36,17 +42,23 @@ export const STEPS = ["status", "resolve", "tally", "finalize", "entries", "shar
 export type Step = (typeof STEPS)[number];
 /** Settle entries in batches this size (Sprint 05's batch fit twelve in one transaction). */
 const BATCH = 10;
+/** Every transaction version the cluster serves (the review's F1). */
+const READ = { encoding: "json", commitment: "confirmed", maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION };
 
 /** Every baker that ever joined `campaign`, from the `EntryAdded` events of its history (oldest pages included). */
 export async function bakersOf(rpc: Rpc, campaign: Address): Promise<Address[]> {
   const bakers = new Set<string>();
+  const unreadable: string[] = [];
   let before: string | undefined;
   for (let page = 0; page < 10; page++) {
     const sigs = await rpc.call<any[]>("getSignaturesForAddress", [campaign, { limit: 1_000, before }]);
     for (const s of sigs) {
       if (s.err !== null) continue;
-      const options = { encoding: "json", commitment: "confirmed", maxSupportedTransactionVersion: 0 };
-      const tx = await rpc.call<any>("getTransaction", [s.signature, options]);
+      const tx = await rpc.call<any>("getTransaction", [s.signature, READ]).catch((error: unknown) => {
+        if (!isUnsupportedVersion(error)) throw error;
+        unreadable.push(s.signature);
+        return null;
+      });
       if (!tx) continue;
       for (const e of decodeTransactionEvents(tx as RpcTransaction)) {
         if (e.name === "EntryAdded" && e.data.campaign === campaign) bakers.add(e.data.baker);
@@ -55,6 +67,8 @@ export async function bakersOf(rpc: Rpc, campaign: Address): Promise<Address[]> 
     if (sigs.length < 1_000) break;
     before = sigs[sigs.length - 1].signature;
   }
+  // Named, never silent: the program still refuses confirm and finalize until every join is tallied (NotTallied).
+  if (unreadable.length > 0) console.error(`bakersOf ${campaign}: unreadable (-32015), bakers unknown: ${unreadable}`);
   return [...bakers].map((b) => address(b));
 }
 

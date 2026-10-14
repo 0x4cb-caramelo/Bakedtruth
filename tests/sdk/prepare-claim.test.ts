@@ -17,6 +17,7 @@ import {
   decodeTransactionEvents,
   Side,
   type RpcTransaction,
+  MAX_TRANSACTION_VERSION,
 } from "@brot/sdk/read";
 import { buildSettleCreatorShare, buildSettleEntry, claimFloor, prepareClaim } from "@brot/sdk/tx";
 
@@ -64,7 +65,9 @@ describe("credit to an empty wallet below rent is reserved", () => {
 
     // The keeper's attempt lands, pays nothing and emits nothing: the share is reserved.
     const sig = await landVia(chain, keeper, [await buildSettleCreatorShare({ campaign, creator: w.creator.address })]);
-    const tx = await rpc.getTransaction(sig as never, { encoding: "json", maxSupportedTransactionVersion: 0 }).send();
+    const tx = await rpc
+      .getTransaction(sig as never, { encoding: "json", maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION })
+      .send();
     expect(decodeTransactionEvents(tx as unknown as RpcTransaction).map((e) => e.name)).toEqual([]);
     expect(balance(w, w.creator.address)).toBe(0n);
     expect(creatorShareStatus(decodeCampaign(rawOf(w, campaign)))).toEqual({ status: "reserved", amount: share });
@@ -103,7 +106,9 @@ describe("credit to an empty wallet below rent is reserved", () => {
     expect(prepared.simulation.events.map((e) => e.name)).toEqual(["CreatorShareSettled"]);
     const signed = await signTransaction([w.creator.keyPair], prepared.transaction);
     const claimed = await rpc.sendTransaction(getBase64EncodedWireTransaction(signed), { encoding: "base64" }).send();
-    const landed = await rpc.getTransaction(claimed, { encoding: "json", maxSupportedTransactionVersion: 0 }).send();
+    const landed = await rpc
+      .getTransaction(claimed, { encoding: "json", maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION })
+      .send();
     const events = decodeTransactionEvents(landed as unknown as RpcTransaction);
     expect(events.map((e) => e.name)).toEqual(["CreatorShareSettled"]);
     expect(events[0].data).toMatchObject({ creator: w.creator.address, amount: share });

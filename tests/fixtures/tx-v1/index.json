@@ -1,0 +1,12 @@
+{
+  "capturedAt": "2026-10-14T04:22:53.674Z",
+  "rpcOrigin": "https://api.devnet.solana.com",
+  "cluster": "devnet",
+  "signature": "2eYGpUyjUA4uRDPEwHdPQkzWwmspQFGaCS5WeUoBB87aEnBJZu38X2zsdQQFx78CszddJfgyyNKpoQr3aU7Xy7aW",
+  "slot": 510839479,
+  "version": 1,
+  "sha256": {
+    "tx.json": "a0f5ed3280257bc749ef4d7aa597c08e4589e7fe38e4157dde834df0a3b52159",
+    "refused-v0.json": "f7f000b325679c8711f7ef345cb9485eb963a54e3acf526dba9c131e63ff9780"
+  }
+}

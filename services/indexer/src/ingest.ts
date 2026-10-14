@@ -1,23 +1,22 @@
 /**
  * Purpose: the ingest (proposal §2.7; Sprint 08 DoD), the indexer's one writer. A refresh lists the program's new
  *          signatures at `finalized` back to the checkpoint (listing.ts), then reads the pending ones oldest first
- *          (`getTransaction`, JSON, version 0) and decodes their events with the SDK under its four decoder rules,
- *          lookup tables included. Each signature is one SQLite transaction: its events `INSERT OR IGNORE` on
- *          (signature, ix_index, inner_index), the projections of every campaign it touches (project.ts), and its
- *          own state, which is the processing checkpoint. A transaction the node answers null for holds the later
- *          ones, so the chain's order holds, until its tries run out; then it is skipped and counted. A call that
- *          fails (a timeout, a 429, a node down) only stops the refresh and is named: an outage never costs a try, so
- *          it never makes the indexer skip a transaction. A campaign whose
- *          `seq` has a gap gets its own signatures listed and read again, once per refresh until the gap closes (a
- *          skipped one gets one more read each time, and never holds the others again). Last, the points and the
- *          home page's order, from one live read (derived.ts). Nothing about a visitor is ever stored: the indexer
- *          reads the chain only. Since Sprint 14, the referral tables are rewritten after each refresh, from the
- *          events and the block positions a tie needs (referral/project.ts); a failure there is named and stops
- *          nothing else.
- * Version: 0.3.0 (the referral tables after each refresh)
- * Sprint:  08 (indexer, API, relay and points); 14 (referral, lane L14R)
+ *          (`getTransaction`, JSON, up to the SDK's MAX_TRANSACTION_VERSION) and decodes their events with the SDK under
+ *          its four decoder rules, lookup tables included. Each signature is one SQLite transaction: its events
+ *          `INSERT OR IGNORE` on (signature, ix_index, inner_index), the projections of every campaign it touches
+ *          (project.ts), and its own state, which is the processing checkpoint. A transaction the node answers null
+ *          for holds the later ones, so the chain's order holds, until its tries run out; then it is skipped and
+ *          counted. One the node cannot return in a version this client reads (-32015) is unreadable: skipped at once
+ *          and counted, never a stop (the review's F1); its campaign's `seq` gap reads it once more per refresh. A
+ *          call that fails (a timeout, a 429, a node down) only stops the refresh and is named: an outage never costs
+ *          a try, so it never makes the indexer skip a transaction. A campaign whose `seq` has a gap gets its own
+ *          signatures listed and read again, once per refresh until the gap closes (a skipped one gets one more read
+ *          each time, and never holds the others again). Last, the points and the home page's order, from one live
+ *          read (derived.ts). Nothing about a visitor is ever stored. Since Sprint 14, the referral tables are
+ *          rewritten after each refresh (referral/project.ts); a failure there is named and stops nothing else.
+ * Version: 0.4.0 (Sprint 16: every transaction version the cluster serves; an unreadable one is skipped and counted)
+ * Sprint:  08 (indexer, API, relay and points); 14 (referral, lane L14R); 16 (the review's F1)
  */
-import { signature as toSignature } from "@solana/kit";
 import {
   decodeTransactionEvents,
   eventCampaign,
@@ -35,6 +34,7 @@ import { checkpointOf, keepListed, listNewer, type ListOptions } from "./listing
 import { liveReader, type ReadLive } from "./live";
 import { refreshDerived } from "./derived";
 import { gapIn, projectAddress } from "./project";
+import { isFailed, isUnreadable, readTransaction } from "./read-tx";
 import { refreshReferrals } from "./referral/project";
 
 export type IngestOptions = Partial<ListOptions> & {
@@ -50,6 +50,8 @@ export type IngestReport = {
   /** A transaction did not read back: the later ones wait for it. */
   waiting: boolean;
   skipped: number;
+  /** Transactions the node cannot return in a version this client reads (-32015): skipped and counted (F1). */
+  unreadable: number;
   /** Campaign addresses whose `seq` still has a gap after this refresh. */
   gaps: string[];
   /** The name of a read or a gap's listing that failed in this refresh (a timeout, a node error). */
@@ -61,7 +63,6 @@ export type IngestReport = {
 };
 
 type Pending = { signature: string; slot: number; ord: number; tries: number };
-const TX = { encoding: "json", maxSupportedTransactionVersion: 0, commitment: "finalized" } as const;
 const nameOf = (caught: unknown) => (caught instanceof Error ? caught.name : "Error");
 
 export function createIngest(rpc: SolanaRpc, store: Store, options: IngestOptions = {}) {
@@ -75,17 +76,7 @@ export function createIngest(rpc: SolanaRpc, store: Store, options: IngestOption
        raw) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   );
 
-  /** The transaction, `null` when the node says it has none, or the name of the call's failure. */
-  async function read(sig: string): Promise<RpcTransaction | null | { failed: string }> {
-    try {
-      const tx = await rpc
-        .getTransaction(toSignature(sig), TX)
-        .send({ abortSignal: AbortSignal.timeout(list.timeoutMs) });
-      return (tx as unknown as RpcTransaction | null) ?? null;
-    } catch (caught) {
-      return { failed: nameOf(caught) };
-    }
-  }
+  const read = (sig: string) => readTransaction(rpc, sig, list.timeoutMs);
 
   /** One signature's events, projections and state, together. Returns the campaigns it touched. */
   function write(p: Pending, tx: RpcTransaction): Set<string> {
@@ -118,7 +109,12 @@ export function createIngest(rpc: SolanaRpc, store: Store, options: IngestOption
       const read_ = await Promise.all(slice.map((p) => read(p.signature)));
       for (const [j, p] of slice.entries()) {
         const tx = read_[j];
-        if (tx !== null && "failed" in tx) {
+        if (isUnreadable(tx)) {
+          store.db.run("UPDATE signatures SET state = 'skipped' WHERE signature = ?", [p.signature]);
+          report.unreadable += 1; // never a stop: the later ones are read
+          continue;
+        }
+        if (isFailed(tx)) {
           report.readError = tx.failed; // the node did not answer: no try is spent, the refresh stops here
           report.waiting = true;
           return;
@@ -158,7 +154,7 @@ export function createIngest(rpc: SolanaRpc, store: Store, options: IngestOption
   return {
     async refresh(): Promise<IngestReport> {
       const report: IngestReport = {
-        ...{ listed: 0, processed: 0, waiting: false, skipped: 0, gaps: [] },
+        ...{ listed: 0, processed: 0, waiting: false, skipped: 0, unreadable: 0, gaps: [] },
         ...{ readError: null, pointsError: null, referralError: null },
       };
       gapped ??= withGap(

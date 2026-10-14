@@ -4,9 +4,11 @@
  *          still counts as paid, so what a wallet is owed never goes below what reached it; a lost ledger, a duplicate
  *          send and an irregular transaction are read back from the operations wallet's own memo'd transfers and
  *          counted as paid to whoever received them; an indexer file with a skipped transaction or a gap, an
- *          operations wallet that cannot pay, and a file that is not a ledger are refused. Filter: `-t referral`.
- * Version: 0.1.0
- * Sprint:  14 (referral, lane L14R)
+ *          operations wallet that cannot pay, and a file that is not a ledger are refused; a payout transaction the
+ *          node cannot return in a version this client reads (-32015) stops the scan, named, and is never skipped
+ *          (Sprint 16, the review's F1). Filter: `-t referral`.
+ * Version: 0.2.0 (Sprint 16: an unreadable payout stops the scan)
+ * Sprint:  14 (referral, lane L14R); 16
  */
 import { describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
@@ -48,6 +50,22 @@ describe("referral ledger", () => {
     expect(paidByWallet(ledger).get(F)).toBe(80_000_000n);
     const third = await prepare(indexer, ops, ledger);
     expect([third.plan.send, third.plan.carried, third.written]).toEqual([[], [], false]); // owed is below zero
+  });
+
+  test("a payout the node cannot return in a version this client reads stops the scan, named; never skipped", async () => {
+    const { indexer } = await earnings();
+    const ops = new OpsWallet();
+    const ledger = openLedger(":memory:");
+    await prepare(indexer, ops, ledger);
+    const paid = ops.pay(F, 40_000_000n, 1, 1);
+    ops.newer.add(paid);
+    await expect(record(ops, ledger)).rejects.toThrow(`cannot read ${paid} (-32015`);
+    const row = ledger.db.query("SELECT status FROM referral_payouts WHERE batch = 1 AND idx = 1");
+    expect(row.all()).toEqual([{ status: "prepared" }]); // not counted as paid, not skipped
+    // No next batch either: preparing scans first, so nothing is paid while that payout cannot be read.
+    await expect(prepare(indexer, ops, ledger)).rejects.toThrow(`cannot read ${paid} (-32015`);
+    ops.newer.delete(paid);
+    expect((await record(ops, ledger)).scan.recorded.map((r) => [r.landing.signature, r.note])).toEqual([[paid, null]]);
   });
 
   test("a line sent with another amount counts as it landed; the line stays in flight until cancelled", async () => {

@@ -24,6 +24,8 @@ import {
   type TransactionSigner,
 } from "@solana/kit";
 
+import { MAX_TRANSACTION_VERSION } from "@brot/sdk/read";
+
 import * as P from "../../tests/brot/program";
 import { decodeEvent, type Event } from "../../tests/brot/setup";
 
@@ -116,7 +118,11 @@ export async function send(rpc: Rpc, payer: TransactionSigner, ixs: Instruction[
     if (status && (status.confirmationStatus === "confirmed" || status.confirmationStatus === "finalized")) break;
     await sleep(200);
   }
-  const options = { encoding: "json", commitment: "confirmed", maxSupportedTransactionVersion: 0 };
+  const options = {
+    encoding: "json",
+    commitment: "confirmed",
+    maxSupportedTransactionVersion: MAX_TRANSACTION_VERSION,
+  };
   let landed = await rpc.call<any>("getTransaction", [signature, options]);
   for (let retry = 0; !landed && retry < 10; retry++) {
     await sleep(200);

@@ -5,8 +5,9 @@
  *          so a second refresh changes nothing and a rebuild from the chain writes the same rows (`REBUILDABLE`). A
  *          failure here never stops the ingest: the refresh names it. `computeReferrals` is also what the weekly
  *          routine reads, on a read-only handle, with no RPC.
- * Version: 0.2.0 (the block positions read first)
- * Sprint:  14 (referral, lane L14R)
+ *          A block that holds a transaction newer than the version this client reads is named `UnreadableBlock`.
+ * Version: 0.2.1 (Sprint 16: an unreadable block named; 0.2.0, the block positions read first)
+ * Sprint:  14 (referral, lane L14R); 16
  */
 import type { SolanaRpc } from "@brot/sdk/read";
 
@@ -61,7 +62,8 @@ const nameOf = (caught: unknown) => (caught instanceof Error ? caught.name : "Er
 export async function refreshReferrals(rpc: SolanaRpc, store: Store, timeoutMs: number): Promise<string | null> {
   let failed: string | null = null;
   try {
-    await readPositions(rpc, store, timeoutMs);
+    // A block of a newer transaction version is named, so the refresh's log and health show it (the review's F1).
+    if ((await readPositions(rpc, store, timeoutMs)).unreadable.length > 0) failed = "UnreadableBlock";
   } catch (caught) {
     failed = nameOf(caught);
   }

@@ -5,9 +5,10 @@
  *          shape, the latest blockhash and simulation (./fake-simulate.ts). Integers are written as JSON numbers without precision loss, as a node writes them.
  *          A transaction is recorded with its version, and `getTransaction` answers as a node does: a versioned one
  *          only to a caller whose `maxSupportedTransactionVersion` reaches it (-32015 otherwise); as the relay does
- *          when `relayed` names the versions it relays (-32602 for any other).
- * Version: 0.1.2 (Sprint 16: transaction versions, and the relay's refusal of the option)
- * Sprint:  05 (SDK); 16 (lane L16P)
+ *          when `relayed` names the versions it relays (-32602 for any other). `throttle` makes one signature's
+ *          `getTransaction` answer HTTP 429, as a node over its rate does.
+ * Version: 0.1.3 (Sprint 16, the review's F2: a throttled transaction)
+ * Sprint:  05 (SDK); 16 (lane L16P; lane R)
  */
 import { getBase64Decoder, type Address } from "@solana/kit";
 
@@ -21,8 +22,16 @@ function stringify(value: unknown): string {
   return marked.replace(/"__big__(-?\d+)__"/g, "$1");
 }
 
-export type FakeRpc = { url: string; record(tx: RpcTransaction, version?: TxVersion): void; close(): void };
+export type FakeRpc = {
+  url: string;
+  record(tx: RpcTransaction, version?: TxVersion): void;
+  /** From now on, `getTransaction` of `signature` answers HTTP 429. */
+  throttle(signature: string): void;
+  close(): void;
+};
 type TxVersion = "legacy" | 0 | 1;
+/** A rate limit a handler throws: the whole answer is HTTP 429, as a node's. */
+class Throttled extends Error {}
 /** A JSON-RPC error a handler throws, answered as the node or the relay answers it. */
 class RpcError extends Error {
   constructor(
@@ -45,6 +54,7 @@ export function startFakeRpc(
 ): FakeRpc {
   const recorded: RpcTransaction[] = [];
   const versions = new Map<string, TxVersion>();
+  const throttled = new Set<string>();
   const account = (at: Address) => {
     const a = w.client.svm.getAccount(at);
     if (!a.exists) return null;
@@ -82,6 +92,7 @@ export function startFakeRpc(
       if (relayed !== null && max !== undefined && !relayed.includes(max)) {
         throw new RpcError(-32602, `maxSupportedTransactionVersion ${relayed.join(", ")} only`);
       }
+      if (throttled.has(signature)) throw new Throttled();
       const tx = recorded.find((t) => t.transaction.signatures[0] === signature);
       if (!tx) return null;
       const version = versions.get(signature) ?? 0;
@@ -109,9 +120,15 @@ export function startFakeRpc(
           return { jsonrpc: "2.0", id, error: { code: error.code, message: error.message } };
         }
       };
-      const body = handler
-        ? answer(handler)
-        : { jsonrpc: "2.0", id, error: { code: -32601, message: `fake RPC: no ${method}` } };
+      let body;
+      try {
+        body = handler
+          ? answer(handler)
+          : { jsonrpc: "2.0", id, error: { code: -32601, message: `fake RPC: no ${method}` } };
+      } catch (error) {
+        if (error instanceof Throttled) return new Response("Too Many Requests", { status: 429 });
+        throw error;
+      }
       return new Response(stringify(body), { headers: { "content-type": "application/json" } });
     },
   });
@@ -121,6 +138,7 @@ export function startFakeRpc(
       recorded.push(tx);
       versions.set(tx.transaction.signatures[0]!, version);
     },
+    throttle: (signature) => void throttled.add(signature),
     close: () => server.stop(true),
   };
 }

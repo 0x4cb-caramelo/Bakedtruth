@@ -3,12 +3,15 @@
  *          hand-built event streams through the real ingest, no cluster: in one transaction, the link counts only when
  *          its instruction runs before the join's, both ways; in one slot across two transactions, only the block's
  *          own order decides, both ways, whatever order the listing gave; while the block cannot be read the link is
- *          undecided and earns nothing, then it is read once and decided; the positions read are rebuilt the same.
+ *          undecided and earns nothing, then it is read once and decided; the positions read are rebuilt the same. A
+ *          block of a newer transaction version (-32015) is skipped and named, its link undecided until it reads, and
+ *          every block is asked for at the SDK's MAX_TRANSACTION_VERSION (Sprint 16, the review's F1).
  *          Filter: `bun test services/indexer -t referral`.
- * Version: 0.1.0
- * Sprint:  14 (referral, lane L14R)
+ * Version: 0.2.0 (Sprint 16: a block of a newer version)
+ * Sprint:  14 (referral, lane L14R); 16
  */
 import { describe, expect, test } from "bun:test";
+import { MAX_TRANSACTION_VERSION } from "@brot/sdk/read";
 
 import { dump } from "../src/db/store";
 import { rebuild } from "../src/rebuild";
@@ -93,5 +96,20 @@ describe("referral chain order", () => {
     const rebuilt = await rebuild(rpcOf(chain).rpc, ":memory:", { readLive: noLive });
     expect(dump(rebuilt.store)).toEqual(before);
     rebuilt.store.close();
+  });
+
+  test("a block of a newer transaction version is skipped and named; its link stays undecided until it reads", async () => {
+    const chain = new Chain();
+    const c = new Campaign(chain, 1);
+    const linkA = chain.link(A, F);
+    c.join(A, "yes", SOL, { slot: linkA.slot, time: linkA.time });
+    settledWith(chain, c);
+    chain.blockNewer = true;
+    const x = await indexed(chain);
+    expect(x.referral(A)).toMatchObject({ status: "undecided", basis: "0", referrer_share: "0", rebate: "0" });
+    chain.blockNewer = false;
+    await x.refresh();
+    expect(x.referral(A)).toMatchObject({ status: "active", basis: "200000000", referrer_share: "40000000" });
+    expect(x.blockVersions).toEqual([MAX_TRANSACTION_VERSION, MAX_TRANSACTION_VERSION]);
   });
 });

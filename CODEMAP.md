@@ -8,8 +8,8 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **1213** |
-| Acima de 200 linhas | **45** ⚠️ |
+| Arquivos mapeados | **1222** |
+| Acima de 200 linhas | **47** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
@@ -41,11 +41,13 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `scripts/codemap.js` — 223 linhas
 - `scripts/devnet-clock-probe.ts` — 201 linhas
 - `scripts/os-self-test.js` — 406 linhas
-- `scripts/pyth-sponsored-feeds.ts` — 201 linhas
+- `scripts/push-oracle-probe.ts` — 204 linhas
+- `scripts/pyth-sponsored-feeds.ts` — 205 linhas
 - `scripts/slot-matrix-spec.ts` — 370 linhas
 - `scripts/sync-selfhosted.js` — 349 linhas
 - `scripts/test/hooks.test.js` — 278 linhas
 - `scripts/tokenomics-model.ts` — 584 linhas
+- `scripts/validator/rpc.ts` — 201 linhas
 - `services/landing/tests/pages.test.mjs` — 229 linhas
 - `tests/brot/codama-spike.test.ts` — 269 linhas
 - `tests/brot/contest-decide.test.ts` — 201 linhas
@@ -177,7 +179,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`activity-panel.tsx`](app/features/campaign-page/activity-panel.tsx) | the recent entries and the chance history (L-23, answered yes), read from the chain's `EntryAdded` events (activity.ts) once per page view and again after an en | 80 |
-| [`activity.ts`](app/features/campaign-page/activity.ts) | the campaign's recent activity and its chance history (L-23, answered yes), read from the chain until the indexer serves them (Sprint 08's activity route is not | 95 |
+| [`activity.ts`](app/features/campaign-page/activity.ts) | the campaign's recent activity and its chance history (L-23, answered yes), read from the chain until the indexer serves them (Sprint 08's activity route is not | 106 |
 | [`campaign-header.tsx`](app/features/campaign-page/campaign-header.tsx) | the campaign page's header (spec 3.5 of Sprint -1): the way back, the kind, the public state from chain time (A-7), the team chip, the sentence as the page's on | 124 |
 | [`campaign-page.tsx`](app/features/campaign-page/campaign-page.tsx) | the campaign page at /c/[id] (Sprint 11; spec 3.5 of Sprint -1): the header, the proof, the pot, the recent entries, the re-check panel, and the entry panel, or | 190 |
 | [`chance-chart.tsx`](app/features/campaign-page/chance-chart.tsx) | the chance history (L-23): the YES share of the entries after each entry, as a step line (a share changes only when an entry goes in), one series in the design' | 89 |
@@ -251,7 +253,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`entry-status.tsx`](app/features/entry/entry-status.tsx) | the sheet after "Sign in wallet": the signing steps (the wallet, then confirming by polling, or checking a transaction the wallet never answered for, with the b | 166 |
 | [`estimate.ts`](app/features/entry/estimate.ts) | the entry panel's estimate (BR-09; P1 §3.2): what an entry returns if its side wins, net of Brot's fee and the creator's share, with the baker's own amount adde | 105 |
 | [`failures.ts`](app/features/entry/failures.ts) | why an entry did not go in, as one of the panel's failures, each with its own message (copy-failures.ts). A program refusal is named by the SDK's error map: its | 171 |
-| [`landed.ts`](app/features/entry/landed.ts) | what a landed transaction says about its own failure: the program of the instruction that failed, read from the transaction as the cluster recorded it (`getTran | 46 |
+| [`landed.ts`](app/features/entry/landed.ts) | what a landed transaction says about its own failure: the program of the instruction that failed, read from the transaction as the cluster recorded it (`getTran | 50 |
 | [`reload-countdown.tsx`](app/features/entry/reload-countdown.tsx) | A-8 on screen: under the "program updated" failure, the seconds left before the page reloads (the back-off of upgrade-pause.ts); at zero the page reloads. The f | 37 |
 | [`retry-guard.ts`](app/features/entry/retry-guard.ts) | the retry guard (A-9; proposal §3.4 rule 6; TP §3.6 S1 rule 6). Before the wallet gets a join, the site saves what it read: the entry total the join is signed a | 200 |
 | [`side-picker.tsx`](app/features/entry/side-picker.tsx) | YES or NO in the entry panel. The button holds only its side's word, centred; under each button, in the page's neutral text, the side's chance (its share of the | 65 |
@@ -309,7 +311,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`close-share.ts`](app/features/my-entries/close-share.ts) | a creator share paid by the campaign's close (the Sprint 12 security review, M1). A share the program kept in the vault (the creator's wallet was empty) is paid | 55 |
 | [`copy.ts`](app/features/my-entries/copy.ts) | the words of "My entries" (Sprint 12; D-m vocabulary; English per L-01, route `/my-entries` confirmed by the founder): the wallet prompt, the totals received an | 40 |
 | [`entry-row.tsx`](app/features/my-entries/entry-row.tsx) | one row of "My entries": the campaign's sentence (a link to its page), its state, the wallet's sides, what the entry returns or is owed, what it received (from  | 105 |
-| [`events-in.ts`](app/features/my-entries/events-in.ts) | the program's events in one landed transaction, as the site reads them: `getTransaction` (JSON, confirmed) decoded by the SDK under its four decoder rules (this | 21 |
+| [`events-in.ts`](app/features/my-entries/events-in.ts) | the program's events in one landed transaction, as the site reads them: `getTransaction` (JSON, confirmed, up to the SDK's MAX_TRANSACTION_VERSION, so a v1 tran | 33 |
 | [`history.ts`](app/features/my-entries/history.ts) | a wallet's history with the program, read from the chain until the indexer serves it (TP §6's `/api/v1/wallets/:address/entries` is Sprint 08's and not built):  | 146 |
 | [`load.ts`](app/features/my-entries/load.ts) | what "my entries" reads from the chain (Sprint 12 DoD: open entries come from the chain): for every campaign the wallet may be in (the read API's list, and ever | 103 |
 | [`model.ts`](app/features/my-entries/model.ts) | the rows of "my entries" (Sprint 12 DoD), as pure values: one per campaign the wallet entered or opened, with its sides and amounts, its public state (the SDK's | 145 |
@@ -441,18 +443,20 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`events.ts`](packages/sdk/src/read/events.ts) | the program's events: each name with its discriminator and the Codama decoder of its payload, and the decoding of one event's inner-instruction data `[0xFF, dis | 109 |
 | [`feeds.ts`](packages/sdk/src/read/feeds.ts) | the compiled lists of Pyth feeds a price campaign may name, one per cluster, as programs/brot-markets/src/feeds.rs compiles them (founder answer 1, 2026-10-09;  | 113 |
 | [`format.ts`](packages/sdk/src/read/format.ts) | exact, deterministic display of the program's units: lamports as SOL with all nine decimals (no floating point), Unix seconds as a UTC date, basis points as a p | 54 |
-| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 44 |
+| [`index.ts`](packages/sdk/src/read/index.ts) | `@brot/sdk/read`, the read half of the SDK: addresses, constants, codecs, the money math, events and their decoder, public state, the creation checks, the openi | 46 |
 | [`knowable.ts`](packages/sdk/src/read/knowable.ts) | the join lock (BR-06) as the program applies it, for a client that wants to know whether a join can still go in: `outcomeKnowable` per kind (the price band reac | 69 |
 | [`pdas.ts`](packages/sdk/src/read/pdas.ts) | every program-derived address a client needs: the config, the fee vault, a campaign and its vault, an entry, a join, a referral link, a sealed fee, the event au | 79 |
 | [`points-now.ts`](packages/sdk/src/read/points-now.ts) | what a live campaign account says now for the points rule (`CampaignNow`, points.ts): its result is final once no key can change it and nothing is left to count | 47 |
 | [`points.ts`](packages/sdk/src/read/points.ts) | devnet points (BR-29; TP §3.5 "Points"; Q7 answered a, narrowed by the founder's answer 3a): 1 point per campaign a wallet entered on the side that won, once th | 167 |
 | [`program-data.ts`](packages/sdk/src/read/program-data.ts) | the program's last deploy (A-8), read from its ProgramData account under the upgradeable loader (loader v3), whose first 45 bytes are `[state u32 = 3 (ProgramDa | 86 |
 | [`quote.ts`](packages/sdk/src/read/quote.ts) | what an opening pays (row 7 of TP 3.4.10): US$ at the sponsored Pyth SOL/USD price charged at `price − conf`, the 90/10 split, the `max_lamports` the creator si | 146 |
-| [`recheck.ts`](packages/sdk/src/read/recheck.ts) | `recheck(campaign, rpcUrl)` (BR-23, "Anyone can re-check. Same account, same answer"): through any RPC the caller chooses, read the campaign, then the very acco | 196 |
+| [`recheck.ts`](packages/sdk/src/read/recheck.ts) | `recheck(campaign, rpcUrl)` (BR-23, "Anyone can re-check. Same account, same answer"): through any RPC the caller chooses, read the campaign, then the very acco | 144 |
 | [`referral.ts`](packages/sdk/src/read/referral.ts) | the referral link (`["referral", referee]`, Sprint 14) for a client: the account decoded from its bytes after the checks the program's loader makes before it re | 46 |
+| [`resolved-event.ts`](packages/sdk/src/read/resolved-event.ts) | the search for a campaign's `CampaignResolved`, the evidence of a price resolution, shared by `recheck` and the keeper's second read (Sprint 16, the red-team re | 114 |
 | [`rpc.ts`](packages/sdk/src/read/rpc.ts) | the reads the SDK makes through any Solana RPC (Kit's `createSolanaRpc`, no paid key, A-5): an account's owner and bytes, several at once, the cluster's clock f | 72 |
 | [`sealed-fee.ts`](packages/sdk/src/read/sealed-fee.ts) | the `SealedFee` account (Sprint 15; `["sealed", campaign, sponsor]`) decoded from its bytes after the checks the program's loader makes before it reads a field, | 23 |
 | [`sealed-quote.ts`](packages/sdk/src/read/sealed-quote.ts) | what a sealed entry costs (Sprint 15, founder answer of 2026-10-13). Mirrors programs/brot-markets/src/instructions/entries/sealed_charge.rs: row 7's charge (`c | 90 |
+| [`tx-version.ts`](packages/sdk/src/read/tx-version.ts) | how every reader of the program's transactions asks for them, and what a transaction it cannot read is (Sprint 16, the red-team review's F1 and F2). `MAX_TRANSA | 30 |
 | [`view.ts`](packages/sdk/src/read/view.ts) | a campaign's public state (BR-05; TP 3.4.2): Open, Closed, In review, Paid or Void, computed by one function from what the program recorded and the CHAIN's time | 134 |
 
 ## `packages/sdk/src/read/chain/`
@@ -1106,6 +1110,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`bun-junit.mjs`](scripts/bun-junit.mjs) | reads the JUnit file `bun test --reporter=junit` writes: each test by name, with its body (empty when it passed, `<skipped />` when filtered out, `<failure …>`  | 18 |
 | [`capture-fixtures-dbc.ts`](scripts/capture-fixtures-dbc.ts) | the Meteora Dynamic Bonding Curve (DBC) accounts the graduation kind (`DbcGraduated`) is tested on, for scripts/capture-fixtures.ts: a `VirtualPool` at each mig | 73 |
 | [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party programs actually write instead of a layout someone typed f | 185 |
+| [`capture-tx-v1.ts`](scripts/capture-tx-v1.ts) | records, read-only, the fixture of a real v1 transaction (Sprint 16, the red-team review's F1 and F2): `tx.json`, the transaction as `getTransaction` (JSON, fin | 88 |
 | [`check-content-schema.ts`](scripts/check-content-schema.ts) | the JSON Schema check of content/ (TP §4 "Content files", §3.1's data contracts; Sprint 08 DoD): every `content/<name>.json` beside a `content/<name>.schema.jso | 81 |
 | [`checks-mutation.mjs`](scripts/checks-mutation.mjs) | the X0.9 evidence for the checks module: removes each check of programs/brot-markets/src/checks.rs and its submodules (checks/top_level.rs) in turn, rebuilds th | 316 |
 | [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns, | 98 |
@@ -1127,9 +1132,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`measure-settle.ts`](scripts/measure-settle.ts) | the settle batch (T3) and the per-account write limit (C7). For each batch size it builds one transaction of `settle_entry` instructions in LiteSVM (self-CPI ev | 117 |
 | [`os-self-test.js`](scripts/os-self-test.js) | the `os-self-test` skill did this, but only when a human or a model remembered to invoke it — and three session logs record it NOT being run when it would have  | 406 |
 | [`pre-commit.js`](scripts/pre-commit.js) | the PreToolUse gate only sees commits Claude makes. A commit from a terminal or an editor skipped it entirely. This runs the same scan from git itself | 76 |
-| [`push-oracle-probe.ts`](scripts/push-oracle-probe.ts) | probe Pyth's push oracle read-only: watch that the sponsored SOL/USD and BTC/USD accounts only move forward on devnet and mainnet, and scan its recent transacti | 200 |
+| [`push-oracle-probe.ts`](scripts/push-oracle-probe.ts) | probe Pyth's push oracle read-only: watch that the sponsored SOL/USD and BTC/USD accounts only move forward on devnet and mainnet, and scan its recent transacti | 204 |
 | [`pwa-icons.ts`](scripts/pwa-icons.ts) | writes the PWA's icons (Sprint 13 DoD, S2: the manifest and its icons, no service worker) from the mascot's deadpan pose on the dark theme's page colour: 192 an | 42 |
-| [`pyth-sponsored-feeds.ts`](scripts/pyth-sponsored-feeds.ts) | list which Pyth feeds have a shard-0 push account on devnet and mainnet, which of those stay fresh, how often they update and who pays for the writes, read-only | 201 |
+| [`pyth-sponsored-feeds.ts`](scripts/pyth-sponsored-feeds.ts) | list which Pyth feeds have a shard-0 push account on devnet and mainnet, which of those stay fresh, how often they update and who pays for the writes, read-only | 205 |
 | [`release-v0.2.0.ps1`](scripts/release-v0.2.0.ps1) | Release helper for AI Dev Operating System v0.2.0 | 11 |
 | [`release-v0.2.0.sh`](scripts/release-v0.2.0.sh) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 16 |
 | [`run-tests.js`](scripts/run-tests.js) | give `npm test` a file list that does not depend on the shell. npm runs scripts through cmd.exe on Windows, which does not expand globs, and Node only learned t | 33 |
@@ -1220,7 +1225,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`open-paid.ts`](scripts/rehearsal/open-paid.ts) | a PAID opening by a wallet outside the team (Sprint 12's devnet rehearsal: the creator's 1% and a prize that returns exist only on a paid, non-team opening; scr | 119 |
-| [`settle-steps.ts`](scripts/rehearsal/settle-steps.ts) | the devnet rehearsal's settlement of one campaign, one step at a time (Sprint 12: the five-campaign rehearsal; until the keeper settles, every payout on devnet  | 183 |
+| [`settle-steps.ts`](scripts/rehearsal/settle-steps.ts) | the devnet rehearsal's settlement of one campaign, one step at a time (Sprint 12: the five-campaign rehearsal; until the keeper settles, every payout on devnet  | 197 |
 | [`settle.ts`](scripts/rehearsal/settle.ts) | `bun run scripts/rehearsal/settle.ts <campaign> <step>`: one settlement step of one campaign on a cluster (Sprint 12's devnet rehearsal; settle-steps.ts). The p | 41 |
 
 ## `scripts/surfpool/`
@@ -1234,7 +1239,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`price-touch.ts`](scripts/surfpool/price-touch.ts) | the Surfpool run of the price reader, the criterion Sprint 01 carried to Sprint 03: on a mainnet fork, a team campaign is opened on SOL/USD's sponsored account; | 140 |
 | [`pyth-model.ts`](scripts/surfpool/pyth-model.ts) | drive Surfpool's Pyth `PriceUpdateV2` model on the upgraded receiver's accounts: read an account's fields, give the model's IDL to `rec2HH…`, and schedule overr | 177 |
 | [`resolution-checks.ts`](scripts/surfpool/resolution-checks.ts) | what the price-touch run asserts about `resolve_campaign`, against the semantics frozen at Sprint 03's opening: refused while no YES is proven, then YES with th | 83 |
-| [`rpc.ts`](scripts/surfpool/rpc.ts) | talk to a surfnet over JSON-RPC: plain calls and Surfpool's `surfnet_*` cheatcodes, the clock, account bytes, and a transaction sent, landed and read back with  | 153 |
+| [`rpc.ts`](scripts/surfpool/rpc.ts) | talk to a surfnet over JSON-RPC: plain calls and Surfpool's `surfnet_*` cheatcodes, the clock, account bytes, and a transaction sent, landed and read back with  | 159 |
 | [`surfnet.ts`](scripts/surfpool/surfnet.ts) | start and stop a Surfpool surfnet for the scripts in this folder: a mainnet fork on 127.0.0.1 with both ports in 4200-4299, run from its own temporary directory | 153 |
 
 ## `scripts/team/`
@@ -1289,7 +1294,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`negative-price.ts`](scripts/validator/negative-price.ts) | rewrite a sponsored Pyth account on the surfnet with one field changed, from the captured devnet bytes (the .bin files are never edited): price, confidence, exp | 56 |
 | [`negative-run.ts`](scripts/validator/negative-run.ts) | the slot matrix and one paid opening on a local validator (Sprint 05 DoD: "the negative tests, the slot tests and one paid opening run once on a real validator" | 147 |
 | [`negative-world.ts`](scripts/validator/negative-world.ts) | run the test kit's account injectors and the slot matrix's mutations against a surfnet, unchanged: a recording stand-in for the three synchronous LiteSVM calls  | 107 |
-| [`rpc.ts`](scripts/validator/rpc.ts) | talk to a cluster over JSON-RPC for the ops scripts: the cluster guard (a non-local URL is refused unless the caller names the cluster on purpose; the genesis h | 192 |
+| [`rpc.ts`](scripts/validator/rpc.ts) | talk to a cluster over JSON-RPC for the ops scripts: the cluster guard (a non-local URL is refused unless the caller names the cluster on purpose; the genesis h | 201 |
 | [`simulate.ts`](scripts/validator/simulate.ts) | simulate a transaction before sending it, so an ops script shows what the program would answer (its custom error by name, the logs, the compute units) without w | 53 |
 | [`spl-token.ts`](scripts/validator/spl-token.ts) | the few System Program and classic SPL Token instructions the ops scripts need to make a burn campaign's mint (`SupplyAtMost`): create an account, transfer SOL, | 115 |
 | [`surfnet.ts`](scripts/validator/surfnet.ts) | start and stop a local OFFLINE Surfpool surfnet for the ops rehearsals: no datasource (`--offline`), bound to 127.0.0.1 on two free ports in 4200-4299, run from | 95 |
@@ -1303,7 +1308,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`dto.ts`](services/api/src/dto.ts) | the JSON shape of a campaign for the site. Amounts are lamport strings, addresses base58, times Unix seconds (strings for the big integers). The state is the SD | 58 |
 | [`health.ts`](services/api/src/health.ts) | what `/api/v1/health` answers (TP §6; Sprint 08), shaped as @brot/sdk/schemas's `ReadApiHealthSchema`: the snapshot's state and freshness, the leaderboard's his | 35 |
 | [`hidden.ts`](services/api/src/hidden.ts) | the wallets left out of the public leaderboard at their owner's request (Sprint 13, the privacy review, TP §8.2 question 8): a JSON array of base58 addresses in | 61 |
-| [`history.ts`](services/api/src/history.ts) | the program's own history, read for the leaderboard (Sprint 13) until Sprint 08's indexer exists: every signature of the program through `getSignaturesForAddres | 170 |
+| [`history.ts`](services/api/src/history.ts) | the program's own history, read for the leaderboard (Sprint 13) until Sprint 08's indexer exists: every signature of the program through `getSignaturesForAddres | 178 |
 | [`indexer-proxy.ts`](services/api/src/indexer-proxy.ts) | the indexer's read routes, public through the read API (the founder's routing answer (a), 2026-10-13; Sprint 08): exactly the routes services/indexer serves (it | 102 |
 | [`leaderboard.ts`](services/api/src/leaderboard.ts) | `GET /api/v1/leaderboard` (TP §6; Sprint 13, BR-29): devnet points from the program's events (history.ts) and the live campaign accounts (the snapshot), through | 75 |
 | [`main.ts`](services/api/src/main.ts) | the read API's entry point. Reads its settings, takes a chain snapshot at start and then every API_REFRESH_MS, reads the program's new history and the hide list | 109 |
@@ -1323,7 +1328,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`board-kit.ts`](services/api/tests/board-kit.ts) | the leaderboard route tests' fake data, with no cluster: campaign rows as the snapshot keeps them (a paid pot with 1 SOL on each side and the devnet rates, open | 110 |
 | [`config.test.ts`](services/api/tests/config.test.ts) | the read API's settings: the refusals (no RPC URL, a public bind, an unknown cluster) and the defaults, since Sprint 13 the leaderboard's and since Sprint 08's  | 63 |
 | [`contract.test.ts`](services/api/tests/contract.test.ts) | the read API's contract (Sprint 08 DoD "/api/v1": zod DTOs with contract tests), no cluster: every /api/v1 answer parses with its schema in @brot/sdk/schemas (r | 173 |
-| [`history.test.ts`](services/api/tests/history.test.ts) | the leaderboard's history reader against a scripted RPC (Sprint 13, the adversarial review's cases): a node that ignores `until` costs a re-listing but never a  | 179 |
+| [`history.test.ts`](services/api/tests/history.test.ts) | the leaderboard's history reader against a scripted RPC (Sprint 13, the adversarial review's cases): a node that ignores `until` costs a re-listing but never a  | 200 |
 | [`leaderboard-pot.test.ts`](services/api/tests/leaderboard-pot.test.ts) | what the leaderboard route reads from a live account for the founder's answer 3a (2026-10-10), with fake data and no cluster: whether a final pot splits (the mo | 49 |
 | [`leaderboard.test.ts`](services/api/tests/leaderboard.test.ts) | the leaderboard route's contract with fake data and no cluster (Sprint 13): 503 until the program's history has been read (or with no history at all), what heal | 91 |
 | [`names-price.test.ts`](services/api/tests/names-price.test.ts) | /api/v1/names and /api/v1/price with fake data and no cluster (Sprint 08): the names file read with the SDK's rules and the listed feeds with their sponsored ac | 132 |
@@ -1339,7 +1344,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`derived.ts`](services/indexer/src/derived.ts) | what the indexer derives after each refresh from its finalized rows and one read of the live chain (Sprint 08): the live campaign accounts and the chain's clock | 24 |
 | [`export.ts`](services/indexer/src/export.ts) | the team's exports from the indexer's file (Sprint 08; TP §6, "the partner report has no public route; it is a team export without addresses"): the KPIs as JSON | 59 |
 | [`feeds.ts`](services/indexer/src/feeds.ts) | the evidence table `feed_history` (A-4; TP §3.5 "Evidence tables", §4; Sprint 08 DoD "Evidence and snapshots"): every update of the sponsored Pyth account of ea | 85 |
-| [`ingest.ts`](services/indexer/src/ingest.ts) | the ingest (proposal §2.7; Sprint 08 DoD), the indexer's one writer. A refresh lists the program's new signatures at `finalized` back to the checkpoint (listing | 192 |
+| [`ingest.ts`](services/indexer/src/ingest.ts) | the ingest (proposal §2.7; Sprint 08 DoD), the indexer's one writer. A refresh lists the program's new signatures at `finalized` back to the checkpoint (listing | 188 |
 | [`kpis.ts`](services/indexer/src/kpis.ts) | the KPIs, without personal data (BR-31, BR-34; BP v0.0.4 P2 §2.5 and §6.3; TP §3.5; proposal §2.7 "the third demand test"; Sprint 08 DoD): openings by team and  | 150 |
 | [`listing.ts`](services/indexer/src/listing.ts) | the ingest's listing (proposal §2.7; Sprint 08): an address's signatures at `finalized`, newest first, paged back to a known signature or to the first page that | 80 |
 | [`live.ts`](services/indexer/src/live.ts) | the campaign accounts that still exist, read for the points rule (Sprint 08): each address whose latest opening the events do not show closed, through `getMulti | 76 |
@@ -1349,6 +1354,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`points.ts`](services/indexer/src/points.ts) | the `points` table (Q7, the founder's answer 3a; Sprint 08): the SDK's own rule (`pointsTable`) over every stored event in chain order and what the live account | 35 |
 | [`project.ts`](services/indexer/src/project.ts) | the projections of one campaign address (TP §4; Sprint 08), rebuilt whole from its stored events each time one of them lands, so a transaction read late or agai | 140 |
 | [`ranking.ts`](services/indexer/src/ranking.ts) | the home page's order (proposal §2.7; TP §3.5 "Ranking and listing"; Sprint 08 DoD, X1.9), from the indexer's finalized rows, content/partners.json and the chai | 123 |
+| [`read-tx.ts`](services/indexer/src/read-tx.ts) | one transaction read for the indexer (Sprint 16, the review's F1): `getTransaction` at `finalized`, JSON, up to the SDK's MAX_TRANSACTION_VERSION, with a timeou | 35 |
 | [`rebuild.ts`](services/indexer/src/rebuild.ts) | the rebuild (proposal §2.7; Sprint 08 DoD, X1.3): the program's whole history replayed into a new file, from its first signature, through the same ingest; the r | 48 |
 | [`retention.ts`](services/indexer/src/retention.ts) | the 30-day return (BP v0.0.4 P2 §2.5 test 1 and §6.3, "a parcela das carteiras que entra de novo em 30 dias"; TP §3.5 KPIs; Sprint 08), from the indexer's entri | 64 |
 | [`snapshot.ts`](services/indexer/src/snapshot.ts) | the hook of the nightly snapshot (TP §3.5 "Snapshots", T16; Sprint 08 DoD "Evidence and snapshots"): the live file copied whole into a new file, consistent at o | 36 |
@@ -1381,11 +1387,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`credit.ts`](services/indexer/src/referral/credit.ts) | whether a payout line can be credited at all (Sprint 14, lane L14R; second review, R2): a referee may name any address as its referrer, and a line the runtime a | 47 |
 | [`earned.ts`](services/indexer/src/referral/earned.ts) | what each wallet has earned from referrals as the indexer's file stands (Sprint 14, lane L14R; TP §3.4.11, "it reads finalized rows only"): the referral rows co | 63 |
 | [`facts.ts`](services/indexer/src/referral/facts.ts) | what the indexer's file says about referrals (Sprint 14, lane L14R; TP §3.4.11), from its finalized rows only: every `ReferralLinked` (the first for each refere | 162 |
-| [`landed.ts`](services/indexer/src/referral/landed.ts) | what the chain says was paid (Sprint 14, lane L14R): the operations wallet's own signatures at `finalized`, back to the last one scanned, each successful transa | 163 |
+| [`landed.ts`](services/indexer/src/referral/landed.ts) | what the chain says was paid (Sprint 14, lane L14R): the operations wallet's own signatures at `finalized`, back to the last one scanned, each successful transa | 168 |
 | [`ledger.ts`](services/indexer/src/referral/ledger.ts) | the referral payouts' ledger (TP §3.4.11, "its ledger is an evidence table snapshotted nightly (A-4)"; Sprint 14, lane L14R): the `referral_payouts` evidence ta | 151 |
 | [`order.ts`](services/indexer/src/referral/order.ts) | "before the first entry", decided by chain order (Sprint 14, lane L14R; the lead's rule of 2026-10-13): a referee's link counts only when its `ReferralLinked` c | 52 |
-| [`positions.ts`](services/indexer/src/referral/positions.ts) | the block positions the referral's chain order needs (Sprint 14, lane L14R; order.ts): for each slot where a referee's link and one of its first entries landed  | 46 |
-| [`project.ts`](services/indexer/src/referral/project.ts) | the referral tables (TP §3.4.11, §4; Sprint 14, lane L14R): every referee's rows computed from the indexer's finalized events (facts.ts, referee.ts) and the blo | 75 |
+| [`positions.ts`](services/indexer/src/referral/positions.ts) | the block positions the referral's chain order needs (Sprint 14, lane L14R; order.ts): for each slot where a referee's link and one of its first entries landed  | 61 |
+| [`project.ts`](services/indexer/src/referral/project.ts) | the referral tables (TP §3.4.11, §4; Sprint 14, lane L14R): every referee's rows computed from the indexer's finalized events (facts.ts, referee.ts) and the blo | 77 |
 | [`referee.ts`](services/indexer/src/referral/referee.ts) | one referee's referral state (TP §3.4.11; P1 §3.9; Sprint 14, lane L14R), from its link, its joins and the facts of each opening it entered: whether the link ca | 145 |
 | [`report.ts`](services/indexer/src/referral/report.ts) | the public report of a batch (Sprint 14, lane L14R; the sprint's security gate, "a public report carries wallets and amounts only"): the wallets the batch paid  | 39 |
 | [`routine.ts`](services/indexer/src/referral/routine.ts) | the weekly referral routine's two steps (TP §3.4.11; Sprint 14, lane L14R), as functions the commands in scripts/referral/ call and the tests drive. Prepare: sy | 69 |
@@ -1400,9 +1406,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`alerts.test.ts`](services/indexer/tests/alerts.test.ts) | the alert the indexer feeds (Sprint 08 DoD "The alerts the indexer feeds"), no cluster: an entry by the creator's own wallet raises one journal line in the keep | 62 |
 | [`api.test.ts`](services/indexer/tests/api.test.ts) | the indexer's read routes over a hand-built file (Sprint 08, slice 2), each answer checked against its schema in @brot/sdk/schemas (the contract): a campaign's  | 169 |
-| [`fake-chain.ts`](services/indexer/tests/fake-chain.ts) | the indexer's no-cluster tests' chain (Sprint 08): the program's own events, encoded by the generated client and wrapped as a node writes a landed transaction ( | 171 |
+| [`fake-chain.ts`](services/indexer/tests/fake-chain.ts) | the indexer's no-cluster tests' chain (Sprint 08): the program's own events, encoded by the generated client and wrapped as a node writes a landed transaction ( | 188 |
 | [`feeds.test.ts`](services/indexer/tests/feeds.test.ts) | the evidence table and its snapshot (Sprint 08 DoD "Evidence and snapshots"), no cluster: `feed_history` watches the feeds of price campaigns whose result is no | 123 |
-| [`ingest.test.ts`](services/indexer/tests/ingest.test.ts) | the ingest against a scripted RPC (Sprint 08), no cluster: pages shorter than asked, chain order and the checkpoint, a node that ignores `until`, each transacti | 130 |
+| [`ingest.test.ts`](services/indexer/tests/ingest.test.ts) | the ingest against a scripted RPC (Sprint 08), no cluster: pages shorter than asked, chain order and the checkpoint, a node that ignores `until`, each transacti | 146 |
 | [`kpis.test.ts`](services/indexer/tests/kpis.test.ts) | the KPIs and the partner report on a hand-built file (Sprint 08 DoD "Creator columns and KPIs", "The partner report"), no cluster: openings by team and by other | 180 |
 | [`paging.test.ts`](services/indexer/tests/paging.test.ts) | the paged lists of the indexer's read routes (Sprint 08: no answer may reach the read API's 1 MB cap), on a hand-built file where one transaction carries three  | 190 |
 | [`partners.test.ts`](services/indexer/tests/partners.test.ts) | content/partners.json and its checks (Sprint 08 DoD "content/partners.json", "a JSON Schema check in CI covers content/*.json"), no cluster: the SDK's parse acc | 124 |
@@ -1410,13 +1416,13 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`ranking.test.ts`](services/indexer/tests/ranking.test.ts) | the home page's order (Sprint 08 DoD "Ranking and listing", X1.9) with no cluster: a partner campaign first during its highlight, only when a team key opened it | 146 |
 | [`referral-basis.test.ts`](services/indexer/tests/referral-basis.test.ts) | the referral basis over hand-built event streams, through the real ingest and a scripted RPC (Sprint 14, lane L14R; TP §3.4.11, §3.4.16), no cluster: a winning  | 171 |
 | [`referral-campaign.ts`](services/indexer/tests/referral-campaign.ts) | one campaign's life for the referral tests (Sprint 14, lane L14R): a small model of the program that lands the campaign's events as it would, numbered from seq  | 181 |
-| [`referral-chain.ts`](services/indexer/tests/referral-chain.ts) | the chain of the referral tests (Sprint 14, lane L14R), with no cluster: each step is one landed transaction at the next slot, with a block time a test may set, | 152 |
+| [`referral-chain.ts`](services/indexer/tests/referral-chain.ts) | the chain of the referral tests (Sprint 14, lane L14R), with no cluster: each step is one landed transaction at the next slot, with a block time a test may set, | 166 |
 | [`referral-commands.test.ts`](services/indexer/tests/referral-commands.test.ts) | the referral commands (scripts/referral/; Sprint 14, lane L14R) on real files, no cluster: a dry run writes nothing; prepare writes the ledger, the signing file | 154 |
 | [`referral-contest.test.ts`](services/indexer/tests/referral-contest.test.ts) | the admin's decision in the indexer's rows (Sprint 14, lane L14R; second review, I1), over hand-built event streams through the real ingest: a `ContestClosed` w | 48 |
 | [`referral-hold.test.ts`](services/indexer/tests/referral-hold.test.ts) | what the second review fixed in the weekly routine (Sprint 14, lane L14R), no cluster. R2: a line that can never be credited (a sysvar, an executable account, a | 127 |
-| [`referral-ledger.test.ts`](services/indexer/tests/referral-ledger.test.ts) | what keeps the referral routine from paying twice or paying blind (Sprint 14, lane L14R), no cluster: a batch is refused while another is open; cancel gives one | 159 |
-| [`referral-ops.ts`](services/indexer/tests/referral-ops.ts) | the operations wallet's side of the referral routine's tests (Sprint 14, lane L14R), with no cluster: the transfers a person sends from it, each a landed transa | 144 |
-| [`referral-order.test.ts`](services/indexer/tests/referral-order.test.ts) | "before the first entry" by chain order (Sprint 14, lane L14R; the lead's rule of 2026-10-13), over hand-built event streams through the real ingest, no cluster | 98 |
+| [`referral-ledger.test.ts`](services/indexer/tests/referral-ledger.test.ts) | what keeps the referral routine from paying twice or paying blind (Sprint 14, lane L14R), no cluster: a batch is refused while another is open; cancel gives one | 177 |
+| [`referral-ops.ts`](services/indexer/tests/referral-ops.ts) | the operations wallet's side of the referral routine's tests (Sprint 14, lane L14R), with no cluster: the transfers a person sends from it, each a landed transa | 146 |
+| [`referral-order.test.ts`](services/indexer/tests/referral-order.test.ts) | "before the first entry" by chain order (Sprint 14, lane L14R; the lead's rule of 2026-10-13), over hand-built event streams through the real ingest, no cluster | 116 |
 | [`referral-rebate.test.ts`](services/indexer/tests/referral-rebate.test.ts) | the referee's rebate and the referral tables' rebuild, over hand-built event streams through the real ingest (Sprint 14, lane L14R; P1 §3.9, P-6), no cluster: t | 106 |
 | [`referral-routine.test.ts`](services/indexer/tests/referral-routine.test.ts) | the weekly referral routine with no cluster (Sprint 14, lane L14R; TP §3.4.11): prepare writes the batch to the ledger, the signing file (Solana CLI transfers w | 126 |
 | [`rows.ts`](services/indexer/tests/rows.ts) | hand-built rows for the indexer's no-cluster tests (Sprint 08, slice 3): a campaign opening with defaults a test overrides by name (a price campaign opened by a | 117 |
@@ -1428,7 +1434,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`capture-proof-tx.ts`](services/keeper/scripts/capture-proof-tx.ts) | records, read-only, the fixtures of the keeper's second-read tests (services/keeper/tests/fixtures/ proof-tx/): a Pyth sponsored price account as `getAccountInf | 82 |
+| [`capture-proof-tx.ts`](services/keeper/scripts/capture-proof-tx.ts) | records, read-only, the fixtures of the keeper's second-read tests (services/keeper/tests/fixtures/ proof-tx/): a Pyth sponsored price account as `getAccountInf | 83 |
 
 ## `services/keeper/src/`
 
@@ -1449,12 +1455,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`log.ts`](services/keeper/src/log.ts) | one JSON line per event on stdout, with a time stamp. The RPC URL and the keypair never reach it: the caller passes only fields it has checked (an origin, a pub | 10 |
 | [`main.ts`](services/keeper/src/main.ts) | the keeper's entry point. Reads its settings and keypair, serves /healthz on loopback (and POST /restart on the primary, when its secret is set), and runs one c | 113 |
 | [`prefilter.ts`](services/keeper/src/prefilter.ts) | which open campaigns are worth a `resolve_campaign` simulation this cycle, from the batched read and the SDK's mirror of the join lock (`outcomeKnowable`), so a | 30 |
-| [`proof-tx.ts`](services/keeper/src/proof-tx.ts) | the proof transaction of a price resolution (the second read; Sprint 07 DoD, proposal §2.11): the transaction that wrote the price account at its `posted_slot`, | 105 |
+| [`proof-tx.ts`](services/keeper/src/proof-tx.ts) | the proof transaction of a price resolution (the second read; Sprint 07 DoD, proposal §2.11): the transaction that wrote the price account at its `posted_slot`, | 116 |
 | [`pyth-watch.ts`](services/keeper/src/pyth-watch.ts) | the Pyth upgrade watch (Sprint 07, carried item "the watchdog also watches Pyth"; TP §3.5, the chain watch): the price reader trusts Pyth's receiver (`rec2HH…`, | 111 |
 | [`resolve.ts`](services/keeper/src/resolve.ts) | the resolve task: for an open campaign, offer `resolve_campaign` with the campaign's own metric account (the program's reader decides), simulate it, and send it | 50 |
 | [`restart.ts`](services/keeper/src/restart.ts) | POST /restart of the primary keeper. A request is accepted only when its HMAC-SHA256 over `${timestamp}\n${body}` matches (constant-time compare) and its timest | 68 |
 | [`review-queue.ts`](services/keeper/src/review-queue.ts) | the review queue, one JSON line per entry, appended to a file the keeper owns. A second-read mismatch lands here so that a person looks at it (T22). Entries car | 36 |
-| [`second-check.ts`](services/keeper/src/second-check.ts) | the second read of one resolved campaign, every read through RPC B (Sprint 07 DoD; proposal §2.11; T22). A price campaign: the campaign and its newest `Campaign | 83 |
+| [`second-check.ts`](services/keeper/src/second-check.ts) | the second read of one resolved campaign, every read through RPC B (Sprint 07 DoD; proposal §2.11; T22). A price campaign: the campaign and its newest `Campaign | 87 |
 | [`second-read-pass.ts`](services/keeper/src/second-read-pass.ts) | the standby's second-read pass (Sprint 07 DoD; T22, review by exception): every campaign in review is checked once through RPC B (second-check.ts). Each check i | 80 |
 | [`second-read.ts`](services/keeper/src/second-read.ts) | the second read of a PRICE campaign (proposal §2.11, Sprint 07): the sponsored or proof price account is read through the primary's RPC and through RPC B, each  | 80 |
 | [`secret.ts`](services/keeper/src/secret.ts) | loads the HMAC secret of POST /restart from the file named by KEEPER_RESTART_SECRET_FILE (a systemd credential, root-owned, 0600). The file is read once at star | 14 |
@@ -1619,7 +1625,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`accounts.ts`](services/rpc/src/accounts.ts) | what an account read may return through brot-rpc (TP §3.5, by owner, since there is no list of accounts, D-i): an account owned by the program, one of the six r | 70 |
-| [`allowlist.ts`](services/rpc/src/allowlist.ts) | the methods brot-rpc relays and the arguments each may carry (docs/technical/relay-allowlist.md, the trace of Sprints 11 to 19; TP §3.5, §6): eleven methods, ea | 161 |
+| [`allowlist.ts`](services/rpc/src/allowlist.ts) | the methods brot-rpc relays and the arguments each may carry (docs/technical/relay-allowlist.md, the trace of Sprints 11 to 19; TP §3.5, §6): eleven methods, ea | 166 |
 | [`config.ts`](services/rpc/src/config.ts) | brot-rpc's settings, read from its environment only (TP §3.5, T14; Sprint 08): the upstream RPC of its own account (a secret: logs never show it), a loopback bi | 107 |
 | [`limits.ts`](services/rpc/src/limits.ts) | brot-rpc's limits (TP §3.5; Sprint 08), all in memory, none written to a disk or a log: whose request it is (Cloudflare's `cf-connecting-ip`, an IPv6 address by | 128 |
 | [`main.ts`](services/rpc/src/main.ts) | brot-rpc's entry point (TP §3.5, T14; Sprint 08). Reads its settings, derives the program's ProgramData address once (A-8), and serves the relay on the loopback | 78 |
@@ -1631,9 +1637,9 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`gates.test.ts`](services/rpc/tests/gates.test.ts) | brot-rpc's gates on transactions and clients (Sprint 08; X1.7): a transaction carries only this program, ComputeBudget and Lighthouse at its top level, never a  | 130 |
-| [`hardening.test.ts`](services/rpc/tests/hardening.test.ts) | the fixes of the Sprint 08 security review, each tested: a hostile option value is refused, never converted (M1, L1), and any throw is a JSON-RPC error with no  | 128 |
+| [`hardening.test.ts`](services/rpc/tests/hardening.test.ts) | the fixes of the Sprint 08 security review, each tested: a hostile option value is refused, never converted (M1, L1), and any throw is a JSON-RPC error with no  | 129 |
 | [`kit.ts`](services/rpc/tests/kit.ts) | what the relay's tests share (Sprint 08): settings as the defaults give them with a fake upstream URL, a relay wired to an in-process fake upstream that records | 103 |
-| [`relay.test.ts`](services/rpc/tests/relay.test.ts) | brot-rpc's refusals and its account rule, with an in-process fake upstream (Sprint 08; X1.7): a batch, an oversized body, a method off the allowlist, a subscrip | 171 |
+| [`relay.test.ts`](services/rpc/tests/relay.test.ts) | brot-rpc's refusals and its account rule, with an in-process fake upstream (Sprint 08; X1.7): a batch, an oversized body, a method off the allowlist, a subscrip | 189 |
 | [`sealed-gate.test.ts`](services/rpc/tests/sealed-gate.test.ts) | the country gate covers the sealed entry (Sprint 15; K-11): `sponsor_join_campaign` puts a sponsor's money into a campaign as a join does, so a transaction that | 37 |
 
 ## `tests/`
@@ -1780,7 +1786,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`chain.ts`](tests/e2e/chain.ts) | the web smoke's chain (Sprint 11, `bun run e2e`): the program in LiteSVM (CI's binary in target/deploy) with the founder's config, a team key and a paying creat | 85 |
 | [`control-open.ts`](tests/e2e/control-open.ts) | the web smoke's control routes for Sprint 19 ("open a campaign"): make the smoke's test wallet a team key, or take that away again (the admin's `admin_set_team` | 53 |
-| [`control-states.ts`](tests/e2e/control-states.ts) | the web smoke's control routes for Sprint 12 ("campaign states"): a campaign written in any public state (tests/site/state-world.ts); a whole cycle with the smo | 97 |
+| [`control-states.ts`](tests/e2e/control-states.ts) | the web smoke's control routes for Sprint 12 ("campaign states"): a campaign written in any public state (tests/site/state-world.ts); a whole cycle with the smo | 105 |
 | [`control.ts`](tests/e2e/control.ts) | the web smoke's control endpoint (loopback, test only): what the Playwright runner asks of the chain. Sign the bytes the injected wallet was handed with the tes | 167 |
 | [`helpers.ts`](tests/e2e/helpers.ts) | what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page opened with the injected wallet and the runner's answer f | 94 |
 | [`open-guard.e2e.ts`](tests/e2e/open-guard.e2e.ts) | "open a campaign: refusals and the retry guard" in the web smoke (Sprint 19 DoD), once at desktop width: three refusals each with its own message on the box (a  | 149 |
@@ -1813,6 +1819,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`mainnet-deploy.test.ts`](tests/ops/mainnet-deploy.test.ts) | the mainnet deploy's pure guards, without a cluster (Sprint 18, lane L18): the cluster rule (mainnet-beta by genesis hash, a Surfpool fork told apart), the upgr | 98 |
 | [`rehearsal.test.ts`](tests/ops/rehearsal.test.ts) | the devnet rehearsal's two scripts run against the program in LiteSVM behind the recording RPC before the founder runs them on devnet (Sprint 12): `open-paid` o | 89 |
 | [`resolution-post.test.ts`](tests/ops/resolution-post.test.ts) | scripts/team/resolution-post.ts writes a resolution post from its template (Sprint 13 DoD; BR-33): read from the program in LiteSVM behind the recording RPC thr | 133 |
+| [`tx-version.test.ts`](tests/ops/tx-version.test.ts) | the team scripts' readers of the program's transactions (Sprint 16, the review's F1): the scripts' JSON-RPC client keeps a node's error code, so -32015 is told  | 75 |
 
 ## `tests/programs/cpi-proxy/src/`
 
@@ -1856,7 +1863,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`contract-source.test.ts`](tests/sdk/contract-source.test.ts) | the SDK's hand-written copies of the program's contract, checked against the program's own source so they cannot drift: the error codes (and one IDL message per | 175 |
 | [`decoder-shapes.test.ts`](tests/sdk/decoder-shapes.test.ts) | the decoder reads an inner instruction whichever way the node wrote it (Sprint 05 review, M1 and L6): compiled with indexes (`getTransaction`, `json`), partiall | 139 |
 | [`decoder.test.ts`](tests/sdk/decoder.test.ts) | the decoder rules (TP 3.4.14; proposal 2.3) on transactions sent in LiteSVM and read back in the RPC's shape: a failed transaction is skipped; only this program | 168 |
-| [`fake-rpc.ts`](tests/sdk/fake-rpc.ts) | a JSON-RPC endpoint on 127.0.0.1 backed by a LiteSVM world, so SDK functions that take an RPC URL (`recheck`, the A-3 preparation) run against the program's rea | 127 |
+| [`fake-rpc.ts`](tests/sdk/fake-rpc.ts) | a JSON-RPC endpoint on 127.0.0.1 backed by a LiteSVM world, so SDK functions that take an RPC URL (`recheck`, the A-3 preparation) run against the program's rea | 145 |
 | [`fake-simulate.ts`](tests/sdk/fake-simulate.ts) | the two RPC methods the A-3 preparation needs beyond reads, answered by a LiteSVM world: `getLatestBlockhash`, and `simulateTransaction` of an unsigned transact | 84 |
 | [`join-parity.test.ts`](tests/sdk/join-parity.test.ts) | `checkJoin` against `user_join_campaign` (Sprint 05 closure review: a baker's money path had no parity harness). Each case of the program's join tests that the  | 131 |
 | [`math-vectors.test.ts`](tests/sdk/math-vectors.test.ts) | X0.3, the TypeScript half, first file: every vector the program's Rust math wrote into tests/vectors/math-vectors.csv (programs/brot-markets/tests/math_vectors. | 56 |
@@ -1864,16 +1871,17 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`points-3a.test.ts`](tests/sdk/points-3a.test.ts) | what the founder's answer 3a (2026-10-10) takes out of the leaderboard's points rule: a wallet with entries on both sides of a campaign scores nothing for it; a | 80 |
 | [`points-kit.ts`](tests/sdk/points-kit.ts) | the points rule tests' events and live accounts, shaped as the SDK decodes and the read API passes them: entries, results, finalizations and openings in chain o | 48 |
 | [`points.test.ts`](tests/sdk/points.test.ts) | the leaderboard's points rule (Sprint 13; BR-29; Q7 answered a): 1 point per campaign entered on the side that won, once the result is final; never for volume,  | 123 |
-| [`prepare-claim.test.ts`](tests/sdk/prepare-claim.test.ts) | the reserve path end to end (TP §3.4.5; TP v0.0.1 Q2, answered b): a creator share that would leave the creator's empty wallet below the rent-exempt minimum sta | 136 |
+| [`prepare-claim.test.ts`](tests/sdk/prepare-claim.test.ts) | the reserve path end to end (TP §3.4.5; TP v0.0.1 Q2, answered b): a creator share that would leave the creator's empty wallet below the rent-exempt minimum sta | 141 |
 | [`prepare-dbc.test.ts`](tests/sdk/prepare-dbc.test.ts) | the SDK on the sixth kind (`DbcGraduated`), against the program's state (LiteSVM behind a local RPC endpoint) and the Meteora DBC pool and config captured from  | 143 |
 | [`prepare-guards.test.ts`](tests/sdk/prepare-guards.test.ts) | the guards of the A-3 preparation (Sprint 05 review): a retried join that already landed is refused instead of doubled (A-9, M2); the slippage is bounded (L3);  | 109 |
 | [`prepare.test.ts`](tests/sdk/prepare.test.ts) | A-3 end to end against the program's state (LiteSVM behind a local RPC endpoint): a join and a paid opening are re-read, checked, built, summarised from the byt | 138 |
 | [`prepared.ts`](tests/sdk/prepared.ts) | `ready(prepared)` for the SDK tests: the prepared transaction when `prepareJoin` or `prepareOpenCampaign` says ready, or a failure that names the stage that sto | 18 |
 | [`program-data.test.ts`](tests/sdk/program-data.test.ts) | A-8 in the SDK: the program's last deploy read from its ProgramData account (owner first, the loader's layout, only 45 bytes), and the preparations of a join an | 116 |
+| [`recheck-versions.test.ts`](tests/sdk/recheck-versions.test.ts) | the review's F2 on the SDK's `recheck` (Sprint 16): a resolution in a v1 transaction is found through a relay that relays versions 0 and 1 (the relay's rule sin | 85 |
 | [`recheck.test.ts`](tests/sdk/recheck.test.ts) | BR-23: `recheck(campaign, rpcUrl)` re-reads, through an RPC endpoint the caller chooses (here a local one backed by the LiteSVM world), the account and field th | 147 |
 | [`referral-summary.test.ts`](tests/sdk/referral-summary.test.ts) | the signed-bytes summary of `user_link_referrer` (Sprint 14): trusted only as the IDL shapes it (33 bytes of data, five accounts, the referee a writable signer  | 95 |
 | [`referral.test.ts`](tests/sdk/referral.test.ts) | the SDK's referral link (Sprint 14) against the program: `decodeReferralLink` refuses what the program's loader refuses, in its order (owner, size, tag, layout  | 103 |
-| [`rpc-shape.ts`](tests/sdk/rpc-shape.ts) | a transaction sent in LiteSVM, returned in the shape the RPC's `getTransaction` (encoding `json`, `maxSupportedTransactionVersion: 0`) gives it, so the SDK's de | 107 |
+| [`rpc-shape.ts`](tests/sdk/rpc-shape.ts) | a transaction sent in LiteSVM, returned in the shape the RPC's `getTransaction` (encoding `json`, `maxSupportedTransactionVersion` up to 1) gives it, so the SDK | 107 |
 | [`schemas.test.ts`](tests/sdk/schemas.test.ts) | the opening's zod schema (TP Appendix B): one valid input per kind parses and converts to the SDK's `OpenArgs` the builders take; text, extra keys, numbers wher | 86 |
 | [`sealed-decoder.test.ts`](tests/sdk/sealed-decoder.test.ts) | the SDK's `SealedFee` decoder (Sprint 15) refuses what the program's loader refuses, in its order (owner, length, tag, layout version), and decodes every field  | 64 |
 | [`sealed-parity.test.ts`](tests/sdk/sealed-parity.test.ts) | `checkSealedEntry` and the SDK's sealed-entry charge against `sponsor_join_campaign` (Sprint 15), as tests/sdk/join-parity.test.ts holds `checkJoin` to the join | 171 |
@@ -1887,6 +1895,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`summary-message.test.ts`](tests/sdk/summary-message.test.ts) | the summary of the bytes a wallet signs (Sprint 05 review, M5) and of what they say (M3, L1, L10): `summarizeMessage` decodes the compiled message itself, so an | 192 |
 | [`summary-shape.test.ts`](tests/sdk/summary-shape.test.ts) | the summary trusts this program's instructions only as the IDL shapes them (Sprint 05 review, L11): every instruction the SDK builds, all 22 kinds, is trusted;  | 116 |
 | [`token-symbol.test.ts`](tests/sdk/token-symbol.test.ts) | a token's symbol through the SDK's readers, on real mainnet bytes (tests/fixtures): the Metaplex metadata PDA of WIF and USDC derived to the captured addresses  | 123 |
+| [`tx-v1-node.ts`](tests/sdk/tx-v1-node.ts) | a node that serves the captured real v1 transaction (tests/fixtures/tx-v1, recorded read-only from devnet by scripts/capture-tx-v1.ts; Sprint 16, the review's F | 48 |
+| [`tx-v1.test.ts`](tests/sdk/tx-v1.test.ts) | the SDK on a real v1 transaction (Sprint 16, the review's F1 and F2), captured read-only from devnet: the fixture is the one its index records; read through Kit | 58 |
 | [`validate-open-dbc.test.ts`](tests/sdk/validate-open-dbc.test.ts) | A-10 / X0.7 for the sixth kind (`DbcGraduated`): every refusal of its rows 2 and 3, the canonical arguments and an opening that passes, fed to both the program  | 116 |
 | [`validate-open-extra.test.ts`](tests/sdk/validate-open-extra.test.ts) | A-10 / X0.7, SDK half: the cases of the program's own tests the first parity files left out (Sprint 05 closure review), each fed to `validateOpenCampaign` and t | 91 |
 | [`validate-open-kinds.test.ts`](tests/sdk/validate-open-kinds.test.ts) | A-10 / X0.7, SDK half, for the four kinds other than the price kind: each case tests/brot/open-campaign-kinds.test.ts feeds to the program (row 1's closed `Stak | 120 |
@@ -1928,7 +1938,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`page-format.test.ts`](tests/site/page-format.test.ts) | how the campaign page writes what it read: exact grouped integers, a value in its kind's units, an age, the visitor's local time (built with options a browser a | 41 |
 | [`panels-render.test.ts`](tests/site/panels-render.test.ts) | blocks of the site rendered with its React on the server. The entry panel's sides: each button holds only "YES" or "NO", and the line under it (the chance, then | 151 |
 | [`powers.test.ts`](tests/site/powers.test.ts) | the powers table (BR-41, Sprint 13 DoD): content/powers.md is published on /record with who holds each key and the limit of each power (P4 §4.2), its four roles | 134 |
-| [`received.test.ts`](tests/site/received.test.ts) | what "my entries" says a wallet received equals the program's settlement events for that wallet, and the SOL that actually reached it (Sprint 12 DoD), on whole  | 172 |
+| [`received.test.ts`](tests/site/received.test.ts) | what "my entries" says a wallet received equals the program's settlement events for that wallet, and the SOL that actually reached it (Sprint 12 DoD), on whole  | 182 |
 | [`recheck-commands.test.ts`](tests/site/recheck-commands.test.ts) | the re-check panel's commands fetch the bytes the program's readers read (BR-23): on real captured accounts, the byte range each command asks for decodes to the | 79 |
 | [`relay-trace.test.ts`](tests/site/relay-trace.test.ts) | the relay's allowlist is taken from a trace of the real client (Sprint 11 DoD; proposal §2.6): the campaign page's reads, the entry's preparation, the hand-off  | 149 |
 | [`report.test.ts`](tests/site/report.test.ts) | "Report this campaign" (C-10, Sprint 13 DoD): the link goes where reports go (the founder's [Q], built as recommended: the same X account as L-13), as a plain l | 82 |
@@ -1938,6 +1948,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`states-render.test.ts`](tests/site/states-render.test.ts) | every public state of the campaign page renders what the chain says (Sprint 12 DoD), one case per state: a campaign account in that state is written into the pr | 195 |
 | [`support.ts`](tests/site/support.ts) | what the site's tests share: the world's accounts read the way the page reads them (owner and bytes), the inputs of the entry panel's estimate, a key-value stor | 93 |
 | [`tokens.test.ts`](tests/site/tokens.test.ts) | the site's colours are the brand's (docs/product/BRAND.md §5; ported 2026-10-10): every token BRAND.md gives a plain colour in both themes has that value in app | 130 |
+| [`tx-version.test.ts`](tests/site/tx-version.test.ts) | the site's readers of the program's transactions on a real v1 transaction (Sprint 16, the review's F1), served as devnet served it (tests/fixtures/tx-v1): the e | 49 |
 | [`upgrade-pause.test.ts`](tests/site/upgrade-pause.test.ts) | A-8 on the site (the founder's answers of 2026-10-10: ProgramData read through the site's RPC; the floor at 1%): the entry's preparation passes the deploy the s | 89 |
 | [`void-log.test.ts`](tests/site/void-log.test.ts) | the void log's public format (Sprint 12 deliverable, "its JSON Schema check in CI"): the committed JSON Schema is the one generated from the zod schema; every r | 132 |
 | [`wallet-render.test.ts`](tests/site/wallet-render.test.ts) | the top bar's wallet button, rendered on the server, is what the browser renders first (React #418, found after the 2026-10-13 release). The server sees no wall | 39 |
