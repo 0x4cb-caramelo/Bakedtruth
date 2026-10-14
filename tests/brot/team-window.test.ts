@@ -1,10 +1,10 @@
 /**
  * Purpose: the team's acts in the review window, on the binary: confirm, void (an automatic void only: a team key
- *          never voids a YES or NO, decision of 2026-10-09), and contest (disabled until Sprint 14). Each act is
- *          refused outside `InReview`, outside the window, to a signer who is not a team key, and with a reason
- *          the team may not choose.
+ *          never voids a YES or NO, decision of 2026-10-09), and contest (enabled in Sprint 14 with its exits). Each
+ *          act is refused outside `InReview`, outside the window, to a signer who is not a team key, and with a
+ *          reason the team may not choose.
  *          Run one with `bun test tests/ -t "void refunds and the opening fee follows the cause"`.
- * Version: 0.0.3 (a void now takes two event numbers: `CampaignFinalized` follows `CampaignVoided`)
+ * Version: 0.0.4 (Sprint 14, lane L14B: the contest opens; it was refused with `ContestExitDisabled` until then)
  * Sprint:  04 (lane A; team void and contest restricted at the closure review). Needs target/deploy/brot_markets.so, and lane C's `finalize_snapshot` for the
  *          successful paths (a stub refuses with UnknownInstruction). Written here, run at integration.
  */
@@ -163,13 +163,15 @@ describe("team window", () => {
     expectError(await send(w, [I.teamConfirmResultIx(outsider, config, c.campaign)]), "NotTeamMember");
   });
 
-  test("team window: team_open_contest is disabled until Sprint 14 and changes nothing", async () => {
+  test("team window: team_open_contest contests a result inside the window (Sprint 14 opens its exits)", async () => {
     const { w, member, config } = await teamWorld();
     const c = await reviewed(w, Yes);
-    const before = accountData(w, c.campaign);
-    expectError(await send(w, [I.teamOpenContestIx(member, config, c.campaign)]), "ContestExitDisabled");
-    expect(accountData(w, c.campaign)).toEqual(before);
-    expect(readCampaign(w, c.campaign).status).toBe(P.Status.InReview);
+    expectOk(await send(w, [I.teamOpenContestIx(member, config, c.campaign, 1)]));
+    // Stage 1 starts and the result stays as read; the exits are in tests/brot/contest-*.test.ts.
+    expect([readCampaign(w, c.campaign).status, readCampaign(w, c.campaign).outcome]).toEqual([
+      P.Status.Contested,
+      Yes,
+    ]);
   });
 
   test("team window: each act takes the campaign's next event number", async () => {

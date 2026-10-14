@@ -68,19 +68,25 @@ export type TeamOpenContestInstruction<
     ]
   >;
 
-export type TeamOpenContestInstructionData = { discriminator: number };
+export type TeamOpenContestInstructionData = { discriminator: number; stage: number };
 
-export type TeamOpenContestInstructionDataArgs = {};
+export type TeamOpenContestInstructionDataArgs = { stage: number };
 
 export function getTeamOpenContestInstructionDataEncoder(): FixedSizeEncoder<TeamOpenContestInstructionDataArgs> {
-  return transformEncoder(getStructEncoder([["discriminator", getU8Encoder()]]), (value) => ({
-    ...value,
-    discriminator: TEAM_OPEN_CONTEST_DISCRIMINATOR,
-  }));
+  return transformEncoder(
+    getStructEncoder([
+      ["discriminator", getU8Encoder()],
+      ["stage", getU8Encoder()],
+    ]),
+    (value) => ({ ...value, discriminator: TEAM_OPEN_CONTEST_DISCRIMINATOR }),
+  );
 }
 
 export function getTeamOpenContestInstructionDataDecoder(): FixedSizeDecoder<TeamOpenContestInstructionData> {
-  return getStructDecoder([["discriminator", getU8Decoder()]]);
+  return getStructDecoder([
+    ["discriminator", getU8Decoder()],
+    ["stage", getU8Decoder()],
+  ]);
 }
 
 export function getTeamOpenContestInstructionDataCodec(): FixedSizeCodec<
@@ -101,12 +107,13 @@ export type TeamOpenContestInput<
   teamMember: TAccountTeamMember;
   /** GlobalConfig, read */
   config: TAccountConfig;
-  /** Campaign, InReview */
+  /** Campaign: InReview for stage 1; Contested at stage 1 for stage 2 */
   campaign: TAccountCampaign;
   /** PDA ["__event_authority"] */
   eventAuthority?: TAccountEventAuthority;
   /** This program */
   program?: TAccountProgram;
+  stage: TeamOpenContestInstructionDataArgs["stage"];
 };
 
 export function getTeamOpenContestInstruction<
@@ -149,6 +156,9 @@ export function getTeamOpenContestInstruction<
   };
   const accounts = originalAccounts as Record<keyof typeof originalAccounts, ResolvedInstructionAccount>;
 
+  // Original args.
+  const args = { ...input };
+
   // Resolve default values.
   if (!accounts.eventAuthority.value) {
     accounts.eventAuthority.value =
@@ -167,7 +177,7 @@ export function getTeamOpenContestInstruction<
       getAccountMeta("eventAuthority", accounts.eventAuthority),
       getAccountMeta("program", accounts.program),
     ],
-    data: getTeamOpenContestInstructionDataEncoder().encode({}),
+    data: getTeamOpenContestInstructionDataEncoder().encode(args as TeamOpenContestInstructionDataArgs),
     programAddress,
   } as TeamOpenContestInstruction<
     TProgramAddress,
@@ -189,7 +199,7 @@ export type ParsedTeamOpenContestInstruction<
     teamMember: TAccountMetas[0];
     /** GlobalConfig, read */
     config: TAccountMetas[1];
-    /** Campaign, InReview */
+    /** Campaign: InReview for stage 1; Contested at stage 1 for stage 2 */
     campaign: TAccountMetas[2];
     /** PDA ["__event_authority"] */
     eventAuthority: TAccountMetas[3];

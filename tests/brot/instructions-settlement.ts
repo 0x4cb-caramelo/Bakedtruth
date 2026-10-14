@@ -2,14 +2,15 @@
  * Purpose: builders for the ten instructions of Sprint 04, with the accounts in the frozen order of
  *          programs/brot-markets/src/instructions/interface.rs. The bodies are lanes A, C and D's; the
  *          builders exist now so the freeze can be checked against the IDL.
- * Version: 0.0.1
- * Sprint:  04 (contract freeze)
+ * Version: 0.0.2 (`team_open_contest`'s byte, the second review's S1)
+ * Sprint:  04 (contract freeze); 14 (lane L14B)
  */
 import type { Address, Instruction, TransactionSigner } from "@solana/kit";
 
 import { encode } from "./layouts";
 import * as P from "./program";
 import * as S from "./structs";
+import * as SL from "./structs-14-15";
 import { data, eventSlots, ix, ro, rw, signer } from "./instructions";
 
 /** Lane A: a team key ends the window at once (the snapshot runs with it). */
@@ -28,9 +29,18 @@ export function teamVoidCampaignIx(
   return ix([signer(team), rw(config), rw(campaign), ...eventSlots()], data(P.IX.TEAM_VOID_CAMPAIGN, bytes));
 }
 
-/** Lane A: a team key enters Contested; the config is read only. */
-export function teamOpenContestIx(team: TransactionSigner, config: Address, campaign: Address): Instruction {
-  return ix([signer(team), ro(config), rw(campaign), ...eventSlots()], data(P.IX.TEAM_OPEN_CONTEST));
+/**
+ * Lane A, then L14B: a team key opens a contest (`stage` 1) or sends one to the admin (2), the act in its one byte
+ * (the second review's S1); raw bytes for the refusals of another byte or length. The config is read only.
+ */
+export function teamOpenContestIx(
+  team: TransactionSigner,
+  config: Address,
+  campaign: Address,
+  stage: number | Uint8Array,
+): Instruction {
+  const bytes = typeof stage === "number" ? encode(SL.TEAM_OPEN_CONTEST_ARGS, { stage }) : stage;
+  return ix([signer(team), ro(config), rw(campaign), ...eventSlots()], data(P.IX.TEAM_OPEN_CONTEST, bytes));
 }
 
 /** Lane C: the snapshot of a reviewed campaign, by any wallet, once the window has closed. */

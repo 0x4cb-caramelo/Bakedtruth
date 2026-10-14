@@ -2,24 +2,21 @@
  * Purpose: the money rules checked on the reference model alone, with no program: the one-sided pot's rows,
  *          the winners' floor (I11), the late-entry refund as a property over random pots, and I9 as a
  *          property of the payout rule. Runs with `bun test tests/brot/invariant-rules.test.ts`.
- * Version: 0.0.1
- * Sprint:  04 (contract freeze, lane E)
+ * Version: 0.1.0 (Sprint 14: a pot with no entry is a refund, as math/snapshot.rs takes it; the fee by the cause)
+ * Sprint:  04 (contract freeze, lane E); 14 (lane INV14)
  */
 import { describe, expect, test } from "bun:test";
 
-import { checkSplitNeverPaysMore } from "./invariant-checks";
 import {
-  collectDue,
   CREATOR_BPS,
-  entryPayout,
   FEE_BPS,
   ONE_SIDED_BPS,
   type Join,
   type ModelCampaign,
   newCampaign,
-  prizeDue,
   snapshotOf,
 } from "./invariant-model";
+import { checkSplitNeverPaysMore, collectDue, entryPayout, prizeDue } from "./invariant-payouts";
 import { feeCeil, payoutOf, settleSplit } from "./money-model";
 import { seededRandom } from "./invariant-harness";
 
@@ -75,11 +72,22 @@ describe("one-sided pot", () => {
     expect(prizeDue(pot([join("ana", 0, SOL)], { prize: 3n * SOL }))).toBe(3n * SOL);
   });
 
-  test("one-sided pot: no entry at all returns the prize to the opener and Brot keeps the 10%", () => {
+  test("a pot with no entry at all is a refund: the prize returns to the opener and Brot keeps the 10%", () => {
+    // math/snapshot.rs: no entry and no late entry is `Refund` whatever the verdict (founder answer 8).
     const c = pot([], { prize: 4n * SOL, openingFee: 500_000_000n });
-    expect(c.snapshot?.mode).toBe("OneSided");
+    expect(c.snapshot?.mode).toBe("Refund");
     expect(prizeDue(c)).toBe(4n * SOL);
     expect(collectDue(c)).toBe(500_000_000n);
+    // A void with nobody in the pot keeps the 10% too, even for a house failure (founder answer 8).
+    for (const voidReason of [1, 3, 4, 5]) {
+      const voided = pot([], { prize: 4n * SOL, openingFee: 500_000_000n, outcome: "Void", voidReason });
+      expect([voided.snapshot?.mode, prizeDue(voided), collectDue(voided)]).toEqual(["Refund", 4n * SOL, 500_000_000n]);
+    }
+    // With someone in the pot, a house failure returns the 10% with the prize; an outside cause keeps it.
+    const entered = (voidReason: number) =>
+      pot([join("ana", 0, SOL)], { prize: 4n * SOL, openingFee: 500_000_000n, outcome: "Void", voidReason });
+    expect([prizeDue(entered(4)), collectDue(entered(4))]).toEqual([4_500_000_000n, 0n]);
+    expect([prizeDue(entered(5)), collectDue(entered(5))]).toEqual([4n * SOL, 500_000_000n]);
   });
 });
 

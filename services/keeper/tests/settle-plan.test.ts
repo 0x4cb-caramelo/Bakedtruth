@@ -176,11 +176,13 @@ describe("planSweep and pendingOf", () => {
       tally: 2,
       finalize: 1,
       entries: 3,
+      sealedFees: 0,
       creatorShare: 1,
       fee: 1,
       prize: 1,
       close: 1,
       reserved: 1,
+      contested: 0,
     });
   });
 });

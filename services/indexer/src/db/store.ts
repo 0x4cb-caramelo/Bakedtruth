@@ -1,11 +1,12 @@
 /**
  * Purpose: the indexer's SQLite file behind a small adapter (TP §3.5, §4; Sprint 08): bun:sqlite in WAL mode with
  *          `synchronous = NORMAL` and a busy timeout; the schema created on a new file; a file of another schema
- *          version, or one that is not the indexer's, refused, never migrated in place (rebuild it instead). One
+ *          version, or one that is not the indexer's (tables and no version, or another application's id, as the
+ *          referral ledger carries), refused, never migrated in place (rebuild it instead). One
  *          writer, the ingest; readers open it read-only. `tx` runs one SQLite transaction (a nested call is a
  *          savepoint); `dump` lists the rebuildable rows in a fixed order, for the rebuild check.
- * Version: 0.1.0
- * Sprint:  08 (indexer, API, relay and points)
+ * Version: 0.1.1 (a file with another application's id refused)
+ * Sprint:  08 (indexer, API, relay and points); 14 (lane L14R)
  */
 import { Database } from "bun:sqlite";
 
@@ -37,6 +38,8 @@ export function openStore(path: string, options: { readonly?: boolean } = {}): S
       db.exec("PRAGMA synchronous = NORMAL");
     }
     const version = one<{ user_version: number }>(db, "PRAGMA user_version").user_version;
+    if (one<{ application_id: number }>(db, "PRAGMA application_id").application_id !== 0)
+      throw new StoreRefused("not the indexer's file: it carries another application's id (a referral ledger?)");
     if (version === 0) {
       if (one<{ n: number }>(db, "SELECT count(*) AS n FROM sqlite_master").n > 0)
         throw new StoreRefused("not the indexer's file: it has tables and no schema version");

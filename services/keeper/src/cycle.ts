@@ -1,16 +1,19 @@
 /**
  * Purpose: one keeper cycle: read the chain in batches (chain.ts); simulate `resolve_campaign` for each open campaign
- *          worth it (prefilter.ts) and send what the program accepts; run the settlement task (settle.ts, behind its
- *          switch); watch Pyth's programs; let the chain watch raise its alerts; and report, for /healthz, the counts,
+ *          worth it (prefilter.ts) and send what the program accepts; re-read the contests at stage 1 when RPC B is
+ *          configured (contest.ts); run the settlement task (settle.ts, behind its switch: it also finalizes a lapsed
+ *          contest and settles the sealed fees); watch Pyth's programs; let the chain watch raise its alerts; and
+ *          report, for /healthz, the counts,
  *          the pending work, `open_campaigns` against `max_open_campaigns`, the SOL in the vaults and the keeper's
  *          balance. A failure on one campaign is logged and does not stop the others. The backoff, the daily claim
  *          clock and the watches' memory live in the context main.ts builds; the chain is re-read every cycle.
- * Version: 0.2.0 (Sprint 07 carry-over: batched reads, settlement, the chain watch, the Pyth watch)
- * Sprint:  06 (server and primary keeper); 07 carry-over
+ * Version: 0.3.0 (Sprints 14 and 15: the stage-1 re-read; the lapse and the sealed fees through the settlement)
+ * Sprint:  06 (server and primary keeper); 07 carry-over; 14 and 15 (lane L14K)
  */
 import { Status } from "@brot/sdk/read";
 
 import type { ChainWatch } from "./chain-watch";
+import { contestTask, type ContestDeps, type ContestReport } from "./contest";
 import { readChainView, type ChainView } from "./chain";
 import type { LandingContext } from "./landing";
 import { log } from "./log";
@@ -25,6 +28,8 @@ export type CycleContext = {
   settle: Omit<SettleContext, "landing">;
   watch: ChainWatch | null;
   pyth: PythWatch | null;
+  /** The stage-1 re-read, only with RPC B configured (the standby's independent read); absent: none. */
+  contest?: ContestDeps | null;
 };
 
 export type CycleReport = {
@@ -43,6 +48,7 @@ export type CycleReport = {
   /** The SOL held in every campaign's vault, in lamports. */
   exposureLamports: string;
   settle: SettleReport;
+  contest: ContestReport | { error: string } | null;
   pyth: PythReport | { error: string } | null;
   readBatches: number;
   alerts: number;
@@ -87,6 +93,7 @@ export async function runCycle(ctx: CycleContext, dryRun: boolean): Promise<Cycl
   const landing: LandingContext = { ...ctx.landing, dryRun };
   const view = await readChainView(landing.rpc, landing.payer.address);
   const { counts, attempts, skipped } = await resolveOpen(landing, view);
+  const contest = await contestReport(ctx, landing, view);
   const settle = await settleTask({ ...ctx.settle, landing }, view);
   const pyth = await pythReport(ctx, landing);
   const alerts = ctx.watch ? ctx.watch.observe(view, attempts, ctx.settle.enabled).length : 0;
@@ -105,10 +112,20 @@ export async function runCycle(ctx: CycleContext, dryRun: boolean): Promise<Cycl
     maxOpenCampaigns: openCampaignsUsage(view.config),
     exposureLamports: exposureOf(view.vaults).toString(),
     settle,
+    contest,
     pyth,
     readBatches: view.batches,
     alerts,
   };
+}
+
+async function contestReport(ctx: CycleContext, landing: LandingContext, view: ChainView) {
+  if (!ctx.contest) return null;
+  try {
+    return await contestTask(ctx.contest, landing, view, ctx.settle.enabled);
+  } catch (error) {
+    return { error: errorText(error) };
+  }
 }
 
 export const errorText = (error: unknown): string => (error instanceof Error ? error.message : String(error));

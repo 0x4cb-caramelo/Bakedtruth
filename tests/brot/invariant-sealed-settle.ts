@@ -4,15 +4,14 @@
  *          caused and to the fee vault otherwise (P-4), the rent goes back to the sponsor, what was sent by hand goes
  *          to the fee vault, and the account closes. Never paused (I10′). Its draw names a live fee most of the time,
  *          and sometimes another wallet in the sponsor's slot (the refund and the rent go nowhere else).
- * Version: 0.0.1
+ * Version: 0.1.0 (with Sprint 14 in one branch: the event and its seq through invariant-run.ts, labels in the trace)
  * Sprint:  15 (the lead's harness, lane INV15)
  */
 import type { BrotErrorName } from "./errors";
 import { settleSealedFeeIx } from "./instructions-14-15";
-import { type Harness, type Plan, type Rng } from "./invariant-harness";
+import { expectFields, sealedAt, type Harness, type Plan, type Rng } from "./invariant-harness";
 import { HOUSE_REASONS } from "./invariant-model";
-import { eventSeq, expectFields, liveSealed, sealedAt, type SealedSettleOp } from "./invariant-sealed-model";
-import type { Sent } from "./setup";
+import { liveSealed, sealedOf, type SealedSettleOp } from "./invariant-sealed-model";
 
 /**
  * settle_sealed_fee.rs, in order: a SealedFee the System Program owns with no data was closed by an earlier call, or
@@ -23,8 +22,8 @@ export async function planSealedSettle(h: Harness, op: SealedSettleOp): Promise<
   const sponsor = h.bakers[op.sponsor].address;
   const thief = op.thief === null ? null : h.bakers[op.thief].address;
   const { campaign } = h.addrs[op.c];
-  const address = await sealedAt(campaign, sponsor);
-  const s = c.sealed.get(sponsor);
+  const address = await sealedAt(h, campaign, sponsor);
+  const s = sealedOf(c).get(sponsor);
   const live = s?.state === "live";
   const finalized = c.snapshot !== null && (c.phase === "Settling" || c.phase === "Settled");
   const error: BrotErrorName | undefined = !live
@@ -49,28 +48,23 @@ export async function planSealedSettle(h: Harness, op: SealedSettleOp): Promise<
     [h.feeVault, toFeeVault],
   ]);
   if (thief !== null) deltas.set(thief, 0n);
-  const seq = error === undefined ? eventSeq(h, campaign) : 0n;
-  const check = (sent: Extract<Sent, { ok: true }>) => {
-    const names = sent.events.map((e) => e.name).join(" ");
-    if (names !== "SealedFeeSettled") throw new Error(`sealedSettle: the events are ${names}`);
-    const [settled] = sent.events.map((e) => e.data);
-    expectFields("sealedSettle", [
-      ["SealedFeeSettled.seq", settled.seq, seq],
-      ["SealedFeeSettled.campaign", settled.campaign, campaign],
-      ["SealedFeeSettled.sponsor", settled.sponsor, sponsor],
-      ["SealedFeeSettled.fee_lamports", settled.fee_lamports, fee],
-      ["SealedFeeSettled.refunded", settled.refunded, refunded],
-      ["Campaign.event_seq", eventSeq(h, campaign), seq + 1n],
-    ]);
-  };
   return {
     ixs: [settleSealedFeeIx(address, campaign, thief ?? sponsor, h.feeVault)],
     error,
     deltas,
-    check,
-    tag: `${refunded ? "refunded" : "kept"}${h.paused ? " paused" : ""}`,
+    label: `sealedSettle-${refunded ? "refunded" : "kept"}`,
+    // One SealedFeeSettled; invariant-run.ts checks its seq follows the campaign's (X0.4).
+    events: ["SealedFeeSettled"],
+    verify: ([e]) =>
+      expectFields(e, {
+        campaign: [campaign],
+        sponsor: [sponsor],
+        fee_lamports: [fee, "feeLamports"],
+        refunded: [refunded ? 1 : 0],
+      }),
     apply: () => {
       if (!s) return;
+      c.seq += 1n;
       s.state = "settled";
       s.lamports = 0n;
       s.paid.push(

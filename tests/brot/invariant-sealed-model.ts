@@ -1,21 +1,18 @@
 /**
  * Purpose: the randomized test's model of a sealed entry (Sprint 15; TP sections 3.4.12, 3.4.16): what a sponsor's
- *          `SealedFee` on a campaign holds and where its settlement sent each part, the config's terms and the price
- *          of a sealed entry written apart from the program's math, its refusals in the program's order, and the
- *          three operations that touch a SealedFee. The planners are in invariant-sealed.ts and
- *          invariant-sealed-settle.ts, the invariants in invariant-sealed-checks.ts.
- * Version: 0.0.2
+ *          `SealedFee` on a campaign holds and where its settlement sent each part (a table beside each campaign's
+ *          model), the config's terms and the price of a sealed entry written apart from the program's math, its
+ *          refusals in the program's order, and the three operations that touch a SealedFee. The planners are in
+ *          invariant-sealed.ts and invariant-sealed-settle.ts, the invariants in invariant-sealed-checks.ts.
+ * Version: 0.1.0 (with Sprint 14 in one branch: the SealedFees beside the campaign's model, which stays under 200
+ *          lines; the address from the harness's cache; the events through invariant-run.ts)
  * Sprint:  15 (the lead's harness, lane INV15; the creation rules' version, red team L2 of lane L15)
  */
 import type { Address } from "@solana/kit";
 
 import type { BrotErrorName } from "./errors";
-import { derivedOnce, type Harness } from "./invariant-harness";
+import type { Harness } from "./invariant-harness";
 import type { ModelCampaign } from "./invariant-model";
-import { decode } from "./layouts";
-import * as P from "./program";
-import { accountData } from "./setup";
-import { CAMPAIGN } from "./structs";
 
 export type SealedModel = {
   address: Address;
@@ -67,9 +64,16 @@ export const sealedTerms = (config: Record<string, any>): SealedTerms => ({
   version: Number(config.params_version),
 });
 
-export const liveSealed = (c: ModelCampaign) => [...c.sealed.values()].filter((s) => s.state === "live");
-export const sealedAt = (campaign: Address, sponsor: Address) =>
-  derivedOnce(`sealed ${campaign} ${sponsor}`, () => P.sealedFeePda(campaign, sponsor));
+/** Each campaign's SealedFees, by sponsor address: kept beside the campaign's model, for as long as the run holds it. */
+const SEALED = new WeakMap<ModelCampaign, Map<string, SealedModel>>();
+export function sealedOf(c: ModelCampaign): Map<string, SealedModel> {
+  const known = SEALED.get(c);
+  if (known) return known;
+  const fresh = new Map<string, SealedModel>();
+  SEALED.set(c, fresh);
+  return fresh;
+}
+export const liveSealed = (c: ModelCampaign) => [...sealedOf(c).values()].filter((s) => s.state === "live");
 export const blankSealed = (address: Address, campaign: Address, sponsor: string): SealedModel => ({
   address,
   campaign,
@@ -82,10 +86,6 @@ export const blankSealed = (address: Address, campaign: Address, sponsor: string
   count: 0,
   paid: [],
 });
-
-/** The campaign's `event_seq` as the chain holds it now. */
-export const eventSeq = (h: Harness, campaign: Address) =>
-  decode(CAMPAIGN, accountData(h.w, campaign)).event_seq as bigint;
 
 /** `ceil(usd × 10^(9 − e) ÷ (p − conf))` at e = −8 (TP 3.4.16), split by `prizeBps`: the entry rounds down, the fee is the rest. */
 export function sealedPrice(usd: bigint, price: bigint, conf: bigint, prizeBps: bigint) {
@@ -119,10 +119,4 @@ export function sealedRefusal(
   if (paid > max) return "SealedEntryAboveMaxLamports";
   // The campaign's minimum cannot refuse a US$500 entry part; the signed entry total is checked at the Entry.
   return op.quirk === "total" ? "EntryTotalMismatch" : undefined;
-}
-
-/** Throws naming the first field of a transaction's events (or of the chain after it) the model did not expect. */
-export function expectFields(what: string, rows: [string, unknown, unknown][]) {
-  const wrong = rows.find(([, have, want]) => have !== want);
-  if (wrong) throw new Error(`${what}: ${wrong[0]} is ${String(wrong[1])}, the model expects ${String(wrong[2])}`);
 }

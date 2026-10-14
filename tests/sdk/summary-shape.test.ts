@@ -10,7 +10,7 @@
 import { describe, expect, test } from "bun:test";
 import { AccountRole, generateKeyPairSigner, type Instruction } from "@solana/kit";
 
-import { campaignAddress, Direction, ReaderKind, Side, VoidReason } from "@brot/sdk/read";
+import { campaignAddress, ContestStage, Direction, ReaderKind, Side, VoidReason } from "@brot/sdk/read";
 import * as T from "@brot/sdk/tx";
 
 import { DEFAULT_PARAMS, sdkParams } from "../brot/flows";
@@ -60,7 +60,7 @@ async function everyBuilt() {
         reason: VoidReason.TeamOutsideCause,
         noteHash: new Uint8Array(32),
       }),
-      T.buildTeamOpenContest({ teamMember: team, campaign }),
+      T.buildTeamOpenContest({ teamMember: team, campaign, stage: ContestStage.Stage1 }),
       T.buildFinalizeCampaign({ campaign }),
       T.buildSettleEntry({ campaign, baker: baker.address }),
       T.buildSettleCreatorShare({ campaign, creator: baker.address }),

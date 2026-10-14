@@ -45,3 +45,11 @@ fn team_window_transition_refusal_is_illegal_transition() {
     let refused: BrotError = transition(Settled, InReview).unwrap_err();
     assert_eq!(refused, IllegalTransition);
 }
+
+#[test]
+fn team_window_a_contested_campaign_with_no_entry_finalizes_to_settled() {
+    // The lead's addendum of Sprint 14 (2026-10-13): the finalize snapshot of a campaign with no open
+    // entry goes straight to Settled, from a contest as from the window, or the pot would freeze.
+    assert_eq!(transition(Contested, Settled), Ok(()));
+    assert_eq!(transition(InReview, Settled), Ok(()));
+}

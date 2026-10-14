@@ -1,8 +1,8 @@
 /**
  * Purpose: the randomized test's opening and joining operations: a paid opening (the 10% fee and the prize), a
  *          team opening (free), a join on either side, the pause, each with its expected refusal and changes.
- * Version: 0.0.1
- * Sprint:  04 (contract freeze, lane E)
+ * Version: 0.1.0 (Sprint 14: each join keeps its Join account; the events each emits, for X0.4)
+ * Sprint:  04 (contract freeze, lane E); 14 (lane INV14)
  */
 import { type Address } from "@solana/kit";
 
@@ -33,7 +33,7 @@ export async function planOpenPaid(h: Harness, creatorIndex: number, days: numbe
   // run keeps going without a refusal the model does not name.
   const needed = paid + h.rent.campaign + h.rent.vault + 10_000_000n;
   if (balance(h.w, creator.address) < needed) {
-    return { ixs: [], deltas: new Map(), tag: "skipped", apply: () => undefined };
+    return { ixs: [], deltas: new Map(), label: "openPaid-unfunded", apply: () => undefined };
   }
   refreshBase(h.w);
   refreshSol(h.w);
@@ -60,6 +60,7 @@ export async function planOpenPaid(h: Harness, creatorIndex: number, days: numbe
       [campaign, h.rent.campaign],
       [vault, h.rent.vault + paid],
     ]),
+    events: ["CampaignOpened"],
     apply: () => {
       const c = newCampaign({
         label: `c${id}`,
@@ -100,6 +101,7 @@ export async function planOpenTeam(h: Harness, memberIndex: number): Promise<Pla
       [campaign, h.rent.campaign],
       [vault, h.rent.vault],
     ]),
+    events: ["CampaignOpened"],
     apply: () => {
       const c = newCampaign({
         label: `t${id}`,
@@ -148,6 +150,7 @@ export async function planJoin(h: Harness, op: JoinOp): Promise<Plan> {
     expectedEntryTotal: mine,
     joinIndex,
   });
+  const address = await P.joinPda(campaign, baker.address, joinIndex);
   return {
     ixs: [ix],
     error,
@@ -155,9 +158,11 @@ export async function planJoin(h: Harness, op: JoinOp): Promise<Plan> {
       [vault, op.amount],
       [baker.address, -(op.amount + (first ? h.rent.entry : 0n) + h.rent.join)],
     ]),
+    events: ["EntryAdded"],
     apply: () => {
-      const join: Join = { baker: baker.address, side: op.side, amount: op.amount, at: t };
+      const join: Join = { baker: baker.address, side: op.side, amount: op.amount, at: t, address };
       c.joins.push(join);
+      c.seq += 1n;
     },
   };
 }
@@ -169,6 +174,7 @@ export async function planPause(h: Harness, pause: boolean): Promise<Plan> {
     ixs: [ix],
     error,
     deltas: new Map(),
+    events: [pause ? "EntriesPaused" : "EntriesResumed"],
     apply: () => {
       h.paused = pause;
     },

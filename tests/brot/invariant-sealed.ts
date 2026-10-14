@@ -4,19 +4,27 @@
  *          Entry (the first-baker rule applies) whose 10% is held in the sponsor's SealedFee, never in the vault. The
  *          refusals follow the program's order: sponsor_join_campaign.rs, join_core.rs, then sealed_charge.rs. The
  *          floor, the split, the SOL/USD bounds and the signed version are the config's at planning time.
- * Version: 0.0.2
+ * Version: 0.1.0 (with Sprint 14 in one branch: the events and their seq through invariant-run.ts, the Join's
+ *          address kept for the tally, labels in the trace)
  * Sprint:  15 (the lead's harness, lane INV15; the creation rules' version signed, red team L2 of lane L15)
  */
 import { readConfig } from "./flows";
 import { sponsorJoinCampaignIx } from "./instructions-14-15";
-import { clock, refreshBase, refreshSol, type Harness, type Plan, type Rng } from "./invariant-harness";
+import {
+  clock,
+  expectFields,
+  refreshBase,
+  refreshSol,
+  sealedAt,
+  type Harness,
+  type Plan,
+  type Rng,
+} from "./invariant-harness";
 import { sumOf } from "./invariant-model";
 import {
   blankSealed,
-  eventSeq,
-  expectFields,
   liveSealed,
-  sealedAt,
+  sealedOf,
   sealedPrice,
   sealedRefusal,
   sealedTerms,
@@ -26,7 +34,7 @@ import {
 } from "./invariant-sealed-model";
 import { systemTransferIx } from "./join-campaign-support";
 import * as P from "./program";
-import { balance, setPriceAccount, type Sent } from "./setup";
+import { balance, setPriceAccount } from "./setup";
 
 export async function planSealed(h: Harness, op: SealedOp): Promise<Plan> {
   const c = h.camps[op.c];
@@ -34,8 +42,8 @@ export async function planSealed(h: Harness, op: SealedOp): Promise<Plan> {
   const { campaign, vault } = h.addrs[op.c];
   const t = clock(h);
   const mine = c.joins.filter((j) => j.baker === sponsor.address);
-  const address = await sealedAt(campaign, sponsor.address);
-  const before = c.sealed.get(sponsor.address);
+  const address = await sealedAt(h, campaign, sponsor.address);
+  const before = sealedOf(c).get(sponsor.address);
   const terms = sealedTerms(await readConfig(h.w));
   const bound = (op.price * terms.confBps) / 10_000n;
   const conf = op.quirk === "wide" ? bound + 1n : (bound * op.confShare) / 1_000n;
@@ -48,7 +56,7 @@ export async function planSealed(h: Harness, op: SealedOp): Promise<Plan> {
   const spent = paid + (mine.length === 0 ? h.rent.entry : 0n) + h.rent.join + rentPaid;
   // A sponsor that cannot pay waits (no transaction), as an opening does: no refusal the model does not name.
   if (balance(h.w, sponsor.address) < spent + P.SOL) {
-    return { ixs: [], deltas: new Map(), tag: "skipped", apply: () => undefined };
+    return { ixs: [], deltas: new Map(), label: "sealed-unfunded", apply: () => undefined };
   }
   refreshBase(h.w);
   const publish = op.quirk === "stale" ? t - terms.maxAge - 1n : t - 5n;
@@ -66,33 +74,10 @@ export async function planSealed(h: Harness, op: SealedOp): Promise<Plan> {
     expectedParamsVersion: terms.version + (op.quirk === "version" ? 1 : 0),
     joinIndex: mine.length,
   });
-  const seq = error === undefined ? eventSeq(h, campaign) : 0n;
+  const join = await P.joinPda(campaign, sponsor.address, mine.length);
   const first = (c.joins[0]?.baker ?? sponsor.address) === sponsor.address;
-  // EntryAdded as any join, then SealedFeeHeld, with contiguous seqs (TP 3.4.14).
-  const check = (sent: Extract<Sent, { ok: true }>) => {
-    const names = sent.events.map((e) => e.name).join(" ");
-    if (names !== "EntryAdded SealedFeeHeld") throw new Error(`sealed: the events are ${names}`);
-    const [added, held] = sent.events.map((e) => e.data);
-    expectFields("sealed", [
-      ["EntryAdded.seq", added.seq, seq],
-      ["EntryAdded.baker", added.baker, sponsor.address],
-      ["EntryAdded.amount", added.amount, entry],
-      ["EntryAdded.side", added.side, op.side],
-      ["EntryAdded.is_first", added.is_first, first],
-      ["SealedFeeHeld.seq", held.seq, seq + 1n],
-      ["SealedFeeHeld.campaign", held.campaign, campaign],
-      ["SealedFeeHeld.sponsor", held.sponsor, sponsor.address],
-      ["SealedFeeHeld.entry_usd", held.entry_usd, op.usd],
-      ["SealedFeeHeld.paid", held.paid, paid],
-      ["SealedFeeHeld.entry_lamports", held.entry_lamports, entry],
-      ["SealedFeeHeld.fee_lamports", held.fee_lamports, fee],
-      ["SealedFeeHeld.fee_total", held.fee_total, (before?.fee ?? 0n) + fee],
-      ["SealedFeeHeld.price", held.price, charged],
-      ["SealedFeeHeld.exponent", held.exponent, -8],
-      ["SealedFeeHeld.publish_time", held.publish_time, publish],
-      ["Campaign.event_seq", eventSeq(h, campaign), seq + 2n],
-    ]);
-  };
+  // Worked out now: invariant-run.ts applies the plan to the model before it verifies the events.
+  const feeTotal = (before?.fee ?? 0n) + fee;
   return {
     ixs: [ix],
     error,
@@ -104,9 +89,26 @@ export async function planSealed(h: Harness, op: SealedOp): Promise<Plan> {
       [h.feeVault, 0n],
     ]),
     after: () => refreshSol(h.w),
-    check,
+    // EntryAdded as any join, then SealedFeeHeld; invariant-run.ts checks their seqs follow the campaign's (X0.4).
+    events: ["EntryAdded", "SealedFeeHeld"],
+    verify: ([added, held]) => {
+      expectFields(added, { baker: [sponsor.address], amount: [entry], side: [op.side], is_first: [first ? 1 : 0] });
+      expectFields(held, {
+        campaign: [campaign],
+        sponsor: [sponsor.address],
+        entry_usd: [op.usd, "entryUsd"],
+        paid: [paid],
+        entry_lamports: [entry, "entryLamports"],
+        fee_lamports: [fee, "feeLamports"],
+        fee_total: [feeTotal, "feeTotal"],
+        price: [charged],
+        exponent: [-8],
+        publish_time: [publish, "publishTime"],
+      });
+    },
     apply: () => {
-      c.joins.push({ baker: sponsor.address, side: op.side, amount: entry, at: t, sealed: true });
+      c.seq += 2n;
+      c.joins.push({ baker: sponsor.address, side: op.side, amount: entry, at: t, address: join, sealed: true });
       const s = before ?? blankSealed(address, campaign, sponsor.address);
       s.lamports += (create ? rentPaid : 0n) + fee;
       s.state = "live";
@@ -114,7 +116,7 @@ export async function planSealed(h: Harness, op: SealedOp): Promise<Plan> {
       s.entry += entry;
       s.usd += op.usd;
       s.count += 1;
-      c.sealed.set(sponsor.address, s);
+      sealedOf(c).set(sponsor.address, s);
     },
   };
 }
@@ -124,8 +126,8 @@ export async function planHandSealed(h: Harness, op: HandSealedOp): Promise<Plan
   const c = h.camps[op.c];
   const sponsor = h.bakers[op.sponsor].address;
   const { campaign } = h.addrs[op.c];
-  const address = await sealedAt(campaign, sponsor);
-  const s = c.sealed.get(sponsor);
+  const address = await sealedAt(h, campaign, sponsor);
+  const s = sealedOf(c).get(sponsor);
   // An empty address takes no less than a data-less account's rent: the runtime refuses a smaller transfer.
   const amount = (s?.lamports ?? 0n) === 0n && op.amount < h.rent.wallet ? op.amount + h.rent.wallet : op.amount;
   return {
@@ -134,11 +136,11 @@ export async function planHandSealed(h: Harness, op: HandSealedOp): Promise<Plan
       [address, amount],
       [h.bank.address, -amount],
     ]),
-    tag: s?.state ?? "funded",
+    label: `handSealed-${s?.state ?? "funded"}`,
     apply: () => {
       const model = s ?? blankSealed(address, campaign, sponsor);
       model.lamports += amount;
-      c.sealed.set(sponsor, model);
+      sealedOf(c).set(sponsor, model);
     },
   };
 }
@@ -149,7 +151,7 @@ const QUIRKS: [number, SealedQuirk][] = [
   [0.25, "under"],
   [0.3, "exact"],
   [0.38, "total"],
-  [0.43, "version"],
+  [0.46, "version"],
 ];
 
 /** A sealed entry: most go to a campaign still taking entries; a third carry a quirk the program refuses. */

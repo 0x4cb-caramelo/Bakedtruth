@@ -27,6 +27,9 @@ const SOURCES = [
   "checks.rs",
   "checks/top_level.rs",
   "checks/upgrade.rs",
+  "instructions/referral/rules.rs",
+  "instructions/resolution/contest_rules.rs",
+  "instructions/resolution/contest_decision.rs",
   "instructions/entries/sealed_charge.rs",
   "instructions/entries/sealed_fee_account.rs",
   "instructions/settlement/settle_sealed_fee.rs",
@@ -36,14 +39,36 @@ const DEPLOY = join(ROOT, "target/deploy");
 const SO = join(DEPLOY, "brot_markets.so");
 const SAVED = join(ROOT, "target/checks-mutation/brot_markets.so");
 const JUNIT = join(ROOT, "target/checks-mutation/junit.xml");
-const RUST_TARGETS = ["checks_mollusk", "checks_mollusk_init", "sealed_entry", "sealed_settle"];
+const RUST_TARGETS = [
+  "checks_mollusk",
+  "checks_mollusk_init",
+  "referral_link",
+  "referral_refusals",
+  "contest_mollusk_open",
+  "contest_mollusk_reread",
+  "contest_mollusk_decide",
+  "contest_mollusk_bounds",
+  "contest_mollusk_escalate",
+  "sealed_entry",
+  "sealed_settle",
+  "contest_mollusk_act",
+];
 const TS_FILES = [
   "tests/brot/checks.test.ts",
   "tests/brot/checks-init.test.ts",
   "tests/brot/resolve-refuses.test.ts",
+  "tests/brot/referral-link.test.ts",
+  "tests/brot/referral-refuses.test.ts",
+  "tests/brot/contest-open.test.ts",
+  "tests/brot/contest-reread.test.ts",
+  "tests/brot/contest-decide.test.ts",
+  "tests/brot/contest-worst-case.test.ts",
+  "tests/brot/contest-proof.test.ts",
+  "tests/brot/contest-escalate.test.ts",
   "tests/brot/sealed-entry.test.ts",
   "tests/brot/sealed-settle.test.ts",
   "tests/brot/sealed-outcomes.test.ts",
+  "tests/brot/contest-act.test.ts",
 ];
 const PATH = `${process.env.HOME}/.bun/bin:${process.env.PATH}`;
 // Mollusk and LiteSVM both run the binary this script builds; logs off and no colours to parse.
@@ -81,6 +106,45 @@ event_accounts        fail  event_program_refuses_a_wrong_program_slot | event_p
 event_program         fail  event_program_refuses_a_wrong_program_slot | event_program: a wrong program slot
 event_program         keeps event_accounts_refuse_a_wrong_event_authority | event_accounts: a wrong event authority
 top_level             fail  - | top_level: a resolve forwarded by another program
+referrer_not_zero     fail  link_refuses_the_zero_referrer | link: the zero address as the referrer
+referrer_not_referee  fail  link_refuses_the_referee_as_its_own_referrer | link: the referee as its own referrer
+referrer_not_referee  keeps link_refuses_the_zero_referrer | link: the zero address as the referrer
+signer                fail  link_refuses_an_unsigned_referee | link: an unsigned referee
+signer                fail  link_refuses_an_unsigned_referee_whose_link_was_funded_in_advance | link: an unsigned referee whose link was funded in advance
+writable              fail  link_refuses_a_read_only_referee | link: a read-only referee
+writable              fail  link_refuses_a_read_only_link | link: a read-only link
+canonical_pda         fail  link_refuses_a_look_alike_a_non_canonical_or_another_referees_link | link: a look-alike, a non-canonical or another referee's link
+system_program        fail  link_refuses_a_look_alike_system_program | link: a look-alike System Program
+create_pda_account    fail  link_records_the_referrer_once_with_the_referees_rent | link: the referee's link records the referrer, the time and the slot, with the referee's rent
+create_pda_account    fail  link_tops_up_a_link_funded_in_advance | link: an address funded in advance is topped up and linked
+create_pda_account    fail  link_refuses_another_programs_account_or_a_system_account_with_data_at_the_link | link: another program's account, or a System account with data, at the link
+create_pda_account    fail  link_refuses_a_second_link_to_any_referrer | link: a second link, to any referrer
+event_accounts        fail  link_refuses_wrong_event_accounts | link: a wrong event authority
+event_accounts        fail  - | link: a wrong program slot
+event_program         fail  link_refuses_wrong_event_accounts | link: a wrong program slot
+event_program         keeps - | link: a wrong event authority
+contest_team_key      fail  contest_team_key_refuses_a_stranger_and_the_admin | contest opens: each refusal has its own error and writes nothing
+contest_window        fail  contest_window_refuses_a_campaign_not_in_review | contest opens: each refusal has its own error and writes nothing
+contest_window        fail  contest_window_refuses_at_the_instant_the_window_closes | -
+contest_tallied       fail  contest_tallied_refuses_while_an_entry_is_untallied | contest opens: each refusal has its own error and writes nothing
+reread_metric         fail  contest_reread_metric_refuses_another_account | contest reread: each refusal has its own error and writes nothing
+contest_status        fail  contest_status_refuses_a_campaign_not_contested | contest reread: each refusal has its own error and writes nothing
+contest_status        fail  contest_status_refuses_a_decision_on_a_campaign_not_contested | contest decide: each refusal has its own error and writes nothing
+contest_stage         fail  contest_stage_refuses_a_reread_at_stage_two | contest reread: each refusal has its own error and writes nothing
+contest_stage         fail  contest_stage_refuses_a_decision_at_stage_one | contest decide: each refusal has its own error and writes nothing
+decide_deadline       fail  decide_deadline_refuses_from_the_deadline_on | contest decide: each refusal has its own error and writes nothing
+lapse_stage           fail  lapse_stage_refuses_a_contest_with_no_stage | -
+reread_proof          fail  reread_proof_offered_and_refused_by_the_reader_refuses_the_reread | contest proof: an offered proof the reader refuses refuses the re-read with the reader's error
+lapse_deadline        fail  lapse_deadline_refuses_one_second_before | contest worst case is 78 hours with the keeper down for a week: the unread stage 1 lapses
+lapse_deadline        fail  lapse_of_an_unread_stage_one_comes_48_hours_after_its_deadline | contest lapse: finalize takes stage 2 from its deadline on, and an unread stage 1 48 hours after its own
+decide_admin          fail  decide_admin_refuses_a_team_key_and_a_stranger | contest decide: a stranger and a team key cannot decide
+decide_confirm_reason fail  decide_arguments_are_refused_each_with_its_own_error | contest decide: each refusal has its own error and writes nothing
+decide_void_reason    fail  decide_arguments_are_refused_each_with_its_own_error | contest decide: each refusal has its own error and writes nothing
+top_level             fail  - | top_level: a re-read forwarded by another program
+contest_team_key      fail  escalation_refuses_anyone_but_a_team_key_first | -
+reread_timelock       fail  reread_timelock_refuses_a_matching_reread_before_stage_one_ends | contest reread: a matching re-read is refused before stage 1's 24 hours end, and pays at their end
+escalate_stage        fail  escalate_stage_refuses_a_contest_at_stage_two_already | contest escalate: each refusal has its own error and writes nothing
+escalate_deadline     fail  escalate_deadline_refuses_from_stage_one_deadline_on | contest escalate: each refusal has its own error and writes nothing
 sealed_floor          fail  sealed_floor_refuses_an_entry_below_the_config_opening_fee | the floor, max_lamports and the SOL/USD account refuse with their own codes and move nothing
 sealed_max_lamports   fail  sealed_max_lamports_refuses_an_entry_above_its_bound | the floor, max_lamports and the SOL/USD account refuse with their own codes and move nothing
 sealed_fee_distinct   fail  sealed_fee_distinct_refuses_a_sealed_fee_slot_that_is_another_slot | a sealed entry's SealedFee slot: another slot of the join, or a SealedFee that does not match, is refused
@@ -92,6 +156,12 @@ sealed_fee_finalized  fail  sealed_fee_finalized_refuses_a_campaign_not_finalize
 sealed_fees_open      fail  sealed_fees_open_keeps_the_campaign_from_closing | Split: the sealed entry is paid as any winning entry, and its fee goes to the fee vault
 distinct              fail  settle_sealed_fee_refuses_its_sealed_fee_in_another_slot | -
 sealed_terms          fail  sealed_terms_refuse_an_entry_signed_under_other_creation_rules | the creation rules signed are the config's: a change between the preview and the landing refuses it
+contest_act           fail  contest_act_refuses_any_other_byte_and_any_other_length | contest act: any other byte or data length is BadInstructionData and writes nothing
+contest_already_open  fail  contest_already_open_refuses_a_retried_opening_at_either_stage | contest act: a retried or duplicate opening is refused with ContestAlreadyOpen and writes nothing
+contest_not_open      fail  contest_not_open_refuses_an_escalation_of_a_campaign_not_contested | contest act: byte 2 on a campaign not contested is refused with NotContested and writes nothing
+contest_act           fail  contest_act_is_the_byte_and_fits_the_campaign_on_the_host | -
+contest_already_open  fail  contest_act_is_the_byte_and_fits_the_campaign_on_the_host | -
+contest_not_open      fail  contest_act_is_the_byte_and_fits_the_campaign_on_the_host | -
 `;
 
 const args = process.argv.slice(2);

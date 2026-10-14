@@ -5,7 +5,7 @@
  *          the caller's to choose; a detail key that names a secret, a token or a URL is refused by name, never echoed.
  *          The line's own fields (ts, event, kind, key, transports) always win: a detail key with one of those names
  *          is written as `detail_<name>` instead, so a caller can never relabel an alert, and nothing is lost.
- * Version: 0.2.1 (the line's own fields win over a colliding detail key; relayed from the indexer lane's review)
+ * Version: 0.3.0 (Sprints 14 and 15: the contest's and the sealed fee's alerts)
  * Sprint:  07 (standby keeper and watchdog)
  */
 
@@ -25,6 +25,10 @@ export const ALERT_KINDS = [
   "reserved_credit_old",
   "sol_usd_stale",
   "pyth_program_changed",
+  "contest_opened",
+  "contest_reread_differs",
+  "contest_stage2_ending",
+  "sealed_fee_open",
   "restart_requested",
   "restart_failed",
 ] as const;

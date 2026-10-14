@@ -1,11 +1,12 @@
 # Sprint 06 — Server and primary keeper (Bun check first)
 
 **Status:** closed 2026-10-10 for the Hackathon MVP by the founder's decision; its open code items are built since
-2026-10-13 (settlement behind `KEEPER_SETTLE`, off; batched reads; transaction landing; `/healthz`; the unit with its own
-identity), on branch `sprint-07-keeper-carryover`, not deployed. Not tagged: blocked by the founder (whether the devnet
-keeper pays; the tag), the server owner (one identity per unit), D4 (the Hermes stream) and P-7 (the conversion
-runbook), and by the clock: the real resolve is first observable when the test campaign `FmDo…` ends, 2026-10-14
-04:48 UTC
+2026-10-13 (settlement behind `KEEPER_SETTLE`; batched reads; transaction landing; `/healthz`; the unit with its own
+identity) and merged with PR #88 (`88a00f9`). The real resolve was observed: the keeper resolved the test campaign
+`FmDo…` on its own on 2026-10-11, and since 2026-10-13 19:03 UTC release `88a00f9` runs under the existing unit with
+`KEEPER_SETTLE=on` and has settled the two campaigns that were waiting ("After closure" below). Not tagged: blocked by
+the founder (the tag), the server owner (one identity per unit; the new unit is not installed), D4 (the Hermes stream)
+and P-7 (the conversion runbook) · **Branch:** `sprint-06-keeper-server` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
@@ -215,6 +216,20 @@ founder:
 - Per-unit identities and the tunnel-token rotation: Sprint 16 (the server owner's agreement is still open).
 - The Bun soak test and the load run of 1,000 campaigns: Sprint 16.
 - The `deploy/vps` rollback script (`push-deploy.sh`): Post-Hackathon; the server was updated by hand on 2026-10-10.
+
+### After closure: the real resolve and the unattended payout (2026-10-11 and 2026-10-13)
+
+- **The real resolve was observed.** The keeper resolved `FmDoXD1qx2ZfLr71WjrHHxFhLqDRkA6s24je1YfCj1Ho` on its own on
+  2026-10-11 at 15:59:17 UTC (`23agRJq8nJtzUjNy…`), with nobody triggering it; the server's journal and the chain show it.
+- **The payout, unattended, on devnet.** On 2026-10-13, at Ronaldo's request, the keeper code of PR #88 (release
+  `88a00f9`) went live under the existing unit with `KEEPER_SETTLE=on`, after a dry run on port 4239; the unit
+  restarted at 19:03 UTC. The keeper then settled the two campaigns that were waiting: `FmDo…` (finalize `5Z5zdkN5…`,
+  prize and fee `ZqDWtcrs…`, close `647Zc7S2…`) and `G6Un…` (finalize `3dRvL3Lz…`, prize and fee `4Ev4MJCH…`, close
+  `4XEdx7xh…`). The release, the backup of the settings and the rollback are in `deploy/vps/README.md`.
+- **Still open.** The new unit with its own identity is not installed: it waits for the server owner. The keeper
+  read the public devnet RPC, which answered 429s (one on the confirmation poll of a transaction that landed); later
+  the same day, at Ronaldo's request, its RPC became Helius devnet, the founder's D4 choice of 2026-10-10, with the
+  key only in the server's settings file.
 
 ## Record and retrospective
 

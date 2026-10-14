@@ -4,8 +4,9 @@
  *          not the cluster's runtime). Every case of tests/brot/slot-matrix.gen.ts is sent, unchanged, against
  *          the baseline its instruction gets here, and must fail with its own error and move no lamport; the
  *          baselines are checked by simulation first, and the paid opening is sent and charged as the SDK says.
- * Version: 0.1.1
- * Sprint:  05 (SDK and the devnet cycle), lane OPS; 15 (the sealed entry's baselines, negative-baselines-sealed.ts)
+ * Version: 0.1.2 (Sprint 14: the contest is enabled, so its baseline must pass; the referral and the dispute's
+ *          baselines, negative-baselines-14.ts; Sprint 15: the sealed entry's, negative-baselines-sealed.ts)
+ * Sprint:  05 (SDK and the devnet cycle), lane OPS; 14 (lane INV14); 15 (lane INV15)
  *
  * `bun run scripts/validator/negative-run.ts` (offline surfnet, loopback-only namespace). Surfpool is not Agave's
  * validator either: see knowledge-base notes; `solana-test-validator` needs a CPU with AVX2 to start.
@@ -19,6 +20,7 @@ import { mutate } from "../../tests/brot/slot-matrix-mutate";
 import { isolateOrExit } from "./isolate";
 import { CONFIG_BASELINES, funded, type Build, type Env } from "./negative-baselines";
 import { SETTLE_BASELINES } from "./negative-baselines-settle";
+import { BASELINES_14 } from "./negative-baselines-14";
 import { SEALED_BASELINES } from "./negative-baselines-sealed";
 import { shimWorld } from "./negative-world";
 import { account, balance, clock, send } from "./rpc";
@@ -38,8 +40,7 @@ async function runCases(env: Env, name: string, build: Build) {
   const cases = SLOT_MATRIX.filter((c) => c.ix === name);
   const { ix, after } = await build(env);
   const sanity = await simulate(env.rpc, env.payer, [ix]);
-  const disabled = name === "TeamOpenContest";
-  if (disabled ? sanity.error !== "ContestExitDisabled" : !sanity.ok) {
+  if (!sanity.ok) {
     counts.skipped += cases.length;
     failures.push(
       `${name}: baseline ${sanity.ok ? "accepted" : `refused (${sanity.error})`}; ${cases.length} cases not run`,
@@ -120,7 +121,7 @@ async function main() {
       feeRecipient: await funded(rpc, 1n),
       team: [await funded(rpc), await funded(rpc)],
     };
-    const baselines = [...CONFIG_BASELINES, ...SETTLE_BASELINES, ...SEALED_BASELINES];
+    const baselines = [...CONFIG_BASELINES, ...SETTLE_BASELINES, ...BASELINES_14, ...SEALED_BASELINES];
     console.log(`slot matrix: ${SLOT_MATRIX.length} cases over ${baselines.length} instructions`);
     for (const [name, build] of baselines) await runCases(env, name, build);
     await paidOpening(env);

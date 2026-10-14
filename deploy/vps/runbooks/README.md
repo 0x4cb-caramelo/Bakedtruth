@@ -25,6 +25,10 @@ nome, com `-` no lugar de `_`.
 | Parte do criador reservada há mais de 7 dias | [reserved-credit-old.md](reserved-credit-old.md) |
 | SOL/USD velho (aberturas pagas bloqueadas) | [sol-usd-stale.md](sol-usd-stale.md) |
 | Programa da Pyth mudou | [pyth-program-changed.md](pyth-program-changed.md) |
+| Disputa aberta (estágio 1 ou 2) | [contest-opened.md](contest-opened.md) |
+| Releitura de disputa deu diferente | [contest-reread-differs.md](contest-reread-differs.md) |
+| Estágio 2 perto do prazo, sem decisão | [contest-stage2-ending.md](contest-stage2-ending.md) |
+| Taxa de entrada selada aberta numa campanha finalizada | [sealed-fee-open.md](sealed-fee-open.md) |
 
 Quem recebe: o CTO. O revisor do dia ainda não tem nome (Sprint 16 exige um antes do mainnet). Os alertas de
 e-mail dependem do provedor (decisão do fundador, D4); até lá o alerta aparece como linha `alert` no diário.
