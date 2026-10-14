@@ -27,10 +27,11 @@ LoadCredential=keeper-rpc-url:/etc/brot-markets/keeper-rpc-url
 LoadCredential=keeper-rpc-url-b:/etc/brot-markets/keeper-rpc-url-b
 LoadCredential=restart-secret:/etc/brot-markets/restart-secret
 Environment=KEEPER_MODE=standby
-Environment=KEEPER_KEYPAIR=%d/keeper-keypair
-Environment=KEEPER_RPC_URL_FILE=%d/keeper-rpc-url
-Environment=KEEPER_RPC_URL_B_FILE=%d/keeper-rpc-url-b
-Environment=KEEPER_RESTART_SECRET_FILE=%d/restart-secret
+# The credentials' directory is spelled out: systemd 249 (the server's) does not expand its specifier in Environment=.
+Environment=KEEPER_KEYPAIR=/run/credentials/brot-keeper-standby.service/keeper-keypair
+Environment=KEEPER_RPC_URL_FILE=/run/credentials/brot-keeper-standby.service/keeper-rpc-url
+Environment=KEEPER_RPC_URL_B_FILE=/run/credentials/brot-keeper-standby.service/keeper-rpc-url-b
+Environment=KEEPER_RESTART_SECRET_FILE=/run/credentials/brot-keeper-standby.service/restart-secret
 # Its own state directory: Bun's caches and the review queue (JSON lines, 0600), the only file it writes.
 StateDirectory=brot-keeper
 Environment=HOME=/var/lib/brot-keeper

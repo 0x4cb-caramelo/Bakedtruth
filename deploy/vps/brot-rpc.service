@@ -21,8 +21,9 @@ WorkingDirectory=/srv/brot-markets/rpc/current/services/rpc
 EnvironmentFile=/etc/brot-markets/rpc.env
 LoadCredential=upstream-url:/etc/brot-markets/rpc-upstream-url
 LoadCredential=tunnel-secret:/etc/brot-markets/rpc-tunnel-secret
-Environment=RELAY_UPSTREAM_URL_FILE=%d/upstream-url
-Environment=RELAY_TUNNEL_SECRET_FILE=%d/tunnel-secret
+# The credentials' directory is spelled out: systemd 249 (the server's) does not expand its specifier in Environment=.
+Environment=RELAY_UPSTREAM_URL_FILE=/run/credentials/brot-rpc.service/upstream-url
+Environment=RELAY_TUNNEL_SECRET_FILE=/run/credentials/brot-rpc.service/tunnel-secret
 # Its own home, created by systemd and the only place it may write (Bun's caches); nothing of the relay's is kept there.
 StateDirectory=brot-rpc
 Environment=HOME=/var/lib/brot-rpc
