@@ -2,8 +2,9 @@
  * Purpose: `recheck(campaign, rpcUrl)` (BR-23, "Anyone can re-check. Same account, same answer"): through
  *          any RPC the caller chooses, read the campaign, then the very account and field the program read
  *          to resolve it, and return that value beside the value the program recorded (`observed_value`).
- * Version: 0.1.3 (Sprint 16: the event search reads every transaction version the cluster serves)
- * Sprint:  05 (SDK); 16 (lane L16P, the keeper lane's note: a resolution sent in a v1 transaction was invisible)
+ * Version: 0.2.0 (Sprint 16, the review's F2: the event search moved to resolved-event.ts; an incomplete search or an
+ *          event of another publish time is never compared)
+ * Sprint:  05 (SDK); 16 (lane L16P, the keeper lane's note; the red-team review's F2)
  *
  * What a later read can show depends on the kind (TP 3.4.6, 3.4.8): a burn only lowers a revoked mint's
  * supply and locked liquidity only grows, so a later read may move past the recorded value with the
@@ -17,18 +18,12 @@
  *
  * Trust: the campaign, the account and the event all come through the RPC named, so `matches` is no proof
  * against that RPC; whoever doubts it rechecks through another. Keep the URL on the person's side: a service
- * that took it from a request would fetch whatever it was told. A malformed answer is skipped, never thrown;
- * the event search reads newest first, a page at a time, up to 10,000 signatures, and stops at the first find. It asks
- * for transactions up to `MAX_TRANSACTION_VERSION`; an RPC that refuses that option (a relay that relays version 0
- * only answers invalid params) is asked for version 0 for the rest of the search, so it still finds v0 resolutions.
+ * that took it from a request would fetch whatever it was told. The event used is the newest `CampaignResolved`
+ * whose publish time is the campaign's (resolved-event.ts): an event of another publish time is a cut-off that
+ * has since moved, and a newer transaction the RPC could not return leaves the answer incomplete (`matches` null)
+ * rather than compared with an older event.
  */
-import {
-  address,
-  isSolanaError,
-  SOLANA_ERROR__JSON_RPC__INVALID_PARAMS,
-  type Address,
-  type Signature,
-} from "@solana/kit";
+import { address, type Address } from "@solana/kit";
 
 import { decodeCampaign, type Campaign } from "./accounts";
 import { bytesToHex } from "./bytes";
@@ -36,8 +31,8 @@ import { Outcome, ReaderKind, VoidReason } from "./constants";
 import { readLockedLiquidity, readMint, readStakePool } from "./chain/accounts";
 import { curveGraduated, readCurvePool } from "./chain/dbc";
 import { readPriceUpdate } from "./chain/price-update";
-import { decodeTransactionEvents, type RpcTransaction } from "./decoder";
-import { fetchRaw, readChainTime, rpcFor, type ChainTime, type SolanaRpc } from "./rpc";
+import { searchResolvedEvent, type EventSearch } from "./resolved-event";
+import { fetchRaw, readChainTime, rpcFor, type ChainTime } from "./rpc";
 
 export type Recheck = {
   campaign: Address;
@@ -57,59 +52,9 @@ export type Recheck = {
   asOf: ChainTime;
 };
 
-/** How the event search pages: signatures per page, and the most it reads. */
-export type EventSearch = { pageSize?: number; maxSignatures?: number };
-
-/**
- * The newest transaction version the cluster serves: legacy, 0 and 1 (devnet carries v1 transactions; Kit 8.4 types
- * the same three). A node returns a transaction of any version up to the one asked and refuses a newer one, so the
- * event search asks for this one. Raise it when the cluster serves a newer version.
- */
-export const MAX_TRANSACTION_VERSION = 1;
-
-type Resolved = { readAccount: string; publishTime: bigint; postedSlot: bigint; seq: bigint };
-/** One transaction read: its `CampaignResolved` of the campaign, if any; `refused` when the RPC refused the options. */
-type Read = { resolved: Resolved | null; refused: boolean };
-
-async function resolvedIn(rpc: SolanaRpc, signature: Signature, campaign: Address, version: 0 | 1): Promise<Read> {
-  try {
-    const options = { encoding: "json", maxSupportedTransactionVersion: version, commitment: "confirmed" } as const;
-    const tx = await rpc.getTransaction(signature, options).send();
-    const events = tx ? decodeTransactionEvents(tx as unknown as RpcTransaction) : [];
-    const found = events.find((e) => e.name === "CampaignResolved" && e.data.campaign === campaign);
-    return { resolved: found?.name === "CampaignResolved" ? { ...found.data } : null, refused: false };
-  } catch (error) {
-    return { resolved: null, refused: isSolanaError(error, SOLANA_ERROR__JSON_RPC__INVALID_PARAMS) };
-  }
-}
-
-/** The `CampaignResolved` of `campaign` found through `rpc` (the evidence of a price resolution), newest first. */
-export async function findResolvedEvent(rpc: SolanaRpc, campaign: Address, search: EventSearch = {}) {
-  const pageSize = search.pageSize ?? 1_000;
-  const most = search.maxSignatures ?? 10_000;
-  let before: Signature | undefined;
-  let version: 0 | 1 = MAX_TRANSACTION_VERSION;
-  for (let read = 0; read < most;) {
-    const page = await rpc
-      .getSignaturesForAddress(campaign, { limit: pageSize, before, commitment: "confirmed" })
-      .send()
-      .catch(() => null);
-    if (!Array.isArray(page) || page.length === 0) return null;
-    for (const { signature, err } of page.slice(0, pageSize)) {
-      if (err !== null) continue;
-      let found = await resolvedIn(rpc, signature, campaign, version);
-      if (found.refused && version !== 0) {
-        version = 0;
-        found = await resolvedIn(rpc, signature, campaign, version);
-      }
-      if (found.resolved) return found.resolved;
-    }
-    read += Math.min(page.length, pageSize);
-    if (page.length < pageSize) return null;
-    before = page[pageSize - 1].signature;
-  }
-  return null;
-}
+/** Every `CampaignResolved` found carries another publish time than the campaign's. */
+const STALE =
+  "the CampaignResolved events found carry another publish time than the campaign's: the cut-off moved, and this RPC did not return the event that moved it";
 
 const result = (c: Campaign, at: Address, chain: ChainTime) =>
   ({ campaign: at, kind: c.kind, outcome: c.outcome, recorded: c.observedValue, asOf: chain }) as const;
@@ -181,8 +126,11 @@ export async function recheck(campaign: Address | string, rpcUrl: string, search
       return compare(null, "last_epoch_total_lamports", "the pool has written a later epoch's snapshot, or is gone");
     }
     case ReaderKind.PriceTouch: {
-      const event = await findResolvedEvent(rpc, at, search);
-      if (!event) return compare(null, "price", "no CampaignResolved event found through this RPC");
+      const found = await searchResolvedEvent(rpc, at, { ...search, publishTime: c.publishTime });
+      if (found.incomplete) return compare(null, "price", `incomplete: ${found.incomplete}; no older event is used`);
+      const event = found.found;
+      if (!event)
+        return compare(null, "price", found.stale > 0 ? STALE : "no CampaignResolved event found through this RPC");
       const proof = await fetchRaw(rpc, event.readAccount);
       const reading = proof ? attempt(() => readPriceUpdate(proof.owner, proof.data, bytesToHex(c.feedId))) : null;
       const same = reading !== null && reading.publishTime === event.publishTime;
