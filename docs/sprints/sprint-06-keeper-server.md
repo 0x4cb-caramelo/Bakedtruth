@@ -3,8 +3,9 @@
 **Status:** closed 2026-10-10 for the Hackathon MVP by the founder's decision; its open code items are built since
 2026-10-13 (settlement behind `KEEPER_SETTLE`; batched reads; transaction landing; `/healthz`; the unit with its own
 identity) and merged with PR #88 (`88a00f9`). The real resolve was observed: the keeper resolved the test campaign
-`FmDo…` on its own on 2026-10-11, and since 2026-10-13 19:03 UTC release `88a00f9` runs under the existing unit with
-`KEEPER_SETTLE=on` and has settled the two campaigns that were waiting ("After closure" below). Not tagged: blocked by
+`FmDo…` on its own on 2026-10-11, and since 2026-10-13 19:03 UTC the keeper runs under the existing unit with
+`KEEPER_SETTLE=on` and has settled the two campaigns that were waiting ("After closure" below); release `88a00f9` until
+2026-10-14 00:46 UTC, then `8af10e2`, which also settles sealed fees and re-reads contests (`deploy/vps/README.md`). Not tagged: blocked by
 the founder (the tag), the server owner (one identity per unit; the new unit is not installed), D4 (the Hermes stream)
 and P-7 (the conversion runbook) · **Branch:** `sprint-06-keeper-server` · **Dates:** none, by the founder's decision
 

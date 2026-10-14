@@ -781,7 +781,10 @@ sponsored account, and older ones are skipped; only the push oracle writes it [E
 | Move a baker's entry | Nobody, by instruction | No instruction exists, and no emergency withdrawal. The upgrade key can still replace the program, and with it any rule (Sprint 02 review, finding 9); the powers page says so (BR-41) |
 
 - **The pause never blocks payout or refunds** [FD] (P4 §4.5). `operating_level` is read by `user_join_campaign`,
-  `user_open_campaign` and, if kept, `sponsor_add_prize` (I10′). A test runs every other instruction with the pause on.
+  `user_open_campaign` and `sponsor_join_campaign` (I10′; `sponsor_add_prize` is deferred). One directed test walks
+  all 27 instructions of the IDL with the pause on (`tests/brot/prefreeze-pause.test.ts`, Sprint 16, G-10): the pause
+  refuses exactly those three; `admin_initialize_config` and `team_pause_entries` refuse for their own reasons; the
+  other 22 run and the payouts move their lamports.
 - **Keys [FD] (Q12).** "tem eu e o Ronaldo": the reading that both hold team keys is to confirm. The mainnet signers
   are fixed after the partners' written agreement (BP-12, open in P-9). The multisig product, with a public wait, is
   still to choose (T7) **[AC]**.
@@ -946,7 +949,12 @@ Sprint 15 shrinks to the sealed entry and, if kept, `sponsor_add_prize`.
 #### 3.4.13 Money invariants (I1–I15)
 
 The invariants a single instruction can see (I1, I3′, I13, I14, I15) are asserted at the end of every instruction that
-moves SOL. All fifteen are checked by the seeded randomized test after every operation: joining, opening, pausing,
+moves SOL. Since Sprint 16's pre-freeze hardening (G-2), each paying instruction (`settle_entry`,
+`settle_creator_share` when it pays, reserves or is claimed, `collect_fee`, `settle_prize`) asserts its vault's lamport
+change against the change in the books (`paid_out_total`, the collected fee and the returned prize), and
+`close_campaign` requires the vault above its rent to cover what the books still hold
+(`settlement/bookkeeping.rs`, `VaultWatch`). Before, the payout checked a value against itself. `move_lamports` and
+`pay_from_vault` read both sides again, so one account on both sides is refused. All fifteen are checked by the seeded randomized test after every operation: joining, opening, pausing,
 sending SOL by hand, moving the clock, resolving, voiding, contesting, settling out of order and twice, emptying a
 winner's wallet, closing (Sprint 04; roadmap gate 1) **[DP]**. V and P are the winning and losing totals, R the prize.
 
@@ -1189,6 +1197,12 @@ bookkeeping silently. C42, answered in Sprint 02: neither Pinocchio nor the runt
 [F]. Today a PDA check also catches it: without `distinct`, the config passed as the fee vault of
 `admin_initialize_config` fails the fee vault's PDA check (X0.9). From Sprint 04, with payouts, `distinct` is the only
 guard. The check costs one comparison per pair.
+
+**Sprint 16 (pre-freeze, G-16 and G-1).** `tally_late_joins` checks its Join slots (`check_join_slots`: each Join
+writable and distinct from the campaign, the entry and the baker); a read-only or aliased Join ended in the runtime's
+own error before. The mutation proof (`scripts/checks-mutation.mjs`) now also covers `checks/close.rs` and
+`checks/paying.rs`, and the new ids (`tally_cutoff_final`, `tally_join_slots`, `vault_booked_change`,
+`move_both_sides`, `close_books_covered`): each test fails with its check removed.
 
 The checks module is the newest risk in the program, because each forgotten check is a vulnerability (P4 §1.4); the
 audit scope in Sprint 17 names it.
@@ -1746,7 +1760,13 @@ the code does.
   `Entry` and goes back to the baker when the entry settles (`LateTallied`, `EntrySettled`).
 - **Cut-off move.** A campaign in review moves its cut-off back, and only back, to an earlier YES price proof, before
   any tally has started. The review window does not move. Any other second proof is refused with `CutoffNotMovable`
-  (6147), after the reader's own refusals (`NotResolvableYet`, `ProofStale`) for a NO or a void.
+  (6147), after the reader's own refusals (`NotResolvableYet`, `ProofStale`) for a NO or a void. Sprint 16 (audit item
+  O-3) closed a gap: "before any tally has started" counted whole entries, so tallying part of one entry's joins left
+  the cut-off movable, and joins already tallied as early stayed early when it moved back. `tally_late_joins` now
+  refuses a YES price result while the chain time is at most the stored proof's publish time plus the proof window
+  (`CutoffNotFinal`, 6178). From then on any earlier proof is staler than the stored one and fails the window, so the
+  cut-off is final before the first join is tallied. Other kinds and outcomes tally at once. A team act that tallies
+  first fails inside that window (about two minutes at most); the keeper already waits for it.
 - **Team voids and contests.** A team key voids only an automatic void (`TeamVoidNotAutomatic`, 6097 for a YES or
   NO). `team_open_contest` is disabled (`ContestExitDisabled`, 6096) until Sprint 14, because a contest would freeze
   the pot with no exit.
@@ -2127,7 +2147,7 @@ what they found was fixed in the sprint (`docs/sprints/sprint-13-site-notices-co
 | Anyone can send cheap transactions that name the program's address; each landed one is read by the history | Above about 13 a second, the leaderboard's history falls behind; on a paid RPC each costs credits | 08 (the indexer, with its own source) |
 | Health says "ok" while the snapshot is old, if a snapshot call hangs (it has no timeout; the history's calls do) | The home list freezes while entries stay open | 08 |
 | A closed campaign's id can be opened again (close returns the account to the System Program); the points and the unlisted list handle it, the resolution post's link and the program do not | A post's `/c/<id>` link can later show another campaign | 16 (a tombstone in `close_campaign`, with the audit scope) |
-| Whoever resolves a YES price campaign first picks the proof that sets the late-join cut-off, and a partial tally does not lock it | Payouts on a contested touch depend on who acted first | 16–17 (audit scope) |
+| Whoever resolves a YES price campaign first picks the proof that sets the late-join cut-off (a partial tally no longer leaves it movable: closed in Sprint 16, `CutoffNotFinal`) | Payouts on a contested touch depend on who acted first, within the proof window | 16–17 (audit scope) |
 | The program's `min_return_bps` check uses the split formula even when the pot would not split; the site now shows the refund (`shownReturnBps`) | A floor that never binds in a lopsided pot | 16–17 (audit scope; a program change) |
 | "You" past the first 1,000 ranked wallets says only that the wallet is not among them; the page reads the table in pages, at different moments, so a row can be skipped until the next read (a repeated one is kept once) | A wallet ranked past 1,000 cannot see its rank | 08 (a histogram, or one cached file, from the indexer) |
 | The snapshot and the history share one RPC unless `API_HISTORY_RPC_URL` is set; on the public devnet RPC, a 429 that reaches the snapshot turns health "stale", which hides the entry panel | Entries pause on the site while the history catches up | At the API redeploy: a keyed RPC for the API, and a separate one for the history (`API_HISTORY_RPC_URL`) |
