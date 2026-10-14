@@ -4,7 +4,7 @@
  *          the recent fees on the accounts every instruction of the batch writes, clamped between the configured floor
  *          and the lower of the configured ceiling and the kind's own, and cut so the whole fee stays under a lamport
  *          cap; and the two ComputeBudget instructions that carry them. Pure: no RPC call here.
- * Version: 0.1.0
+ * Version: 0.1.1 (Sprints 14 and 15: the sealed fee and the re-read, priced as settlement: neither has a deadline)
  * Sprint:  07 carry-over (Sprint 06 DoD: transaction landing)
  *
  * The runtime charges `ceil(price × limit / 10^6)` lamports before it runs anything, whether the transaction then
@@ -16,7 +16,17 @@ import { MAX_COMPUTE_UNIT_LIMIT, priorityFeeAtMost, readComputeBudget } from "@b
 
 /** Every instruction the keeper sends, by kind: each kind has its own budget below. */
 export type TaskKind =
-  "resolve" | "tally" | "finalize" | "settleEntry" | "creatorShare" | "collectFee" | "settlePrize" | "close" | "sweep";
+  | "resolve"
+  | "tally"
+  | "finalize"
+  | "settleEntry"
+  | "creatorShare"
+  | "collectFee"
+  | "settlePrize"
+  | "sealedFee"
+  | "reread"
+  | "close"
+  | "sweep";
 
 /**
  * Per kind: the highest priority fee it may pay (micro-lamports per compute unit). A resolve races the 60 s proof
@@ -31,6 +41,8 @@ export const KIND_FEE_CEILING: Record<TaskKind, bigint> = {
   creatorShare: 100_000n,
   collectFee: 100_000n,
   settlePrize: 100_000n,
+  sealedFee: 100_000n,
+  reread: 100_000n,
   close: 100_000n,
   sweep: 100_000n,
 };

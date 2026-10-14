@@ -1,11 +1,16 @@
 /**
- * Purpose: the settlement plan of one campaign (TP §3.5, the keeper's cycle, steps 2 to 5), from its stored account
- *          and its entries alone: each step is planned only when the program's own conditions for it hold, as read in
- *          programs/brot-markets/src/instructions/settlement/*.rs, and every destination is a stored field (the entry's
- *          baker, the campaign's creator and rent payer, the config's fee recipient), never one the keeper chooses.
- *          Pure; settle.ts builds, simulates and sends what it returns.
- * Version: 0.1.0
- * Sprint:  07 carry-over (Sprint 06 DoD: finalize, settle in batches, the daily retry of reserved credits)
+ * Purpose: the settlement plan of one campaign (TP §3.5, the keeper's cycle, steps 2 to 5), from its stored account,
+ *          its entries and its sponsors' sealed fees alone: each step is planned only when the program's own
+ *          conditions for it hold, as read in programs/brot-markets/src/instructions/settlement/*.rs, and every
+ *          destination is a stored field (the entry's baker, the fee's sponsor, the campaign's creator and rent payer,
+ *          the config's fee recipient), never one the keeper chooses. Pure; settle.ts builds and sends what it returns.
+ * Version: 0.2.0 (Sprints 14 and 15: a lapsed contest finalized; every sealed fee settled before the close)
+ * Sprint:  07 carry-over (Sprint 06 DoD); 14 and 15 (lane L14K)
+ *
+ * Every open `SealedFee` is settled (`settle_sealed_fee`) once the campaign is finalized, and the close is planned
+ * only when the campaign counts none open (`SealedFeesOpen` otherwise): the plan reads the fees, it never retries a
+ * refused close. A contest that lapsed with no decision (the SDK's view: stage 2's deadline, or 48 hours after an
+ * unread stage 1's) is finalized with its stored result; the keeper never opens, escalates or decides a contest.
  *
  * The tally of a YES price campaign waits for the end of its review window: its cut-off can still move back to an
  * earlier YES proof, but only while no tally has started (`CutoffNotMovable`, decision of 2026-10-09), so tallying at
@@ -14,9 +19,9 @@
  * window's end in every case.
  */
 import type { Address } from "@solana/kit";
-import { Outcome, ReaderKind, SettleMode, Status, type Campaign } from "@brot/sdk/read";
+import { Outcome, ReaderKind, SettleMode, Status, publicState, type Campaign } from "@brot/sdk/read";
 
-import type { EntryAt, OpenCampaign } from "./campaigns";
+import type { EntryAt, OpenCampaign, SealedFeeAt } from "./campaigns";
 
 export type Step =
   | { kind: "tally"; campaign: Address; baker: Address; from: number; to: number }
@@ -25,6 +30,7 @@ export type Step =
   | { kind: "creatorShare"; campaign: Address; creator: Address; claim: boolean }
   | { kind: "collectFee"; campaign: Address }
   | { kind: "settlePrize"; campaign: Address; recipient: Address }
+  | { kind: "sealedFee"; campaign: Address; sponsor: Address }
   | { kind: "close"; campaign: Address; rentPayer: Address }
   | { kind: "sweep"; feeRecipient: Address };
 
@@ -36,10 +42,12 @@ export const shareDue = (c: Campaign) => !c.creatorIsTeam && c.settleMode === Se
 
 const finalized = (c: Campaign) => c.status === Status.Settling || c.status === Status.Settled;
 
-/** `close_campaign`'s own test: Settled, no entry open, the three flags, and no reserve unless the creator pays rent. */
+/** `close_campaign`'s own test: Settled, no entry or sealed fee open, the three flags, no reserve unless the creator
+ *  pays rent. */
 export const closable = (c: Campaign) =>
   c.status === Status.Settled &&
   c.entriesOpen === 0 &&
+  c.sealedFeesOpen === 0 &&
   c.feeCollected &&
   c.prizeSettled &&
   c.creatorShareSettled &&
@@ -52,9 +60,16 @@ export const cutoffMayMove = (c: Campaign) => c.kind === ReaderKind.PriceTouch &
 export const tallyOpen = (c: Campaign, now: bigint) =>
   c.status === Status.InReview && c.entriesUntallied > 0 && (now >= c.reviewEndsAt || !cutoffMayMove(c));
 
-/** Settlement is due: the review window has ended, or the campaign is finalized (the idle alert's "settling"). */
+/** A contest that lapsed with no decision, by the SDK's view: the stored result stands and finalize may run. */
+export const contestLapsed = (c: Campaign, now: bigint) =>
+  c.status === Status.Contested && publicState(c, { slot: 0n, epoch: 0n, unixTimestamp: now }).contestLapsed;
+
+/** Settlement is due: the window ended, a contest lapsed, or the campaign is finalized (the idle alert's "settling"). */
 export const settlementDue = (c: Campaign, now: bigint) =>
-  (c.status === Status.InReview && now >= c.reviewEndsAt) || finalized(c);
+  (c.status === Status.InReview && now >= c.reviewEndsAt) || contestLapsed(c, now) || finalized(c);
+
+/** The campaign needs its sponsors' sealed fees listed to be planned. */
+export const needsSealed = (c: Campaign) => finalized(c) && c.sealedFeesOpen > 0;
 
 /** The campaign needs its entries listed to be planned: joins to tally, or open entries. */
 export const needsEntries = (c: Campaign, now: bigint) =>
@@ -75,23 +90,25 @@ function tallies(campaign: Address, entries: readonly EntryAt[]): Step[] {
 }
 
 /**
- * The steps `at` takes now. `entries` are the campaign's existing entries (null when not listed); `claimDue` lets a
- * reserved creator share be retried (once a day, by the caller's clock).
+ * The steps `at` takes now. `entries` and `sealed` are the campaign's existing entries and sealed fees (null when not
+ * listed); `claimDue` lets a reserved creator share be retried (once a day, by the caller's clock).
  */
 export function planCampaign(
   at: OpenCampaign,
   entries: readonly EntryAt[] | null,
   now: bigint,
   claimDue: boolean,
+  sealed: readonly SealedFeeAt[] | null = null,
 ): Step[] {
   const c = at.campaign;
   const campaign = at.address;
+  if (contestLapsed(c, now)) return [{ kind: "finalize", campaign }];
   if (c.status === Status.InReview) {
     if (tallyOpen(c, now)) return entries ? tallies(campaign, entries) : [];
     if (c.entriesUntallied > 0 || now < c.reviewEndsAt) return [];
     return [{ kind: "finalize", campaign }];
   }
-  if (!finalized(c)) return []; // Open is the resolve task's; Contested waits for Sprint 14's exits
+  if (!finalized(c)) return []; // Open is the resolve task's; a live contest is contest.ts's (the re-read)
   const steps: Step[] = [];
   if (c.status === Status.Settling) {
     for (const { entry } of entries ?? []) {
@@ -105,6 +122,7 @@ export function planCampaign(
   }
   if (!c.prizeSettled) steps.push({ kind: "settlePrize", campaign, recipient: c.creator });
   if (!c.feeCollected && c.entriesOpen === 0) steps.push({ kind: "collectFee", campaign });
+  for (const { fee } of sealed ?? []) steps.push({ kind: "sealedFee", campaign, sponsor: fee.sponsor });
   if (closable(c)) steps.push({ kind: "close", campaign, rentPayer: c.rentPayer });
   return steps;
 }
@@ -124,6 +142,8 @@ export function stepKey(step: Step): string {
       return `tally:${step.campaign}:${step.baker}:${step.from}`;
     case "settleEntry":
       return `settleEntry:${step.campaign}:${step.baker}`;
+    case "sealedFee":
+      return `sealedFee:${step.campaign}:${step.sponsor}`;
     case "sweep":
       return "sweep";
     default:
@@ -133,12 +153,25 @@ export function stepKey(step: Step): string {
 
 /** What the campaigns owe, from their accounts alone (for /healthz): counts, not addresses. */
 export function pendingOf(campaigns: readonly OpenCampaign[], now: bigint) {
-  const pending = { tally: 0, finalize: 0, entries: 0, creatorShare: 0, fee: 0, prize: 0, close: 0, reserved: 0 };
+  const pending = {
+    tally: 0,
+    finalize: 0,
+    entries: 0,
+    sealedFees: 0,
+    creatorShare: 0,
+    fee: 0,
+    prize: 0,
+    close: 0,
+    reserved: 0,
+    contested: 0,
+  };
   for (const { campaign: c } of campaigns) {
     if (tallyOpen(c, now)) pending.tally += c.entriesUntallied;
-    if (c.status === Status.InReview && now >= c.reviewEndsAt) pending.finalize++;
+    if ((c.status === Status.InReview && now >= c.reviewEndsAt) || contestLapsed(c, now)) pending.finalize++;
+    if (c.status === Status.Contested) pending.contested++;
     if (!finalized(c)) continue;
     if (c.status === Status.Settling) pending.entries += c.entriesOpen;
+    pending.sealedFees += c.sealedFeesOpen;
     if (!c.creatorShareSettled && shareDue(c)) pending.creatorShare++;
     if (c.creatorShareReserved > 0n) pending.reserved++;
     if (!c.prizeSettled) pending.prize++;

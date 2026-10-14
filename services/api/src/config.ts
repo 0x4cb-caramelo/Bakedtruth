@@ -3,8 +3,9 @@
  *          the port and host (loopback by default), the refresh interval, the CORS origin for the site, how many
  *          program transactions a refresh reads for the leaderboard, and the file of wallets left out of it (Sprint
  *          13); the names file and the display price's interval (Sprint 08); K-11's entries switch, `on` unless set
- *          to `off` (Sprint 08's third part).
- * Version: 0.4.0 (the entries switch; 0.3.1, 2b: no CoinGecko settings)
+ *          to `off` (Sprint 08's third part); the indexer the read routes forward to (`API_INDEXER_URL`, the founder's
+ *          routing answer (a)): loopback only, `off` to stop forwarding.
+ * Version: 0.5.0 (the indexer's URL; 0.4.0, the entries switch; 0.3.1, 2b: no CoinGecko settings)
  * Sprint:  08 (indexer and API, hackathon MVP)
  */
 import { fileURLToPath } from "node:url";
@@ -28,10 +29,14 @@ export type ApiConfig = {
   priceRefreshMs: number;
   /** K-11's switch: false turns /api/v1/health's `entries_allowed` off, whatever the chain says. */
   entriesSwitch: boolean;
+  /** The indexer the five read routes forward to, on loopback; null (`off`): they answer 503. */
+  indexerUrl: string | null;
 };
 
 type Env = Record<string, string | undefined>;
 const LOOPBACK = new Set(["127.0.0.1", "localhost", "::1"]);
+/** The loopback names as a URL's hostname spells them (an IPv6 address keeps its brackets). */
+const LOOPBACK_URL_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
 
 export function loadApiConfig(env: Env = process.env): ApiConfig {
   const rpcUrl = env.API_RPC_URL?.trim();
@@ -57,7 +62,23 @@ export function loadApiConfig(env: Env = process.env): ApiConfig {
       env.API_NAMES_FILE?.trim() || fileURLToPath(new URL("../../../content/account-names.json", import.meta.url)),
     priceRefreshMs: positive(env.API_PRICE_REFRESH_MS, 180_000, "API_PRICE_REFRESH_MS"),
     entriesSwitch: onOff(env.API_ENTRIES_ALLOWED, "API_ENTRIES_ALLOWED"),
+    indexerUrl: indexer(env.API_INDEXER_URL),
   };
+}
+
+/** `http://127.0.0.1:4201` unless set; `off` is null; anything but an http URL on loopback stops the start. */
+function indexer(raw: string | undefined): string | null {
+  const text = raw?.trim() || "http://127.0.0.1:4201";
+  if (text === "off") return null;
+  let parsed: URL;
+  try {
+    parsed = new URL(text);
+  } catch {
+    throw new Error("API_INDEXER_URL is not a URL");
+  }
+  if (parsed.protocol !== "http:" || !LOOPBACK_URL_HOSTS.has(parsed.hostname) || parsed.username || parsed.password)
+    throw new Error("API_INDEXER_URL must be an http URL on a loopback address, or off");
+  return text;
 }
 
 /** `on` (the default) or `off`; anything else stops the start, so a typo never opens or closes entries silently. */

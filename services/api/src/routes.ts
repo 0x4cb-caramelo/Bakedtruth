@@ -5,13 +5,16 @@
  *          {"error": {"code", "message"}}, never a stack trace. Reads only what is in memory: the chain snapshot, the
  *          program's history, the names and the last display price. Health's body is health.ts's: since Sprint 08's
  *          third part it adds `program_last_deploy_slot` and `entries_allowed`; every answer keeps its fields (TP §6:
- *          change only by adding), each shaped as its schema in @brot/sdk/schemas (read-api.ts).
- * Version: 0.4.0 (health.ts: the deploy slot and entries_allowed; 0.3.2, 2b; 0.3.1, names and price)
+ *          change only by adding), each shaped as its schema in @brot/sdk/schemas (read-api.ts). The indexer's read
+ *          routes (activity, chance, recent activity, a wallet's entries, the ranking) go to it through
+ *          indexer-proxy.ts, matched before the 404 (the founder's routing answer (a), 2026-10-13).
+ * Version: 0.5.0 (the indexer's routes forwarded; 0.4.0, health.ts; 0.3.2, 2b; 0.3.1, names and price)
  * Sprint:  08 (indexer and API, hackathon MVP; the third part); 13
  */
 import { healthBody } from "./health";
 import type { Hidden } from "./hidden";
 import type { History } from "./history";
+import { isIndexerRoute, type IndexerProxy } from "./indexer-proxy";
 import { createBoard, leaderboardOf, parseLeaderboardQuery } from "./leaderboard";
 import type { Names } from "./names";
 import { MAX_SERVED_SECONDS, priceBody, type Price } from "./price";
@@ -34,6 +37,8 @@ export type RouteOptions = {
   now?: () => bigint;
   /** K-11's switch (API_ENTRIES_ALLOWED): false turns `entries_allowed` off whatever the chain says; true if unset. */
   entriesSwitch?: boolean;
+  /** The forwarding to the indexer (indexer-proxy.ts); without it, the indexer's routes answer 503. */
+  indexer?: IndexerProxy;
 };
 
 const json = (body: unknown, status: number, cors: string) =>
@@ -127,6 +132,10 @@ function route(store: Store, options: RouteOptions, board: ReturnType<typeof cre
         200,
         cors,
       );
+    }
+    if (isIndexerRoute(url.pathname)) {
+      if (!options.indexer) return fail(503, "indexer_unavailable", "the indexer is not reachable from here", cors);
+      return options.indexer(request, url, cors);
     }
     return fail(404, "not_found", "no such route", cors);
   };

@@ -27,6 +27,18 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **As rotas do indexador públicas pela API de leitura** (branch `feat/api-indexer-route`, 13/10/2026; Sprint 08, a
+  resposta (a) do fundador sobre o caminho público; `session-log/2026-10-13-rotas-do-indexador-pela-api.md`). O
+  `brot-api`, já público em `brot.markets/api/v1`, encaminha ao indexador, no loopback, exatamente as cinco rotas de
+  leitura dele (a atividade e a chance de uma campanha, a atividade recente, as entradas de uma carteira e a ordem da
+  página inicial), sem mudança na Cloudflare nem no túnel. Só GET e HEAD; o caminho e a consulta passam como vieram;
+  nenhum cabeçalho do cliente segue adiante além do `accept`; o CORS é o da API; o indexador fora do ar dá 503, a
+  demora 504 e uma resposta acima de 1 MB 502, sempre no formato de erro da API e sem o endereço do indexador
+  (`API_INDEXER_URL`, só no loopback; `off` desliga). As três listas sem limite do indexador ganharam páginas
+  (`?limit=` de 1 a 500, 100 por padrão, e o cursor `?before=`, com `next_before` na resposta), para nenhuma resposta
+  chegar ao teto. Nada foi publicado: vale quando o indexador for instalado e o `brot-api` reiniciado, um ato do
+  Ronaldo no servidor.
+
 - **13/10/2026, ações em produção pedidas pelo Ronaldo, nas palavras dele** (`session-log/2026-10-13-landing-tags-e-pr-88.md`):
   o landing de `brot.markets` passou de `ab764ab` para a `main` em `395efa5`, depois do teste na porta 4239: a página
   de privacidade corrigida está no ar e `/terms` responde 404 (a resposta 9a); as tags `sprint--1` (`635c77a`),
@@ -146,6 +158,13 @@ recomendado (1a a 12a).
   segurança e o caminho de volta estão no README. A unidade com identidade própria continua não instalada: depende do
   dono do servidor.
 
+- **O keeper aprende as Sprints 14 e 15** (13/10/2026, faixa L14K, `a827b1e` e `c6ec66e`; no PR da Sprint 14). Fecha
+  uma campanha só depois de liquidar cada taxa selada aberta (`settle_sealed_fee`, para o patrocinador gravado), para
+  nunca mandar um fechamento que o programa recusa. Numa disputa na etapa 1, um keeper com a RPC B simula a releitura
+  por ela: a mesma leitura, recusada até o fim das 24 horas, espera sem contar como falha; uma diferente vai na hora
+  para a etapa 2 e avisa a equipe; a disputa vencida é finalizada e liquidada. Ele nunca abre nem decide uma disputa.
+  Alertas novos, cada um com o seu runbook: disputa aberta, etapa 2 perto do fim, releitura diferente e taxa selada
+  ainda aberta. Nada muda no `keeper.env`; no servidor ele relê só quando a RPC B for configurada.
 - **Sprint 14: as correções da segunda revisão adversária** (13/10/2026; `docs/sprints/sprint-14-referral-second-read.md`,
   "Record"). A revisão não achou como pagar cedo, ou para o lado errado, um resultado contestado, nem como travar um
   pote. **S1:** o `team_open_contest` escolhia abrir ou escalar pelo estado gravado, e uma abertura repetida (um 429

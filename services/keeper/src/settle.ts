@@ -1,13 +1,14 @@
 /**
  * Purpose: the settlement task (TP §3.5, the keeper's cycle, steps 2 to 5), behind KEEPER_SETTLE (off by default:
- *          whether the devnet keeper pays is the founder's decision). For each campaign whose review window has ended
- *          or that is finalized, it plans the next steps from the chain (settle-plan.ts), builds them with the SDK's
- *          builders, and lands them (landing.ts: simulated batches, a failing instruction dropped). It re-reads the
- *          campaign and plans again, up to six rounds a cycle (tally, finalize, the entries with the creator share and
- *          the prize, the fee, the close), then sweeps the fee vault to the config's fee recipient. Every step is the
- *          program's to accept: a second keeper, or a retry, gets the program's refusal and nothing moves twice.
- * Version: 0.1.0
- * Sprint:  07 carry-over (Sprint 06 DoD: finalize, settlement and payouts, idempotent, with retries and backoff)
+ *          whether the devnet keeper pays is the founder's decision). For each campaign whose review window has ended,
+ *          whose contest lapsed, or that is finalized, it plans the next steps from the chain (settle-plan.ts), builds
+ *          them with the SDK's builders, and lands them (landing.ts: simulated batches, a failing instruction dropped).
+ *          It re-reads the campaign and plans again, up to six rounds a cycle (tally, finalize, the entries with the
+ *          creator share, the prize and the sealed fees, the fee, the close), then sweeps the fee vault to the config's
+ *          fee recipient. Every step is the program's to accept: a second keeper, or a retry, gets the program's
+ *          refusal and nothing moves twice.
+ * Version: 0.2.0 (Sprints 14 and 15: the lapsed contest's finalize, the sealed fees listed and settled)
+ * Sprint:  07 carry-over (Sprint 06 DoD); 14 and 15 (lane L14K)
  */
 import { address, type Address } from "@solana/kit";
 import { decodeCampaign, feeVaultAddress, fetchRaw, rentExemptMinimum, type SolanaRpc } from "@brot/sdk/read";
@@ -18,19 +19,21 @@ import {
   buildSettleCreatorShare,
   buildSettleEntry,
   buildSettlePrize,
+  buildSettleSealedFee,
   buildSweepFees,
   buildTallyLateJoins,
 } from "@brot/sdk/tx";
 
 import type { Backoff, DailyClock } from "./backoff";
 import { withRetry } from "./backoff";
-import { listEntries, type OpenCampaign } from "./campaigns";
+import { listEntries, listSealedFees, type OpenCampaign } from "./campaigns";
 import type { ChainView } from "./chain";
 import { landItems, type Item, type ItemResult, type LandingContext } from "./landing";
 import { log as journal } from "./log";
 import {
   inSettlement,
   needsEntries,
+  needsSealed,
   pendingOf,
   planCampaign,
   planSweep,
@@ -78,6 +81,8 @@ export async function buildStep(step: Step): Promise<Item> {
       return { key, kind: step.kind, ix: await buildCollectFee(step) };
     case "settlePrize":
       return { key, kind: step.kind, ix: await buildSettlePrize(step) };
+    case "sealedFee":
+      return { key, kind: step.kind, ix: await buildSettleSealedFee(step) };
     case "close":
       return { key, kind: step.kind, ix: await buildCloseCampaign(step) };
     case "sweep":
@@ -114,10 +119,11 @@ async function settleOne(ctx: SettleContext, first: OpenCampaign, chainNow: bigi
     const entries = needsEntries(current.campaign, chainNow)
       ? await withRetry(() => listEntries(rpc, current.address))
       : null;
+    const sealed = needsSealed(current.campaign) ? await withRetry(() => listSealedFees(rpc, current.address)) : null;
     const claimKey = `claim:${current.address}`;
     // The daily clock starts only once a reserve is seen (its first sighting waits a day, backoff.ts).
     const claimDue = current.campaign.creatorShareReserved > 0n && ctx.claims.due(claimKey, wall());
-    const steps = planCampaign(current, entries, chainNow, claimDue);
+    const steps = planCampaign(current, entries, chainNow, claimDue, sealed);
     const eligible = steps.filter((step) => ctx.backoff.ready(stepKey(step), wall()));
     if (eligible.length === 0) return;
     if (eligible.some((step) => step.kind === "creatorShare" && step.claim)) ctx.claims.mark(claimKey, wall());
