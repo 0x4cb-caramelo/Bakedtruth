@@ -27,6 +27,15 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **Sprint 16, o endurecimento do programa antes do congelamento** (14/10/2026, faixa L16P, branch
+  `sprint-16-prefreeze`; `session-log/2026-10-14-sprint-16-endurecimento-antes-do-congelamento.md`). Corrige o que o
+  pacote de auditoria listou antes de congelar a versão das firmas. **O-3:** a contagem de um SIM de preço espera a
+  prova passar do prazo da janela (`CutoffNotFinal`, 6178), para que uma contagem parcial não deixe o corte das
+  entradas tardias móvel. Era um defeito de dinheiro da Sprint 04, reproduzido pelo teste aleatório e agora preso num
+  teste. **G-2:** cada instrução que paga confere a variação do cofre contra os livros, e o fechamento confere que o
+  cofre cobre o que eles guardam. **G-16:** as recusas da contagem e os slots de Join. **G-10:** a pausa com as 27
+  instruções. **G-1:** a prova de mutação cobre `checks/close.rs`, `checks/paying.rs` e as checagens novas. **SDK:** a
+  busca do evento de resolução lê toda versão de transação. Nenhum valor de pagamento mudou e nenhum layout mudou.
 - **O keeper novo no servidor, com a segunda RPC, e as mesclas da noite** (14/10/2026;
   `session-log/2026-10-14-keeper-novo-e-segunda-rpc.md`). Com as palavras do Ronaldo ("mergeie 92 e 91, adicione o
   novo keeper e segunda RPC"), os PRs #92 (a Sprint 14 com a 15 e o keeper, `98b6ece`) e #91 (as rotas do indexador

@@ -211,8 +211,23 @@ merged, it fixed the gaps the audit package found before the freeze (`docs/audit
 - **G-1:** the mutation plan covers `checks/close.rs`, `checks/paying.rs` and the new ids (11 of 11 cases killed).
 - **The SDK's event search** reads every transaction version the cluster serves.
 
-The checks: 1,100 TypeScript, 562 Rust and 564 mainnet tests; the fixed seed and 12 more; the Surfpool negative suite
-513 of 513. Still open:
+The checks: 1,100 TypeScript, 562 Rust and 564 mainnet tests; the fixed seed and 24 more (12 by the lane, 12 by the
+lead); the Surfpool negative suite 513 of 513. **The adversarial review** (read-only, 2026-10-14) found that O-3's
+claim holds: any later tally finds no earlier proof still fresh, since the cluster's clock never goes back along a
+fork. It also found that G-2 freezes no legitimate payout (Split, OneSided, Refund, reserves, the share taken from the
+fee, sealed fees, SOL sent by hand, dust and campaigns opened before the upgrade), and that no test was weakened. Its
+findings go to a follow-up before the freeze:
+- **High, off-chain:** the indexer, the API's history, the site's my entries and the team scripts read with
+  transaction version 0, so one v1 transaction that names the program stops the indexer's refresh and aborts the
+  team scripts. They should share the SDK's constant and skip an unreadable transaction without stopping.
+- **Medium:** the SDK's recheck can miss a v1 resolve when it falls back to version 0, and the relay allows only 0.
+  The recheck should also compare the event's publish time with the campaign's.
+- **Low:** a moved cut-off keeps the first proof's `observed_value` (a false second-read mismatch). G-2 checks
+  unbooked moves, not a wrong amount: a cap per payout from the snapshot would.
+- **Info:** a rent rise above the SOL sent by hand would block a close for good; the keeper can tally a YES price
+  result from the proof window on, not the review window's end; the pause test with a free opening.
+
+Still open:
 - the other event readers that ask for version 0 (the app's activity and my entries, the indexer, the API's history,
   the relay's allowlist);
 - an operation in the randomized test that tallies only part of one baker's joins.
