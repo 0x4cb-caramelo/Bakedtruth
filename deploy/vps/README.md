@@ -65,6 +65,42 @@ before the switch is backed up in `/etc/brot-markets/bak-20261013/keeper.env.bef
 the new URL to that line as root and restart `brot-keeper`. After the switch: the unit active, 0 errors and 0 429s in
 the first cycles, settlement on with nothing pending.
 
+**Since 2026-10-14: release `8af10e2`, the contest and the sealed fee, and RPC B.** At Ronaldo's request ("adicione o
+novo keeper e segunda RPC"), `brot-keeper` runs release `8af10e2` (`main` after PRs #92 and #91) since 2026-10-14 at
+00:46 UTC. It settles every sealed fee before a close, and in a contest's stage 1 it re-reads through RPC B. A
+`git archive` of that commit was uploaded with its SHA-256 checked, unpacked into
+`/srv/brot-markets/keeper/releases/8af10e2` and installed with `bun install --frozen-lockfile --filter @brot/keeper` as
+`brot`. A dry run first: a transient `systemd-run` unit as `brot` on port 4239, with a temporary copy of `keeper.env`
+plus the overrides in `/run` (deleted after), ran four cycles with no error and the second read on. Then
+`KEEPER_RPC_URL_B=https://api.devnet.solana.com` was appended to `keeper.env`. RPC B is Solana's public devnet RPC, a
+provider other than the primary's Helius, with no key. `current` was switched and the unit restarted. After the
+restart: settlement on, `secondRead` true with origin `https://api.devnet.solana.com`, cycles every 15 s, no failure
+and no 429. The env as it was before is backed up in `/etc/brot-markets/bak-20261014/keeper.env.before-8af10e2`.
+Rollback: point `current` back to `releases/88a00f9`, restore that backup, then `sudo systemctl restart brot-keeper`.
+
+## Where each key lives, and how to rotate it (Sprint 16)
+
+No value is written here. On devnet every key is a test key; the mainnet keys are in `deploy/mainnet/README.md` (two
+Squads multisigs of the same three hardware wallets, decisions M-1 to M-4 of 2026-10-13).
+
+| Key or secret | Where | Power | How to rotate |
+|---|---|---|---|
+| Keeper keypair (`BXnk…HALU` on devnet) | `/etc/brot-markets/keeper-devnet.json`, `root:brot` 0640 | Pays transaction fees. Every instruction it sends is open to any wallet; it moves no one's money but the program's rules | New keypair written as root, funded, the old balance swept to it, `restart brot-keeper` |
+| The primary's RPC URL (Helius key) | `KEEPER_RPC_URL` in `/etc/brot-markets/keeper.env`, `root:brot` 0640 | Reads and sends; a leak spends the Helius plan's credits | New key in Helius, the line rewritten as root, `restart brot-keeper` |
+| RPC B | `KEEPER_RPC_URL_B` in the same file | None: Solana's public devnet RPC, no key | — |
+| Restart secret (primary and standby) | `/etc/brot-markets/restart-secret`, `root:brot` 0440 | Asks the primary to restart (loopback only) | New random value as root, restart both keepers |
+| Tunnel token | `TUNNEL_TOKEN` in `/etc/brot-markets/tunnel.env`, `root` 0600 | Routes `brot.markets` to this server | New token in Cloudflare (the tunnel's page), the line rewritten as root, `restart brot-tunnel` |
+| Read API's RPC | `API_RPC_URL` in `/etc/brot-markets/api.env`, `root` 0600 | None: the public devnet RPC, no key | — |
+| Devnet upgrade authority, `admin` and fee recipient (`6N7r…4wcq`) | Ronaldo's machine (`~/.config/solana`), never on the server | Upgrades the program; `admin` resumes entries, changes the creation rules, decides a contest's stage 2; the fees go to it | Upgrade authority: `solana program set-upgrade-authority`. `admin`: `admin_transfer_admin` then `admin_accept_admin`. Fee recipient: `admin_set_fee_recipient` |
+| Team key (Ronaldo's) | Ronaldo's machine, never on the server | Pauses entries, opens free campaigns, confirms a result in its window or records the cause of an automatic void, contests a result and sends a contest to stage 2 | `admin_set_team` without it (`scripts/team/set-team.ts`) |
+| Program keypair (the id `5Rx8…n8o`) | Its backup on Ronaldo's machine, outside `target/deploy` | None after the deploy; needed only to deploy the same id again | — |
+
+**No internet-connected key has power over money.** User money moves only by the program's rules. No key can withdraw
+a vault: there is no emergency withdrawal, and a pause never stops payouts. On the server, the keeper keypair only pays
+fees, and the other secrets reach a provider's plan or a route, never a vault. What remains open for mainnet: the key
+vault for the keeper's wallet **[AC]**, and where the referral operations wallet lives (it holds the company's weekly
+referral budget, and a person signs it).
+
 ## Sprint 07: the standby, the restart and the alerts (closed for the Hackathon MVP, 2026-10-10)
 
 On the server, as the founder authorised on 2026-10-10: `brot-keeper` runs release `cc87637` (`main` at PR #48), with

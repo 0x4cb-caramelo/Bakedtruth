@@ -1,6 +1,7 @@
 # Runbooks dos alertas (Sprint 07; os da vigia de cadeia, da exposição e da Pyth desde a continuação da Sprint 07)
 
-Um arquivo por alerta. Cada um diz o que o alerta significa, quem age, como e em quanto tempo. Os prazos vêm da
+O plano de incidente, de uma página (quem pausa, quem retoma, quão rápido, quem fala e onde), está em
+[incident-plan.md](incident-plan.md). Um arquivo por alerta. Cada um diz o que o alerta significa, quem age, como e em quanto tempo. Os prazos vêm da
 Sprint 07: vigia a cada 5 minutos, assume após 10 minutos sem resposta, campanha resolvível parada por 10 minutos,
 liquidação parada por 30 minutos.
 

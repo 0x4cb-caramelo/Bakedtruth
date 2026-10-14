@@ -2,7 +2,7 @@
 
 **Status:** closed 2026-10-10 for the Hackathon MVP by the founder's decision; its open code items are built since
 2026-10-13 (the alerts, the second read through RPC B, the two-keepers test, the Pyth watch) and merged with PR #88,
-whose release `88a00f9` runs on the primary since 2026-10-13 19:03 UTC; the standby is not deployed. Not tagged:
+whose release `88a00f9` ran on the primary from 2026-10-13 19:03 UTC; since 2026-10-14 00:46 UTC the primary runs release `8af10e2` (PRs #92 and #91) with RPC B set to Solana's public devnet RPC, so its second read and the contest's re-read are live (`deploy/vps/README.md`); the standby is not deployed. Not tagged:
 blocked by D4 (the VM at a second provider with wallet 2, the RPC account at another company, the email provider), the
 founder (the path unit, the tag) and the server owner · **Branch:** `sprint-07-standby-watchdog` · **Dates:** none, by the founder's decision
 

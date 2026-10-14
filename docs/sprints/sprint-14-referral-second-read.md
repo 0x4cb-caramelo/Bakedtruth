@@ -1,6 +1,6 @@
 # Sprint 14 — Referral and second read
 
-**Status:** in progress: the program, the SDK, the referral routine and the randomized test built and tested (2026-10-13), with the founder's answer to D2 built the same day and the second red-team pass's findings fixed; waiting for the merge and the devnet redeploy · **Branch:** `sprint-14-referral-second-read` · **Dates:** none, by the founder's decision
+**Status:** in progress: the program, the SDK, the referral routine and the randomized test built and tested (2026-10-13), with the founder's answer to D2 built the same day and the second red-team pass's findings fixed; merged 2026-10-14 with Sprint 15 and the keeper's part (PR #92, `98b6ece`); the keeper is live on the server; waiting for the devnet redeploy, which Ronaldo set after Sprint 16's O-3 fix · **Branch:** `sprint-14-referral-second-read` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|
