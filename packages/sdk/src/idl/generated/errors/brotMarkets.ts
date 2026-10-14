@@ -314,6 +314,8 @@ export const BROT_MARKETS_ERROR__CONFIRM_WITH_VOID_REASON = 0x181f; // 6175
 export const BROT_MARKETS_ERROR__REREAD_BEFORE_TIMELOCK = 0x1820; // 6176
 /** ContestAlreadyOpen: The campaign is already Contested: an opening (stage 1) never escalates it; stage 2 is its own byte */
 export const BROT_MARKETS_ERROR__CONTEST_ALREADY_OPEN = 0x1821; // 6177
+/** CutoffNotFinal: A YES price result is tallied only once its proof is over 60 s old: an earlier proof could still move the cut-off */
+export const BROT_MARKETS_ERROR__CUTOFF_NOT_FINAL = 0x1822; // 6178
 
 export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY
@@ -342,6 +344,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__CURVE_HAS_TRANSFER_HOOK
   | typeof BROT_MARKETS_ERROR__CURVE_NOT_IN_SOL
   | typeof BROT_MARKETS_ERROR__CURVE_TOO_SMALL
+  | typeof BROT_MARKETS_ERROR__CUTOFF_NOT_FINAL
   | typeof BROT_MARKETS_ERROR__CUTOFF_NOT_MOVABLE
   | typeof BROT_MARKETS_ERROR__DUPLICATE_ACCOUNT
   | typeof BROT_MARKETS_ERROR__DUPLICATE_TEAM_KEY
@@ -496,6 +499,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__CURVE_HAS_TRANSFER_HOOK]: `Row 2: the DBC pool is a transfer-hook pool, which this kind does not accept`,
     [BROT_MARKETS_ERROR__CURVE_NOT_IN_SOL]: `Row 2: the curve is not priced in SOL: its config's quote mint is not wSOL`,
     [BROT_MARKETS_ERROR__CURVE_TOO_SMALL]: `Row 2: the curve's graduation threshold is below \`DBC_MIN_GRADUATION_LAMPORTS\``,
+    [BROT_MARKETS_ERROR__CUTOFF_NOT_FINAL]: `A YES price result is tallied only once its proof is over 60 s old: an earlier proof could still move the cut-off`,
     [BROT_MARKETS_ERROR__CUTOFF_NOT_MOVABLE]: `The proof does not move the cut-off back: not earlier, not a YES price result, or a tally has started`,
     [BROT_MARKETS_ERROR__DUPLICATE_ACCOUNT]: `The same account was passed in two slots that must differ`,
     [BROT_MARKETS_ERROR__DUPLICATE_TEAM_KEY]: `The same team key appears twice`,

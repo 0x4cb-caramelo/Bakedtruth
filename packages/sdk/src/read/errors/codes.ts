@@ -1,9 +1,9 @@
 /**
  * Purpose: the program's custom error codes by name (programs/brot-markets/src/error.rs), so a client
  *          names the exact refusal. Codes are appended there and here, never reused.
- * Version: 0.1.2
+ * Version: 0.1.3
  * Sprint:  05 (SDK); moved from tests/brot/errors.ts, which now re-exports it; the scaffold of Sprints 14–15
- *          (2026-10-13) appends 6153 and 6160 to 6174
+ *          (2026-10-13) appends 6153 and 6160 to 6174; Sprint 16 (lane L16P) appends 6178
  *
  * The messages are not here: they come from the IDL (`./index.ts`), which shank-cli writes from the
  * `#[error("...")]` of each variant, so a code and its message cannot drift apart. The test
@@ -175,6 +175,8 @@ export const BROT_ERROR_CODES = {
   ConfirmWithVoidReason: 6175,
   RereadBeforeTimelock: 6176,
   ContestAlreadyOpen: 6177,
+  // Sprint 16, the pre-freeze hardening (error.rs, from 6178)
+  CutoffNotFinal: 6178,
 } as const;
 
 /** The name of a program error, as error.rs and the IDL spell it. */

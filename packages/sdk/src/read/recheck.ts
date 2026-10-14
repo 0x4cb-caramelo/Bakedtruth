@@ -2,8 +2,8 @@
  * Purpose: `recheck(campaign, rpcUrl)` (BR-23, "Anyone can re-check. Same account, same answer"): through
  *          any RPC the caller chooses, read the campaign, then the very account and field the program read
  *          to resolve it, and return that value beside the value the program recorded (`observed_value`).
- * Version: 0.1.2 (the sixth kind: a DBC curve's stamp against the deadline)
- * Sprint:  05 (SDK)
+ * Version: 0.1.3 (Sprint 16: the event search reads every transaction version the cluster serves)
+ * Sprint:  05 (SDK); 16 (lane L16P, the keeper lane's note: a resolution sent in a v1 transaction was invisible)
  *
  * What a later read can show depends on the kind (TP 3.4.6, 3.4.8): a burn only lowers a revoked mint's
  * supply and locked liquidity only grows, so a later read may move past the recorded value with the
@@ -18,9 +18,17 @@
  * Trust: the campaign, the account and the event all come through the RPC named, so `matches` is no proof
  * against that RPC; whoever doubts it rechecks through another. Keep the URL on the person's side: a service
  * that took it from a request would fetch whatever it was told. A malformed answer is skipped, never thrown;
- * the event search reads newest first, a page at a time, up to 10,000 signatures, and stops at the first find.
+ * the event search reads newest first, a page at a time, up to 10,000 signatures, and stops at the first find. It asks
+ * for transactions up to `MAX_TRANSACTION_VERSION`; an RPC that refuses that option (a relay that relays version 0
+ * only answers invalid params) is asked for version 0 for the rest of the search, so it still finds v0 resolutions.
  */
-import { address, type Address, type Signature } from "@solana/kit";
+import {
+  address,
+  isSolanaError,
+  SOLANA_ERROR__JSON_RPC__INVALID_PARAMS,
+  type Address,
+  type Signature,
+} from "@solana/kit";
 
 import { decodeCampaign, type Campaign } from "./accounts";
 import { bytesToHex } from "./bytes";
@@ -52,17 +60,26 @@ export type Recheck = {
 /** How the event search pages: signatures per page, and the most it reads. */
 export type EventSearch = { pageSize?: number; maxSignatures?: number };
 
-type Resolved = { readAccount: string; publishTime: bigint; postedSlot: bigint; seq: bigint };
+/**
+ * The newest transaction version the cluster serves: legacy, 0 and 1 (devnet carries v1 transactions; Kit 8.4 types
+ * the same three). A node returns a transaction of any version up to the one asked and refuses a newer one, so the
+ * event search asks for this one. Raise it when the cluster serves a newer version.
+ */
+export const MAX_TRANSACTION_VERSION = 1;
 
-async function resolvedIn(rpc: SolanaRpc, signature: Signature, campaign: Address): Promise<Resolved | null> {
+type Resolved = { readAccount: string; publishTime: bigint; postedSlot: bigint; seq: bigint };
+/** One transaction read: its `CampaignResolved` of the campaign, if any; `refused` when the RPC refused the options. */
+type Read = { resolved: Resolved | null; refused: boolean };
+
+async function resolvedIn(rpc: SolanaRpc, signature: Signature, campaign: Address, version: 0 | 1): Promise<Read> {
   try {
-    const options = { encoding: "json", maxSupportedTransactionVersion: 0, commitment: "confirmed" } as const;
+    const options = { encoding: "json", maxSupportedTransactionVersion: version, commitment: "confirmed" } as const;
     const tx = await rpc.getTransaction(signature, options).send();
     const events = tx ? decodeTransactionEvents(tx as unknown as RpcTransaction) : [];
     const found = events.find((e) => e.name === "CampaignResolved" && e.data.campaign === campaign);
-    return found?.name === "CampaignResolved" ? { ...found.data } : null;
-  } catch {
-    return null;
+    return { resolved: found?.name === "CampaignResolved" ? { ...found.data } : null, refused: false };
+  } catch (error) {
+    return { resolved: null, refused: isSolanaError(error, SOLANA_ERROR__JSON_RPC__INVALID_PARAMS) };
   }
 }
 
@@ -71,6 +88,7 @@ export async function findResolvedEvent(rpc: SolanaRpc, campaign: Address, searc
   const pageSize = search.pageSize ?? 1_000;
   const most = search.maxSignatures ?? 10_000;
   let before: Signature | undefined;
+  let version: 0 | 1 = MAX_TRANSACTION_VERSION;
   for (let read = 0; read < most;) {
     const page = await rpc
       .getSignaturesForAddress(campaign, { limit: pageSize, before, commitment: "confirmed" })
@@ -79,8 +97,12 @@ export async function findResolvedEvent(rpc: SolanaRpc, campaign: Address, searc
     if (!Array.isArray(page) || page.length === 0) return null;
     for (const { signature, err } of page.slice(0, pageSize)) {
       if (err !== null) continue;
-      const found = await resolvedIn(rpc, signature, campaign);
-      if (found) return found;
+      let found = await resolvedIn(rpc, signature, campaign, version);
+      if (found.refused && version !== 0) {
+        version = 0;
+        found = await resolvedIn(rpc, signature, campaign, version);
+      }
+      if (found.resolved) return found.resolved;
     }
     read += Math.min(page.length, pageSize);
     if (page.length < pageSize) return null;

@@ -1,7 +1,7 @@
 //! Purpose: `resolve_campaign`: any wallet records the outcome the campaign's reader reads, at
 //!          the top level only, and opens the six-hour review window (TP sections 3.4.2, 3.4.6).
-//! Version: 0.0.4
-//! Sprint: 03 (readers and resolution); accounts frozen at the sprint's opening, body by lane D
+//! Version: 0.0.5 (the cut-off's gate and the tally's, O-3)
+//! Sprint: 03 (readers and resolution); accounts frozen at the sprint's opening, body by lane D; 16 (lane L16P)
 //!
 //! Order, each refusal with its own error: no arguments (`BadInstructionData`) and the five slots
 //! (`NotEnoughAccountKeys`); `checks::top_level` before any account is read (`ResolveNotTopLevel`);
@@ -59,7 +59,8 @@ pub fn resolve_campaign(
     }
     let kind = ReaderKind::try_from(stored.kind)?;
     // A campaign already in review moves its cut-off only for an earlier YES price proof, before any tally starts
-    // (decision of 2026-10-09): every other re-proof is refused.
+    // (decision of 2026-10-09): every other re-proof is refused. `entries_untallied` sees only entries tallied whole;
+    // no part of one is tallied while a move is still possible (`tally_late_joins`, `CutoffNotFinal`, O-3).
     if review
         && (kind != ReaderKind::PriceTouch
             || stored.outcome != Outcome::Yes as u8

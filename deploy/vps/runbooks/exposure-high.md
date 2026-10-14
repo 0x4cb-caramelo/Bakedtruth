@@ -1,7 +1,7 @@
 # Runbook: SOL demais nos cofres das campanhas
 
 **Alerta:** `exposure_high`: a soma dos lamports em todos os cofres de campanha ainda não fechados passou do limite
-`KEEPER_EXPOSURE_ALERT_LAMPORTS` (padrão 100 SOL, valor de trabalho a confirmar com o fundador).
+`KEEPER_EXPOSURE_ALERT_LAMPORTS` (padrão 100 SOL, aprovado pelo fundador em 13/10/2026).
 
 **O que significa.** Nenhum teto limita quanto o programa guarda (BP v0.0.4: sem cap). Se houver um defeito no
 programa, é isso que está em risco. O alerta não diz que há defeito: diz que a exposição cresceu além do combinado.

@@ -2,19 +2,20 @@
 //!          the baker (TP 3.4.5). A losing entry goes through the same instruction with zero from the pot; its late
 //!          part comes back whole. The Entry's joins were tallied before finalize (`tally_late_joins`), so this
 //!          instruction takes no Join accounts.
-//! Version: 0.0.1
-//! Sprint: 04 (lane C); the amendment of 2026-10-09 (the tally, the late sums on the Entry)
+//! Version: 0.0.2 (G-2: the vault's change asserted against the books, `VaultWatch`)
+//! Sprint: 04 (lane C); the amendment of 2026-10-09 (the tally, the late sums on the Entry); 16 (lane L16P)
 //!
 //! Accounts: 0 entry (writable), 1 campaign (writable), 2 vault (writable), 3 baker (writable; the stored baker),
 //! 4 event authority, 5 program. Any wallet; the caller chooses nothing.
 //! Refusals, in order: the arguments; the slots; a closed entry (`AlreadySettled`); the stored campaign and baker
 //! (`EntryNotOnCampaign`, `WrongBaker`); the campaign's status (`NotFinalized`, or `AlreadySettled` once Settled);
-//! `NotTallied` while a join is untallied; then the payout math, `paying_vault`, and the transfer.
+//! `NotTallied` while a join is untallied; then the payout math, `paying_vault`, and the transfer. Last, the vault's
+//! change equals the payout the books record in `paid_out_total` (`VaultWatch`, `InvariantViolated`).
 
 use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 
 use super::{
-    bookkeeping::{bump, credit, pay_from_vault, take_seq},
+    bookkeeping::{bump, credit, pay_from_vault, take_seq, VaultWatch},
     rules::{entry_payout, EntryAmounts, PotRule},
 };
 use crate::{
@@ -129,6 +130,7 @@ pub fn settle_entry(
     drop(entry_state);
 
     checks::paying_vault(vault, program_id, &[&*baker])?;
+    let watch = VaultWatch::start(vault, &stored)?;
     let rent = entry.lamports();
     let seq = take_seq(&mut stored)?;
     let open = stored
@@ -147,6 +149,7 @@ pub fn settle_entry(
     credit(baker, rent)?;
     entry.set_lamports(0);
     checks::close_account(entry, program_id)?;
+    watch.check(vault, &stored)?;
 
     let event = EntrySettled {
         campaign: campaign_key,

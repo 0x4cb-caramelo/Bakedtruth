@@ -27,6 +27,30 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **Sprint 16, o endurecimento do programa antes do congelamento** (14/10/2026, faixa L16P, branch
+  `sprint-16-prefreeze`; `session-log/2026-10-14-sprint-16-endurecimento-antes-do-congelamento.md`). Corrige o que o
+  pacote de auditoria listou antes de congelar a versão das firmas. **O-3:** a contagem de um SIM de preço espera a
+  prova passar do prazo da janela (`CutoffNotFinal`, 6178), para que uma contagem parcial não deixe o corte das
+  entradas tardias móvel. Era um defeito de dinheiro da Sprint 04, reproduzido pelo teste aleatório e agora preso num
+  teste. **G-2:** cada instrução que paga confere a variação do cofre contra os livros, e o fechamento confere que o
+  cofre cobre o que eles guardam. **G-16:** as recusas da contagem e os slots de Join. **G-10:** a pausa com as 27
+  instruções. **G-1:** a prova de mutação cobre `checks/close.rs`, `checks/paying.rs` e as checagens novas. **SDK:** a
+  busca do evento de resolução lê toda versão de transação. Nenhum valor de pagamento mudou e nenhum layout mudou.
+- **O keeper novo no servidor, com a segunda RPC, e as mesclas da noite** (14/10/2026;
+  `session-log/2026-10-14-keeper-novo-e-segunda-rpc.md`). Com as palavras do Ronaldo ("mergeie 92 e 91, adicione o
+  novo keeper e segunda RPC"), os PRs #92 (a Sprint 14 com a 15 e o keeper, `98b6ece`) e #91 (as rotas do indexador
+  pela API, `8af10e2`) entraram na `main`, cada um com o CI verde no commit da ponta. O keeper da release `8af10e2`
+  roda no servidor desde as 00h46 UTC, depois de um ensaio sem envio na porta 4239. Ele liquida as taxas seladas antes
+  do fechamento e relê a disputa na etapa 1 pela RPC B, que é a RPC pública do devnet da Solana, sem chave e de outro
+  provedor que a Helius. A volta atrás está em `deploy/vps/README.md`. A atualização do programa no devnet e a nova
+  publicação do site ficaram para depois da correção do O-3 (Sprint 16), a pedido do Ronaldo.
+- **Sprint 16, os registros que não dependem do endurecimento** (14/10/2026). Onde mora cada chave e segredo, e como
+  trocar cada um (`deploy/vps/README.md`, nenhum valor escrito), com o motivo de nenhuma chave ligada à internet mover
+  dinheiro de usuário. O plano de incidente numa página (`deploy/vps/runbooks/incident-plan.md`): quem pausa, o que a
+  pausa para e o que nunca para, quem retoma; as lacunas **[F]** são do fundador. Os limites dos alertas aprovados em
+  13/10 nos runbooks. Marcados com a evidência: o build verificável no CI, a checagem T12 do binário da mainnet e os
+  parâmetros da mainnet.
+
 - **As rotas do indexador públicas pela API de leitura** (branch `feat/api-indexer-route`, 13/10/2026; Sprint 08, a
   resposta (a) do fundador sobre o caminho público; `session-log/2026-10-13-rotas-do-indexador-pela-api.md`). O
   `brot-api`, já público em `brot.markets/api/v1`, encaminha ao indexador, no loopback, exatamente as cinco rotas de

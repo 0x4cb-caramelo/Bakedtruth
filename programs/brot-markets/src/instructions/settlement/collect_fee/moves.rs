@@ -1,10 +1,13 @@
 //! Purpose: the lamport moves of the settlement instructions, and the two reads they share: the
 //!          rent of an empty account, from the Rent sysvar (decision 6), and the fee vault's address.
-//! Version: 0.0.1
-//! Sprint: 04 (lane D). Used by `collect_fee`, `settle_prize`, `close_campaign` and `sweep_fees`.
+//! Version: 0.0.2 (G-2: each move re-reads both sides after it, `moved_exactly`)
+//! Sprint: 04 (lane D). Used by `collect_fee`, `settle_prize`, `close_campaign`, `sweep_fees` and
+//!         `settle_sealed_fee`; `moved_exactly` also by `pay_from_vault`. 16 (lane L16P, the audit package's G-2).
 //!
 //! A program-owned account gives lamports by a plain balance edit; the sum of the two sides is
-//! unchanged, so the runtime's balance check holds. Each side is checked before any is written.
+//! unchanged, so the runtime's balance check holds. Each side is checked before any is written, and
+//! read again after both are: the instruction-level assertion against the books is `VaultWatch`
+//! (`settlement/bookkeeping.rs`).
 
 use pinocchio::{
     error::ProgramError,
@@ -15,7 +18,7 @@ use pinocchio::{
 use crate::{checks, constants::FEE_VAULT_SEED, error::BrotError};
 
 /// Moves `amount` from `from` to `to`, refusing (`InvariantViolated`) when `from` holds less. Zero moves
-/// nothing and touches neither account.
+/// nothing and touches neither account. Both sides are read again after the move (`moved_exactly`).
 pub fn move_lamports(from: &mut AccountView, to: &mut AccountView, amount: u64) -> ProgramResult {
     if amount == 0 {
         return Ok(());
@@ -30,7 +33,22 @@ pub fn move_lamports(from: &mut AccountView, to: &mut AccountView, amount: u64) 
         .ok_or(BrotError::MathOverflow)?;
     from.set_lamports(left);
     to.set_lamports(arrived);
-    Ok(())
+    moved_exactly(from, left, to, arrived)
+}
+
+/// After a move, each side holds what the move wrote: `from` exactly `amount` less, `to` exactly `amount` more
+/// (`InvariantViolated` otherwise). The values are read from the accounts again, so the same account on both sides,
+/// which would end with the credit and not the debit (lamports out of nothing), is refused here, before the
+/// runtime's own balance check.
+pub fn moved_exactly(
+    from: &AccountView,
+    left: u64,
+    to: &AccountView,
+    arrived: u64,
+) -> ProgramResult {
+    let held = (from.lamports(), to.lamports());
+    // X0.9 move_both_sides
+    checks::require(held == (left, arrived), BrotError::InvariantViolated)
 }
 
 /// The rent-exempt minimum of an account with no data, read from the Rent sysvar.

@@ -2,18 +2,21 @@
 //!          in index order, adds the late amounts (joined at or after the YES proof's publish time) to the entry
 //!          and the campaign, closes each Join with its rent back to the baker, and marks the entry tallied when
 //!          its last join is closed. Lets the snapshot know the late totals before finalize.
-//! Version: 0.0.3
-//! Sprint: 04 (contract amendment; the body is lane G's)
+//! Version: 0.0.5 (O-3: a YES price result is tallied only once its cut-off is final; G-16: the Join slots)
+//! Sprint: 04 (contract amendment; the body is lane G's); 16 (lane L16P, the audit package's O-3 and G-16)
 //!
 //! Accounts: 0 campaign (writable), 1 entry (writable), 2 baker (writable), 3 event authority, 4 program,
-//! then the Join accounts to close, in index order, at least one. Refused unless the campaign is InReview
-//! (`TallyNotReady`), for every outcome. A join is late only on a YES price campaign, at or after the proof's
+//! then the Join accounts to close, in index order, at least one, each writable and none of them a named slot
+//! (`check_join_slots`: `NotWritable`, `DuplicateAccount`). Refused unless the campaign is InReview
+//! (`TallyNotReady`), for every outcome; on a YES price result, also while its cut-off can still move
+//! (`CutoffNotFinal`, `require_cutoff_final`). A join is late only on a YES price campaign, at or after the proof's
 //! publish time (`LateRule`); each join must be the next index (`JoinAccountsMismatch`).
 
 use pinocchio::{AccountView, Address, ProgramResult};
 
 use crate::{
     checks,
+    constants::PROOF_DELAY_SECONDS,
     error::BrotError,
     events::{self, LateTallied},
     instructions::entries::{
@@ -21,6 +24,7 @@ use crate::{
         join_tally::{tally_join, LateRule},
     },
     layout::{LeU32, LeU64},
+    readers::ChainTime,
     state::{campaign::Campaign, enums::Status},
 };
 
@@ -42,6 +46,7 @@ pub fn tally_late_joins(
     checks::distinct(campaign, baker)?;
     checks::distinct(entry, baker)?;
     checks::event_accounts(event_authority, program, program_id)?;
+    check_join_slots(joins, [&*campaign, &*entry, &*baker])?;
 
     let campaign_key = *campaign.address();
     let baker_key = *baker.address();
@@ -54,6 +59,7 @@ pub fn tally_late_joins(
     if campaign_state.status != Status::InReview as u8 {
         return Err(BrotError::TallyNotReady.into());
     }
+    require_cutoff_final(rule, ChainTime::now()?.unix_timestamp)?;
     let mut entry_state = load_entry_for_tally(entry, &campaign_key, &baker_key, program_id)?;
     let total = entry_state.join_count.get();
     let mut next = entry_state.joins_tallied.get();
@@ -113,6 +119,42 @@ pub fn tally_late_joins(
     };
     drop(campaign_state);
     events::emit(&event, event_authority, program, program_id)
+}
+
+/// The Join slots (G-16, Sprint 16), before any account is loaded: each writable, since the tally closes it
+/// (`NotWritable`; the runtime would refuse the closed balance anyway, with no error of this program), and none of
+/// them the campaign, the entry or the baker (`DuplicateAccount`; a loaded account would otherwise fail its second
+/// borrow). A join passed twice is the same account twice: the first pass closes it, and the second finds it no
+/// longer the program's (`WrongOwner`).
+fn check_join_slots(joins: &[AccountView], named: [&AccountView; 3]) -> ProgramResult {
+    // X0.9 tally_join_slots
+    for join in joins {
+        checks::writable(join)?;
+        for slot in named {
+            checks::distinct(join, slot)?;
+        }
+    }
+    Ok(())
+}
+
+/// The cut-off is final (O-3, Sprint 16). On a YES price result, `resolve_campaign` moves the cut-off back to an
+/// earlier proof at most `PROOF_DELAY_SECONDS` old, and its own gate sees only entries tallied whole, never a part of
+/// one, so a join tallied under the old cut-off would keep its class. Once `now` is past the recorded proof's
+/// publish time plus that bound, the recorded proof is itself too old to be accepted, every earlier one is older
+/// still, and the cut-off can no longer move: the tally waits until then. Every other outcome and kind has no cut-off
+/// to move. In i128, so no publish time can overflow the bound.
+pub fn require_cutoff_final(rule: LateRule, now: i64) -> ProgramResult {
+    if !rule.yes_price {
+        return Ok(());
+    }
+    let moves_until = i128::from(rule.publish_time)
+        .checked_add(i128::from(PROOF_DELAY_SECONDS))
+        .ok_or(BrotError::MathOverflow)?;
+    // X0.9 tally_cutoff_final
+    if i128::from(now) <= moves_until {
+        return Err(BrotError::CutoffNotFinal.into());
+    }
+    Ok(())
 }
 
 fn add(a: u64, b: u64) -> Result<u64, BrotError> {

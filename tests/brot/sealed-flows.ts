@@ -35,8 +35,16 @@ export async function resolve(w: World, campaign: Address, outcome: Outcome) {
   return expectOk(await resolveWith(w, campaign));
 }
 
-/** `tally_late_joins` for each baker: every Join of its Entry, in index order. */
+/**
+ * `tally_late_joins` for each baker: every Join of its Entry, in index order. A YES price result is tallied once its
+ * proof is over 60 s old (CutoffNotFinal, O-3), so the clock moves there first, as the keeper waits.
+ */
 export async function tallyAll(w: World, campaign: Address, bakers: Address[]) {
+  const c = readCampaign(w, campaign);
+  const final = (c.publish_time as bigint) + 61n;
+  if (c.outcome === P.Outcome.Yes && c.kind === P.ReaderKind.PriceTouch && now(w.client) < final) {
+    setTime(w.client, final);
+  }
   for (const baker of bakers) {
     const count = Number((await readEntry(w, campaign, baker)).join_count);
     const joins = await Promise.all(Array.from({ length: count }, (_, i) => P.joinPda(campaign, baker, i)));

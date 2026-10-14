@@ -119,7 +119,13 @@ export const SPEC: Record<string, Record<string, Slot>> = {
     feeVault: FEE,
   },
   SweepFees: { feeVault: FEE, feeRecipient: { kind: "stored", stored: "FeeRecipientMismatch" } },
-  TallyLateJoins: { campaign: CAMP, entry: { kind: "entry" }, baker: { kind: "stored", stored: "WrongBaker" } },
+  // Sprint 16 (G-16): `join` is the first of the Join accounts after the IDL's five, the slot the tally reads and closes.
+  TallyLateJoins: {
+    campaign: CAMP,
+    entry: { kind: "entry" },
+    baker: { kind: "stored", stored: "WrongBaker" },
+    join: { kind: "join" },
+  },
   // The scaffold of Sprints 14–15 (2026-10-13): disabled below until each lane lands.
   UserLinkReferrer: {
     referee: { kind: "payer", stranger: "PdaMismatch" },
@@ -165,6 +171,12 @@ export const DISTINCT: Record<string, [string, string][]> = {
     ["feeVault", "vault"],
   ],
   SweepFees: [["feeRecipient", "feeVault"]],
+  // Sprint 16 (G-16): each Join slot apart from the three named writable slots, before any load.
+  TallyLateJoins: [
+    ["join", "campaign"],
+    ["join", "entry"],
+    ["join", "baker"],
+  ],
   // Sprint 14, lane L14B: the re-read and the admin's decision check their two writable slots differ first.
   RereadCampaign: [["campaign", "config"]],
   AdminDecideContest: [["config", "campaign"]],

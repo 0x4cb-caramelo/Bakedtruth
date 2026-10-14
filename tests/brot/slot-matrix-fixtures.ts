@@ -85,7 +85,8 @@ export const BASELINES: Record<string, () => Promise<Baseline>> = {
     const baker = await fundedWallet(w);
     const { campaign } = await injectReviewed(
       w.client,
-      await base(w, { poolYes: SOL, poolNo: 0n, extra: { publish_time: now(w.client), entries_untallied: 1 } }),
+      // The proof is over 60 s old, so the cut-off is final and the tally may run (CutoffNotFinal, O-3).
+      await base(w, { poolYes: SOL, poolNo: 0n, extra: { publish_time: now(w.client) - 61n, entries_untallied: 1 } }),
       P.Outcome.Yes,
       now(w.client) + P.HOUR * 6n,
     );
@@ -109,7 +110,7 @@ export const BASELINES: Record<string, () => Promise<Baseline>> = {
       campaign,
       baker: baker.address,
       index: 0,
-      joined_at: now(w.client) - 60n,
+      joined_at: now(w.client) - 120n,
       amount: SOL,
       _reserved: new Uint8Array(8),
     });
@@ -255,7 +256,8 @@ export const BASELINES: Record<string, () => Promise<Baseline>> = {
     const { campaign, vault } = await injectCampaign(w.client, {
       ...c,
       status: P.Status.Settled,
-      extra: { rent_payer: c.creator, fee_collected: 1, prize_settled: 1, creator_share_settled: 1 },
+      // A finalized campaign has a mode: close reads its books against the vault (G-2). No entry: Refund (3).
+      extra: { rent_payer: c.creator, settle_mode: 3, fee_collected: 1, prize_settled: 1, creator_share_settled: 1 },
     });
     return { w, ix: S.closeCampaignIx(campaign, vault, c.creator as Address, await P.feeVaultPda()) };
   },
