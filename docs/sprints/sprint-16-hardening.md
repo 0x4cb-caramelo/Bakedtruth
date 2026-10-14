@@ -1,6 +1,6 @@
 # Sprint 16 — Hardening (multisig, pause, incident plan, creation rules frozen)
 
-**Status:** in progress; the CI and supply-chain items merged 2026-10-13 (PR #87), with the verifiable build, the T12 check, the mainnet parameters and "no cap" done; the pre-freeze hardening of the program (O-3 first) merged 2026-10-14 (PR #93) and on devnet the same day (slot 510863588), with the adversarial review's follow-ups in progress; the incident plan and the key inventory drafted; the rest waits for the founder and the hardware multisig (see "Record") · **Branch:** `sprint-16-hardening` · **Dates:** none, by the founder's decision
+**Status:** in progress; the CI and supply-chain items merged 2026-10-13 (PR #87), with the verifiable build, the T12 check, the mainnet parameters and "no cap" done; the pre-freeze hardening of the program merged 2026-10-14 in three PRs (#93, #94, #95) and on devnet the same day (slot 510894454 since ~06:35 UTC), each round read by an adversarial review; the incident plan and the key inventory drafted; the rest waits for the founder and the hardware multisig (see "Record") · **Branch:** `sprint-16-hardening` · **Dates:** none, by the founder's decision
 
 | | |
 |---|---|

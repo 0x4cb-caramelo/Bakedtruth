@@ -5,7 +5,9 @@
 identity) and merged with PR #88 (`88a00f9`). The real resolve was observed: the keeper resolved the test campaign
 `FmDo…` on its own on 2026-10-11, and since 2026-10-13 19:03 UTC the keeper runs under the existing unit with
 `KEEPER_SETTLE=on` and has settled the two campaigns that were waiting ("After closure" below); release `88a00f9` until
-2026-10-14 00:46 UTC, then `8af10e2`, which also settles sealed fees and re-reads contests (`deploy/vps/README.md`). Not tagged: blocked by
+2026-10-14 00:46 UTC, then `8af10e2`, `2e7a28c` and, since about 06:45 UTC, `6bd0f68`, which also settles sealed fees, re-reads contests and raises
+`settle_invariant` (`deploy/vps/README.md`). **Tagged `sprint-06`** (`88a00f9`, PR #88) on 2026-10-14 at Ronaldo's request, with this
+carry list in the tag. What stays open: blocked by
 the founder (the tag), the server owner (one identity per unit; the new unit is not installed), D4 (the Hermes stream)
 and P-7 (the conversion runbook) · **Branch:** `sprint-06-keeper-server` · **Dates:** none, by the founder's decision
 

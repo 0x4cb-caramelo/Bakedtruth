@@ -27,6 +27,13 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **A última rodada no ar e as tags de cinco sprints** (14/10/2026; `session-log/2026-10-14-indexador-no-ar-e-segunda-atualizacao.md`).
+  Com as palavras do Ronaldo, o #95 entrou na `main` (`6bd0f68`), e o binário do CI dela (`c002c5c3…`) foi para o devnet
+  no slot 510.894.454, sem extensão e com o hash conferido na rede. O site (`6bd0f68171d2`) e o keeper (`6bd0f68`, com o
+  alerta `settle_invariant`) foram publicados nesse commit, cada um ensaiado antes na porta 4239. As tags `sprint-06` e
+  `sprint-07` (`88a00f9`), `sprint-08` (`8af10e2`), `sprint-14` e `sprint-15` (`98b6ece`) foram postas, cada uma com a
+  lista do que ficou aberto. Este é o único PR destes registros, a pedido do Ronaldo.
+
 - **As últimas mudanças antes do congelamento** (14/10/2026). Num `Split`, o pagamento de cada entrada é conferido
   contra a parte dela no snapshot guardado (`EntryPayoutAboveShare`, 6180). O keeper avisa (`settle_invariant`) quando
   uma liquidação é recusada por uma dessas checagens de segurança. O teste da pausa fixa a contagem de cada arquivo que

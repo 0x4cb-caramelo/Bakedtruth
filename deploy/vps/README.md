@@ -83,6 +83,13 @@ as its cut-off is final, and every reader of transactions takes any version the 
 dry-run first on port 4239 (four cycles, no failure, the second read on), then `current` was switched. The env did not
 change. Rollback: point `current` back to `releases/8af10e2` and restart.
 
+**Since 2026-10-14 ~06:45 UTC: release `6bd0f68`** (`main` after PR #95), at Ronaldo's word ("atualize o keeper"). It
+raises `settle_invariant` when a settlement is refused by a safety check (6101, 6179, 6180). It was dry-run on port
+4239 first (four cycles, no failure), and the env did not change. Rollback: point `current` back to
+`releases/2e7a28c` and restart. The indexer keeps the drop-in `credential-path.conf` of its first start: the unit file
+in this directory no longer needs it, and installing that file and removing the drop-in is a cleanup for a later
+release.
+
 ## Where each key lives, and how to rotate it (Sprint 16)
 
 No value is written here. On devnet every key is a test key; the mainnet keys are in `deploy/mainnet/README.md` (two
@@ -318,7 +325,9 @@ release on. Decided by Ronaldo on 2026-10-11: the tunnel and systemd (no Nginx, 
 
 **Rolling back:** delete the two routes in the dashboard (the landing then answers both paths with 404) and
 `sudo systemctl disable --now brot-site brot-api`; or point `current` at the previous release and
-`sudo systemctl restart brot-api brot-site`. **Since 2026-10-14 ~05:40 UTC:** release `2e7a28c207bd` (`main` after PR
+`sudo systemctl restart brot-api brot-site`. **Since 2026-10-14 ~06:35 UTC:** release `6bd0f68171d2` (`main` after PR #95), built
+for the program deploy at slot 510894454 and tested on 4239 first (the eight pages as the live release's, no error); the
+way back is `2e7a28c207bd`. **From ~05:40 UTC:** release `2e7a28c207bd` (`main` after PR
 #94), built for the program deploy at slot 510880658, tested on 4239 first (its eight pages answered as the live
 release's, no error in its log); the way back is `a5e6014e42f3`. **Before it, from ~04:21 UTC:** release `a5e6014e42f3` (`main` after PR
 #93), built for the program deploy at slot 510863588 and tested on port 4239 first, through a transient unit as

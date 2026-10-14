@@ -136,6 +136,13 @@ second time put Sprints 14, 15 and 16's pre-freeze hardening (`main` `a5e6014`) 
   - **The upgrade.** Transaction
     `3BE3oCbwNYEXKZEPFnNvCkPysKWTx6FN6LnjPbnue18gotAgofugwWJUm1ESz6aNW9vojLQ3feLZxaTUubdf2PZo`, deployed in slot
     510880658, with the on-chain hash checked again. It cost only the fees.
+- **A fourth time, the same morning** (`main` `6bd0f68`, PR #95: the last changes before the freeze), at Ronaldo's
+  word ("pode mesclar o #95, atualizar o programa no devnet com o binário do CI da main depois dele e publicar o site"):
+  - **The artifact.** Run 38521057703, 206,784 bytes, sha256 `c002c5c3…5b93b21`, equal to the local build.
+  - **No extension.** The binary still fits in the account.
+  - **The upgrade.** Transaction
+    `x5geEUHNCGGUVPdv2DWTSHhAt1hJNbp7q9eZUqvpX8w7cgrGgdd75YrZQUtSjrCENWoSrvXaRv9ztQL7CaKZfUB`, deployed in slot
+    510894454, with the on-chain hash checked. The authority keeps 4.384 SOL.
 only, so an upgrade is these CLI steps, each command with `--url "$DEVNET_RPC_URL"` and the key passed explicitly:
 
 1. **Read first, send nothing.** `solana program show <id>`: loader v3, the expected authority, `Data Length` and
