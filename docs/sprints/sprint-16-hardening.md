@@ -29,7 +29,8 @@ release candidate. The version that leaves this sprint is the one the two firms 
 - [ ] The `.so`'s origin is attested with `actions/attest-build-provenance` in a job of its own, and checked with
       `gh attestation verify` (every `gh` call passes `--repo 0x4cb-caramelo/Bakedtruth`).
       *Built, skipped while the repository is private:* the founder answered (a) on 2026-10-13, public before mainnet;
-      the job runs from the day it is public.
+      the job runs from the day it is public. On 2026-10-14 Ronaldo added "repo publico por hora nao": not public
+      for now.
 - [ ] The 2-of-3 multisig exists, on hardware devices, with a public wait of 24 to 48 hours. On devnet it owns the
       upgrade authority and `admin` (by the two-step handover) and has made a test signature (T7; TP §14.4 C11 **[AC]**:
       a product with a public wait for program upgrades).

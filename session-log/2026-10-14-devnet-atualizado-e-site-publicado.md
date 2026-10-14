@@ -36,3 +36,9 @@ ele e não conferido pelo líder.
 
 Para o site, apontar `current` para `353c2a3a1b90` e reiniciar os dois serviços. Para o programa, só implantando de
 novo o binário anterior (`63610a32…`, do artefato do CI de `df09357`).
+
+## Depois
+
+O Ronaldo, sobre o repositório público: "repo publico por hora nao". O repositório continua privado. A atestação de
+origem do CI segue desligada, e a resposta (a) de 13/10, público antes da mainnet, continua de pé.
+
