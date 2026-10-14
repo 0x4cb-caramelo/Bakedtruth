@@ -78,6 +78,11 @@ restart: settlement on, `secondRead` true with origin `https://api.devnet.solana
 and no 429. The env as it was before is backed up in `/etc/brot-markets/bak-20261014/keeper.env.before-8af10e2`.
 Rollback: point `current` back to `releases/88a00f9`, restore that backup, then `sudo systemctl restart brot-keeper`.
 
+**Since 2026-10-14 ~05:45 UTC: release `2e7a28c`** (`main` after PR #94). The keeper tallies a YES price result as soon
+as its cut-off is final, and every reader of transactions takes any version the cluster serves. The release was
+dry-run first on port 4239 (four cycles, no failure, the second read on), then `current` was switched. The env did not
+change. Rollback: point `current` back to `releases/8af10e2` and restart.
+
 ## Where each key lives, and how to rotate it (Sprint 16)
 
 No value is written here. On devnet every key is a test key; the mainnet keys are in `deploy/mainnet/README.md` (two
@@ -313,13 +318,15 @@ release on. Decided by Ronaldo on 2026-10-11: the tunnel and systemd (no Nginx, 
 
 **Rolling back:** delete the two routes in the dashboard (the landing then answers both paths with 404) and
 `sudo systemctl disable --now brot-site brot-api`; or point `current` at the previous release and
-`sudo systemctl restart brot-api brot-site`. **Since 2026-10-14 ~04:21 UTC:** release `a5e6014e42f3` (`main` after PR
+`sudo systemctl restart brot-api brot-site`. **Since 2026-10-14 ~05:40 UTC:** release `2e7a28c207bd` (`main` after PR
+#94), built for the program deploy at slot 510880658, tested on 4239 first (its eight pages answered as the live
+release's, no error in its log); the way back is `a5e6014e42f3`. **Before it, from ~04:21 UTC:** release `a5e6014e42f3` (`main` after PR
 #93), built for the program deploy at slot 510863588 and tested on port 4239 first, through a transient unit as
 `brot-site`; its eight pages answered as the live release's. The previous release was `353c2a3a1b90`, which is also
 the way back. **A new release:** step 4 with the new commit, then
 `sudo systemctl restart brot-api brot-site`. Build again after every program upgrade (A-8).
 
-## The indexer's routes through the read API (Sprint 08; not live)
+## The indexer's routes through the read API (Sprint 08; live since 2026-10-14)
 
 The founder's routing answer (a), 2026-10-13: the indexer's read routes (`/api/v1/activity`, `/api/v1/ranking`,
 `/api/v1/wallets/<address>/entries`, `/api/v1/campaigns/<address>/activity` and `/chance`) reach the public through
@@ -329,7 +336,24 @@ The founder's routing answer (a), 2026-10-13: the indexer's read routes (`/api/v
 `off` to stop forwarding. Until the indexer runs, the five routes answer 503 `indexer_unavailable`, and every other
 route of the API is unchanged.
 
-Publishing them is a server act for Ronaldo, in this order:
+**Live since 2026-10-14 ~05:22 UTC**, at Ronaldo's word ("pode instalar o indexador"):
+- **The user and the release.** `brot-indexer` is a system user with no login, with its own copy of the pinned Bun
+  (`/usr/local/lib/brot-indexer/bun`, compared with `cmp`). The release is
+  `/srv/brot-markets/indexer/releases/2e7a28c207bd` (`current`), installed with `--filter @brot/indexer`.
+- **The settings.** `/etc/brot-markets/indexer.env` (`root:brot-indexer`, 0640) holds only the polls, the timeout and
+  the CORS origin. The credential `/etc/brot-markets/indexer-rpc-url` (root, 0400) is Solana's public devnet RPC
+  (D4: no paid account yet).
+- **The unit's first start failed.** The server's systemd 249 cannot resolve `%d` in `Environment=` ("Invalid slot")
+  and drops the line. A drop-in, `/etc/systemd/system/brot-indexer.service.d/credential-path.conf`, sets
+  `INDEXER_RPC_URL_FILE=/run/credentials/brot-indexer.service/rpc-url`; the unit files in this directory now use that
+  absolute path.
+- **Now.** The unit is enabled, health `ok`, and it reads the program's history from the start. The public RPC
+  answers 429 at times, so its refresh waits and goes on without skipping. The five routes answer through `brot-api`
+  inside and outside (`/api/v1/activity` and `/ranking` 200).
+- **Rolling back the indexer.** `sudo systemctl disable --now brot-indexer`: the routes answer 503 again, and nothing
+  else changes.
+
+Publishing them was a server act for Ronaldo, in this order:
 
 1. **The indexer**, installed and running on `127.0.0.1:4201` (`brot-indexer.service`; its header lists the steps,
    with its own RPC account, D4), and caught up: `curl -s http://127.0.0.1:4201/healthz`.
