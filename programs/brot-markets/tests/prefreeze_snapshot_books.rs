@@ -1,8 +1,9 @@
 //! Purpose: S-8 of the audit scope (the third review) on the host: `check_snapshot` pins a `Split` snapshot's
 //!          `winning_total` and `losing_total` to the campaign's books (each pool less its late part, the side the
-//!          stored outcome names). Every `Split` snapshot the program takes passes; a total one lamport off, a snapshot
-//!          taken on an input that is not the books' (the late parts left in, the sides swapped), a `Split` on an
-//!          outcome that is neither YES nor NO, and a pool below its late part are `SnapshotInconsistent`.
+//!          stored outcome names). Every `Split` snapshot the program takes passes; a total one lamport off (alone, or
+//!          with `distributable` and Brot's share moved to match), a snapshot taken on an input that is not the books'
+//!          (the late parts left in, the sides swapped), a `Split` on an outcome that is neither YES nor NO, and a pool
+//!          below its late part are `SnapshotInconsistent`.
 //! Version: 0.0.2 (the pots moved to `common/splits.rs`; the fee and `distributable` in `prefreeze_snapshot_derived.rs`)
 //! Sprint: 16 (lane S8)
 
@@ -47,6 +48,18 @@ fn prefreeze_snapshot_books_every_split_passes_and_a_total_one_lamport_off_does_
         }
         if w != l {
             assert_eq!(check_snapshot(&books, input, &off(l, w)), INCONSISTENT);
+        }
+        // S-8's own case: V one lamport smaller (or larger) with `distributable` and Brot's share moved to match. The
+        // fee, `distributable`'s identity and the sums all hold; only the books refuse it.
+        let (d, keeps) = (snap.distributable, snap.brot_keeps);
+        for (w, d, keeps) in [(down(w), down(d), up(keeps)), (up(w), up(d), down(keeps))] {
+            let shifted = Snapshot {
+                winning_total: w,
+                distributable: d,
+                brot_keeps: keeps,
+                ..snap
+            };
+            assert_eq!(check_snapshot(&books, input, &shifted), INCONSISTENT);
         }
     }
 }
