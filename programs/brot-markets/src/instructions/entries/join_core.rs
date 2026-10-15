@@ -1,7 +1,7 @@
 //! Purpose: the core of a join, shared by `user_join_campaign` and `sponsor_join_campaign`: every join
 //!          rule in `user_join_campaign`'s order with its own error, the baker's `Entry` and `Join`
 //!          records, the deposit into the vault, the bookkeeping and `EntryAdded`.
-//! Version: 0.0.2
+//! Version: 0.0.3 (Sprint 16, the S-8 review's L-1: the first baker is written once)
 //! Sprint: 15 (lane L15): moved out of `join_campaign.rs` 0.0.5 unchanged in order, errors and
 //!         effects, so the sealed entry joins the pot through the very same path; `amount_of` also
 //!         gets the parameters' version (red team L2)
@@ -117,9 +117,11 @@ pub fn join<T>(
     };
 
     // The first baker: the entry that lands in an empty pot, by the books, never by the vault's
-    // balance (I15). The exemption covers that wallet's whole entry, both sides (Q3).
+    // balance (I15). The exemption covers that wallet's whole entry, both sides (Q3). Written once, while
+    // none is recorded, so the pair `settle_entry` compares never moves to a second entry (L-1).
     let (pool_yes, pool_no) = (campaign.pool_yes.get(), campaign.pool_no.get());
-    if add(pool_yes, pool_no)? == 0 {
+    let none_yet = campaign.first_baker == Address::new_from_array([0; 32]);
+    if add(pool_yes, pool_no)? == 0 && none_yet {
         campaign.first_baker = baker_key;
         entry.is_first = 1;
     }
