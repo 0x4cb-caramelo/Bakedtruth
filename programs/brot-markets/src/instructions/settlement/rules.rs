@@ -2,8 +2,8 @@
 //!          that a `Split` payout stays within the entry's exact share, and the reserve path of a credit below rent
 //!          (TP section 3.4.5; amendment 2026-10-09). No account is read here; the instructions call these and host
 //!          tests check them.
-//! Version: 0.0.2 (the second pre-freeze review's R1: `require_within_share`)
-//! Sprint: 04 (lane C); 16 (lane L16P)
+//! Version: 0.0.3 (S-8: `require_within_share` restates the early part from the entry's fields)
+//! Sprint: 04 (lane C); 16 (lanes L16P and S8)
 
 use crate::{
     error::BrotError,
@@ -103,7 +103,9 @@ pub fn entry_payout(
 /// side; late both its late parts, refunded whole). Checked in u128 without the floor division the payout used:
 /// `(payout − late) × V ≤ early × D`. The floor the program pays always passes, the running cap (`payout_cap.rs`)
 /// still bounds the campaign as a whole, and an overpaid entry is refused before any lamport moves
-/// (`EntryPayoutAboveShare`). A payout below its own late parts is `InvariantViolated`. Other modes pay exact sums.
+/// (`EntryPayoutAboveShare`). A payout below its own late parts is `InvariantViolated`. The early part is subtracted
+/// here from the entry's fields, not through `early()`, so the check shares no helper with the payout it guards
+/// (S-8). The other modes are `entry_books.rs`'s.
 pub fn require_within_share(
     rule: &PotRule,
     entry: &EntryAmounts,
@@ -117,9 +119,10 @@ pub fn require_within_share(
         .checked_add(entry.late_no)
         .ok_or(BrotError::MathOverflow)?;
     let early_winning = match rule.winning {
-        Side::Yes => early(entry.yes, entry.late_yes)?,
-        Side::No => early(entry.no, entry.late_no)?,
-    };
+        Side::Yes => entry.yes.checked_sub(entry.late_yes),
+        Side::No => entry.no.checked_sub(entry.late_no),
+    }
+    .ok_or(BrotError::MathOverflow)?;
     let share = payout
         .amount
         .checked_sub(late)
