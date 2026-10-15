@@ -320,6 +320,10 @@ export const BROT_MARKETS_ERROR__CUTOFF_NOT_FINAL = 0x1822; // 6178
 export const BROT_MARKETS_ERROR__PAID_OUT_ABOVE_SNAPSHOT = 0x1823; // 6179
 /** EntryPayoutAboveShare: A Split entry's payout would exceed its exact share of distributable plus its late parts */
 export const BROT_MARKETS_ERROR__ENTRY_PAYOUT_ABOVE_SHARE = 0x1824; // 6180
+/** RefundPayoutAboveEntry: A Refund entry's payout would exceed its own YES plus NO, or take a one-sided fee */
+export const BROT_MARKETS_ERROR__REFUND_PAYOUT_ABOVE_ENTRY = 0x1825; // 6181
+/** OneSidedPayoutNotExact: A OneSided entry's payout plus its fee is not its YES plus NO, or the fee is not the one-sided rate on its early part (none for the first baker) */
+export const BROT_MARKETS_ERROR__ONE_SIDED_PAYOUT_NOT_EXACT = 0x1826; // 6182
 
 export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__ACCOUNT_NOT_EMPTY
@@ -400,6 +404,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__NOT_WRITABLE
   | typeof BROT_MARKETS_ERROR__ONE_SIDED_FEE_BPS_ABOVE_CEILING
   | typeof BROT_MARKETS_ERROR__ONE_SIDED_FEES_NOT_RECORDED
+  | typeof BROT_MARKETS_ERROR__ONE_SIDED_PAYOUT_NOT_EXACT
   | typeof BROT_MARKETS_ERROR__OPENING_ABOVE_MAX_LAMPORTS
   | typeof BROT_MARKETS_ERROR__OPENING_FEE_USD_OUT_OF_RANGE
   | typeof BROT_MARKETS_ERROR__OPENING_PRIZE_BPS_OUT_OF_RANGE
@@ -425,6 +430,7 @@ export type BrotMarketsError =
   | typeof BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN
   | typeof BROT_MARKETS_ERROR__READER_NOT_READY
   | typeof BROT_MARKETS_ERROR__READER_WRONG_OWNER
+  | typeof BROT_MARKETS_ERROR__REFUND_PAYOUT_ABOVE_ENTRY
   | typeof BROT_MARKETS_ERROR__RENT_PAYER_NOT_STORED
   | typeof BROT_MARKETS_ERROR__REREAD_BEFORE_TIMELOCK
   | typeof BROT_MARKETS_ERROR__REREAD_NOT_TOP_LEVEL
@@ -557,6 +563,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__NOT_WRITABLE]: `A slot that must be writable was passed read-only`,
     [BROT_MARKETS_ERROR__ONE_SIDED_FEE_BPS_ABOVE_CEILING]: `\`one_sided_fee_bps\` is above its ceiling`,
     [BROT_MARKETS_ERROR__ONE_SIDED_FEES_NOT_RECORDED]: `The running total of one-sided fees is not recorded, so the fee cannot be collected yet`,
+    [BROT_MARKETS_ERROR__ONE_SIDED_PAYOUT_NOT_EXACT]: `A OneSided entry's payout plus its fee is not its YES plus NO, or the fee is not the one-sided rate on its early part (none for the first baker)`,
     [BROT_MARKETS_ERROR__OPENING_ABOVE_MAX_LAMPORTS]: `Row 7: the opening would cost more lamports than the signed \`max_lamports\``,
     [BROT_MARKETS_ERROR__OPENING_FEE_USD_OUT_OF_RANGE]: `\`opening_fee_usd\` is outside its floor and ceiling`,
     [BROT_MARKETS_ERROR__OPENING_PRIZE_BPS_OUT_OF_RANGE]: `\`opening_prize_bps\` is outside its floor and ceiling`,
@@ -582,6 +589,7 @@ if (process.env["NODE_ENV"] !== "production") {
     [BROT_MARKETS_ERROR__READER_KIND_NOT_OPEN]: `Row 1: this kind does not open in this build (\`StakeAtLeast\` until a devnet YES is recorded; \`DbcGraduated\` not on mainnet)`,
     [BROT_MARKETS_ERROR__READER_NOT_READY]: `Unused since Sprint 03: the reader methods returned it before they were ported`,
     [BROT_MARKETS_ERROR__READER_WRONG_OWNER]: `Account is not owned by the program this reader trusts`,
+    [BROT_MARKETS_ERROR__REFUND_PAYOUT_ABOVE_ENTRY]: `A Refund entry's payout would exceed its own YES plus NO, or take a one-sided fee`,
     [BROT_MARKETS_ERROR__RENT_PAYER_NOT_STORED]: `The rent payer is not the one stored at opening`,
     [BROT_MARKETS_ERROR__REREAD_BEFORE_TIMELOCK]: `A matching re-read pays only after stage 1's 24-hour wait`,
     [BROT_MARKETS_ERROR__REREAD_NOT_TOP_LEVEL]: `reread_campaign must run at the transaction's top level, never by CPI`,

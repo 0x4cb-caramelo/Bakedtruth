@@ -4962,6 +4962,16 @@
       "code": 6180,
       "name": "EntryPayoutAboveShare",
       "msg": "A Split entry's payout would exceed its exact share of distributable plus its late parts"
+    },
+    {
+      "code": 6181,
+      "name": "RefundPayoutAboveEntry",
+      "msg": "A Refund entry's payout would exceed its own YES plus NO, or take a one-sided fee"
+    },
+    {
+      "code": 6182,
+      "name": "OneSidedPayoutNotExact",
+      "msg": "A OneSided entry's payout plus its fee is not its YES plus NO, or the fee is not the one-sided rate on its early part (none for the first baker)"
     }
   ],
   "metadata": {
