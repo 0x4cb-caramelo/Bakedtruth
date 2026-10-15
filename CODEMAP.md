@@ -944,7 +944,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`mod.rs`](programs/brot-markets/tests/vectors_support/mod.rs) | what the snapshot vector generator shares: the seeded generator, the amounts and rates it draws (zeros, values near `u64::MAX`, rates above 100%), and the print | 81 |
 | [`other_rows.rs`](programs/brot-markets/tests/vectors_support/other_rows.rs) | the `entry`, `estimate` and `schedule` rows of the snapshot vectors: what one entry is paid under each mode (late parts included), the join's return estimate, a | 134 |
-| [`snapshot_rows.rs`](programs/brot-markets/tests/vectors_support/snapshot_rows.rs) | the `snapshot` rows of the snapshot vectors: random pots under the four verdicts, one in three of the YES and NO rows (about a sixth of all) placed within a few | 103 |
+| [`snapshot_rows.rs`](programs/brot-markets/tests/vectors_support/snapshot_rows.rs) | the `snapshot` rows of the snapshot vectors: random pots under the four verdicts, one in three of the YES and NO rows (about a sixth of all) placed within a few | 138 |
 
 ## `prototype-lab/campaigns/js/`
 
