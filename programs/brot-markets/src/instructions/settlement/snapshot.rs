@@ -3,8 +3,9 @@
 //!          `math::snapshot`, stores the mode and the sums, moves the status to `Settling` through the transition
 //!          table, and decrements the open count for a paid campaign only (I7). `finalized_event` builds the
 //!          `CampaignFinalized` all three emit from what the snapshot stored (TP 3.4.3, 3.4.14).
-//! Version: 0.0.2 (`finalized_event`: the team's confirm and void emit `CampaignFinalized` too)
+//! Version: 0.0.3 (S-8: `check_snapshot` also reads the campaign's books, apart from the snapshot's input)
 //! Sprint: 04 (lane C). The late totals come from `tally_late_joins` (amendment 2026-10-09): they leave V and P.
+//!         16 (lane S8): `books_of`.
 //!
 //! Refusals, in order: `NotTallied` while an entry is untallied; `NoProofTime` for a YES on a price campaign without
 //! a publish time (only a YES proof is measured against late joins); the transition (`IllegalTransition`); the
@@ -16,7 +17,7 @@ use crate::{
     events::CampaignFinalized,
     layout::{LeU64, Pubkey},
     math::{
-        invariant::check_snapshot,
+        invariant::{check_snapshot, Books},
         snapshot::{snapshot, SnapshotInput, Verdict},
         void::VoidClass,
     },
@@ -73,6 +74,18 @@ fn input_of(campaign: &Campaign) -> Result<SnapshotInput, BrotError> {
     })
 }
 
+/// The campaign's books as its fields hold them, read apart from `input_of`, so `check_snapshot` holds the snapshot to
+/// the campaign and not to the input it was taken on (S-8).
+fn books_of(campaign: &Campaign) -> Result<Books, BrotError> {
+    Ok(Books {
+        outcome: Outcome::try_from(campaign.outcome)?,
+        pool_yes: campaign.pool_yes.get(),
+        pool_no: campaign.pool_no.get(),
+        late_yes: campaign.late_yes.get(),
+        late_no: campaign.late_no.get(),
+    })
+}
+
 pub fn finalize_snapshot(
     campaign: &mut Campaign,
     config: &mut GlobalConfig,
@@ -97,7 +110,7 @@ pub fn finalize_snapshot(
 
     let input = input_of(campaign)?;
     let snap = snapshot(input)?;
-    check_snapshot(&input, &snap)?;
+    check_snapshot(&books_of(campaign)?, &input, &snap)?;
 
     // The valve counts paid openings only (founder answer 4): a paid team opening counts, a free one does not.
     if campaign.opening_usd.get() > 0 {

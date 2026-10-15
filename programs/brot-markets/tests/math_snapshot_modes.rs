@@ -1,8 +1,10 @@
 //! Purpose: the `OneSided` and no-entry snapshots: the one-sided pot of Ana, Bruno and Carla (100,
 //!          198, 297 back, 5 to Brot), the one-sided baker with and without the prize, a team
 //!          campaign, and the rule for a campaign with no entry at all (founder answer 8).
-//! Version: 0.0.1
-//! Sprint: 04 (lane B)
+//! Version: 0.0.2 (S-8: `check_snapshot` also takes the books the input was read from)
+//! Sprint: 04 (lane B); 16 (lane S8)
+
+mod common;
 
 use brot_markets::error::BrotError;
 use brot_markets::math::{
@@ -12,6 +14,7 @@ use brot_markets::math::{
     void::VoidClass,
 };
 use brot_markets::state::enums::SettleMode;
+use common::books::books_of;
 
 fn input(verdict: Verdict, yes: u64, no: u64, prize: u64, opening: u64) -> SnapshotInput {
     SnapshotInput {
@@ -80,7 +83,7 @@ fn math_snapshot_modes_only_late_entries_on_the_other_side_still_leave_a_one_sid
     let snap = snapshot(late).unwrap();
     assert_eq!(snap.mode, SettleMode::OneSided);
     assert_eq!(snap.refunded_late, 40);
-    assert_eq!(check_snapshot(&late, &snap), Ok(()));
+    assert_eq!(check_snapshot(&books_of(&late), &late, &snap), Ok(()));
 }
 
 #[test]
@@ -101,7 +104,7 @@ fn math_snapshot_modes_no_entry_returns_the_prize_and_keeps_the_ten_percent() {
         assert_eq!(snap.to_opener, 450);
         assert_eq!(snap.brot_keeps, 50);
         assert_eq!(snap.distributable, 0);
-        assert_eq!(check_snapshot(&case, &snap), Ok(()));
+        assert_eq!(check_snapshot(&books_of(&case), &case, &snap), Ok(()));
     }
 }
 

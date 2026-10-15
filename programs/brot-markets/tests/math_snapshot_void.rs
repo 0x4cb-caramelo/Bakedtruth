@@ -1,8 +1,10 @@
 //! Purpose: the `Refund` snapshot of a void, per class: every entry back whole (late ones too), the
 //!          prize to the opener, and the 10% opening fee back to the opener on a house failure and kept
 //!          by Brot on an outside cause (P-4). One test per stored void reason.
-//! Version: 0.0.1
-//! Sprint: 04 (lane B)
+//! Version: 0.0.2 (S-8: `check_snapshot` also takes the books the input was read from)
+//! Sprint: 04 (lane B); 16 (lane S8)
+
+mod common;
 
 use brot_markets::math::{
     invariant::check_snapshot,
@@ -10,6 +12,7 @@ use brot_markets::math::{
     void::{void_return, VoidClass},
 };
 use brot_markets::state::enums::{SettleMode, VoidReason};
+use common::books::books_of;
 
 fn void(class: VoidClass, yes: u64, no: u64, late: u64) -> SnapshotInput {
     SnapshotInput {
@@ -37,7 +40,7 @@ fn math_snapshot_void_house_failure_returns_the_prize_and_the_opening_fee() {
     assert_eq!(snap.creator_share, 0);
     assert_eq!(snap.fee_total, 0);
     assert_eq!(snap.refunded_late, 30);
-    assert_eq!(check_snapshot(&case, &snap), Ok(()));
+    assert_eq!(check_snapshot(&books_of(&case), &case, &snap), Ok(()));
 }
 
 #[test]
@@ -47,7 +50,7 @@ fn math_snapshot_void_outside_cause_keeps_the_opening_fee() {
     assert_eq!(snap.mode, SettleMode::Refund);
     assert_eq!(snap.to_opener, 450);
     assert_eq!(snap.brot_keeps, 50);
-    assert_eq!(check_snapshot(&case, &snap), Ok(()));
+    assert_eq!(check_snapshot(&books_of(&case), &case, &snap), Ok(()));
 }
 
 #[test]
