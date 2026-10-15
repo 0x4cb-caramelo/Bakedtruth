@@ -264,6 +264,12 @@ findings go to a follow-up before the freeze:
   6180 trust. Its Info findings on the tests and the unit comment were fixed. The alert's step attribution in a batch
   stays as is (info).
 
+**S-8 fixed before the freeze (2026-10-15, branch `sprint-16-s8-snapshot`), at Ronaldo's word ("sim vamos corrigir
+isso").** At finalize the snapshot's totals are held to the campaign's books (6102). Each `Refund` and `OneSided` payout
+is checked against the entry's own amounts (6181, 6182), and the per-entry `Split` check no longer shares the payout's
+helper. The keeper alerts on the new refusals. Checks: 1,155 TypeScript, 575 Rust and 577 mainnet tests, 13 seeds,
+the mutation proof of the three new markers; a read-only adversarial review before the PR.
+
 **The freeze waits for the founders** (Ronaldo, 2026-10-14): the third-party prize (`sponsor_add_prize`, still
 deferred) and the two audit firms are decided with the partners before the release candidate's tag. Until then the
 audit package cites `8af10e2`, and by function the files the hardening rewrote; the freeze refreshes the lines at the

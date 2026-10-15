@@ -1,17 +1,23 @@
 //! Purpose: the `snapshot` rows of the snapshot vectors: random pots under the four verdicts, one in three
 //!          of the YES and NO rows (about a sixth of all) placed within a few lamports of the Economic
 //!          Viability Rule's threshold, where the pot turns from one-sided to split (decision of 2026-10-09).
-//! Version: 0.0.1
-//! Sprint: 05 (SDK and the devnet cycle)
+//!          Since S-8 every row that snapshots also passes the finalize check against its own books (`check_snapshot`),
+//!          at the row's random fee and share rates.
+//! Version: 0.0.2 (S-8: `check_snapshot` asserted on every row)
+//! Sprint: 05 (SDK and the devnet cycle); 16 (S-8)
 //!
 //! Row: `snapshot,verdict;yes;no;late_yes;late_no;prize;opening_fee;fee_bps;one_sided_bps;creator_bps;team`
 //! then `mode;winning;losing;late;fee;share;share_from_fee;from_pot;distributable;brot_keeps;to_opener`.
 
 use std::fmt::Write as _;
 
-use brot_markets::math::{
-    snapshot::{snapshot, SnapshotInput, Verdict},
-    void::VoidClass,
+use brot_markets::{
+    math::{
+        invariant::{check_snapshot, Books},
+        snapshot::{snapshot, SnapshotInput, Verdict},
+        void::VoidClass,
+    },
+    state::enums::Outcome,
 };
 
 use super::{err, mode_name, Lcg};
@@ -42,6 +48,25 @@ fn near_threshold(rng: &mut Lcg, winning: u64, fee_bps: u16, share_bps: u16, tea
         .unwrap_or(i128::MAX)
         .saturating_add(rng.step());
     u64::try_from(losing.max(1)).unwrap_or(u64::MAX)
+}
+
+/// The books `settlement/snapshot.rs` reads `input` from: each pool is its side's total plus its late part. `None`
+/// when a pool would not fit the `u64` the campaign stores: such a row cannot exist on chain.
+fn books_of(input: &SnapshotInput) -> Option<Books> {
+    let outcome = match input.verdict {
+        Verdict::Yes => Outcome::Yes,
+        Verdict::No => Outcome::No,
+        Verdict::Void(_) => Outcome::Void,
+    };
+    Some(Books {
+        outcome,
+        pool_yes: input.yes_total.checked_add(input.late_yes)?,
+        pool_no: input.no_total.checked_add(input.late_no)?,
+        late_yes: input.late_yes,
+        late_no: input.late_no,
+        fee_bps: input.fee_bps,
+        prize: input.prize,
+    })
 }
 
 pub fn rows(rng: &mut Lcg, out: &mut String) {
@@ -77,20 +102,30 @@ pub fn rows(rng: &mut Lcg, out: &mut String) {
             creator_is_team,
         };
         let shown = match snapshot(input) {
-            Ok(s) => format!(
-                "{};{};{};{};{};{};{};{};{};{};{}",
-                mode_name(s.mode),
-                s.winning_total,
-                s.losing_total,
-                s.refunded_late,
-                s.fee_total,
-                s.creator_share,
-                s.creator_share_from_fee,
-                s.from_pot,
-                s.distributable,
-                s.brot_keeps,
-                s.to_opener
-            ),
+            Ok(s) => {
+                // S-8: the finalize check accepts every snapshot the code produces, at any rate pair.
+                if let Some(books) = books_of(&input) {
+                    let checked = check_snapshot(&books, &input, &s);
+                    assert!(
+                        checked.is_ok(),
+                        "check_snapshot refused a row's own snapshot: {checked:?} for {input:?}"
+                    );
+                }
+                format!(
+                    "{};{};{};{};{};{};{};{};{};{};{}",
+                    mode_name(s.mode),
+                    s.winning_total,
+                    s.losing_total,
+                    s.refunded_late,
+                    s.fee_total,
+                    s.creator_share,
+                    s.creator_share_from_fee,
+                    s.from_pot,
+                    s.distributable,
+                    s.brot_keeps,
+                    s.to_opener
+                )
+            }
             Err(error) => err(error),
         };
         let _ = writeln!(

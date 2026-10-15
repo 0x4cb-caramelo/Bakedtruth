@@ -1,14 +1,17 @@
 //! Purpose: the `Split` snapshot on the sprint file's worked examples (V 600 / P 400 with and without
 //!          a 450 prize), a team campaign, the late refunds, and the Economic Viability Rule (2026-10-09):
 //!          a losing side too small to pay the fees resolves one-sided, with or without a prize.
-//! Version: 0.0.2
-//! Sprint: 04 (lane B; viability rule added at the closure review)
+//! Version: 0.0.3 (S-8: `check_snapshot` also takes the books the input was read from)
+//! Sprint: 04 (lane B; viability rule added at the closure review); 16 (lane S8)
+
+mod common;
 
 use brot_markets::math::{
     invariant::check_snapshot,
     snapshot::{snapshot, Snapshot, SnapshotInput, Verdict},
 };
 use brot_markets::state::enums::SettleMode;
+use common::books::books_of;
 
 const FEE_BPS: u16 = 1_000;
 const CREATOR_BPS: u16 = 100;
@@ -31,7 +34,7 @@ fn yes_wins(yes: u64, no: u64, prize: u64) -> SnapshotInput {
 
 fn take(input: SnapshotInput) -> Snapshot {
     let snap = snapshot(input).expect("a pot snapshots");
-    assert_eq!(check_snapshot(&input, &snap), Ok(()));
+    assert_eq!(check_snapshot(&books_of(&input), &input, &snap), Ok(()));
     snap
 }
 

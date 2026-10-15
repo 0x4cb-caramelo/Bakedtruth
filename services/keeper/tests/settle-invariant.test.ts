@@ -43,7 +43,13 @@ describe("settle_invariant", () => {
     expect(
       alertInvariants(sink, "A", [result("landed", null), result("refused", BROT_ERROR_CODES.AlreadySettled)]),
     ).toBe(false);
-    for (const code of [BROT_ERROR_CODES.InvariantViolated, BROT_ERROR_CODES.EntryPayoutAboveShare]) {
+    for (const code of [
+      BROT_ERROR_CODES.InvariantViolated,
+      BROT_ERROR_CODES.SnapshotInconsistent,
+      BROT_ERROR_CODES.EntryPayoutAboveShare,
+      BROT_ERROR_CODES.RefundPayoutAboveEntry,
+      BROT_ERROR_CODES.OneSidedPayoutNotExact,
+    ]) {
       expect(alertInvariants(sink, `B${code}`, [result("failed", code)])).toBe(true);
     }
     expect(alertInvariants(sink, "C", [result("refused", BROT_ERROR_CODES.PaidOutAboveSnapshot)])).toBe(true);
@@ -51,7 +57,10 @@ describe("settle_invariant", () => {
     expect(alertInvariants(undefined, "D", [result("refused", BROT_ERROR_CODES.InvariantViolated)])).toBe(false);
     expect(lines.map((line) => [line.kind, line.key, line.code, line.error])).toEqual([
       ["settle_invariant", "B6101", 6101, "InvariantViolated"],
+      ["settle_invariant", "B6102", 6102, "SnapshotInconsistent"],
       ["settle_invariant", "B6180", 6180, "EntryPayoutAboveShare"],
+      ["settle_invariant", "B6181", 6181, "RefundPayoutAboveEntry"],
+      ["settle_invariant", "B6182", 6182, "OneSidedPayoutNotExact"],
       ["settle_invariant", "C", 6179, "PaidOutAboveSnapshot"],
     ]);
   });

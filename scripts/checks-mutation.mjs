@@ -5,7 +5,9 @@
  *          rebuilds the program with cargo build-sbf, and shows that the check's own negative tests
  *          (Mollusk and LiteSVM) fail without it. Each source is restored byte for byte after each
  *          mutant, on error and on Ctrl-C.
- * Version: 0.0.5 (Sprint 16: G-1, lane L16P's pre-freeze markers, F4's cap with LiteSVM rows, R1's per-entry share)
+ * Version: 0.0.7 (Sprint 16: G-1, lane L16P's pre-freeze markers, F4's cap with LiteSVM rows, R1's per-entry share;
+ *          S-8's snapshot pin and the one-sided and refund rules; the S-8 review's L-2, the snapshot's fee and
+ *          distributable)
  * Sprint:  02 (pot core on Pinocchio), lane A; `top_level` in 03, lane D. Run by hand, never by CI.
  *
  * Usage:  node scripts/checks-mutation.mjs [--plan] [--only id,id] [--jobs N]
@@ -42,6 +44,9 @@ const SOURCES = [
   "instructions/settlement/collect_fee/moves.rs",
   "instructions/settlement/payout_cap.rs",
   "instructions/settlement/rules.rs",
+  // Sprint 16, the third review's S-8: the snapshot's totals pinned to the books, the other modes' entry rules.
+  "math/invariant.rs",
+  "instructions/settlement/entry_books.rs",
 ].map((file) => join(ROOT, "programs/brot-markets/src", file));
 const DEPLOY = join(ROOT, "target/deploy");
 const SO = join(DEPLOY, "brot_markets.so");
@@ -65,6 +70,9 @@ const RUST_TARGETS = [
   "prefreeze_tally",
   "prefreeze_payout_cap",
   "prefreeze_entry_share",
+  "prefreeze_snapshot_books",
+  "prefreeze_snapshot_derived",
+  "prefreeze_entry_books",
 ];
 const TS_FILES = [
   "tests/brot/checks.test.ts",
@@ -85,6 +93,7 @@ const TS_FILES = [
   "tests/brot/prefreeze-partial-tally.test.ts",
   "tests/brot/prefreeze-tally-refusals.test.ts",
   "tests/brot/prefreeze-payout-cap.test.ts",
+  "tests/brot/prefreeze-entry-books.test.ts",
 ];
 const PATH = `${process.env.HOME}/.bun/bin:${process.env.PATH}`;
 // Mollusk and LiteSVM both run the binary this script builds; logs off and no colours to parse.
@@ -196,6 +205,14 @@ close_books_covered   fail  - | close_campaign: a reserve larger than what the b
 close_books_covered   keeps - | close_campaign: a vault holding less than its books still owe
 entry_within_share    fail  prefreeze_entry_share_every_payout_the_program_computes_passes_and_one_lamport_more_does_not | -
 entry_within_share    fail  prefreeze_entry_share_counts_the_winning_side_and_refunds_late_parts_whole | -
+snapshot_split_totals fail  prefreeze_snapshot_books_every_split_passes_and_a_total_one_lamport_off_does_not | -
+snapshot_split_totals fail  prefreeze_snapshot_books_a_snapshot_taken_on_another_input_is_refused | -
+snapshot_split_totals fail  prefreeze_snapshot_books_a_split_on_another_outcome_or_a_pool_below_its_late_part_is_refused | -
+refund_within_entry   fail  prefreeze_entry_books_refund_pays_at_most_the_entry_and_takes_no_fee | -
+one_sided_exact       fail  prefreeze_entry_books_every_one_sided_payout_passes_and_any_other_split_of_it_does_not | settle_entry one-sided: an entry whose first-baker flag disagrees with the campaign's first_baker is refused either way
+one_sided_exact       fail  prefreeze_entry_books_one_sided_fee_on_the_whole_entry_or_with_another_exemption_is_refused | -
+snapshot_split_fee    fail  prefreeze_snapshot_derived_a_fee_off_the_rate_is_refused | -
+snapshot_split_distributable fail prefreeze_snapshot_derived_a_distributable_off_the_identity_is_refused | -
 `;
 
 const args = process.argv.slice(2);

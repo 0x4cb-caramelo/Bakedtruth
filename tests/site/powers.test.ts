@@ -76,6 +76,8 @@ describe("powers table", () => {
       "settlement/bookkeeping": null,
       // Sprint 16, the pre-freeze review's F4: the payout cap every paying instruction asserts (a helper, no power).
       "settlement/payout_cap": null,
+      // Sprint 16, the third review's S-8: the one-sided and refund payout rules settle_entry asserts (a helper).
+      "settlement/entry_books": null,
       "settlement/rules": null,
       "settlement/snapshot": null,
       // The scaffold of Sprints 14–15 (2026-10-13): any wallet, and the program chooses every result and destination.

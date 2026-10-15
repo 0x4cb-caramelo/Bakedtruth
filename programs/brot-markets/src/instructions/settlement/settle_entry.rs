@@ -2,21 +2,24 @@
 //!          the baker (TP 3.4.5). A losing entry goes through the same instruction with zero from the pot; its late
 //!          part comes back whole. The Entry's joins were tallied before finalize (`tally_late_joins`), so this
 //!          instruction takes no Join accounts.
-//! Version: 0.0.3 (G-2: the vault's change against the books; R1: a Split payout within the entry's exact share)
-//! Sprint: 04 (lane C); the amendment of 2026-10-09 (the tally, the late sums on the Entry); 16 (lane L16P)
+//! Version: 0.0.4 (G-2: the vault's change against the books; R1: a Split payout within the entry's exact share;
+//!         S-8: a Refund or OneSided payout against the entry's own amounts)
+//! Sprint: 04 (lane C); the amendment of 2026-10-09 (the tally, the late sums on the Entry); 16 (lanes L16P and S8)
 //!
 //! Accounts: 0 entry (writable), 1 campaign (writable), 2 vault (writable), 3 baker (writable; the stored baker),
 //! 4 event authority, 5 program. Any wallet; the caller chooses nothing.
 //! Refusals, in order: the arguments; the slots; a closed entry (`AlreadySettled`); the stored campaign and baker
 //! (`EntryNotOnCampaign`, `WrongBaker`); the campaign's status (`NotFinalized`, or `AlreadySettled` once Settled);
 //! `NotTallied` while a join is untallied; then the payout math, a `Split` payout within the entry's exact share
-//! (`require_within_share`, `EntryPayoutAboveShare`), `paying_vault`, and the transfer. Last, the vault's change
-//! equals the payout the books record in `paid_out_total` (`VaultWatch`, `InvariantViolated`).
+//! (`require_within_share`, `EntryPayoutAboveShare`), a `Refund` or `OneSided` payout against the entry's own amounts
+//! (`require_entry_books`: `RefundPayoutAboveEntry`, `OneSidedPayoutNotExact`), `paying_vault`, and the transfer.
+//! Last, the vault's change equals the payout the books record in `paid_out_total` (`VaultWatch`, `InvariantViolated`).
 
 use pinocchio::{error::ProgramError, AccountView, Address, ProgramResult};
 
 use super::{
     bookkeeping::{bump, credit, pay_from_vault, take_seq, VaultWatch},
+    entry_books::require_entry_books,
     rules::{entry_payout, require_within_share, EntryAmounts, PotRule},
 };
 use crate::{
@@ -129,6 +132,9 @@ pub fn settle_entry(
     let is_first = entry_state.is_first != 0;
     let payout = entry_payout(&rule, &amounts, is_first)?;
     require_within_share(&rule, &amounts, &payout)?;
+    // The exemption as the campaign records it, not the entry's flag the payout read (S-8).
+    let first_baker = stored.first_baker == *baker.address();
+    require_entry_books(&rule, &amounts, &payout, first_baker)?;
     drop(entry_state);
 
     checks::paying_vault(vault, program_id, &[&*baker])?;

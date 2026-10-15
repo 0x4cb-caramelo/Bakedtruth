@@ -27,6 +27,13 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **A fotografia do pote conferida contra os livros (S-8)** (15/10/2026; `session-log/2026-10-15-s8-fotografia-do-pote.md`).
+  Os sócios escolheram corrigir antes do congelamento. Quando uma campanha é decidida, os totais do snapshot de um
+  `Split` precisam bater com os potes da campanha menos as entradas tardias (6102). Cada pagamento de devolução e de
+  pote de um lado só é conferido contra os valores da própria entrada (6181, 6182), e a checagem por entrada do `Split`
+  calcula a parte antecipada por conta própria. O keeper avisa (`settle_invariant`) também nessas recusas. Nenhum valor
+  de pagamento mudou.
+
 - **As notas da Sprint -1 na `main`, e os dois últimos PRs de fora resolvidos** (14/10/2026). As quatro notas de
   sessão da Sprint -1 que só estavam no rascunho #36 (`session-log/2026-10-08-sprint-menos-1-abertura-design.md`,
   `2026-10-09-sprint-menos-1-porte-e-aprovacoes.md`, `2026-10-09-sprint-menos-1-primitivos-e-registro.md`,

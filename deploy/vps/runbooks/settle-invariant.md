@@ -1,8 +1,10 @@
 # Runbook: uma liquidação recusada por um invariante de dinheiro
 
 **Alerta:** `settle_invariant`, uma vez por campanha. O programa recusou um passo de liquidação (pagar uma entrada, a
-parte do criador, o prêmio, a taxa ou o fechamento) com `InvariantViolated` (6101), `PaidOutAboveSnapshot` (6179) ou
-`EntryPayoutAboveShare` (6180). A linha traz a campanha, o passo e o código.
+parte do criador, o prêmio, a taxa ou o fechamento, ou a finalização) com `InvariantViolated` (6101),
+`SnapshotInconsistent` (6102, a fotografia do pote não bate com os livros), `PaidOutAboveSnapshot` (6179),
+`EntryPayoutAboveShare` (6180), `RefundPayoutAboveEntry` (6181) ou `OneSidedPayoutNotExact` (6182). A linha traz a
+campanha, o passo e o código.
 
 **O que significa.** Os livros da campanha não batem com o cofre ou com o snapshot: o programa travou o pagamento antes
 de mover um lamport, como deve. Nenhuma liquidação que o programa produz chega aqui; é um defeito no código ou um

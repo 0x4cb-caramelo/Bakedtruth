@@ -1,14 +1,16 @@
 //! Purpose: a small seeded generator for the math property tests (xorshift64*): fixed seeds,
 //!          reproducible runs, no dependency; plus the checked u128 helpers the oracles use.
-//! Version: 0.0.1
-//! Sprint: 02 (pot core on Pinocchio), lane C
+//! Version: 0.0.3 (`books`: the campaign books of a snapshot input, S-8; `splits`: its Split pots)
+//! Sprint: 02 (pot core on Pinocchio), lane C; 16 (lane S8)
 //!
 //! Each test crate uses a subset of these helpers, hence the `dead_code` allowance. A failing
 //! case prints its seed and index; rerunning the test replays it exactly.
 
 #![allow(dead_code)]
 
+pub mod books;
 pub mod pots;
+pub mod splits;
 
 /// How many random cases a property test draws.
 pub const CASES: usize = 20_000;
