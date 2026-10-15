@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **1240** |
+| Arquivos mapeados | **1242** |
 | Acima de 200 linhas | **47** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -147,7 +147,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`mascot.tsx`](app/components/mascot.tsx) | Mounts the mascot once for the whole app. Each page decides where it may stand with | 32 |
 | [`phone-menu.tsx`](app/components/phone-menu.tsx) | the menu under 1180 px (the approved prototype's `.phone-nav` sheet): the campaign search (the top bar's field hides on a phone), every route, the theme switch  | 64 |
 | [`pointer-effects.tsx`](app/components/pointer-effects.tsx) | the approved prototype's pointer effects (prototype-lab/campaigns/js/effects.js, whose styles came over in base.css and card.css): the dot field behind every pa | 91 |
-| [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 49 |
+| [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are listed (with an install link when missing), Solflare on the site's network; any other | 56 |
 | [`site-footer.tsx`](app/components/site-footer.tsx) | the footer of every screen, in the approved prototype's style (prototype-lab/campaigns, `.foot`): the links, then the legal lines the site must carry: BRAND.md' | 60 |
 | [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): Baked and the wordmark, the three main links with the current one unde | 117 |
 | [`site-notice.tsx`](app/components/site-notice.tsx) | the strip above every screen (Sprint 09, BR-47, P1 §4.6), in the approved prototype's place and style (prototype-lab/campaigns, `.status`): the devnet mark, the | 27 |
@@ -406,6 +406,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`wallet-picker.tsx`](app/features/wallet/wallet-picker.tsx) | "Connect" opens this list (the approved prototype's "Connect a wallet" dialog, ui/wallet.js): every wallet the browser has, detected ones first and the missing  | 119 |
 | [`wallet-state.test.ts`](app/features/wallet/wallet-state.test.ts) | the wallet's view: disconnected, connected with a balance, no SOL (faucet on devnet only), the balance still loading, and the SOL formatting (four decimals, tru | 54 |
 | [`wallet-state.ts`](app/features/wallet/wallet-state.ts) | the wallet's view, as pure logic: disconnected; connected with its address and SOL balance; connected with no SOL, which offers the devnet faucet only on devnet | 36 |
+| [`web-shell.test.ts`](app/features/wallet/web-shell.test.ts) | the Android app's WebView is told apart by the marker the web shell appends to its user agent, and Solflare opens on the site's network (never mainnet-beta for  | 40 |
+| [`web-shell.ts`](app/features/wallet/web-shell.ts) | the wallets the site lists, by where it runs. Inside the Android app (the Solana Mobile web shell, a WebView) only the Mobile Wallet Adapter connects: Solflare' | 24 |
 
 ## `app/lib/`
 

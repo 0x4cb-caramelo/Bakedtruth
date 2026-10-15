@@ -1323,6 +1323,12 @@ recomendado (1a a 12a).
 
 ### Fixed
 
+- **A carteira dentro do app Android** (15/10/2026, achado por um testador do APK da submissão à Solana Mobile). O
+  site criava o adaptador da Solflare sem rede, e o SDK dela abre na mainnet-beta quando não recebe uma. Dentro do app
+  (o shell web da Solana Mobile, um WebView) não há extensão, então tocar em "Solflare" abria a página web de conexão
+  dela, na mainnet-beta. Agora, dentro do app, a lista "Connect a wallet" mostra só o Mobile Wallet Adapter, que abre o
+  app de carteira do celular na devnet; a Phantom também sai de lá, porque só levava à instalação. Fora do app, a
+  Solflare abre na rede do site (`app/features/wallet/web-shell.ts`, com testes). O APK não muda: ele só abre o site.
 - **O erro #418 do React em todas as páginas do site** (13/10/2026, achado na publicação do ticker;
   `session-log/2026-10-13-publicacao-do-ticker-no-dev0x.md`). O servidor não vê carteira nenhuma, e o navegador quase
   sempre vê uma: o adaptador da Solflare fica "Loadable" em qualquer navegador de computador. Por isso duas partes da

@@ -14,12 +14,19 @@ import { CurveNamesProvider } from "@/features/campaigns/curve-names";
 import { registerMwaOnce } from "@/features/wallet/register-mwa";
 import { SolBalanceProvider } from "@/features/wallet/sol-balance-provider";
 import { WalletPickerProvider } from "@/features/wallet/wallet-picker";
+import { isWebShell, solflareNetworkOf } from "@/features/wallet/web-shell";
 
 /** `curveNames`: the reviewed names of graduation curves, read by the root layout on the server. */
 export function Providers({ children, curveNames }: { children: ReactNode; curveNames: readonly AccountName[] }) {
-  // Phantom and Solflare are always listed (with an install link when missing); any other
-  // Wallet Standard wallet (Backpack, ...) is discovered automatically.
-  const wallets = useMemo(() => [new PhantomWalletAdapter(), new SolflareWalletAdapter()], []);
+  // Phantom and Solflare are listed (with an install link when missing), Solflare on the site's network; any other
+  // Wallet Standard wallet (Backpack, ...) is discovered automatically. Inside the Android app only MWA connects.
+  const wallets = useMemo(
+    () =>
+      typeof navigator !== "undefined" && isWebShell(navigator.userAgent)
+        ? []
+        : [new PhantomWalletAdapter(), new SolflareWalletAdapter({ network: solflareNetworkOf(CLUSTER) })],
+    [],
+  );
   // The MWA wallet registers once, for the site's cluster. A cluster without an MWA chain is logged, not thrown.
   useEffect(() => {
     try {
