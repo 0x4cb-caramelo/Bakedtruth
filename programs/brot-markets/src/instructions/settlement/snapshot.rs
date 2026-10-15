@@ -3,7 +3,8 @@
 //!          `math::snapshot`, stores the mode and the sums, moves the status to `Settling` through the transition
 //!          table, and decrements the open count for a paid campaign only (I7). `finalized_event` builds the
 //!          `CampaignFinalized` all three emit from what the snapshot stored (TP 3.4.3, 3.4.14).
-//! Version: 0.0.3 (S-8: `check_snapshot` also reads the campaign's books, apart from the snapshot's input)
+//! Version: 0.0.4 (S-8: `check_snapshot` also reads the campaign's books, apart from the snapshot's input; its fee
+//!         rate and prize since the review's L-2)
 //! Sprint: 04 (lane C). The late totals come from `tally_late_joins` (amendment 2026-10-09): they leave V and P.
 //!         16 (lane S8): `books_of`.
 //!
@@ -83,6 +84,8 @@ fn books_of(campaign: &Campaign) -> Result<Books, BrotError> {
         pool_no: campaign.pool_no.get(),
         late_yes: campaign.late_yes.get(),
         late_no: campaign.late_no.get(),
+        fee_bps: campaign.fee_bps.get(),
+        prize: campaign.prize_lamports.get(),
     })
 }
 

@@ -3,7 +3,7 @@
 //!          stored outcome names). Every `Split` snapshot the program takes passes; a total one lamport off, a snapshot
 //!          taken on an input that is not the books' (the late parts left in, the sides swapped), a `Split` on an
 //!          outcome that is neither YES nor NO, and a pool below its late part are `SnapshotInconsistent`.
-//! Version: 0.0.1
+//! Version: 0.0.2 (the pots moved to `common/splits.rs`; the fee and `distributable` in `prefreeze_snapshot_derived.rs`)
 //! Sprint: 16 (lane S8)
 
 mod common;
@@ -12,83 +12,43 @@ use brot_markets::{
     error::BrotError,
     math::{
         invariant::{check_snapshot, Books},
-        snapshot::{snapshot, Snapshot, SnapshotInput, Verdict},
+        snapshot::{Snapshot, Verdict},
     },
-    state::enums::{Outcome, SettleMode},
+    state::enums::Outcome,
 };
-use common::books::books_of;
+use common::{
+    books::books_of,
+    splits::{down, grid, input, split, up},
+};
 
 const INCONSISTENT: Result<(), BrotError> = Err(BrotError::SnapshotInconsistent);
 
-fn input(
-    verdict: Verdict,
-    yes: u64,
-    no: u64,
-    late_yes: u64,
-    late_no: u64,
-    team: bool,
-) -> SnapshotInput {
-    SnapshotInput {
-        verdict,
-        yes_total: yes,
-        no_total: no,
-        late_yes,
-        late_no,
-        prize: 4_118_239_224,
-        opening_fee: 457_582_136,
-        fee_bps: 1_000,
-        one_sided_fee_bps: 100,
-        creator_share_bps: 100,
-        creator_is_team: team,
-    }
-}
-
-fn split(input: &SnapshotInput) -> Snapshot {
-    let snap = snapshot(*input).expect("the pot snapshots");
-    assert_eq!(snap.mode, SettleMode::Split, "{input:?}");
-    snap
-}
-
 #[test]
 fn prefreeze_snapshot_books_every_split_passes_and_a_total_one_lamport_off_does_not() {
-    // Each pot splits on either verdict: neither side is 89 times the other (the Economic Viability Rule).
-    let pots = [
-        (600u64, 400u64),
-        (400, 600),
-        (2_000_000_000, 1_000_000_000),
-        (1_000_000, 50_000_000),
-        (9_007_199_254_740_993, 1_000_000_000_000_007),
-    ];
-    let lates = [(0u64, 0u64), (77, 0), (0, 13), (1_000_000_000, 7)];
-    let mut checked = 0u32;
-    for verdict in [Verdict::Yes, Verdict::No] {
-        for &(yes, no) in &pots {
-            for &(late_yes, late_no) in &lates {
-                for team in [false, true] {
-                    let input = input(verdict, yes, no, late_yes, late_no, team);
-                    let snap = split(&input);
-                    let books = books_of(&input);
-                    assert_eq!(check_snapshot(&books, &input, &snap), Ok(()), "{input:?}");
-                    let off = |w: u64, l: u64| Snapshot {
-                        winning_total: w,
-                        losing_total: l,
-                        ..snap
-                    };
-                    let (w, l) = (snap.winning_total, snap.losing_total);
-                    let (w_up, l_up) = (w.checked_add(1).unwrap(), l.checked_add(1).unwrap());
-                    let (w_down, l_down) = (w.checked_sub(1).unwrap(), l.checked_sub(1).unwrap());
-                    for tampered in [off(w_down, l), off(w_up, l), off(w, l_down), off(w, l_up)] {
-                        assert_eq!(check_snapshot(&books, &input, &tampered), INCONSISTENT);
-                    }
-                    if w != l {
-                        assert_eq!(check_snapshot(&books, &input, &off(l, w)), INCONSISTENT);
-                    }
-                    checked = checked.checked_add(1).unwrap();
-                }
-            }
+    let all = grid();
+    assert_eq!(all.len(), 80);
+    for input in &all {
+        let snap = split(input);
+        let books = books_of(input);
+        assert_eq!(check_snapshot(&books, input, &snap), Ok(()), "{input:?}");
+        let off = |w: u64, l: u64| Snapshot {
+            winning_total: w,
+            losing_total: l,
+            ..snap
+        };
+        let (w, l) = (snap.winning_total, snap.losing_total);
+        for tampered in [
+            off(down(w), l),
+            off(up(w), l),
+            off(w, down(l)),
+            off(w, up(l)),
+        ] {
+            assert_eq!(check_snapshot(&books, input, &tampered), INCONSISTENT);
+        }
+        if w != l {
+            assert_eq!(check_snapshot(&books, input, &off(l, w)), INCONSISTENT);
         }
     }
-    assert_eq!(checked, 80);
 }
 
 #[test]
@@ -100,6 +60,8 @@ fn prefreeze_snapshot_books_a_snapshot_taken_on_another_input_is_refused() {
         pool_no: 550,
         late_yes: 100,
         late_no: 50,
+        fee_bps: 1_000,
+        prize: 4_118_239_224,
     };
     let right = input(Verdict::Yes, 1_000, 500, 100, 50, false);
     assert_eq!(books_of(&right), books);
@@ -123,14 +85,16 @@ fn prefreeze_snapshot_books_a_split_on_another_outcome_or_a_pool_below_its_late_
         let books = Books { outcome, ..books };
         assert_eq!(check_snapshot(&books, &input, &snap), INCONSISTENT);
     }
-    let below = Books {
-        late_yes: 601,
-        ..books
-    };
-    assert_eq!(check_snapshot(&below, &input, &snap), INCONSISTENT);
-    let below = Books {
-        late_no: 401,
-        ..books
-    };
-    assert_eq!(check_snapshot(&below, &input, &snap), INCONSISTENT);
+    for below in [
+        Books {
+            late_yes: 601,
+            ..books
+        },
+        Books {
+            late_no: 401,
+            ..books
+        },
+    ] {
+        assert_eq!(check_snapshot(&below, &input, &snap), INCONSISTENT);
+    }
 }

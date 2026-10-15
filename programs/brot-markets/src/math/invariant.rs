@@ -2,7 +2,7 @@
 //!          instruction equals the change the bookkeeping makes. A lamport sent by hand to the vault
 //!          never refuses a join (it is outside the instruction); a lamport the bookkeeping does not
 //!          explain is refused (`InvariantViolated`).
-//! Version: 0.0.3 (S-8: a `Split` snapshot's totals are pinned to the campaign's own books)
+//! Version: 0.0.4 (S-8: a `Split` snapshot's totals, then its fee and `distributable`, pinned to the campaign's books)
 //! Sprint: 04 (contract freeze; called at the end of `user_open_campaign` and `user_join_campaign`;
 //!         lane B adds `check_snapshot`, the sums of the settlement snapshot, called by finalize); 16 (lane S8)
 //!
@@ -11,12 +11,13 @@
 
 use super::snapshot::{Snapshot, SnapshotInput};
 use crate::{
+    constants::BPS_DENOMINATOR,
     error::BrotError,
     state::enums::{Outcome, SettleMode},
 };
 
 /// The campaign's own books at finalize, read from its fields apart from the snapshot's input (S-8): the stored
-/// outcome, and each pool with its late part inside it.
+/// outcome, each pool with its late part inside it, the house fee rate copied at opening and the prize.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Books {
     pub outcome: Outcome,
@@ -24,6 +25,8 @@ pub struct Books {
     pub pool_no: u64,
     pub late_yes: u64,
     pub late_no: u64,
+    pub fee_bps: u16,
+    pub prize: u64,
 }
 
 /// `vault_after − vault_before == booked_in − booked_out`, in `i128` with checked math.
@@ -50,8 +53,9 @@ pub fn vault_change_matches(
 /// `yes + no + late + prize + opening`; the snapshot must share all of it out:
 ///
 /// - `Split`: `distributable + creator share + Brot's share + late refunds` (`distributable` holds the
-///   winners and their dust; Brot's share includes the opening fee), and its two totals are the campaign's books
-///   (`split_totals_are_the_books`).
+///   winners and their dust; Brot's share includes the opening fee); its two totals are the campaign's books
+///   (`split_totals_are_the_books`), and its fee and `distributable` follow from them (`split_fee_is_the_rate`,
+///   `split_distributable_closes`).
 /// - `Refund`: every entry and late entry back whole, plus `to_opener` and `brot_keeps`.
 /// - `OneSided`: the prize to the opener, the opening fee to Brot, nothing else booked. The one-sided
 ///   fees are taken per entry at settlement, so their sum is checked when the vault is closed, not here.
@@ -87,7 +91,9 @@ pub fn check_snapshot(
                 u128::from(snap.brot_keeps),
                 late,
             ])?;
-            close(out == total_in)
+            close(out == total_in)?;
+            split_fee_is_the_rate(books, snap)?;
+            split_distributable_closes(books, snap)
         }
         SettleMode::Refund => {
             let out = add_all(&[
@@ -129,6 +135,49 @@ fn split_totals_are_the_books(books: &Books, snap: &Snapshot) -> Result<(), Brot
     };
     // X0.9 snapshot_split_totals
     if booked != Some((snap.winning_total, snap.losing_total)) {
+        return Err(BrotError::SnapshotInconsistent);
+    }
+    Ok(())
+}
+
+/// L-2 of the S-8 review: `fee_total` is Brot's fee on `losing_total` at the campaign's rate,
+/// `⌈P × fee_bps ÷ 10,000⌉` (`math/fees.rs`), checked without a division: `P × fee_bps ≤ fee × 10,000 < P × fee_bps +
+/// 10,000` (`SnapshotInconsistent`).
+fn split_fee_is_the_rate(books: &Books, snap: &Snapshot) -> Result<(), BrotError> {
+    let denominator = u128::from(BPS_DENOMINATOR);
+    let due = u128::from(snap.losing_total)
+        .checked_mul(u128::from(books.fee_bps))
+        .ok_or(BrotError::MathOverflow)?;
+    let charged = u128::from(snap.fee_total)
+        .checked_mul(denominator)
+        .ok_or(BrotError::MathOverflow)?;
+    let ceiling = due
+        .checked_add(denominator)
+        .ok_or(BrotError::MathOverflow)?;
+    // X0.9 snapshot_split_fee
+    if charged < due || charged >= ceiling {
+        return Err(BrotError::SnapshotInconsistent);
+    }
+    Ok(())
+}
+
+/// L-2 of the S-8 review: `distributable` is `math/payout.rs`'s `V + P − fee − from_pot + R`, with the stored fee and
+/// `from_pot` and the campaign's prize, summed without a subtraction: `distributable + fee + from_pot = V + P + R`.
+/// Brot's share is not stored (`collect_fee` takes it from `fee_total`), so a lamport moved from it into
+/// `distributable` would close the sums above and leave the vault short at the end (`SnapshotInconsistent`).
+fn split_distributable_closes(books: &Books, snap: &Snapshot) -> Result<(), BrotError> {
+    let stored = add_all(&[
+        u128::from(snap.distributable),
+        u128::from(snap.fee_total),
+        u128::from(snap.from_pot),
+    ])?;
+    let booked = add_all(&[
+        u128::from(snap.winning_total),
+        u128::from(snap.losing_total),
+        u128::from(books.prize),
+    ])?;
+    // X0.9 snapshot_split_distributable
+    if stored != booked {
         return Err(BrotError::SnapshotInconsistent);
     }
     Ok(())

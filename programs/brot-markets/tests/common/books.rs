@@ -1,6 +1,6 @@
 //! Purpose: the campaign books a snapshot's input was read from, for the host tests of `check_snapshot` (S-8): each
 //!          pool is its side's total plus its late part, and the outcome is the verdict's.
-//! Version: 0.0.1
+//! Version: 0.0.2 (the fee rate and the prize, L-2)
 //! Sprint: 16 (lane S8)
 
 use brot_markets::{
@@ -25,5 +25,7 @@ pub fn books_of(input: &SnapshotInput) -> Books {
         pool_no: pool(input.no_total, input.late_no),
         late_yes: input.late_yes,
         late_no: input.late_no,
+        fee_bps: input.fee_bps,
+        prize: input.prize,
     }
 }

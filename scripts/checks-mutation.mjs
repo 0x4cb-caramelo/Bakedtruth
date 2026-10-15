@@ -5,8 +5,9 @@
  *          rebuilds the program with cargo build-sbf, and shows that the check's own negative tests
  *          (Mollusk and LiteSVM) fail without it. Each source is restored byte for byte after each
  *          mutant, on error and on Ctrl-C.
- * Version: 0.0.6 (Sprint 16: G-1, lane L16P's pre-freeze markers, F4's cap with LiteSVM rows, R1's per-entry share;
- *          S-8's snapshot pin and the one-sided and refund rules)
+ * Version: 0.0.7 (Sprint 16: G-1, lane L16P's pre-freeze markers, F4's cap with LiteSVM rows, R1's per-entry share;
+ *          S-8's snapshot pin and the one-sided and refund rules; the S-8 review's L-2, the snapshot's fee and
+ *          distributable)
  * Sprint:  02 (pot core on Pinocchio), lane A; `top_level` in 03, lane D. Run by hand, never by CI.
  *
  * Usage:  node scripts/checks-mutation.mjs [--plan] [--only id,id] [--jobs N]
@@ -70,6 +71,7 @@ const RUST_TARGETS = [
   "prefreeze_payout_cap",
   "prefreeze_entry_share",
   "prefreeze_snapshot_books",
+  "prefreeze_snapshot_derived",
   "prefreeze_entry_books",
 ];
 const TS_FILES = [
@@ -209,6 +211,8 @@ snapshot_split_totals fail  prefreeze_snapshot_books_a_split_on_another_outcome_
 refund_within_entry   fail  prefreeze_entry_books_refund_pays_at_most_the_entry_and_takes_no_fee | -
 one_sided_exact       fail  prefreeze_entry_books_every_one_sided_payout_passes_and_any_other_split_of_it_does_not | settle_entry one-sided: an entry whose first-baker flag disagrees with the campaign's first_baker is refused either way
 one_sided_exact       fail  prefreeze_entry_books_one_sided_fee_on_the_whole_entry_or_with_another_exemption_is_refused | -
+snapshot_split_fee    fail  prefreeze_snapshot_derived_a_fee_off_the_rate_is_refused | -
+snapshot_split_distributable fail prefreeze_snapshot_derived_a_distributable_off_the_identity_is_refused | -
 `;
 
 const args = process.argv.slice(2);
