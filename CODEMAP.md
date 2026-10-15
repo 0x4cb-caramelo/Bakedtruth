@@ -8,7 +8,7 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **1237** |
+| Arquivos mapeados | **1240** |
 | Acima de 200 linhas | **47** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
@@ -37,7 +37,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 - `prototype-lab/shared/ledger.js` — 238 linhas
 - `prototype-lab/shared/mascot.js` — 379 linhas
 - `prototype-lab/shared/mock-data.js` — 290 linhas
-- `scripts/checks-mutation.mjs` — 342 linhas
+- `scripts/checks-mutation.mjs` — 346 linhas
 - `scripts/codemap.js` — 223 linhas
 - `scripts/devnet-clock-probe.ts` — 201 linhas
 - `scripts/os-self-test.js` — 406 linhas
@@ -630,7 +630,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`entry_account.rs`](programs/brot-markets/src/instructions/entries/entry_account.rs) | the baker's `Entry` at a join: created at its canonical PDA on the first join, rent paid by the baker, and checked against the campaign, the baker and the total | 121 |
 | [`join_campaign.rs`](programs/brot-markets/src/instructions/entries/join_campaign.rs) | `user_join_campaign`: a baker joins YES or NO with at least `min_entry_lamports` while the outcome is not knowable; the entry moves from the baker's wallet into | 85 |
-| [`join_core.rs`](programs/brot-markets/src/instructions/entries/join_core.rs) | the core of a join, shared by `user_join_campaign` and `sponsor_join_campaign`: every join rule in `user_join_campaign`'s order with its own error, the baker's  | 195 |
+| [`join_core.rs`](programs/brot-markets/src/instructions/entries/join_core.rs) | the core of a join, shared by `user_join_campaign` and `sponsor_join_campaign`: every join rule in `user_join_campaign`'s order with its own error, the baker's  | 197 |
 | [`join_lock.rs`](programs/brot-markets/src/instructions/entries/join_lock.rs) | the join lock (BR-06) and the proximity buffer (question 7): a join is refused once the campaign's reader says the outcome is knowable (`OutcomeKnowable`), and  | 79 |
 | [`join_record.rs`](programs/brot-markets/src/instructions/entries/join_record.rs) | the `Join` account (`["join", campaign, baker, index]`): its creation with the baker's rent, and the checked read of one join for the refund (lane G, question 7 | 168 |
 | [`join_rules.rs`](programs/brot-markets/src/instructions/entries/join_rules.rs) | the two pure rules of a join: the campaign's own minimum entry (question 5) and the proximity buffer at the join lock (question 7). Pure, so the host tests chec | 63 |
@@ -689,7 +689,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`settle_entry.rs`](programs/brot-markets/src/instructions/settlement/settle_entry.rs) | `settle_entry`: pays one entry from the vault to its stored baker and closes the Entry, its rent back to the baker (TP 3.4.5). A losing entry goes through the s | 172 |
 | [`settle_prize.rs`](programs/brot-markets/src/instructions/settlement/settle_prize.rs) | `settle_prize`: returns the prize to whoever opened in `OneSided` and `Refund`, and the opening fee too on a house-failure void (TP sections 3.4.7, 3.4.16; P-4) | 83 |
 | [`settle_sealed_fee.rs`](programs/brot-markets/src/instructions/settlement/settle_sealed_fee.rs) | `settle_sealed_fee`: once the campaign is finalized, any wallet sends a sponsor's held fee to the sponsor on a void the house caused, or else to the fee vault ( | 177 |
-| [`snapshot.rs`](programs/brot-markets/src/instructions/settlement/snapshot.rs) | `finalize_snapshot`, the one snapshot path that `finalize_campaign`, `team_confirm_result` and `team_void_campaign` call: it takes the campaign's totals and ver | 171 |
+| [`snapshot.rs`](programs/brot-markets/src/instructions/settlement/snapshot.rs) | `finalize_snapshot`, the one snapshot path that `finalize_campaign`, `team_confirm_result` and `team_void_campaign` call: it takes the campaign's totals and ver | 174 |
 | [`sweep_fees.rs`](programs/brot-markets/src/instructions/settlement/sweep_fees.rs) | `sweep_fees`: sends the fee vault's lamports above its rent-exempt minimum to `GlobalConfig.fee_recipient`, and nowhere else (TP sections 3.4.3, 3.4.4). Any wal | 71 |
 | [`tally_late_joins.rs`](programs/brot-markets/src/instructions/settlement/tally_late_joins.rs) | `tally_late_joins` (amendment of 2026-10-09, founder decisions 1 and 2): reads a baker's Join accounts in index order, adds the late amounts (joined at or after | 163 |
 
@@ -705,7 +705,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`fees.rs`](programs/brot-markets/src/math/fees.rs) | Brot's fee on the losing side and the one-sided fee per entry (P1 sections 3.3 and 3.5; TP section 3.4.16). Both round up | 27 |
-| [`invariant.rs`](programs/brot-markets/src/math/invariant.rs) | the in-program assertion of TP section 3.4.13: the vault's lamport change across an instruction equals the change the bookkeeping makes. A lamport sent by hand  | 151 |
+| [`invariant.rs`](programs/brot-markets/src/math/invariant.rs) | the in-program assertion of TP section 3.4.13: the vault's lamport change across an instruction equals the change the bookkeeping makes. A lamport sent by hand  | 200 |
 | [`mod.rs`](programs/brot-markets/src/math/mod.rs) | the money and schedule math as pure functions: the opening conversion, the entry close, the fee and the creator share (TP section 3.4.16) | 21 |
 | [`opening.rs`](programs/brot-markets/src/math/opening.rs) | the price of a paid opening in lamports at the Pyth SOL/USD price, and its split into the prize and Brot's opening fee (D-b, D-f; TP section 3.4.16; T25) | 79 |
 | [`payout.rs`](programs/brot-markets/src/math/payout.rs) | the creator share, what winners split, and the return estimate a join checks against `min_return_bps` (D-g read as P-2; TP section 3.4.16) | 171 |
@@ -821,7 +821,8 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`prefreeze_entry_books.rs`](programs/brot-markets/tests/prefreeze_entry_books.rs) | S-8 of the audit scope (the third review) on the host: `require_entry_books`. Every `OneSided` and `Refund` payout `entry_payout` computes passes, over a grid o | 168 |
 | [`prefreeze_entry_share.rs`](programs/brot-markets/tests/prefreeze_entry_share.rs) | R1 of the second pre-freeze review (Sprint 16, S-5) on the host: `require_within_share`. Every `Split` payout `entry_payout` computes (the floor of the exact sh | 114 |
 | [`prefreeze_payout_cap.rs`](programs/brot-markets/tests/prefreeze_payout_cap.rs) | F4 of the pre-freeze review (Sprint 16) on the host: the payout cap from the snapshot (`settlement/payout_cap.rs`). A split's payouts reach at most the distribu | 73 |
-| [`prefreeze_snapshot_books.rs`](programs/brot-markets/tests/prefreeze_snapshot_books.rs) | S-8 of the audit scope (the third review) on the host: `check_snapshot` pins a `Split` snapshot's `winning_total` and `losing_total` to the campaign's books (ea | 137 |
+| [`prefreeze_snapshot_books.rs`](programs/brot-markets/tests/prefreeze_snapshot_books.rs) | S-8 of the audit scope (the third review) on the host: `check_snapshot` pins a `Split` snapshot's `winning_total` and `losing_total` to the campaign's books (ea | 114 |
+| [`prefreeze_snapshot_derived.rs`](programs/brot-markets/tests/prefreeze_snapshot_derived.rs) | L-2 of the S-8 review on the host: after its totals, `check_snapshot` pins a `Split` snapshot's fee to the campaign's rate on `losing_total` (`⌈P × fee_bps ÷ 10 | 84 |
 | [`prefreeze_tally.rs`](programs/brot-markets/tests/prefreeze_tally.rs) | O-3 of the audit package (Sprint 16) on the host: `require_cutoff_final`, the tally's wait on a YES price result. Refused while the recorded proof is at most `P | 52 |
 | [`prefreeze_vault.rs`](programs/brot-markets/tests/prefreeze_vault.rs) | G-2 of the audit package (Sprint 16) on the host: each in-program assertion of TP section 3.4.13 refuses a planted mismatch. A move whose two sides end with oth | 169 |
 | [`price_join.rs`](programs/brot-markets/tests/price_join.rs) | the join lock of a price campaign (BR-06) on the host: `readers::outcome_knowable` on the sponsored account, each refusal with its own error, the freshness boun | 165 |
@@ -873,9 +874,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`books.rs`](programs/brot-markets/tests/common/books.rs) | the campaign books a snapshot's input was read from, for the host tests of `check_snapshot` (S-8): each pool is its side's total plus its late part, and the out | 30 |
-| [`mod.rs`](programs/brot-markets/tests/common/mod.rs) | a small seeded generator for the math property tests (xorshift64*): fixed seeds, reproducible runs, no dependency; plus the checked u128 helpers the oracles use | 153 |
+| [`books.rs`](programs/brot-markets/tests/common/books.rs) | the campaign books a snapshot's input was read from, for the host tests of `check_snapshot` (S-8): each pool is its side's total plus its late part, and the out | 32 |
+| [`mod.rs`](programs/brot-markets/tests/common/mod.rs) | a small seeded generator for the math property tests (xorshift64*): fixed seeds, reproducible runs, no dependency; plus the checked u128 helpers the oracles use | 154 |
 | [`pots.rs`](programs/brot-markets/tests/common/pots.rs) | random `Split` pots for the property tests, and the P-2 chain that settles one (fee, creator share, distributable), shared by the payout and estimate properties | 54 |
+| [`splits.rs`](programs/brot-markets/tests/common/splits.rs) | the `Split` pots of the S-8 host tests (`prefreeze_snapshot_books.rs`, `prefreeze_snapshot_derived.rs`): a snapshot input at the reference rates, the snapshot i | 71 |
 
 ## `programs/brot-markets/tests/contest_support/`
 
@@ -1119,7 +1121,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`capture-fixtures.ts`](scripts/capture-fixtures.ts) | capture real on-chain accounts into tests/fixtures, so the reader tests decode the bytes third-party programs actually write instead of a layout someone typed f | 185 |
 | [`capture-tx-v1.ts`](scripts/capture-tx-v1.ts) | records, read-only, the fixture of a real v1 transaction (Sprint 16, the red-team review's F1 and F2): `tx.json`, the transaction as `getTransaction` (JSON, fin | 88 |
 | [`check-content-schema.ts`](scripts/check-content-schema.ts) | the JSON Schema check of content/ (TP §4 "Content files", §3.1's data contracts; Sprint 08 DoD): every `content/<name>.json` beside a `content/<name>.schema.jso | 81 |
-| [`checks-mutation.mjs`](scripts/checks-mutation.mjs) | the X0.9 evidence for the checks module: removes each check of programs/brot-markets/src/checks.rs and its submodules (checks/top_level.rs) in turn, rebuilds th | 342 |
+| [`checks-mutation.mjs`](scripts/checks-mutation.mjs) | the X0.9 evidence for the checks module: removes each check of programs/brot-markets/src/checks.rs and its submodules (checks/top_level.rs) in turn, rebuilds th | 346 |
 | [`ci-secret-scan.js`](scripts/ci-secret-scan.js) | the pre-commit hook only protects commits made on a machine that has it wired. This scans every line a branch adds relative to its base, with the same patterns, | 98 |
 | [`codama-spike.ts`](scripts/codama-spike.ts) | the Codama spike (T9): renders a Kit client from the Shank IDL of brot-markets into packages/sdk/src/idl/generated. T9, decided in Sprint 05: the generated clie | 61 |
 | [`codemap.js`](scripts/codemap.js) | let an AI locate the right file without reading every file. Pairs with the 200-line limit in .claude/rules/code-style.md — small files plus a one-line index mea | 223 |
@@ -1752,6 +1754,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`prefreeze-close-rent.test.ts`](tests/brot/prefreeze-close-rent.test.ts) | F5 of the pre-freeze review (Sprint 16): a close after the rent-exempt minimum rose above what the vault was funded with at its opening. The vault is planted 1, | 88 |
 | [`prefreeze-cutoff-evidence.test.ts`](tests/brot/prefreeze-cutoff-evidence.test.ts) | F3 of the pre-freeze review (Sprint 16): a cut-off move stores the earlier proof's price with its time, so the campaign and the `CampaignResolved` the move emit | 59 |
 | [`prefreeze-entry-books.test.ts`](tests/brot/prefreeze-entry-books.test.ts) | S-8 of the audit scope (the third review) through the program: in `OneSided` and `Refund`, `settle_entry` checks each payout against the entry's own amounts (`s | 152 |
+| [`prefreeze-first-baker.test.ts`](tests/brot/prefreeze-first-baker.test.ts) | L-1 of the S-8 review (Sprint 16): the first baker is written once. `settle_entry` exempts a one-sided entry only when its baker is the campaign's `first_baker` | 34 |
 | [`prefreeze-partial-tally.test.ts`](tests/brot/prefreeze-partial-tally.test.ts) | O-3 of the audit package (Sprint 16): a tally of part of one entry's joins can no longer leave a tallied join in its old class when an earlier YES proof moves t | 112 |
 | [`prefreeze-pause-static.test.ts`](tests/brot/prefreeze-pause-static.test.ts) | F7 of the pre-freeze review (Sprint 16), the static half of I10′: the pause gates only the opening and the joins because only they read `operating_level` to ref | 62 |
 | [`prefreeze-pause.test.ts`](tests/brot/prefreeze-pause.test.ts) | I10′ with every instruction (G-10 of the audit package; the test Sprint 16 names): with entries paused, the program refuses exactly the three instructions that  | 169 |

@@ -962,8 +962,15 @@ when it pays, reserves or is claimed, `collect_fee`, `settle_prize`) asserts two
   - `Refund`: no fee, and `amount ≤ yes + no` (`RefundPayoutAboveEntry`, 6181);
   - `OneSided`: `amount + fee = yes + no`, with the fee `⌈early × bps ÷ 10,000⌉`, or zero for the campaign's
     `first_baker` (`OneSidedPayoutNotExact`, 6182).
-- **The snapshot.** At finalize, `check_snapshot` holds a `Split` snapshot's totals to each pool less its late part
-  (`SnapshotInconsistent`, 6102), so the cap and 6180 never trust a wrong snapshot (S-8, closed 2026-10-15).
+- **The snapshot.** At finalize, `check_snapshot` holds a `Split` snapshot to the campaign's books
+  (`SnapshotInconsistent`, 6102), so the cap and 6180 never trust a wrong snapshot (S-8, closed 2026-10-15):
+  - each side's total is its pool less its late part;
+  - the fee is the campaign's rate on the losing total, rounded up (`P × bps ≤ fee × 10⁴ < P × bps + 10⁴`);
+  - `distributable + fee + from_pot = V + P + R`.
+- **The first baker** is written once, while none is recorded, so the `OneSided` rule above cannot disagree with the
+  entry's own flag.
+- **What a refusal holds.** A 6181 or 6182 refusal freezes that entry, Brot's fee and the close until an upgrade; a
+  6102 at finalize holds the whole campaign the same way. Nothing the program produces today reaches them.
 
 `close_campaign` requires the vault to cover what the books still hold, and returns the vault's rent as
 `min(rent, vault − held)`, so a rise in the rent-exempt minimum never blocks a close. Before, the payout checked a

@@ -23,3 +23,12 @@ isso", antes do congelamento.
 
 1.155 testes TypeScript, 575 Rust e 577 da mainnet; o teste aleatório do dinheiro na semente fixa e em mais 12, sem
 nenhuma recusa nova; a prova de mutação das três checagens novas; uma revisão adversária só de leitura antes do PR.
+
+## A revisão e os dois ajustes
+
+Uma revisão adversária só de leitura não achou campanha legítima recusada pelas regras novas, nem as decididas antes
+da atualização. Ela deixou dois achados baixos, os dois sobre erros futuros. O primeiro padeiro agora é gravado uma vez
+só, para a regra nova do pote de um lado só nunca discordar da marcação da entrada (L-1). A fotografia passa a conferir
+também a taxa e o total a dividir (L-2). Depois disso: 1.156 testes TypeScript, 577 Rust e 579 da mainnet, as 13
+sementes sem nenhuma recusa nova, a mutação das checagens novas, e uma revisão curta só dessa diferença.
+
