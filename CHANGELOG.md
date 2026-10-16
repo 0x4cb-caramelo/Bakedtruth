@@ -27,6 +27,16 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **O app Android no repositório, e o README em dia** (16/10/2026, para a inscrição no bounty da Superteam Brasil, que
+  pede um repositório público que compile a partir de um clone limpo). `android/` é o projeto que o CLI da Solana
+  Mobile gerou (`solana-mobile webshell` 0.6.0) em volta de `brot.markets/dev0x`, sem mudança no Kotlin nem no Gradle;
+  só o caminho da chave de assinatura no `twa-manifest.json` virou um nome de arquivo local, e a chave fica fora do Git.
+  O `gradle-wrapper.jar` também fica fora: o verificador de segredos do CI recusa arquivos compactados, e o jar gerado
+  pelo CLI não é o do Gradle 9.7.1 (o SHA-256 dele não bate com o publicado); o README manda gerá-lo com o Gradle.
+  O `android/README.md` diz como instalar o APK publicado, como compilar a versão de teste e como assinar a de
+  lançamento. O README da raiz passa a dizer o estado de 16/10 (o keeper, a API, o indexador e o site no ar na devnet;
+  o app Android em andamento) e como rodar o site, a API e o app.
+
 - **O polimento da página inicial do site** (15/10/2026). A barra do topo mostra o pão do brot.markets
   (`app/public/img/brot-loaf.webp`, o mesmo arquivo da landing, no tamanho e no espaçamento dela) no lugar do Baked.
   O bloco "How it works" ganhou um X amarelo no canto, que o esconde de vez neste navegador: a escolha fica no
@@ -1350,6 +1360,20 @@ recomendado (1a a 12a).
 
 ### Fixed
 
+- **A carteira dentro do app Android** (15/10/2026, achado por um testador do APK da submissão à Solana Mobile). O
+  site criava o adaptador da Solflare sem rede, e o SDK dela abre na mainnet-beta quando não recebe uma. Dentro do app
+  (o shell web da Solana Mobile, um WebView) não há extensão, então tocar em "Solflare" abria a página web de conexão
+  dela, na mainnet-beta. Agora, dentro do app, a lista "Connect a wallet" mostra só o Mobile Wallet Adapter, que abre o
+  app de carteira do celular na devnet; a Phantom também sai de lá, porque só levava à instalação. Fora do app, a
+  Solflare abre na rede do site (`app/features/wallet/web-shell.ts`, com testes). O APK não muda: ele só abre o site.
+- **Nenhuma conexão pelo Mobile Wallet Adapter passava pela política de segurança do site** (15/10/2026, achado no
+  mesmo APK, depois da correção acima: a carteira abria e o app ficava em "connecting"). No celular, a carteira abre
+  um soquete no próprio aparelho, e a página se conecta a `ws://localhost:<porta>/solana-wallet`; o `connect-src` da
+  CSP não aceitava esse endereço, então o navegador recusava cada tentativa até a biblioteca desistir, aos 30 s. A CSP
+  agora aceita `ws://localhost:*` (`app/next.config.ts`, com um teste que falha sem a regra). Conferido num emulador
+  Android 15 com o APK e a carteira de teste da Solana Mobile: com a CSP antiga, 21 recusas e "Failed to connect to the
+  wallet websocket"; com a nova, servida localmente, nenhuma recusa, a carteira pediu a autorização na devnet e o app
+  voltou conectado.
 - **O erro #418 do React em todas as páginas do site** (13/10/2026, achado na publicação do ticker;
   `session-log/2026-10-13-publicacao-do-ticker-no-dev0x.md`). O servidor não vê carteira nenhuma, e o navegador quase
   sempre vê uma: o adaptador da Solflare fica "Loadable" em qualquer navegador de computador. Por isso duas partes da

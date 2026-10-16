@@ -325,7 +325,14 @@ release on. Decided by Ronaldo on 2026-10-11: the tunnel and systemd (no Nginx, 
 
 **Rolling back:** delete the two routes in the dashboard (the landing then answers both paths with 404) and
 `sudo systemctl disable --now brot-site brot-api`; or point `current` at the previous release and
-`sudo systemctl restart brot-api brot-site`. **Since 2026-10-14 ~06:35 UTC:** release `6bd0f68171d2` (`main` after PR #95), built
+`sudo systemctl restart brot-api brot-site`. **Since 2026-10-16 ~03:05 UTC:** release `79318d17428d` (branch
+`fix/wallet-web-shell`: the CSP admits `ws://localhost:*`, the Mobile Wallet Adapter's socket), built for the program
+deploy at slot 511223702, tested on 4239 first (the eight pages as the live release's, the new CSP served, no error).
+Only `brot-site` restarted, since the API's code had not changed; the API still runs from `5df35297d05c`'s files. The way
+back is `a7c9b1561f71`. **From 2026-10-15 ~21:40 UTC:** release `a7c9b1561f71` (the same branch: the Android app lists
+only the Mobile Wallet Adapter, and Solflare opens on the site's network), tested the same way; the way back is
+`5df35297d05c` (`main` after PR #99), live from 2026-10-15 with the program upgrade of that day; its way back is
+`6bd0f68171d2`. **From 2026-10-14 ~06:35 UTC:** release `6bd0f68171d2` (`main` after PR #95), built
 for the program deploy at slot 510894454 and tested on 4239 first (the eight pages as the live release's, no error); the
 way back is `2e7a28c207bd`. **From ~05:40 UTC:** release `2e7a28c207bd` (`main` after PR
 #94), built for the program deploy at slot 510880658, tested on 4239 first (its eight pages answered as the live

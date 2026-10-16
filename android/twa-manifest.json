@@ -1,0 +1,13 @@
+{
+  "fallbackType": "webview",
+  "generatorApp": "solana-mobile",
+  "host": "brot.markets",
+  "launcherName": "Brot",
+  "name": "Brot",
+  "packageId": "markets.brot.app",
+  "startUrl": "/dev0x",
+  "signingKey": {
+    "alias": "brot",
+    "path": "brot-release.keystore"
+  }
+}
