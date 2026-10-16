@@ -8,14 +8,15 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **1240** |
-| Acima de 200 linhas | **47** ⚠️ |
+| Arquivos mapeados | **1250** |
+| Acima de 200 linhas | **48** ⚠️ |
 | Sem cabeçalho `Purpose:` | **40** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
 
 A regra diz "under 200 lines where practical". Estes passaram — vale checar se dá pra separar:
 
+- `app/features/campaign-page/copy.ts` — 202 linhas
 - `app/lib/mascot/engine.ts` — 312 linhas
 - `programs/brot-markets/src/constants.rs` — 204 linhas
 - `programs/brot-markets/src/error.rs` — 400 linhas
@@ -92,7 +93,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09), in the approved prototype's frame (prototype-lab/campaigns): the two fonts the site serves itself, the theme script in <head | 64 |
+| [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09), in the approved prototype's frame (prototype-lab/campaigns): the two fonts the site serves itself, the theme script and the  | 67 |
 | [`manifest.ts`](app/app/manifest.ts) | the installable PWA, manifest only (Sprint 13 DoD, S2; TP §3.6): the name, the start page, standalone display, the dark theme's colours and the icons scripts/pw | 35 |
 | [`page.tsx`](app/app/page.tsx) | the home route (Sprint 10), in the approved prototype's layout since the UI overhaul (features/home): the top line, the "Open now" carousel with "Closing soon"  | 15 |
 
@@ -149,7 +150,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`pointer-effects.tsx`](app/components/pointer-effects.tsx) | the approved prototype's pointer effects (prototype-lab/campaigns/js/effects.js, whose styles came over in base.css and card.css): the dot field behind every pa | 91 |
 | [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are always listed (with an install link when missing); any other | 49 |
 | [`site-footer.tsx`](app/components/site-footer.tsx) | the footer of every screen, in the approved prototype's style (prototype-lab/campaigns, `.foot`): the links, then the legal lines the site must carry: BRAND.md' | 60 |
-| [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): Baked and the wordmark, the three main links with the current one unde | 117 |
+| [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): the loaf and the wordmark (the loaf is brot.markets' own, services/lan | 118 |
 | [`site-notice.tsx`](app/components/site-notice.tsx) | the strip above every screen (Sprint 09, BR-47, P1 §4.6), in the approved prototype's place and style (prototype-lab/campaigns, `.status`): the devnet mark, the | 27 |
 | [`toast.tsx`](app/components/toast.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 71 |
 | [`wallet-button.tsx`](app/components/wallet-button.tsx) | the top bar's wallet control (Sprint 09, S1), in the approved prototype's look (prototype-lab/campaigns, ui/wallet.js): "Connect" as the primary button connects | 121 |
@@ -161,7 +162,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`button.tsx`](app/components/ui/button.tsx) | the buttons of the design: the primary action with its orbiting edge, the secondary and quiet ones, and the icon button. Colour from the tokens only. The edge i | 73 |
 | [`card.tsx`](app/components/ui/card.tsx) | the surface of a card or a panel: the panel colour, a 1px line and the card radius. Its contents set their own spacing | 21 |
 | [`cx.ts`](app/components/ui/cx.ts) | joins class names, dropping the falsy ones. The only helper the primitives share | 7 |
-| [`dialog.tsx`](app/components/ui/dialog.tsx) | the dialog of the design (a bottom sheet on phones): the browser's own modal <dialog>, which keeps focus inside, puts the page behind it out of reach and closes | 69 |
+| [`dialog.tsx`](app/components/ui/dialog.tsx) | the dialog of the design (a bottom sheet on phones): the browser's own modal <dialog>, which keeps focus inside, puts the page behind it out of reach and closes | 76 |
 | [`empty-state.tsx`](app/components/ui/empty-state.tsx) | the empty state: a title, a line of text and an optional action, centred in the space of a list or a page | 17 |
 | [`field.tsx`](app/components/ui/field.tsx) | the form controls: a labelled field with its help or error text, a text input, and a select. The error sets aria-invalid and the error colour; the text says wha | 58 |
 | [`kind-tile.tsx`](app/components/ui/kind-tile.tsx) | the campaign's kind as a letter tile on the kind's own colour, with its name beside it in the screens. The six kinds (P1 §4.2, and the Meteora graduation) map f | 37 |
@@ -180,16 +181,16 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`activity-panel.tsx`](app/features/campaign-page/activity-panel.tsx) | the recent entries and the chance history (L-23, answered yes), read from the chain's `EntryAdded` events (activity.ts) once per page view and again after an en | 80 |
 | [`activity.ts`](app/features/campaign-page/activity.ts) | the campaign's recent activity and its chance history (L-23, answered yes), read from the chain until the indexer serves them (Sprint 08's activity route is not | 106 |
-| [`campaign-header.tsx`](app/features/campaign-page/campaign-header.tsx) | the campaign page's header (spec 3.5 of Sprint -1): the way back, the kind, the public state from chain time (A-7), the team chip, the sentence as the page's on | 124 |
+| [`campaign-header.tsx`](app/features/campaign-page/campaign-header.tsx) | the campaign page's header (spec 3.5 of Sprint -1): the way back, the kind, the public state from chain time (A-7), the team chip, the sentence as the page's on | 126 |
 | [`campaign-page.tsx`](app/features/campaign-page/campaign-page.tsx) | the campaign page at /c/[id] (Sprint 11; spec 3.5 of Sprint -1): the header, the proof, the pot, the recent entries, the re-check panel, and the entry panel, or | 190 |
 | [`chance-chart.tsx`](app/features/campaign-page/chance-chart.tsx) | the chance history (L-23): the YES share of the entries after each entry, as a step line (a share changes only when an entry goes in), one series in the design' | 89 |
 | [`copy-button.tsx`](app/features/campaign-page/copy-button.tsx) | "Copy" for an address or a command on the campaign page, with what happened said in a polite live region (copied, or the browser blocked it). The re-check panel | 42 |
 | [`copy-curve.ts`](app/features/campaign-page/copy-curve.ts) | the words of a graduation campaign's curve on its page (D-m vocabulary; English per L-01): what the bar shows (the SOL raised against the curve's threshold), wh | 26 |
 | [`copy-states.ts`](app/features/campaign-page/copy-states.ts) | the words of the campaign states (Sprint 12; D-m vocabulary; English per L-01): closed and why, in review with the six-hour window, contested (L-04, answered "C | 128 |
-| [`copy.ts`](app/features/campaign-page/copy.ts) | the campaign page's words (BR-23, BR-26, BR-27; D-m vocabulary; English per L-01): the rule of each kind in plain words, the proof's labels, the price facts and | 189 |
+| [`copy.ts`](app/features/campaign-page/copy.ts) | the campaign page's words (BR-23, BR-26, BR-27; D-m vocabulary; English per L-01): the rule of each kind in plain words, the proof's labels, the price facts and | 202 |
 | [`curve-progress.tsx`](app/features/campaign-page/curve-progress.tsx) | a graduation campaign's curve on its page (`DbcGraduated`): a progress bar of the SOL raised over the curve's threshold (`quote_reserve` over `migration_quote_t | 49 |
 | [`curve.ts`](app/features/campaign-page/curve.ts) | what the site shows of a Meteora DBC launch curve (`DbcGraduated`), read through the SDK's copy of the program's reader (owner first, then the layout): the quot | 71 |
-| [`format.ts`](app/features/campaign-page/format.ts) | how the campaign page writes what it read: a value in its field's units (a price in the feed's exponent, a supply or a liquidity as a whole number, a pool or a  | 76 |
+| [`format.ts`](app/features/campaign-page/format.ts) | how the campaign page writes what it read: a value in its field's units (a price in the feed's exponent, a supply or a liquidity as a whole number, a pool or a  | 90 |
 | [`load.ts`](app/features/campaign-page/load.ts) | what the campaign page reads, through the SDK over RPC (the read API has no account bytes, no entries and no metric reading): the campaign at the route's id, th | 131 |
 | [`opening.ts`](app/features/campaign-page/opening.ts) | the transaction that opened a campaign, for the header's "Opened by …" link to Solscan (Ronaldo, 2026-10-11). The program stores when the campaign opened, not t | 48 |
 | [`payout-panel.tsx`](app/features/campaign-page/payout-panel.tsx) | the connected wallet's own lines on the campaign page (Sprint 12): "Your entry" with its sides and what it returns, as an estimate while the pot or the result c | 168 |
@@ -198,9 +199,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`proof.ts`](app/features/campaign-page/proof.ts) | the proof a campaign page shows (BR-23; P1 §4.4): the value read now from the account the campaign reads, through the SDK's copy of the program's readers (owner | 179 |
 | [`recheck-commands.ts`](app/features/campaign-page/recheck-commands.ts) | the re-check panel's commands (BR-23, "Anyone can re-check. Same account, same answer"; proposal §2.9): one JSON-RPC request that fetches the bytes the reader r | 71 |
 | [`recheck-panel.tsx`](app/features/campaign-page/recheck-panel.tsx) | the re-check panel (BR-23; P1 §4.4 "Anyone can re-check. Same account, same answer"; spec 3.7): the account, its owner, the field the reader reads, the raw valu | 133 |
-| [`state-panel.tsx`](app/features/campaign-page/state-panel.tsx) | what takes the entry panel's place once a campaign takes no entry (Sprint 12; BR-05, BR-10, BR-11, BR-25, BR-45): closed and why; in review with the result, the | 189 |
+| [`rule-line.tsx`](app/features/campaign-page/rule-line.tsx) | the campaign page's rule in one line (copy.ts), with the deadline as a live countdown from the chain's time ("… within 4d 10h 23m 07s. Otherwise NO.") so the ti | 42 |
+| [`state-panel.tsx`](app/features/campaign-page/state-panel.tsx) | what takes the entry panel's place once a campaign takes no entry (Sprint 12; BR-05, BR-10, BR-11, BR-25, BR-45): closed and why; in review with the result, the | 175 |
 | [`states.ts`](app/features/campaign-page/states.ts) | what the campaign page says in each public state (Sprint 12; BR-05, BR-10, BR-11, BR-25, BR-45), as pure values from the stored campaign and the SDK's public vi | 165 |
 | [`use-campaign-page.ts`](app/features/campaign-page/use-campaign-page.ts) | the campaign page's data (load.ts) in React: read once, then again every 20 seconds while the tab is visible (a devnet price updates about once a minute), and a | 93 |
+| [`use-countdown.ts`](app/features/campaign-page/use-countdown.ts) | a countdown on screen from the chain's time (A-7): the seconds left when the page last read the chain, counted down each second between reads, never below zero. | 26 |
 | [`void-note.ts`](app/features/campaign-page/void-note.ts) | the team's note on a void, as the campaign page shows it (BR-45): the void-log record whose SHA-256 equals the `void_note_hash` the program stored, and which na | 25 |
 
 ## `app/features/campaigns/`
@@ -243,25 +246,29 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`amount-field.tsx`](app/features/entry/amount-field.tsx) | the amount of an entry, in SOL: a decimal field (exact lamports, amount.ts), quick amounts, "Max" (the balance less the rents and the network fee, in 0.01 SOL s | 96 |
 | [`amount.ts`](app/features/entry/amount.ts) | the amount a baker types, as lamports, exactly: no floating point between the text and the bigint the transaction carries. Accepts a dot or a comma, at most nin | 36 |
 | [`copy-failures.ts`](app/features/entry/copy-failures.ts) | one message for each way an entry can fail (the Sprint 11 list: entries closed, outcome already known, no fresh price, pause, below the minimum, not enough SOL, | 152 |
-| [`copy.ts`](app/features/entry/copy.ts) | the entry panel's words (BR-12, BR-27; D-m vocabulary): the panel, the five notices a baker reads before signing (the estimate, a large entry, the lock, the fee | 138 |
+| [`copy.ts`](app/features/entry/copy.ts) | the entry panel's words (BR-12, BR-27; D-m vocabulary): the panel, the five notices a baker reads before signing (the estimate, a large entry, the lock, the fee | 163 |
 | [`entry-action.tsx`](app/features/entry/entry-action.tsx) | the entry panel's one button, the one that fits the moment: entries paused, waiting for a fresh price, "Connect", the devnet faucet when the wallet cannot cover | 66 |
 | [`entry-estimate.tsx`](app/features/entry/entry-estimate.tsx) | the live estimate under the amount (BR-09), in a polite live region: what the entry returns if its side wins, net of Brot's fee and the creator's share, with th | 82 |
 | [`entry-notices.tsx`](app/features/entry/entry-notices.tsx) | the notices a baker reads before signing (Sprint 11 DoD; BR-12, P1 §3.2, P1 §4.6): the return is an estimate that changes until entries close; a large entry low | 68 |
 | [`entry-panel.tsx`](app/features/entry/entry-panel.tsx) | the entry panel of the campaign page (Sprint 11; spec 3.6 of Sprint -1): YES or NO, the amount in SOL (the campaign's minimum, 0.01 SOL under P-5), the estimate | 190 |
-| [`entry-review.tsx`](app/features/entry/entry-review.tsx) | the sheet "Check before you sign" (A-3), what the transaction carries, from the SDK's preparation of it. In view, what a person decides on (Ronaldo, 2026-10-11: | 176 |
-| [`entry-sheet.tsx`](app/features/entry/entry-sheet.tsx) | the one dialog of an entry, from "Review entry" to the result: the review (entry-review.tsx), the signing steps, the receipt and the failures (entry-status.tsx) | 79 |
+| [`entry-review.tsx`](app/features/entry/entry-review.tsx) | the sheet "Check before you sign" (A-3), what the transaction carries, from the SDK's preparation of it, in the redesign of 2026-10-15 (the founder's mockup "Co | 119 |
+| [`entry-sheet.tsx`](app/features/entry/entry-sheet.tsx) | the one dialog of an entry, from "Review entry" to the result: the review (entry-review.tsx), the signing steps, the receipt and the failures (entry-status.tsx) | 94 |
 | [`entry-status.tsx`](app/features/entry/entry-status.tsx) | the sheet after "Sign in wallet": the signing steps (the wallet, then confirming by polling, or checking a transaction the wallet never answered for, with the b | 166 |
 | [`estimate.ts`](app/features/entry/estimate.ts) | the entry panel's estimate (BR-09; P1 §3.2): what an entry returns if its side wins, net of Brot's fee and the creator's share, with the baker's own amount adde | 105 |
 | [`failures.ts`](app/features/entry/failures.ts) | why an entry did not go in, as one of the panel's failures, each with its own message (copy-failures.ts). A program refusal is named by the SDK's error map: its | 171 |
+| [`fresh-join.ts`](app/features/entry/fresh-join.ts) | the join right before the wallet (2026-10-15, so "Sign" works on the first click). A blockhash lives 150 blocks, about 34 s on devnet (4.45 blocks a second, mea | 60 |
 | [`landed.ts`](app/features/entry/landed.ts) | what a landed transaction says about its own failure: the program of the instruction that failed, read from the transaction as the cluster recorded it (`getTran | 50 |
 | [`reload-countdown.tsx`](app/features/entry/reload-countdown.tsx) | A-8 on screen: under the "program updated" failure, the seconds left before the page reloads (the back-off of upgrade-pause.ts); at zero the page reloads. The f | 37 |
 | [`retry-guard.ts`](app/features/entry/retry-guard.ts) | the retry guard (A-9; proposal §3.4 rule 6; TP §3.6 S1 rule 6). Before the wallet gets a join, the site saves what it read: the entry total the join is signed a | 200 |
+| [`review-details.tsx`](app/features/entry/review-details.tsx) | the folded figures of the sheet "Check before you sign" (the redesign of 2026-10-15): "Cost breakdown", the exact total and its three parts to the lamport (the  | 109 |
+| [`review-hero.tsx`](app/features/entry/review-hero.tsx) | the top of the sheet "Check before you sign" (the redesign of 2026-10-15): the campaign, its id with a copy button and the side as a badge; what you pay against | 105 |
+| [`review-notes.tsx`](app/features/entry/review-notes.tsx) | the notes of the sheet "Check before you sign" (the redesign of 2026-10-15), each approved notice word for word with its lead in bold: "Before you enter", in vi | 83 |
 | [`side-picker.tsx`](app/features/entry/side-picker.tsx) | YES or NO in the entry panel. The button holds only its side's word, centred; under each button, in the page's neutral text, the side's chance (its share of the | 65 |
 | [`sides-tinted.tsx`](app/features/entry/sides-tinted.tsx) | the side words of a line written in green and red (Ronaldo, 2026-10-11): "YES" in the YES colour and "NO" in the NO colour wherever an estimate or a summary nam | 27 |
 | [`stored-record.ts`](app/features/entry/stored-record.ts) | one browser record of a retry guard, read for the guards' clean-up (an entry's and an opening's): a record that does not parse, or is not an object, guards noth | 16 |
 | [`submit.ts`](app/features/entry/submit.ts) | an entry from the panel to the chain, without React. `prepareEntry` is the SDK's A-3 preparation for the connected wallet's address (re-read, checked, built, su | 183 |
 | [`upgrade-pause.ts`](app/features/entry/upgrade-pause.ts) | A-8's back-off. When Brot's program is no longer the deploy this site was built for, the page does not sign: it waits, then reloads to fetch a site built for th | 69 |
-| [`use-entry-flow.ts`](app/features/entry/use-entry-flow.ts) | the entry's steps in React, around submit.ts: review (A-3: the SDK re-reads the campaign and the wallet's entry, checks, builds, summarises the bytes and simula | 182 |
+| [`use-entry-flow.ts`](app/features/entry/use-entry-flow.ts) | the entry's steps in React, around submit.ts: review (A-3: the SDK re-reads the campaign and the wallet's entry, checks, builds, summarises the bytes and simula | 198 |
 | [`use-rents.ts`](app/features/entry/use-rents.ts) | the rents an entry opens, from the cluster (`getMinimumBalanceForRentExemption`), read once per page: a `Join` record on every entry and the `Entry` account on  | 53 |
 | [`watch.ts`](app/features/entry/watch.ts) | watching an entry after the wallet, by polling and never a WebSocket (proposal §2.6): the signature's status (`getSignatureStatuses`), the finalized block heigh | 107 |
 
@@ -277,15 +284,16 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`copy.ts`](app/features/home/copy.ts) | the home page's words (the UI overhaul), from the approved prototype (prototype-lab/campaigns, home.js and home-mosaic.js) where they hold on devnet, and change | 86 |
+| [`copy.ts`](app/features/home/copy.ts) | the home page's words (the UI overhaul), from the approved prototype (prototype-lab/campaigns, home.js and home-mosaic.js) where they hold on devnet, and change | 89 |
 | [`home-empty.tsx`](app/features/home/home-empty.tsx) | the home page's empty block (the approved prototype's `.empty`): Baked sulking, one sentence and at most one way out ("No campaigns here." [Clear filters]) | 23 |
 | [`home-feature.tsx`](app/features/home/home-feature.tsx) | the home page's "Open now" carousel (the approved prototype's `.home-feature`, home-mosaic.js): the top-ranked listed campaigns that take entries, up to five, a | 174 |
-| [`home-how.tsx`](app/features/home/home-how.tsx) | the home page's "How it works" (the approved prototype's `.home-how`): the six steps told in three, with the link to every step, fee and refund, then the three  | 70 |
+| [`home-how.tsx`](app/features/home/home-how.tsx) | the home page's "How it works" (the approved prototype's `.home-how`): the six steps told in three, with the link to every step, fee and refund, then the three  | 83 |
 | [`home-lead.tsx`](app/features/home/home-lead.tsx) | the home page's top line (the approved prototype's `.home-lead`): what this is, and what a US$500 opening costs in SOL right now at Pyth's SOL/USD price (4a: US | 41 |
 | [`home-page.tsx`](app/features/home/home-page.tsx) | the home page (the UI overhaul; the approved prototype's home.js): the top line with the opening's cost, the mosaic ("Open now" and the two side boxes), how it  | 76 |
 | [`home-proof.tsx`](app/features/home/home-proof.tsx) | the "On-chain read" panel of a home slide (the approved prototype's `.home-proof`, where the old chart was): the value read now against the target, "if read now | 126 |
 | [`home-side.tsx`](app/features/home/home-side.tsx) | the two boxes beside the home page's carousel (the approved prototype's `.home-side`): "Closing soon", the four listed campaigns whose entries close first, and  | 113 |
 | [`home-slide.tsx`](app/features/home/home-slide.tsx) | one slide of the home page's "Open now" carousel (the approved prototype's `.home-slide`): the kind, the sentence, each side's share in large type, the pot bar  | 111 |
+| [`how-closed.ts`](app/features/home/how-closed.ts) | whether this browser closed the home page's "How it works" (a per-viewer convenience, kept in localStorage like the theme): the storage key, the script that mar | 27 |
 | [`use-opening-now.ts`](app/features/home/use-opening-now.ts) | what a US$500 opening costs right now, for the home page's top line (the approved prototype's `.home-open`): the creation box's own reads (open-campaign/reads.t | 45 |
 
 ## `app/features/how/`
@@ -324,7 +332,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`registry-open.ts`](app/features/notices/registry-open.ts) | the mandatory notices of the creation box at /abrir (Sprint 19 DoD; BR-26; TP §3.4.10), listed with the screens that must show them and the components that draw | 96 |
-| [`registry.ts`](app/features/notices/registry.ts) | every mandatory notice that holds on devnet (BR-47; P1 §4.6; TP §3.6 "Notices and copy"; Sprint 13 DoD), each with the screens that must show it and the compone | 186 |
+| [`registry.ts`](app/features/notices/registry.ts) | every mandatory notice that holds on devnet (BR-47; P1 §4.6; TP §3.6 "Notices and copy"; Sprint 13 DoD), each with the screens that must show it and the compone | 195 |
 
 ## `app/features/open-campaign/`
 
@@ -1928,7 +1936,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`amount.test.ts`](tests/site/amount.test.ts) | the amount a baker types becomes lamports exactly (no floating point), with a dot or a comma and at most nine decimals; anything else is refused, never guessed. | 54 |
-| [`campaign-head.test.ts`](tests/site/campaign-head.test.ts) | the campaign page's head made compact (Ronaldo, 2026-10-11): the title asks the sentence ("…$150?") and a campaign outside the templates keeps its name without  | 50 |
+| [`campaign-head.test.ts`](tests/site/campaign-head.test.ts) | the campaign page's head made compact (Ronaldo, 2026-10-11): the title asks the sentence ("…$150?") and a campaign outside the templates keeps its name without  | 119 |
 | [`campaign-load.test.ts`](tests/site/campaign-load.test.ts) | what the campaign page reads through the RPC, against the program in LiteSVM: the campaign at the route's u64 id (nothing at an unknown one), its public state a | 101 |
 | [`campaign-proof.test.ts`](tests/site/campaign-proof.test.ts) | the campaign page's proof (BR-23) for each kind, from the program's own campaign accounts and real captured bytes of the accounts they read: the value read now  | 120 |
 | [`copy-vocabulary.test.ts`](tests/site/copy-vocabulary.test.ts) | the site's words follow D-m (campaign, entry, baker, creator, pot, YES/NO) and never the D6 table's old copy (proposal 0.4 §5.2: "mercado", "aposta", "apostar", | 143 |
@@ -1938,8 +1946,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`cycle.ts`](tests/site/cycle.ts) | a campaign's whole life driven through the site tests' recording RPC (fake-chain.ts), so every transaction is in the RPC's history and a wallet's page can read  | 192 |
 | [`entry-estimate.test.ts`](tests/site/entry-estimate.test.ts) | the entry panel's estimate is the SDK's (BR-09; P1 §3.2): the number `checkJoin` gives for the pot with the baker's own amount added, which is the number `prepa | 144 |
 | [`entry-failures.test.ts`](tests/site/entry-failures.test.ts) | each way an entry can fail has its own message (Sprint 11 DoD): the program's refusals are named by the SDK's error map, with the program's own message from the | 163 |
+| [`entry-review.test.ts`](tests/site/entry-review.test.ts) | the sheet "Check before you sign" in its redesign of 2026-10-15, rendered with the site's React on the server from a prepared join: the side as a badge, what yo | 127 |
 | [`fake-chain.ts`](tests/site/fake-chain.ts) | the SDK's LiteSVM-backed fake RPC (tests/sdk/fake-rpc.ts) with what the site's entry flow adds: the wallet's submission (`sendTransaction`, landed in LiteSVM an | 162 |
 | [`fee-example.test.ts`](tests/site/fee-example.test.ts) | the fee page's worked example is the SDK's math, and it is P1 §1.2's case (Sprint 13 DoD; BR-32): 600 on YES and 400 on NO (here 6 and 4 SOL) give a fee of 40,  | 64 |
+| [`fresh-join.test.ts`](tests/site/fresh-join.test.ts) | a join prepared again on "Sign" goes to the wallet without a second review only when its terms are the ones on screen (app/features/entry/fresh-join.ts): a new  | 112 |
+| [`home-how-closed.test.ts`](tests/site/home-how-closed.test.ts) | the home page's "How it works" closes for good in this browser (features/home/how-closed.ts): the head script marks <html> only for the stored "closed", and nev | 106 |
 | [`manifest.test.ts`](tests/site/manifest.test.ts) | the PWA is the manifest and its icons only (Sprint 13 DoD, S2): the manifest names the site, opens at "/" standalone in the dark theme's colour, and lists icons | 43 |
 | [`my-entries.test.ts`](tests/site/my-entries.test.ts) | the rows of "My entries" through a whole cycle, read the way the page reads them (the chain behind the recording RPC, the wallet's history): while settling, eac | 150 |
 | [`notices.test.ts`](tests/site/notices.test.ts) | every mandatory notice is on its screen (Sprint 13 DoD; BR-47, P1 §4.6): each notice of app/features/notices/registry.ts is drawn by the component it names, and | 199 |
