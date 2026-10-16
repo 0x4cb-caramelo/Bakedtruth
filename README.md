@@ -164,6 +164,7 @@ You need Bun 1.4.2, Rust 1.89 (pinned by `rust-toolchain.toml`), the Solana CLI 
 
 ```bash
 bun install
+cargo install --locked --version 0.4.9 --root target/tools shank-cli   # once: the IDL step needs it
 bun run build:program        # cargo build-sbf into target/deploy, then the IDL
 bun run test                 # TypeScript suites on LiteSVM, in-process, no validator
 bun run test:rust            # host tests and Mollusk
