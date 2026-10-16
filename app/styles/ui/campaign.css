@@ -1,5 +1,5 @@
 /* Purpose: the campaign page (#/c/:id): header with the rule, proof, split and pot, timeline, re-check panel, about rows, creator notice, report line, the state card that takes the entry panel's place once entries close, "You're in", the share block and the phone bar. Two columns (1.7fr / 1fr, the right one sticky) above 860 px; one column below, in the spec's phone order (campaign.js moves the blocks). Tokens only; see ../README.md for the contract. Small amber text uses --st-review-fg, which holds 4.5:1 in both themes where --warn does not on light surfaces. From prototype-lab/campaigns/css/campaign.css (Sprint -1, approved 2026-10-10), as is, in the `components` layer;
-   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.0 · Sprint 09 (the UI overhaul) */
+   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.1 (the deadline's countdown in the rule) · Sprint 09 (the UI overhaul) */
 @layer components {
 .cp-cols { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr); gap: 22px; align-items: start; }
 .cp-main, .cp-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
@@ -20,6 +20,9 @@
 .cp-title { margin: 12px 0 0; font: 700 clamp(30px, 3.4vw, 46px)/1.02 var(--display); letter-spacing: -0.3px; text-wrap: balance; }
 .cp-rule { max-width: 68ch; margin: 12px 0 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
 .cp-rule b { color: var(--text); font-weight: 600; }
+/* The deadline as a live countdown inside the rule's line (rule-line.tsx): steady digits, kept on one line. */
+.cp-countdown { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cp-countdown svg { display: inline-block; margin-right: 4px; vertical-align: -2px; color: var(--accent-soft); }
 .cp-by { margin: 10px 0 0; color: var(--muted); font-size: 12.5px; }
 .cp-unlisted-note { display: flex; align-items: flex-start; gap: 8px; max-width: 68ch; margin: 10px 0 0; padding: 8px 12px; border-radius: var(--r-sm); background: var(--note-bg); color: var(--note-fg); font-size: 12.5px; }
 .cp-unlisted-note svg { flex-shrink: 0; margin-top: 2px; } .cp-unlisted-note b { color: var(--text); font-weight: 600; }
