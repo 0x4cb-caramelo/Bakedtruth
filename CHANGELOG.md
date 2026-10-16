@@ -27,6 +27,16 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **O app Android no repositório, e o README em dia** (16/10/2026, para a inscrição no bounty da Superteam Brasil, que
+  pede um repositório público que compile a partir de um clone limpo). `android/` é o projeto que o CLI da Solana
+  Mobile gerou (`solana-mobile webshell` 0.6.0) em volta de `brot.markets/dev0x`, sem mudança no Kotlin nem no Gradle;
+  só o caminho da chave de assinatura no `twa-manifest.json` virou um nome de arquivo local, e a chave fica fora do Git.
+  O `gradle-wrapper.jar` também fica fora: o verificador de segredos do CI recusa arquivos compactados, e o jar gerado
+  pelo CLI não é o do Gradle 9.7.1 (o SHA-256 dele não bate com o publicado); o README manda gerá-lo com o Gradle.
+  O `android/README.md` diz como instalar o APK publicado, como compilar a versão de teste e como assinar a de
+  lançamento. O README da raiz passa a dizer o estado de 16/10 (o keeper, a API, o indexador e o site no ar na devnet;
+  o app Android em andamento) e como rodar o site, a API e o app.
+
 - **O polimento da página inicial do site** (15/10/2026). A barra do topo mostra o pão do brot.markets
   (`app/public/img/brot-loaf.webp`, o mesmo arquivo da landing, no tamanho e no espaçamento dela) no lugar do Baked.
   O bloco "How it works" ganhou um X amarelo no canto, que o esconde de vez neste navegador: a escolha fica no

@@ -8,14 +8,15 @@ Todo arquivo de código do projeto, com uma linha sobre o núcleo de cada um.
 
 | | |
 |---|---|
-| Arquivos mapeados | **1253** |
-| Acima de 200 linhas | **48** ⚠️ |
-| Sem cabeçalho `Purpose:` | **40** ⚠️ |
+| Arquivos mapeados | **1259** |
+| Acima de 200 linhas | **49** ⚠️ |
+| Sem cabeçalho `Purpose:` | **46** ⚠️ |
 
 ## ⚠️ Acima do limite de 200 linhas
 
 A regra diz "under 200 lines where practical". Estes passaram — vale checar se dá pra separar:
 
+- `android/app/src/main/java/markets/brot/app/MainActivity.kt` — 409 linhas
 - `app/features/campaign-page/copy.ts` — 202 linhas
 - `app/lib/mascot/engine.ts` — 312 linhas
 - `programs/brot-markets/src/constants.rs` — 204 linhas
@@ -80,6 +81,22 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`block-secret-commit.js`](.claude/hooks/block-secret-commit.js) | turn golden rule #9 ("never hardcode secrets") from a request into a guarantee. The `secrets-scan` skill finds leaks when invoked; this stops them at the commit | 179 |
 | [`lint-on-edit.js`](.claude/hooks/lint-on-edit.js) | close the feedback loop at the edit instead of at the CI. Without this, the agent learns about a lint or format error one push later, from a red check | 99 |
 | [`protect-env-files.js`](.claude/hooks/protect-env-files.js) | the OS position is that real secrets live in the user's local environment and the agent maintains `.env.example` instead. This enforces that split | 72 |
+
+## `android/app/src/main/java/markets/brot/app/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`MainActivity.kt`](android/app/src/main/java/markets/brot/app/MainActivity.kt) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 409 |
+| [`WebShellChromeClient.kt`](android/app/src/main/java/markets/brot/app/WebShellChromeClient.kt) | Console messages are page-controlled and may contain sensitive | 97 |
+| [`WebShellViewClient.kt`](android/app/src/main/java/markets/brot/app/WebShellViewClient.kt) | Never intercept subframe (iframe) navigation — this breaks | 113 |
+
+## `android/app/src/main/java/markets/brot/app/ui/theme/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`Color.kt`](android/app/src/main/java/markets/brot/app/ui/theme/Color.kt) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 12 |
+| [`Theme.kt`](android/app/src/main/java/markets/brot/app/ui/theme/Theme.kt) | Dynamic color is available on Android 12+ | 59 |
+| [`Type.kt`](android/app/src/main/java/markets/brot/app/ui/theme/Type.kt) | Set of Material typography styles to start with | 35 |
 
 ## `app/`
 

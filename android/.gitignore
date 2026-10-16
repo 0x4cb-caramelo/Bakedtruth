@@ -1,0 +1,21 @@
+*.iml
+.gradle
+/local.properties
+.local/
+
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+
+.idea
+
+# The release signing key never enters the repository (README.md, "Release build").
+*.keystore
+*.jks
+.kotlin/
+# The repository refuses archives (scripts/ci/file-rules.js): create the wrapper jar with Gradle (README.md).
+gradle/wrapper/gradle-wrapper.jar
