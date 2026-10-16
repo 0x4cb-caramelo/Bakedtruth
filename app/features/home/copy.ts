@@ -11,7 +11,8 @@ export const HOME = {
   title: "Campaigns the chain resolves.",
   sub: "Permissionless campaigns that turn on-chain milestones into growth, settled by the chain itself.",
   open: "Open a campaign",
-  cost: "US$500 in SOL · 90% becomes the prize",
+  // No-break spaces keep the second clause whole, so a phone breaks the line at the "·".
+  cost: "Opening a campaign costs US$500 in SOL · 90% becomes its prize",
   now: (sol: string, usd: string) => `Now ${sol} at Pyth SOL/USD ${usd}`,
   reading: "Reading Pyth's SOL/USD price…",
   paused: "New campaigns are paused right now.",
@@ -24,6 +25,8 @@ export const HOME = {
   nothingAnswered: "Nothing answered yet.",
   how: "How it works",
   howLink: "Every step, fee and refund",
+  howClose: "Hide “How it works”",
+  howCloseHint: "Hide this in this browser. Every step stays on the How it works page.",
   loadFailed: "Couldn't load campaigns.",
   loadFailedNote: "Your SOL is on-chain and unaffected. Reload the page to try again.",
 } as const;
