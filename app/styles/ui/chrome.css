@@ -10,9 +10,9 @@
 .top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 18px; min-height: 64px;
   padding: 10px var(--gutter); background: var(--top-bg); backdrop-filter: blur(10px); border-bottom: var(--bw) solid transparent; }
 .top.scrolled { border-bottom-color: var(--line); }
-.brand { display: flex; flex-shrink: 0; align-items: center; gap: 2px; color: var(--crust-ink); font: 700 28px/1 var(--display); letter-spacing: -0.3px; }
+.brand { display: flex; flex-shrink: 0; align-items: center; gap: 8px; color: var(--crust-ink); font: 700 28px/1 var(--display); letter-spacing: -0.3px; }
 .brand:hover { color: var(--crust-ink); text-decoration: none; }
-.brand img { width: 52px; height: 33px; object-fit: contain; margin-left: -8px; }
+.brand img { width: 58px; height: 37px; object-fit: contain; } /* brot.markets' loaf, at the size and gap services/landing gives it */
 .brand b { color: var(--text); font-weight: 700; }
 .nav-links { display: flex; align-items: center; gap: 4px; }
 .nav-links a { padding: 8px 10px; border-radius: var(--r-sm); color: var(--muted); font-size: 13px; font-weight: 500; white-space: nowrap; }

@@ -1,14 +1,16 @@
 /* Purpose: the home page and the list of all campaigns: the top line, the mosaic (the "Open now" carousel with its proof panel, "Closing soon", "Answered recently"), how it works, the principles, the toolbar and the grid's states, then the dense list with its stacked phone rows. The card itself is css/card.css. Tokens only; see ../README.md for the contract. From prototype-lab/campaigns/css/cards.css (Sprint -1, approved 2026-10-10), as is, in the `components` layer;
-   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.1 (each side's estimate under its button) · Sprint 09 (the UI overhaul) */
+   colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.2 (the cost as a quiet card; the closable "How it works"; 0.1.1, each side's estimate under its button) · Sprint 09 (the UI overhaul) */
 @layer components {
 /* Top line: what it is, and the opening action with its cost. */
 .home-lead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 40px; margin: 4px 0 88px; } /* Baked perches above the carousel */
 .home-lead > div:first-child { flex: 1 1 360px; }
 .home-lead h1 { max-width: 15em; margin: 0; font: 700 clamp(30px, 3.2vw, 44px)/1 var(--display); letter-spacing: -0.4px; }
-.home-lead > div > p { margin: 10px 0 0; color: var(--muted); font-size: 15px; }
-.home-open { display: grid; justify-items: end; gap: 3px; margin-left: auto; text-align: right; }
+.home-lead > div:first-child > p { margin: 10px 0 0; color: var(--muted); font-size: 15px; } /* the subtitle only, not .home-open's lines */
+/* The opening's cost: a quiet card of small print beside the title, metadata rather than a second headline. */
+.home-open { display: grid; justify-items: end; gap: 2px; margin-left: auto; padding: 7px 11px; border: var(--bw) solid var(--line);
+  border-radius: var(--r-sm); background: color-mix(in srgb, var(--panel) 65%, transparent); text-align: right; }
 .home-open .cta { margin-bottom: 7px; } .home-open .cta > span { min-height: 42px; padding-inline: 18px; font-size: 14px; }
-.home-open p { margin: 0; color: var(--muted); font-size: 12px; } .home-open p:first-of-type { color: var(--text); font-weight: 600; }
+.home-open p { margin: 0; color: var(--dim); font-size: 11.5px; } .home-open p:first-of-type { color: var(--muted); font-weight: 500; }
 
 /* Mosaic: the carousel on the left, two side boxes on the right. */
 .home-mosaic { display: grid; grid-template-columns: minmax(0, 1.85fr) minmax(300px, 1fr); gap: 14px; }
@@ -68,8 +70,13 @@
 .home-box .card-row-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; } .home-none { margin: 8px 0; color: var(--muted); font-size: 12.5px; }
 
 /* How it works, then the principles. */
-.home-how { margin-top: 64px; } /* headroom for Baked, who perches on the heading row */
-.home-how-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin-bottom: 12px; }
+.home-how-wrap { position: relative; margin-top: 64px; } /* headroom for Baked, who perches on the heading row */
+[data-home-how="closed"] .home-how-wrap { display: none; } /* set before the first paint by features/home/how-closed.ts */
+.home-how-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin-bottom: 12px;
+  padding-right: 46px; } /* room for the close button in the corner */
+.home-how-close { position: absolute; top: -4px; right: 0; width: 30px; height: 30px; border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--accent); }
+.home-how-close:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
 .home-how-head a, .home-all { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; }
 .home-steps, .home-principles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; margin: 0; padding: 0; list-style: none; }
 .home-steps li, .home-principles li { display: flex; gap: 14px; padding: 16px 18px; border: var(--bw) solid var(--line-strong); border-radius: var(--r);
@@ -150,8 +157,9 @@
   .home-steps, .home-principles { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 700px) {
-  .home-lead { gap: 16px; margin: 0 0 60px; } .home-lead > div > p { font-size: 14px; }
-  .home-open { justify-items: stretch; width: 100%; text-align: left; } .home-open .cta { display: block; } .home-open .cta > span { min-height: var(--tap); }
+  .home-lead { gap: 16px; margin: 0 0 60px; } .home-lead > div:first-child > p { font-size: 14px; }
+  .home-open { justify-items: start; margin-left: 0; text-align: left; } .home-open .cta { display: block; } .home-open .cta > span { min-height: var(--tap); }
+  .home-how-head { padding-right: 52px; } .home-how-close { top: -11px; width: var(--tap); height: var(--tap); }
   .home-side { grid-template-columns: minmax(0, 1fr); }
   .home-feature { padding: 0; border: 0; background: none; box-shadow: none; }
   .home-feature-head { margin-bottom: 10px; } .home-dots { display: none; } .home-pager .icon-btn { width: var(--tap); height: var(--tap); }

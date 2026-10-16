@@ -3,8 +3,9 @@
  *          plain words, the proof's labels, the price facts and the screen when no fresh price exists (L-22), the
  *          re-check panel, the creator notice (BR-26, BP-14's recommendation, still open in P-9), the pot, the activity
  *          and the state card. The entry panel's words are in features/entry/copy.ts.
- * Version: 0.3.0 (the UI overhaul: the rule in one line, the full rule and the proof's details folded; 0.2.1,
- *          Sprint 19: the burn and lock rules and units; 0.2.0, Sprint 12: the closed account)
+ * Version: 0.3.1 (the one-line rule around a countdown; 0.3.0, the UI overhaul: the rule in one line, the full rule
+ *          and the proof's details folded; 0.2.1, Sprint 19: the burn and lock rules and units; 0.2.0, Sprint 12: the
+ *          closed account)
  * Sprint:  11 (site: campaign page and entry); 12
  */
 import type { KindName } from "./proof";
@@ -53,27 +54,39 @@ export function ruleText(a: {
   return `${rules[a.kind]} ${UNREADABLE}`;
 }
 
+type ShortTerms = { kind: KindName; name: string; target: string; below: boolean; deadline: string; epoch: string };
+
+/** What decides YES, without the deadline; the epoch kinds name their epoch instead of a deadline. */
+function condition(a: ShortTerms): string {
+  const rules: Record<KindName, string> = {
+    price: `YES if ${a.name} ${a.below ? `falls to ${a.target} or less` : `reaches ${a.target} or more`}`,
+    burn: `YES if the supply of ${a.name} falls to ${a.target} raw units or less`,
+    lock: `YES if the Meteora pool ${a.name} has at least ${a.target} liquidity units locked for good`,
+    pool: `YES if the stake pool ${a.name} holds at least ${a.target} at the start of epoch ${a.epoch}`,
+    stake: `YES if the vote account ${a.name} has at least ${a.target} of active stake in epoch ${a.epoch}`,
+    curve: `YES if the Meteora launch curve ${a.name} raises its full ${a.target}`,
+  };
+  return rules[a.kind];
+}
+
+/** The word before a kind's deadline, for the kinds that have one. */
+const BY: Partial<Record<KindName, string>> = { price: "before", burn: "before", lock: "before", curve: "by" };
+const OTHERWISE = ". Otherwise NO.";
+
 /**
  * The rule in one line, with only what decides it: the condition, the target and the deadline (Ronaldo, 2026-10-11).
  * The whole rule (`ruleText`) stays one click away, under "Full rules".
  */
-export function ruleShort(a: {
-  kind: KindName;
-  name: string;
-  target: string;
-  below: boolean;
-  deadline: string;
-  epoch: string;
-}): string {
-  const rules: Record<KindName, string> = {
-    price: `YES if ${a.name} ${a.below ? `falls to ${a.target} or less` : `reaches ${a.target} or more`} before ${a.deadline}.`,
-    burn: `YES if the supply of ${a.name} falls to ${a.target} raw units or less before ${a.deadline}.`,
-    lock: `YES if the Meteora pool ${a.name} has at least ${a.target} liquidity units locked for good before ${a.deadline}.`,
-    pool: `YES if the stake pool ${a.name} holds at least ${a.target} at the start of epoch ${a.epoch}.`,
-    stake: `YES if the vote account ${a.name} has at least ${a.target} of active stake in epoch ${a.epoch}.`,
-    curve: `YES if the Meteora launch curve ${a.name} raises its full ${a.target} by ${a.deadline}.`,
-  };
-  return `${rules[a.kind]} Otherwise NO.`;
+export function ruleShort(a: ShortTerms): string {
+  return `${condition(a)}${BY[a.kind] ? ` ${BY[a.kind]} ${a.deadline}` : ""}${OTHERWISE}`;
+}
+
+/**
+ * The same line with a live countdown in the deadline's place (2026-10-15): the words before it ("… within") and after
+ * it. `null` for the epoch kinds, whose line names an epoch, not a deadline.
+ */
+export function ruleShortAround(a: ShortTerms): { lead: string; tail: string } | null {
+  return BY[a.kind] ? { lead: `${condition(a)} within`, tail: OTHERWISE } : null;
 }
 
 export const PAGE = {

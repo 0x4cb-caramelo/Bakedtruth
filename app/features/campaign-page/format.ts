@@ -1,10 +1,11 @@
 /**
  * Purpose: how the campaign page writes what it read: a value in its field's units (a price in the feed's exponent, a
  *          supply or a liquidity as a whole number, a pool or a stake in SOL), a moment in UTC (the SDK's, exact) and
- *          in the visitor's own time zone, an age in seconds and minutes, and the public state's chip. Money never
- *          passes through a float; a price is shown through Sprint 10's target format so the page agrees with the list.
- * Version: 0.1.3 (the UI overhaul: "$" on a price in US$; 0.1.2, Sprint 19: the grouping is the sentence's; burn and
- *          lock values with their unit)
+ *          in the visitor's own time zone, an age in seconds and minutes, a countdown to a deadline, and the public
+ *          state's chip. Money never passes through a float; a price is shown through Sprint 10's target format so the
+ *          page agrees with the list.
+ * Version: 0.1.4 (the deadline's countdown; 0.1.3, the UI overhaul: "$" on a price in US$; 0.1.2, Sprint 19: the
+ *          grouping is the sentence's; burn and lock values with their unit)
  * Sprint:  11 (site: campaign page and entry); 19
  */
 import { bytesToHex, formatUtc, type PublicView } from "@brot/sdk/read";
@@ -63,6 +64,19 @@ export function ageText(seconds: bigint): string {
   if (s < 3_600n) return `${s / 60n} min${s % 60n ? ` ${s % 60n} s` : ""}`;
   return `${s / 3_600n} h${(s % 3_600n) / 60n ? ` ${(s % 3_600n) / 60n} min` : ""}`;
 }
+
+/** A countdown from its largest unit, the rest two digits wide: 7n → "7s"; 383_587n → "4d 10h 33m 07s". */
+export function countdownText(seconds: bigint): string {
+  const s = seconds > 0n ? seconds : 0n;
+  const two = (n: bigint) => n.toString().padStart(2, "0");
+  const [d, h, m, r] = [s / 86_400n, (s / 3_600n) % 24n, (s / 60n) % 60n, s % 60n];
+  if (d > 0n) return `${d}d ${two(h)}h ${two(m)}m ${two(r)}s`;
+  if (h > 0n) return `${h}h ${two(m)}m ${two(r)}s`;
+  return m > 0n ? `${m}m ${two(r)}s` : `${r}s`;
+}
+
+/** A moment as an ISO 8601 string, for a <time>'s machine-readable `dateTime`. */
+export const isoOf = (unixSeconds: bigint) => new Date(Number(unixSeconds) * 1_000).toISOString();
 
 /**
  * The SDK's public state as the chip names it; a contested review shows as such, and a Paid campaign is "Result final"

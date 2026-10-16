@@ -5,8 +5,9 @@
  *          copy files: this list adds none. P1 §4.6's line on an automatic payout at the end of the 6-hour window is
  *          not here: on devnet nothing pays out by itself yet, so the founder replaced it (2026-10-10) with the review
  *          rule and "Waiting for payout", which promise no time.
- * Version: 0.3.0 (Sprint 19: the creation box's notices, registry-open.ts; 0.2.2, the footer's age line; 0.2.1,
- *          answer 9a: the footer's privacy link; 0.2.0, the Sprint 13 adversarial review)
+ * Version: 0.3.1 (the review sheet's redesign: its notices in review-notes.tsx; 0.3.0, Sprint 19: the creation box's
+ *          notices, registry-open.ts; 0.2.2, the footer's age line; 0.2.1, answer 9a: the footer's privacy link; 0.2.0,
+ *          the Sprint 13 adversarial review)
  * Sprint:  13 (site: ranking, notices and copy); 19
  */
 import { AGE_NOTICE, AUDIT_NOTICE, PRIVACY_LABEL, TEST_NOTICE } from "../../components/copy-site";
@@ -78,7 +79,9 @@ export const MANDATORY_NOTICES: readonly MandatoryNotice[] = [
     drawnBy: [
       { file: "features/entry/entry-notices.tsx", uses: "NOTICES.lock" },
       { file: "features/entry/entry-panel.tsx", uses: "<EntryNotices" },
-      { file: "features/entry/entry-review.tsx", uses: "<EntryNotices" },
+      // The review sheet's list, since 2026-10-15: L-03 in its two sentences, the same words (LOCK_LINES).
+      { file: "features/entry/review-notes.tsx", uses: "LOCK_LINES" },
+      { file: "features/entry/entry-review.tsx", uses: "<ReviewNotes" },
     ],
   },
   {
@@ -89,6 +92,7 @@ export const MANDATORY_NOTICES: readonly MandatoryNotice[] = [
     drawnBy: [
       { file: "features/entry/entry-notices.tsx", uses: "NOTICES.estimate" },
       { file: "features/entry/entry-panel.tsx", uses: "<EntryNotices" },
+      { file: "features/entry/review-notes.tsx", uses: "NOTICES.estimate" },
     ],
   },
   {
@@ -99,6 +103,7 @@ export const MANDATORY_NOTICES: readonly MandatoryNotice[] = [
     drawnBy: [
       { file: "features/entry/entry-notices.tsx", uses: "NOTICES.fee" },
       { file: "features/entry/entry-panel.tsx", uses: "<EntryNotices" },
+      { file: "features/entry/review-notes.tsx", uses: "NOTICES.fee" },
     ],
   },
   {
@@ -109,6 +114,7 @@ export const MANDATORY_NOTICES: readonly MandatoryNotice[] = [
     drawnBy: [
       { file: "features/entry/entry-notices.tsx", uses: "NOTICES.oneSided" },
       { file: "features/entry/entry-panel.tsx", uses: "<EntryNotices" },
+      { file: "features/entry/review-notes.tsx", uses: "NOTICES.oneSided" },
     ],
   },
   {
@@ -116,7 +122,10 @@ export const MANDATORY_NOTICES: readonly MandatoryNotice[] = [
     source: "TP §8, question 8: entries are public and permanent, said before the first entry",
     text: SHEET.public,
     screens: "the review sheet of a wallet's first entry in a campaign",
-    drawnBy: [{ file: "features/entry/entry-review.tsx", uses: "SHEET.public" }],
+    drawnBy: [
+      { file: "features/entry/review-notes.tsx", uses: "SHEET.public" },
+      { file: "features/entry/entry-review.tsx", uses: "<ReviewNotes" },
+    ],
   },
   {
     id: "creator",
