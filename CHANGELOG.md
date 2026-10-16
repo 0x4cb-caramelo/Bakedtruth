@@ -35,6 +35,33 @@ recomendado (1a a 12a).
   lançamento. O README da raiz passa a dizer o estado de 16/10 (o keeper, a API, o indexador e o site no ar na devnet;
   o app Android em andamento) e como rodar o site, a API e o app.
 
+- **O polimento da página inicial do site** (15/10/2026). A barra do topo mostra o pão do brot.markets
+  (`app/public/img/brot-loaf.webp`, o mesmo arquivo da landing, no tamanho e no espaçamento dela) no lugar do Baked.
+  O bloco "How it works" ganhou um X amarelo no canto, que o esconde de vez neste navegador: a escolha fica no
+  `localStorage` (`brot-home-how`), e um script no `<head>` marca o `<html>` antes da primeira pintura, como o tema,
+  para que quem já fechou não veja o bloco piscar (`app/features/home/how-closed.ts`,
+  `tests/site/home-how-closed.test.ts`). O custo da abertura virou um cartão discreto de letra miúda, que agora diz
+  para que é a cobrança ("Opening a campaign costs US$500 in SOL"); ele aparecia em 15 px e negrito porque a regra do
+  subtítulo também pegava as linhas dele. O título e o subtítulo já eram os pedidos. Na página da campanha, a regra
+  em uma linha mostra o prazo como uma contagem regressiva ("… within 4d 07h 13m 06s. Otherwise NO."), contada a
+  partir do relógio da rede como o relógio da revisão (o gancho saiu de `state-panel.tsx` para `use-countdown.ts`). A
+  data exata fica no passar do mouse, em "Full rules" e na prova; depois do prazo, a linha volta a dizer a data
+  (`app/features/campaign-page/rule-line.tsx`, `tests/site/campaign-head.test.ts`). A janela "Check before you sign"
+  da entrada ganhou o desenho do mockup do fundador ("Confirm entry — before / after", 1a): o lado como selo, o que
+  se paga contra o que volta se o lado ganhar, o efeito de uma entrada grande numa barra, o custo e os campos do
+  programa dobrados com os valores exatos e crus, os avisos numa lista e as regras dobradas, e o valor no botão com o
+  que a carteira deve mostrar (`app/features/entry/review-*.tsx`, `tests/site/entry-review.test.ts`). Os avisos
+  obrigatórios seguem palavra por palavra; o L-03 aparece nas suas duas frases, que juntas são o texto aprovado.
+
+- **"Sign" funciona no primeiro clique** (15/10/2026). No devnet saem cerca de 4,45 blocos por segundo (medido), então
+  os 150 blocos de vida de uma transação duram uns 34 s, e o "Sign" exigia 60 de sobra: quem lia a janela por mais de
+  uns 20 s via o clique preparar a transação de novo, a janela fechar e voltar com "Prepared again", e só o segundo
+  clique abria a carteira. Agora a transação vencida é preparada de novo sem fechar a janela e, quando só o blockhash
+  mudou (o resumo dos bytes, o total, a estimativa e o pote iguais), o mesmo clique segue para a carteira; termos
+  novos ainda voltam para a revisão, com o aviso junto ao botão. Um segundo clique durante a checagem não faz nada, e
+  o botão diz "Preparing for your wallet…" (`app/features/entry/fresh-join.ts`, `tests/site/fresh-join.test.ts`).
+  Reproduzido no navegador com uma carteira de teste que só recusa: antes, 0 pedidos à carteira; depois, 1.
+
 - **A fotografia do pote conferida contra os livros (S-8)** (15/10/2026; `session-log/2026-10-15-s8-fotografia-do-pote.md`).
   Os sócios escolheram corrigir antes do congelamento. Quando uma campanha é decidida, os totais do snapshot de um
   `Split` precisam bater com os potes da campanha menos as entradas tardias (6102). Cada pagamento de devolução e de

@@ -1,8 +1,9 @@
 /**
  * Purpose: the dialog of the design (a bottom sheet on phones): the browser's own modal <dialog>, which keeps focus
  *          inside, puts the page behind it out of reach and closes on Escape. `dismissable` false keeps it open while
- *          something must not be interrupted (a transaction in the wallet). Colour from the tokens only.
- * Version: 0.1.0
+ *          something must not be interrupted (a transaction in the wallet). Colour from the tokens only. A `badge` sits
+ *          beside the title.
+ * Version: 0.1.1 (the badge)
  * Sprint:  11 (site: campaign page and entry)
  */
 "use client";
@@ -15,12 +16,15 @@ import { cx } from "./cx";
 export function Dialog({
   open,
   title,
+  badge,
   onClose,
   dismissable = true,
   children,
 }: {
   open: boolean;
   title: string;
+  /** A small mark beside the title (the entry review's network). */
+  badge?: ReactNode;
   onClose: () => void;
   dismissable?: boolean;
   children: ReactNode;
@@ -48,9 +52,12 @@ export function Dialog({
       )}
     >
       <div className="flex items-start gap-3 border-b border-line px-5 py-4">
-        <h2 id={titleId} className="m-0 flex-1 font-display text-2xl font-bold">
-          {title}
-        </h2>
+        <div className="flex flex-1 flex-wrap items-center gap-x-2.5 gap-y-1">
+          <h2 id={titleId} className="m-0 font-display text-2xl font-bold">
+            {title}
+          </h2>
+          {badge}
+        </div>
         {dismissable ? (
           <button
             type="button"

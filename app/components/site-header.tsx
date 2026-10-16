@@ -1,10 +1,11 @@
 /**
- * Purpose: the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): Baked and the
- *          wordmark, the three main links with the current one underlined, the campaign search, "Open a campaign",
+ * Purpose: the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): the loaf and the
+ *          wordmark (the loaf is brot.markets' own, services/landing's img/brot-loaf.webp, at its size), the three main
+ *          links with the current one underlined, the campaign search, "Open a campaign",
  *          the theme switch, the wallet and, under 1180 px, the menu with every route (phone-menu.tsx). It sticks to the
  *          top and draws its edge once the page scrolls. The theme follows the stored choice after the first paint
  *          (the head script already set it, so there is no flash).
- * Version: 0.3.0 (the UI overhaul: the prototype's bar; 0.2.1, Sprint 13's routes)
+ * Version: 0.3.1 (brot.markets' loaf beside the wordmark; 0.3.0, the UI overhaul: the prototype's bar)
  * Sprint:  09 (site shell, theme and wallet); 13
  */
 "use client";
@@ -52,8 +53,8 @@ export function SiteHeader() {
   return (
     <header className={cx("top", scrolled && "scrolled")}>
       <Link className="brand" href="/" aria-label="Brot Markets, home">
-        {/* eslint-disable-next-line @next/next/no-img-element -- a 52 px sprite of Baked, already sized */}
-        <img src={asset("/mascot/deadpan.png")} alt="" width={52} height={33} />
+        {/* eslint-disable-next-line @next/next/no-img-element -- brot.markets' 58 px loaf, already sized */}
+        <img src={asset("/img/brot-loaf.webp")} alt="" width={58} height={35} />
         <span>
           brot<b className="tld">.markets</b>
         </span>

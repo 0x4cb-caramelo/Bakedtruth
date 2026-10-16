@@ -5,8 +5,9 @@
  *          the founder approved the same day in Sprint 12 (no automatic payout, no time promised, until the keeper
  *          settles); changing it is the founder's decision. English, per L-01. Failures have their own file
  *          (copy-failures.ts).
- * Version: 0.3.1 (the founder's answer 9a: a winning entry "can appear" on the leaderboard, since answer 3a leaves
- *          some unscored; 0.3.0, Sprint 13: the too-small refund before signing, the leaderboard in the first-entry line)
+ * Version: 0.4.0 (the sheet's redesign of 2026-10-15, with L-03 split in its two sentences, word for word; 0.3.1, the
+ *          founder's answer 9a: a winning entry "can appear" on the leaderboard, since answer 3a leaves some unscored;
+ *          0.3.0, Sprint 13: the too-small refund before signing, the leaderboard in the first-entry line)
  * Sprint:  11 (site: campaign page and entry); 12; 13
  */
 
@@ -75,43 +76,67 @@ export const PANEL = {
   notTaken: "Entries are not taken on this site right now. The campaign, its proof and its payouts stay visible.",
 } as const;
 
+/**
+ * L-03 in its two sentences, for the sheet's "Before you enter" list (the redesign of 2026-10-15): the same words, each
+ * with a bold lead. Joined with a space they are LOCK_NOTICE exactly (tests/site/notices.test.ts).
+ */
+export const LOCK_LINES = [
+  ["Your entry stays locked until the campaign ends.", "You cannot take it out before then."],
+  ["Payouts go to your wallet after the result is read;", "on devnet that is not automatic yet, and no time is promised."],
+] as const;
+
+/** A notice's lead and the rest, split after its first colon so the lead can be bold; the words do not change. */
+export function leadOf(text: string): readonly [string, string] {
+  const at = text.indexOf(": ");
+  return at < 0 ? ["", text] : [text.slice(0, at + 1), text.slice(at + 2)];
+}
+
+/** The sheet "Check before you sign", in the redesign of 2026-10-15 (the founder's mockup, 1a). */
 export const SHEET = {
   title: "Check before you sign",
-  campaign: (id: string) => `Campaign ${id}`,
-  /** What a person needs to decide, in view (Ronaldo, 2026-10-11); the rest under "Transaction details". */
-  youEnter: "You enter",
+  campaign: (id: string) => `Campaign #${id.length > 10 ? `${id.slice(0, 4)}…${id.slice(-4)}` : id}`,
+  campaignId: "campaign id",
+  yourSide: "Your side",
+  youPay: "You pay",
+  rentBack: (rent: string) => `${rent} SOL of it is rent, back at settlement`,
+  ifWins: (side: string) => `If ${side} wins, est.`,
+  ifEmpty: (other: string) => `If ${other} stays empty, est.`,
+  times: (perOne: string) => `${perOne}× your entry`,
   addsTo: (total: string) => `Adds to the ${total} SOL you already have here.`,
-  ifWins: (side: string) => `If ${side} wins`,
-  ifEmpty: (other: string) => `If ${other} stays empty`,
-  backPerOne: (back: string, perOne: string) => `est. ${back} SOL back · ${perOne} per 1`,
-  backOnly: (back: string) => `est. ${back} SOL back`,
   tooSmall: (other: string) =>
     `The ${other} side is too small to pay the fees: if entries closed now, the pot would not split and this entry would be refunded. The floor in the details is the program's own estimate, which assumes the pot splits.`,
-  youPay: "You pay",
-  payNote: (amount: string, rents: string, fee: string) =>
-    `${amount} SOL entry + ${rents} SOL account rent, returned when the campaign settles, + a network fee of at most ${fee} SOL.`,
+  moves: "Your entry moves the payout",
+  cost: "Cost breakdown",
+  entryOn: (side: string) => `Entry on ${side}`,
+  rentTag: "Returned at settlement",
+  feeMax: "Network fee (at most)",
+  beforeYouEnter: "Before you enter",
+  payouts: "How payouts work",
+  feeTile: "of the losing side to Brot",
+  creatorTile: "of the entries to the creator",
+  refunds: "Refunds:",
   details: "Transaction details",
+  soFar: "Your entry so far",
+  guardNote: (total: string) =>
+    `This entry goes in only if your entry is still ${total} SOL when it lands, so this transaction cannot go in twice.`,
   floor: "Lowest estimate you accept",
-  floorValue: (perOne: string) => `${perOne} per 1`,
-  floorNote: (bps: string) =>
-    `min_return_bps ${bps}: if other entries go in first and the estimate falls below this, the program refuses the entry. Later entries can still lower it.`,
-  guard: (total: string) =>
-    `expected_entry_total ${total} SOL: this entry goes in only if your entry is still ${total} SOL when it lands, so this transaction cannot go in twice.`,
+  floorNote:
+    "If other entries go in first and the estimate falls below this, the program refuses the entry. Later entries can still lower it.",
+  rents: "Account rents",
+  rentsNote: "Returned when the campaign settles.",
+  fee: "Network fee",
+  program: "Program",
+  bytes: "What you sign, read from the transaction's bytes",
   notKept:
     'This browser does not keep data for this page. If it closes before your wallet answers, check "Your entry" here before you try again.',
-  soFar: "Your entry so far",
   refreshed: "Prepared again: the network moved on while this was open. Check it again before you sign.",
-  feeValue: (fee: string) => `at most ${fee} SOL`,
-  rents: "Account rents",
-  rentsNote: "Returned when the campaign settles",
-  fee: "Network fee",
-  network: "Network · program",
-  bytes: "What you sign, read from the transaction's bytes",
-  walletDiffers: "If your wallet shows something different from this summary, reject it.",
   public:
     "Entries are public and permanent: anyone can see this wallet's entries on-chain, and a wallet that enters on the side that wins can appear on the public devnet leaderboard.",
+  walletShows: "Your wallet should show",
+  walletDiffers: "If it shows something different, reject it.",
   back: "Back",
-  sign: "Sign in wallet",
+  sign: (amount: string) => `Sign ${amount} SOL in wallet`,
+  readying: "Preparing for your wallet…",
 } as const;
 
 export const STEPS = {

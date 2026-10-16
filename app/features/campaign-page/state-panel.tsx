@@ -5,12 +5,11 @@
  *          one-sided refund rule or the empty pot; voided with the public reason, the team's note when the void log has
  *          one, and what returns to whoever opened. Every state after the result says where to report a wrong one
  *          (L-13). The words are copy-states.ts; the values are states.ts, from the chain's time (A-7).
- * Version: 0.2.1 (Sprint 19: burn and lock numbers with their unit; 0.2.0, Sprint 12: every public state)
+ * Version: 0.2.2 (the countdown hook in use-countdown.ts; 0.2.1, Sprint 19: burn and lock numbers with their unit;
+ *          0.2.0, Sprint 12: every public state)
  * Sprint:  12 (site: my entries and campaign states)
  */
 "use client";
-
-import { useEffect, useState } from "react";
 
 import { SettleMode } from "@/lib/brot";
 import { explorerAddress } from "@/lib/config";
@@ -20,21 +19,8 @@ import { utc, valueWithUnit } from "./format";
 import type { PageData } from "./load";
 import type { Proof } from "./proof";
 import { pageStateOf, type StateView } from "./states";
+import { useCountdown } from "./use-countdown";
 import type { VoidNote } from "./void-note";
-
-/** The review clock: the seconds left at the chain time read, counted down on screen between reads. */
-function useCountdown(atRead: bigint): bigint {
-  const [left, setLeft] = useState(atRead);
-  useEffect(() => {
-    const started = Date.now();
-    const timer = window.setInterval(() => {
-      const passed = BigInt(Math.floor((Date.now() - started) / 1000));
-      setLeft(atRead > passed ? atRead - passed : 0n);
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, [atRead]);
-  return left;
-}
 
 function ReviewClock({ state }: { state: Extract<StateView, { kind: "review" }> }) {
   const left = useCountdown(state.secondsLeft);
