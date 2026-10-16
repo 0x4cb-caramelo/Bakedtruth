@@ -139,17 +139,16 @@ What is not solved yet:
 
 > _"Still baking."_ — Baked
 
-As of 10 October 2026.
+As of 16 October 2026.
 
 | Piece | State |
 | --- | --- |
 | Program, `programs/brot-markets` (Rust, Pinocchio) | **Baked.** On devnet. The full cycle (open, join, resolve, settle) has run end to end, with the team's own wallets |
 | SDK, `packages/sdk` (`@brot/sdk`) | **Baked.** `read`, `tx` and `schemas` over the Codama client generated from the Shank IDL |
-| Keeper, `services/keeper` | **In the oven.** Runs on our server, watching devnet, and is built to resolve a campaign when its reader allows. It has not had a real campaign to resolve yet. The standby and the watchdog are written, with no second machine running them. Settlement tasks come next |
-| Indexer and API | **Dough.** Next in line |
-| Site | `brot.markets` is a coming-soon page with a waitlist. The campaign screens exist as a prototype with mock data. Entries are made by script: there is no YES/NO button yet |
-| `app/` | The front end of the program this repository grew from. It leaves when the new site arrives |
-| Android app | **Dough.** Planned for the Solana dApp Store |
+| Keeper, `services/keeper` | **Baked, on devnet.** Runs on our server. It resolved a real campaign unattended on 11 October, and since 13 October it also settles and pays. The standby and the watchdog are written, with no second machine running them |
+| Indexer and API | **Baked, on devnet.** The read API answers at `brot.markets/api/v1` since 11 October, and the indexer behind it since 14 October |
+| Site, `app/` (Next.js) | **Baked, on devnet.** [`brot.markets/dev0x`](https://brot.markets/dev0x): open campaigns, YES/NO entries signed in your wallet, opening a campaign, your entries, the record and the leaderboard. The root `brot.markets` is still the coming-soon page with the waitlist |
+| Android app, [`android/`](android/) | **In the oven.** A Solana Mobile web shell around the site that connects through the Mobile Wallet Adapter. The devnet APK is in the [releases](https://github.com/0x4cb-caramelo/Bakedtruth/releases/tag/android-devnet-v0.1.0). Not on the Solana dApp Store yet |
 | Audits | None yet. Two are planned before mainnet |
 | Mainnet | Not before the audits and their fixes |
 
@@ -175,6 +174,21 @@ bun run lint
 The suites load the program binary, so build before testing after any program change. The SDK's own tests
 (`tests/sdk/`) need no binary.
 
+The site and its read API, on devnet:
+
+```bash
+API_RPC_URL=https://api.devnet.solana.com API_CLUSTER=devnet bun services/api/src/main.ts   # 127.0.0.1:4220
+cp app/.env.example app/.env.local
+bun run dev                  # the site on http://localhost:3000
+(cd app && bun run build)    # the production build
+```
+
+The Android app needs JDK 17 and the Android SDK; the details are in [`android/README.md`](android/README.md).
+
+```bash
+cd android && ./gradlew assembleDebug
+```
+
 To watch a whole campaign cycle, run `bun run smoke:devnet`. It acts on a local cluster by default and touches devnet
 only with `-- --cluster devnet`. The deploy procedure is in [`deploy/devnet/README.md`](deploy/devnet/README.md).
 
@@ -195,7 +209,8 @@ docs/                    business plan, technical plan, sprints, legal and produ
 knowledge-base/          research, with sources
 session-log/             why each decision was made
 prototype-lab/           the design directions and the campaign screens
-app/                     the old front end, on its way out
+app/                     the campaign site (Next.js), at brot.markets/dev0x
+android/                 the Android app: a Solana Mobile web shell around the site
 ```
 
 [`CODEMAP.md`](CODEMAP.md) lists every code file with one line on what it does.

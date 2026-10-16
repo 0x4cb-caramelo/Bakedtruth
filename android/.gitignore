@@ -1,0 +1,19 @@
+*.iml
+.gradle
+/local.properties
+.local/
+
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+
+.idea
+
+# The release signing key never enters the repository (README.md, "Release build").
+*.keystore
+*.jks
+.kotlin/

@@ -27,6 +27,14 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **O app Android no repositório, e o README em dia** (16/10/2026, para a inscrição no bounty da Superteam Brasil, que
+  pede um repositório público que compile a partir de um clone limpo). `android/` é o projeto que o CLI da Solana
+  Mobile gerou (`solana-mobile webshell` 0.6.0) em volta de `brot.markets/dev0x`, sem mudança no Kotlin nem no Gradle;
+  só o caminho da chave de assinatura no `twa-manifest.json` virou um nome de arquivo local, e a chave fica fora do Git.
+  O `android/README.md` diz como instalar o APK publicado, como compilar a versão de teste e como assinar a de
+  lançamento. O README da raiz passa a dizer o estado de 16/10 (o keeper, a API, o indexador e o site no ar na devnet;
+  o app Android em andamento) e como rodar o site, a API e o app.
+
 - **A fotografia do pote conferida contra os livros (S-8)** (15/10/2026; `session-log/2026-10-15-s8-fotografia-do-pote.md`).
   Os sócios escolheram corrigir antes do congelamento. Quando uma campanha é decidida, os totais do snapshot de um
   `Split` precisam bater com os potes da campanha menos as entradas tardias (6102). Cada pagamento de devolução e de
