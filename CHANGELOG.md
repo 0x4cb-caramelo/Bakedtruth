@@ -1329,6 +1329,14 @@ recomendado (1a a 12a).
   dela, na mainnet-beta. Agora, dentro do app, a lista "Connect a wallet" mostra só o Mobile Wallet Adapter, que abre o
   app de carteira do celular na devnet; a Phantom também sai de lá, porque só levava à instalação. Fora do app, a
   Solflare abre na rede do site (`app/features/wallet/web-shell.ts`, com testes). O APK não muda: ele só abre o site.
+- **Nenhuma conexão pelo Mobile Wallet Adapter passava pela política de segurança do site** (15/10/2026, achado no
+  mesmo APK, depois da correção acima: a carteira abria e o app ficava em "connecting"). No celular, a carteira abre
+  um soquete no próprio aparelho, e a página se conecta a `ws://localhost:<porta>/solana-wallet`; o `connect-src` da
+  CSP não aceitava esse endereço, então o navegador recusava cada tentativa até a biblioteca desistir, aos 30 s. A CSP
+  agora aceita `ws://localhost:*` (`app/next.config.ts`, com um teste que falha sem a regra). Conferido num emulador
+  Android 15 com o APK e a carteira de teste da Solana Mobile: com a CSP antiga, 21 recusas e "Failed to connect to the
+  wallet websocket"; com a nova, servida localmente, nenhuma recusa, a carteira pediu a autorização na devnet e o app
+  voltou conectado.
 - **O erro #418 do React em todas as páginas do site** (13/10/2026, achado na publicação do ticker;
   `session-log/2026-10-13-publicacao-do-ticker-no-dev0x.md`). O servidor não vê carteira nenhuma, e o navegador quase
   sempre vê uma: o adaptador da Solflare fica "Loadable" em qualquer navegador de computador. Por isso duas partes da

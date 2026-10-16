@@ -1,11 +1,11 @@
 /**
  * Purpose: the site's Next.js settings: the security headers and the Content-Security-Policy (Sprint 09, X2.5). The
- *          policy allows the page's own origin, the one RPC origin the browser reads from (NEXT_PUBLIC_RPC_URL), and the
- *          read API (NEXT_PUBLIC_API_URL); nothing else. No third-party script and no framing by another origin. And
- *          A-8: the program deploy a build is for, baked into the bundle as NEXT_PUBLIC_PROGRAM_DEPLOY_SLOT. And the path
- *          the site is served under (NEXT_PUBLIC_BASE_PATH, `/dev0x` on brot.markets; none locally), with the noindex
- *          the unlisted preview at that path always had.
- * Version: 0.5.0 (the /dev0x deploy: the base path; 0.4.0, Sprint 11: A-8's deploy slot; no RPC URL with a key, A-5)
+ *          policy allows the page's own origin, the one RPC origin the browser reads from (NEXT_PUBLIC_RPC_URL), the
+ *          read API (NEXT_PUBLIC_API_URL) and the Mobile Wallet Adapter's socket on the phone itself; nothing else. No
+ *          third-party script and no framing by another origin. And A-8: the program deploy a build is for, baked into
+ *          the bundle as NEXT_PUBLIC_PROGRAM_DEPLOY_SLOT. And the path the site is served under (NEXT_PUBLIC_BASE_PATH,
+ *          `/dev0x` on brot.markets; none locally), with the noindex the unlisted preview at that path always had.
+ * Version: 0.6.0 (the MWA socket; 0.5.0, the /dev0x deploy: the base path; 0.4.0, Sprint 11: A-8's deploy slot)
  * Sprint:  09 (site shell, theme and wallet)
  */
 import type { NextConfig } from "next";
@@ -47,6 +47,11 @@ const apiOrigin = (() => {
   }
 })();
 
+// The Mobile Wallet Adapter on Android: the wallet app on the same phone listens on a random loopback port, and the page
+// connects to ws://localhost:<port>/solana-wallet (@solana-mobile/mobile-wallet-adapter-protocol). Without this source
+// the policy refused every MWA connection (seen in the Android app on an emulator, 2026-10-15).
+const mwaSocket = "ws://localhost:*";
+
 // The path the site is served under: `/dev0x` on brot.markets, where the tunnel sends it (deploy/vps/README.md, "The
 // site under /dev0x"); none locally and in the web smoke. Inlined in the bundle at build time (lib/base-path.ts).
 const basePath = (() => {
@@ -63,7 +68,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  `connect-src 'self' ${rpcOrigin} ${wsOrigin} ${apiOrigin}`,
+  `connect-src 'self' ${rpcOrigin} ${wsOrigin} ${apiOrigin} ${mwaSocket}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
