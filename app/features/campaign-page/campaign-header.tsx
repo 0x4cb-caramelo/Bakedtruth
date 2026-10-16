@@ -1,12 +1,13 @@
 /**
  * Purpose: the campaign page's header (spec 3.5 of Sprint -1): the way back, the kind, the public state from chain time
  *          (A-7), the team chip, the sentence as the page's one <h1>, asked ("…$150?"), the rule in one line with the
- *          deadline in UTC and local time and the whole rule folded under "Full rules", who opened it (a link to the
- *          opening transaction on Solscan, once found), and the creator
+ *          deadline as a live countdown (rule-line.tsx; the moment in UTC and local time on its hover) and the whole
+ *          rule, with the moment, folded under "Full rules", who opened it (a link to the opening transaction on
+ *          Solscan, once found), and the creator
  *          notice on burn, lock and stake campaigns (BR-26) with the creator's own entry when the creator's wallet has
  *          one. A graduation curve is named by its ticker, never by its address alone (the address is in the proof).
- * Version: 0.3.2 (the curve's name; 0.3.1, Ronaldo, 2026-10-11: the rule in one line, the rest folded, the opening
- *          linked on Solscan; 0.2.0, the approved prototype's `.cp-head`)
+ * Version: 0.3.3 (the deadline as a countdown; 0.3.2, the curve's name; 0.3.1, Ronaldo, 2026-10-11: the rule in one
+ *          line, the rest folded, the opening linked on Solscan; 0.2.0, the approved prototype's `.cp-head`)
  * Sprint:  11 (site: campaign page and entry)
  */
 "use client";
@@ -21,11 +22,12 @@ import { solscanTx } from "@/lib/config";
 import { rpc } from "@/lib/rpc";
 import { sol4 } from "@/features/entry/amount";
 import { KINDS } from "@/features/campaigns/card-parts";
-import { CREATOR_NOTICE, KIND_NAME, PAGE, creatorHasEntry, ruleShort, ruleText } from "./copy";
+import { CREATOR_NOTICE, KIND_NAME, PAGE, creatorHasEntry, ruleText } from "./copy";
 import { local, priceAsset, stateChip, utc, valueText } from "./format";
 import type { PageData } from "./load";
 import { openingSignature } from "./opening";
 import type { Proof } from "./proof";
+import { RuleLine } from "./rule-line";
 
 /** `accountName`: a graduation curve's name (its ticker with the pool's last characters), in place of the address. */
 export function CampaignHeader({
@@ -91,7 +93,7 @@ export function CampaignHeader({
         </span>
       </div>
       <h1 className="cp-title">{sentence}</h1>
-      <p className="cp-rule">{ruleShort(terms)}</p>
+      <RuleLine terms={terms} deadlineAt={c.deadlineAt} chainNow={data.chain.unixTimestamp} />
       <details className="fold cp-fullrule">
         <summary>
           {PAGE.fullRules}
