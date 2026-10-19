@@ -302,6 +302,15 @@ release on. Decided by Ronaldo on 2026-10-11: the tunnel and systemd (no Nginx, 
    The whole landing at this commit, when that is wanted: `sudo rsync -a --delete "$R/services/landing/"
    <landing-root>/services/landing/` and the same for `prototype-lab/campaigns/`, then the restart above.
 
+   **The landing since 2026-10-19 ~03:25 UTC.** `<landing-root>` is `/srv/brot-markets/work/current`, a Git checkout
+   owned by `brot` at `395efa5`. At Ronaldo's request only the three files of PR #103 (`services/landing/public/index.html`,
+   `public/2/index.html` and `public/live.css`: the X and Discord logos at the top, Discord in the footer) were installed
+   from `bf2a5ce` (`brot:brot`, 0664), and `brot-landing` restarted. Between `395efa5` and `bf2a5ce` nothing else in
+   the landing changed, so it now serves `bf2a5ce`'s landing, and `git status` there shows those three files modified.
+   The files as they were are in `/srv/brot-markets/work/bak-20261019-landing/`. Rollback: `sudo -u brot git -C
+   /srv/brot-markets/work/current checkout -- services/landing/public` (or copy the backup back), then
+   `sudo systemctl restart brot-landing`.
+
 8. **The tunnel's two routes**, in the Cloudflare dashboard (Zero Trust → Networks → Tunnels → `brot-markets` →
    Public hostnames). The tunnel takes the first rule that matches, so both go above the landing's:
 
@@ -325,7 +334,14 @@ release on. Decided by Ronaldo on 2026-10-11: the tunnel and systemd (no Nginx, 
 
 **Rolling back:** delete the two routes in the dashboard (the landing then answers both paths with 404) and
 `sudo systemctl disable --now brot-site brot-api`; or point `current` at the previous release and
-`sudo systemctl restart brot-api brot-site`. **Since 2026-10-16 ~03:05 UTC:** release `79318d17428d` (branch
+`sudo systemctl restart brot-api brot-site`. **Since 2026-10-19 ~03:30 UTC:** release `bf2a5ce3282a` (`main` after PR
+#103: the X and Discord logos under the home page's subtitle, and Discord beside X in the footer), at Ronaldo's request,
+built for the program deploy at slot 511223702 and tested on 4239 first (the eight pages answered as the live
+release's, the same CSP, no error in the test unit's journal). It differs from the release before it only by PR #103,
+so only `brot-site` restarted; `brot-api` still runs the files of `1f8427f98d5c`, whose API code is the same. The way
+back is `1f8427f98d5c`. **From 2026-10-16 ~03:51 UTC:** release `1f8427f98d5c` (`main` after PR #102, which brought
+the wallet fixes `a7c9b15` and `79318d1` and the site polish of PR #100 into `main`); found live on 2026-10-19 with no
+record, so how it was tested is not known; the way back is `79318d17428d`. **From 2026-10-16 ~03:05 UTC:** release `79318d17428d` (branch
 `fix/wallet-web-shell`: the CSP admits `ws://localhost:*`, the Mobile Wallet Adapter's socket), built for the program
 deploy at slot 511223702, tested on 4239 first (the eight pages as the live release's, the new CSP served, no error).
 Only `brot-site` restarted, since the API's code had not changed; the API still runs from `5df35297d05c`'s files. The way
@@ -368,6 +384,14 @@ route of the API is unchanged.
   inside and outside (`/api/v1/activity` and `/ranking` 200).
 - **Rolling back the indexer.** `sudo systemctl disable --now brot-indexer`: the routes answer 503 again, and nothing
   else changes.
+- **Down since the server's reboot of 2026-10-17 ~18:15 UTC** (found on 2026-10-19, not fixed). The unit restarts
+  every 5 s with `Cannot find module '@solana/kit'`, and the five routes answer 503. The cause: `bun install` run as
+  root hard-links each package file from root's cache, so the indexer's release and every site release share the
+  same files (one inode, 15 links for `@solana/kit`'s `package.json`), and step 4's `chown -R root:brot-web` of a
+  site release gives those shared files to `brot-web`, which `brot-indexer` is not in. The process that was already
+  running had its modules in memory; the reboot exposed it. The fix, for Ronaldo to approve: reinstall the indexer's
+  `node_modules` with its own copies (`bun install --backend=copyfile`), `chown -R root:brot-indexer` the release, and
+  restart the unit; and install the site's releases with copies too, so the next `chown` touches only them.
 
 Publishing them was a server act for Ronaldo, in this order:
 

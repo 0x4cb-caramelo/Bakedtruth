@@ -27,6 +27,14 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **Os logos do X e do Discord no ar** (PR #103, publicados em 19/10/2026 a pedido do Ronaldo;
+  `session-log/2026-10-19-logos-x-discord-no-ar.md`). No `brot.markets` e no `/2/`, os dois logos no topo e o Discord
+  ao lado do X no rodapé: só os três arquivos do PR instalados na cópia do landing, com backup, e o `brot-landing`
+  reiniciado. No `/dev0x`, a release `bf2a5ce3282a`, testada antes na porta 4239; a de volta é a `1f8427f98d5c`, que
+  estava no ar desde 16/10 sem registro e agora está em `deploy/vps/README.md`. Na mesma visita ao servidor, o
+  indexador foi achado fora do ar desde o reinício do servidor em 17/10 (causa registrada, correção à espera do
+  Ronaldo).
+
 - **O app Android no repositório, e o README em dia** (16/10/2026, para a inscrição no bounty da Superteam Brasil, que
   pede um repositório público que compile a partir de um clone limpo). `android/` é o projeto que o CLI da Solana
   Mobile gerou (`solana-mobile webshell` 0.6.0) em volta de `brot.markets/dev0x`, sem mudança no Kotlin nem no Gradle;
