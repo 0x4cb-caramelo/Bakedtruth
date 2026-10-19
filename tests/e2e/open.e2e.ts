@@ -1,6 +1,6 @@
 /**
  * Purpose: "open a campaign" in the web smoke (Sprint 19 DoD; `bun run e2e -- --grep "open a campaign"`): the creation
- *          box at /abrir in Chromium at desktop width and at 412 CSS px, with the injected test wallet, against the
+ *          box at /open in Chromium at desktop width and at 412 CSS px, with the injected test wallet, against the
  *          program in LiteSVM: a paid opening from a link (the box says a link filled it, never signs by itself, shows
  *          the summary of the bytes, and the campaign stores the very charge the box quoted, split 90/10, I14), and a
  *          team key's free opening; and the search as a search bar (a typed campaign completed, Enter fills the box,
@@ -77,7 +77,7 @@ test.describe("open a campaign", () => {
   test("the search completes what is typed into a campaign the chain can check, as a search bar does", async ({
     page,
   }) => {
-    await page.goto("/abrir");
+    await page.goto("/open");
     const query = box(page).getByRole("combobox", { name: "What should the chain answer?" });
     await query.click();
     // An empty box starts with an example a fair way off the live price: BTC/USD is at 85,212 on this chain.

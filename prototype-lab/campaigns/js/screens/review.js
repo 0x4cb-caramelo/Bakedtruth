@@ -26,7 +26,7 @@ const SCREENS = [
   ["Campaign · voided, outside cause", "#/c/5039917762"],
   ["Campaign · voided, our failure", "#/c/7302281195"],
   ["Campaign · unlisted after a report", "#/c/9931045570"],
-  ["Open a campaign", "#/abrir"],
+  ["Open a campaign", "#/open"],
   ["My entries", "#/entries"],
   ["Leaderboard", "#/leaderboard"],
   ["Fees", "#/fees"],
@@ -55,7 +55,7 @@ const PHONES = [
   ["Home", "#/", 412],
   ["Campaign, open", "#/c/8231904417", 412],
   ["Campaign, in review", "#/c/4419928305", 360],
-  ["Open a campaign", "#/abrir", 412],
+  ["Open a campaign", "#/open", 412],
   ["My entries", "#/entries", 360],
   ["Campaign, paid", "#/c/6650183342", 360],
 ];

@@ -1,5 +1,5 @@
 /**
- * Purpose: the creation box at /abrir (Sprint 19; spec 3.12 of Sprint -1, prototype-lab/campaigns/js/screens/open*.js):
+ * Purpose: the creation box at /open (Sprint 19; spec 3.12 of Sprint -1, prototype-lab/campaigns/js/screens/open*.js):
  *          any wallet opens an On-Chain Campaign inside the rules. 1 What and 2 Details build the sentence from typed
  *          slots; 3 Preview, sticky beside them on a wide screen, shows what the transaction carries; 4 Cost prices it at
  *          Pyth's SOL/USD; on a phone a sticky bar keeps the total and the button. The program decides: the box mirrors

@@ -12,7 +12,7 @@ python -m http.server 4173 --bind 127.0.0.1
 # http://127.0.0.1:4173/campaigns/#/screens   every screen and state, with phone previews
 ```
 
-**Routes** (English, spec 1.8): `#/` home, `#/campaigns` all campaigns, `#/c/<id>` a campaign, `#/abrir` (or `#/open`)
+**Routes** (English, spec 1.8): `#/` home, `#/campaigns` all campaigns, `#/c/<id>` a campaign, `#/open` (or `#/abrir`, its first name)
 open a campaign, `#/entries` my entries, `#/leaderboard`, `#/fees`, `#/record` (who can do what, and the voids),
 `#/how`, `#/card/<id>` the share card, `#/screens` the review index. The first names (`/all`, `/me`, `/ranking`,
 `/powers`) still work.

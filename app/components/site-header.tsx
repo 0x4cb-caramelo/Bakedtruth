@@ -68,7 +68,7 @@ export function SiteHeader() {
       </nav>
       <HeaderSearch />
       <div className="top-actions">
-        <Link className="cta open-link" href="/abrir">
+        <Link className="cta open-link" href="/open">
           <span>
             <Plus className="size-4" aria-hidden="true" />
             Open a campaign

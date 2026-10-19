@@ -13,7 +13,7 @@ import { pickWallet, sheet } from "./helpers";
 
 /** 110% of the captured BTC/USD price (85,212.34): far enough from the band, and not met. */
 export const TARGET = "93733.57";
-export const link = (extra = "") => `/abrir?t=price-touch&feed=BTC/USD&target=${TARGET}&days=7${extra}`;
+export const link = (extra = "") => `/open?t=price-touch&feed=BTC/USD&target=${TARGET}&days=7${extra}`;
 export const box = (page: Page) => page.getByTestId("open-box");
 export const reviewButton = (page: Page) => box(page).getByRole("button", { name: "Review and sign" });
 export const heading = (page: Page, name: string) => sheet(page).getByRole("heading", { name });

@@ -93,7 +93,7 @@ export function feature(list, mode, band) {
     : "";
   const body = mode === "loading" ? skelSlide() : mode === "error" ? errorBlock()
     : n ? `<div class="home-track" data-track>${list.map((c, i) => slide(c, i, n, band)).join("")}</div>`
-    : emptyBlock("No open campaigns right now.", `<a class="btn" href="#/abrir">${icon("plus", 15)}Open a campaign</a>`);
+    : emptyBlock("No open campaigns right now.", `<a class="btn" href="#/open">${icon("plus", 15)}Open a campaign</a>`);
   return `<section class="home-feature" data-carousel aria-roledescription="carousel" aria-labelledby="home-open-now"${mode === "loading" ? ' aria-busy="true"' : ""}
       data-perch="home-feature" data-perch-x="0.9" data-perch-size="1" data-perch-say="Open now.">
     <div class="home-feature-head"><h2 id="home-open-now">${icon("trending", 15)}Open now</h2>${pager}</div>${body}

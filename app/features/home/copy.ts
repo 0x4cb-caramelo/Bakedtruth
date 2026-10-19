@@ -13,6 +13,8 @@ export const HOME = {
   open: "Open a campaign",
   // No-break spaces keep the second clause whole, so a phone breaks the line at the "·".
   cost: "Opening a campaign costs US$500 in SOL · 90% becomes its prize",
+  // The creator's 1% is of the entries, never of the prize (the fee page's words); the hook a creator comes for.
+  creator: "The creator gets 1% of all entries when YES or NO wins",
   now: (sol: string, usd: string) => `Now ${sol} at Pyth SOL/USD ${usd}`,
   reading: "Reading Pyth's SOL/USD price…",
   paused: "New campaigns are paused right now.",

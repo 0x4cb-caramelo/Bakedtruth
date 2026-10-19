@@ -45,7 +45,7 @@ function lead() {
     : state.stalePrice ? "Paid openings wait for a fresh SOL/USD price."
     : `Now ${sol(paid, { round: "up" })} at Pyth SOL/USD ${usd(SOL_USD.price * 10 ** SOL_USD.expo, 2)}`;
   return `<section class="home-lead"><div><h1>YES/NO questions an on-chain account answers.</h1><p>Join with SOL; the program reads the result.</p></div>
-    <div class="home-open"><a class="cta" href="#/abrir"><span>${icon("plus", 15)}Open a campaign</span></a>
+    <div class="home-open"><a class="cta" href="#/open"><span>${icon("plus", 15)}Open a campaign</span></a>
       <p>US$500 in SOL · 90% becomes the prize</p><p>${now}</p></div></section>`;
 }
 

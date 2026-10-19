@@ -742,6 +742,15 @@ recomendado (1a a 12a).
 
 ### Changed
 
+- **A caixa de criação passou de `/abrir` a `/open`, e o 1% do criador aparece onde se abre uma campanha**
+  (19/10/2026, pedido do Ronaldo). A rota mudou no site, nos links do topo, do menu, do rodapé, da página inicial e
+  da de taxas, nos testes de ponta a ponta, no protótipo (que mantém `#/abrir` como apelido), nos READMEs e no plano
+  técnico; os registros de sprint, as revisões jurídicas e a proposta de arquitetura ficam como foram escritos.
+  `/abrir` responde 308 para `/open`, com a consulta junto, para os links já compartilhados. O texto de "Open a
+  campaign" passou a abrir com "As the creator, you get 1% of all the entries, on both sides, when YES or NO wins", e o
+  quadro de preço da página inicial ganhou, em destaque, "The creator gets 1% of all entries when YES or NO wins". A
+  base é a das entradas, nunca o prêmio, como na página de taxas.
+
 - **O `/dev0x` mostra "brot.markets" inteiro no celular** (19/10/2026, pedido do Ronaldo). Abaixo de 700 px a barra
   do topo escondia o ".markets", regra que veio do protótipo para a barra não quebrar. Agora o nome e o pão encolhem
   com a largura (24px a partir de 412 px, cerca de 20px em 390, 15,6px em 360), e a busca, o "Connect" e o menu ficam

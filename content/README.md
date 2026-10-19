@@ -9,7 +9,7 @@ fails its build (`app/lib/content.ts`); a change appears once it is merged and t
 | `void-log/`          | The team's public text for each void it records, and corrections (its own README)              | `/record`, and the campaign's page     |
 | `powers.md`          | Who holds each key and the limit of each power (BR-41); Sprint 16 updates it with the multisig | `/record`                              |
 | `unlisted.json`      | Campaigns the team took off the home page after a report (C-10)                                | The home page, and the campaign's page |
-| `account-names.json` | Reviewed names of accounts a campaign can read (A-11); empty until the team adds one           | The creation box at `/abrir`           |
+| `account-names.json` | Reviewed names of accounts a campaign can read (A-11); empty until the team adds one           | The creation box at `/open`           |
 
 ## Unlisting a campaign after a report
 
@@ -36,7 +36,7 @@ file on each request and keeps working without it if it cannot be read.
 
 ## Naming an account
 
-A name helps a creator find an account in the creation box (`/abrir`); it is not a gate (D-i). An account with no
+A name helps a creator find an account in the creation box (`/open`); it is not a gate (D-i). An account with no
 name still opens a campaign and shows its shortened address with an explorer link. Price accounts are named by Pyth's
 list, which the program compiles, never here.
 

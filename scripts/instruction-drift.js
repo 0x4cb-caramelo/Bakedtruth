@@ -21,7 +21,8 @@ const ALLOWED_COMMANDS = new Set([
   'codex', // gstack's external cross-review command, cited by multi-ai-review
   'investors', // product route the pitch skill may create, not a Claude command
   'health', // HTTP path of Cloak's API, cited by upstream's PRIVACY_PLAN.md; not a Claude command
-  'abrir', // the site's route for opening a campaign (docs/SPRINTS.md, Sprint 19); not a Claude command
+  'abrir', // the site's first route for opening a campaign (docs/SPRINTS.md, Sprint 19); not a Claude command
+  'open', // that route since 2026-10-19 (/abrir redirects to it); not a Claude command
   'rpc', // the site's JSON-RPC relay path, served by brot-rpc (Technical Plan §3.5); not a Claude command
   'pitch2', // the provisional site's second deck, served by services/landing; not a Claude command
   'my-entries', // the site's "My entries" route (Sprint 12, L-01); not a Claude command

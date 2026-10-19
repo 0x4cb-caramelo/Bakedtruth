@@ -7,7 +7,7 @@
  *          kinds name their account by its shortened address: no creator-supplied text, and no name unless two people
  *          reviewed it. One exception (A-11, TP §3.4.10): a graduation curve is named by the caller's `accountName`,
  *          its reviewed name or its token's ticker always paired with the pool's last four characters, and without
- *          one "Token (…7Dny)" (curve-name.ts). The creation box at /abrir writes its preview with this same function,
+ *          one "Token (…7Dny)" (curve-name.ts). The creation box at /open writes its preview with this same function,
  *          so the sentence a creator reads is the one every page shows.
  * Version: 0.6.0 (the curve named by its ticker, never by its address alone; 0.5.0, the sixth template: a Meteora
  *          launch curve's graduation; 0.4.0, the UI overhaul: "$" before a price in US$, the title as a question)

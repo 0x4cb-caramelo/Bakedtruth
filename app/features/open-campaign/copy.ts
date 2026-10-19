@@ -13,7 +13,8 @@ export const BOX = {
   kicker: "Any wallet, inside the rules",
   kickerTeam: "Team key",
   title: "Open a campaign",
-  lede: "From US$500 in SOL: 90% becomes the prize in your campaign's pot, 10% is Brot's opening fee. You fill in the fields and the site writes the sentence. The program checks every rule again when you sign.",
+  // The creator's 1% first: it is what a creator comes for (Ronaldo, 2026-10-19). Its base is the entries, never the prize.
+  lede: "As the creator, you get 1% of all the entries, on both sides, when YES or NO wins. From US$500 in SOL to open: 90% becomes the prize in your campaign's pot, 10% is Brot's opening fee. You fill in the fields and the site writes the sentence. The program checks every rule again when you sign.",
   ledeTeam:
     "Your wallet is a team key: this opening is free, with no prize and no creator share. You fill in the fields and the site writes the sentence. The program checks every rule again when you sign.",
   fromLink: "Filled from a link. Check every field: a link never signs anything.",

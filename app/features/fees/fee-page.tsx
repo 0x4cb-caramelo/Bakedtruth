@@ -119,7 +119,7 @@ export function FeePage() {
         <p className="m-0 text-sm">{FEES.openingFree}</p>
         <p className="m-0 text-xs text-muted">
           {FEES.openingSite}{" "}
-          <Link href="/abrir" className="underline">
+          <Link href="/open" className="underline">
             {FEES.openingLink}
           </Link>
         </p>

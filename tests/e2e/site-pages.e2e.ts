@@ -19,7 +19,7 @@ import { PRIVACY_URL } from "../../app/lib/config";
 import { PANEL, SHEET } from "../../app/features/entry/copy";
 import { choose, connect, control, openCampaign, panel, pickWallet, sheet } from "./helpers";
 
-const ROUTES = ["/", "/leaderboard", "/record", "/fees", "/how-it-works", "/my-entries", "/abrir"];
+const ROUTES = ["/", "/leaderboard", "/record", "/fees", "/how-it-works", "/my-entries", "/open"];
 const desktopOnly = (name: string) => test.skip(name !== "desktop", "runs once, at desktop width");
 
 async function noSidewaysScroll(page: Page) {

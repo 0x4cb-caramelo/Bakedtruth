@@ -54,6 +54,6 @@ export default () => ({
     <section class="pg-sec" aria-labelledby="pg-more"><h2 class="t-section" id="pg-more">What that means for your SOL</h2>
       <div class="pg-more">${MORE.map(([t, ic, pose, say, body], i) => `<section class="panel" aria-labelledby="pg-m${i}" data-perch="how-${i}" data-perch-x="0.88" data-perch-size="0.75" data-perch-pose="${pose}"${say ? ` data-perch-say="${say}"` : ""}>
         <h3 class="panel-head" id="pg-m${i}">${icon(ic)}${t}</h3>${body()}</section>`).join("")}</div></section>
-    <p class="cluster pg-how-go"><a class="cta" href="#/"><span>See the campaigns</span></a><a class="btn" href="#/abrir">${icon("plus")}Open a campaign</a></p>
+    <p class="cluster pg-how-go"><a class="cta" href="#/"><span>See the campaigns</span></a><a class="btn" href="#/open">${icon("plus")}Open a campaign</a></p>
   </div>`,
 });
