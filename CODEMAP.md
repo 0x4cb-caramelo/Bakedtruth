@@ -164,11 +164,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`copy-site.ts`](app/components/copy-site.ts) | the words every screen shows above any campaign or entry (BR-47; P1 §4.6), in English per L-01: the test-money notice and the not-audited notice, while each is  | 24 |
 | [`header-search.tsx`](app/components/header-search.tsx) | the top bar's campaign search (the approved prototype's `.search`): what you type filters the home grid by title, asset, kind, address, creator or state (featur | 42 |
 | [`mascot.tsx`](app/components/mascot.tsx) | Mounts the mascot once for the whole app. Each page decides where it may stand with | 32 |
-| [`phone-menu.tsx`](app/components/phone-menu.tsx) | the menu under 1180 px (the approved prototype's `.phone-nav` sheet): the campaign search (the top bar's field hides on a phone), every route, the theme switch  | 64 |
+| [`phone-menu.tsx`](app/components/phone-menu.tsx) | the menu under 1180 px (the approved prototype's `.phone-nav` sheet): the campaign search (the top bar's field hides on a phone), every route, the theme switch  | 54 |
 | [`pointer-effects.tsx`](app/components/pointer-effects.tsx) | the approved prototype's pointer effects (prototype-lab/campaigns/js/effects.js, whose styles came over in base.css and card.css): the dot field behind every pa | 91 |
 | [`providers.tsx`](app/components/providers.tsx) | Phantom and Solflare are listed (with an install link when missing), Solflare on the site's network; any other | 56 |
 | [`site-footer.tsx`](app/components/site-footer.tsx) | the footer of every screen, in the approved prototype's style (prototype-lab/campaigns, `.foot`): the links, then the legal lines the site must carry: BRAND.md' | 65 |
-| [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): the loaf and the wordmark (the loaf is brot.markets' own, services/lan | 118 |
+| [`site-header.tsx`](app/components/site-header.tsx) | the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): the loaf and the wordmark (the loaf is brot.markets' own, services/lan | 104 |
 | [`site-notice.tsx`](app/components/site-notice.tsx) | the strip above every screen (Sprint 09, BR-47, P1 §4.6), in the approved prototype's place and style (prototype-lab/campaigns, `.status`): the devnet mark, the | 27 |
 | [`social-links.tsx`](app/components/social-links.tsx) | Brot's X and Discord (the founder, 2026-10-18): the two addresses, which the footer links by name, and the two small logo links under the home page's subtitle.  | 40 |
 | [`toast.tsx`](app/components/toast.tsx) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 71 |

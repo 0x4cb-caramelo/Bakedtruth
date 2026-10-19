@@ -1,11 +1,11 @@
 /**
  * Purpose: the site's top bar, in the approved prototype's layout (prototype-lab/campaigns, `.top`): the loaf and the
  *          wordmark (the loaf is brot.markets' own, services/landing's img/brot-loaf.webp, at its size), the three main
- *          links with the current one underlined, the campaign search, "Open a campaign",
- *          the theme switch, the wallet and, under 1180 px, the menu with every route (phone-menu.tsx). It sticks to the
- *          top and draws its edge once the page scrolls. The theme follows the stored choice after the first paint
- *          (the head script already set it, so there is no flash).
- * Version: 0.3.1 (brot.markets' loaf beside the wordmark; 0.3.0, the UI overhaul: the prototype's bar)
+ *          links with the current one underlined, the campaign search (on a phone it is in the menu only),
+ *          "Open a campaign", the theme switch, the wallet and, under 1180 px, the menu with every route
+ *          (phone-menu.tsx). It sticks to the top and draws its edge once the page scrolls. The theme follows the stored
+ *          choice after the first paint (the head script already set it, so there is no flash).
+ * Version: 0.3.2 (no search button on a phone: the menu carries the search; 0.3.1, brot.markets' loaf)
  * Sprint:  09 (site shell, theme and wallet); 13
  */
 "use client";
@@ -13,7 +13,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { Menu, Moon, Plus, Search, Sun } from "lucide-react";
+import { Menu, Moon, Plus, Sun } from "lucide-react";
 
 import { HeaderSearch } from "@/components/header-search";
 import { PhoneMenu } from "@/components/phone-menu";
@@ -42,7 +42,7 @@ export function SiteHeader() {
   const theme = useSyncExternalStore(subscribe, currentTheme, serverTheme);
   const toggle = () => applyTheme(theme === "dark" ? "light" : "dark");
   const pathname = usePathname();
-  const [menu, setMenu] = useState<null | "menu" | "search">(null);
+  const [menu, setMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4);
@@ -75,14 +75,6 @@ export function SiteHeader() {
           </span>
         </Link>
         <button
-          className="icon-btn search-btn"
-          type="button"
-          aria-label="Search campaigns"
-          onClick={() => setMenu("search")}
-        >
-          <Search className="size-[18px]" aria-hidden="true" />
-        </button>
-        <button
           className="icon-btn theme"
           type="button"
           onClick={toggle}
@@ -100,18 +92,12 @@ export function SiteHeader() {
           type="button"
           aria-label="Menu"
           aria-haspopup="dialog"
-          onClick={() => setMenu("menu")}
+          onClick={() => setMenu(true)}
         >
           <Menu className="size-[18px]" aria-hidden="true" />
         </button>
       </div>
-      <PhoneMenu
-        open={menu !== null}
-        focusSearch={menu === "search"}
-        onClose={() => setMenu(null)}
-        theme={theme}
-        onTheme={toggle}
-      />
+      <PhoneMenu open={menu} onClose={() => setMenu(false)} theme={theme} onTheme={toggle} />
     </header>
   );
 }
