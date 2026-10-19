@@ -9,7 +9,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
 
 import { HeaderSearch } from "@/components/header-search";
@@ -28,16 +27,7 @@ export const ROUTES = [
   { href: "/fees", label: "Fees" },
 ] as const;
 
-export function PhoneMenu(props: {
-  open: boolean;
-  focusSearch: boolean;
-  onClose: () => void;
-  theme: Theme;
-  onTheme: () => void;
-}) {
-  useEffect(() => {
-    if (props.open && props.focusSearch) document.getElementById("menu-search")?.focus();
-  }, [props.open, props.focusSearch]);
+export function PhoneMenu(props: { open: boolean; onClose: () => void; theme: Theme; onTheme: () => void }) {
   return (
     <Dialog open={props.open} title="Menu" onClose={props.onClose}>
       <div className="mb-3 [&_.search]:max-w-none">
