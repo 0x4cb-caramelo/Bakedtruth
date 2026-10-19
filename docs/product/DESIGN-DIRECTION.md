@@ -155,6 +155,10 @@ nomes, nunca uma cor escrita direto.
   - `--notice-bg` no escuro é `#232c3b`, azul-acinzentado. Na marca é o verde do "you joined" da lista de espera, que é
     o mesmo verde do fundo do YES; no site ele está atrás das caixas de informação e da linha "You" do ranking, que
     pareceriam YES.
+  - **A luz do ponteiro no escuro é azulada** (19/10/2026, escolha do Ronaldo): o holofote dos cards (`--glow`
+    `rgba(79, 125, 255, .16)`, `--spot-edge` `#8fb0ff`) e o campo de pontos (`--dot-rgb` `150, 175, 235`) voltam ao
+    azul da Ledger², e a landing escura usa os mesmos pontos. É o único azul de volta, e o teste o aceita só ali; o
+    `--spot`, que tinge uma opção escolhida, continua laranja, e o claro não muda.
 - **O que a marca não define e o site precisa**, tirado da mesma paleta, sem azul e com verde e vermelho só no YES e
   no NO: os chips de estado (aberta em laranja; fechada e anulada em cinza da paleta; em revisão e contestada em
   âmbar; resultado final em creme sobre neutro, para não parecer YES), os blocos dos tipos (preço em azul-ardósia da

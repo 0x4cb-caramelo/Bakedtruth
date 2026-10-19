@@ -19,37 +19,39 @@
   inherits: false;
 }
 
+/* Dark is the /dev0x site's dark theme (app/styles/tokens.css, BRAND.md §5.1): navy, cream text, green and red only
+   for YES and NO, and the dots in the same blue as the site's pointer light. Keep the two in step. */
 :root {
   color-scheme: dark;
-  --bg: #10141b;
-  --panel: #181d27;
-  --raised: #212838;
-  --line: #2a3243;
-  --line-strong: #36466a;
-  --text: #edf0f5;
-  --muted: #9aa4b6;
-  --dim: #6b7588;
-  --accent: #4f7dff;
-  --accent-soft: #a8beff;
-  --accent-hover: #bdccff;
-  --on-accent: #fff;
-  --crust: #efbc74;
-  --yes-bg: #153b32;
-  --yes-fg: #6be1b4;
+  --bg: #10151c;
+  --panel: #171e29;
+  --raised: #1f2836;
+  --line: #263041;
+  --line-strong: #3a4558;
+  --text: #f7eedb;
+  --muted: #d9d1c1;
+  --dim: #a3acba;
+  --accent: #eea546;
+  --accent-soft: #eea546;
+  --accent-hover: #f7cd8f;
+  --on-accent: #10151c;
+  --crust: #eea546;
+  --yes-bg: #1c3a30;
+  --yes-fg: #a6ffcf;
   --no-bg: #402530;
-  --no-fg: #fa9aac;
-  --strip-bg: #0c1016;
-  --notice-bg: #263249;
-  --track: #2c3547;
-  --fill: linear-gradient(90deg, #5d7fe0, #9db8ff);
-  --ic-bg: #23305180;
+  --no-fg: #ff9a7a;
+  --strip-bg: #0b0f15;
+  --notice-bg: #232c3b;
+  --track: #263041;
+  --fill: linear-gradient(90deg, #c2410c, #eea546);
+  --ic-bg: #2f3a4e;
   --dot-rgb: 150, 175, 235;
-  --cta-hover: #6590ff;
-  --cta-ring: conic-gradient(from var(--spin), #2b4fc2 0 62%, #dfe8ff 80%, #2b4fc2 100%);
-  --say-bg: #f3dfbd;
-  --say-fg: #1c1408;
-  --pet-shadow: rgba(0, 0, 0, 0.5);
-  --error: #fa9aac;
+  --cta-hover: #f7cd8f;
+  --cta-ring: #eea546;
+  --say-bg: #f7eedb;
+  --say-fg: #10151c;
+  --pet-shadow: rgba(0, 0, 0, 0.55);
+  --error: #ff9a7a;
   --shadow: none;
   --r: 10px;
   --r-sm: 7px;

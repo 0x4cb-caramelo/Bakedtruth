@@ -4,7 +4,7 @@
 .card { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 15px; border: var(--bw) solid var(--line);
   border-radius: var(--r); background: var(--panel); box-shadow: var(--shadow); isolation: isolate; }
 .card::before, .card::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 0.25s; }
-.card::before { z-index: -1; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), var(--spot), transparent 70%); }
+.card::before { z-index: -1; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), var(--glow), transparent 70%); }
 .card::after { padding: 1px; background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%), var(--spot-edge), transparent 70%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
 .grid-cards:hover .card::before, .grid-cards:hover .card::after { opacity: 1; }
