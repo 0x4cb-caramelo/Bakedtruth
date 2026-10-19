@@ -105,5 +105,11 @@ chega nele. Nenhuma porta abre para fora.
    partir de `.env.example`, e instalar `deploy/brot-landing.service`.
 3. A cada atualização: `sudo systemctl restart brot-landing` e conferir `curl -s localhost:4200/healthz`.
 
+**Mudou um `.css` ou um `.js`? Suba o `?v=` dele em toda página que o carrega** (e em `scripts/build-legal.mjs`, que
+gera a privacidade). O servidor manda `no-cache`, mas o Cloudflare troca isso por `max-age=14400` nos arquivos de
+estilo e de script: um navegador que já abriu a página guarda a versão antiga por até 4 horas. As páginas em si chegam
+com `no-cache`, então o endereço novo do arquivo é o que faz o navegador buscá-lo (visto em 19/10/2026, com as cores
+novas).
+
 O túnel (`deploy/brot-tunnel.service`) só precisa ser mexido se o endereço ou a porta mudarem. O passo a passo da
 primeira instalação e os nomes criados no Cloudflare estão em `knowledge-base/tecnologia/servidor-e-dominio.md`.

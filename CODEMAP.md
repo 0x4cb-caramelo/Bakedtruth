@@ -1607,7 +1607,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`campaigns.mjs`](services/landing/lib/campaigns.mjs) | serves the Sprint -1 campaign screens under /prototype/ (the team's preview, unlisted: noindex, no link from the site) from prototype-lab/campaigns, with a CSP  | 70 |
 | [`leads.mjs`](services/landing/lib/leads.mjs) | waitlist store for the "coming soon" page: validates an email and keeps one line per lead in a JSONL file | 91 |
 | [`rate-limit.mjs`](services/landing/lib/rate-limit.mjs) | in-memory request limiter per visitor address, so one address cannot flood the waitlist endpoint | 40 |
-| [`static.mjs`](services/landing/lib/static.mjs) | serves the files under public/ for the "coming soon" site, with clean URLs and no way out of that folder | 104 |
+| [`static.mjs`](services/landing/lib/static.mjs) | serves the files under public/ for the "coming soon" site, with clean URLs and no way out of that folder | 105 |
 
 ## `services/landing/public/`
 
