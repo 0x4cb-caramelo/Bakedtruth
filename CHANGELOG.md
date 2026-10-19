@@ -737,7 +737,13 @@ recomendado (1a a 12a).
   `services/landing/public/styles.css` trocou o cinza-azulado e o azul pelo creme e a ferrugem do site
   (`app/styles/tokens.css`, BRAND.md §5.1): fundo `#f6eddb`, painel `#fffaf0`, destaque e botão `#a8481b`, laranja só
   nos preenchimentos, e o SIM e o NÃO nos mesmos verdes e vermelhos de lá. Vale para a página inicial, a privacidade e
-  o 404, que dividem a folha. O modo escuro da landing continua no azul de antes, e `/2` tem estilos próprios.
+  o 404, que dividem a folha. `/2` tem estilos próprios e não mudou.
+- **O modo escuro da landing nas cores do `/dev0x`, e a luz do ponteiro azulada no escuro** (19/10/2026, pedido do
+  Ronaldo). O escuro da landing passou do azul ao azul-marinho com o laranja e o texto creme do site, menos os
+  pontinhos do fundo, que ficam no azulado de antes (`--dot-rgb: 150, 175, 235`). No `/dev0x`, no escuro, os dois
+  efeitos que seguem o ponteiro voltam ao azul de antes de 10/10: o brilho dos cartões (o token novo `--glow` e o
+  `--spot-edge`) e os pontinhos que acendem perto dele. O `--spot`, a cor de uma opção escolhida, continua laranja, e
+  o modo claro não muda.
 
 - **O último desenho do modo foguete do deck** (11/10/2026, pedido do fundador). No fim do slide 5 o mascote passa a
   bater na lua rindo, no lugar do rosto em pânico. O desenho novo tem o mesmo enquadramento do anterior, então o

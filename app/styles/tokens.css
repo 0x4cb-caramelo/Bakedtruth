@@ -1,8 +1,8 @@
 /* Purpose: the design tokens of the Brot Markets site in both themes, in the brand's colours (docs/product/BRAND.md §5,
    taken from the approved /5 page): navy and orange in dark, cream and rust in light. Dark is the default; light is set
    by data-theme="light" on <html>. The tokens BRAND.md names take its values; the ones only the site needs (states,
-   kinds, bars, notices, fields) are drawn from the same palette, with no blue and with green and red kept for YES and
-   NO. Every text pair passes 4.5:1 and every field border and bar 3:1 (DESIGN-DIRECTION.md, "Colours"). No component
+   kinds, bars, notices, fields) are drawn from the same palette, with no blue (but the pointer's light in dark) and
+   with green and red kept for YES and NO. Every text pair passes 4.5:1 and every field border and bar 3:1 (DESIGN-DIRECTION.md, "Colours"). No component
    may use a literal colour: components read these variables, through the Tailwind names in app/app/globals.css.
    Version: 0.2.0 · Sprint 09 (site shell); 2026-10-10, the brand's colours (BRAND.md §13's open item)
    Fonts are not declared here: app/lib/fonts.ts loads them with next/font and sets --font-barlow and --font-inter. */
@@ -44,7 +44,10 @@
   --note-bg: #1f2836; --note-fg: #d9d1c1; --notice-bg: #232c3b; --danger-bg: #402530;
   --track: #263041; --fill: linear-gradient(90deg, #c2410c, #eea546);
   --pressed-bg: #263041; --pressed-fg: var(--text); --row-hover: #1b2230;
-  --ic-bg: #2f3a4e; --spot: rgba(238, 165, 70, 0.14); --spot-edge: #f7cd8f; --dot-rgb: 163, 172, 186;
+  /* The pointer's light (the cards' spotlight and the dot field) stays the earlier blue in dark, by Ronaldo's choice of
+     2026-10-19; --spot, the tint of a chosen option, stays orange. */
+  --ic-bg: #2f3a4e; --spot: rgba(238, 165, 70, 0.14); --glow: rgba(79, 125, 255, 0.16); --spot-edge: #8fb0ff;
+  --dot-rgb: 150, 175, 235;
   --scrim: rgba(5, 8, 12, 0.66);
   --say-bg: #f7eedb; --say-fg: #10151c; --pet-shadow: rgba(0, 0, 0, 0.55);
   --shadow: none; --shadow-pop: 0 18px 50px -12px rgba(0, 0, 0, 0.6);
@@ -85,7 +88,8 @@
   --note-bg: #efe2c8; --note-fg: #3d3328; --notice-bg: #fbe3bd; --danger-bg: #f6dcd0;
   --track: #e2d4ba; --fill: linear-gradient(90deg, #a8481b, #eea546);
   --pressed-bg: #e8d9bd; --row-hover: #fbf3e4;
-  --ic-bg: #a8481b1f; --spot: rgba(168, 72, 27, 0.09); --spot-edge: #a8481b; --dot-rgb: 107, 94, 78;
+  --ic-bg: #a8481b1f; --spot: rgba(168, 72, 27, 0.09); --glow: rgba(168, 72, 27, 0.09); --spot-edge: #a8481b;
+  --dot-rgb: 107, 94, 78;
   --scrim: rgba(27, 22, 17, 0.45);
   --say-bg: #1b1611; --say-fg: #f7eedb; --pet-shadow: rgba(27, 22, 17, 0.3);
   --shadow: 0 1px 2px rgba(27, 22, 17, 0.05), 0 10px 24px -14px rgba(27, 22, 17, 0.18);
