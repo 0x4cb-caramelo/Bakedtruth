@@ -77,6 +77,11 @@ const csp = [
 
 const nextConfig: NextConfig = {
   ...(basePath ? { basePath } : {}),
+  // The creation box was /abrir until 2026-10-19 (Ronaldo: "/abrir vire /open"); links already shared, prefilled ones
+  // included (the query passes through), land on /open.
+  async redirects() {
+    return [{ source: "/abrir", destination: "/open", permanent: true }];
+  },
   async headers() {
     return [
       {

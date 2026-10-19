@@ -183,12 +183,12 @@ only, so an upgrade is these CLI steps, each command with `--url "$DEVNET_RPC_UR
 
 ## Checking an opening (Sprint 19)
 
-The creation box at `/abrir` opens a campaign from the site. Its devnet check is the founder's (every devnet write is),
+The creation box at `/open` opens a campaign from the site. Its devnet check is the founder's (every devnet write is),
 by hand, once the site is built for devnet (`cd app && bun run build`, which reads the program's last deploy for A-8):
 
 1. With a test wallet outside the team that holds no real funds (Phantom uses the same keys on every network) and
    enough test SOL for the total the box shows (US$500 of SOL at its price, plus about 0.005 SOL of rent and fees),
-   open a paid campaign at `/abrir` (a fresh Pyth feed, a target 10% away, 7 days). The review sheet names the campaign
+   open a paid campaign at `/open` (a fresh Pyth feed, a target 10% away, 7 days). The review sheet names the campaign
    id ("Open campaign #<id> on …"). The check below prints the creator's address: leave it out of anything recorded.
 2. Read the opening back, read-only (it signs nothing):
 

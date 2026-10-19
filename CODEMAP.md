@@ -104,7 +104,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 |---|---|---:|
 | [`eslint.config.mjs`](app/eslint.config.mjs) | Override default ignores of eslint-config-next | 19 |
 | [`next.config.test.ts`](app/next.config.test.ts) | the site's Content-Security-Policy lets the page reach the Mobile Wallet Adapter's socket on the phone (ws://localhost:<port>), which it refused before 2026-10- | 29 |
-| [`next.config.ts`](app/next.config.ts) | the site's Next.js settings: the security headers and the Content-Security-Policy (Sprint 09, X2.5). The policy allows the page's own origin, the one RPC origin | 127 |
+| [`next.config.ts`](app/next.config.ts) | the site's Next.js settings: the security headers and the Content-Security-Policy (Sprint 09, X2.5). The policy allows the page's own origin, the one RPC origin | 132 |
 | [`postcss.config.mjs`](app/postcss.config.mjs) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 8 |
 
 ## `app/app/`
@@ -114,12 +114,6 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`layout.tsx`](app/app/layout.tsx) | the site's root layout (Sprint 09), in the approved prototype's frame (prototype-lab/campaigns): the two fonts the site serves itself, the theme script and the  | 67 |
 | [`manifest.ts`](app/app/manifest.ts) | the installable PWA, manifest only (Sprint 13 DoD, S2; TP §3.6): the name, the start page, standalone display, the dark theme's colours and the icons scripts/pw | 35 |
 | [`page.tsx`](app/app/page.tsx) | the home route (Sprint 10), in the approved prototype's layout since the UI overhaul (features/home): the top line, the "Open now" carousel with "Closing soon"  | 15 |
-
-## `app/app/abrir/`
-
-| Arquivo | Núcleo | Linhas |
-|---|---|---:|
-| [`page.tsx`](app/app/abrir/page.tsx) | the creation route (the creation box, Sprint 19; TP §3.6): any wallet opens an On-Chain Campaign inside the rules. The server passes only the reviewed account n | 35 |
 
 ## `app/app/c/[id]/`
 
@@ -150,6 +144,12 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
 | [`page.tsx`](app/app/my-entries/page.tsx) | the wallet's own entries, results and payouts at /my-entries (Sprint 12; the route name confirmed by the founder with L-01). The page reads the chain in the bro | 16 |
+
+## `app/app/open/`
+
+| Arquivo | Núcleo | Linhas |
+|---|---|---:|
+| [`page.tsx`](app/app/open/page.tsx) | the creation route (the creation box, Sprint 19; TP §3.6): any wallet opens an On-Chain Campaign inside the rules. The server passes only the reviewed account n | 35 |
 
 ## `app/app/record/`
 
@@ -303,11 +303,11 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`copy.ts`](app/features/home/copy.ts) | the home page's words (the UI overhaul), from the approved prototype (prototype-lab/campaigns, home.js and home-mosaic.js) where they hold on devnet, and change | 89 |
+| [`copy.ts`](app/features/home/copy.ts) | the home page's words (the UI overhaul), from the approved prototype (prototype-lab/campaigns, home.js and home-mosaic.js) where they hold on devnet, and change | 91 |
 | [`home-empty.tsx`](app/features/home/home-empty.tsx) | the home page's empty block (the approved prototype's `.empty`): Baked sulking, one sentence and at most one way out ("No campaigns here." [Clear filters]) | 23 |
 | [`home-feature.tsx`](app/features/home/home-feature.tsx) | the home page's "Open now" carousel (the approved prototype's `.home-feature`, home-mosaic.js): the top-ranked listed campaigns that take entries, up to five, a | 174 |
 | [`home-how.tsx`](app/features/home/home-how.tsx) | the home page's "How it works" (the approved prototype's `.home-how`): the six steps told in three, with the link to every step, fee and refund, then the three  | 83 |
-| [`home-lead.tsx`](app/features/home/home-lead.tsx) | the home page's top line (the approved prototype's `.home-lead`): what this is, and what a US$500 opening costs in SOL right now at Pyth's SOL/USD price (4a: US | 44 |
+| [`home-lead.tsx`](app/features/home/home-lead.tsx) | the home page's top line (the approved prototype's `.home-lead`): what this is, and what a US$500 opening costs in SOL right now at Pyth's SOL/USD price (4a: US | 45 |
 | [`home-page.tsx`](app/features/home/home-page.tsx) | the home page (the UI overhaul; the approved prototype's home.js): the top line with the opening's cost, the mosaic ("Open now" and the two side boxes), how it  | 76 |
 | [`home-proof.tsx`](app/features/home/home-proof.tsx) | the "On-chain read" panel of a home slide (the approved prototype's `.home-proof`, where the old chart was): the value read now against the target, "if read now | 126 |
 | [`home-side.tsx`](app/features/home/home-side.tsx) | the two boxes beside the home page's carousel (the approved prototype's `.home-side`): "Closing soon", the four listed campaigns whose entries close first, and  | 113 |
@@ -350,7 +350,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 
 | Arquivo | Núcleo | Linhas |
 |---|---|---:|
-| [`registry-open.ts`](app/features/notices/registry-open.ts) | the mandatory notices of the creation box at /abrir (Sprint 19 DoD; BR-26; TP §3.4.10), listed with the screens that must show them and the components that draw | 96 |
+| [`registry-open.ts`](app/features/notices/registry-open.ts) | the mandatory notices of the creation box at /open (Sprint 19 DoD; BR-26; TP §3.4.10), listed with the screens that must show them and the components that draw  | 96 |
 | [`registry.ts`](app/features/notices/registry.ts) | every mandatory notice that holds on devnet (BR-47; P1 §4.6; TP §3.6 "Notices and copy"; Sprint 13 DoD), each with the screens that must show it and the compone | 195 |
 
 ## `app/features/open-campaign/`
@@ -365,7 +365,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`copy-money.ts`](app/features/open-campaign/copy-money.ts) | the creation box's money words and notices (BR-01, BR-26; TP §3.4.10, §3.4.16; D-m vocabulary; English per L-01): the charge at Pyth's price, the cost table wit | 105 |
 | [`copy-refusals.ts`](app/features/open-campaign/copy-refusals.ts) | one message for each refusal of `user_open_campaign` (TP §3.4.10, rows 1 to 10; D-m vocabulary; English per L-01), keyed by the program's error name, with the s | 191 |
 | [`copy-sheet.ts`](app/features/open-campaign/copy-sheet.ts) | the words of an opening's sheet, from "Review and sign" to the campaign's link (spec 3.12 of Sprint -1; A-3; T17; D-m vocabulary; English per L-01): "Check befo | 144 |
-| [`copy.ts`](app/features/open-campaign/copy.ts) | the creation box's words (spec 3.12 of Sprint -1; BR-01, BR-02, BR-26; D-m vocabulary; English per L-01): the four sections, the six kinds' words, the fields an | 186 |
+| [`copy.ts`](app/features/open-campaign/copy.ts) | the creation box's words (spec 3.12 of Sprint -1; BR-01, BR-02, BR-26; D-m vocabulary; English per L-01): the four sections, the six kinds' words, the fields an | 187 |
 | [`cost-section.tsx`](app/features/open-campaign/cost-section.tsx) | section 4 of the creation box, "Cost" (spec 3.12; TP §3.4.10, §3.4.16; P-3): the opening amount (US$500 or more, split 90/10 as a whole; amount-picker.tsx), the | 175 |
 | [`curve-target.tsx`](app/features/open-campaign/curve-target.tsx) | a graduation campaign's target in the creation box (`DbcGraduated`): never typed, it is the curve's own threshold, read from the config the pool names (the prog | 58 |
 | [`deadline-slot.tsx`](app/features/open-campaign/deadline-slot.tsx) | the deadline slot of the creation box (TP §3.4.10 row 5; P1 §3.6): quick choices of 7 to 90 days from the chain's clock (A-7), a date and a time in the visitor' | 127 |
@@ -378,10 +378,10 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`kinds.ts`](app/features/open-campaign/kinds.ts) | the six templates of the creation box (D-k; P1 §4.2; TP §3.4.10 row 1), one per kind: its reader kind, the template id a link may name, what the account slot is | 129 |
 | [`names.ts`](app/features/open-campaign/names.ts) | the reviewed account names (A-11; TP §3.4.10 "Display names"), read on the server from content/account-names.json: a list of `{ "address": "<base58>", "kind": " | 28 |
 | [`open-action.tsx`](app/features/open-campaign/open-action.tsx) | the creation box's one button and its total (spec 3.12), at the foot of the preview and in the phone's sticky bar: "Connect" while no wallet is connected; the f | 84 |
-| [`open-box.tsx`](app/features/open-campaign/open-box.tsx) | the creation box at /abrir (Sprint 19; spec 3.12 of Sprint -1, prototype-lab/campaigns/js/screens/open*.js): any wallet opens an On-Chain Campaign inside the ru | 145 |
+| [`open-box.tsx`](app/features/open-campaign/open-box.tsx) | the creation box at /open (Sprint 19; spec 3.12 of Sprint -1, prototype-lab/campaigns/js/screens/open*.js): any wallet opens an On-Chain Campaign inside the rul | 145 |
 | [`open-review.tsx`](app/features/open-campaign/open-review.tsx) | "Check before you sign" for an opening (A-3; spec 3.12): every argument the transaction carries, from the choice the SDK prepared and its preparation (the id th | 198 |
 | [`open-sheet.tsx`](app/features/open-campaign/open-sheet.tsx) | the one dialog of an opening, from "Review and sign" to the campaign's link (spec 3.12): the recent opening found on-chain (or the look-up that failed), the rev | 142 |
-| [`prefill.ts`](app/features/open-campaign/prefill.ts) | the creation box's prefill (proposal §3.8; TP §3.6 "Links"): `/abrir` accepts a template id and slot values in the URL — `t` (or `template`), `kind`, `feed` (a  | 63 |
+| [`prefill.ts`](app/features/open-campaign/prefill.ts) | the creation box's prefill (proposal §3.8; TP §3.6 "Links"): `/open` accepts a template id and slot values in the URL — `t` (or `template`), `kind`, `feed` (a s | 63 |
 | [`preview-parts.ts`](app/features/open-campaign/preview-parts.ts) | the pieces of the creation box's preview that read what the box fetched, as pure values (Sprint 19): the listed feeds with their state read live (TP §3.4.10 row | 133 |
 | [`preview-section.tsx`](app/features/open-campaign/preview-section.tsx) | section 3 of the creation box, "Preview" (spec 3.12; proposal Appendix B), built from the draft as `checkBox` reads it and the arguments it built (`OpenArgs`):  | 164 |
 | [`preview.ts`](app/features/open-campaign/preview.ts) | what the creation box's preview shows, as pure values (Sprint 19; proposal Appendix B): the sentence and its gaps (template v1), then the preview's facts, all f | 200 |
@@ -1837,7 +1837,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`helpers.ts`](tests/e2e/helpers.ts) | what the web smoke's tests share on the runner's side: calls to the chain's control endpoint, the page opened with the injected wallet and the runner's answer f | 94 |
 | [`open-guard.e2e.ts`](tests/e2e/open-guard.e2e.ts) | "open a campaign: refusals and the retry guard" in the web smoke (Sprint 19 DoD), once at desktop width: three refusals each with its own message on the box (a  | 149 |
 | [`open-helpers.ts`](tests/e2e/open-helpers.ts) | what the creation box's smoke tests share (Sprint 19): the link that prefills a paid BTC/USD opening, the box and its button as locators, the connection through | 68 |
-| [`open.e2e.ts`](tests/e2e/open.e2e.ts) | "open a campaign" in the web smoke (Sprint 19 DoD; `bun run e2e -- --grep "open a campaign"`): the creation box at /abrir in Chromium at desktop width and at 41 | 104 |
+| [`open.e2e.ts`](tests/e2e/open.e2e.ts) | "open a campaign" in the web smoke (Sprint 19 DoD; `bun run e2e -- --grep "open a campaign"`): the creation box at /open in Chromium at desktop width and at 412 | 104 |
 | [`playwright.config.ts`](tests/e2e/playwright.config.ts) | the web smoke's Playwright configuration (Sprint 11; @playwright/test 1.63.0, pinned in package.json, whose Chromium is build 1243): the site built against the  | 27 |
 | [`run.ts`](tests/e2e/run.ts) | `bun run e2e`, the web smoke on this machine (Sprint 11): the chain process (tests/e2e/chain.ts: the program in LiteSVM, CI's binary in target/deploy), then the | 86 |
 | [`site-pages.e2e.ts`](tests/e2e/site-pages.e2e.ts) | "site pages and notices" in the web smoke (Sprint 13 DoD; `bun run e2e -- --grep "site pages"`): the built site in Chromium against the program in LiteSVM, at d | 201 |

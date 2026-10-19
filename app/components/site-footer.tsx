@@ -16,7 +16,7 @@ import { AGE_NOTICE, NOT_AN_OFFER, PRIVACY_LABEL } from "./copy-site";
 
 const LINKS = [
   { href: "/", label: "Campaigns" },
-  { href: "/abrir", label: "Open a campaign" },
+  { href: "/open", label: "Open a campaign" },
   { href: "/my-entries", label: "My entries" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/fees", label: "Fees" },

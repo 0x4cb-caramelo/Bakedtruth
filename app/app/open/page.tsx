@@ -14,7 +14,7 @@ import { prefillOf } from "@/features/open-campaign/prefill";
 
 export const metadata: Metadata = { title: "Open a campaign · Brot Markets" };
 
-export default async function Page(props: PageProps<"/abrir">) {
+export default async function Page(props: PageProps<"/open">) {
   const query = await props.searchParams;
   // A malformed names file is the team's mistake to fix: the box still opens, naming no account (A-11: names are
   // never a gate), and the error is logged.

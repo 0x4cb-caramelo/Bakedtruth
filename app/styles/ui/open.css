@@ -1,4 +1,4 @@
-/* Purpose: the creation box at /abrir (spec 3.12): the four numbered sections, the combobox and the six kinds, the typed slots and the account picker, the sticky preview with the rule, the card and the share image's thumbnail, the money table, the phone's price bar, the refusals table and the signing sheets. Tokens only; breakpoints 1100 / 860 / 700 / 412. From prototype-lab/campaigns/css/open.css (Sprint -1, approved 2026-10-10), as is, in the `components` layer;
+/* Purpose: the creation box at /open (spec 3.12): the four numbered sections, the combobox and the six kinds, the typed slots and the account picker, the sticky preview with the rule, the card and the share image's thumbnail, the money table, the phone's price bar, the refusals table and the signing sheets. Tokens only; breakpoints 1100 / 860 / 700 / 412. From prototype-lab/campaigns/css/open.css (Sprint -1, approved 2026-10-10), as is, in the `components` layer;
    colours from app/styles/tokens.css (BRAND.md §5). Version: 0.1.0 · Sprint 09 (the UI overhaul) */
 @layer components {
 .op-head { display: grid; gap: 6px; max-width: 720px; margin: 10px 0 20px; }

@@ -161,7 +161,7 @@ export function HomeFeature({ cards, loading, now, readings, saved, onToggle }: 
         <HomeEmpty
           text={HOME.noOpen}
           action={
-            <Link className="btn" href="/abrir">
+            <Link className="btn" href="/open">
               <Plus className="size-[15px]" aria-hidden="true" />
               {HOME.open}
             </Link>

@@ -36,6 +36,7 @@ export function HomeLead() {
       </div>
       <div className="home-open">
         <p>{HOME.cost}</p>
+        <p className="creator">{HOME.creator}</p>
         <p>{line}</p>
       </div>
     </section>

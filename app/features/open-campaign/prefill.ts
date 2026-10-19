@@ -1,5 +1,5 @@
 /**
- * Purpose: the creation box's prefill (proposal §3.8; TP §3.6 "Links"): `/abrir` accepts a template id and slot values
+ * Purpose: the creation box's prefill (proposal §3.8; TP §3.6 "Links"): `/open` accepts a template id and slot values
  *          in the URL — `t` (or `template`), `kind`, `feed` (a symbol such as BTC/USD, or the feed id in hex), `dir`,
  *          `target`, `days` (3 to 90) or `deadline` (Unix seconds), `epoch` and `account`, each checked against its
  *          field's own form, anything else dropped. The amount is never read from a link: it stays US$500 until the

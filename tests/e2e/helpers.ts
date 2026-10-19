@@ -33,7 +33,7 @@ export type Opened = { wallet: string; mode: { current: WalletMode } };
 export const openCampaign = (page: Page, id: string, query = ""): Promise<Opened> =>
   openWithWallet(page, `/c/${id}${query}`);
 
-/** Opens `path` with the test wallet installed (Sprint 19: the creation box at /abrir too). */
+/** Opens `path` with the test wallet installed (Sprint 19: the creation box at /open too). */
 export async function openWithWallet(page: Page, path: string): Promise<Opened> {
   const { address } = await control<{ address: string }>("/wallet");
   const mode = { current: "answer" as WalletMode };

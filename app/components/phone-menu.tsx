@@ -19,7 +19,7 @@ import { PRIVACY_LABEL } from "./copy-site";
 
 export const ROUTES = [
   { href: "/", label: "Campaigns" },
-  { href: "/abrir", label: "Open a campaign" },
+  { href: "/open", label: "Open a campaign" },
   { href: "/my-entries", label: "My entries" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/record", label: "Who can do what" },

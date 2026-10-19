@@ -1,5 +1,5 @@
 /**
- * Purpose: the mandatory notices of the creation box at /abrir (Sprint 19 DoD; BR-26; TP §3.4.10), listed with the
+ * Purpose: the mandatory notices of the creation box at /open (Sprint 19 DoD; BR-26; TP §3.4.10), listed with the
  *          screens that must show them and the components that draw them, joined to the site's list in registry.ts so
  *          tests/site/notices.test.ts checks them with the rest. The words come from their copy files.
  * Version: 0.3.0 (the Sprint 19 legal review: the devnet line, where the prize goes, what devnet does not send, the

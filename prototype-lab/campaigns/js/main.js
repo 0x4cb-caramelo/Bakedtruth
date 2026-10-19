@@ -58,7 +58,7 @@ document.querySelector("[data-action=search]").addEventListener("click", () =>
 // Phone menu: every link of the top bar and the footer, and the theme switch, in one sheet.
 const LINKS = [
   ["#/", "grid", "Campaigns"],
-  ["#/abrir", "plus", "Open a campaign"],
+  ["#/open", "plus", "Open a campaign"],
   ["#/entries", "receipt", "My entries"],
   ["#/leaderboard", "trophy", "Leaderboard"],
   ["#/how", "info", "How it works"],

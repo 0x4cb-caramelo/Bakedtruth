@@ -214,7 +214,7 @@ Blocks, without dates (D-r):
 | B5 | `@brot/sdk` (read and tx), the event decoder, the client, the creation preview, `recheck`; the React Native check; a full devnet cycle with a paid opening by a non-team wallet | 05 | B4 |
 | B6 | Keepers: the primary on the VPS (Bun check first), then the standby and watchdog on VM 2 | 06, 07 | B5 |
 | B7 | Indexer, read API, `brot-rpc`, ranking and listing, KPIs, points | 08 | B5; B6 to publish |
-| B8 | The website: design system, creation screen and phone layouts (-1), shell to notices (09 to 13), the creation box at `/abrir` (19) | -1, 09–13, 19 | B5, B7, -1 |
+| B8 | The website: design system, creation screen and phone layouts (-1), shell to notices (09 to 13), the creation box at `/open` (19) | -1, 09–13, 19 | B5, B7, -1 |
 | B9 | Before mainnet: referral and the second read (14), the sealed entry (15), hardening (16), audits (17), mainnet (18) | 14–18 | B4, B6, B7, B8 |
 | M | The Android app: skeleton (M-1), money flows on devnet (M-2), dApp Store release (M-3) | 20, 21, 22 | 13 and 05; 22 also 18, the company and L0 |
 
@@ -1501,7 +1501,7 @@ system of Sprint -1; it replaces the provisional `services/landing` on `127.0.0.
 | Country switch | `GEO_BLOCK`: when on, the server reads the visitor's country from Cloudflare (C9 **[AC]**) and hides the entry panel; it also reads `entries_allowed` from `/api/v1/health`. Entries, results and payouts stay visible, and payouts are never blocked (K-11; P4 §5.2) **[DP]** |
 | Team panel | None in the MVP. The team operates through `scripts/team/`, each person with their own key. The public register page exists from the MVP (L-12) **[DP]** |
 
-**Routes** (D6: `/c/[id]` and `/abrir`; proposal §2.9, §3.8) **[DP]**.
+**Routes** (D6: `/c/[id]` and `/open`, which was `/abrir` until 2026-10-19 and now redirects there; proposal §2.9, §3.8) **[DP]**.
 
 | Route | What it is | Sprint |
 |---|---|---|
@@ -1509,7 +1509,7 @@ system of Sprint -1; it replaces the provisional `services/landing` on `127.0.0.
 | The "all campaigns" list | Every campaign, unlisted ones included, with filters (proposal §2.7) | 10 |
 | `/c/[id]` | Campaign page: the generated sentence and rule, live value, pot and YES/NO split, entry panel, re-check panel, share button. `id` is the client-drawn u64 (§3.4.1) | 11 |
 | `/c/[id]/opengraph-image` | The share card (below) | 10 |
-| `/abrir` | The creation box (below) | Design in -1; built in 19 |
+| `/open` | The creation box (below) | Design in -1; built in 19 |
 | "My entries" | A wallet's entries, results and payouts. Its path, like those of the ranking, register and fee pages, is named with the site language (L-01). **Built at `/my-entries` in Sprint 12 [F]:** read from the chain (the wallet's own transactions, decoded by the SDK; the open `Entry` accounts) until `GET /api/v1/wallets/:address/entries` exists | 12 |
 | Ranking | Points on devnet (§3.5). **Built at `/leaderboard` in Sprint 13 [F]:** from `/api/v1/leaderboard`, read in pages; the request carries no wallet, and the connected wallet's own line is found in the browser (§8.2) | 13 |
 | Register and powers | Who can do what, from `content/powers.md` (BR-41), and the void log from `content/void-log/` (BR-45). **The void log is at `/record` since Sprint 12 [F]**, read on the server; its record format is `@brot/sdk/schemas` `VoidLogRecord`, with a JSON Schema at `content/void-log/record.schema.json` checked in CI. **The powers table is at `/record` since Sprint 13 [F]**, each key by role and address, and checked live against the program's config and ProgramData in the visitor's browser | 12–13 |
@@ -1538,7 +1538,7 @@ system of Sprint -1; it replaces the provisional `services/landing` on `127.0.0.
   it comes from `/api/v1/price` (D-f).
 - The `id` is drawn once and saved before the wallet hand-off, so a retried opening fails on the existing account
   instead of charging US$500 twice (T17, A-9). `max_lamports` bounds the price move between preview and signature (T25).
-- `/abrir` accepts a prefill by template id and slots; a link never signs anything (proposal §3.8).
+- `/open` accepts a prefill by template id and slots; a link never signs anything (proposal §3.8).
 - **Gap:** the approved prototype and `DESIGN-DIRECTION.md` have no creation screen. Under D8 (a) (Summary), Sprint -1
   designs it at web and phone widths and Sprint 19 builds it.
 - **Built in Sprint 19 (2026-10-10) [F]** (`app/features/open-campaign/`, `docs/sprints/sprint-19-site-open-campaign.md`):
@@ -2336,7 +2336,7 @@ done). Report channel: PASS, its X-login condition met (8a). Nothing blocked the
 
 ### 8.3 Sprint 19: the creation box
 
-The nine questions for what the creation box (`/abrir`) adds, answered before the merge (the legal review of
+The nine questions for what the creation box (`/open`) adds, answered before the merge (the legal review of
 2026-10-10, applied to the code as merged). Nothing new reaches Brot's servers; what is new is a record in the visitor's
 browser and what the RPC provider sees **[F]**.
 
@@ -2352,7 +2352,7 @@ browser and what the RPC provider sees **[F]**.
 | 8. Deletion and export | Clearing the site's data; Brot holds nothing to delete or export | Not Brot's | The chain cannot be changed; the policy says so |
 | 9. Document or consent | `docs/legal/PRIVACY-POLICY.md` (this PR) names the record, when it is written and deleted, the RPC's reads and that clearing the site's data deletes it; the sheet says the id is saved when "Sign in wallet" is pressed, and that an opening is public and permanent. No consent asked: the record is strictly needed for the opening the person asked for (L0 confirms) | The policy names the RPC service and what it sees | The sheet's public-opening notice |
 
-**Verdict.** PASS, with one condition before `/abrir` is reachable at a public address: the founder deploys the
+**Verdict.** PASS, with one condition before `/open` is reachable at a public address: the founder deploys the
 landing with this text, a new date and the post on X its section 8 promises (answer 9a; the legal review, M8;
 confirmed by Sprint 19's answer 2a, 2026-10-11).
 
