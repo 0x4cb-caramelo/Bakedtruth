@@ -67,7 +67,10 @@
 @media (max-width: 700px) {
   .status .long { display: none; } .status .short { display: inline; }
   .top { gap: 8px; min-height: 58px; }
-  .brand { font-size: 24px; } .brand img { width: 44px; height: 28px; } .brand .tld { display: none; }
+  /* The whole name, as on brot.markets: name and loaf shrink with the width (24px from 412 px, about 20px at 390, 15px
+     at 360) so the bar, with the 210 px of search, Connect and menu, still fits on one line. */
+  .brand { gap: 5px; font-size: clamp(15px, calc((100vw - 261px) / 6.35), 24px); }
+  .brand img { width: 1.6em; height: 1.02em; }
   .top .search { display: none; } .search-btn { display: inline-grid; }
   .top .theme { display: none; }
   .wallet-on .addr { display: none; }
