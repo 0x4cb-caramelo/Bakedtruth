@@ -1165,7 +1165,7 @@ A regra diz "under 200 lines where practical". Estes passaram — vale checar se
 | [`extract-external-links.sh`](scripts/extract-external-links.sh) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 16 |
 | [`init-project.ps1`](scripts/init-project.ps1) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 34 |
 | [`init-project.sh`](scripts/init-project.sh) | ⚠️ sem cabeçalho — adicione purpose/version/sprint | 25 |
-| [`instruction-drift.js`](scripts/instruction-drift.js) | catch references in instruction files (CLAUDE.md, templates, skills, agents, WIZARD) to agents, commands and wizard stages that do not exist, and model generati | 164 |
+| [`instruction-drift.js`](scripts/instruction-drift.js) | catch references in instruction files (CLAUDE.md, templates, skills, agents, WIZARD) to agents, commands and wizard stages that do not exist, and model generati | 165 |
 | [`measure-cu.ts`](scripts/measure-cu.ts) | prints the compute units of each instruction's valid baseline and the program binary's size, in the Sprint 03 "Measurements" table's shape (T3). Runs in LiteSVM | 30 |
 | [`measure-settle.ts`](scripts/measure-settle.ts) | the settle batch (T3) and the per-account write limit (C7). For each batch size it builds one transaction of `settle_entry` instructions in LiteSVM (self-CPI ev | 117 |
 | [`os-self-test.js`](scripts/os-self-test.js) | the `os-self-test` skill did this, but only when a human or a model remembered to invoke it — and three session logs record it NOT being run when it would have  | 406 |
