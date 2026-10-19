@@ -158,6 +158,22 @@ Devnet program id:
 [`5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o`](https://explorer.solana.com/address/5Rx8o5c5frxqF17mZwvTFg36ZcW5xU12ePojqDbj9n8o?cluster=devnet).
 The order of the work is in [`docs/SPRINTS.md`](docs/SPRINTS.md), and what changed is in [`CHANGELOG.md`](CHANGELOG.md).
 
+### What we are planning next
+
+Planned in October 2026, not built yet. The summaries and the market research behind them are in
+[`docs/business/planejamento-2026-10/`](docs/business/planejamento-2026-10/README.md) (in Portuguese).
+
+- **Everything in USDC.** Pots, openings and payouts in USDC, with SOL and other liquid tokens converted in the app.
+  We cover the conversion up to a cap.
+- **More kinds of question.** Fifteen in the design: the six the program reads today, community-versus-community
+  Bake-offs, ladders, tournaments, and house rounds the program opens on its own.
+- **New ways in.** The Fornada (several questions on one ticket), an open API for bots that keep pots balanced, and a
+  paid Turbo instead of leverage.
+- **Creators and BDs.** Three opening tiers, a 120-day program for the first partners (the Levain), commission for
+  BDs by monthly volume, and Crumbs, points that only spend inside Brot.
+- **Four papers instead of one business plan,** named after breads.
+- **A public launch on 17 November 2026,** after a closed beta with hand-picked testers.
+
 ## Run it
 
 You need Bun 1.4.2, Rust 1.89 (pinned by `rust-toolchain.toml`), the Solana CLI 3.1.x and, for the IDL, shank-cli 0.4.9.

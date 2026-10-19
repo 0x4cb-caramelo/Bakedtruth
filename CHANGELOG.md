@@ -27,6 +27,21 @@ recomendado (1a a 12a).
 
 ### Added
 
+- **A fornada de planos: planejamento e estudos de mercado para as próximas fases** (17 a 19/10/2026, a pedido do
+  Lucas; `session-log/2026-10-19-fornada-de-planos.md`). Só documentação: nada mudou no programa, no site ou no
+  servidor.
+  - **Os resumos dos planos** em `docs/business/planejamento-2026-10/`: a remuneração de criadores, BDs e Levain na
+    versão 4 (USDC, tiers, faixas do BD, 15 tipos de pergunta, campanhas da casa, Crumbs, Fornada, API com Semeadores,
+    Turbo e a projeção de seis meses), o programa de lançamento de 17/11 e a captação (a /welcome com o mascote e a
+    máquina de e-mails em código aberto). Os documentos vivos são do Claude e privados; os termos da rodada, as listas
+    de contatos e os detalhes do envio ficam fora do repositório.
+  - **Seis estudos com fontes** na base de conhecimento: o mercado de previsão por categoria e o pedaço que o Brot
+    alcança, comparáveis de valuation e de token, whitepapers de referência e os quatro pães, o custo do NFT do
+    Laser Breadfier, USDC e swap na Solana, e as ferramentas da máquina de captação.
+  - **O mascote passa a se chamar Cacetinho** (decisão do Lucas), com a proposta de personalidade em
+    `docs/product/cacetinho-personalidade.txt`. O site, o guia da marca e o deck ainda usam Baked, até a palavra dele.
+  - **O README** ganhou "What we are planning next".
+
 - **Os logos do X e do Discord no ar** (PR #103, publicados em 19/10/2026 a pedido do Ronaldo;
   `session-log/2026-10-19-logos-x-discord-no-ar.md`). No `brot.markets` e no `/2/`, os dois logos no topo e o Discord
   ao lado do X no rodapé: só os três arquivos do PR instalados na cópia do landing, com backup, e o `brot-landing`
