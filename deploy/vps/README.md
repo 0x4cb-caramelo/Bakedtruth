@@ -384,14 +384,19 @@ route of the API is unchanged.
   inside and outside (`/api/v1/activity` and `/ranking` 200).
 - **Rolling back the indexer.** `sudo systemctl disable --now brot-indexer`: the routes answer 503 again, and nothing
   else changes.
-- **Down since the server's reboot of 2026-10-17 ~18:15 UTC** (found on 2026-10-19, not fixed). The unit restarts
-  every 5 s with `Cannot find module '@solana/kit'`, and the five routes answer 503. The cause: `bun install` run as
-  root hard-links each package file from root's cache, so the indexer's release and every site release share the
-  same files (one inode, 15 links for `@solana/kit`'s `package.json`), and step 4's `chown -R root:brot-web` of a
-  site release gives those shared files to `brot-web`, which `brot-indexer` is not in. The process that was already
-  running had its modules in memory; the reboot exposed it. The fix, for Ronaldo to approve: reinstall the indexer's
-  `node_modules` with its own copies (`bun install --backend=copyfile`), `chown -R root:brot-indexer` the release, and
-  restart the unit; and install the site's releases with copies too, so the next `chown` touches only them.
+- **Down from the server's reboot of 2026-10-17 ~18:15 UTC to 2026-10-19 ~03:41 UTC.** The unit restarted every 5 s
+  with `Cannot find module '@solana/kit'`, and the five routes answered 503. The cause: `bun install` run as root
+  hard-links each package file from root's cache, so the indexer's release and every site release shared the same
+  files (one inode, 15 links for `@solana/kit`'s `package.json`), and step 4's `chown -R root:brot-web` of a site
+  release gave those shared files to `brot-web`, which `brot-indexer` is not in. The process that was already running
+  had its modules in memory; the reboot exposed it. **The fix**, at Ronaldo's word ("pode corrigir o indexador"): the
+  unit stopped, the release's three `node_modules` folders removed and installed again as copies
+  (`bun install --frozen-lockfile --ignore-scripts --filter @brot/indexer --backend=copyfile`, as root in the release),
+  then `chown -R root:brot-indexer` and `chmod -R g+rX,o-rwx`; no file of the release shares an inode now, and the
+  SQLite state in `/var/lib/brot-indexer` was not touched. After the start: health `ok`, no restart, and the five
+  routes 200 from outside. Its `as_of_slot` (511591708) is the program's last transaction on devnet (2026-10-16), so it
+  is up to date. **From now on, any release installed as root for a user outside `brot-web` (the indexer, the relay)
+  installs with `--backend=copyfile`**, so a site release's `chown` cannot reach it.
 
 Publishing them was a server act for Ronaldo, in this order:
 

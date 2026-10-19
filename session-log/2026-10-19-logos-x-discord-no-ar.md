@@ -1,4 +1,4 @@
-# 2026-10-19 — Os logos do X e do Discord no ar, e o indexador fora do ar desde o reinício
+# 2026-10-19 — Os logos do X e do Discord no ar, e o indexador de volta depois do reinício
 
 Pedido do Ronaldo, num texto colado: autorizar a chave SSH de um segundo computador no usuário `ronaldo` do servidor, e
 publicar os logos do PR #103 (`bf2a5ce`) no `brot.markets` e no `/dev0x`, registrando a release e o caminho de volta.
@@ -32,7 +32,7 @@ nenhuma; as permissões ficaram como o SSH pede. O acesso a partir do outro comp
   rodapé, também numa captura sem tela. O console mostra dois bloqueios da CSP que não vêm desta release: a fonte DM Sans
   que a folha de estilo do wallet-adapter importa e o beacon que o Cloudflare injeta.
 
-## O indexador, fora do ar desde 17/10
+## O indexador, fora do ar de 17/10 a 19/10
 
 Na checagem do servidor, o `brot-indexer` estava em laço de reinício (mais de 21 mil tentativas), com
 `Cannot find module '@solana/kit'`, desde o reinício do servidor em 17/10 às ~18h15 UTC; as cinco rotas dele respondem
@@ -43,12 +43,15 @@ esses arquivos para o grupo `brot-web`, do qual o `brot-indexer` não faz parte.
 memória; o reinício expôs o problema. Esta publicação repetiu o mesmo `chown`, mas sobre arquivos que já eram
 `brot-web`.
 
-Não foi corrigido, porque o pedido não incluía o indexador. A correção proposta está em `deploy/vps/README.md`:
-reinstalar os módulos do indexador como cópias (`--backend=copyfile`, que o Bun 1.4.2 oferece), devolver a release ao
-grupo `brot-indexer` e reiniciar a unidade; e montar as releases do site também com cópias.
+**A correção (03h41 UTC)**, com a palavra do Ronaldo ("pode corrigir o indexador"): a unidade parada, as três pastas
+`node_modules` da release apagadas e instaladas de novo como cópias (`--backend=copyfile`, que o Bun 1.4.2 oferece), e a
+release devolvida ao grupo `brot-indexer`. Nenhum arquivo dela compartilha inode agora, e o estado em SQLite não foi
+tocado. Depois da partida: saúde `ok`, nenhum reinício, e as cinco rotas 200 por fora. O `as_of_slot` dele (511591708)
+é a última transação do programa no devnet (16/10), então ele está em dia. Daqui em diante, qualquer release instalada
+como root para um usuário fora do `brot-web` (o indexador, o relay) usa cópias. As releases do site seguem com links,
+porque o `chown` delas só alcança arquivos do próprio `brot-web`.
 
 ## O que fica aberto
 
-- A correção do indexador, à espera do Ronaldo.
 - Os registros que já estavam atrasados: a atualização do programa no devnet de 15/10 e o keeper `5df3529`.
 - O teste da chave SSH a partir do outro computador.

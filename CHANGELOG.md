@@ -32,8 +32,9 @@ recomendado (1a a 12a).
   ao lado do X no rodapé: só os três arquivos do PR instalados na cópia do landing, com backup, e o `brot-landing`
   reiniciado. No `/dev0x`, a release `bf2a5ce3282a`, testada antes na porta 4239; a de volta é a `1f8427f98d5c`, que
   estava no ar desde 16/10 sem registro e agora está em `deploy/vps/README.md`. Na mesma visita ao servidor, o
-  indexador foi achado fora do ar desde o reinício do servidor em 17/10 (causa registrada, correção à espera do
-  Ronaldo).
+  indexador foi achado fora do ar desde o reinício do servidor em 17/10: as dependências dele dividiam arquivos com as
+  releases do site, e o `chown` de cada release do site tirava a leitura dele. Com a palavra do Ronaldo, elas foram
+  instaladas de novo como cópias próprias, e as cinco rotas voltaram às 03h41 UTC.
 
 - **O app Android no repositório, e o README em dia** (16/10/2026, para a inscrição no bounty da Superteam Brasil, que
   pede um repositório público que compile a partir de um clone limpo). `android/` é o projeto que o CLI da Solana
