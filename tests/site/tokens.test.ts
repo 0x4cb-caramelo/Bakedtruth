@@ -1,8 +1,8 @@
 /**
  * Purpose: the site's colours are the brand's (docs/product/BRAND.md §5; ported 2026-10-10): every token BRAND.md gives
  *          a plain colour in both themes has that value in app/styles/tokens.css, but for the few the site keeps apart
- *          on purpose (DESIGN-DIRECTION.md, "Cores"); no blue of the earlier palette is back; and every text pair reads
- *          at 4.5:1 and every field border and bar at 3:1 (WCAG 2.x), in both themes.
+ *          on purpose (DESIGN-DIRECTION.md, "Cores"); no blue of the earlier palette is back, but the pointer's light
+ *          in dark (2026-10-19); and every text pair reads at 4.5:1 and every field border and bar at 3:1 (WCAG 2.x), in both themes.
  *          Filter: `bun test tests/ -t "site colours follow the brand"`.
  * Version: 0.1.0
  * Sprint:  out of band (the brand's colours, 2026-10-10)
@@ -90,6 +90,8 @@ const APART: Record<string, Theme[]> = {
   "--notice-bg": ["dark"], // the brand's is YES's green; here it backs info boxes and the leaderboard's "You" row
   "--ic-bg": ["light"], // BRAND.md writes "#a8481b at 12%"; the token is #a8481b1f
 };
+/** The one blue allowed back: the pointer's light in dark (the cards' spotlight edge), Ronaldo's choice of 2026-10-19. */
+const POINTER_LIGHT: Record<string, Theme[]> = { "--spot-edge": ["dark"] };
 
 describe("site colours follow the brand", () => {
   test("every token BRAND.md gives a plain colour has its value, in both themes, but the ones kept apart", () => {
@@ -108,7 +110,7 @@ describe("site colours follow the brand", () => {
     for (const theme of ["dark", "light"] as const)
       for (const name of THEMES[theme].keys()) {
         const value = hex(theme, name);
-        if (value)
+        if (value && !POINTER_LIGHT[name]?.includes(theme))
           expect(`${theme} ${name} ${value} blue: ${isBlue(value)}`).toBe(`${theme} ${name} ${value} blue: false`);
       }
     expect(css).not.toMatch(/#4f7dff|#2f5fe6|#a8beff/i);
