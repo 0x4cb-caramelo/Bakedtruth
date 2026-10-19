@@ -3,8 +3,9 @@
    the prototype's `spin`), and the phone label of the wallet button when no wallet is installed, so the top bar never
    overflows 412 px. Then the campaign page made compact (Ronaldo, 2026-10-11): `.fold`, a quiet line that opens what is
    secondary (the full rule, the proof's details, the notes before an entry, the last in the brand's accent), a thinner
-   "Re-check it yourself", an estimate box as tall as what it says, and the opening line as a link.
-   Version: 0.2.0 (the compact campaign page; 0.1.0, Sprint 09, the UI overhaul) */
+   "Re-check it yourself", an estimate box as tall as what it says, and the opening line as a link. Last, the X and
+   Discord logos under the home page's subtitle (`.social`, 2026-10-18).
+   Version: 0.3.0 (the X and Discord logos; 0.2.0, the compact campaign page; 0.1.0, Sprint 09, the UI overhaul) */
 @layer components {
 .cta { animation-name: brot-spin; }
 .wallet .cta .short { display: none; }
@@ -28,4 +29,10 @@
 .cp-recheck { padding-top: 8px; padding-bottom: 8px; }
 .cp-recheck summary { min-height: 26px; } .cp-recheck summary > svg { top: 5px; }
 .en-est { min-height: 0; }
+
+.social { display: flex; gap: 6px; margin-top: 14px; }
+.social a { display: inline-grid; place-items: center; width: 30px; height: 30px; border: var(--bw) solid var(--line);
+  border-radius: var(--r-sm); color: var(--muted); }
+.social a:hover { color: var(--text); border-color: var(--muted); text-decoration: none; }
+.social svg { width: 14px; height: 14px; }
 }

@@ -1,12 +1,14 @@
 /**
  * Purpose: the footer of every screen, in the approved prototype's style (prototype-lab/campaigns, `.foot`): the links,
  *          then the legal lines the site must carry: BRAND.md's "not an offer" line (Sprint 13), the privacy page
- *          (answer 9a) and the age rule, with the program's explorer link. Baked may perch on it (data-perch).
- * Version: 0.1.0 (the UI overhaul; the footer lived in app/layout.tsx)
+ *          (answer 9a) and the age rule, with the program's explorer link, X and Discord. Baked may perch on it
+ *          (data-perch).
+ * Version: 0.1.1 (Discord beside X; 0.1.0, the UI overhaul: the footer lived in app/layout.tsx)
  * Sprint:  09 (site shell, theme and wallet)
  */
 import Link from "next/link";
 
+import { DISCORD_URL, X_URL } from "@/components/social-links";
 import { BRAND } from "@/lib/brand";
 import { programExplorerUrl } from "@/lib/brot";
 import { PRIVACY_URL } from "@/lib/config";
@@ -44,8 +46,11 @@ export function SiteFooter() {
         <a href={PRIVACY_URL} target="_blank" rel="noreferrer">
           {PRIVACY_LABEL}
         </a>
-        <a href="https://x.com/brotmarkets" target="_blank" rel="noreferrer">
+        <a href={X_URL} target="_blank" rel="noreferrer">
           X
+        </a>
+        <a href={DISCORD_URL} target="_blank" rel="noreferrer">
+          Discord
         </a>
       </nav>
       <p>
