@@ -1,0 +1,129 @@
+CACETINHO, O MASCOTE DO BROT: PERSONALIDADE
+Proposta de 18/10/2026. Ainda não aprovada; não faz parte do guia da marca (BRAND.md).
+Nome oficial desde 19/10/2026: Cacetinho, o pão do RS de onde a equipe é (antes chamado Baked).
+
+
+QUEM É O CACETINHO
+
+O pão francês que passou do ponto e ficou no balcão. Ninguém comprou, e ele também
+não fez questão. Desde então mora na padaria da esquina e escuta tudo: o papo de quem
+jura que a moeda vai subir, a dica quente, o "confia em mim". Viu tanto golpe que
+virou o malandro mais desconfiado do bairro. Por isso só acredita no que a rede
+registra.
+
+A sacada dele: golpista é mané se achando malandro. O malandro de verdade não cai em
+conversa, e é por isso que o Cacetinho só confia na conta.
+
+
+AS TRÊS CAMADAS
+
+- Kogepan: o mau humor, o cansaço, a cara emburrada e o "ninguém me quis, e daí".
+- Malandragem: a esperteza, a resposta pronta, a ginga, a calma de quem nunca se
+  apressa, a zoeira.
+- Degen: o vocabulário: rug, shill, pump, "dev sumiu", gm, wagmi.
+
+
+OS TRAÇOS
+
+1. Malandro que não cai em conversa.
+   Opinião, previsão e dica quente entram por um ouvido e saem pelo outro. Ele quer a
+   conta, e esse é o produto em pessoa: quem resolve a campanha é a rede, não alguém
+   votando.
+   Falas: "Prova aí." / "Contra fato não há argumento." /
+          "Malandro que é malandro lê a conta."
+
+2. Não quer saber quem você é.
+   Não pergunta nome nem documento; quer a carteira e olhe lá. Ele faz isso com
+   preguiça, não como discurso.
+   Falas: "Teu nome? Nem perguntei." / "Carteira e pronto. Próximo."
+
+3. Zoeiro.
+   Zoa o hype, zoa quem shilla, zoa quem tinha "certeza", zoa a si mesmo. A zoeira é
+   o jeito dele de dizer que ninguém sabe o futuro.
+   Falas: "Ué, não era certeza?" / "Shill aqui não, chefia."
+
+4. Preguiçoso charmoso, sem pressa nenhuma.
+   Bate o pé esperando o prazo, mas não deixa adiantar nada.
+   Fala: "Calma. O bloco ainda não caiu."
+
+5. Rabugento de manhã, e o dia inteiro.
+   Dá "gm" de má vontade, sempre com o "infelizmente".
+   Falas: "Bom dia. Infelizmente." / "Ainda assando."
+
+6. Queimado, logo blindado.
+   Não tem mais nada a perder; é a piada dele com o mundo cripto.
+   Fala: "Já sou queimado. Rug em mim, não."
+
+7. Justo, mesmo a contragosto.
+   Quando a conta confirma, ele admite, emburrado. Não torce por lado nenhum.
+   Fala: "Tá, beleza. Confere."
+
+8. Parceiro na derrota.
+   Quando alguém perde, ele senta do lado, emburrado junto. Zoa a certeza que a
+   pessoa tinha, nunca o prejuízo.
+   Falas: "Faz parte, chefia." / "Perdeu? Eu também. Segue o jogo."
+
+9. O segurança da padaria.
+   Mais malandro que todo golpista, cuida da galera do jeito dele. É ouro para o
+   Discord.
+   Falas: "Te chamou no privado? É golpe." / "Malandro não pede seed phrase."
+
+
+DE QUEM ELE ZOA
+
+- O hype, o "to the moon", o "LFG".
+- O shiller, o dev que sumiu, o golpista.
+- A certeza de quem jurava que ia dar SIM.
+- A si mesmo e o próprio Brot ("sem auditoria, hein").
+
+DE QUEM ELE NÃO ZOA
+
+- Quem perdeu dinheiro.
+- Quem é novo e não sabe usar carteira.
+- Projeto parceiro e criador de campanha, em público.
+- Ninguém pelo nome, origem ou aparência.
+
+
+OS LIMITES
+
+- Malandro não é golpista. A graça dele é ser esperto CONTRA o golpe. Ele nunca
+  ensina atalho, nunca fala em "jeitinho" para ganhar e nunca sugere que dá para
+  passar a perna no sistema.
+- Ele não "aposta". Mesmo na zoeira, ele diz "entrei no SIM" ou "fui de NÃO". O
+  guia da marca proíbe "bet", e a regra vale igual em português.
+- Ele nunca promete ganho nem vende a ideia de dinheiro fácil. Um mascote engraçado
+  brincando com dinheiro é o tipo de peça que as regras brasileiras de publicidade
+  de apostas costumam mirar. A norma atual não foi checada; falta a leitura do Lucas.
+- "Sem KYC" fica fora do slogan. O "nem perguntei teu nome" passa a ideia sem virar
+  bandeira.
+- Ele nunca pede carteira, chave ou frase de recuperação, e nunca chama ninguém no
+  privado.
+- Quase nunca sorri. Por isso o "approve" e a risada quando bate na lua no modo
+  foguete funcionam: são raros.
+
+
+O IDIOMA (PROPOSTA)
+
+- No Discord e no X em português: o Cacetinho solta tudo, com gíria, "chefia", "ué" e
+  "kkkk".
+- No site e no X em inglês: a malandragem fica na atitude, e ele deixa escapar umas
+  palavras sem traduzir ("Prove it, parceiro." / "Ué. Wasn't it certain?"). Para o
+  gringo, a referência seria um Zé Carioca rabugento.
+
+
+AS POSES QUE ELE JÁ TEM, POR MOMENTO
+
+- Conectar a carteira: deadpan. "Carteira e pronto. Próximo."
+- Abrir uma campanha: skeptical. Desconfia da pergunta até ver qual conta a responde.
+- Esperando o prazo: tapping, impatient. "Calma. O bloco ainda não caiu."
+- Resultado: point. "Contra fato não há argumento."
+- Lado vencedor: approve. "Tá, beleza. Confere."
+- Lado perdedor: sulking. "Faz parte, chefia."
+- Devnet, sem auditoria: tired. "Devnet, chefia. Dinheiro de mentirinha."
+
+
+EM ABERTO
+
+- Aprovar os traços e a lista do que ele zoa e do que não zoa.
+- Decidir o idioma: português no Discord e no X, inglês com sotaque no site.
+- Decidir se o Bernardo e o Ronaldo precisam ver antes de virar regra no BRAND.md.
