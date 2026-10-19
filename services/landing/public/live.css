@@ -1,6 +1,6 @@
 /* Purpose: the two parts of the home page added on 2026-10-12, shared by the home page and by /2 (which must say the
    same): the "Still baking" notice under the top bar, one link to the devnet site, and the example campaigns that
-   play in the hero (examples.js). It only adds classes of its own and uses the few tokens both pages define, so it
+   play in the hero (examples.js); and, since 2026-10-18, the X and Discord logos in the top bar. It only adds classes of its own and uses the few tokens both pages define, so it
    works over styles.css and over 2/home.css. Sprint: out of band (landing page), 2026-10-12. */
 
 /* The notice is the loaf's colours in both themes: crust orange, dark crumb text. */
@@ -206,6 +206,29 @@
     font-size: 22px;
   }
 }
+/* The X and Discord logos in the top bar (2026-10-18), quieter than the theme button beside them. */
+.social {
+  display: flex;
+  gap: 4px;
+}
+.social a {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--muted);
+}
+.social a:hover {
+  border-color: var(--line);
+  color: var(--text);
+}
+.social svg {
+  width: 15px;
+  height: 15px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .baking,
   .ex,
