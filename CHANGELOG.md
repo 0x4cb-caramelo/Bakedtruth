@@ -742,6 +742,12 @@ recomendado (1a a 12a).
 
 ### Changed
 
+- **A lista de espera da landing avisa do lançamento na mainnet** (19/10/2026, pedido do Ronaldo). O rótulo do campo
+  passou de "Get an email when campaigns open on devnet" a "Get an email when Brot Markets launches on mainnet", e a
+  confirmação diz o mesmo, na página inicial e em `/2`, que repete o texto. A frase de consentimento ("to tell you when
+  Brot Markets opens") e a privacidade ("again when they open with real money") já cobriam esse aviso, então o
+  `CONSENT_VERSION` não mudou.
+
 - **O modo claro da landing nas cores do `/dev0x`** (19/10/2026, pedido do Ronaldo). O tema claro de
   `services/landing/public/styles.css` trocou o cinza-azulado e o azul pelo creme e a ferrugem do site
   (`app/styles/tokens.css`, BRAND.md §5.1): fundo `#f6eddb`, painel `#fffaf0`, destaque e botão `#a8481b`, laranja só
