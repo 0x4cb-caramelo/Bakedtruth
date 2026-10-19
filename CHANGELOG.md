@@ -742,6 +742,11 @@ recomendado (1a a 12a).
 
 ### Changed
 
+- **O `/dev0x` mostra "brot.markets" inteiro no celular** (19/10/2026, pedido do Ronaldo). Abaixo de 700 px a barra
+  do topo escondia o ".markets", regra que veio do protótipo para a barra não quebrar. Agora o nome e o pão encolhem
+  com a largura (24px a partir de 412 px, cerca de 20px em 390, 15,6px em 360), e a busca, o "Connect" e o menu ficam
+  como estavam; medido sem transbordar em 360, 375, 390, 412 e 700 px.
+
 - **A lista de espera da landing avisa do lançamento na mainnet** (19/10/2026, pedido do Ronaldo). O rótulo do campo
   passou de "Get an email when campaigns open on devnet" a "Get an email when Brot Markets launches on mainnet", e a
   confirmação diz o mesmo, na página inicial e em `/2`, que repete o texto. A frase de consentimento ("to tell you when
