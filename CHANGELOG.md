@@ -742,6 +742,12 @@ recomendado (1a a 12a).
 
 ### Changed
 
+- **O modo claro da landing nas cores do `/dev0x`** (19/10/2026, pedido do Ronaldo). O tema claro de
+  `services/landing/public/styles.css` trocou o cinza-azulado e o azul pelo creme e a ferrugem do site
+  (`app/styles/tokens.css`, BRAND.md §5.1): fundo `#f6eddb`, painel `#fffaf0`, destaque e botão `#a8481b`, laranja só
+  nos preenchimentos, e o SIM e o NÃO nos mesmos verdes e vermelhos de lá. Vale para a página inicial, a privacidade e
+  o 404, que dividem a folha. O modo escuro da landing continua no azul de antes, e `/2` tem estilos próprios.
+
 - **O último desenho do modo foguete do deck** (11/10/2026, pedido do fundador). No fim do slide 5 o mascote passa a
   bater na lua rindo, no lugar do rosto em pânico. O desenho novo tem o mesmo enquadramento do anterior, então o
   tamanho, o ponto de apoio, o ângulo e a lua que espera na borda do slide não mudaram. O arquivo ganhou outro nome

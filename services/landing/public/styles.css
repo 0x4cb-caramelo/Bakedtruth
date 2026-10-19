@@ -57,37 +57,40 @@
   --display: "Barlow Condensed", "Arial Narrow", sans-serif;
   --body: Inter, system-ui, sans-serif;
 }
+/* Light is the /dev0x site's light theme (app/styles/tokens.css, BRAND.md §5.1): the pitch deck's cream with the
+   rust accent, orange only on fills. Keep the two in step. */
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #eef1f6;
-  --panel: #fff;
-  --raised: #e3e8f0;
-  --line: #d5dbe6;
-  --line-strong: #b4bfd2;
-  --text: #131a26;
-  --muted: #556074;
-  --dim: #6b7689;
-  --accent: #2f5fe6;
-  --accent-soft: #2a52c9;
-  --accent-hover: #1b3a9c;
-  --crust: #b5670f;
-  --yes-bg: #dff5ea;
-  --yes-fg: #0a7a52;
-  --no-bg: #fde6ea;
-  --no-fg: #c0243f;
-  --strip-bg: #e3e8f0;
-  --notice-bg: #dfe8ff;
-  --track: #dde3ec;
-  --fill: linear-gradient(90deg, #2f5fe6, #6f93ff);
-  --ic-bg: #e3eaff;
-  --dot-rgb: 60, 85, 140;
-  --cta-hover: #2450cf;
-  --cta-ring: conic-gradient(from var(--spin), #1f43b0 0 62%, #c9d8ff 80%, #1f43b0 100%);
-  --say-bg: #131a26;
-  --say-fg: #fff;
-  --pet-shadow: rgba(19, 26, 38, 0.28);
-  --error: #c0243f;
-  --shadow: 0 1px 2px rgba(19, 26, 38, 0.05), 0 10px 24px -14px rgba(19, 26, 38, 0.18);
+  --bg: #f6eddb;
+  --panel: #fffaf0;
+  --raised: #efe2c8;
+  --line: #e2d4ba;
+  --line-strong: #cdbb98;
+  --text: #1b1611;
+  --muted: #3d3328;
+  --dim: #6b5e4e;
+  --accent: #a8481b;
+  --accent-soft: #a8481b;
+  --accent-hover: #7a3212;
+  --on-accent: #f7eedb;
+  --crust: #a8481b;
+  --yes-bg: #dcefdc;
+  --yes-fg: #1c5a3f;
+  --no-bg: #f6dcd0;
+  --no-fg: #a32e17;
+  --strip-bg: #efe2c8;
+  --notice-bg: #fbe3bd;
+  --track: #e2d4ba;
+  --fill: linear-gradient(90deg, #a8481b, #eea546);
+  --ic-bg: #a8481b1f;
+  --dot-rgb: 107, 94, 78;
+  --cta-hover: #8c3a14;
+  --cta-ring: conic-gradient(from var(--spin), #a8481b 0 62%, #eea546 80%, #a8481b 100%);
+  --say-bg: #1b1611;
+  --say-fg: #f7eedb;
+  --pet-shadow: rgba(27, 22, 17, 0.3);
+  --error: #a32e17;
+  --shadow: 0 1px 2px rgba(27, 22, 17, 0.05), 0 10px 24px -14px rgba(27, 22, 17, 0.18);
 }
 
 * {
