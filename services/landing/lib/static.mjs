@@ -22,7 +22,8 @@ const YEAR = 60 * 60 * 24 * 365;
 function cacheFor(ext) {
   if (ext === ".woff2") return `public, max-age=${YEAR}, immutable`;
   if (ext === ".webp" || ext === ".png" || ext === ".svg") return `public, max-age=${WEEK}`;
-  // Pages, styles and scripts change with each deploy and are small: always revalidate.
+  // Pages, styles and scripts change with each deploy and are small: always revalidate. Cloudflare still hands
+  // browsers max-age=14400 for styles and scripts, so a changed one needs a new ?v= in the pages (README).
   return "no-cache";
 }
 

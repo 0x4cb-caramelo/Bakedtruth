@@ -58,7 +58,7 @@ for (const p of pages) {
     <link rel="canonical" href="https://brot.markets/${p.out.replace(".html", "")}" />
     <link rel="icon" type="image/png" href="img/favicon.png" />
     <script src="app.js?v=2"></script>
-    <link rel="stylesheet" href="styles.css?v=3" />
+    <link rel="stylesheet" href="styles.css?v=4" />
   </head>
   <body>
     <header class="top">

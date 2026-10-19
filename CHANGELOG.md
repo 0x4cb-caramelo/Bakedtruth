@@ -746,7 +746,9 @@ recomendado (1a a 12a).
   `services/landing/public/styles.css` trocou o cinza-azulado e o azul pelo creme e a ferrugem do site
   (`app/styles/tokens.css`, BRAND.md §5.1): fundo `#f6eddb`, painel `#fffaf0`, destaque e botão `#a8481b`, laranja só
   nos preenchimentos, e o SIM e o NÃO nos mesmos verdes e vermelhos de lá. Vale para a página inicial, a privacidade e
-  o 404, que dividem a folha. `/2` tem estilos próprios e não mudou.
+  o 404, que dividem a folha. `/2` tem estilos próprios e não mudou. Publicada, a troca não aparecia para quem já
+  tinha aberto a página: o Cloudflare manda os navegadores guardarem o CSS por 4 horas, apesar do `no-cache` do
+  servidor. O link passou a `styles.css?v=4`, e o README da landing diz para subir o `?v=` a cada mudança de CSS ou JS.
 - **O modo escuro da landing nas cores do `/dev0x`, e a luz do ponteiro azulada no escuro** (19/10/2026, pedido do
   Ronaldo). O escuro da landing passou do azul ao azul-marinho com o laranja e o texto creme do site, menos os
   pontinhos do fundo, que ficam no azulado de antes (`--dot-rgb: 150, 175, 235`). No `/dev0x`, no escuro, os dois
